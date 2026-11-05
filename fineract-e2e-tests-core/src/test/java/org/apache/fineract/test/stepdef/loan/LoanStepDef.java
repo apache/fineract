@@ -2508,6 +2508,20 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(totalInterestOutstandingExpected);
     }
 
+    @Then("Loan has {double} principal paid and {double} principal adjustments amount")
+    public void loanPrincipalPaidAndAdjustments(double principalPaidExpected, double principalAdjustmentsExpected) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+
+        assertThat(loanDetailsResponse.getSummary().getPrincipalPaid().doubleValue()).as("Wrong principal paid in the loan summary")
+                .isEqualTo(principalPaidExpected);
+        assertThat(loanDetailsResponse.getSummary().getPrincipalAdjustments().doubleValue())
+                .as("Wrong principal adjustments in the loan summary").isEqualTo(principalAdjustmentsExpected);
+    }
+
     @Then("Loan has {double} total unpaid payable due interest")
     public void loanTotalUnpaidPayableDueInterest(double totalUnpaidPayableDueInterestExpected) {
         PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

@@ -3536,3 +3536,102 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 22 October 2026  | Re-age           | 525.13 | 500.0     | 25.13    | 0.0  | 0.0       | 0.0          | false    | false    |
     When Loan Pay-off is made on "22 October 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC6: chargeback on additional installment is partly repaid
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+#   --- Chargeback after maturity goes to the additional (N+1) installment and is repaid in part ---
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+#   --- Only the outstanding 30 is re-aged, what was repaid stays repaid ---
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 32   | 22 November 2026  |                 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 0.0    | 0.0        | 0.0    | 10.0        |
+      | 9  | 30   | 22 December 2026  |                 | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 0.0    | 0.0        | 0.0    | 10.0        |
+      | 10 | 31   | 22 January 2027   |                 | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 0.0    | 0.0        | 0.0    | 10.0        |
+#   --- A repayment after the re-age must reach the re-aged installments ---
+    When Loan Pay-off is made on "22 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC7: credit balance refund on additional installment is partly covered by overpayment
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    And Customer makes "AUTOPAY" repayment on "20 October 2026" with 1000 EUR transaction amount
+    When Admin makes Credit Balance Refund transaction on "20 October 2026" with 579.69 EUR transaction amount
+#   --- The charge is replayed under the refund, so 10 of it becomes principal outstanding on the additional installment ---
+    When Admin sets the business date to "22 October 2026"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 October 2026" due date and 10 EUR transaction amount
+    Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    When Loan Pay-off is made on "22 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC8: interest of chargeback is not accrued again with default interest handling
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                               | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_FEE_PRINCIPAL | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "14 May 2026"
+    And Customer makes "AUTOPAY" repayment on "14 May 2026" with 102.93 EUR transaction amount
+#   --- The chargeback gives back 45 principal and 5 interest, the 5 interest was accrued with the first installment ---
+    When Admin sets the business date to "20 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    When Admin sets the business date to "22 October 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan has 25.9 total Accruals
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 22 November 2026 | 3                    |
+    When Admin sets the business date to "23 November 2026"
+    And Admin runs inline COB job for Loan
+    When Admin sets the business date to "23 December 2026"
+    And Admin runs inline COB job for Loan
+    When Admin sets the business date to "23 January 2027"
+    And Admin runs inline COB job for Loan
+    When Admin sets the business date to "24 January 2027"
+    And Admin runs inline COB job for Loan
+#   --- 45.67 interest on the schedule, 5 of it is the chargeback interest that must not be accrued again ---
+    Then Loan has 40.67 total Accruals
+    When Loan Pay-off is made on "24 January 2027"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
