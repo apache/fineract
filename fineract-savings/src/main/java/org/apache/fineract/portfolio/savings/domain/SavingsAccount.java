@@ -3294,6 +3294,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         recalculateDailyBalances(Money.zero(this.currency), transactionDate, false, postReversals);
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void loadLazyCollections() {
         transactions.size();
         charges.size();

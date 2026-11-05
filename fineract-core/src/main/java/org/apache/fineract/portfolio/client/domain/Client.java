@@ -692,6 +692,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.legalForm = legalForm;
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void loadLazyCollections() {
         this.groups.size();
     }

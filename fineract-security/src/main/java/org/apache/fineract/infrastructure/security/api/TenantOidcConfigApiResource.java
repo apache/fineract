@@ -116,8 +116,9 @@ public class TenantOidcConfigApiResource {
     public String delete(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
 
-        tenantOidcConfigService.findByTenantId(tenantId).orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
-                "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
+        var unused = tenantOidcConfigService.findByTenantId(tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
+                        "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
 
         tenantOidcConfigService.deleteByTenantId(tenantId);
         return "{}";

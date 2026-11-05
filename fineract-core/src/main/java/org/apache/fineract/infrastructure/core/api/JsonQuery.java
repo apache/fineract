@@ -146,10 +146,6 @@ public final class JsonQuery {
     public Map<String, Boolean> mapValueOfParameterNamed(final String parameterName) {
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
 
-        if (this.parsedQuery.getAsJsonObject().has(parameterName)) {
-            this.parsedQuery.getAsJsonObject().get(parameterName);
-        }
-
         return this.fromApiJsonHelper.extractMap(typeOfMap, this.jsonQuery);
     }
 
