@@ -136,37 +136,13 @@ Feature: Client
     Then Exactly 1 client exists with the stored externalId
 
   @TestRailId:C119635
-  Scenario: Verify recoverable idempotent error on client creation - UC6: rename collision keeps the literal key intact
+  Scenario: Verify recoverable idempotent error on client creation - UC6: a client key ending with the reserved suffix is rejected
     When Admin sets the business date to "14 January 2025"
     When Admin prepares an idempotency key
-# --- Literal key "<key>_RE2" is created first and gets its own processed client ---
+# --- "<key>_RE<digits>" is the form of a renamed failure row, so a client may not send it ---
     When Admin creates an active client with activation date "14 January 2025" and idempotency key suffix "_RE2"
-    Then The client creation attempt returned a clientId
-    Then The client creation attempt was not served from cache
-# --- Recoverable failure: "<key>_RE1" exists (the literal key counts in the RE pattern), so the row is renamed to "<key>_RE3" ---
-    When Admin creates an active client with activation date "15 January 2025" and the stored idempotency key
     Then The client creation attempt returned the following error:
-      | httpCode | errorMessage                                   |
-      | 400      | error.msg.clients.activationDate.in.the.future |
+      | httpCode | errorMessage                              |
+      | 400      | error.msg.idempotency.key.reserved.suffix |
     Then The client creation attempt was not served from cache
-# --- Business date catches up, retry of the freed key succeeds despite the renamed rows ---
-    When Admin sets the business date to "15 January 2025"
-    When Admin retries the stored client request with the stored idempotency key
-    Then The client creation attempt returned 200 and was not served from cache
-    Then The client creation attempt returned a clientId
-    Then Exactly 1 client exists with the stored externalId
-# --- The literal key still replays its own result ---
-    When Admin retries the stored second client request with the stored second idempotency key
-    Then The client creation attempt returned 200 served from cache with the same clientId
-    Then Exactly 1 client exists with the stored second externalId
-    Then The audit search for action "CREATE" on entity "CLIENT" filtered by resourceId of the created second client returns 1 entries
-    And The returned audit entry has the following data:
-      | field            | value                 |
-      | resourceId       | created second client |
-      | processingResult | Processed             |
-# --- The renamed failure row "<key>_RE3" replays the original failure when referenced literally ---
-    When Admin retries the stored client request with idempotency key suffix "_RE3"
-    Then The client creation attempt returned the following error:
-      | httpCode | errorMessage                                   |
-      | 400      | error.msg.clients.activationDate.in.the.future |
-    Then The client creation attempt was served from cache
+    Then Exactly 0 clients exist with the stored second externalId

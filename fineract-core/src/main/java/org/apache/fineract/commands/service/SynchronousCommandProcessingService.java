@@ -140,7 +140,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 commandSource = commandSourceService.saveInitial(wrapper, command, user, idempotencyKey);
                 commandId = commandSource.getId();
-                executionContext.markCommandSourceCreated();
             }
         }
         executionContext.setCommandSource(commandSource);
@@ -229,7 +228,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private boolean saveAsRecoverableError(CommandExecutionContext executionContext, RuntimeException mappable) {
         CommandSource commandSource = executionContext.commandSource();
         try {
-            if (executionContext.commandSourceCreated() && recoverableErrorClassifier.isRecoverable(mappable)) {
+            if (recoverableErrorClassifier.isRecoverable(mappable)) {
                 commandSourceService.saveRecoverableErrorResult(commandSource);
                 return true;
             }
@@ -292,7 +291,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         private final boolean approvedByChecker;
         private CommandSource commandSource;
         private boolean enclosingTransaction;
-        private boolean commandSourceCreated;
 
         private CommandExecutionContext(CommandWrapper wrapper, JsonCommand command, boolean approvedByChecker) {
             this.wrapper = wrapper;
@@ -326,14 +324,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         void setEnclosingTransaction(boolean enclosingTransaction) {
             this.enclosingTransaction = enclosingTransaction;
-        }
-
-        boolean commandSourceCreated() {
-            return commandSourceCreated;
-        }
-
-        void markCommandSourceCreated() {
-            this.commandSourceCreated = true;
         }
     }
 

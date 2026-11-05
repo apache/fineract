@@ -171,19 +171,6 @@ public class ClientStepDef extends AbstractStepDef {
                 TestContextKey.CLIENT_IDEMPOTENT_KEY);
     }
 
-    @When("Admin retries the stored second client request with the stored second idempotency key")
-    public void retryStoredSecondClientRequest() {
-        executeClientAttempt(storedRequest(TestContextKey.CLIENT_IDEMPOTENT_REQUEST_SECOND),
-                testContext().get(TestContextKey.CLIENT_IDEMPOTENT_KEY_SECOND), TestContextKey.CLIENT_IDEMPOTENT_REQUEST_SECOND,
-                TestContextKey.CLIENT_IDEMPOTENT_KEY_SECOND);
-    }
-
-    @When("Admin retries the stored client request with idempotency key suffix {string}")
-    public void retryStoredClientRequestWithKeySuffix(String keySuffix) {
-        executeClientAttempt(storedRequest(TestContextKey.CLIENT_IDEMPOTENT_REQUEST), storedKey() + keySuffix,
-                TestContextKey.CLIENT_IDEMPOTENT_REQUEST, TestContextKey.CLIENT_IDEMPOTENT_KEY);
-    }
-
     @When("Created user creates an active client with activation date {string} and idempotency key")
     public void createdUserCreatesActiveClientWithIdempotencyKey(String activationDate) {
         PostClientsRequest request = clientRequestFactory.defaultClientCreationRequest().active(true).activationDate(activationDate);
@@ -299,6 +286,7 @@ public class ClientStepDef extends AbstractStepDef {
         assertClientCountByExternalId(storedRequest(TestContextKey.CLIENT_IDEMPOTENT_REQUEST), expectedCount);
     }
 
+    @Then("Exactly {int} clients exist with the stored second externalId")
     @Then("Exactly {int} client exists with the stored second externalId")
     public void countClientsWithStoredSecondExternalId(int expectedCount) {
         assertClientCountByExternalId(storedRequest(TestContextKey.CLIENT_IDEMPOTENT_REQUEST_SECOND), expectedCount);

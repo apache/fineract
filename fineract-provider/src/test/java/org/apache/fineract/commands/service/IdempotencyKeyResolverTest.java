@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.commands.service;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,5 +83,56 @@ public class IdempotencyKeyResolverTest {
                 null, null, null, idk, null, null);
         String resolvedIdk = underTest.resolve(wrapper);
         Assertions.assertEquals(idk, resolvedIdk);
+    }
+
+    @Test
+    public void keyOfMaxClientLength_isAccepted() {
+        String idk = "k".repeat(IdempotencyKeyResolver.MAX_CLIENT_KEY_LENGTH);
+        fineractRequestContextHolder.setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idk);
+        Assertions.assertEquals(idk, underTest.resolve(CommandWrapper.wrap("act", "ent", 1L, 1L)));
+    }
+
+    @Test
+    public void keyLongerThanMaxClientLength_isRejected() {
+        fineractRequestContextHolder.setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE,
+                "k".repeat(IdempotencyKeyResolver.MAX_CLIENT_KEY_LENGTH + 1));
+        assertRejectedWith(IdempotencyKeyResolver.KEY_TOO_LONG_ERROR_CODE, CommandWrapper.wrap("act", "ent", 1L, 1L));
+    }
+
+    @Test
+    public void wrapperKeyLongerThanMaxClientLength_isRejected() {
+        CommandWrapper wrapper = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, "k".repeat(IdempotencyKeyResolver.MAX_CLIENT_KEY_LENGTH + 1), null, null);
+        assertRejectedWith(IdempotencyKeyResolver.KEY_TOO_LONG_ERROR_CODE, wrapper);
+    }
+
+    @Test
+    public void keyEndingWithReservedSuffix_isRejected() {
+        fineractRequestContextHolder.setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, "abc_RE12");
+        assertRejectedWith(IdempotencyKeyResolver.KEY_RESERVED_SUFFIX_ERROR_CODE, CommandWrapper.wrap("act", "ent", 1L, 1L));
+    }
+
+    @Test
+    public void keyContainingSuffixWithoutTrailingDigits_isAccepted() {
+        for (String idk : new String[] { "abc_RE", "abc_RE1x", "abc_RE1_x", "abc_re1" }) {
+            fineractRequestContextHolder.setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idk);
+            Assertions.assertEquals(idk, underTest.resolve(CommandWrapper.wrap("act", "ent", 1L, 1L)));
+        }
+    }
+
+    @Test
+    public void generatedKey_isNotValidated() {
+        String idk = "g".repeat(IdempotencyKeyResolver.MAX_CLIENT_KEY_LENGTH + 1) + "_RE1";
+        when(idempotencyKeyGenerator.create()).thenReturn(idk);
+        Assertions.assertEquals(idk, underTest.resolve(CommandWrapper.wrap("act", "ent", 1L, 1L)));
+    }
+
+    private void assertRejectedWith(String expectedCode, CommandWrapper wrapper) {
+        PlatformApiDataValidationException exception = Assertions.assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.resolve(wrapper));
+        Assertions.assertEquals(1, exception.getErrors().size());
+        Assertions.assertEquals(expectedCode, exception.getErrors().get(0).getUserMessageGlobalisationCode());
+        Assertions.assertEquals("idempotencyKey", exception.getErrors().get(0).getParameterName());
+        verify(idempotencyKeyGenerator, never()).create();
     }
 }

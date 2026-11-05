@@ -166,14 +166,6 @@ public class AuditStepDef extends AbstractStepDef {
                 expectedCount);
     }
 
-    @Then("The audit search for action {string} on entity {string} filtered by resourceId of the created second client returns {int} entries")
-    public void auditSearchByResourceIdOfCreatedSecondClient(String actionName, String entityName, int expectedCount) {
-        Long resourceId = testContext().get(TestContextKey.CLIENT_IDEMPOTENT_SECOND_SUCCESS_CLIENT_ID);
-        assertThat(resourceId).as("No second client was created successfully yet").isNotNull();
-        searchAudits(new RetrieveAuditEntriesQueryParams().actionName(actionName).entityName(entityName).resourceId(resourceId),
-                expectedCount);
-    }
-
     @Then("The audit search for action {string} on entity {string} filtered by {word} of {string} returns {int} entries")
     public void auditSearchByField(String actionName, String entityName, String field, String value, int expectedCount) {
         Long identifier = (Long) resolveExpectedValue(value);
@@ -235,9 +227,6 @@ public class AuditStepDef extends AbstractStepDef {
         }
         if ("created client".equals(value)) {
             return testContext().<Long>get(TestContextKey.CLIENT_IDEMPOTENT_FIRST_SUCCESS_CLIENT_ID);
-        }
-        if ("created second client".equals(value)) {
-            return testContext().<Long>get(TestContextKey.CLIENT_IDEMPOTENT_SECOND_SUCCESS_CLIENT_ID);
         }
         if ("created loan".equals(value)) {
             return createdLoanId();

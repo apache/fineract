@@ -58,7 +58,7 @@ public class CommandSourceService {
 
     public static final String COMMAND_MASK_VALUE = "***";
     public static final String COMMAND_SANITIZE_ALL = "SANITIZE_ALL";
-    private static final String RECOVERABLE_ERROR_KEY_SUFFIX = "_RE";
+    public static final String RECOVERABLE_ERROR_KEY_SUFFIX = "_RE";
     private static final String LIKE_ESCAPE = "!";
     private static final int MAX_RECOVERABLE_RENAME_ATTEMPTS = 3;
 

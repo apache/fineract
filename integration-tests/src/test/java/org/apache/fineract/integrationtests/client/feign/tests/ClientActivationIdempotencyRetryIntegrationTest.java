@@ -72,6 +72,9 @@ public class ClientActivationIdempotencyRetryIntegrationTest extends FeignIntegr
     private static final String CLIENT_ACTIVATION_IN_FUTURE = "error.msg.clients.activationDate.in.the.future";
     private static final String CLIENT_SUBMITTED_IN_FUTURE = "error.msg.clients.submittedOnDate.in.the.future";
     private static final String GROUP_ACTIVATION_IN_FUTURE = "error.msg.group.activationDate.in.the.future";
+    private static final String IDEMPOTENCY_KEY_TOO_LONG = "error.msg.idempotency.key.too.long";
+    private static final String IDEMPOTENCY_KEY_RESERVED_SUFFIX = "error.msg.idempotency.key.reserved.suffix";
+    private static final int MAX_CLIENT_KEY_LENGTH = 50;
 
     private static final Long SUPER_USER_ROLE_ID = 1L;
     private static final String USER_PASSWORD = "A1b2c3d4e5f$";
@@ -243,34 +246,44 @@ public class ClientActivationIdempotencyRetryIntegrationTest extends FeignIntegr
 
     @Test
     @Order(8)
-    void renamedKeyCollidesWithLiteralClientKey_failureMovesToNextFreeNumberAndRetryExecutes() {
-        String key = UUID.randomUUID().toString();
-        String literalKey = key + "_RE2";
-        PostClientsRequest literalRequest = ClientRequestBuilders.createActivePersonClientWithExternalId(LAGGED_BUSINESS_DATE);
-        IdempotentCallOutcome<PostClientsResponse> literal = createClient(literalRequest, literalKey);
-        assertEquals(200, literal.status(), "The literal-key request must succeed on the lagged business date: " + literal);
-        assertFalse(literal.servedFromCache(), "The literal-key request must execute: " + literal);
-        Long literalClientId = literal.data().getClientId();
+    void keyEndingWithReservedSuffix_isRejectedWithoutExecuting() {
+        PostClientsRequest request = ClientRequestBuilders.createActivePersonClientWithExternalId(LAGGED_BUSINESS_DATE);
+        String key = UUID.randomUUID() + "_RE2";
 
+        assertFreshFailure(createClient(request, key), IDEMPOTENCY_KEY_RESERVED_SUFFIX);
+        assertFreshFailure(createClient(request, key), IDEMPOTENCY_KEY_RESERVED_SUFFIX);
+        assertEquals(0, clientHelper.countClientsByExternalId(request.getExternalId()), "No client may be created");
+    }
+
+    @Test
+    @Order(9)
+    void keyLongerThanFiftyCharacters_isRejectedWithoutExecuting() {
+        PostClientsRequest request = ClientRequestBuilders.createActivePersonClientWithExternalId(LAGGED_BUSINESS_DATE);
+
+        assertFreshFailure(createClient(request, fullLengthKey() + "x"), IDEMPOTENCY_KEY_TOO_LONG);
+        assertEquals(0, clientHelper.countClientsByExternalId(request.getExternalId()), "No client may be created");
+    }
+
+    @Test
+    @Order(10)
+    void fullLengthKey_recoverableFailureIsRenamedAndRetryExecutes() {
         PostClientsRequest request = ClientRequestBuilders.createActivePersonClientWithExternalId(REQUEST_DATE);
-        IdempotentCallOutcome<PostClientsResponse> first = createClient(request, key);
-        assertFreshFailure(first, CLIENT_ACTIVATION_IN_FUTURE);
+        String key = fullLengthKey();
+
+        assertFreshFailure(createClient(request, key), CLIENT_ACTIVATION_IN_FUTURE);
+        assertFreshFailure(createClient(request, key), CLIENT_ACTIVATION_IN_FUTURE);
 
         moveBusinessDateTo(REQUEST_DATE);
 
         IdempotentCallOutcome<PostClientsResponse> retry = createClient(request, key);
-        assertEquals(200, retry.status(), "Retry must run again despite the rename collision: " + retry);
+        assertEquals(200, retry.status(), "A 50-character key must still be freed after a recoverable failure: " + retry);
         assertFalse(retry.servedFromCache(), "Retry must not be served from cache: " + retry);
-        assertNotNull(retry.data().getClientId(), "Successful retry must return the created clientId");
         assertEquals(1, clientHelper.countClientsByExternalId(request.getExternalId()), "Exactly one client must be created");
+    }
 
-        IdempotentCallOutcome<PostClientsResponse> literalReplay = createClient(literalRequest, literalKey);
-        assertEquals(200, literalReplay.status(), "The literal key must keep its own result: " + literalReplay);
-        assertTrue(literalReplay.servedFromCache(), "The literal key must be served from cache: " + literalReplay);
-        assertEquals(literalClientId, literalReplay.data().getClientId(), "The literal key must replay its own clientId");
-        assertEquals(1, clientHelper.countClientsByExternalId(literalRequest.getExternalId()), "The literal-key client must exist once");
-
-        assertCachedReplayOf(first, createClient(request, key + "_RE3"));
+    private static String fullLengthKey() {
+        String uuid = UUID.randomUUID().toString();
+        return uuid + "k".repeat(MAX_CLIENT_KEY_LENGTH - uuid.length());
     }
 
     private void assertActivationFailureReplayedAfterBusinessDateMoves() {
