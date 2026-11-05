@@ -137,7 +137,11 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             final Map<String, Object> changes = chargeForUpdate.update(command);
 
             this.fromApiJsonDeserializer.validateChargeTimeNCalculationType(chargeForUpdate.getChargeTimeType(),
-                    chargeForUpdate.getChargeCalculation());
+                    chargeForUpdate.getChargeCalculation(), chargeForUpdate.isPenalty());
+
+            if (changes.containsKey(Charge.CHARGE_TIME_PARAM_NAME) && chargeForUpdate.isDownPaymentCharge()) {
+                validateLoanProductsSupportDownPaymentCharges(chargeId);
+            }
 
             // MIFOSX-900: Check if the Charge has been active before and now is
             // deactivated:
@@ -275,6 +279,15 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final String sql = "select (CASE WHEN exists (select 1 from m_savings_account_charge sc where sc.charge_id = ? and sc.is_active = true) THEN 'true' ELSE 'false' END)";
         final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
         return Boolean.valueOf(isSavingsUsingCharge);
+    }
+
+    private void validateLoanProductsSupportDownPaymentCharges(final Long chargeId) {
+        final boolean attachedToUnsupportedProduct = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId).stream()
+                .anyMatch(product -> !product.supportsDownPaymentCharges());
+        if (attachedToUnsupportedProduct) {
+            throw new ChargeCannotBeUpdatedException("error.msg.charge.down.payment.requires.progressive.down.payment.loan.product",
+                    "Charge cannot be changed to a down payment charge, it is attached to a loan product that is not progressive or has no down payment enabled.");
+        }
     }
 
     private boolean isAnyLoanProductsAssociateWithThisCharge(final Long chargeId) {

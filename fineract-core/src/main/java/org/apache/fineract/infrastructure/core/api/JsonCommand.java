@@ -579,11 +579,11 @@ public final class JsonCommand {
     }
 
     public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue,
-            final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
+            final PlatformPasswordEncoder platformPasswordEncoder) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
-            final String workingValue = passwordValueOfParameterNamed(parameterName, platformPasswordEncoder, saltValue);
-            isChanged = differenceExists(existingValue, workingValue);
+            final String workingValue = stringValueOfParameterNamed(parameterName);
+            isChanged = !platformPasswordEncoder.matches(workingValue, existingValue);
         }
         return isChanged;
     }

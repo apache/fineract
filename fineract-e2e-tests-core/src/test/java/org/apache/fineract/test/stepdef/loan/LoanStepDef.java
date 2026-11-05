@@ -35,8 +35,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -54,6 +59,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,6 +132,7 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoansApprovedAmountRequest;
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargeData;
+import org.apache.fineract.client.models.PutLoansLoanIdDisbursementData;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.test.data.AmortizationType;
@@ -186,6 +193,7 @@ import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -206,6 +214,8 @@ public class LoanStepDef extends AbstractStepDef {
     private static final String LOAN_WITHDRAWAL_COMMAND = "loanWithdrawal";
     private static final String UNDO_CONTRACT_TERMINATION_COMMAND = "undoContractTermination";
     private static final String UNDO_LOAN_WITHDRAWAL_COMMAND = "undoLoanWithdrawal";
+    private static final String REMEMBERED_LOAN_PREFIX = "rememberedLoan:";
+    private static final String SAVED_INTEREST_MODEL_PREFIX = "savedInterestModel:";
 
     private final BusinessDateHelper businessDateHelper;
     private final FineractFeignClient fineractClient;
@@ -223,10 +233,188 @@ public class LoanStepDef extends AbstractStepDef {
     private final EventProperties eventProperties;
     private final JobPollingProperties jobPollingProperties;
     private final ChargeProductResolver chargeProductResolver;
+    private final JdbcTemplate testJdbcTemplate;
 
     private void storePaymentTransactionResponse(ApiResponse<PostLoansLoanIdTransactionsResponse> apiResponse) {
         testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_RESPONSE, apiResponse.getData());
         testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_HEADERS, apiResponse.getHeaders());
+    }
+
+    @When("Admin remembers the current loan as {string}")
+    public void rememberCurrentLoan(final String name) {
+        assertThat(name).isNotBlank();
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertThat(loanResponse).as("Current loan").isNotNull();
+        assertThat(loanResponse.getLoanId()).as("Current loan ID").isNotNull();
+        assertThat(testContext().get().containsKey(REMEMBERED_LOAN_PREFIX + name)).as("Loan reference '%s' already exists", name).isFalse();
+        testContext().set(REMEMBERED_LOAN_PREFIX + name, loanResponse);
+    }
+
+    @When("Admin selects the loan named {string}")
+    public void selectRememberedLoan(final String name) {
+        final PostLoansResponse loanResponse = testContext().get(REMEMBERED_LOAN_PREFIX + name);
+        assertThat(loanResponse).as("Remembered loan '%s'", name).isNotNull();
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, loanResponse);
+    }
+
+    @Then("Loan principal outstanding is {string}")
+    public void checkPrincipalOutstanding(final String expectedAmount) {
+        final long loanId = currentLoanId();
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of()));
+        assertThat(loanDetails.getSummary().getPrincipalOutstanding()).as("Loan %s principal outstanding", loanId)
+                .isEqualByComparingTo(new BigDecimal(expectedAmount));
+    }
+
+    @Then("Loan interest is accrued through {string}")
+    public void checkAccruedTill(final String expectedDate) {
+        final long loanId = currentLoanId();
+        final LocalDate accruedTill = testJdbcTemplate.queryForObject("SELECT accrued_till FROM m_loan WHERE id = ?", LocalDate.class,
+                loanId);
+        assertThat(accruedTill).as("Loan %s accrued till", loanId).isEqualTo(LocalDate.parse(expectedDate, FORMATTER));
+    }
+
+    @When("Admin remembers the loan saved interest model")
+    public void rememberSavedInterestModel() {
+        testContext().set(SAVED_INTEREST_MODEL_PREFIX + currentLoanId(), savedInterestModel());
+    }
+
+    @When("Admin regenerates the saved progressive loan interest model")
+    public void regenerateSavedInterestModel() {
+        final long loanId = currentLoanId();
+        final Map<String, Object> model = ok(() -> fineractClient.progressiveLoan().updateInternalProgressiveLoan(loanId));
+        checkInternalInterestModelResponse(model);
+    }
+
+    @Then("Loan retrieved progressive interest model matches the saved model")
+    public void checkRetrievedInterestModel() {
+        final long loanId = currentLoanId();
+        final Map<String, Object> model = ok(() -> fineractClient.progressiveLoan().retrieveOneInternalProgressiveLoan(loanId));
+        checkInternalInterestModelResponse(model);
+    }
+
+    private void checkInternalInterestModelResponse(final Map<String, Object> model) {
+        final long loanId = currentLoanId();
+        assertThat(model).as("Loan %s internal interest model response", loanId).isNotNull().containsKeys("repaymentPeriods",
+                "interestRates", "modifiers", "overdueCorrections");
+        assertThat(new Gson().toJsonTree(model)).as("Loan %s internal interest model response matches persisted model", loanId)
+                .isEqualTo(savedInterestModel());
+    }
+
+    @Then("Loan saved interest model is unchanged")
+    public void checkSavedInterestModelIsUnchanged() {
+        final long loanId = currentLoanId();
+        final JsonObject expectedModel = testContext().get(SAVED_INTEREST_MODEL_PREFIX + loanId);
+        assertThat(expectedModel).as("Remembered saved interest model for loan %s", loanId).isNotNull();
+        assertThat(savedInterestModel()).as("Loan %s saved interest model after accrual", loanId).isEqualTo(expectedModel);
+    }
+
+    @Then("Loan saved interest model has {int} complete repayment periods")
+    public void checkSavedInterestModelPeriods(final int expectedPeriods) {
+        final long loanId = currentLoanId();
+        final List<JsonElement> repaymentPeriods = savedInterestModel().getAsJsonArray("repaymentPeriods").asList();
+        assertThat(repaymentPeriods).as("Loan %s saved repayment periods", loanId).hasSize(expectedPeriods);
+        repaymentPeriods.forEach((final JsonElement repaymentPeriodElement) -> {
+            final JsonObject repaymentPeriod = repaymentPeriodElement.getAsJsonObject();
+            final List<JsonElement> interestPeriods = repaymentPeriod.getAsJsonArray("interestPeriods").asList();
+            final String fromDate = repaymentPeriod.get("fromDate").getAsString();
+            final String dueDate = repaymentPeriod.get("dueDate").getAsString();
+            assertThat(interestPeriods).as("Loan %s interest periods for %s to %s", loanId, fromDate, dueDate).isNotEmpty();
+            assertThat(interestPeriods.getFirst().getAsJsonObject().get("fromDate").getAsString()).isEqualTo(fromDate);
+            assertThat(interestPeriods.getLast().getAsJsonObject().get("dueDate").getAsString()).isEqualTo(dueDate);
+            interestPeriods.forEach((final JsonElement interestPeriodElement) -> {
+                final JsonObject interestPeriod = interestPeriodElement.getAsJsonObject();
+                final LocalDate interestFromDate = LocalDate.parse(interestPeriod.get("fromDate").getAsString());
+                final LocalDate interestDueDate = LocalDate.parse(interestPeriod.get("dueDate").getAsString());
+                assertThat(interestFromDate).isBetween(LocalDate.parse(fromDate), LocalDate.parse(dueDate));
+                assertThat(interestDueDate).isBetween(interestFromDate, LocalDate.parse(dueDate));
+            });
+        });
+    }
+
+    @Then("Loan saved interest model has overdue corrections through {string}")
+    public void checkSavedInterestModelOverdueCorrections(final String maturityDate) {
+        final List<JsonObject> corrections = savedInterestModel().getAsJsonArray("overdueCorrections").asList().stream()
+                .map(JsonElement::getAsJsonObject).toList();
+        checkOverdueCorrectionsThrough(corrections, LocalDate.parse(maturityDate, FORMATTER));
+    }
+
+    @Then("Loan saved interest model has a credited boundary from {string} to {string} with overdue corrections through {string}")
+    public void checkCreditedBoundaryWithOverdueCorrections(final String fromDate, final String dueDate, final String maturityDate) {
+        final long loanId = currentLoanId();
+        final String expectedFromDate = LocalDate.parse(fromDate, FORMATTER).toString();
+        final String expectedDueDate = LocalDate.parse(dueDate, FORMATTER).toString();
+        final LocalDate maturity = LocalDate.parse(maturityDate, FORMATTER);
+        final JsonObject model = savedInterestModel();
+        final JsonObject repaymentPeriod = model.getAsJsonArray("repaymentPeriods").asList().stream().map(JsonElement::getAsJsonObject)
+                .filter((final JsonObject period) -> expectedFromDate.equals(period.get("fromDate").getAsString())
+                        && expectedDueDate.equals(period.get("dueDate").getAsString()))
+                .findFirst().orElseThrow(() -> new IllegalStateException("Missing credited repayment period for loan " + loanId));
+        final List<JsonElement> interestPeriods = repaymentPeriod.getAsJsonArray("interestPeriods").asList();
+        assertThat(interestPeriods).as("Loan %s credited repayment period interest periods", loanId).isNotEmpty();
+        final JsonObject firstInterestPeriod = interestPeriods.getFirst().getAsJsonObject();
+        assertThat(firstInterestPeriod.get("fromDate").getAsString()).isEqualTo(expectedFromDate);
+        assertThat(firstInterestPeriod.get("dueDate").getAsString()).isEqualTo(expectedDueDate);
+        assertThat(firstInterestPeriod.get("creditedPrincipal").getAsBigDecimal()
+                .add(firstInterestPeriod.get("creditedInterest").getAsBigDecimal())).as("Loan %s credited boundary amounts", loanId)
+                .isPositive();
+        final List<JsonObject> corrections = model.getAsJsonArray("overdueCorrections").asList().stream().map(JsonElement::getAsJsonObject)
+                .toList();
+        assertThat(corrections).as("Loan %s overdue corrections on credited period due date", loanId)
+                .anySatisfy((final JsonObject correction) -> {
+                    assertThat(correction.get("correctionDate").getAsString()).isEqualTo(expectedDueDate);
+                    assertThat(correction.get("affectedRpDueDate").getAsString()).isEqualTo(expectedDueDate);
+                    assertThat(correction.get("amount").getAsBigDecimal()).isPositive();
+                });
+        checkOverdueCorrectionsThrough(corrections, maturity);
+    }
+
+    private void checkOverdueCorrectionsThrough(final List<JsonObject> corrections, final LocalDate maturity) {
+        final long loanId = currentLoanId();
+        assertThat(corrections).as("Loan %s overdue correction at maturity", loanId).anySatisfy((final JsonObject correction) -> {
+            assertThat(correction.get("correctionDate").getAsString()).isEqualTo(maturity.toString());
+            assertThat(correction.get("affectedRpDueDate").getAsString()).isEqualTo(maturity.toString());
+            assertThat(correction.get("amount").getAsBigDecimal()).isNotZero();
+        }).allSatisfy((final JsonObject correction) -> {
+            assertThat(LocalDate.parse(correction.get("correctionDate").getAsString())).isBeforeOrEqualTo(maturity);
+            assertThat(LocalDate.parse(correction.get("affectedRpDueDate").getAsString())).isBeforeOrEqualTo(maturity);
+        });
+    }
+
+    private long currentLoanId() {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        return loanResponse.getLoanId();
+    }
+
+    private JsonObject savedInterestModel() {
+        final long loanId = currentLoanId();
+        final String jsonModel = testJdbcTemplate.queryForObject("SELECT json_model FROM m_loan_progressive_model WHERE loan_id = ?",
+                String.class, loanId);
+        assertThat(jsonModel).as("Loan %s persisted interest model", loanId).isNotBlank();
+        return JsonParser.parseString(jsonModel).getAsJsonObject();
+    }
+
+    @After(value = "@ProgressiveLoanBackdatedPeriodicAccrual", order = Integer.MAX_VALUE)
+    public void undoRememberedLoanDisbursements() {
+        final List<Long> loanIds = testContext().get().entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(REMEMBERED_LOAN_PREFIX))
+                .map(entry -> ((PostLoansResponse) entry.getValue()).getLoanId()).distinct().toList();
+        final IllegalStateException cleanupFailure = new IllegalStateException("Unable to undo disbursements of remembered loans");
+        loanIds.forEach((final Long loanId) -> {
+            try {
+                final GetLoansLoanIdResponse loanDetails = ok(
+                        () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+                if (loanDetails.getStatus().getId().intValue() == LoanStatus.ACTIVE.getValue()) {
+                    final PostLoansLoanIdRequest undoDisbursalRequest = new PostLoansLoanIdRequest().note("");
+                    ok(() -> fineractClient.loans().handleCommandsLoan(loanId, undoDisbursalRequest, Map.of("command", "undodisbursal")));
+                }
+            } catch (final RuntimeException | AssertionError exception) {
+                log.error("Failed to clean up remembered loan {}", loanId, exception);
+                cleanupFailure.addSuppressed(new IllegalStateException("Loan " + loanId, exception));
+            }
+        });
+        if (cleanupFailure.getSuppressed().length > 0) {
+            throw cleanupFailure;
+        }
     }
 
     @When("Admin creates a new Loan")
@@ -1831,6 +2019,130 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
     }
 
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount skipping down payment fee")
+    public void disburseLoanSkippingDownPaymentFee(String actualDisbursementDate, String transactionAmount) throws IOException {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .skipDownPaymentFee(true);
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
+    }
+
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount")
+    public void disburseLoanWithDownPaymentFeeAmount(final String actualDisbursementDate, final String transactionAmount,
+            final String downPaymentFeeAmount) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount and got an error {string}")
+    public void disburseLoanWithDownPaymentFeeAmountFailure(final String actualDisbursementDate, final String transactionAmount,
+            final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount and {string} EUR down payment fee amount skipping down payment fee and got an error {string}")
+    public void disburseLoanWithDownPaymentFeeAmountSkippingDownPaymentFeeFailure(final String actualDisbursementDate,
+            final String transactionAmount, final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount))
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount)).skipDownPaymentFee(true);
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @Then("Admin fails to disburse all expected tranches of the loan on {string} with {string} EUR down payment fee amount and got an error {string}")
+    public void disburseAllExpectedTranchesWithDownPaymentFeeAmountFailure(final String actualDisbursementDate,
+            final String downPaymentFeeAmount, final String errorMessage) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(null)
+                .downPaymentFeeAmount(new BigDecimal(downPaymentFeeAmount));
+
+        validateDisburseLoanWithInvalidDataFailure(loanResponse.getLoanId(), disburseRequest, 400, errorMessage);
+    }
+
+    @When("Admin modifies the loan resending its expected disbursement details and charges")
+    public void modifyLoanResendingExpectedDisbursementDetailsAndCharges() throws IOException {
+        modifyLoanResendingExpectedDisbursementDetails(null);
+    }
+
+    @When("Admin modifies the loan resending its charges and moving the expected disbursement date of its last tranche to {string}")
+    public void modifyLoanMovingLastTrancheExpectedDisbursementDate(final String newExpectedDisbursementDate) throws IOException {
+        modifyLoanResendingExpectedDisbursementDetails(newExpectedDisbursementDate);
+    }
+
+    private void modifyLoanResendingExpectedDisbursementDetails(final String lastTrancheNewExpectedDisbursementDate) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        final long loanId = loanResponse.getLoanId();
+        // "all" is needed: disbursementDetails are only returned with the multiDisburseDetails/all association
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "all", "exclude", "guarantors,futureSchedule")));
+        assertNotNull(loanDetails.getDisbursementDetails());
+
+        // Mirrors the UI "modify loan application" request: every existing expected tranche is resent with its id.
+        final List<GetLoansLoanIdDisbursementDetails> details = loanDetails.getDisbursementDetails().stream()
+                .sorted(Comparator.comparing(GetLoansLoanIdDisbursementDetails::getExpectedDisbursementDate)).toList();
+        final List<PutLoansLoanIdDisbursementData> disbursementData = new ArrayList<>();
+        for (int i = 0; i < details.size(); i++) {
+            final GetLoansLoanIdDisbursementDetails detail = details.get(i);
+            final boolean moveThisTranche = lastTrancheNewExpectedDisbursementDate != null && i == details.size() - 1;
+            disbursementData.add(new PutLoansLoanIdDisbursementData().id(detail.getId()).expectedDisbursementDate(
+                    moveThisTranche ? lastTrancheNewExpectedDisbursementDate : FORMATTER.format(detail.getExpectedDisbursementDate()))
+                    .principal(detail.getPrincipal()));
+        }
+        // The loan GET lists a down payment fee once per tranche; the application carries each charge definition once.
+        final Map<Long, PutLoansLoanIdChargeData> chargesByDefinition = new LinkedHashMap<>();
+        if (loanDetails.getCharges() != null) {
+            loanDetails.getCharges().forEach(charge -> chargesByDefinition.putIfAbsent(charge.getChargeId(),
+                    new PutLoansLoanIdChargeData().chargeId(charge.getChargeId()).amount(charge.getAmountOrPercentage())));
+        }
+        final List<PutLoansLoanIdChargeData> charges = new ArrayList<>(chargesByDefinition.values());
+
+        final PutLoansLoanIdRequest modifyRequest = new PutLoansLoanIdRequest()//
+                .productId(loanDetails.getLoanProductId())//
+                .clientId(loanDetails.getClientId())//
+                .loanType("individual")//
+                .principal(loanDetails.getPrincipal().longValue())//
+                .loanTermFrequency(loanDetails.getTermFrequency())//
+                .loanTermFrequencyType(loanDetails.getTermPeriodFrequencyType().getId().intValue())//
+                .numberOfRepayments(loanDetails.getNumberOfRepayments())//
+                .repaymentEvery(loanDetails.getRepaymentEvery())//
+                .repaymentFrequencyType(loanDetails.getRepaymentFrequencyType().getId().intValue())//
+                .interestRatePerPeriod(loanDetails.getInterestRatePerPeriod())//
+                .amortizationType(loanDetails.getAmortizationType().getId().intValue())//
+                .interestType(loanDetails.getInterestType().getId().intValue())//
+                .interestCalculationPeriodType(loanDetails.getInterestCalculationPeriodType().getId().intValue())//
+                .transactionProcessingStrategyCode(loanDetails.getTransactionProcessingStrategyCode())//
+                .expectedDisbursementDate(FORMATTER.format(loanDetails.getTimeline().getExpectedDisbursementDate()))//
+                .submittedOnDate(FORMATTER.format(loanDetails.getTimeline().getSubmittedOnDate()))//
+                .maxOutstandingLoanBalance(10000L)//
+                .disbursementData(disbursementData)//
+                .charges(charges)//
+                .dateFormat(DATE_FORMAT)//
+                .locale("en");
+
+        final PutLoansLoanIdResponse modifyResponse = ok(
+                () -> fineractClient.loans().updateLoanApplication(loanId, modifyRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, modifyResponse);
+    }
+
     @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and {string} fixed emi amount")
     public void disburseLoanWithFixedEmiAmount(final String actualDisbursementDate, final String transactionAmount,
             final String fixedEmiAmount) throws IOException {
@@ -2715,6 +3027,24 @@ public class LoanStepDef extends AbstractStepDef {
         }
     }
 
+    @Then("Loan Charges tab has exactly the following data:")
+    public void loanChargesTabCheckExact(DataTable table) {
+        PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.getLoanId();
+
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+        List<GetLoansLoanIdLoanChargeData> charges = loanDetailsResponse.getCharges() == null ? List.of()
+                : loanDetailsResponse.getCharges();
+        int expectedRows = table.asLists().size() - 1;
+        String actualCharges = charges.stream().map(c -> "%s due %s amount %s paid %s outstanding %s".formatted(c.getName(), c.getDueDate(),
+                c.getAmount(), c.getAmountPaid(), c.getAmountOutstanding())).toList().toString();
+        assertThat(charges.size()).as("Loan %s: Charges tab has %s charge(s) but %s expected. Actual: %s".formatted(loanId, charges.size(),
+                expectedRows, actualCharges)).isEqualTo(expectedRows);
+
+        loanChargesTabCheck(table);
+    }
+
     private List<List<String>> getActualValuesList(List<GetLoansLoanIdLoanChargeData> charges, String paymentDueAtExpected,
             String dueAsOfExpected) {
         List<GetLoansLoanIdLoanChargeData> result;
@@ -3140,6 +3470,32 @@ public class LoanStepDef extends AbstractStepDef {
             testContext().set(TestContextKey.LOAN_TRANSACTION_RESPONSE, loanTransaction);
         } else {
             testContext().set(TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE, loanTransaction);
+        }
+    }
+
+    @Then("The stored {string}th transaction, retrieved by id, has the following data:")
+    public void storedLoanTransactionRetrievedByIdCheck(String nthTrnOrderNumber, DataTable table) {
+        GetLoansLoanIdTransactions storedTransaction = testContext().get(
+                nthTrnOrderNumber.equals("1") ? TestContextKey.LOAN_TRANSACTION_RESPONSE : TestContextKey.LOAN_SECOND_TRANSACTION_RESPONSE);
+        assertNotNull(storedTransaction);
+        // GET /loans/{id}/transactions/{id} also returns rows hidden from the loan transaction list (reversed by
+        // reverse-replay)
+        GetLoansLoanIdTransactionsTransactionIdResponse transaction = getLoanTransactionIdById(storedTransaction.getId());
+        Map<String, Double> actualValues = new LinkedHashMap<>();
+        actualValues.put("Amount", transaction.getAmount());
+        actualValues.put("Principal", transaction.getPrincipalPortion());
+        actualValues.put("Interest", transaction.getInterestPortion());
+        actualValues.put("Fees", transaction.getFeeChargesPortion());
+        String retrieved = "transaction %s (%s on %s) retrieved by id: %s".formatted(transaction.getId(), transaction.getType().getCode(),
+                transaction.getDate(), actualValues);
+
+        List<String> header = table.row(0);
+        List<String> expectedValues = table.row(1);
+        for (int i = 0; i < header.size(); i++) {
+            String column = header.get(i);
+            assertThat(actualValues).as("Unsupported column %s", column).containsKey(column);
+            Double actualValue = actualValues.get(column) == null ? 0.0 : actualValues.get(column);
+            assertThat(actualValue).as("Wrong %s of %s", column, retrieved).isEqualTo(Double.valueOf(expectedValues.get(i)));
         }
     }
 

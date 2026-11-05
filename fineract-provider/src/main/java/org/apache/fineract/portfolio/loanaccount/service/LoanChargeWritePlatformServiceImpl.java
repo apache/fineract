@@ -271,6 +271,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 reprocessRequired = false;
             }
         }
+        // Ensure reverse-replay so an existing auto down payment transaction can cover a newly added DP fee
+        if (loanCharge.isDueAtDownPayment() && loan.isAutoRepaymentForDownPaymentEnabled()) {
+            reprocessRequired = true;
+        }
 
         if (reprocessRequired) {
             if (loan.isProgressiveSchedule()) {
@@ -1030,6 +1034,15 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             final String defaultUserMessage = "Installment charge cannot be added to the loan.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null,
                     chargeDefinition.getName());
+        } else if (chargeDefinition.isDownPaymentCharge()) {
+            final LocalDate dueDate = loanCharge.getDueLocalDate();
+            final boolean hasMatchingDownPaymentPeriod = loan.getRepaymentScheduleInstallments().stream()
+                    .anyMatch(installment -> installment.isDownPayment() && DateUtils.isEqual(dueDate, installment.getDueDate()));
+            if (!hasMatchingDownPaymentPeriod) {
+                final String defaultUserMessage = "Down payment charge due date must match an existing down payment installment.";
+                throw new LoanChargeCannotBeAddedException("loanCharge", "down.payment.due.date.no.matching.period", defaultUserMessage,
+                        dueDate, chargeDefinition.getName());
+            }
         } else if (loanCharge.getDueLocalDate() != null) {
             // TODO: Review, error message seems not valid if interest recalculation is not enabled.
             boolean isCumulative = loan.getLoanRepaymentScheduleDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE);

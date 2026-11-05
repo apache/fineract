@@ -44,6 +44,8 @@ public interface LoanApiConstants {
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";
     String postDatedChecks = "postDatedChecks";
+    String skipDownPaymentFeeParameterName = "skipDownPaymentFee";
+    String downPaymentFeeAmountParameterName = "downPaymentFeeAmount";
 
     String approvedLoanAmountParameterName = "approvedLoanAmount";
     String approvedOnDateParameterName = "approvedOnDate";

@@ -6,6 +6,9 @@ Apache Fineract enforces API backward compatibility using https://github.com/doc
 
 The check runs automatically on every pull request via the `verify-api-backward-compatibility.yml` GitHub Actions workflow.
 
+`/v1/internal` is reserved for endpoints enabled by `FineractProfiles.TEST` and excluded from backward compatibility checks because its test clients evolve with the server.
+OpenAPI generation, client generation and tests remain enabled.
+
 == How It Works
 
 The workflow follows these steps:

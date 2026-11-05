@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.businessdate.service;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +70,7 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
     }
 
     @Override
+    @Retry(name = "tenantContextLookup")
     public HashMap<BusinessDateType, LocalDate> getBusinessDates() {
         HashMap<BusinessDateType, LocalDate> businessDateMap = new HashMap<>();
         LocalDate tenantDate = DateUtils.getLocalDateOfTenant();

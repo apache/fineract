@@ -64,4 +64,19 @@ class LoanProductTest {
         loanProduct.getLoanProductRelatedDetail().setDaysInYearType(360);
         loanProduct.validateLoanProductPreSave();
     }
+
+    @Test
+    void testSupportsDownPaymentChargesOnlyWhenProgressiveWithDownPaymentEnabled() {
+        Assertions.assertTrue(loanProductWith(LoanScheduleType.PROGRESSIVE, true).supportsDownPaymentCharges());
+        Assertions.assertFalse(loanProductWith(LoanScheduleType.PROGRESSIVE, false).supportsDownPaymentCharges());
+        Assertions.assertFalse(loanProductWith(LoanScheduleType.CUMULATIVE, true).supportsDownPaymentCharges());
+    }
+
+    private LoanProduct loanProductWith(final LoanScheduleType scheduleType, final boolean enableDownPayment) {
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setLoanProductRelatedDetail(new LoanProductRelatedDetail());
+        loanProduct.getLoanProductRelatedDetail().setLoanScheduleType(scheduleType);
+        loanProduct.getLoanProductRelatedDetail().setEnableDownPayment(enableDownPayment);
+        return loanProduct;
+    }
 }

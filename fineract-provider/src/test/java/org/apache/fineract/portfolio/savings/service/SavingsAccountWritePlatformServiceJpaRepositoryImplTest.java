@@ -90,6 +90,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -421,6 +423,20 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     }
 
     @Test
+    void blockAccount_shouldLoadSavingsAccountInUserScope() {
+        Long savingsId = 1L;
+        SavingsAccount account = mock(SavingsAccount.class);
+        JsonCommand command = mock(JsonCommand.class);
+        when(savingAccountAssembler.assembleFromInUserScope(savingsId, false)).thenReturn(account);
+        when(account.block()).thenThrow(new IllegalStateException("Stop after loading the account"));
+
+        assertThatThrownBy(() -> service.blockAccount(savingsId, command)).isInstanceOf(IllegalStateException.class);
+
+        verify(savingAccountAssembler).assembleFromInUserScope(savingsId, false);
+        verify(savingAccountAssembler, never()).assembleFrom(savingsId, false);
+    }
+
+    @Test
     void postInterest_shouldValidateRequestAndUpdateManualInterestPostingExternalId() {
         Long savingsId = 1L;
         LocalDate transactionDate = LocalDate.of(2024, 4, 5);
@@ -482,7 +498,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         setupTenantContext(businessDate);
         when(savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
-        when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        when(savingAccountAssembler.assembleFromInUserScope(savingsId, false)).thenReturn(account);
         when(account.findExistingTransactionIds()).thenReturn(Set.of(10L));
         when(account.findExistingReversedTransactionIds()).thenReturn(Set.of(11L));
         when(account.officeId()).thenReturn(1L);
@@ -668,6 +684,28 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         verify(transaction).setAccountDebit(OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID);
         verify(transaction).setAccountCredit(INTEREST_RECEIVABLE_GL_ACCOUNT_ID);
+    }
+
+    @ParameterizedTest(name = "backdatedTxnsAllowedTill={0}")
+    @ValueSource(booleans = { false, true })
+    void postInterestForJob_newPosting_getsGlAccountsWithAndWithoutPivotDateConfig(final boolean backdatedTxnsAllowedTill) {
+        setupTenantContext(LocalDate.of(2025, 4, 1));
+        final SavingsAccountData account = savingsAccountWithGlAccounts(false);
+        final SavingsAccountTransactionData existingDeposit = transactionOfType(SavingsAccountTransactionType.DEPOSIT);
+        when(existingDeposit.getId()).thenReturn(1L);
+        final SavingsAccountTransactionData newPosting = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
+        when(newPosting.getId()).thenReturn(null);
+        when(account.getNominalAnnualInterestRate()).thenReturn(new BigDecimal("5"));
+        when(account.getSavingsAccountTransactionData()).thenReturn(List.of(existingDeposit, newPosting));
+        when(configurationDomainService.retrieveFinancialYearBeginningMonth()).thenReturn(1);
+        when(savingsAccountInterestPostingService.postInterest(any(), any(), anyBoolean(), anyBoolean(), any(), any(),
+                Mockito.eq(backdatedTxnsAllowedTill), Mockito.same(account))).thenReturn(account);
+
+        service.postInterest(account, false, null, backdatedTxnsAllowedTill);
+
+        verify(newPosting).setAccountDebit(INTEREST_PAYABLE_GL_ACCOUNT_ID);
+        verify(newPosting).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        verify(existingDeposit, never()).setAccountCredit(any());
     }
 
     private static SavingsAccountTransactionData transactionOfType(final SavingsAccountTransactionType type) {

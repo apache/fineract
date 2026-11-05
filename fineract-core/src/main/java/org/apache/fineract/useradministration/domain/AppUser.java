@@ -249,7 +249,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     private void updatePassword(JsonCommand command, PlatformPasswordEncoder platformPasswordEncoder, Map<String, Object> actualChanges) {
         final String passwordParamName = PASSWORD;
         if (command.hasParameter(passwordParamName)
-                && command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
+                && command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder)) {
             final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder, getId());
             actualChanges.put(passwordParamName, true);
             updatePassword(passwordEncodedValue);
@@ -730,7 +730,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         String passwordEncodedValue = null;
 
         if (command.hasParameter(passwordParamName)) {
-            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
+            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder)) {
 
                 passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder, getId());
 

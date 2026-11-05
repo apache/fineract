@@ -143,6 +143,23 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
+    // Tranche whose down payment period a down payment fee belongs to; null for other charges and single disbursement
+    // loans
+    @ManyToOne
+    @JoinColumn(name = "loan_disbursement_detail_id")
+    private LoanDisbursementDetails disbursementDetail;
+
+    // Configured down payment fee a fee created by a downPaymentFeeAmount override replaces; only an active fee holds
+    // it
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replaced_loan_charge_id")
+    private LoanCharge replacedLoanCharge;
+
+    // Created by a downPaymentFeeAmount override; a full undo of the disbursement deactivates it, with or without a
+    // replaced fee
+    @Column(name = "is_down_payment_fee_override", nullable = false)
+    private boolean downPaymentFeeOverride;
+
     @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanChargePaidBy> loanChargePaidBySet = new HashSet<>();
 
@@ -250,6 +267,33 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public boolean isDueAtDisbursement() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT)
                 || ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
+    }
+
+    public boolean isDueAtDownPayment() {
+        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DOWN_PAYMENT);
+    }
+
+    // Like a tranche disbursement charge, the fee of a tranche that is not disbursed yet is not due: it is in no
+    // installment, allocation or accrual until its tranche is disbursed
+    public boolean isDownPaymentFeeAwaitingDisbursement() {
+        return isDueAtDownPayment() && this.disbursementDetail != null && this.disbursementDetail.actualDisbursementDate() == null;
+    }
+
+    // Compared by id, or as entity instances while the tranche is not saved yet: LoanDisbursementDetails.equals only
+    // compares the expected date and principal, which tranches of the same day can share
+    @SuppressWarnings("ReferenceEquality")
+    public boolean isDownPaymentFeeOf(final LoanDisbursementDetails tranche) {
+        if (!isDueAtDownPayment() || tranche == null || this.disbursementDetail == null) {
+            return false;
+        }
+        if (this.disbursementDetail.getId() != null && tranche.getId() != null) {
+            return this.disbursementDetail.getId().equals(tranche.getId());
+        }
+        return this.disbursementDetail == tranche;
+    }
+
+    public boolean isDueAtDisbursementOrDownPayment() {
+        return isDueAtDisbursement() || isDueAtDownPayment();
     }
 
     public boolean isSpecifiedDueDate() {
@@ -573,6 +617,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         if (!active) {
             this.overdueInstallmentCharge = null;
             this.loanTrancheDisbursementCharge = null;
+            this.replacedLoanCharge = null;
             this.clearLoanInstallmentCharges();
         }
     }

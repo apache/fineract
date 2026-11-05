@@ -77,8 +77,6 @@ public class SmsCampaignApiResource {
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<String> toApiJsonSerializer;
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "SMS_CAMPAIGN";
-
     @GET
     @Path("template")
     @Operation(summary = "Retrieve a SMS Campaign", operationId = "retrieveTemplateSmsCampaign", description = """
@@ -184,7 +182,7 @@ public class SmsCampaignApiResource {
     @Operation(summary = "Preview SMS Campaign message", operationId = "previewSmsCampaign")
     @AlternativeOperationId("preview_1")
     public CampaignPreviewData preview(SmsCampaignPreviewDto previewDto) {
-        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        context.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
         final String strPreviewDtoJson = toApiJsonSerializer.serialize(previewDto);
         final JsonElement parsedQuery = fromJsonHelper.parse(strPreviewDtoJson);
         final JsonQuery query = JsonQuery.from(strPreviewDtoJson, parsedQuery, fromJsonHelper);
