@@ -709,13 +709,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
                     savingsAccountData);
 
-            if (!backdatedTxnsAllowedTill) {
-                List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
-                for (SavingsAccountTransactionData accountTransaction : transactions) {
-                    if (accountTransaction.getId() == null) {
-                        savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
-                        selectAccountId(accountTransaction, savingsAccountData);
-                    }
+            // the job books journal entries for these new postings from the accounts chosen here,
+            // with or without the pivot date configuration
+            List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
+            for (SavingsAccountTransactionData accountTransaction : transactions) {
+                if (accountTransaction.getId() == null) {
+                    savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
+                    selectAccountId(accountTransaction, savingsAccountData);
                 }
             }
             savingsAccountData.setExistingTransactionIds(existingTransactionIds);
