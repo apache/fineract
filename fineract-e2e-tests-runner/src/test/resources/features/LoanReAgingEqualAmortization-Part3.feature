@@ -3713,6 +3713,11 @@ Feature: LoanReAgingEqualAmortization - Part3
 #   --- The chargeback gives back 45 principal and 5 interest, the 5 interest was accrued with the first installment ---
     When Admin sets the business date to "20 October 2026"
     And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    Then Loan Transactions tab has a "CHARGEBACK" transaction with date "20 October 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 50.0   |
+      | ASSET     | 112601       | Loans Receivable          | 45.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   | 5.0   |        |
     When Admin sets the business date to "22 October 2026"
     And Admin runs inline COB job for Loan
     Then Loan has 25.9 total Accruals

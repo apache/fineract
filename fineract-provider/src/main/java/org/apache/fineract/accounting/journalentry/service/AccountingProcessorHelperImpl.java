@@ -175,13 +175,14 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             }
 
             BigDecimal principalPaid = loanTxnDto.getPrincipalPaid();
+            BigDecimal interestPaid = loanTxnDto.getInterestPaid();
             BigDecimal feePaid = loanTxnDto.getFeePaid();
             BigDecimal penaltyPaid = loanTxnDto.getPenaltyPaid();
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
                     penaltyPaymentDetails, feePaymentDetails, localIsAccountTransfer, chargeRefundChargeType, loanChargeDTO, principalPaid,
-                    feePaid, penaltyPaid);
+                    interestPaid, feePaid, penaltyPaid);
 
             transaction.setLoanToLoanTransfer(loanTxnDto.isLoanToLoanTransfer());
             transaction.setChargeTaxPayments(chargeTaxPayments);

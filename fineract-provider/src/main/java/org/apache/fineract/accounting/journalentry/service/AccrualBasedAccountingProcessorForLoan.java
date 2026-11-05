@@ -1228,12 +1228,16 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         final BigDecimal principalCredited = Objects.isNull(loanTransactionDTO.getPrincipal()) ? BigDecimal.ZERO
                 : loanTransactionDTO.getPrincipal();
+        final BigDecimal interestCredited = Objects.isNull(loanTransactionDTO.getInterest()) ? BigDecimal.ZERO
+                : loanTransactionDTO.getInterest();
         final BigDecimal feeCredited = Objects.isNull(loanTransactionDTO.getFees()) ? BigDecimal.ZERO : loanTransactionDTO.getFees();
         final BigDecimal penaltyCredited = Objects.isNull(loanTransactionDTO.getPenalties()) ? BigDecimal.ZERO
                 : loanTransactionDTO.getPenalties();
 
         final BigDecimal principalPaid = Objects.isNull(loanTransactionDTO.getPrincipalPaid()) ? BigDecimal.ZERO
                 : loanTransactionDTO.getPrincipalPaid();
+        final BigDecimal interestPaid = Objects.isNull(loanTransactionDTO.getInterestPaid()) ? BigDecimal.ZERO
+                : loanTransactionDTO.getInterestPaid();
         final BigDecimal feePaid = Objects.isNull(loanTransactionDTO.getFeePaid()) ? BigDecimal.ZERO : loanTransactionDTO.getFeePaid();
         final BigDecimal penaltyPaid = Objects.isNull(loanTransactionDTO.getPenaltyPaid()) ? BigDecimal.ZERO
                 : loanTransactionDTO.getPenaltyPaid();
@@ -1256,6 +1260,14 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     transactionId, transactionDate, principalPaid.subtract(principalCredited));
         }
 
+        if (interestCredited.compareTo(interestPaid) > 0) {
+            helper.createDebitJournalEntryForLoan(office, currencyCode, getInterestAccount(loanDTO), loanProductId, paymentTypeId, loanId,
+                    transactionId, transactionDate, interestCredited.subtract(interestPaid));
+        } else if (interestCredited.compareTo(interestPaid) < 0) {
+            helper.createCreditJournalEntryForLoan(office, currencyCode, getInterestAccount(loanDTO), loanProductId, paymentTypeId, loanId,
+                    transactionId, transactionDate, interestPaid.subtract(interestCredited));
+        }
+
         if (feeCredited.compareTo(feePaid) > 0) {
             helper.createDebitJournalEntryForLoan(office, currencyCode, getFeeAccount(loanDTO), loanProductId, paymentTypeId, loanId,
                     transactionId, transactionDate, feeCredited.subtract(feePaid));
@@ -1271,6 +1283,14 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             helper.createCreditJournalEntryForLoan(office, currencyCode, getPenaltyAccount(loanDTO), loanProductId, paymentTypeId, loanId,
                     transactionId, transactionDate, penaltyPaid.subtract(penaltyCredited));
         }
+    }
+
+    private Integer getInterestAccount(LoanDTO loanDTO) {
+        Integer account = AccrualAccountsForLoan.INTEREST_RECEIVABLE.getValue();
+        if (loanDTO.isMarkedAsChargeOff()) {
+            account = AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST.getValue();
+        }
+        return account;
     }
 
     private Integer getFeeAccount(LoanDTO loanDTO) {
