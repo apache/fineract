@@ -21,5 +21,7 @@ package org.apache.fineract.command.core;
 @FunctionalInterface
 public interface CommandHandlerManager {
 
+    // The handler is looked up at runtime, so RES can't be tied to an argument without changing Command
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     <REQ, RES> RES handle(Command<REQ> command);
 }

@@ -1149,6 +1149,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
     }
 
     /** Without a datatable id this reads every entry of the application-table row, with one it reads that entry. */
+    @SuppressWarnings("TypeParameterUnusedInFormals") // Callers choose the type of the parsed JSON
     private <T> T readDatatableEntry(String datatableName, Integer apptableId, boolean genericResultSet, Long datatableId) {
         String json = datatableId == null
                 ? ok(() -> fineractClient().dataTables().getDatatableEntries(datatableName, apptableId.longValue(),
@@ -1190,7 +1191,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
      * Reads a datatable response the way the assertions below compare it: whole numbers as {@code Integer} and decimals
      * as {@code Float}, the types the entry values are generated with.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "TypeParameterUnusedInFormals" }) // Callers choose the type of the parsed JSON
     private static <T> T parse(String json) {
         try {
             return (T) normalize(ObjectMapperFactory.getShared().readValue(json, Object.class));

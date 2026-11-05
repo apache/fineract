@@ -144,12 +144,11 @@ class SavingsAccountChargeTest {
         return getField(charge, "amountOutstanding");
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T getField(final Object target, final String fieldName) {
+    private static BigDecimal getField(final Object target, final String fieldName) {
         try {
             final Field field = SavingsAccountCharge.class.getDeclaredField(fieldName);
             field.setAccessible(true);
-            return (T) field.get(target);
+            return (BigDecimal) field.get(target);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Unable to read field " + fieldName, e);
         }

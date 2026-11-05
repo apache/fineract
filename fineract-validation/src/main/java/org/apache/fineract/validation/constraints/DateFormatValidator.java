@@ -46,7 +46,7 @@ public class DateFormatValidator implements ConstraintValidator<DateFormat, Stri
             return true;
         }
         try {
-            DateTimeFormatter.ofPattern(pattern);
+            var unused = DateTimeFormatter.ofPattern(pattern);
             return true;
         } catch (IllegalArgumentException e) {
             return false;

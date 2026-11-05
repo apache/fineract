@@ -50,6 +50,7 @@ public class DefaultCommandHandlerManager implements CommandHandlerManager {
     }
 
     @Override
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public <REQ, RES> RES handle(Command<REQ> command) {
         CommandHandler<REQ, RES> handler = lookup(command);
 

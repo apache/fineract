@@ -979,7 +979,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Long parentLoanId = loanId;
 
-        glimRepository.findById(parentLoanId).orElseThrow();
+        var unused = glimRepository.findById(parentLoanId).orElseThrow();
 
         JsonArray repayments = command.arrayOfParameterNamed("formDataArray");
         JsonCommand childCommand;
