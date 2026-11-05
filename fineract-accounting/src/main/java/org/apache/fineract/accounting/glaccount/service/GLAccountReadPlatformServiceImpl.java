@@ -31,7 +31,6 @@ import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountProjection;
@@ -40,8 +39,6 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidClassificationException;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.query.QAccGlJournalEntry;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,8 +51,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformService {
 
-    private static final String NAME_DECORATED_BASE_ON_HIERARCHY = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
-
     private static final QAccGlJournalEntry BALANCE_ENTRY = new QAccGlJournalEntry("balanceEntry");
     private static final QAccGlJournalEntry CANDIDATE_ENTRY = new QAccGlJournalEntry("candidateEntry");
     private static final QAccGlJournalEntry CALCULATED_ENTRY = new QAccGlJournalEntry("calculatedEntry");
@@ -64,63 +59,6 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     private final JdbcTemplate jdbcTemplate;
     private final SQLQueryFactory queryFactory;
-
-    private static final class GLAccountMapper implements RowMapper<GLAccountData> {
-
-        private final JournalEntryAssociationParametersData associationParametersData;
-
-        GLAccountMapper(final JournalEntryAssociationParametersData associationParametersData) {
-            if (associationParametersData == null) {
-                this.associationParametersData = new JournalEntryAssociationParametersData();
-            } else {
-                this.associationParametersData = associationParametersData;
-            }
-        }
-
-        private String schema() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(
-                    " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, ")
-                    .append("classification_enum as classification, account_usage as accountUsage, gl.description as description, ")
-                    .append(NAME_DECORATED_BASE_ON_HIERARCHY).append(" as nameDecorated, ")
-                    .append("cv.id as codeId, cv.code_value as codeValue ");
-            if (this.associationParametersData.isRunningBalanceRequired()) {
-                sb.append(",gl_j.organization_running_balance as organizationRunningBalance ");
-            }
-            sb.append("from acc_gl_account gl left join m_code_value cv on tag_id=cv.id ");
-            if (this.associationParametersData.isRunningBalanceRequired()) {
-                sb.append("left outer Join acc_gl_journal_entry gl_j on gl_j.account_id = gl.id");
-            }
-            return sb.toString();
-        }
-
-        @Override
-        public GLAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String name = rs.getString("name");
-            final Long parentId = JdbcSupport.getLong(rs, "parentId");
-            final String glCode = rs.getString("glCode");
-            final boolean disabled = rs.getBoolean("disabled");
-            final boolean manualEntriesAllowed = rs.getBoolean("manualEntriesAllowed");
-            final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
-            final EnumOptionData accountType = AccountingEnumerations.gLAccountType(accountTypeId);
-            final int usageId = JdbcSupport.getInteger(rs, "accountUsage");
-            final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(usageId);
-            final String description = rs.getString("description");
-            final String nameDecorated = rs.getString("nameDecorated");
-            final Long codeId = rs.wasNull() ? null : rs.getLong("codeId");
-            final String codeValue = rs.getString("codeValue");
-            final CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
-            Long organizationRunningBalance = null;
-            if (associationParametersData.isRunningBalanceRequired()) {
-                organizationRunningBalance = rs.getLong("organizationRunningBalance");
-            }
-            return new GLAccountData().setId(id).setName(name).setParentId(parentId).setGlCode(glCode).setDisabled(disabled)
-                    .setManualEntriesAllowed(manualEntriesAllowed).setType(accountType).setUsage(usage).setDescription(description)
-                    .setNameDecorated(nameDecorated).setTagId(tagId).setOrganizationRunningBalance(organizationRunningBalance);
-        }
-    }
 
     @Override
     public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,

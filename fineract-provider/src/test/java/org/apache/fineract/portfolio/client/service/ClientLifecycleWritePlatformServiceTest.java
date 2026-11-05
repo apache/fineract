@@ -52,7 +52,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ClientWritePlatformServiceJpaRepositoryImplTest {
+public class ClientLifecycleWritePlatformServiceTest {
 
     @Mock
     private ClientDataValidator fromApiJsonDeserializer;
@@ -71,7 +71,7 @@ public class ClientWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     @InjectMocks
-    private ClientWritePlatformServiceJpaRepositoryImpl clientWritePlatformService;
+    private ClientLifecycleWritePlatformService clientLifecycleWritePlatformService;
 
     @Test
     void shouldPublishClientCloseBusinessEventWhenClientIsClosed() {
@@ -95,7 +95,7 @@ public class ClientWritePlatformServiceJpaRepositoryImplTest {
         // no opening loan and savings
         when(loanRepositoryWrapper.findLoanByClientId(clientId)).thenReturn(Collections.emptyList());
         when(savingsRepositoryWrapper.findSavingAccountByClientId(clientId)).thenReturn(Collections.emptyList());
-        clientWritePlatformService.closeClient(clientId, command);
+        clientLifecycleWritePlatformService.closeClient(clientId, command);
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(ClientCloseBusinessEvent.class));
     }
 
@@ -109,7 +109,7 @@ public class ClientWritePlatformServiceJpaRepositoryImplTest {
         when(command.localDateValueOfParameterNamed(ClientApiConstants.reactivationDateParamName)).thenReturn(reactivateDate);
         when(currentClient.isClosed()).thenReturn(Boolean.TRUE);
         when(currentClient.getClosureDate()).thenReturn(reactivateDate);
-        clientWritePlatformService.reActivateClient(entityId, command);
+        clientLifecycleWritePlatformService.reActivateClient(entityId, command);
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(ClientReactivateBusinessEvent.class));
     }
 
@@ -123,7 +123,7 @@ public class ClientWritePlatformServiceJpaRepositoryImplTest {
         when(command.localDateValueOfParameterNamed(ClientApiConstants.reopenedDateParamName)).thenReturn(undoRejectDate);
         when(currentClient.isRejected()).thenReturn(Boolean.TRUE);
         when(currentClient.getRejectedDate()).thenReturn(undoRejectDate);
-        clientWritePlatformService.undoRejection(entityId, command);
+        clientLifecycleWritePlatformService.undoRejection(entityId, command);
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(ClientUndoRejectionBusinessEvent.class));
     }
 
@@ -142,7 +142,7 @@ public class ClientWritePlatformServiceJpaRepositoryImplTest {
                 .thenReturn(withdrawalReason);
         when(currentClient.isNotPending()).thenReturn(Boolean.FALSE);
         when(currentClient.getSubmittedOnDate()).thenReturn(withdrawalDate);
-        clientWritePlatformService.withdrawClient(entityId, command);
+        clientLifecycleWritePlatformService.withdrawClient(entityId, command);
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(ClientWithdrawBusinessEvent.class));
     }
 
@@ -156,7 +156,7 @@ public class ClientWritePlatformServiceJpaRepositoryImplTest {
         when(command.localDateValueOfParameterNamed(ClientApiConstants.reopenedDateParamName)).thenReturn(undoWithdrawalDate);
         when(currentClient.isWithdrawn()).thenReturn(Boolean.TRUE);
         when(currentClient.getWithdrawalDate()).thenReturn(undoWithdrawalDate);
-        clientWritePlatformService.undoWithdrawal(entityId, command);
+        clientLifecycleWritePlatformService.undoWithdrawal(entityId, command);
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(ClientUndoWithdrawalBusinessEvent.class));
     }
 }
