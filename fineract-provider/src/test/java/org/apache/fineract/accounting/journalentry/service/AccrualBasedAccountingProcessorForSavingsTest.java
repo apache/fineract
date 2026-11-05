@@ -33,9 +33,8 @@ import org.apache.fineract.accounting.journalentry.data.SavingsTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -58,24 +57,33 @@ class AccrualBasedAccountingProcessorForSavingsTest {
     @InjectMocks
     private AccrualBasedAccountingProcessorForSavings processor;
 
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    void interestPostingThatPaysDownAnOverdraftComesOutOfInterestPayable(final boolean reversal) {
+    @Test
+    void interestPostingThatPaysDownAnOverdraftComesOutOfInterestPayable() {
         when(helper.getOfficeById(OFFICE_ID)).thenReturn(office);
 
         // 19.18 posted to an account overdrawn by 10: 10 pays down the overdraft and 9.18 goes to the balance
-        processor.createJournalEntriesForSavings(savingsWith(interestPosting(new BigDecimal("19.18"), BigDecimal.TEN, reversal)));
+        processor.createJournalEntriesForSavings(savingsWith(interestPosting(new BigDecimal("19.18"), BigDecimal.TEN, false)));
 
-        // the Post Interest job debits Interest Payable for both parts, and a reversal swaps debit and credit of these
-        // same pairs, so it undoes a posting the job made
+        // the Post Interest job debits Interest Payable for both parts too, as both book from SavingsInterestPostingLegs
         verify(helper).createCashBasedJournalEntriesAndReversalsForSavings(office, CURRENCY_CODE,
                 AccrualAccountsForSavings.INTEREST_PAYABLE.getValue(), AccrualAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
-                SAVINGS_PRODUCT_ID, null, SAVINGS_ID, TRANSACTION_ID, POSTING_DATE, BigDecimal.TEN, reversal);
+                SAVINGS_PRODUCT_ID, null, SAVINGS_ID, TRANSACTION_ID, POSTING_DATE, BigDecimal.TEN, false);
         verify(helper).createCashBasedJournalEntriesAndReversalsForSavings(office, CURRENCY_CODE,
                 AccrualAccountsForSavings.INTEREST_PAYABLE.getValue(), AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(),
-                SAVINGS_PRODUCT_ID, null, SAVINGS_ID, TRANSACTION_ID, POSTING_DATE, new BigDecimal("9.18"), reversal);
+                SAVINGS_PRODUCT_ID, null, SAVINGS_ID, TRANSACTION_ID, POSTING_DATE, new BigDecimal("9.18"), false);
         verify(helper, never()).createCashBasedJournalEntriesAndReversalsForSavings(any(), any(),
                 eq(AccrualAccountsForSavings.INTEREST_ON_SAVINGS.getValue()), any(), any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void reversalMirrorsTheStoredEntriesInsteadOfRebuildingThem() {
+        when(helper.getOfficeById(OFFICE_ID)).thenReturn(office);
+
+        processor.createJournalEntriesForSavings(savingsWith(interestPosting(new BigDecimal("19.18"), BigDecimal.TEN, true)));
+
+        verify(helper).createJournalEntriesForReversedSavingsTransaction(TRANSACTION_ID, POSTING_DATE);
+        verify(helper, never()).createCashBasedJournalEntriesAndReversalsForSavings(any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any());
     }
 
     private static SavingsDTO savingsWith(final SavingsTransactionDTO transaction) {

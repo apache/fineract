@@ -495,6 +495,27 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
     }
 
     /**
+     * Books the opposite of every entry stored for a reversed savings transaction, so the reversal nets to zero on each
+     * GL account however the transaction was booked: by an accounting processor, or by the Post Interest For Savings
+     * job, which writes its own entries, and under GL mappings that may have changed since. A transaction with nothing
+     * booked gets no reversal entries.
+     */
+    @Override
+    public void createJournalEntriesForReversedSavingsTransaction(final String transactionId, final LocalDate transactionDate) {
+        // looked up by transaction id alone, because the job stores its credit entries with another entity type
+        final List<JournalEntry> journalEntries = this.glJournalEntryRepository
+                .findUnReversedSystemJournalEntriesByTransactionId(SAVINGS_TRANSACTION_IDENTIFIER + transactionId);
+        for (final JournalEntry journalEntry : journalEntries) {
+            persistJournalEntry(JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
+                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), Boolean.FALSE,
+                    transactionDate, journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT,
+                    journalEntry.getAmount(), journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(),
+                    journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
+                    journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId()));
+        }
+    }
+
+    /**
      * Convenience method that creates a pair of related Debits and Credits for Cash Based accounting.
      *
      * The target accounts for debits and credits are switched in case of a reversal

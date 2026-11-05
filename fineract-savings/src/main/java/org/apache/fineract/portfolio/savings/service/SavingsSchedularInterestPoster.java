@@ -36,6 +36,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForSavings;
+import org.apache.fineract.accounting.common.SavingsInterestPostingLegs;
+import org.apache.fineract.accounting.common.SavingsInterestPostingLegs.Leg;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -132,21 +135,26 @@ public class SavingsSchedularInterestPoster {
                     if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
                             && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                         OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
-                        BigDecimal amount = savingsAccountTransactionData.getAmount();
-                        // interest posted to an overdrawn account pays down the overdraft first, as in the accounting
-                        // processors; the debit side is the same for both parts
-                        final BigDecimal overdraftAmount = savingsAccountTransactionData.getTransactionType().isInterestPosting()
-                                ? savingsAccountTransactionData.getOverdraftAmount()
-                                : null;
-                        if (MathUtil.isGreaterThanZero(overdraftAmount)) {
+                        if (savingsAccountTransactionData.getTransactionType().isInterestPosting()) {
+                            // booked from the same rules as a manual posting in the accounting processors
+                            for (final Leg leg : SavingsInterestPostingLegs.legsFor(
+                                    savingsAccountData.isCashBasedAccountingEnabledOnSavingsProduct(),
+                                    savingsAccountTransactionData.getAmount(), savingsAccountTransactionData.getOverdraftAmount())) {
+                                addJournalEntryPair(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData,
+                                        glAccountId(savingsAccountData, leg.accountTypeToDebit()),
+                                        glAccountId(savingsAccountData, leg.accountTypeToCredit()), leg.amount(), currencyCode, userId,
+                                        auditDatetime);
+                            }
+                        } else if (savingsAccountTransactionData.getTransactionType().isOverDraftInterestPosting()) {
                             addJournalEntryPair(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData,
-                                    savingsAccountData.getGlAccountIdForOverdraftPorfolio(), overdraftAmount, currencyCode, userId,
-                                    auditDatetime);
-                            amount = amount.subtract(overdraftAmount);
-                        }
-                        if (MathUtil.isGreaterThanZero(amount)) {
-                            addJournalEntryPair(paramsForGLInsertion, savingsAccountData, savingsAccountTransactionData,
-                                    savingsAccountTransactionData.getAccountCredit(), amount, currencyCode, userId, auditDatetime);
+                                    savingsAccountTransactionData.getAccountDebit(), savingsAccountTransactionData.getAccountCredit(),
+                                    savingsAccountTransactionData.getAmount(), currencyCode, userId, auditDatetime);
+                        } else {
+                            // the job only has GL rules for the transactions it posts; another type would otherwise be
+                            // booked without accounts and fail the whole batch insert with a less obvious error
+                            throw new IllegalStateException("The Post Interest For Savings job has no GL rule for transaction type "
+                                    + savingsAccountTransactionData.getTransactionType().getCode() + " on savings account "
+                                    + savingsAccountData.getId());
                         }
                     }
 
@@ -159,13 +167,25 @@ public class SavingsSchedularInterestPoster {
         }
     }
 
+    // the GL accounts the job loaded for the savings product, by mapping type; cash and accrual mapping types share
+    // their values
+    private static Long glAccountId(final SavingsAccountData savingsAccountData, final int accountType) {
+        return switch (AccrualAccountsForSavings.fromInt(accountType)) {
+            case SAVINGS_CONTROL -> savingsAccountData.getGlAccountIdForSavingsControl();
+            case INTEREST_ON_SAVINGS -> savingsAccountData.getGlAccountIdForInterestOnSavings();
+            case INTEREST_PAYABLE -> savingsAccountData.getGlAccountIdForInterestPayable();
+            case OVERDRAFT_PORTFOLIO_CONTROL -> savingsAccountData.getGlAccountIdForOverdraftPorfolio();
+            default -> throw new IllegalStateException("The job does not load the GL account for savings mapping type " + accountType);
+        };
+    }
+
     private void addJournalEntryPair(final List<Object[]> paramsForGLInsertion, final SavingsAccountData savingsAccountData,
-            final SavingsAccountTransactionData savingsAccountTransactionData, final Long creditAccountId, final BigDecimal amount,
-            final String currencyCode, final Long userId, final OffsetDateTime auditDatetime) {
+            final SavingsAccountTransactionData savingsAccountTransactionData, final Long debitAccountId, final Long creditAccountId,
+            final BigDecimal amount, final String currencyCode, final Long userId, final OffsetDateTime auditDatetime) {
         paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData, creditAccountId,
                 JournalEntryType.CREDIT, amount, currencyCode, userId, auditDatetime));
-        paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData,
-                savingsAccountTransactionData.getAccountDebit(), JournalEntryType.DEBIT, amount, currencyCode, userId, auditDatetime));
+        paramsForGLInsertion.add(journalEntryParams(savingsAccountData, savingsAccountTransactionData, debitAccountId,
+                JournalEntryType.DEBIT, amount, currencyCode, userId, auditDatetime));
     }
 
     private Object[] journalEntryParams(final SavingsAccountData savingsAccountData,
