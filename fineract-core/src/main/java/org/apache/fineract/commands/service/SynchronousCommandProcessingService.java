@@ -232,7 +232,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     private void publishHookErrorEvent(CommandWrapper wrapper, JsonCommand command, ErrorInfo errorInfo) {
         try {
-            publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, gson.toJson(errorInfo));
+            publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, errorInfo);
         } catch (Exception e) {
             log.error("Failed to publish hook error event for entity: {}, action: {}", wrapper.entityName(), wrapper.actionName(), e);
         }
@@ -425,11 +425,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 } else if (result instanceof ErrorInfo ex) {
                     reqmap.put("status", "Exception");
 
-                    Map<String, Object> errorMap = new HashMap<>();
+                    Map<String, Object> errorMap = null;
 
                     try {
                         errorMap = gson.fromJson(ex.getMessage(), type);
                     } catch (Exception e) {
+                        log.debug("Error message is not a JSON object, sending it as is", e);
+                    }
+
+                    if (errorMap == null) {
+                        errorMap = new HashMap<>();
                         errorMap.put("errorMessage", ex.getMessage());
                     }
 
