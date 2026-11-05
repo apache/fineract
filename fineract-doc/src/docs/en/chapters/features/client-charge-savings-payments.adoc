@@ -1,0 +1,86 @@
+= Savings-Funded Client Charge Payments
+
+== Paying a Client Charge
+
+`POST /v1/clients/{clientId}/charges/{chargeId}?command=paycharge` accepts an
+optional `savingsAccountId`. Without it, payment does not withdraw savings.
+The shared charge safeguards described below apply to both payment paths.
+An explicit amount can pay all or part of the charge.
+
+[source,json]
+----
+{
+  "transactionDate": "05 November 2026",
+  "amount": 20,
+  "savingsAccountId": 123,
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en"
+}
+----
+
+The source savings account must use the charge's currency and office. It may
+belong to another client, provided the operator has access to both sides and
+the `WITHDRAWAL_SAVINGSACCOUNT` permission in addition to the client-charge
+payment permission. Cash payment-detail fields cannot accompany savings
+funding. Existing savings status, hold, balance, overdraft, interest and date
+rules apply, including the source account's `withdrawalFeeForTransfers` setting.
+Account creation defaults this flag to false when omitted; API callers must set
+it explicitly rather than assuming it is inherited from the product.
+
+Client transaction reads expose `savingsAccountId` and `savingsTransactionId`;
+the payment result includes `savingsId`.
+
+== Maker-Checker Authorization
+
+When maker-checker is enabled for client charge payments, submitting a payment
+queues it for approval without withdrawing funds or reducing the charge
+outstanding. Approval applies both operations; rejection leaves both unchanged.
+The checker needs `PAY_CLIENTCHARGE_CHECKER`, access to the source savings
+account, and `WITHDRAWAL_SAVINGSACCOUNT`. The maker's savings permission does
+not substitute for the checker's permission when approval executes the payment.
+
+The same rule applies to queued undo: approval requires
+`UNDOTRANSACTION_CLIENT_CHECKER` and `UNDOTRANSACTION_SAVINGSACCOUNT`.
+Submitting the undo does not restore either balance before approval.
+
+== Persistence and Accounting
+
+The payment creates a normal savings withdrawal and a normal client charge
+payment within one database transaction. A unique, nullable
+`m_client_transaction.funding_savings_transaction_id` foreign key records the
+funding relationship without treating a client as a portfolio account.
+
+Client transactions use a non-null version column, defaulting to zero for existing
+rows, to prevent competing undo requests
+from reversing the same payment twice. Payment and waiver serialize on a
+pessimistic charge lock, and payment validates that the charge belongs to the
+client in the request path. Charge payment allocations record the rounded
+amount applied to the charge rather than the raw requested amount.
+
+When accounting is enabled, the savings leg debits savings control (or the
+overdraft control where applicable) and credits internal liability-transfer
+clearing. The client leg debits that same clearing account and credits the
+charge income account. Neither leg represents a cash receipt. Accounting must
+be enabled on both sides, with required GL mappings, or disabled on both sides.
+The persisted link also identifies the withdrawal during accounting replay.
+Funding-link lookups use batches of at most 1,000 transaction IDs so large
+accounting replays do not produce an unbounded SQL `IN` clause.
+
+== Undo
+
+Undo the client payment using
+`POST /v1/clients/{clientId}/transactions/{transactionId}?command=undo`.
+Undo requires `UNDOTRANSACTION_SAVINGSACCOUNT` in addition to the client
+transaction undo permission and access to the source savings account.
+It reverses the funding withdrawal, its associated withdrawal fee where
+applicable, and the client payment atomically. The relationship remains for
+audit and reversal accounting. Direct savings undo, reversal and adjustment of
+the linked withdrawal are rejected. Bulk reversal also checks every transaction
+sharing the requested transaction's reference number, so requesting reversal
+through an associated withdrawal fee cannot bypass this protection.
+
+== Scope
+
+This feature does not add automatic collection, standing instructions,
+foreign-exchange conversion, or cross-office funding. Existing loan-charge
+payments from linked savings and savings-account charge payments are unchanged.

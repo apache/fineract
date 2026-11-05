@@ -50,6 +50,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -66,6 +67,7 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionRepositor
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -168,6 +170,8 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     private ExternalIdFactory externalIdFactory;
     @Mock
     private ErrorHandler errorHandler;
+    @Mock
+    private ClientTransactionRepository clientTransactionRepository;
 
     @InjectMocks
     private SavingsAccountWritePlatformServiceJpaRepositoryImpl service;
@@ -193,6 +197,30 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     void tearDown() {
         ThreadLocalContextUtil.reset();
         MoneyHelper.clearCache();
+    }
+
+    @Test
+    void bulkReversalOfFeeRejectsLinkedFundingWithdrawal() {
+        Long savingsId = 1L;
+        Long feeId = 2L;
+        Long withdrawalId = 3L;
+        JsonCommand command = mock(JsonCommand.class);
+        SavingsAccount account = mock(SavingsAccount.class);
+        SavingsAccountTransaction fee = mock(SavingsAccountTransaction.class);
+        SavingsAccountTransaction withdrawal = mock(SavingsAccountTransaction.class);
+        when(command.booleanPrimitiveValueOfParameterNamed("isBulk")).thenReturn(true);
+        when(savingAccountAssembler.assembleFromInUserScope(savingsId, false)).thenReturn(account);
+        when(savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(feeId, savingsId)).thenReturn(fee);
+        when(account.allowModify()).thenReturn(true);
+        when(fee.getId()).thenReturn(feeId);
+        when(fee.getRefNo()).thenReturn("funding-reference");
+        when(withdrawal.getId()).thenReturn(withdrawalId);
+        when(savingsAccountTransactionRepository.findByRefNo("funding-reference")).thenReturn(List.of(fee, withdrawal));
+        when(clientTransactionRepository.existsByFundingSavingsTransactionId(withdrawalId)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.reverseTransaction(savingsId, feeId, false, command))
+                .isInstanceOf(PlatformServiceUnavailableException.class).hasMessageContaining("update not allowed");
+        verify(savingsAccountDomainService, never()).handleReversal(any(), any(), anyBoolean());
     }
 
     @Test
