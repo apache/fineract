@@ -111,10 +111,10 @@ buildscript {
 }
 
 plugins {
-    id "org.barfuin.gradle.taskinfo" version "3.0.2"
+    id "org.barfuin.gradle.taskinfo" version "3.1.0"
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'com.diffplug.spotless' version '8.10.2' apply false
-    id 'org.nosphere.apache.rat' version '0.8.1' apply false
+    id 'org.nosphere.apache.rat' version '0.11.0' apply false
     id 'com.github.jk1.dependency-license-report' version '3.1.4' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
     id 'org.springframework.boot' version '4.1.1' apply false
