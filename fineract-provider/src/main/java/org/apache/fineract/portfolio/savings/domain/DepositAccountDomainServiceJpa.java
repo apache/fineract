@@ -209,7 +209,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             ExternalId externalId = this.externalIdFactory.create();
-            FixedDepositAccount reinvestedDeposit = account.reInvest(account.getAccountBalance(), externalId);
+            // Reinvest-principal-only rolls the original deposit over; reinvest-principal-and-interest rolls the
+            // matured balance over. The closing account still withdraws its whole balance either way, because
+            // closing it requires a zero balance — interest that is not reinvested is paid out to the depositor.
+            final BigDecimal reInvestAmount = onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY
+                    ? account.getDepositAmount()
+                    : account.getAccountBalance();
+            FixedDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount, externalId);
             this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
