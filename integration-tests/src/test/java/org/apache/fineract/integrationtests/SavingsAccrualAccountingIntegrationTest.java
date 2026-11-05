@@ -36,7 +36,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
@@ -201,6 +203,42 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
             deposit(savingsAccountId, AMOUNT, startDateString());
 
             schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(interestPostingOf(savingsAccountId));
+            assertHasEntry(journalEntries, DEBIT, accounts.interestPayable(),
+                    "DEBIT to Interest Payable (Liability) Account not found for accrual interest posting.");
+            assertHasEntry(journalEntries, CREDIT, accounts.savingsControl(),
+                    "CREDIT to Savings Control (Liability) Account not found for accrual interest posting.");
+        });
+    }
+
+    /**
+     * With backdated transactions before the interest posting date disallowed, the job takes its pivot date path. It
+     * has to book the same entries there.
+     */
+    @Test
+    public void testPostInterestJobPostsAccrualJournalEntriesWithPivotDateConfiguration() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
+
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+            assertNotNull(savingsProductId, "Failed to create savings product.");
+
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            deposit(savingsAccountId, AMOUNT, startDateString());
+
+            globalConfigurationHelper.updateGlobalConfiguration(
+                    GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            try {
+                schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+            } finally {
+                globalConfigurationHelper.updateGlobalConfiguration(
+                        GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
+                        new PutGlobalConfigurationsRequest().enabled(true));
+            }
 
             final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(interestPostingOf(savingsAccountId));
             assertHasEntry(journalEntries, DEBIT, accounts.interestPayable(),
