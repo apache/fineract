@@ -40,6 +40,8 @@ public enum AssetExternalizationErrorMessage {
     LOAN_PRODUCT_ATTRIBUTE_OF_ANOTHER_LOAN_PRODUCT("The requested attribute does not belong to the loanProductId"), //
     USER_HAS_NO_CREATE_ATTRIBUTE_AUTHORITY("User has no authority to: CREATE_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE"), //
     USER_HAS_NO_UPDATE_ATTRIBUTE_AUTHORITY("User has no authority to: UPDATE_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE"), //
+    USER_HAS_NO_UPDATE_LOAN_ATTRIBUTE_AUTHORITY("User has no authority to: UPDATE_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE"), //
+    LOAN_ATTRIBUTE_NO_LOAN_LEVEL_COPY("has no loan-level copy of the external asset owner attributes"), //
     INVALID_REQUEST("The request was invalid. This typically will happen due to validation errors which are provided."); //
 
     public final String value;
