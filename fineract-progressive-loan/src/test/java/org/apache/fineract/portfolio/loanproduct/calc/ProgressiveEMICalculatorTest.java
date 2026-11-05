@@ -5466,6 +5466,7 @@ class ProgressiveEMICalculatorTest {
     }
 
     // utilities
+    @SuppressWarnings("DirectInvocationOnMock") // Each test keeps its schedule settings on this mock
     private List<LoanScheduleModelRepaymentPeriod> generateExpectedRepaymentPeriods(LocalDate disbursementDate) {
         return switch (loanProductRelatedDetail.getRepaymentPeriodFrequencyType()) {
             case MONTHS -> expectedRepaymentsMonthly(disbursementDate, loanProductRelatedDetail.getNumberOfRepayments(),

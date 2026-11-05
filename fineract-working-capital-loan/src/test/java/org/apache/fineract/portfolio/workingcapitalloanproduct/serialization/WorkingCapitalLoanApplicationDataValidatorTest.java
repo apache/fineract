@@ -514,9 +514,8 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
     /** YEARS used to be accepted on products, so a stored one must fail on the frequency, not as uncalculable. */
     @Test
     void tpvLoan_OnAProductStillStoringYears_ShouldReportTheFrequencyType() {
-        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
-        final WorkingCapitalLoanProductRelatedDetail relatedDetail = productRepository.findById(PRODUCT_ID).orElseThrow()
-                .getRelatedDetail();
+        final WorkingCapitalLoanProduct product = stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
+        final WorkingCapitalLoanProductRelatedDetail relatedDetail = product.getRelatedDetail();
         when(relatedDetail.getRepaymentFrequencyType()).thenReturn(WorkingCapitalLoanPeriodFrequencyType.YEARS);
         assertCreateCodes(createBaseJsonObject(), WCL + "repaymentFrequencyType.invalid.period.frequency.type");
     }
@@ -567,18 +566,18 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
     }
 
     private void stubFrequencyOverridableProduct() {
-        stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
+        final WorkingCapitalLoanProduct product = stubProduct(WorkingCapitalPaymentAmountCalculationStrategy.TPV, null, null, null);
         final WorkingCapitalLoanProductConfigurableAttributes config = org.mockito.Mockito
                 .mock(WorkingCapitalLoanProductConfigurableAttributes.class);
         lenient().when(config.isPeriodPaymentFrequency()).thenReturn(true);
         lenient().when(config.isPeriodPaymentFrequencyType()).thenReturn(true);
-        when(productRepository.findById(PRODUCT_ID).orElseThrow().getConfigurableAttributes()).thenReturn(config);
+        when(product.getConfigurableAttributes()).thenReturn(config);
     }
 
     private static final String WCL = "validation.msg." + WorkingCapitalLoanConstants.WCL_RESOURCE_NAME + ".";
 
-    private void stubProduct(final WorkingCapitalPaymentAmountCalculationStrategy strategy, final BigDecimal paymentAmount,
-            final BigDecimal minPaymentAmount, final BigDecimal maxPaymentAmount) {
+    private WorkingCapitalLoanProduct stubProduct(final WorkingCapitalPaymentAmountCalculationStrategy strategy,
+            final BigDecimal paymentAmount, final BigDecimal minPaymentAmount, final BigDecimal maxPaymentAmount) {
         final WorkingCapitalLoanProduct product = createMockProduct();
         final WorkingCapitalLoanProductRelatedDetail relatedDetail = org.mockito.Mockito.mock(WorkingCapitalLoanProductRelatedDetail.class);
         lenient().when(relatedDetail.getPaymentAmountCalculationStrategy()).thenReturn(strategy);
@@ -592,6 +591,7 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
                         BigDecimal.valueOf(0.5), BigDecimal.valueOf(2.0), null, null, minPaymentAmount, maxPaymentAmount));
         lenient().when(product.getCurrency()).thenReturn(new MonetaryCurrency("USD", 2, null));
         lenient().when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+        return product;
     }
 
     private JsonObject paymentAmountJsonObject(final BigDecimal paymentAmount) {

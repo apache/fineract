@@ -57,9 +57,11 @@ class CreateJournalEntriesForChargeOffLoanTest {
     private AccrualBasedAccountingProcessorForLoan processor;
     private LoanDTO loanDTO;
 
+    private Office office;
+
     @BeforeEach
     void setUp() {
-        Office office = Office.headOffice("Main Office", LocalDate.now(ZoneId.systemDefault()), null);
+        office = Office.headOffice("Main Office", LocalDate.now(ZoneId.systemDefault()), null);
         when(helper.getOfficeById(1L)).thenReturn(office);
 
         GLClosure mockClosure = mock(GLClosure.class);
@@ -100,11 +102,10 @@ class CreateJournalEntriesForChargeOffLoanTest {
 
         verify(helper, times(1)).getChargeOffMappingByCodeValue(1L, PortfolioProductType.LOAN, chargeOffReasonId);
         verify(helper, times(1)).getLinkedGLAccountForLoanProduct(1L, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(), 1L);
-        verify(helper, times(1)).createCreditJournalEntryForLoan(helper.getOfficeById(1L), "USD", AccrualAccountsForLoan.LOAN_PORTFOLIO, 1L,
-                null, 1L, "txn-123", LocalDate.now(ZoneId.systemDefault()), new BigDecimal("500.00"));
-        verify(helper, times(1)).createDebitJournalEntryForLoan(helper.getOfficeById(1L), "USD",
-                AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), 1L, null, 1L, "txn-123", LocalDate.now(ZoneId.systemDefault()),
-                new BigDecimal("500.00"));
+        verify(helper, times(1)).createCreditJournalEntryForLoan(office, "USD", 1L, "txn-123", LocalDate.now(ZoneId.systemDefault()),
+                new BigDecimal("500.00"), loanPortfolioGLAccount);
+        verify(helper, times(1)).createDebitJournalEntryForLoan(office, "USD", 1L, "txn-123", LocalDate.now(ZoneId.systemDefault()),
+                new BigDecimal("500.00"), chargeOffGLAccount);
     }
 
     @Test

@@ -654,7 +654,6 @@ configure(project.fineractJavaProjects) {
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
                     "ReturnValueIgnored",
-                    "DirectInvocationOnMock",
                     "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
                     "MultiVariableDeclaration", // Until errorprone recognizes Lombok

@@ -184,11 +184,10 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
         underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, List.of(installment), Set.of(charge),
-                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
+                new MoneyHolder(overpaidAmount), null, new ArrayList<>()));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
-        assertEquals(zero.getAmount(), loanTransaction.getAmount(currency).minus(chargeAmountMoney).getAmount());
         assertEquals(0, chargeAmount.compareTo(installment.getFeeChargesCharged(currency).getAmount()));
         assertEquals(0, BigDecimal.ZERO.compareTo(installment.getFeeChargesOutstanding(currency).getAmount()));
         Mockito.verify(loan, times(0)).getPaymentAllocationRules();
@@ -228,11 +227,10 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
         underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, List.of(installment), Set.of(charge),
-                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
+                new MoneyHolder(overpaidAmount), null, new ArrayList<>()));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(transactionAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(transactionAmountMoney), refEq(zero));
-        assertEquals(zero.getAmount(), loanTransaction.getAmount(currency).minus(transactionAmountMoney).getAmount());
         assertEquals(0, chargeAmount.compareTo(installment.getFeeChargesCharged(currency).getAmount()));
         assertEquals(0, BigDecimal.valueOf(80.00).compareTo(installment.getFeeChargesOutstanding(currency).getAmount()));
         Mockito.verify(loan, times(0)).getPaymentAllocationRules();
@@ -267,7 +265,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         when(loanTransaction.getLoan()).thenReturn(loan);
         when(loan.getCurrency()).thenReturn(currency);
-        when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         when(loan.getDisbursementDate()).thenReturn(disbursementDate);
         when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
@@ -280,11 +278,10 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.isOn(transactionDate)).thenReturn(true);
 
         underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, List.of(installment), Set.of(charge),
-                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
+                new MoneyHolder(overpaidAmount), null, new ArrayList<>()));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(transactionDate, chargeAmountMoney);
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
-        assertEquals(0, BigDecimal.valueOf(20).compareTo(loanTransaction.getAmount(currency).minus(chargeAmountMoney).getAmount()));
         assertEquals(0, chargeAmount.compareTo(installment.getFeeChargesCharged(currency).getAmount()));
         assertEquals(0, BigDecimal.ZERO.compareTo(installment.getFeeChargesOutstanding(currency).getAmount()));
         assertEquals(0, BigDecimal.valueOf(80).compareTo(installment.getPrincipalOutstanding(currency).getAmount()));
@@ -308,8 +305,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
-                loan.getActiveLoanTermVariations());
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null, new ArrayList<>());
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify principal
@@ -366,8 +362,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
-                loan.getActiveLoanTermVariations());
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null, new ArrayList<>());
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify charges on installment
@@ -419,8 +414,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment2);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null,
-                loan.getActiveLoanTermVariations());
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null, new ArrayList<>());
         underTest.processCreditTransaction(chargebackTransaction, ctx);
 
         // verify principal
@@ -513,7 +507,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // Set up TransactionCtx with installments and charges
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), overpaymentHolder, changedTransactionDetail,
-                model, loan.getActiveLoanTermVariations());
+                model, new ArrayList<>());
 
         // Mock additional necessary methods
         LoanCharge loanCharge = mock(LoanCharge.class);
@@ -590,7 +584,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(model.getMaturityDate()).thenReturn(LocalDate.of(2023, 12, 31));
 
         TransactionCtx ctx = new ProgressiveTransactionCtx(currency, spyInstallments, Set.of(), new MoneyHolder(Money.zero(currency)),
-                mock(ChangedTransactionDetail.class), model, Money.zero(currency), loan.getActiveLoanTermVariations());
+                mock(ChangedTransactionDetail.class), model, Money.zero(currency), new ArrayList<>());
 
         underTest.processLatestTransaction(disbursementTransaction, ctx);
 
@@ -684,7 +678,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         lenient().when(emiCalculator.getDueAmounts(any(), any(), any(), any())).thenThrow(new NoSuchElementException("No value present"));
 
         final ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), new MoneyHolder(zeroMoney),
-                mock(ChangedTransactionDetail.class), model, zeroMoney, loan.getActiveLoanTermVariations());
+                mock(ChangedTransactionDetail.class), model, zeroMoney, new ArrayList<>());
 
         underTest.processLatestTransaction(merchantIssuedRefund, ctx);
 
@@ -790,7 +784,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
                 .thenReturn(new PeriodDueDetails(middlePeriodDuePrincipal, middlePeriodDuePrincipal, zeroMoney));
 
         final ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), new MoneyHolder(zeroMoney),
-                mock(ChangedTransactionDetail.class), model, zeroMoney, loan.getActiveLoanTermVariations());
+                mock(ChangedTransactionDetail.class), model, zeroMoney, new ArrayList<>());
 
         // Used to spin until "Loop exceeded N iterations" - must now terminate and cascade to the previous installment
         underTest.processLatestTransaction(merchantIssuedRefund, ctx);
@@ -1308,7 +1302,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         final MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
         final ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
         final ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(MONETARY_CURRENCY, installments, Set.of(), overpaymentHolder,
-                changedTransactionDetail, model, loan.getActiveLoanTermVariations());
+                changedTransactionDetail, model, new ArrayList<>());
 
         // then
         Assertions.assertDoesNotThrow(() -> underTest.processLatestTransaction(chargeOffTransaction, ctx));
