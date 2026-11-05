@@ -3612,6 +3612,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     }
                     installment.setAdditional(false);
                     installment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+                    installment.setCreditedInterest(rp.getCreditedInterest().getAmount());
                     installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                 }
             } else {
@@ -3629,6 +3630,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     }
 
                     newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+                    newInstallment.setCreditedInterest(rp.getCreditedInterest().getAmount());
                     newInstallment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                     iterator.add(newInstallment);
                 }
@@ -3734,6 +3736,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             m.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(m);
         });
         newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+        newInstallment.setCreditedInterest(rp.getCreditedInterest().getAmount());
         newInstallment.updateObligationsMet(currency, transactionDate);
 
         return newInstallment;
@@ -4093,10 +4096,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         emiCalculator.reAgeEqualAmortization(model, transactionDate, EMICalculatorDataMapper.toLoanReAgeParameterData(loanReAgeParameter),
                 outstandingBalances.fees.add(outstandingBalances.penalties), calculatedFees.add(calculatedPenalties), amountsNotInModel);
 
+        // an additional installment that falls within the re-aged schedule is dropped, unless something was paid on it:
+        // its outstanding amounts were lifted above, so it holds only what was paid, which must stay paid
         installments.removeIf(i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
-                && !i.isAdditional()) || (!i.getDueDate().isAfter(model.getMaturityDate()) && i.isAdditional()));
+                && !i.isAdditional())
+                || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && i.getTotalPaid(currency).isZero()));
 
-        installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional).forEach(i -> {
+        installments.stream().filter(i -> i.isAdditional() && i.getDueDate().isAfter(model.getMaturityDate())).forEach(i -> {
             i.setFromDate(model.getMaturityDate());
             i.setInstallmentNumber(model.repaymentPeriods().size());
         });
