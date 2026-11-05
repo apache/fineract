@@ -23,6 +23,9 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +40,14 @@ public class DeleteCenterCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.deleteGroup(command.entityId());
+
+        final GroupDeleteResponse response = this.groupWritePlatformService
+                .deleteGroup(GroupDeleteRequest.builder().groupId(command.entityId()).build());
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(response.getGroupId()) //
+                .withOfficeId(response.getOfficeId()) //
+                .build();
     }
 }

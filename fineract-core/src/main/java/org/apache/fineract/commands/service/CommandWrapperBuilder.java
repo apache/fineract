@@ -2323,15 +2323,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateGroup(final Long groupId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_GROUP;
-        this.entityId = groupId;
-        this.groupId = groupId;
-        this.href = "/groups/" + groupId;
-        return this;
-    }
-
     public CommandWrapperBuilder activateGroup(final Long groupId) {
         this.actionName = ACTION_ACTIVATE;
         this.entityName = ENTITY_GROUP;
@@ -2354,15 +2345,6 @@ public class CommandWrapperBuilder {
         this.actionName = ACTION_SAVE;
         this.entityName = ENTITY_COLLECTIONSHEET;
         this.href = "/collectionsheet?command=saveCollectionSheet";
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteGroup(final Long groupId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_GROUP;
-        this.entityId = groupId;
-        this.groupId = groupId;
-        this.href = "/groups/" + groupId;
         return this;
     }
 

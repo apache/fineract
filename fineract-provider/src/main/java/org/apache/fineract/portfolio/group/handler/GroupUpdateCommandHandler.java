@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "UPDATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class UpdateGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupUpdateCommandHandler implements CommandHandler<GroupUpdateRequest, GroupUpdateResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupUpdate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public GroupUpdateResponse handle(Command<GroupUpdateRequest> command) {
+        return groupingTypesWritePlatformService.updateGroup(command.getPayload());
+    }
 
-        return this.groupWritePlatformService.updateGroup(command.entityId(), command);
+    @Override
+    public GroupUpdateResponse fallback(Command<GroupUpdateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
