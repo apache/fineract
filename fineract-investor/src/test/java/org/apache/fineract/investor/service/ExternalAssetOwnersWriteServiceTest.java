@@ -139,6 +139,8 @@ public class ExternalAssetOwnersWriteServiceTest {
 
         when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
+        String loanProductShortName = "LP1";
+        when(testContext.loanDataForExternalTransfer.getLoanProductShortName()).thenReturn(loanProductShortName);
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanId, testContext.loanProductId)).thenReturn(false);
 
         // when
@@ -150,8 +152,8 @@ public class ExternalAssetOwnersWriteServiceTest {
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
         verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanId, testContext.loanProductId);
-        Assertions.assertEquals(thrownException.getMessage(), "Delayed Settlement Configuration is not enabled for the loan product: "
-                + testContext.loanDataForExternalTransfer.getLoanProductShortName());
+        Assertions.assertEquals(thrownException.getMessage(),
+                "Delayed Settlement Configuration is not enabled for the loan product: " + loanProductShortName);
     }
 
     @ParameterizedTest
