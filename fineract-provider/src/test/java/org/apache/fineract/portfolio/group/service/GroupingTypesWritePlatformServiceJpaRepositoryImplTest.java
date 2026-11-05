@@ -50,11 +50,13 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.GroupLevelNotFoundException;
+import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransitionException;
 import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
@@ -134,7 +136,7 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
     private JsonCommand command;
 
     @Test
-    void updateGroupThrowsGroupLevelNotFoundExceptionWhenGroupLevelMissing() {
+    void updateCenterThrowsGroupLevelNotFoundExceptionWhenGroupLevelMissing() {
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
                 fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
@@ -154,7 +156,48 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
         when(group.update(any(JsonCommand.class))).thenReturn(Collections.emptyMap());
         when(groupLevelRepository.findById(groupLevelId)).thenReturn(Optional.empty());
 
-        assertThrows(GroupLevelNotFoundException.class, () -> service.updateGroup(groupId, command));
+        assertThrows(GroupLevelNotFoundException.class, () -> service.updateCenter(groupId, command));
+    }
+
+    @Test
+    void updateGroupThrowsWhenActivationDateBeforeOfficeOpeningDate() {
+        GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
+                groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
+                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
+                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
+
+        when(groupRepository.findOneWithNotFoundDetection(1L)).thenReturn(group);
+        when(group.getOffice()).thenReturn(office);
+        when(office.getHierarchy()).thenReturn(".");
+        when(office.getOpeningLocalDate()).thenReturn(LocalDate.of(2000, 1, 1));
+        when(group.getGroupLevel()).thenReturn(groupLevel);
+        when(groupLevel.getLevelName()).thenReturn("Group");
+
+        GroupUpdateRequest request = GroupUpdateRequest.builder().groupId(1L).activationDate("04 March 1990").dateFormat("dd MMMM yyyy")
+                .build();
+
+        assertThrows(InvalidGroupStateTransitionException.class, () -> service.updateGroup(request));
+    }
+
+    @Test
+    void updateGroupThrowsWhenActivationDateBeforeSubmittedOnDate() {
+        GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
+                groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
+                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
+                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
+
+        when(groupRepository.findOneWithNotFoundDetection(1L)).thenReturn(group);
+        when(group.getOffice()).thenReturn(office);
+        when(office.getHierarchy()).thenReturn(".");
+        when(office.getOpeningLocalDate()).thenReturn(LocalDate.of(1990, 1, 1));
+        when(group.getGroupLevel()).thenReturn(groupLevel);
+
+        GroupUpdateRequest request = GroupUpdateRequest.builder().groupId(1L).submittedOnDate("04 March 2011")
+                .activationDate("01 January 2011").dateFormat("dd MMMM yyyy").build();
+
+        assertThrows(GeneralPlatformDomainRuleException.class, () -> service.updateGroup(request));
     }
 
     @Test
