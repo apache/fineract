@@ -326,6 +326,18 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/paymenttypes"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE")
 
+                    // accounting closure
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/glclosures"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GLCLOSURE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/glclosures/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GLCLOSURE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/glclosures"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GLCLOSURE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/glclosures/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GLCLOSURE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/glclosures/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GLCLOSURE")
+
                     // working days
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/workingdays"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS")
