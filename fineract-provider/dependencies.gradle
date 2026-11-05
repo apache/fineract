@@ -37,6 +37,7 @@ dependencies {
     implementation(project(path: ':fineract-loan'))
     implementation(project(path: ':fineract-savings'))
     implementation(project(path: ':fineract-shares'))
+    implementation(project(path: ':fineract-account-transfer'))
     implementation(project(path: ':fineract-branch'))
     implementation(project(path: ':fineract-document'))
     implementation(project(path: ':fineract-progressive-loan'))
