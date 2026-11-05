@@ -169,7 +169,7 @@ dependencyManagement {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
-        dependency ('org.apache.activemq:activemq-client:6.2.5') {
+        dependency ('org.apache.activemq:activemq-client:6.2.10') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
