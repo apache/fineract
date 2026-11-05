@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -61,10 +62,13 @@ import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +86,8 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
+    private final ClientChargeSavingsPaymentService savingsPaymentService;
+    private final SavingsAccountAssembler savingsAccountAssembler;
 
     @Override
     public CommandProcessingResult addCharge(Long clientId, JsonCommand command) {
@@ -134,13 +140,23 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     }
 
     @Override
+    @Transactional
     public CommandProcessingResult payCharge(Long clientId, Long clientChargeId, JsonCommand command) {
         try {
             this.clientChargeDataValidator.validatePayCharge(command.json());
 
+            final Long savingsAccountId = command.longValueOfParameterNamed("savingsAccountId");
+            if (savingsAccountId != null) {
+                savingsAccountAssembler.lockInIdOrder(savingsAccountId);
+            }
+
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
 
-            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientCharge clientCharge = this.clientChargeRepository.findOneForUpdate(clientChargeId);
+            if (!clientId.equals(clientCharge.getClientId())) {
+                throw new GeneralPlatformDomainRuleException("error.msg.client.charge.client.mismatch",
+                        "The charge does not belong to the specified client");
+            }
 
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
@@ -153,6 +169,9 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             // Validate business rules for payment
             validatePaymentTransaction(client, clientCharge, fmt, transactionDate, amountPaid);
 
+            final SavingsAccountTransaction funding = savingsAccountId == null ? null
+                    : savingsPaymentService.withdraw(savingsAccountId, clientCharge, chargePaid, transactionDate, fmt);
+
             // pay the charge
             clientCharge.pay(chargePaid);
 
@@ -162,10 +181,11 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
 
             ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
                     chargePaid, clientCharge.getCurrency().getCode(), transactionExternalId);
+            clientTransaction.setFundingSavingsTransaction(funding);
             this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
             // update charge paid by associations
-            final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, amountPaid);
+            final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, chargePaid.getAmount());
             clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
 
             // generate accounting entries
@@ -178,7 +198,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
                     .withSubEntityExternalId(clientTransaction.getExternalId()) //
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //
-                    .build();
+                    .withSavingsId(savingsAccountId).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
@@ -193,10 +213,11 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     }
 
     @Override
+    @Transactional
     public CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId) {
         try {
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
-            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientCharge clientCharge = this.clientChargeRepository.findOneForUpdate(clientChargeId);
             final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
             // Validate business rules for payment
