@@ -43,10 +43,11 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
     @Query("select sa from SavingsAccount sa where sa.id = :savingsId")
     SavingsAccount findOneLocked(@Param("savingsId") Long id);
 
-    // the rows are locked in ascending id order, see SavingsAccountRepositoryWrapper#lockInIdOrder
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select sa from SavingsAccount sa where sa.id in :ids order by sa.id")
-    List<SavingsAccount> findAllLockedOrderedById(@Param("ids") Collection<Long> ids);
+    // Locks the account row and returns only its id, see SavingsAccountRepositoryWrapper#lockInIdOrder. Native on
+    // purpose: a JPQL PESSIMISTIC_WRITE query refreshes the entity to the version it locked, which hides a stale
+    // snapshot from the version check.
+    @Query(value = "SELECT id FROM m_savings_account WHERE id = ?1 FOR UPDATE", nativeQuery = true)
+    Long lockById(Long id);
 
     @Query("select s_acc from SavingsAccount s_acc where s_acc.gsim.id = :gsimId")
     List<SavingsAccount> findSavingAccountByGsimId(@Param("gsimId") Long gsimId);

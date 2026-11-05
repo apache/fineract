@@ -18,14 +18,17 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.util.List;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 
 /**
  * Two transfers in opposite directions (A to B and B to A) deadlock when each locks its own account first. The accounts
@@ -40,24 +43,32 @@ class SavingsAccountRepositoryWrapperLockOrderTest {
     @Test
     void accountsAreLockedInAscendingIdOrderWhateverTheDirection() {
         underTest.lockInIdOrder(9L, 3L);
-        verify(repository).findAllLockedOrderedById(List.of(3L, 9L));
+        verifyLockedInOrder(3L, 9L);
     }
 
     @Test
     void theOppositeDirectionLocksTheSameOrder() {
         underTest.lockInIdOrder(3L, 9L);
-        verify(repository).findAllLockedOrderedById(List.of(3L, 9L));
+        verifyLockedInOrder(3L, 9L);
     }
 
     @Test
     void nullAndDuplicateIdsAreIgnored() {
         underTest.lockInIdOrder(5L, null, 5L);
-        verify(repository).findAllLockedOrderedById(List.of(5L));
+        verify(repository, times(1)).lockById(5L);
+        verifyNoMoreInteractions(repository);
     }
 
     @Test
     void nothingIsLockedWithoutIds() {
         underTest.lockInIdOrder((Long) null);
-        verify(repository, never()).findAllLockedOrderedById(ArgumentMatchers.any());
+        verify(repository, never()).lockById(anyLong());
+    }
+
+    private void verifyLockedInOrder(final Long first, final Long second) {
+        final InOrder order = inOrder(repository);
+        order.verify(repository).lockById(first);
+        order.verify(repository).lockById(second);
+        verifyNoMoreInteractions(repository);
     }
 }
