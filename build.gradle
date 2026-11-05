@@ -180,6 +180,13 @@ ext.LICENSE_REPORT_CONFIGURATIONS = [
 ]
 
 allprojects  {
+    // The RAT plugin resolves its tool through each project's own buildscript repositories
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+    }
+
     group = 'org.apache.fineract'
 
     repositories {
