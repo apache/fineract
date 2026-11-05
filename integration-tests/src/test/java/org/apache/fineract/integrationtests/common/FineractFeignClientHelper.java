@@ -20,7 +20,6 @@ package org.apache.fineract.integrationtests.common;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.integrationtests.ConfigProperties;
 
@@ -38,7 +37,7 @@ public final class FineractFeignClientHelper {
     }
 
     public static FineractFeignClient createNewFineractFeignClient(String username, String password) {
-        return createNewFineractFeignClient(username, password, Function.identity()::apply);
+        return createNewFineractFeignClient(username, password, builder -> {});
     }
 
     public static FineractFeignClient createNewFineractFeignClient(String username, String password, boolean debugEnabled) {
