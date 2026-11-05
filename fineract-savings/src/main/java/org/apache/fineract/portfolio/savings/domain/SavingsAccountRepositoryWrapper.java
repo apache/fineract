@@ -64,13 +64,20 @@ public class SavingsAccountRepositoryWrapper {
      * accounts in opposite directions (A to B and B to A) would otherwise each lock one account and wait for the other:
      * a deadlock, which the database resolves by aborting one of them. With a single global lock order they queue up
      * instead.
+     *
+     * <p>
+     * Only the rows are locked; no entity is loaded. Under REPEATABLE READ (the pool default) a transaction that has
+     * already read something, such as a batch chunk that has read its items, keeps its snapshot after the lock is
+     * granted. A locking query that loaded the entity would refresh it to the latest version while the account's
+     * transactions, loaded afterwards by plain reads, still came from the old snapshot: the balance would be recomputed
+     * without a transfer another transaction had just committed, and the version check would pass, losing that transfer
+     * silently. With the lock alone, the entity is read from the same snapshot as its transactions, so a concurrent
+     * change fails the version check instead and the caller retries.
+     * </p>
      */
     @Transactional
     public void lockInIdOrder(final Long... savingsIds) {
-        final List<Long> ids = java.util.Arrays.stream(savingsIds).filter(java.util.Objects::nonNull).distinct().sorted().toList();
-        if (!ids.isEmpty()) {
-            this.repository.findAllLockedOrderedById(ids);
-        }
+        java.util.Arrays.stream(savingsIds).filter(java.util.Objects::nonNull).distinct().sorted().forEach(this.repository::lockById);
     }
 
     @Transactional
