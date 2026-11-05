@@ -18,14 +18,16 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.group;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
-import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
@@ -35,14 +37,18 @@ import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateI
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.ClientIdSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -61,12 +67,14 @@ public class GroupImportHandler implements ImportHandler {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
+    private final CommandDispatcher dispatcher;
 
     @Autowired
     public GroupImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            IdempotencyKeyGenerator idempotencyKeyGenerator) {
+            final IdempotencyKeyGenerator idempotencyKeyGenerator, final CommandDispatcher dispatcher) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.idempotencyKeyGenerator = idempotencyKeyGenerator;
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -271,18 +279,44 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private CommandProcessingResult importGroup(final List<GroupGeneralData> groups, final int rowIndex, final String dateFormat) {
-        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, groups.get(rowIndex).getLocale()));
-        Type clientCollectionType = new TypeToken<Collection<ClientData>>() {
+        GroupGeneralData groupData = groups.get(rowIndex);
 
-        }.getType();
-        gsonBuilder.registerTypeAdapter(clientCollectionType, new ClientIdSerializer());
-        String payload = gsonBuilder.create().toJson(groups.get(rowIndex));
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createGroup() //
-                .withJson(payload) //
-                .build(); //
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        Set<Long> clientMemberIds = new HashSet<>();
+        if (groupData.getClientMembers() != null) {
+            for (ClientData client : groupData.getClientMembers()) {
+                if (client.getId() != null) {
+                    clientMemberIds.add(client.getId());
+                }
+            }
+        }
+
+        final Locale locale = StringUtils.isBlank(groupData.getLocale()) ? null : Locale.forLanguageTag(groupData.getLocale());
+        String activationDateStr = DateUtils.format(groupData.getActivationDate(), dateFormat, locale);
+        String submittedOnDateStr = DateUtils.format(groupData.getSubmittedOnDate(), dateFormat, locale);
+
+        GroupCreateRequest request = GroupCreateRequest.builder() //
+                .name(groupData.getName()) //
+                .officeId(groupData.getOfficeId()) //
+                .staffId(groupData.getStaffId()) //
+                .centerId(groupData.getCenterId()) //
+                .externalId(groupData.getExternalId()) //
+                .active(groupData.getActive()) //
+                .activationDate(activationDateStr) //
+                .submittedOnDate(submittedOnDateStr) //
+                .clientMembers(clientMemberIds.isEmpty() ? null : clientMemberIds) //
+                .locale(groupData.getLocale()) //
+                .dateFormat(dateFormat) //
+                .build();
+
+        GroupCreateCommand command = new GroupCreateCommand();
+        command.setPayload(request);
+        GroupCreateResponse response = dispatcher.<GroupCreateRequest, GroupCreateResponse>dispatch(command).get();
+
+        return new CommandProcessingResultBuilder() //
+                .withOfficeId(response.getOfficeId()) //
+                .withGroupId(response.getGroupId()) //
+                .withEntityId(response.getResourceId()) //
+                .build();
     }
 
     private int getProgressLevel(String status) {
@@ -293,5 +327,4 @@ public class GroupImportHandler implements ImportHandler {
         }
         return 0;
     }
-
 }
