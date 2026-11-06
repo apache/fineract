@@ -27,9 +27,11 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 public class UpdateDepositsAccountMaturityDetailsConfig {
@@ -42,6 +44,9 @@ public class UpdateDepositsAccountMaturityDetailsConfig {
     private DepositAccountReadPlatformService depositAccountReadPlatformService;
     @Autowired
     private DepositAccountWritePlatformService depositAccountWritePlatformService;
+    @Autowired
+    @Qualifier("requiresNewTransactionTemplate")
+    private TransactionTemplate requiresNewTransactionTemplate;
 
     @Bean
     protected Step updateDepositsAccountMaturityDetailsStep() {
@@ -57,6 +62,7 @@ public class UpdateDepositsAccountMaturityDetailsConfig {
 
     @Bean
     public UpdateDepositsAccountMaturityDetailsTasklet updateDepositsAccountMaturityDetailsTasklet() {
-        return new UpdateDepositsAccountMaturityDetailsTasklet(depositAccountReadPlatformService, depositAccountWritePlatformService);
+        return new UpdateDepositsAccountMaturityDetailsTasklet(depositAccountReadPlatformService, depositAccountWritePlatformService,
+                requiresNewTransactionTemplate);
     }
 }

@@ -253,9 +253,15 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(final boolean backdatedTxnsAllowedTill, final int pageSize,
             final Integer status, final Long maxSavingsId) {
-        LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
+        LocalDate today = DateUtils.getBusinessLocalDate();
+        LocalDate yesterday = today.minusDays(1);
+        // A deposit whose maturity date has arrived belongs to the "Update Deposit Accounts Maturity details" job (same
+        // cut-off as its selection), which posts the final interest and matures it. This path has no maturity cap, so
+        // posting here too carries interest past maturity and races that job for the same rows.
         String sql = "select " + this.savingAccountMapperForInterestPosting.schema()
-                + "join (select a.id from m_savings_account a where a.id > ? and a.status_enum = ? limit ?) b on b.id = sa.id ";
+                + "join (select a.id from m_savings_account a where a.id > ? and a.status_enum = ? "
+                + "and not exists (select 1 from m_deposit_account_term_and_preclosure dat where dat.savings_account_id = a.id and dat.maturity_date <= ?) "
+                + "order by a.id limit ?) b on b.id = sa.id ";
         if (backdatedTxnsAllowedTill) {
             sql = sql
                     + "where (CASE WHEN sa.interest_posted_till_date is not null THEN tr.transaction_date >= sa.interest_posted_till_date ELSE tr.transaction_date >= sa.activatedon_date END) ";
@@ -266,7 +272,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql = sql + " order by sa.id, tr.transaction_date, tr." + CREATED_DATE_DB_FIELD + ", tr.created_date, tr.id";
 
         List<SavingsAccountData> savingsAccountDataList = this.jdbcTemplate.query(sql, this.savingAccountMapperForInterestPosting, // NOSONAR
-                new Object[] { maxSavingsId, status, pageSize, yesterday });
+                new Object[] { maxSavingsId, status, today, pageSize, yesterday });
         loadTaxGroupsForInterestPosting(savingsAccountDataList);
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
             this.savingAccountAssembler.assembleSavings(savingsAccountData);
