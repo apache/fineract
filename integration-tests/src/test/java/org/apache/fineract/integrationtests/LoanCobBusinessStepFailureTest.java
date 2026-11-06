@@ -45,6 +45,9 @@ import org.junit.jupiter.api.Test;
  * Two loans of one chunk: the first posts an accrual journal entry on the COB date, which a GL closure on that date
  * rejects; the second has no accounting, so it posts nothing and is not concerned by the closure. The Loan COB job must
  * complete, close the second loan, and leave the first locked with its error, so that a later run can take it over.
+ * <p>
+ * The scenario - a GL closure on the COB date failing one loan's accrual, beside a loan with no accounting in the same
+ * chunk - is Piotr Wargulak's, from his {@code LoanCobBusinessStepFailureTest} in apache/fineract#6753.
  */
 public class LoanCobBusinessStepFailureTest extends FeignLoanTestBase {
 
