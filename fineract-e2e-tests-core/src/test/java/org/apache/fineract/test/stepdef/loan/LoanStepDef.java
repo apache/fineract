@@ -85,6 +85,8 @@ import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.DisbursementDetail;
@@ -4158,6 +4160,119 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(template.getDelinquencyBucketOptions()).isNotNull();
         final List<String> bucketNames = template.getDelinquencyBucketOptions().stream().map(DelinquencyBucketData::getName).toList();
         assertThat(bucketNames).doesNotContainAnyElementsOf(table.asList());
+    }
+
+    @Then("Loan Product template has creditAllocationStrategyOptions:")
+    public void verifyLoanProductTemplateCreditAllocationStrategyOptions(final DataTable table) {
+        final GetLoanProductsTemplateResponse template = ok(() -> fineractClient.loanProducts().retrieveTemplateLoanProduct(false));
+        assertThat(template.getCreditAllocationStrategyOptions()).isNotNull();
+        final List<List<String>> expectedOptions = table.asMaps().stream().map(row -> List.of(row.get("Code"), row.get("Value"))).toList();
+        final List<List<String>> actualOptions = template.getCreditAllocationStrategyOptions().stream()
+                .map(option -> List.of(option.getCode(), option.getValue())).toList();
+        assertThat(actualOptions).as("creditAllocationStrategyOptions").containsExactlyElementsOf(expectedOptions);
+    }
+
+    @Then("Loan Product {string} has the following credit allocation:")
+    public void verifyLoanProductCreditAllocation(final String loanProductName, final DataTable table) {
+        final Long loanProductId = resolveLoanProductId(loanProductName);
+        final GetLoanProductsProductIdResponse product = ok(
+                () -> fineractClient.loanProducts().retrieveOneLoanProductUniversal(loanProductId, Map.of()));
+        assertThat(product.getCreditAllocation()).as("creditAllocation of loan product %s", loanProductName).isNotNull();
+        final List<List<String>> expected = table.asMaps().stream().map(row -> List.of(row.get("Transaction type"),
+                row.get("Credit allocation strategy"), Objects.requireNonNullElse(row.get("Credit allocation order"), ""))).toList();
+        final List<List<String>> actual = product.getCreditAllocation().stream()
+                .map(creditAllocation -> List.of(creditAllocation.getTransactionType(), creditAllocation.getCreditAllocationStrategy(),
+                        creditAllocationOrderAsString(creditAllocation)))
+                .toList();
+        assertThat(actual).as("creditAllocation of loan product %s", loanProductName).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Then("Admin failed to create a new Loan Product with {string} payment strategy, credit allocation strategy {string}, credit allocation order {string} and got an error {string}")
+    public void createLoanProductWithInvalidCreditAllocationFailed(final String paymentStrategy, final String creditAllocationStrategy,
+            final String creditAllocationOrder, final String errorMessage) {
+        final PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP2EmiWithCreditAllocation(
+                chargebackCreditAllocation(creditAllocationStrategy, creditAllocationOrder));
+        final TransactionProcessingStrategyCode strategyCode = TransactionProcessingStrategyCode.valueOf(paymentStrategy);
+        if (strategyCode != ADVANCED_PAYMENT_ALLOCATION) {
+            request.transactionProcessingStrategyCode(strategyCode.getValue())//
+                    .loanScheduleType("CUMULATIVE")//
+                    .paymentAllocation(null);
+        }
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(400);
+        assertThat(exception.getResponseBody()).contains(errorMessage);
+    }
+
+    @Given("Loan product {string} dedicated to this scenario exists with chargeback credit allocation strategy {string} and credit allocation order {string}")
+    public void ensureDedicatedCreditAllocationLoanProduct(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder) {
+        ensureCreditAllocationLoanProduct(loanProductName, creditAllocationStrategy, creditAllocationOrder, false);
+    }
+
+    @When("Admin creates a new Loan Product {string} with chargeback credit allocation strategy {string}, credit allocation order {string} and interest recalculation {string}")
+    public void createCreditAllocationLoanProduct(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder, final String interestRecalculation) {
+        ensureCreditAllocationLoanProduct(loanProductName, creditAllocationStrategy, creditAllocationOrder,
+                Boolean.parseBoolean(interestRecalculation));
+    }
+
+    private void ensureCreditAllocationLoanProduct(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder, final boolean interestRecalculation) {
+        if (findLoanProductIdByName(loanProductName).isPresent()) {
+            updateLoanProductChargebackCreditAllocation(loanProductName, creditAllocationStrategy, creditAllocationOrder);
+            return;
+        }
+        final PostLoanProductsRequest request = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2EmiWithCreditAllocation(
+                        chargebackCreditAllocation(creditAllocationStrategy, creditAllocationOrder))//
+                .name(loanProductName);
+        if (interestRecalculation) {
+            request.isInterestRecalculationEnabled(true)//
+                    .preClosureInterestCalculationStrategy(1)//
+                    .rescheduleStrategyMethod(4)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1);
+        }
+        ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
+    @When("Admin updates {string} loan product chargeback credit allocation to strategy {string} and credit allocation order {string}")
+    public void updateLoanProductChargebackCreditAllocation(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder) {
+        final Long loanProductId = resolveLoanProductId(loanProductName);
+        final PutLoanProductsProductIdRequest request = new PutLoanProductsProductIdRequest()//
+                .locale(LOCALE_EN)//
+                .creditAllocation(chargebackCreditAllocation(creditAllocationStrategy, creditAllocationOrder));
+        ok(() -> fineractClient.loanProducts().updateLoanProduct(loanProductId, request));
+    }
+
+    private List<CreditAllocationData> chargebackCreditAllocation(final String creditAllocationStrategy,
+            final String creditAllocationOrder) {
+        return List.of(LoanProductsRequestFactory.createCreditAllocation("CHARGEBACK",
+                parseCreditAllocationStrategy(creditAllocationStrategy), parseCreditAllocationOrder(creditAllocationOrder)));
+    }
+
+    private String parseCreditAllocationStrategy(final String creditAllocationStrategy) {
+        return "NONE".equals(creditAllocationStrategy) ? null : creditAllocationStrategy;
+    }
+
+    private List<String> parseCreditAllocationOrder(final String creditAllocationOrder) {
+        return switch (creditAllocationOrder) {
+            case "NONE" -> null;
+            case "EMPTY" -> List.of();
+            default -> Arrays.stream(creditAllocationOrder.split(",")).map(String::trim).toList();
+        };
+    }
+
+    private String creditAllocationOrderAsString(final CreditAllocationData creditAllocation) {
+        if (creditAllocation.getCreditAllocationOrder() == null) {
+            return "";
+        }
+        return creditAllocation.getCreditAllocationOrder().stream()//
+                .sorted(Comparator.comparing(CreditAllocationOrder::getOrder))//
+                .map(CreditAllocationOrder::getCreditAllocationRule)//
+                .collect(Collectors.joining(","));
     }
 
     @Then("Admin failed to create a new Loan Product with field {string} invalid data {string} and got an error {string}")
