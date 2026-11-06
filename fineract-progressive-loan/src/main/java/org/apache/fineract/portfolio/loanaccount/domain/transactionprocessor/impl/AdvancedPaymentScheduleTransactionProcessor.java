@@ -3612,6 +3612,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     }
                     installment.setAdditional(false);
                     installment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+                    installment.setCreditedInterest(rp.getCreditedInterest().getAmount());
                     installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                 }
             } else {
@@ -3629,6 +3630,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     }
 
                     newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+                    newInstallment.setCreditedInterest(rp.getCreditedInterest().getAmount());
                     newInstallment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                     iterator.add(newInstallment);
                 }
@@ -3734,6 +3736,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             m.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(m);
         });
         newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+        newInstallment.setCreditedInterest(rp.getCreditedInterest().getAmount());
         newInstallment.updateObligationsMet(currency, transactionDate);
 
         return newInstallment;
@@ -4051,13 +4054,19 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         OutstandingDetails outstandingDetails = emiCalculator.precalculateReAgeEqualAmortizationAmount(model, transactionDate,
                 EMICalculatorDataMapper.toLoanReAgeParameterData(loanReAgeParameter));
+        // must be taken before the outstanding balances are lifted from the installments
+        OutstandingDetails amountsNotInModel = calculateOutstandingAmountsNotInModel(installments,
+                outstandingDetails.getOutstandingPrincipal(), currency);
+        liftAmountsNotInModelFromAdditionalInstallments(installments, transactionDate, amountsNotInModel, currency);
 
         OutstandingBalances outstandingBalances = liftOutstandingBalances(installments, transactionDate, currency,
                 settings.isSkipDownPayments(), settings.isOnlyPayableInterest(), settings.isEqualInstallmentForInterest(),
                 settings.isEqualInstallmentForFeesAndPenalties(), ctx);
 
-        loanTransaction.updateComponentsAndTotal(outstandingDetails.getOutstandingPrincipal(), outstandingDetails.getOutstandingInterest(),
-                outstandingBalances.fees, outstandingBalances.penalties);
+        loanTransaction.updateComponentsAndTotal(
+                outstandingDetails.getOutstandingPrincipal().plus(amountsNotInModel.getOutstandingPrincipal()),
+                outstandingDetails.getOutstandingInterest().plus(amountsNotInModel.getOutstandingInterest()), outstandingBalances.fees,
+                outstandingBalances.penalties);
 
         if (loanTransaction.getAmount().compareTo(ZERO) == 0) {
             loanTransaction.reverse();
@@ -4085,12 +4094,15 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 ctx.getAlreadyProcessedTransactions());
 
         emiCalculator.reAgeEqualAmortization(model, transactionDate, EMICalculatorDataMapper.toLoanReAgeParameterData(loanReAgeParameter),
-                outstandingBalances.fees.add(outstandingBalances.penalties), calculatedFees.add(calculatedPenalties));
+                outstandingBalances.fees.add(outstandingBalances.penalties), calculatedFees.add(calculatedPenalties), amountsNotInModel);
 
+        // an additional installment that falls within the re-aged schedule is dropped, unless something was paid on it:
+        // its outstanding amounts were lifted above, so it holds only what was paid, which must stay paid
         installments.removeIf(i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
-                && !i.isAdditional()) || (!i.getDueDate().isAfter(model.getMaturityDate()) && i.isAdditional()));
+                && !i.isAdditional())
+                || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && i.getTotalPaid(currency).isZero()));
 
-        installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional).forEach(i -> {
+        installments.stream().filter(i -> i.isAdditional() && i.getDueDate().isAfter(model.getMaturityDate())).forEach(i -> {
             i.setFromDate(model.getMaturityDate());
             i.setInstallmentNumber(model.repaymentPeriods().size());
         });
@@ -4146,6 +4158,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     reAgedInstallmentIndex++;
                 }
                 created.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
+                created.setCreditedInterest(rp.getCreditedInterest().getAmount());
                 created.updateObligationsMet(currency, transactionDate);
                 installments.add(created);
             }
@@ -4385,10 +4398,19 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 loanTransaction.getTransactionDate());
 
         final BigDecimal interestRate = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
-        final Money totalOutstandingPrincipal = ctx.getModel().getTotalOutstandingPrincipal();
+        final Money modelOutstandingPrincipal = ctx.getModel().getTotalOutstandingPrincipal();
+        final OutstandingDetails amountsNotInModel = calculateOutstandingAmountsNotInModel(installments, modelOutstandingPrincipal,
+                currency);
+        final Money totalOutstandingPrincipal = modelOutstandingPrincipal.plus(amountsNotInModel.getOutstandingPrincipal());
+        // The re-aged EMI is sized for the principal of the model and adjusted to the principal not in the model once
+        // that is credited on the re-age date, like the re-age does for the interest moved down from the closed
+        // periods. Only a model without any principal left is sized for the principal not in it: re-aged periods with
+        // an EMI of zero count as paid and the EMI would not be adjusted.
+        final Money reAgedPrincipalForEmi = modelOutstandingPrincipal.isGreaterThanZero() ? modelOutstandingPrincipal
+                : totalOutstandingPrincipal;
 
         final LoanApplicationTerms loanApplicationTerms = new LoanApplicationTerms.Builder().currency(currency.toData())
-                .repaymentsStartingFromDate(reAgingStartDate).principal(totalOutstandingPrincipal)
+                .repaymentsStartingFromDate(reAgingStartDate).principal(reAgedPrincipalForEmi)
                 .loanTermFrequency(loanTransaction.getLoanReAgeParameter().getNumberOfInstallments())
                 .loanTermPeriodFrequencyType(loanTransaction.getLoanReAgeParameter().getFrequencyType())
                 .numberOfRepayments(loanTransaction.getLoanReAgeParameter().getNumberOfInstallments())
@@ -4412,13 +4434,72 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final LocalDate reAgeFirstDueDate = loanTransaction.getLoanReAgeParameter().getStartDate();
         // Update the existing model with re-aged periods
         emiCalculator.updateModelRepaymentPeriodsDuringReAge(ctx.getModel(), reAgePeriodStartDate, reAgeFirstDueDate,
-                loanTransaction.getTransactionDate(), loanApplicationTerms, mc);
+                loanTransaction.getTransactionDate(), loanApplicationTerms, amountsNotInModel, mc);
 
+        liftAmountsNotInModelFromAdditionalInstallments(installments, loanTransaction.getTransactionDate(), amountsNotInModel, currency);
         updateInstallmentsByModelForReAging(loanTransaction, ctx, reAgePeriodStartDate);
 
-        loanTransaction.updateComponentsAndTotal(totalOutstandingPrincipal, interestFromZeroedInstallments, Money.zero(currency),
+        loanTransaction.updateComponentsAndTotal(totalOutstandingPrincipal,
+                interestFromZeroedInstallments.plus(amountsNotInModel.getOutstandingInterest()), Money.zero(currency),
                 Money.zero(currency));
         reprocessInstallments(installments);
+    }
+
+    /**
+     * A chargeback posted after maturity is booked only on the additional (N+1) installment, the interest schedule
+     * model never sees it. Gives back the outstanding amounts of the additional installments that are missing from the
+     * model, so the re-age can take them over instead of dropping them: the part of their outstanding principal that is
+     * missing from the principal the model re-ages, and their outstanding interest, which the model never holds.
+     */
+    private OutstandingDetails calculateOutstandingAmountsNotInModel(final List<LoanRepaymentScheduleInstallment> installments,
+            final Money modelOutstandingPrincipal, final MonetaryCurrency currency) {
+        final List<LoanRepaymentScheduleInstallment> additionalInstallments = installments.stream()
+                .filter(LoanRepaymentScheduleInstallment::isAdditional).toList();
+        final Money additionalOutstandingInterest = additionalInstallments.stream().map(i -> i.getInterestOutstanding(currency))
+                .reduce(Money.zero(currency), Money::plus);
+        final Money additionalOutstandingPrincipal = additionalInstallments.stream().map(i -> i.getPrincipalOutstanding(currency))
+                .reduce(Money.zero(currency), Money::plus);
+        if (!additionalOutstandingPrincipal.isGreaterThanZero()) {
+            return new OutstandingDetails(Money.zero(currency), MathUtil.negativeToZero(additionalOutstandingInterest));
+        }
+        final Money installmentsOutstandingPrincipal = installments.stream().filter(i -> !i.isDownPayment())
+                .map(i -> i.getPrincipalOutstanding(currency)).reduce(Money.zero(currency), Money::plus);
+        final Money missingFromModel = MathUtil.negativeToZero(installmentsOutstandingPrincipal.minus(modelOutstandingPrincipal));
+        return new OutstandingDetails(MathUtil.min(additionalOutstandingPrincipal, missingFromModel, false),
+                MathUtil.negativeToZero(additionalOutstandingInterest));
+    }
+
+    /**
+     * Takes the amounts that the re-aged periods took over off the additional installments, together with the credited
+     * principal and interest that the chargeback or credit balance refund booked on them: the re-aged periods carry
+     * them from now on. An additional installment that is left with nothing charged and nothing paid is removed.
+     */
+    private void liftAmountsNotInModelFromAdditionalInstallments(final List<LoanRepaymentScheduleInstallment> installments,
+            final LocalDate transactionDate, final OutstandingDetails amountsNotInModel, final MonetaryCurrency currency) {
+        Money principalToLift = amountsNotInModel.getOutstandingPrincipal();
+        Money interestToLift = amountsNotInModel.getOutstandingInterest();
+        if (!principalToLift.isGreaterThanZero() && !interestToLift.isGreaterThanZero()) {
+            return;
+        }
+        for (LoanRepaymentScheduleInstallment installment : installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional)
+                .toList()) {
+            final Money liftedPrincipal = MathUtil.min(installment.getPrincipalOutstanding(currency), principalToLift, false);
+            if (liftedPrincipal.isGreaterThanZero()) {
+                installment.addToPrincipal(transactionDate, liftedPrincipal.negated());
+                installment.setCreditedPrincipal(
+                        MathUtil.negativeToZero(installment.getCreditedPrincipal(currency).minus(liftedPrincipal)).getAmount());
+                principalToLift = principalToLift.minus(liftedPrincipal);
+            }
+            final Money liftedInterest = MathUtil.min(installment.getInterestOutstanding(currency), interestToLift, false);
+            if (liftedInterest.isGreaterThanZero()) {
+                installment.addToInterest(transactionDate, liftedInterest.negated());
+                installment.setCreditedInterest(MathUtil.subtractToZero(installment.getCreditedInterest(), liftedInterest.getAmount()));
+                interestToLift = interestToLift.minus(liftedInterest);
+            }
+            if (installment.getDue(currency).isZero() && installment.getTotalPaid(currency).isZero()) {
+                installments.remove(installment);
+            }
+        }
     }
 
     OutstandingBalances liftOutstandingBalances(List<LoanRepaymentScheduleInstallment> installments, LocalDate transactionDate,
@@ -4463,8 +4544,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 outstandingFeesBalance.set(outstandingFeesBalance.get().add(feesOutstanding));
                 outstandingPenaltiesBalance.set(outstandingPenaltiesBalance.get().add(penaltiesOutstanding));
 
-                i.setFeeChargesCharged(i.getFeeChargesPaid());
-                i.setPenaltyCharges(i.getPenaltyChargesPaid());
+                i.setFeeChargesCharged(MathUtil.add(i.getFeeChargesPaid(), i.getFeeChargesWaived(), i.getFeeChargesWrittenOff()));
+                i.setPenaltyCharges(MathUtil.add(i.getPenaltyChargesPaid(), i.getPenaltyChargesWaived(), i.getPenaltyChargesWrittenOff()));
             }
             if (isEqualInstallmentForFeesAndPenalties) {
                 BigDecimal paid = MathUtil.nullToZero(i.getFeeChargesPaid());

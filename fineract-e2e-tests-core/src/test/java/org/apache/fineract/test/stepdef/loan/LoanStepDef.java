@@ -67,6 +67,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,6 +105,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSubStatus;
+import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTimeline;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
@@ -2506,6 +2508,60 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(totalInterestOutstandingActual)
                 .as(ErrorMessageHelper.wrongAmountInTotalOutstanding(totalInterestOutstandingActual, totalInterestOutstandingExpected))
                 .isEqualTo(totalInterestOutstandingExpected);
+    }
+
+    @Then("Loan has {double} principal paid and {double} principal adjustments amount")
+    public void loanPrincipalPaidAndAdjustments(double principalPaidExpected, double principalAdjustmentsExpected) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+
+        assertThat(loanDetailsResponse.getSummary().getPrincipalPaid().doubleValue()).as("Wrong principal paid in the loan summary")
+                .isEqualTo(principalPaidExpected);
+        assertThat(loanDetailsResponse.getSummary().getPrincipalAdjustments().doubleValue())
+                .as("Wrong principal adjustments in the loan summary").isEqualTo(principalAdjustmentsExpected);
+    }
+
+    private static final Map<String, Function<GetLoansLoanIdSummary, BigDecimal>> LOAN_SUMMARY_FIELDS = Map.ofEntries(
+            Map.entry("Principal disbursed", GetLoansLoanIdSummary::getPrincipalDisbursed),
+            Map.entry("Principal paid", GetLoansLoanIdSummary::getPrincipalPaid),
+            Map.entry("Principal adjustments", GetLoansLoanIdSummary::getPrincipalAdjustments),
+            Map.entry("Principal outstanding", GetLoansLoanIdSummary::getPrincipalOutstanding),
+            Map.entry("Interest charged", GetLoansLoanIdSummary::getInterestCharged),
+            Map.entry("Interest paid", GetLoansLoanIdSummary::getInterestPaid),
+            Map.entry("Interest outstanding", GetLoansLoanIdSummary::getInterestOutstanding),
+            Map.entry("Fees charged", GetLoansLoanIdSummary::getFeeChargesCharged),
+            Map.entry("Fees paid", GetLoansLoanIdSummary::getFeeChargesPaid),
+            Map.entry("Fees outstanding", GetLoansLoanIdSummary::getFeeChargesOutstanding),
+            Map.entry("Penalties charged", GetLoansLoanIdSummary::getPenaltyChargesCharged),
+            Map.entry("Penalties paid", GetLoansLoanIdSummary::getPenaltyChargesPaid),
+            Map.entry("Penalties outstanding", GetLoansLoanIdSummary::getPenaltyChargesOutstanding),
+            Map.entry("Total repayment", GetLoansLoanIdSummary::getTotalRepayment),
+            Map.entry("Total outstanding", GetLoansLoanIdSummary::getTotalOutstanding));
+
+    @Then("Loan summary has the following data:")
+    public void loanSummaryHasData(final DataTable table) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        final GetLoansLoanIdSummary summary = loanDetailsResponse.getSummary();
+        assertThat(summary).as("Loan %s has no summary", loanId).isNotNull();
+
+        final List<String> header = table.row(0);
+        final List<String> expected = table.row(1);
+        final SoftAssertions softly = new SoftAssertions();
+        for (int i = 0; i < header.size(); i++) {
+            final Function<GetLoansLoanIdSummary, BigDecimal> field = LOAN_SUMMARY_FIELDS.get(header.get(i));
+            assertThat(field).as("Unknown loan summary column: %s", header.get(i)).isNotNull();
+            final BigDecimal actual = field.apply(summary);
+            softly.assertThat(actual == null ? 0.0 : actual.doubleValue()).as("Wrong %s in the summary of loan %s", header.get(i), loanId)
+                    .isEqualTo(Double.parseDouble(expected.get(i)));
+        }
+        softly.assertAll();
     }
 
     @Then("Loan has {double} total unpaid payable due interest")
