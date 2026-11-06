@@ -32,6 +32,7 @@ import org.apache.fineract.client.models.GetAccountTransfersPageItems;
 import org.apache.fineract.client.models.GetAccountTransfersPageItemsPaymentDetailData;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostAccountTransfersResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -142,8 +143,9 @@ public class AccountTransferTest extends FeignSavingsTestBase {
         Long fromClientId = createClientInOffice(fromOfficeId);
         Long fromSavingsId = createActiveSavingsAccount(fromClientId, createCashBasedSavingsProduct());
 
-        accountTransferHelper
-                .createAccountTransfer(savingsToSavings(fromClientId, fromSavingsId, fromClientId, toSavingsId, ACCOUNT_TRANSFER_AMOUNT));
+        PostAccountTransfersResponse response = accountTransferHelper.createAccountTransfer(
+                savingsToSavings(fromClientId, fromSavingsId, fromClientId, toSavingsId, ACCOUNT_TRANSFER_AMOUNT));
+        assertReturnedTransferTransactionId(response);
 
         BigDecimal openingBalance = new BigDecimal(MINIMUM_OPENING_BALANCE);
         BigDecimal transferred = new BigDecimal(ACCOUNT_TRANSFER_AMOUNT);
@@ -161,12 +163,41 @@ public class AccountTransferTest extends FeignSavingsTestBase {
     public void testFromSavingsToSavingsAccountTransferWithoutPaymentDetailsReadResponseRemainsCompatible() {
         SavingsTransferFixture fixture = createSavingsTransferFixture();
 
-        Long accountTransferDetailId = accountTransferHelper.createAccountTransfer(savingsToSavings(fixture.fromClientId,
-                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, ACCOUNT_TRANSFER_AMOUNT)).getResourceId();
+        PostAccountTransfersResponse response = accountTransferHelper.createAccountTransfer(savingsToSavings(fixture.fromClientId,
+                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, ACCOUNT_TRANSFER_AMOUNT));
+        assertReturnedTransferTransactionId(response);
 
-        List<GetAccountTransfersPageItems> transfers = accountTransferHelper.retrieveTransfersByAccountDetailId(accountTransferDetailId);
+        List<GetAccountTransfersPageItems> transfers = accountTransferHelper.retrieveTransfersByAccountDetailId(response.getResourceId());
         assertEquals(1, transfers.size());
         assertNull(transfers.get(0).getPaymentDetailData(), "A transfer made without payment details should report none");
+    }
+
+    @Test
+    public void testUndoAccountTransferUsesSubResourceId() {
+        Long clientId = createClientInOffice(1L);
+        Long savingsProductId = createCashBasedSavingsProduct();
+        Long fromSavingsId = createActiveSavingsAccount(clientId, savingsProductId);
+        Long toSavingsId = createActiveSavingsAccount(clientId, savingsProductId);
+        BigDecimal fromBalanceBefore = savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance();
+        BigDecimal toBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
+
+        PostAccountTransfersResponse response = accountTransferHelper.createAccountTransfer(savingsToSavings(clientId, fromSavingsId,
+                clientId, toSavingsId, "100"));
+
+        assertNotNull(response.getResourceId(), "resourceId must identify the account transfer details");
+        assertNotNull(response.getSubResourceId(), "subResourceId must identify the account transfer transaction");
+
+        List<GetAccountTransfersPageItems> transfers = accountTransferHelper.retrieveTransfersByAccountDetailId(response.getResourceId());
+        assertEquals(1, transfers.size());
+        assertEquals(response.getSubResourceId(), transfers.get(0).getId(),
+                "subResourceId must match the transaction id exposed by the read API");
+
+        assertNotNull(accountTransferHelper.undoTransfer(response.getSubResourceId()).getResourceId(),
+                "Undo must succeed using subResourceId, the transaction id required by the endpoint");
+        SavingsTestValidators.verifyAmount(fromBalanceBefore, savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
+                "Undoing the transfer must restore the source savings balance");
+        SavingsTestValidators.verifyAmount(toBalanceBefore, savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance(),
+                "Undoing the transfer must restore the destination savings balance");
     }
 
     @Test
@@ -214,9 +245,10 @@ public class AccountTransferTest extends FeignSavingsTestBase {
         Long fromClientId = createClientInOffice(fromOfficeId);
         Long fromSavingsId = createActiveSavingsAccount(fromClientId, createCashBasedSavingsProduct());
 
-        accountTransferHelper
-                .createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId, fromSavingsId,
-                        PortfolioAccountType.SAVINGS, toClientId, toLoanId, PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT_ADJUST));
+        PostAccountTransfersResponse response = accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders
+                .transfer(ACCOUNT_TRANSFER_DATE, fromClientId, fromSavingsId, PortfolioAccountType.SAVINGS, toClientId, toLoanId,
+                        PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT_ADJUST));
+        assertReturnedTransferTransactionId(response);
 
         BigDecimal transferred = new BigDecimal(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
         SavingsTestValidators.verifyAmount(new BigDecimal(MINIMUM_OPENING_BALANCE).subtract(transferred),
@@ -239,15 +271,19 @@ public class AccountTransferTest extends FeignSavingsTestBase {
         Long loanId = createActiveLoan(fromClientId);
         Long fromSavingsId = createActiveSavingsAccount(fromClientId, createCashBasedSavingsProduct());
 
-        accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId,
-                fromSavingsId, PortfolioAccountType.SAVINGS, fromClientId, loanId, PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT));
+        PostAccountTransfersResponse savingsToLoanResponse = accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders
+                .transfer(ACCOUNT_TRANSFER_DATE, fromClientId, fromSavingsId, PortfolioAccountType.SAVINGS, fromClientId, loanId,
+                        PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT));
+        assertReturnedTransferTransactionId(savingsToLoanResponse);
 
         SavingsTestValidators.verifyAmount(new BigDecimal(MINIMUM_OPENING_BALANCE).subtract(new BigDecimal(ACCOUNT_TRANSFER_AMOUNT)),
                 savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
                 "Verifying From Savings Account Balance after Account Transfer");
 
-        accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId, loanId,
-                PortfolioAccountType.LOAN, toClientId, toSavingsId, PortfolioAccountType.SAVINGS, ACCOUNT_TRANSFER_AMOUNT_ADJUST));
+        PostAccountTransfersResponse loanToSavingsResponse = accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders
+                .transfer(ACCOUNT_TRANSFER_DATE, fromClientId, loanId, PortfolioAccountType.LOAN, toClientId, toSavingsId,
+                        PortfolioAccountType.SAVINGS, ACCOUNT_TRANSFER_AMOUNT_ADJUST));
+        assertReturnedTransferTransactionId(loanToSavingsResponse);
 
         SavingsTestValidators.verifyAmount(new BigDecimal(MINIMUM_OPENING_BALANCE).add(new BigDecimal(ACCOUNT_TRANSFER_AMOUNT_ADJUST)),
                 savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance(),
@@ -310,6 +346,12 @@ public class AccountTransferTest extends FeignSavingsTestBase {
             String amount) {
         return AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId, fromSavingsId, PortfolioAccountType.SAVINGS,
                 toClientId, toSavingsId, PortfolioAccountType.SAVINGS, amount);
+    }
+
+    private void assertReturnedTransferTransactionId(PostAccountTransfersResponse response) {
+        assertNotNull(response.getResourceId());
+        assertNotNull(response.getSubResourceId());
+        assertEquals(response.getSubResourceId(), accountTransferHelper.getAccountTransfer(response.getSubResourceId()).getId());
     }
 
     /**
