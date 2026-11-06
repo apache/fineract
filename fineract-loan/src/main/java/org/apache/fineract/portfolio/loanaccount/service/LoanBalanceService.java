@@ -237,11 +237,10 @@ public class LoanBalanceService {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(loan.getCurrency()));
                 }
             }
-            if (receivableInterest.isLessThanZero()) {
-                receivableInterest = receivableInterest.zero();
-            }
         }
-        return receivableInterest;
+        // Floor only the net balance: interest received before it is accrued (a repayment made before the accrual job
+        // posts that interest) offsets that later accrual instead of leaving it receivable.
+        return receivableInterest.isLessThanZero() ? receivableInterest.zero() : receivableInterest;
     }
 
     public LoanRepaymentScheduleInstallment fetchLoanForeclosureDetail(final Loan loan, final LocalDate closureDate) {

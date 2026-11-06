@@ -582,9 +582,12 @@ public class AccountingScenarioIntegrationTest extends FeignLoanTestBase {
         checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[5]), FIRST_INTEREST, FEE_PORTION, PENALTY_PORTION, loanID);
         addInterestWaiver(loanID, waiveInterest(AMOUNT_TO_BE_WAIVE, REPAYMENT_DATE[4]));
 
-        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(AMOUNT_TO_BE_WAIVE, assetAccount, CREDIT));
+        // By the waiver date 800 is accrued and 600 received: only 200 of the waived interest is receivable. The rest
+        // is not accrued by that date and is unrecognized income, so only 200 is reversed from the receivable.
+        final float RECEIVABLE_PART_OF_WAIVER = 200.0f;
+        checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], journal(RECEIVABLE_PART_OF_WAIVER, assetAccount, CREDIT));
 
-        checkJournalEntryForExpenseAccount(expenseAccount, REPAYMENT_DATE[4], journal(AMOUNT_TO_BE_WAIVE, expenseAccount, DEBIT));
+        checkJournalEntryForExpenseAccount(expenseAccount, REPAYMENT_DATE[4], journal(RECEIVABLE_PART_OF_WAIVER, expenseAccount, DEBIT));
         LOG.info("Waive Interest Done......");
 
         // REPAYMENT 3
