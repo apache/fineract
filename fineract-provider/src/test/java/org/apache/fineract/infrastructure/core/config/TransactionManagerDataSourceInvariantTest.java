@@ -19,10 +19,12 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.config.jpa.JpaTransactionConfig;
+import org.apache.fineract.infrastructure.core.persistence.RequiresNewJdbcTransactionTemplate;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,8 @@ import org.springframework.boot.transaction.autoconfigure.TransactionManagerCust
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Locks in the invariant that keeps mixed JPA/JDBC usage consistent: the primary (JPA) transaction manager must NOT
@@ -75,6 +79,25 @@ public class TransactionManagerDataSourceInvariantTest {
         assertThat(((DataSourceTransactionManager) transactionManager).getDataSource())
                 .as("JDBC transaction manager must bind the routing DataSource so JdbcTemplate work participates in its transaction")
                 .isSameAs(dataSource);
+    }
+
+    @Test
+    void requiresNewJdbcTemplateIsTheGuardedOneOnTheJdbcTransactionManager() {
+        PlatformTransactionManager jdbcTransactionManager = new JdbcTransactionConfig().jdbcTransactionManager(writeModeProperties(),
+                mock(RoutingDataSource.class), noTransactionManagerCustomizers(), noCallbacks());
+
+        TransactionTemplate template = new JdbcTransactionConfig().requiresNewTransactionJdbcTemplate(jdbcTransactionManager);
+
+        assertThat(template).as("the JDBC REQUIRES_NEW template must refuse to run inside a JPA transaction")
+                .isInstanceOf(RequiresNewJdbcTransactionTemplate.class);
+        assertThat(template.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        assertThat(template.getTransactionManager()).isSameAs(jdbcTransactionManager);
+    }
+
+    @Test
+    void requiresNewJdbcTemplateRejectsATransactionManagerThatIsNotJdbc() {
+        assertThatThrownBy(() -> new RequiresNewJdbcTransactionTemplate(mock(JpaTransactionManager.class)))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private static FineractProperties writeModeProperties() {

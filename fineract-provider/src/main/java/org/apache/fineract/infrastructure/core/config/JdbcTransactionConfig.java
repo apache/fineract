@@ -19,10 +19,9 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
-
 import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedDataSourceTransactionManager;
+import org.apache.fineract.infrastructure.core.persistence.RequiresNewJdbcTransactionTemplate;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.beans.factory.ObjectProvider;
@@ -48,11 +47,14 @@ public class JdbcTransactionConfig {
         return transactionManager;
     }
 
+    /**
+     * Refuses to start inside a JPA transaction, where a JDBC {@code REQUIRES_NEW} would silently run on the JPA
+     * transaction's connection - see {@link RequiresNewJdbcTransactionTemplate}. Use the JPA
+     * {@code requiresNewTransactionTemplate} there.
+     */
     @Bean("requiresNewTransactionJdbcTemplate")
     public TransactionTemplate requiresNewTransactionJdbcTemplate(
             @Qualifier("jdbcTransactionManager") PlatformTransactionManager jdbcTransactionManager) {
-        TransactionTemplate transactionTemplate = new TransactionTemplate(jdbcTransactionManager);
-        transactionTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
-        return transactionTemplate;
+        return new RequiresNewJdbcTransactionTemplate(jdbcTransactionManager);
     }
 }
