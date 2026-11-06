@@ -75,7 +75,7 @@ public class CompoundInterestHelper {
                 interestEarned = interestEarned.plus(moneyToBePostedForPeriod);
                 // these checks are for fixed deposit account for not include
                 // interest for accounts which has post interest to linked savings
-                // account and if already transfered then it includes in interest
+                // account and if already transferred then it includes in interest
                 // calculation.
                 if (!(period.isInterestTransfered() || !interestTransferEnabled
                         || (lockUntil != null && !DateUtils.isAfter(period.dateOfPostingTransaction(), lockUntil)))) {
