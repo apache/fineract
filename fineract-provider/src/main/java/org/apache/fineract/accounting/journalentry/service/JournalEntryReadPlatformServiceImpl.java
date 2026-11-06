@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,7 +102,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,")
                     .append(" journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, ")
                     .append(" creatingUser.username as createdByUserName, journalEntry.description as comments, ")
-                    .append(" journalEntry.submitted_on_date as submittedOnDate, journalEntry.reversed as reversed, ")
+                    .append(" journalEntry.submitted_on_date as submittedOnDate, journalEntry.created_on_utc as createdDate, journalEntry.reversed as reversed, ")
                     .append(" journalEntry.currency_code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
                     .append(" eao.external_id as externalAssetOwner ");
@@ -162,6 +163,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final Long entityId = JdbcSupport.getLong(rs, "entityId");
             final Long createdByUserId = rs.getLong("createdByUserId");
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final OffsetDateTime createdDate = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final String createdByUserName = rs.getString("createdByUserName");
             final String comments = rs.getString("comments");
             final Boolean reversed = rs.getBoolean("reversed");
@@ -233,7 +235,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final String externalAssetOwner = rs.getString("externalAssetOwner");
 
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
-                    entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
+                    entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate, createdDate,
                     createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
                     runningBalanceComputed, transactionDetailData, currency, externalAssetOwner);
         }
