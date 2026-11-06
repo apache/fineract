@@ -217,6 +217,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessProgressiveLoanTransactions(
             LocalDate disbursementDate, LocalDate targetDate, List<LoanTransaction> loanTransactions, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
+        return reprocessProgressiveLoanTransactions(disbursementDate, targetDate, loanTransactions, currency, installments, charges,
+                Money.zero(currency));
+    }
+
+    // only for progressive loans
+    public Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessProgressiveLoanTransactions(
+            LocalDate disbursementDate, LocalDate targetDate, List<LoanTransaction> loanTransactions, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, Money amortizablePrincipalReduction) {
         final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         if (loanTransactions.isEmpty()) {
             return Pair.of(changedTransactionDetail, null);
@@ -251,6 +259,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
                 changedTransactionDetail, scheduleModel, Money.zero(currency), loan.getActiveLoanTermVariations(), loanChargeIdProcessed);
+        ctx.setAmortizablePrincipalReduction(amortizablePrincipalReduction);
 
         List<ChangeOperation> changeOperations = createSortedChangeList(loanTermVariations, loanTransactions, charges);
 
@@ -1750,6 +1759,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
+        if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
+            // Interest Refund simulation: shrink only the amortizable part, keeping the down-payment installment
+            // matched to the real DOWN_PAYMENT transaction amount (see FINERACT-3014).
+            amortizableAmount = amortizableAmount.minus(progressiveTransactionCtx.consumeAmortizablePrincipalReduction(amortizableAmount));
+        }
         emiCalculator.addDisbursement(model, transactionDate, amortizableAmount);
         alignModelWithPaidAmounts(transactionCtx, loan, model, installments, transactionDate);
 
@@ -1817,6 +1831,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
+        if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
+            // Interest Refund simulation: shrink only the amortizable part, keeping the down-payment installment
+            // matched to the real DOWN_PAYMENT transaction amount (see FINERACT-3014).
+            amortizableAmount = amortizableAmount.minus(progressiveTransactionCtx.consumeAmortizablePrincipalReduction(amortizableAmount));
+        }
 
         recalculateRepaymentInstallmentsWithoutEMICalculation(disbursementTransaction, amortizableAmount, candidateRepaymentInstallments,
                 currency, installmentAmountInMultiplesOf);
@@ -2526,13 +2545,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             amountToBePaid = loanCharge.getAmountOutstanding(transactionCtx.getCurrency());
         }
 
-        LocalDate startDate = loanTransaction.getLoan().getDisbursementDate();
-
         Money unprocessed = loanTransaction.getAmount(transactionCtx.getCurrency());
         int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
                 .fetchFirstNormalInstallmentNumber(transactionCtx.getInstallments());
         for (final LoanRepaymentScheduleInstallment installment : transactionCtx.getInstallments()) {
-            boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(),
+            boolean isDue = loanCharge.isDueInPeriod(installment.getFromDate(), installment.getDueDate(),
                     installment.getInstallmentNumber().equals(firstNormalInstallmentNumber));
             if (isDue) {
                 Integer installmentNumber = installment.getInstallmentNumber();
