@@ -5475,6 +5475,63 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                     loanProductsResponseNoInterestRecalcChargebackAccrualActivity);
         });
 
+        tasks.add(() -> {
+            // LP2 with disabled interest recalculation + chargeback allocation strategy PRINCIPAL_ONLY
+            // (LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_ONLY)
+            final String name189 = DefaultLoanProduct.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_ONLY.getName();
+            final PostLoanProductsRequest loanProductsRequestChargebackAllocationPrincipalOnly = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2Emi()//
+                    .name(name189)//
+                    .daysInYearType(DaysInYearType.DAYS360.value)//
+                    .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                    .creditAllocation(List.of(//
+                            LoanProductsRequestFactory.createCreditAllocation("CHARGEBACK", "PRINCIPAL_ONLY", null)//
+            ))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse loanProductsResponseChargebackAllocationPrincipalOnly = createLoanProductIdempotent(
+                    loanProductsRequestChargebackAllocationPrincipalOnly);
+            TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_ONLY_RESPONSE,
+                    loanProductsResponseChargebackAllocationPrincipalOnly);
+        });
+
+        tasks.add(() -> {
+            // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+            // Chargeback allocation strategy PRINCIPAL_ONLY
+            // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+            // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+            // (LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_ONLY)
+            final String name190 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_ONLY
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestInterestRecalcChargebackPrincipalOnly = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2Emi()//
+                    .name(name190)//
+                    .daysInYearType(DaysInYearType.DAYS360.value)//
+                    .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                    .isInterestRecalculationEnabled(true)//
+                    .preClosureInterestCalculationStrategy(1)//
+                    .rescheduleStrategyMethod(4)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .creditAllocation(List.of(//
+                            LoanProductsRequestFactory.createCreditAllocation("CHARGEBACK", "PRINCIPAL_ONLY", null)//
+            ))//
+                    .paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+            final PostLoanProductsResponse loanProductsResponseInterestRecalcChargebackPrincipalOnly = createLoanProductIdempotent(
+                    loanProductsRequestInterestRecalcChargebackPrincipalOnly);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_ONLY,
+                    loanProductsResponseInterestRecalcChargebackPrincipalOnly);
+        });
+
         ParallelExecutionHelper.runInParallel(tasks);
     }
 
