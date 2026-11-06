@@ -87,6 +87,8 @@ public class JournalEntriesApiResource {
             "referenceNumber", "currency", "transactionDetails"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSION = "JOURNALENTRY";
+    private static final String ENTRY_SOURCE_MANUAL = "MANUAL";
+    private static final String ENTRY_SOURCE_SYSTEM = "SYSTEM";
 
     private final PlatformSecurityContext context;
     private final JournalEntryReadPlatformService journalEntryReadPlatformService;
@@ -113,6 +115,8 @@ public class JournalEntriesApiResource {
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId,
             @QueryParam("manualEntriesOnly") @Parameter(description = "manualEntriesOnly") final Boolean onlyManualEntries,
+            @QueryParam("entrySource") @Parameter(description = "MANUAL returns manual entries, their reversals and opening balances; SYSTEM returns the entries posted by the system. Any other value is rejected. Combined with manualEntriesOnly=true, SYSTEM returns no entries.", schema = @Schema(allowableValues = {
+                    "MANUAL", "SYSTEM" })) final String entrySource,
             @QueryParam("fromDate") @Parameter(description = "fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") @Parameter(description = "toDate") final DateParam toDateParam,
             @QueryParam("submittedOnDateFrom") @Parameter(description = "submittedOnDateFrom") final DateParam submittedOnDateFromParam,
@@ -159,8 +163,9 @@ public class JournalEntriesApiResource {
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
 
+        final Boolean manualEntry = parseEntrySource(entrySource);
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
-                onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
+                onlyManualEntries, manualEntry, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
                 associationParametersData);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
@@ -253,7 +258,7 @@ public class JournalEntriesApiResource {
         this.context.authenticatedUser();
         String transactionId = "P" + entryId;
         SearchParameters params = SearchParameters.builder().limit(limit).offset(offset).build();
-        Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, null, null,
+        Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, null, null, null,
                 transactionId, PortfolioProductType.PROVISIONING.getValue(), null);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
@@ -301,5 +306,18 @@ public class JournalEntriesApiResource {
         final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.GL_JOURNAL_ENTRIES.toString(),
                 uploadedInputStream, fileDetail, locale, dateFormat);
         return this.apiJsonSerializerService.serialize(importDocumentId);
+    }
+
+    private static Boolean parseEntrySource(final String entrySource) {
+        if (StringUtils.isBlank(entrySource)) {
+            return null;
+        }
+        if (ENTRY_SOURCE_MANUAL.equalsIgnoreCase(entrySource)) {
+            return Boolean.TRUE;
+        }
+        if (ENTRY_SOURCE_SYSTEM.equalsIgnoreCase(entrySource)) {
+            return Boolean.FALSE;
+        }
+        throw new UnrecognizedQueryParamException("entrySource", entrySource, ENTRY_SOURCE_MANUAL, ENTRY_SOURCE_SYSTEM);
     }
 }
