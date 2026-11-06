@@ -25,14 +25,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 
@@ -66,28 +62,10 @@ public class GLClosure extends AbstractAuditableCustom {
         }
     }
 
-    public static GLClosure fromJson(final Office office, final JsonCommand command) {
-        final LocalDate closingDate = command.localDateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
-        final String comments = command.stringValueOfParameterNamed(GLClosureJsonInputParams.COMMENTS.getValue());
-        return new GLClosure(office, closingDate, comments);
-    }
-
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
-        handlePropertyUpdate(command, actualChanges, GLClosureJsonInputParams.COMMENTS.getValue(), this.comments);
-        return actualChanges;
-    }
-
-    private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final String propertyToBeUpdated) {
-        if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            // now update actual property
-            if (paramName.equals(GLClosureJsonInputParams.COMMENTS.getValue())) {
-                this.comments = newValue;
-            }
+    public void setComments(final String comments) {
+        this.comments = StringUtils.defaultIfEmpty(comments, null);
+        if (this.comments != null) {
+            this.comments = this.comments.trim();
         }
     }
-
 }

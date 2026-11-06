@@ -196,7 +196,6 @@ public final class CommandWrapperConstants {
     public static final String ENTITY_DISBURSEMENTDETAIL = "DISBURSEMENTDETAIL";
     public static final String ENTITY_GLIMLOAN = "GLIMLOAN";
     public static final String ENTITY_CODEVALUE = "CODEVALUE";
-    public static final String ENTITY_GLCLOSURE = "GLCLOSURE";
     public static final String ENTITY_PERIODICACCRUALACCOUNTING = "PERIODICACCRUALACCOUNTING";
     public static final String ENTITY_GLACCOUNT = "GLACCOUNT";
     public static final String ENTITY_JOURNALENTRY = "JOURNALENTRY";

@@ -194,7 +194,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITPRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FUND;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLACCOUNT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLCLOSURE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLIMLOAN;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GROUP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GSIMACCOUNT;
@@ -1815,30 +1814,6 @@ public class CommandWrapperBuilder {
         this.entityId = codeId;
         this.subentityId = codeValueId;
         this.href = "/codes/name/" + codeName + "/codevalues/" + codeValueId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createGLClosure() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_GLCLOSURE;
-        this.entityId = null;
-        this.href = "/glclosures/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateGLClosure(final Long glClosureId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_GLCLOSURE;
-        this.entityId = glClosureId;
-        this.href = "/glclosures/" + glClosureId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteGLClosure(final Long glClosureId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_GLCLOSURE;
-        this.entityId = glClosureId;
-        this.href = "/glclosures/" + glClosureId;
         return this;
     }
 
