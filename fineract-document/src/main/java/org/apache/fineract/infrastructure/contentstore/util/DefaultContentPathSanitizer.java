@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.contentstore.util;
 
 import java.nio.file.Path;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -37,7 +38,7 @@ public class DefaultContentPathSanitizer implements ContentPathSanitizer {
         final var sanitizedPath = Path.of(path).normalize().toString();
 
         if (log.isDebugEnabled()) {
-            final var fileName = FilenameUtils.getName(sanitizedPath).toLowerCase();
+            final var fileName = FilenameUtils.getName(sanitizedPath).toLowerCase(Locale.ROOT);
 
             log.debug("Path: {} -> {} ({})", path, sanitizedPath, fileName);
         }

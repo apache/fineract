@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -303,7 +304,8 @@ public class SavingsAccountTransactionTest extends FeignSavingsTestBase {
     }
 
     private String createSavingsTransactionDatatable() {
-        final String datatableName = Utils.uniqueRandomStringGenerator(DATATABLE_NAME_PREFIX, DATATABLE_NAME_SUFFIX_LENGTH).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator(DATATABLE_NAME_PREFIX, DATATABLE_NAME_SUFFIX_LENGTH)
+                .toLowerCase(Locale.ROOT);
         datatableHelper
                 .createDatatable(new PostDataTablesRequest().datatableName(datatableName).apptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME)
                         .multiRow(false).addColumnsItem(stringColumn(FIRST_COLUMN, false, FIRST_COLUMN_LENGTH))
@@ -380,7 +382,7 @@ public class SavingsAccountTransactionTest extends FeignSavingsTestBase {
             assertTrue(doneLatch.await(EXECUTOR_TIMEOUT_SECONDS, TimeUnit.SECONDS), description + " did not complete within timeout");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while waiting for " + description.toLowerCase(), e);
+            throw new IllegalStateException("Interrupted while waiting for " + description.toLowerCase(Locale.ROOT), e);
         } finally {
             executor.shutdown();
         }

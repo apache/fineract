@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -106,7 +107,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 dateAsString = formatter.format(entityActivationDate);
             }
 
-            final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase() + ".activation.date";
+            final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase(Locale.ROOT) + ".activation.date";
             baseDataValidator.reset().parameter(CalendarSupportedParameters.START_DATE.getValue()).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode(errorMessage);
         }

@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -98,7 +99,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
     @Test
     public void validateCreateReadDeleteDatatable() throws ParseException {
         // Fetch / Create tst code
-        String tst_tst_tst = "TST_TST_TST".toLowerCase();
+        String tst_tst_tst = "TST_TST_TST".toLowerCase(Locale.ROOT);
         Long createdCodeId = retrieveCodeId(tst_tst_tst);
         Integer createdCodeValueId;
         Integer createdCodeValueIdSecond;
@@ -116,7 +117,8 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         // creating datatable for client entity
         final PostDataTablesRequest columnMap = new PostDataTablesRequest();
         final List<PostColumnHeaderData> datatableColumnsList = new ArrayList<>();
-        columnMap.datatableName(Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase());
+        columnMap.datatableName(
+                Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT).toLowerCase(Locale.ROOT));
         columnMap.entitySubType("PERSON");
         columnMap.multiRow(false);
         String itsABoolean = "itsaboolean";
@@ -976,7 +978,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         addDatatableColumn(datatableColumnsList, spacedColumn, "String", false, 20, null);
 
         final PostDataTablesRequest columnMap = new PostDataTablesRequest();
-        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
         columnMap.datatableName(datatableName);
         columnMap.apptableName(CLIENT_APP_TABLE_NAME);
         columnMap.entitySubType(CLIENT_PERSON_SUBTYPE_NAME);
@@ -1035,7 +1037,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         addDatatableColumn(datatableColumnsList, spacedColumn, "String", false, 20, null);
 
         final PostDataTablesRequest columnMap = new PostDataTablesRequest();
-        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
         columnMap.datatableName(datatableName);
         columnMap.apptableName(CLIENT_APP_TABLE_NAME);
         columnMap.entitySubType(CLIENT_PERSON_SUBTYPE_NAME);

@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -168,7 +169,8 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
         final List<AccountGLJournalEntryAnnualSummaryData> allRecords = Stream
                 .concat(incomeExpenseRecords.stream(), retainedEarningRecords.stream()).map(data -> {
                     final AccountGLJournalEntryAnnualSummaryData typedData = data.toBuilder().productType(productType).build();
-                    ProductReference product = data.getProductName() != null ? productByName.get(data.getProductName().toLowerCase())
+                    ProductReference product = data.getProductName() != null
+                            ? productByName.get(data.getProductName().toLowerCase(Locale.ROOT))
                             : null;
                     if (product == null) {
                         return typedData;
@@ -191,7 +193,7 @@ public class RetainedEarningDataServiceImpl implements RetainedEarningDataServic
                     .map(p -> new ProductReference(p.getId(), p.getName(), p.getCurrency().getCode()));
             default -> throw new IllegalArgumentException("Retained earning is not supported for product type " + productType);
         };
-        return products.collect(Collectors.toMap(p -> p.name().toLowerCase(), p -> p, (a, b) -> a));
+        return products.collect(Collectors.toMap(p -> p.name().toLowerCase(Locale.ROOT), p -> p, (a, b) -> a));
     }
 
     private Predicate<String> buildGlAccountMatcher(String incomeAndExpenseGlAccounts) {

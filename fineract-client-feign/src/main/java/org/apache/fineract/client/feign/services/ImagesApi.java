@@ -24,6 +24,7 @@ import feign.QueryMap;
 import feign.RequestLine;
 import feign.Response;
 import java.io.File;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData;
 
@@ -83,7 +84,7 @@ public interface ImagesApi {
         if (dotPos == -1) {
             return "application/octet-stream";
         }
-        String ext = fileName.substring(dotPos + 1).toLowerCase();
+        String ext = fileName.substring(dotPos + 1).toLowerCase(Locale.ROOT);
 
         return switch (ext) {
             case "jpg", "jpeg" -> "image/jpeg";

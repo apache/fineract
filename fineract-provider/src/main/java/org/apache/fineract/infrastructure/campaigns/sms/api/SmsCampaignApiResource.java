@@ -39,6 +39,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -203,7 +204,7 @@ public class SmsCampaignApiResource {
         if (StringUtils.isBlank(commandParam)) {
             return null;
         }
-        return switch (commandParam.trim().toLowerCase()) {
+        return switch (commandParam.trim().toLowerCase(Locale.ROOT)) {
             case ACTIVATE_COMMAND -> commandsSourceWritePlatformService.logCommandSource(builder.activateSmsCampaign(campaignId).build());
             case CLOSE_COMMAND -> commandsSourceWritePlatformService.logCommandSource(builder.closeSmsCampaign(campaignId).build());
             case REACTIVATE_COMMAND ->

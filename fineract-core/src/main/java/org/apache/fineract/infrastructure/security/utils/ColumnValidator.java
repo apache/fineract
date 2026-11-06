@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -101,12 +102,12 @@ public class ColumnValidator {
             }
             sqlValidator.validate("column", condition);
             List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<", "> =", "< =", "! =", "!=", ">=", "<="));
-            condition = condition.trim().replace("( ", "(").replace(" )", ")").toLowerCase();
+            condition = condition.trim().replace("( ", "(").replace(" )", ")").toLowerCase(Locale.ROOT);
             for (String op : operator) {
                 condition = replaceAll(condition, op).replaceAll(" +", " ");
             }
             Set<String> operands = getOperand(condition);
-            schema = schema.trim().replaceAll(" +", " ").toLowerCase();
+            schema = schema.trim().replaceAll(" +", " ").toLowerCase(Locale.ROOT);
             Map<String, Set<String>> tableColumnAliasMap = getTableColumnAliasMap(operands);
             Map<String, Set<String>> tableColumnMap = getTableColumnMap(schema, tableColumnAliasMap);
             validateColumn(tableColumnMap);

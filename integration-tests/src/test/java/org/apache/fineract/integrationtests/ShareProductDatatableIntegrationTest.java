@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
@@ -47,7 +48,8 @@ public class ShareProductDatatableIntegrationTest {
     @Test
     public void testDatatableCreationForShareProduct() {
         // create dataTable
-        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT)
+                .toLowerCase(Locale.ROOT);
         String column1Name = "aNumber";
         String column2Name = "aString";
 
@@ -101,7 +103,8 @@ public class ShareProductDatatableIntegrationTest {
         assertNotNull(shareProductId);
 
         // create dataTable
-        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator("dt_" + SHARES_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT)
+                .toLowerCase(Locale.ROOT);
         String column1Name = "aNumber";
 
         PostDataTablesRequest request = new PostDataTablesRequest();

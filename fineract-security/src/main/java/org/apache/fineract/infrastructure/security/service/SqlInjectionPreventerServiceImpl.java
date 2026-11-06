@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.security.service;
 
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
@@ -116,7 +117,7 @@ public class SqlInjectionPreventerServiceImpl implements SqlInjectionPreventerSe
         }
 
         // Whitelist validation if provided
-        if (allowedValues != null && !allowedValues.contains(identifier.toLowerCase())) {
+        if (allowedValues != null && !allowedValues.contains(identifier.toLowerCase(Locale.ROOT))) {
             throw new IllegalArgumentException("Identifier not in whitelist: " + identifier);
         }
 
