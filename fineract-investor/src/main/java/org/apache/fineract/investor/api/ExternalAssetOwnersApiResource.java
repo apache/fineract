@@ -34,6 +34,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -55,11 +56,13 @@ import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
 import org.apache.fineract.investor.api.search.ExternalAssetOwnersSearchApiDelegate;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
+import org.apache.fineract.investor.data.ExternalAssetOwnerLoanAttributesData;
 import org.apache.fineract.investor.data.ExternalOwnerJournalEntryData;
 import org.apache.fineract.investor.data.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferOwnerData;
 import org.apache.fineract.investor.data.request.ExternalAssetOwnerRequest;
+import org.apache.fineract.investor.service.ExternalAssetOwnerLoanAttributesReadService;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.investor.service.search.domain.ExternalAssetOwnerSearchRequest;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceCommon;
@@ -80,8 +83,13 @@ public class ExternalAssetOwnersApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final LoanReadPlatformServiceCommon loanReadPlatformService;
     private final ExternalAssetOwnersSearchApiDelegate delegate;
+    private final ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
 
     private static final String COMMAND_PARAM = "command";
+    private static final String LOAN_ATTRIBUTES_GET_DESCRIPTION = "Retrieves the copy of the external asset owner loan product attributes "
+            + "taken when the loan was first sold. Attributes the loan product gains or changes later do not affect a loan with a copy. "
+            + "copiedFromTransferId is the id of the sale request (the pending transfer) whose execution created the copy. "
+            + "A loan without a copy follows its loan product attributes and is returned with hasLoanLevelCopy=false and no attributes.";
 
     private static final CommandHandlerRegistry<String, Long, String, CommandWrapper> COMMAND_HANDLER_REGISTRY = new CommandHandlerRegistry<>(
             Map.of(CANCEL_COMMAND_VALUE, (id, json) -> new CommandWrapperBuilder().cancelTransactionByIdToExternalAssetOwner(id).build(),
@@ -212,6 +220,53 @@ public class ExternalAssetOwnersApiResource {
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         platformUserRightsContext.isAuthenticated();
         return externalAssetOwnersReadService.retrieveJournalEntriesOfOwner(ownerExternalId, offset, limit);
+    }
+
+    @GET
+    @Path("/loans/{loanId}/attributes")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(tags = {
+            "External Asset Owners" }, summary = "Retrieve the loan-level external asset owner attributes of a loan", operationId = "retrieveExternalAssetOwnerLoanAttributes", description = LOAN_ATTRIBUTES_GET_DESCRIPTION)
+    public ExternalAssetOwnerLoanAttributesData retrieveLoanAttributes(
+            @PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
+        platformUserRightsContext.isAuthenticated();
+        return externalAssetOwnerLoanAttributesReadService.retrieveLoanAttributes(loanId);
+    }
+
+    @GET
+    @Path("/loans/external-id/{loanExternalId}/attributes")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(tags = {
+            "External Asset Owners" }, summary = "Retrieve the loan-level external asset owner attributes of a loan by loan external id", operationId = "retrieveExternalAssetOwnerLoanAttributesByLoanExternalId", description = LOAN_ATTRIBUTES_GET_DESCRIPTION)
+    public ExternalAssetOwnerLoanAttributesData retrieveLoanAttributesByLoanExternalId(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId) {
+        platformUserRightsContext.isAuthenticated();
+        final Long loanId = loanReadPlatformService.getLoanIdByLoanExternalId(loanExternalId);
+        return externalAssetOwnerLoanAttributesReadService.retrieveLoanAttributes(loanId);
+    }
+
+    @PUT
+    @Path("/loans/{loanId}/attributes")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PutExternalAssetOwnerLoanAttributeRequest.class)))
+    @Operation(tags = {
+            "External Asset Owners" }, summary = "Correct a loan-level external asset owner attribute", operationId = "updateExternalAssetOwnerLoanAttribute", description = "Exceptional correction tool, not part of the normal workflow. "
+                    + "Sets a single external asset owner attribute on the loan-level copy of one loan. Validation, normalisation and error codes are the same as for "
+                    + "the loan product attribute endpoint (PUT /external-asset-owners/loan-product/{loanProductId}/attributes/{id}). "
+                    + "It affects only this loan and only activity from this point onwards; already posted journal entries and events are not changed. "
+                    + "It is intended for use outside COB: relative to a COB run already in progress for the loan, when the correction takes effect is undefined "
+                    + "and it may apply to only part of that run. "
+                    + "The loan must already have a loan-level copy (taken when it was first sold), and SETTLEMENT_MODEL cannot be changed while a transfer is in progress. "
+                    + "Requires the UPDATE_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE permission and supports maker-checker.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    @ApiResponse(responseCode = "403", description = "The loan has no loan-level copy, the attribute is invalid, or a transfer is in progress")
+    public CommandProcessingResult updateLoanAttribute(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        platformUserRightsContext.isAuthenticated();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson)
+                .updateExternalAssetOwnerLoanAttribute(loanId).build();
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @POST

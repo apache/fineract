@@ -44,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class LoanTransferabilityServiceImplTest {
 
+    private static final Long LOAN_ID = 2L;
     private static final Long LOAN_PRODUCT_ID = 1L;
 
     private static Stream<Arguments> amountDataProvider() {
@@ -63,9 +64,10 @@ public class LoanTransferabilityServiceImplTest {
         when(loanSummary.getTotalOutstanding()).thenReturn(loanOutstandingAmount);
 
         Loan loan = Mockito.mock(Loan.class);
+        when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getLoanProduct()).thenReturn(loanProduct);
         when(loan.getSummary()).thenReturn(loanSummary);
-        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(false);
+        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(false);
 
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
         externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING);
@@ -90,9 +92,10 @@ public class LoanTransferabilityServiceImplTest {
         when(loanSummary.getTotalOutstanding()).thenReturn(loanOutstandingAmount);
 
         Loan loan = Mockito.mock(Loan.class);
+        when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getLoanProduct()).thenReturn(loanProduct);
         when(loan.getSummary()).thenReturn(loanSummary);
-        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(true);
+        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
 
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
         externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING_INTERMEDIATE);
@@ -113,8 +116,9 @@ public class LoanTransferabilityServiceImplTest {
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
 
         Loan loan = Mockito.mock(Loan.class);
+        when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getLoanProduct()).thenReturn(loanProduct);
-        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_PRODUCT_ID)).thenReturn(true);
+        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
 
         ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
         externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING);

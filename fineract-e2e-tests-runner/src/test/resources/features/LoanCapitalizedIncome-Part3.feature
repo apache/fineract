@@ -190,7 +190,7 @@ Feature: Capitalized Income - Part3
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 1.1              | 48.9                | 0.0             | 0.0                |
     # --- Switch to IMMEDIATE: only the new capitalized income is recognized immediately ---
-    When Admin set external asset owner loan product attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
+    When Admin sets external asset owner loan attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "04 July 2026" with "30" EUR transaction amount
     Then Loan Transactions tab has the following data without accruals:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -483,7 +483,7 @@ Feature: Capitalized Income - Part3
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 0.57             | 49.43               | 0.0             | 0.0                |
     # --- Switch to IMMEDIATE and post 2nd capitalized income on still-sold loan: fully amortized at once ---
-    When Admin set external asset owner loan product attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
+    When Admin sets external asset owner loan attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     When Admin adds capitalized income with "AUTOPAY" payment type to the loan on "04 January 2026" with "5" EUR transaction amount
     Then Loan Transactions tab has the following data without accruals:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
@@ -700,7 +700,7 @@ Feature: Capitalized Income - Part3
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 1.1              | 48.9                | 0.0             | 0.0                |
     # --- New capitalized income under IMMEDIATE, then an adjustment on it ---
-    When Admin set external asset owner loan product attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
+    When Admin sets external asset owner loan attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "04 July 2026" with "30" EUR transaction amount
     And Admin adds capitalized income adjustment of capitalized income transaction made on "04 July 2026" with "AUTOPAY" payment type to the loan on "04 July 2026" with "10" EUR transaction amount
     # --- Only the IMMEDIATE balance is adjusted; the old deferred balance stays deferred ---
