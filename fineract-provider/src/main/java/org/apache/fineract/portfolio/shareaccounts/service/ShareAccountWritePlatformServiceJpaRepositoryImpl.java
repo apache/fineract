@@ -173,7 +173,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     public CommandProcessingResult updateShareAccount(Long accountId, JsonCommand jsonCommand) {
         try {
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndUpdate(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -205,7 +205,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult applyAddtionalShares(final Long accountId, JsonCommand jsonCommand) {
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndApplyAddtionalShares(jsonCommand, account);
             ShareAccountTransaction transaction = null;
             if (!changes.isEmpty()) {
@@ -239,7 +239,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     public CommandProcessingResult approveShareAccount(Long accountId, JsonCommand jsonCommand) {
 
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndApprove(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -282,7 +282,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult rejectShareAccount(Long accountId, JsonCommand jsonCommand) {
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndReject(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -316,7 +316,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult undoApproveShareAccount(Long accountId, JsonCommand jsonCommand) {
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndUndoApprove(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -354,7 +354,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     public CommandProcessingResult activateShareAccount(Long accountId, JsonCommand jsonCommand) {
 
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndActivate(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -377,7 +377,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     public CommandProcessingResult approveAdditionalShares(Long accountId, JsonCommand jsonCommand) {
 
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndApproveAddtionalShares(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -413,7 +413,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult rejectAdditionalShares(Long accountId, JsonCommand jsonCommand) {
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndRejectAddtionalShares(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
@@ -441,7 +441,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult redeemShares(Long accountId, JsonCommand jsonCommand) {
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndRedeemShares(jsonCommand, account);
             if (!changes.isEmpty()) {
                 final Map<String, Object> paymentDetailChanges = attachPaymentDetail(jsonCommand,
@@ -480,7 +480,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult closeShareAccount(Long accountId, JsonCommand jsonCommand) {
         try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+            ShareAccount account = this.shareAccountRepository.findOneInUserScope(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndClose(jsonCommand, account);
             if (!changes.isEmpty()) {
                 final Map<String, Object> paymentDetailChanges = attachPaymentDetail(jsonCommand,

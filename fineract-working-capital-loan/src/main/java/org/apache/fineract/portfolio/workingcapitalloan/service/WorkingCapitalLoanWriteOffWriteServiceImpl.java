@@ -90,6 +90,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     public CommandProcessingResult writeOff(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateWriteOff(command, loan);
 
         final LoanStatus oldStatus = loan.getLoanStatus();
@@ -165,6 +166,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     public CommandProcessingResult undoWriteOff(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateUndoWriteOff(command, loan);
 
         final LoanStatus oldStatus = loan.getLoanStatus();

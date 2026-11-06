@@ -77,7 +77,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
 
         this.loanTransactionValidator.validateBuyDownFee(command, loanId);
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -132,7 +132,7 @@ public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformSer
     @Transactional
     public CommandProcessingResult buyDownFeeAdjustment(final Long loanId, final Long buyDownFeeTransactionId, final JsonCommand command) {
         this.loanTransactionValidator.validateBuyDownFeeAdjustment(command, loanId, buyDownFeeTransactionId);
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = new LinkedHashMap<>();

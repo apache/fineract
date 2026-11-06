@@ -65,7 +65,7 @@ dependencyManagement {
         // Remove once the Spring Boot BOM brings a kafka-clients that ships snappy-java >= 1.1.10.12.
         dependency 'org.xerial.snappy:snappy-java:1.1.10.12'
         dependency 'com.google.code.gson:gson:2.14.0'
-        dependency 'com.google.googlejavaformat:google-java-format:1.35.0'
+        dependency 'com.google.googlejavaformat:google-java-format:2.0.0'
         dependency 'org.apache.commons:commons-collections4:4.5.0'
         dependency 'org.apache.commons:commons-compress:1.28.0'
         dependency ('software.amazon.msk:aws-msk-iam-auth:2.3.6') {
@@ -169,7 +169,7 @@ dependencyManagement {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
-        dependency ('org.apache.activemq:activemq-client:6.2.5') {
+        dependency ('org.apache.activemq:activemq-client:6.2.10') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 

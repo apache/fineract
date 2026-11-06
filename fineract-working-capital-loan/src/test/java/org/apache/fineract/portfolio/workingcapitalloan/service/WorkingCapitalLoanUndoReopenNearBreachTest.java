@@ -41,6 +41,8 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -150,6 +152,10 @@ class WorkingCapitalLoanUndoReopenNearBreachTest {
     @Mock
     private JsonCommand command;
 
+    @Mock
+    private Office office;
+    @Mock
+    private PlatformSecurityContext context;
     @InjectMocks
     private WorkingCapitalLoanWritePlatformServiceImpl writePlatformService;
 
@@ -162,6 +168,7 @@ class WorkingCapitalLoanUndoReopenNearBreachTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
+        when(loan.getOffice()).thenReturn(office);
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getLoanStatus()).thenAnswer(invocation -> status.get());
         when(loan.isOpen()).thenAnswer(invocation -> status.get() == LoanStatus.ACTIVE);
