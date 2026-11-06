@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,6 +74,7 @@ public class LoanApplicationTimelineData {
 
     private LocalDate overpaidOnDate;
 
+    @JsonIgnore
     public LocalDate getDisbursementDate() {
         LocalDate disbursementDate = this.expectedDisbursementDate;
         if (this.actualDisbursementDate != null) {

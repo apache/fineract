@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -35,6 +37,7 @@ import org.apache.fineract.portfolio.calendar.data.CalendarData;
 /**
  * Immutable data object representing groups.
  */
+@Getter
 public final class CenterData implements Serializable {
 
     private final Long id;
@@ -113,6 +116,7 @@ public final class CenterData implements Serializable {
         this.officeName = null;
     }
 
+    @JsonIgnore
     public Integer getRowIndex() {
         return rowIndex;
     }

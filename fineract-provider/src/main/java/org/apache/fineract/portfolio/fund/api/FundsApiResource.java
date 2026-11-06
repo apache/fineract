@@ -33,10 +33,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -59,7 +56,6 @@ public class FundsApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "externalId"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "FUND";
 
@@ -105,11 +101,10 @@ public class FundsApiResource {
     @Operation(summary = "Update a Fund", description = "Updates the details of a fund.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FundRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FundsApiResourceSwagger.PutFundsFundIdResponse.class)))
-    public String updateFund(@PathParam("fundId") @Parameter(description = "fundId") final Long fundId,
+    public CommandProcessingResult updateFund(@PathParam("fundId") @Parameter(description = "fundId") final Long fundId,
             @Parameter(hidden = true) final FundRequest fundRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFund(fundId)
                 .withJson(toApiJsonSerializer.serialize(fundRequest)).build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }
