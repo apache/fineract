@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 /**
  * Immutable data object represent the timeline events of a report mailing job (creation)
@@ -30,6 +31,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 @SuppressWarnings("unused")
+@JsonLocalDateArrayFormat
 public class ReportMailingJobTimelineData {
 
     private LocalDate createdOnDate;

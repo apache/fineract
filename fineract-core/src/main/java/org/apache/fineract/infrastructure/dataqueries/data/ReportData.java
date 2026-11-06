@@ -21,35 +21,24 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 
+@Getter
 public class ReportData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final String reportName;
-    @SuppressWarnings("unused")
     private final String reportType;
-    @SuppressWarnings("unused")
     private final String reportSubType;
-    @SuppressWarnings("unused")
     private final String reportCategory;
-    @SuppressWarnings("unused")
     private final String description;
-    @SuppressWarnings("unused")
     private final String reportSql;
-    @SuppressWarnings("unused")
     private final Boolean coreReport;
-    @SuppressWarnings("unused")
     private final Boolean useReport;
-    @SuppressWarnings("unused")
     private final Collection<ReportParameterData> reportParameters;
 
-    @SuppressWarnings("unused")
     private List<String> allowedReportTypes;
-    @SuppressWarnings("unused")
     private List<String> allowedReportSubTypes;
-    @SuppressWarnings("unused")
     private Collection<ReportParameterData> allowedParameters;
 
     public ReportData(final Long id, final String reportName, final String reportType, final String reportSubType,
