@@ -301,4 +301,5 @@
     <include file="parts/0279_add_disbursement_detail_to_loan_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0280_add_replaced_loan_charge_to_loan_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0281_add_down_payment_fee_override_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0282_idempotency_recoverable_error_codes.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.configuration.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
@@ -204,4 +205,6 @@ public interface ConfigurationDomainService {
     Long retrievePayoffSchedulePreviewMaxPayoffPeriods();
 
     Long retrievePayoffSchedulePreviewMaxTermPeriods();
+
+    Set<String> getIdempotencyRecoverableErrorCodes();
 }

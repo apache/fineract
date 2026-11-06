@@ -29,6 +29,8 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 @SuppressWarnings("rawtypes")
 public final class GlobalConfigurationHelper {
 
+    public static final String IDEMPOTENCY_RECOVERABLE_ERROR_CODES_DEFAULT = "error.msg.clients.activationDate.in.the.future,error.msg.group.activationDate.in.the.future";
+
     private GlobalConfigurationHelper() {}
 
     /**
@@ -621,6 +623,14 @@ public final class GlobalConfigurationHelper {
         payoffSchedulePreviewMaxTermPeriods.put("enabled", true);
         payoffSchedulePreviewMaxTermPeriods.put("trapDoor", false);
         defaults.add(payoffSchedulePreviewMaxTermPeriods);
+
+        HashMap<String, Object> idempotencyRecoverableErrorCodes = new HashMap<>();
+        idempotencyRecoverableErrorCodes.put("name", GlobalConfigurationConstants.IDEMPOTENCY_RECOVERABLE_ERROR_CODES);
+        idempotencyRecoverableErrorCodes.put("value", 0L);
+        idempotencyRecoverableErrorCodes.put("enabled", true);
+        idempotencyRecoverableErrorCodes.put("trapDoor", false);
+        idempotencyRecoverableErrorCodes.put("string_value", IDEMPOTENCY_RECOVERABLE_ERROR_CODES_DEFAULT);
+        defaults.add(idempotencyRecoverableErrorCodes);
 
         return defaults;
     }
