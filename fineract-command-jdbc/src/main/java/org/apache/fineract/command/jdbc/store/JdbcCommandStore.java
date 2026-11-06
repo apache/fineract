@@ -43,6 +43,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
@@ -57,17 +58,13 @@ public class JdbcCommandStore implements CommandStore {
     private final JdbcCommandProperties properties;
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getRequestById(Long id) {
-        return (T) repository.findById(id).map(CommandEntity::getRequest)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
+    public <T> T getRequestById(Long id, Class<T> type) {
+        return repository.findById(id).map(CommandEntity::getRequest).map(json -> read(json, type)).orElse(null);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getResponseById(Long id) {
-        return (T) repository.findById(id).map(CommandEntity::getResponse)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
+    public <T> T getResponseById(Long id, Class<T> type) {
+        return repository.findById(id).map(CommandEntity::getResponse).map(json -> read(json, type)).orElse(null);
     }
 
     @Override
@@ -76,17 +73,13 @@ public class JdbcCommandStore implements CommandStore {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getRequestByKey(String key) {
-        return (T) repository.findOneByIdempotencyKey(key).map(CommandEntity::getRequest)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
+    public <T> T getRequestByKey(String key, Class<T> type) {
+        return repository.findOneByIdempotencyKey(key).map(CommandEntity::getRequest).map(json -> read(json, type)).orElse(null);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getResponseByKey(String key) {
-        return (T) repository.findOneByIdempotencyKey(key).map(CommandEntity::getResponse)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
+    public <T> T getResponseByKey(String key, Class<T> type) {
+        return repository.findOneByIdempotencyKey(key).map(CommandEntity::getResponse).map(json -> read(json, type)).orElse(null);
     }
 
     @Override
@@ -135,6 +128,10 @@ public class JdbcCommandStore implements CommandStore {
         } catch (Exception e) {
             log.error("Unable to initialize command dead-letter queue:", e);
         }
+    }
+
+    private <T> T read(JsonNode json, Class<T> type) {
+        return type.cast(objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString())));
     }
 
     @SneakyThrows

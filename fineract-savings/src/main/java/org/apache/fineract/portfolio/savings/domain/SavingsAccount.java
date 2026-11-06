@@ -3353,6 +3353,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void loadLazyCollections() {
         transactions.size();
         charges.size();

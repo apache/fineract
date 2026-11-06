@@ -155,7 +155,7 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanProducts().createLoanProduct(request));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "TypeParameterUnusedInFormals" }) // Callers choose the type of the parsed JSON
     private <T> T extractErrorAttribute(CallFailedRuntimeException exception, String jsonAttributeToGetBack) {
         if (!(exception.getCause() instanceof org.apache.fineract.client.feign.FeignException feignException)) {
             throw new IllegalStateException("Expected FeignException cause");
@@ -168,6 +168,7 @@ public class FeignLoanHelper {
         }
     }
 
+    @SuppressWarnings("TypeParameterUnusedInFormals") // Callers choose the type of the parsed JSON
     public <T> T getLoanProductError(PostLoanProductsRequest request, String jsonAttributeToGetBack) {
         CallFailedRuntimeException ex = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
         return extractErrorAttribute(ex, jsonAttributeToGetBack);

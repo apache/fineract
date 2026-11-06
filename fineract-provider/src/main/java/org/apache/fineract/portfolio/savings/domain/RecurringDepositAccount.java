@@ -1258,6 +1258,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     @Override
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void loadLazyCollections() {
         this.depositScheduleInstallments.size();
         super.loadLazyCollections();

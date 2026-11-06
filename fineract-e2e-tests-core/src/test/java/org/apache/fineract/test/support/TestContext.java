@@ -31,6 +31,7 @@ public enum TestContext {
     @SuppressWarnings("ImmutableEnumChecker")
     private final ThreadLocal<Map<String, Object>> testContexts = withInitial(HashMap::new);
 
+    @SuppressWarnings("TypeParameterUnusedInFormals") // Callers choose the type of the stored value
     public <T> T get(String name) {
         Object storedValue = testContexts.get().get(name);
         return (T) storedValue;
