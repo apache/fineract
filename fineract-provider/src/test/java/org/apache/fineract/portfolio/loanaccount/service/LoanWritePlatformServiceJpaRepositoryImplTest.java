@@ -193,6 +193,9 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier;
 
+    @Mock
+    private LoanTransactionWritePlatformService loanTransactionWritePlatformService;
+
     @InjectMocks
     private LoanWritePlatformServiceJpaRepositoryImpl loanWritePlatformService;
 
@@ -830,6 +833,155 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getOfficeId()).thenReturn(3L);
         when(loan.getGroupId()).thenReturn(null);
+    }
+
+    @Test
+    public void makeGLIMLoanRepayment_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeGLIMLoanRepayment(LOAN_ID, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeGLIMLoanRepayment(LOAN_ID, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeGLIMLoanRepayment(LOAN_ID, command);
+    }
+
+    @Test
+    public void makeLoanRepayment_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeLoanRepayment(LoanTransactionType.REPAYMENT, LOAN_ID, command, false))
+                .thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeLoanRepayment(LoanTransactionType.REPAYMENT, LOAN_ID, command,
+                false);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeLoanRepayment(LoanTransactionType.REPAYMENT, LOAN_ID, command, false);
+    }
+
+    @Test
+    public void makeLoanRepaymentWithChargeRefundChargeType_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType.REPAYMENT, LOAN_ID,
+                command, false, "chargeType")).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService
+                .makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType.REPAYMENT, LOAN_ID, command, false, "chargeType");
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType.REPAYMENT, LOAN_ID,
+                command, false, "chargeType");
+    }
+
+    @Test
+    public void makeInterestPaymentWaiver_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeInterestPaymentWaiver(command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeInterestPaymentWaiver(command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeInterestPaymentWaiver(command);
+    }
+
+    @Test
+    public void adjustLoanTransaction_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.adjustLoanTransaction(LOAN_ID, 2L, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.adjustLoanTransaction(LOAN_ID, 2L, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).adjustLoanTransaction(LOAN_ID, 2L, command);
+    }
+
+    @Test
+    public void chargebackLoanTransaction_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.chargebackLoanTransaction(LOAN_ID, 2L, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.chargebackLoanTransaction(LOAN_ID, 2L, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).chargebackLoanTransaction(LOAN_ID, 2L, command);
+    }
+
+    @Test
+    public void waiveInterestOnLoan_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.waiveInterestOnLoan(LOAN_ID, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.waiveInterestOnLoan(LOAN_ID, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).waiveInterestOnLoan(LOAN_ID, command);
+    }
+
+    @Test
+    public void recoverFromGuarantor_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.recoverFromGuarantor(LOAN_ID)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.recoverFromGuarantor(LOAN_ID);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).recoverFromGuarantor(LOAN_ID);
+    }
+
+    @Test
+    public void creditBalanceRefund_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.creditBalanceRefund(LOAN_ID, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.creditBalanceRefund(LOAN_ID, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).creditBalanceRefund(LOAN_ID, command);
+    }
+
+    @Test
+    public void makeLoanRefund_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeLoanRefund(LOAN_ID, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeLoanRefund(LOAN_ID, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeLoanRefund(LOAN_ID, command);
+    }
+
+    @Test
+    public void makeRefund_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeRefund(LOAN_ID, LoanTransactionType.MERCHANT_ISSUED_REFUND, command))
+                .thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeRefund(LOAN_ID, LoanTransactionType.MERCHANT_ISSUED_REFUND,
+                command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeRefund(LOAN_ID, LoanTransactionType.MERCHANT_ISSUED_REFUND, command);
+    }
+
+    @Test
+    public void makeManualInterestRefund_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeManualInterestRefund(LOAN_ID, 2L, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeManualInterestRefund(LOAN_ID, 2L, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeManualInterestRefund(LOAN_ID, 2L, command);
+    }
+
+    @Test
+    public void handleChargebackTransaction_shouldDelegateToLoanTransactionWritePlatformService() {
+        Loan mockLoan = mock(Loan.class);
+        LoanTransaction mockTxn = mock(LoanTransaction.class);
+
+        loanWritePlatformService.handleChargebackTransaction(mockLoan, mockTxn);
+
+        verify(loanTransactionWritePlatformService).handleChargebackTransaction(mockLoan, mockTxn);
     }
 
     private static final class DisbursementFixture {
