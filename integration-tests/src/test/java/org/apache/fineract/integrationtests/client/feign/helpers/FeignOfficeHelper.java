@@ -24,10 +24,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.OfficeUpdateResponse;
 import org.apache.fineract.client.models.PostOfficesRequest;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdRequest;
-import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignOfficeHelper {
@@ -73,16 +73,20 @@ public class FeignOfficeHelper {
         return ok(() -> fineractClient.offices().retrieveOneOffice(HEAD_OFFICE_ID));
     }
 
-    public PutOfficesOfficeIdResponse updateOffice(Long officeId, String name, String openingDate) {
+    public OfficeUpdateResponse updateOffice(Long officeId, String name, String openingDate) {
+        return updateOffice(officeId, name, openingDate, "dd MMMM yyyy", "en");
+    }
+
+    public OfficeUpdateResponse updateOffice(Long officeId, String name, String openingDate, String dateFormat, String locale) {
         PutOfficesOfficeIdRequest request = new PutOfficesOfficeIdRequest()//
                 .name(name)//
                 .openingDate(openingDate)//
-                .dateFormat("dd MMMM yyyy")//
-                .locale("en");
+                .dateFormat(dateFormat)//
+                .locale(locale);
         return ok(() -> fineractClient.offices().updateOffice(officeId, request));
     }
 
-    public PutOfficesOfficeIdResponse updateOfficeByExternalId(String externalId, String name, String openingDate) {
+    public OfficeUpdateResponse updateOfficeByExternalId(String externalId, String name, String openingDate) {
         PutOfficesOfficeIdRequest request = new PutOfficesOfficeIdRequest()//
                 .name(name)//
                 .openingDate(openingDate)//

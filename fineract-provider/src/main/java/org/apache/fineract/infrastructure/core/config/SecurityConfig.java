@@ -361,6 +361,13 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFF")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/staff/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFF")
+                    // office
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/offices"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_OFFICE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/offices/external-id/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_OFFICE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/offices/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_OFFICE")
                     // meeting
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/*/*/meeting/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MEETING")

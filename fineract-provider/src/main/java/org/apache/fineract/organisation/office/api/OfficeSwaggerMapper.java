@@ -18,24 +18,15 @@
  */
 package org.apache.fineract.organisation.office.api;
 
-import java.util.Map;
-import java.util.Optional;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface OfficeSwaggerMapper {
 
-    OfficesApiResourceSwagger.PutOfficesOfficeIdResponse toPutOfficesOfficeIdResponse(CommandProcessingResult commandProcessingResult);
-
-    default OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.PutOfficesOfficeIdResponseChanges toPutOfficesOfficeIdResponseChanges(
-            Map<String, Object> changes) {
-        OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.PutOfficesOfficeIdResponseChanges response = new OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.PutOfficesOfficeIdResponseChanges();
-        Optional.ofNullable(changes).map(c -> c.get("name")).ifPresent(c -> response.name = String.valueOf(c));
-        return response;
-    }
+    OfficesApiResourceSwagger.PostOfficesResponse toPostOfficesResponse(OfficeCreateResponse response);
 
     OfficesApiResourceSwagger.GetOfficesResponse toGetOfficesResponse(OfficeData officeData);
 }
