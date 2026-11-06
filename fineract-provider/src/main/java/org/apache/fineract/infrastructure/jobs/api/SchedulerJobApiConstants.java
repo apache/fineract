@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public final class SchedulerJobApiConstants {
 
     private SchedulerJobApiConstants() {
@@ -58,14 +54,4 @@ public final class SchedulerJobApiConstants {
     public static final String SHORT_NAME_PARAM = "short-name";
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
-
-    static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(jobIdentifierParamName, displayNameParamName, nextRunTimeParamName, initializingErrorParamName,
-                    cronExpressionParamName, jobActiveStatusParamName, currentlyRunningParamName, lastRunHistoryObjParamName));
-
-    static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(idParamName, versionParamName, jobRunStartTimeParamName, jobRunEndTimeParamName, statusParamName,
-                    jobRunErrorMessageParamName, triggerTypeParamName, jobRunErrorLogParamName));
-
-    static final Set<String> SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(schedulerStatusParamName));
 }

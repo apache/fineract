@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Data;
@@ -56,6 +57,15 @@ public final class ReportMailingJobData {
     private List<EnumOptionData> emailAttachmentFileFormatOptions;
     private List<EnumOptionData> stretchyReportParamDateOptions;
     private Long runAsUserId;
+
+    /**
+     * Explicit accessor so that the JSON property stays {@code isActive}; the generated {@code isActive()} getter would
+     * otherwise be serialized as {@code active}.
+     */
+    @JsonProperty("isActive")
+    public boolean isActive() {
+        return this.isActive;
+    }
 
     /**
      * @return an instance of the ReportMailingJobData class

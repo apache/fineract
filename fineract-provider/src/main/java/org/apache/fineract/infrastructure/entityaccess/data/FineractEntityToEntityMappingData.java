@@ -23,10 +23,12 @@ import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonLocalDateArrayFormat
 public class FineractEntityToEntityMappingData implements Serializable {
 
     private static final long serialVersionUID = 1L;
