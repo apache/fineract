@@ -64,7 +64,7 @@ class TaxComponentTest {
                 """));
 
         assertThat(changes).containsExactlyEntriesOf(Map.of(TaxApiConstants.startDateParamName, LocalDate.of(2024, 4, 1)));
-        assertThat(taxComponent.startDate()).isEqualTo(LocalDate.of(2024, 4, 1));
+        assertThat(taxComponent.getStartDate()).isEqualTo(LocalDate.of(2024, 4, 1));
         assertThat(taxComponent.getTaxComponentHistories()).singleElement()
                 .satisfies(previousRate -> assertThat(previousRate.endDate()).isEqualTo(LocalDate.of(2024, 4, 1)));
         assertThat(taxComponent.getApplicablePercentage(LocalDate.of(2024, 3, 15))).isEqualByComparingTo("5");
@@ -79,7 +79,7 @@ class TaxComponentTest {
                 {"startDate": "01 April 2024", "dateFormat": "dd MMMM yyyy", "locale": "en"}
                 """));
 
-        assertThat(taxComponent.startDate()).isEqualTo(LocalDate.of(2024, 4, 1));
+        assertThat(taxComponent.getStartDate()).isEqualTo(LocalDate.of(2024, 4, 1));
         assertThat(taxComponent.getTaxComponentHistories()).isEmpty();
     }
 

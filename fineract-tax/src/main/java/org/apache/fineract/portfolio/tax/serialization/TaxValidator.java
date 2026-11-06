@@ -350,8 +350,8 @@ public class TaxValidator {
             baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
                     .validateDateAfter(DateUtils.getBusinessLocalDate());
             baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
-                    .validateDateAfter(taxComponent.startDate());
-        } else if (command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, taxComponent.startDate())) {
+                    .validateDateAfter(taxComponent.getStartDate());
+        } else if (command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, taxComponent.getStartDate())) {
             validateStartDateMove(taxComponent, command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName),
                     baseDataValidator);
         }
@@ -361,7 +361,7 @@ public class TaxValidator {
     private void validateStartDateMove(final TaxComponent taxComponent, final LocalDate startDate,
             final DataValidatorBuilder baseDataValidator) {
         final LocalDate today = DateUtils.getBusinessLocalDate();
-        if (!DateUtils.isAfter(taxComponent.startDate(), today)) {
+        if (!DateUtils.isAfter(taxComponent.getStartDate(), today)) {
             baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).failWithCode("cannot.be.modified.after.activation");
             return;
         }
@@ -379,7 +379,7 @@ public class TaxValidator {
         changes.put(TaxApiConstants.percentageParamName,
                 command.isChangeInBigDecimalParameterNamed(TaxApiConstants.percentageParamName, taxComponent.getPercentage()));
         changes.put(TaxApiConstants.startDateParamName,
-                command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, taxComponent.startDate()));
+                command.isChangeInLocalDateParameterNamed(TaxApiConstants.startDateParamName, taxComponent.getStartDate()));
         changes.put(TaxApiConstants.debitAccountTypeParamName, command
                 .isChangeInIntegerSansLocaleParameterNamed(TaxApiConstants.debitAccountTypeParamName, taxComponent.getDebitAccountType()));
         changes.put(TaxApiConstants.debitAccountIdParamName,
