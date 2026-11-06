@@ -317,6 +317,31 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     }
 
     /**
+     * method recognises, on receipt, the interest, fees and penalties an open NPA loan has been paid but never accrued
+     */
+    @Override
+    public void processAccrualsOnNpaLoanRepayment(@NonNull final Loan loan) {
+        if (!loan.isOpen() || !loan.isNpa()) {
+            return;
+        }
+        final boolean realTimeChargeAccrual = isRealTimeChargeAccrual(loan);
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        addAccruals(loan, businessDate, true, false, true, resolveChargeOnDueDate(isChargeOnDueDate(), realTimeChargeAccrual),
+                realTimeChargeAccrual, resolveReceiptDate(loan, businessDate));
+    }
+
+    /**
+     * The date income received by an NPA loan is recognised on: the date of the latest repayment posted, so a backdated
+     * repayment's income is dated with it, never after the business date.
+     */
+    private LocalDate resolveReceiptDate(final Loan loan, final LocalDate businessDate) {
+        return loan.getLoanTransactions().stream()
+                .filter(t -> t.isNotReversed() && t.isRepaymentLikeType() && t.getId() != null && t.getTransactionDate() != null)
+                .max(Comparator.comparing(LoanTransaction::getId)).map(LoanTransaction::getTransactionDate)
+                .filter(date -> DateUtils.isBefore(date, businessDate)).orElse(businessDate);
+    }
+
+    /**
      * method calculates accruals for loan on loan fore closure
      */
     @Override
@@ -376,7 +401,21 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     private void addAccruals(@NonNull final Loan loan, @NonNull LocalDate tillDate, final boolean periodic, final boolean isFinal,
             final boolean addJournal, final boolean chargeOnDueDate, final boolean realTimeChargeAccrual) {
-        if ((!isFinal && !loan.isOpen()) || loan.isNpa() || loan.isChargedOff()
+        addAccruals(loan, tillDate, periodic, isFinal, addJournal, chargeOnDueDate, realTimeChargeAccrual, null);
+    }
+
+    /**
+     * @param receiptDate
+     *            set only to recognise, on that date, the income an open NPA loan has received but not accrued
+     */
+    private void addAccruals(@NonNull final Loan loan, @NonNull LocalDate tillDate, final boolean periodic, final boolean isFinal,
+            final boolean addJournal, final boolean chargeOnDueDate, final boolean realTimeChargeAccrual, final LocalDate receiptDate) {
+        // An NPA loan stops accruing; only the final accrual on closure still runs. Income it actually receives is
+        // recognised on receipt instead (receiptDate), limited to what was paid and not accrued. Otherwise the
+        // repayment
+        // clears more receivable than was ever accrued and that income never reaches the income accounts.
+        final boolean npaIncomeOnReceipt = receiptDate != null && loan.isNpa() && !isFinal;
+        if ((!isFinal && !loan.isOpen()) || (loan.isNpa() && !isFinal && !npaIncomeOnReceipt) || loan.isChargedOff()
                 || !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
             return;
         }
@@ -405,8 +444,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         final LocalDate accrualDate = isFinal
                 ? (progressiveAccrual ? (DateUtils.isBefore(lastDueDate, businessDate) ? lastDueDate : businessDate)
                         : getFinalAccrualTransactionDate(loan))
-                : tillDate;
-        if (progressiveAccrual && accruedTill != null && !DateUtils.isAfter(tillDate, accruedTill)) {
+                : (npaIncomeOnReceipt ? receiptDate : tillDate);
+        if (progressiveAccrual && !npaIncomeOnReceipt && accruedTill != null && !DateUtils.isAfter(tillDate, accruedTill)) {
             if (isFinal) {
                 adjustAccrualsAfter(loan, accrualDate, addJournal);
             } else if (loanTransactionRepository.existsNonReversedByLoanAndTypesAndOnOrAfterDate(loan, ACCRUAL_TYPES, accrualDate)
@@ -417,6 +456,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
         final AccrualPeriodsData accrualPeriods = calculateAccrualAmounts(loan, tillDate, periodic, isFinal, chargeOnDueDate,
                 realTimeChargeAccrual);
+        if (npaIncomeOnReceipt) {
+            limitAccrualsToReceivedIncome(loan, accrualPeriods, progressiveAccrual);
+        }
         final boolean mergeTransactions = isFinal || progressiveAccrual;
         final MonetaryCurrency currency = loan.getLoanProductRelatedDetail().getCurrency();
         List<LoanTransaction> accrualTransactions = new ArrayList<>();
@@ -448,10 +490,15 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 if (!isFinal && DateUtils.isAfter(dueDate, tillDate) && DateUtils.isBefore(tillDate, accruedTill)) {
                     continue;
                 }
-                final LocalDate periodAccrualDate = DateUtils.isBefore(dueDate, accrualDate) ? dueDate : accrualDate;
+                // income recognised on receipt is dated on receipt, never back into an earlier (possibly closed) period
+                final LocalDate periodAccrualDate = !npaIncomeOnReceipt && DateUtils.isBefore(dueDate, accrualDate) ? dueDate : accrualDate;
                 final LoanTransaction accrualTransaction = addAccrualTransaction(loan, periodAccrualDate, period, interestPortion,
                         feePortion, penaltyPortion, false);
                 if (accrualTransaction != null) {
+                    if (npaIncomeOnReceipt) {
+                        // its date no longer says which installment it is for, so record it
+                        accrualTransaction.setAccrualInstallmentNumber(period.getInstallmentNumber());
+                    }
                     accrualTransactions.add(accrualTransaction);
                 }
             }
@@ -471,7 +518,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             return;
         }
 
-        if (!isFinal || progressiveAccrual) {
+        // the unpaid interest of an NPA loan is still unaccrued, so accruedTill must not move past it
+        if (!npaIncomeOnReceipt && (!isFinal || progressiveAccrual)) {
             loan.setAccruedTill(isFinal ? accrualDate : tillDate);
         }
 
@@ -488,6 +536,51 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 journalEntryPoster.postJournalEntriesForLoanTransaction(accrualTransaction, false, false);
             }
         }
+    }
+
+    /**
+     * Limits what an NPA loan accrues to the income it received: per period, the interest and each charge are capped at
+     * what was paid on them.
+     *
+     * <p>
+     * The floor is what the loan had accrued, or could have accrued, before it stopped accruing. Cumulative accruals
+     * are never taken below what is already accrued here: an undone repayment's on-receipt accrual is reversed when the
+     * accruals are reprocessed. Progressive accruals are netted in one transaction per run, so here the floor is what
+     * was accruable by {@code accruedTill} (which does not move while the loan is NPA) and anything above it that is no
+     * longer paid is adjusted.
+     */
+    private void limitAccrualsToReceivedIncome(@NonNull final Loan loan, @NonNull final AccrualPeriodsData accrualPeriods,
+            final boolean progressiveAccrual) {
+        final MonetaryCurrency currency = accrualPeriods.getCurrency();
+        final AccruableBeforeNpa accruableBeforeNpa = new AccruableBeforeNpa(loan);
+        for (AccrualPeriodData period : accrualPeriods.getPeriods()) {
+            final LoanRepaymentScheduleInstallment installment = loan.fetchRepaymentScheduleInstallment(period.getInstallmentNumber());
+            final Money interestAccruable = period.getInterestAccruable();
+            if (interestAccruable != null) {
+                final Money received = MathUtil.min(interestAccruable, installment.getInterestPaid(currency), false);
+                final Money floor = progressiveAccrual
+                        ? MathUtil.min(interestAccruable, MathUtil.toMoney(accruableBeforeNpa.interest(installment), currency), false)
+                        : period.getInterestAccrued();
+                period.setInterestAccruable(MathUtil.max(received, floor, true));
+            }
+            for (AccrualChargeData charge : period.getCharges()) {
+                final Money chargeAccruable = charge.getChargeAccruable();
+                final LoanCharge loanCharge = loanChargeService.fetchLoanChargesById(loan, charge.getLoanChargeId());
+                final Money received = MathUtil.min(chargeAccruable, chargePaid(loanCharge, installment, currency), false);
+                final Money floor = progressiveAccrual ? (accruableBeforeNpa.isChargeAccruable(loanCharge, installment) ? chargeAccruable
+                        : MathUtil.toMoney(BigDecimal.ZERO, currency)) : charge.getChargeAccrued();
+                charge.setChargeAccruable(MathUtil.max(received, floor, true));
+            }
+        }
+    }
+
+    private static Money chargePaid(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment,
+            final MonetaryCurrency currency) {
+        if (loanCharge.isInstalmentFee()) {
+            final LoanInstallmentCharge installmentCharge = loanCharge.getInstallmentLoanCharge(installment.getInstallmentNumber());
+            return installmentCharge == null ? Money.zero(currency) : installmentCharge.getAmountPaid(currency);
+        }
+        return loanCharge.getAmountPaid(currency);
     }
 
     private boolean hasNoActiveChargeOnDate(Loan loan, LocalDate accrualDate) {
@@ -622,9 +715,29 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             BigDecimal accrued = MathUtil.subtractToZero(totalAccrued, prevAccrued);
             // if this is the current-last period, all the remaining accrued amount is added
             return isInPeriod(tillDate, installment, false) ? accrued : MathUtil.min(installment.getInterestAccrued(), accrued, false);
+        } else if (isFullPeriod(tillDate, installment)) {
+            return installment.getInterestAccrued();
         } else {
-            return isFullPeriod(tillDate, installment) ? installment.getInterestAccrued()
-                    : loanTransactionRepository.findAccrualInterestInPeriod(loan, installment.getFromDate(), installment.getDueDate());
+            // The accruals dated in the installment's window, except the ones recognised on receipt for another
+            // installment, plus the ones recognised on receipt for this one, whatever their date
+            final Integer installmentNumber = installment.getInstallmentNumber();
+            final LocalDate fromDate = installment.getFromDate();
+            final LocalDate dueDate = installment.getDueDate();
+            BigDecimal accrued = loanTransactionRepository.findAccrualInterestInPeriod(loan, fromDate, dueDate);
+            for (LoanTransaction transaction : loan.getLoanTransactions()) {
+                final Integer accrualInstallmentNumber = transaction.getAccrualInstallmentNumber();
+                if (accrualInstallmentNumber == null || transaction.isReversed() || !transaction.isAccrual()) {
+                    continue;
+                }
+                final boolean datedInWindow = DateUtils.isAfter(transaction.getTransactionDate(), fromDate)
+                        && !DateUtils.isAfter(transaction.getTransactionDate(), dueDate);
+                if (accrualInstallmentNumber.equals(installmentNumber) && !datedInWindow) {
+                    accrued = accrued.add(MathUtil.nullToZero(transaction.getInterestPortion()));
+                } else if (!accrualInstallmentNumber.equals(installmentNumber) && datedInWindow) {
+                    accrued = accrued.subtract(MathUtil.nullToZero(transaction.getInterestPortion()));
+                }
+            }
+            return MathUtil.negativeToZero(accrued);
         }
     }
 
@@ -1022,6 +1135,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         Money fee = zero;
         Money penalty = zero;
         for (LoanTransaction accrualTransaction : accrualTransactions) {
+            if (accrualTransaction.getAccrualInstallmentNumber() != null) {
+                continue;
+            }
             LocalDate transactionDateForRange = getDateForRangeCalculation(accrualTransaction, isBasedOnSubmittedOnDate);
             boolean isInPeriod = isInPeriod(transactionDateForRange, installment, installments);
             if (isInPeriod) {
@@ -1036,7 +1152,55 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 }
             }
         }
+        // Accruals recognised on receipt belong to the installment they record, whatever their date
+        AccrualBalances limits = null;
+        for (LoanTransaction accrualTransaction : accrualTransactions) {
+            if (!installment.getInstallmentNumber().equals(accrualTransaction.getAccrualInstallmentNumber())
+                    || accrualTransaction.isReversed()) {
+                continue;
+            }
+            if (limits == null) {
+                limits = receivedIncomeLimits(loan, installment, interest, fee, penalty);
+            }
+            final Money newInterest = MathUtil.plus(interest, accrualTransaction.getInterestPortion(currency));
+            final Money newFee = MathUtil.plus(fee, accrualTransaction.getFeeChargesPortion(currency));
+            final Money newPenalty = MathUtil.plus(penalty, accrualTransaction.getPenaltyChargesPortion(currency));
+            if (MathUtil.isGreaterThan(newInterest.getAmount(), limits.getInterestPortion())
+                    || MathUtil.isGreaterThan(newFee.getAmount(), limits.getFeePortion())
+                    || MathUtil.isGreaterThan(newPenalty.getAmount(), limits.getPenaltyPortion())) {
+                // no longer received (an undone repayment) or no longer charged; what is still received and not accrued
+                // is recognised again on receipt, by the balance-change listener
+                reverseTransaction(accrualTransaction, addEvent);
+            } else {
+                interest = newInterest;
+                fee = newFee;
+                penalty = newPenalty;
+            }
+        }
         installment.updateAccrualPortion(interest, fee, penalty);
+    }
+
+    /**
+     * How much of an installment's interest, fees and penalties may stay accrued once the accruals recognised on
+     * receipt are added to the ones attributed by date: the larger of those, what was accruable by {@code accruedTill}
+     * and what was paid, never more than is charged. It does not depend on whether the loan is NPA now:
+     * {@code accruedTill} does not move while it is, and moves on again once it is not.
+     */
+    private AccrualBalances receivedIncomeLimits(final Loan loan, final LoanRepaymentScheduleInstallment installment,
+            final Money datedInterest, final Money datedFee, final Money datedPenalty) {
+        final AccruableBeforeNpa accruableBeforeNpa = new AccruableBeforeNpa(loan);
+        final boolean chargesAccruable = accruableBeforeNpa.isAccruable(installment.getDueDate());
+        final BigDecimal interestCharged = MathUtil.nullToZero(installment.getInterestCharged());
+        final BigDecimal feeCharged = MathUtil.nullToZero(installment.getFeeChargesCharged());
+        final BigDecimal penaltyCharged = MathUtil.nullToZero(installment.getPenaltyCharges());
+        final BigDecimal interestReceived = MathUtil.min(interestCharged, MathUtil.nullToZero(installment.getInterestPaid()), false);
+        final BigDecimal feeReceived = MathUtil.min(feeCharged, MathUtil.nullToZero(installment.getFeeChargesPaid()), false);
+        final BigDecimal penaltyReceived = MathUtil.min(penaltyCharged, MathUtil.nullToZero(installment.getPenaltyChargesPaid()), false);
+        final AccrualBalances limits = new AccrualBalances();
+        limits.setInterestPortion(datedInterest.getAmount().max(accruableBeforeNpa.interest(installment)).max(interestReceived));
+        limits.setFeePortion(datedFee.getAmount().max(chargesAccruable ? feeCharged : feeReceived));
+        limits.setPenaltyPortion(datedPenalty.getAmount().max(chargesAccruable ? penaltyCharged : penaltyReceived));
+        return limits;
     }
 
     private boolean hasIncomeAmountChangedForInstallment(Loan loan, LoanRepaymentScheduleInstallment installment, Money interest, Money fee,
@@ -1054,6 +1218,52 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         return isChargeAccrualBasedOnSubmittedOnDate && !loanTransaction.getLoanChargesPaid().isEmpty()
                 ? loanTransaction.getLoanChargesPaid().stream().findFirst().get().getLoanCharge().getEffectiveDueDate()
                 : loanTransaction.getTransactionDate();
+    }
+
+    /**
+     * What a loan could accrue before it stopped accruing as NPA: everything due by {@code accruedTill} (which does not
+     * move while the loan is NPA), plus the in-progress installment's interest up to it (nothing if the loan turned NPA
+     * before its first accrual), net of waivers. Everything, once the loan is closed or overpaid.
+     */
+    private final class AccruableBeforeNpa {
+
+        private final Loan loan;
+        private final LocalDate accruedTill;
+        private final boolean settled;
+        private final int firstInstallmentNumber;
+        private LoanScheduleGenerator scheduleGenerator;
+
+        private AccruableBeforeNpa(final Loan loan) {
+            this.loan = loan;
+            this.accruedTill = loan.getAccruedTill();
+            this.settled = loan.isClosed() || loanBalanceService.isOverPaid(loan);
+            this.firstInstallmentNumber = fetchFirstNormalInstallmentNumber(loan.getRepaymentScheduleInstallments());
+        }
+
+        private boolean isAccruable(final LocalDate dueDate) {
+            return settled || (accruedTill != null && dueDate != null && !DateUtils.isBefore(accruedTill, dueDate));
+        }
+
+        private boolean isChargeAccruable(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment) {
+            return isAccruable(loanCharge.isInstalmentFee() ? installment.getDueDate() : loanCharge.getDueLocalDate());
+        }
+
+        private BigDecimal interest(final LoanRepaymentScheduleInstallment installment) {
+            final BigDecimal net = MathUtil.subtractToZero(MathUtil.nullToZero(installment.getInterestCharged()),
+                    MathUtil.nullToZero(installment.getInterestWaived()));
+            if (isAccruable(installment.getDueDate())) {
+                return net;
+            }
+            if (accruedTill == null || !loan.isInterestBearing()
+                    || !isInPeriod(accruedTill, installment, installment.getInstallmentNumber().equals(firstInstallmentNumber))) {
+                return BigDecimal.ZERO;
+            }
+            if (scheduleGenerator == null) {
+                final LoanProductRelatedDetail productDetail = loan.getLoanProductRelatedDetail();
+                scheduleGenerator = loanScheduleFactory.create(productDetail.getLoanScheduleType(), productDetail.getInterestMethod());
+            }
+            return MathUtil.min(net, MathUtil.toBigDecimal(scheduleGenerator.getPeriodInterestTillDate(installment, accruedTill)), false);
+        }
     }
 
     // IncomePosting
