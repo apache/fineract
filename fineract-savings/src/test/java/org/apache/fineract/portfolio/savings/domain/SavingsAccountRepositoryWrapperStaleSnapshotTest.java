@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.savings.domain;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -57,6 +59,35 @@ class SavingsAccountRepositoryWrapperStaleSnapshotTest {
         when(repository.findVersionsById(List.of(3L, 9L))).thenReturn(List.of(new Object[] { 3L, 1 }, new Object[] { 9L, 4 }));
 
         assertThatCode(() -> underTest.lockInIdOrder(9L, 3L)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void anAccountMissingFromTheSnapshotFailsTheLock() {
+        // account 9 was committed after this transaction took its snapshot, so the plain read does not see it
+        final List<SavingsAccount> lockedAccounts = List.of(account(3L, 1), account(9L, 1));
+        when(repository.findAllLockedOrderedById(List.of(3L, 9L))).thenReturn(lockedAccounts);
+        when(repository.findVersionsById(List.of(3L, 9L))).thenReturn(List.<Object[]>of(new Object[] { 3L, 1 }));
+
+        assertThatThrownBy(() -> underTest.lockInIdOrder(3L, 9L)).isInstanceOf(ObjectOptimisticLockingFailureException.class)
+                .hasMessageContaining("[9]");
+    }
+
+    @Test
+    void theSameAccountTwiceIsLockedOnce() {
+        final List<SavingsAccount> lockedAccounts = List.of(account(3L, 1));
+        when(repository.findAllLockedOrderedById(List.of(3L))).thenReturn(lockedAccounts);
+        when(repository.findVersionsById(List.of(3L))).thenReturn(List.<Object[]>of(new Object[] { 3L, 1 }));
+
+        assertThatCode(() -> underTest.lockInIdOrder(3L, null, 3L)).doesNotThrowAnyException();
+        verify(repository).findAllLockedOrderedById(List.of(3L));
+    }
+
+    @Test
+    void noAccountIdsLockNothing() {
+        underTest.lockInIdOrder();
+        underTest.lockInIdOrder((Long) null);
+
+        verifyNoInteractions(repository);
     }
 
     private static SavingsAccount account(final Long id, final int version) {
