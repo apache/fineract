@@ -22,54 +22,35 @@ import java.time.Duration;
 import org.springframework.core.retry.RetryPolicy;
 
 /**
- * Builds the retry policy of a fault-tolerant chunk-oriented step out of a configured retry limit, preserving the
- * meaning that limit had under Spring Batch 5.
+ * Builds the retry policy of the fault-tolerant COB worker steps.
  * <p>
- * {@code ChunkOrientedStepBuilder.retryLimit(n)} is deliberately not used for this. It forwards to
- * {@code RetryPolicy.Builder#maxRetries(long)}, which differs from Batch 5's {@code SimpleRetryPolicy(n)} twice over:
- * <ul>
- * <li>{@code maxRetries} counts retries <em>after</em> the initial attempt ({@code total attempts = 1 + maxRetries}),
- * whereas {@code SimpleRetryPolicy(n)} meant {@code n} attempts in total - so routing the configured value straight
- * through would grant every item one extra attempt.</li>
- * <li>{@code RetryPolicy.Builder#build()} installs a default back-off when none is given: an {@code ExponentialBackOff}
- * with a 1000 ms initial interval and a multiplier of 1, i.e. a one second pause before every retry. Batch 5's
- * {@code RetryTemplate} defaulted to {@code NoBackOffPolicy} and retried immediately, so the default would silently add
- * up to {@code (limit - 1) * 1s} of sleeping to each failing item - on LOAN_COB, up to {@code skipLimit} times per
- * partition.</li>
- * </ul>
- * Both are corrected here, so {@code fineract.partitioned-job.partitioned-job-properties[*].retry-limit} keeps meaning
- * "maximum number of attempts per item" and retries stay immediate.
+ * They do not retry, and must not. Spring Batch 5 retried statefully: a failed item rethrew, the chunk transaction
+ * rolled back, and the next attempt ran in a new transaction against freshly read state. Spring Batch 6's
+ * {@code ChunkOrientedStep} retries inside the transaction the item failed in. A COB failure has by then marked that
+ * transaction rollback-only - through the participating {@code @Transactional} of {@code COBBusinessStepService.run},
+ * or through EclipseLink on a failed flush - so a retry either fails again, or appears to succeed: no error reaches
+ * Batch, scan mode never starts, and the chunk is silently rolled back at its end while being recorded as committed,
+ * leaving its accounts locked with no error.
+ * <p>
+ * Recovery comes from scan mode instead, which writes each item of a failed chunk again in a transaction of its own:
+ * that is the one meaningful retry, and it is built in. An account that fails there stays locked with its error until
+ * the next COB, catch-up or inline COB run.
+ * <p>
+ * {@code ChunkOrientedStepBuilder.retryLimit(n)} is not used: it forwards to
+ * {@code RetryPolicy.Builder#maxRetries(long)}, whose default back-off would also pause one second before every retry.
  */
 public final class StepRetryPolicyFactory {
 
     private StepRetryPolicyFactory() {}
 
     /**
-     * @param maxAttempts
-     *            total number of attempts per item, the initial one included; values below 1 are treated as 1
-     * @param retryableException
-     *            exception type (and its subtypes and nested causes) that should be retried
-     * @return a policy that retries immediately until {@code maxAttempts} attempts have been made
-     */
-    public static RetryPolicy immediateRetryPolicy(int maxAttempts, Class<? extends Throwable> retryableException) {
-        return RetryPolicy.builder() //
-                .includes(retryableException) //
-                .maxRetries(Math.max(maxAttempts - 1, 0)) //
-                .delay(Duration.ZERO) //
-                .build();
-    }
-
-    /**
-     * A policy that makes exactly one attempt per item.
-     * <p>
-     * For steps whose items fail in a way that dooms the chunk transaction. Batch 6 retries an item inside the
-     * transaction it failed in, so once that transaction is marked rollback-only - as any exception leaving a
-     * participating {@code @Transactional}, or a failed JPA flush, marks it - every further attempt runs against it in
-     * vain. Recovery then comes from scan mode alone, which writes each item again in a transaction of its own.
-     *
-     * @return a policy that never retries
+     * @return a policy that makes exactly one attempt per item and never retries
      */
     public static RetryPolicy noRetryPolicy() {
-        return immediateRetryPolicy(1, Throwable.class);
+        return RetryPolicy.builder() //
+                .includes(Throwable.class) //
+                .maxRetries(0) //
+                .delay(Duration.ZERO) //
+                .build();
     }
 }
