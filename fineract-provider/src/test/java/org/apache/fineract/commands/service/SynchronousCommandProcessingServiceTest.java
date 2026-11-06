@@ -154,8 +154,7 @@ public class SynchronousCommandProcessingServiceTest {
 
                     CommandProcessingResult result = handler.processCommand(command);
                     resultUpdater.accept(commandSource, result);
-                    CommandSource savedCommandSource = commandSourceService.saveResult(commandSource);
-                    return new CommandSourceService.CommandExecutionResult(result, savedCommandSource);
+                    return new CommandSourceService.CommandExecutionResult(result, commandSource);
                 });
     }
 
@@ -199,16 +198,14 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
-        assertEquals(CommandProcessingResultType.PROCESSED.getValue(), commandSource.getStatus());
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         assertEquals(commandProcessingResult, actualCommandProcessingResult);
         verify(commandSourceService, never()).generateErrorInfo(any());
-        verify(commandSourceService).saveResult(commandSource);
     }
 
     /**
@@ -258,7 +255,6 @@ public class SynchronousCommandProcessingServiceTest {
                 () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
 
         verify(commandSource, times(3)).getStatus();
-        assertEquals(CommandProcessingResultType.UNDER_PROCESSING.getValue(), commandSource.getStatus());
         verify(commandSourceService, times(0)).generateErrorInfo(any());
         verify(commandSourceService, times(0)).saveResult(commandSource);
     }
@@ -299,7 +295,6 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.UNDER_PROCESSING.getValue()) //
                 .thenReturn(CommandProcessingResultType.UNDER_PROCESSING.getValue()) //
                 // Is it possible???
@@ -314,7 +309,7 @@ public class SynchronousCommandProcessingServiceTest {
 
         verify(commandSource, times(3)).getStatus();
         verify(commandSourceService, times(0)).generateErrorInfo(any());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         assertEquals(actualCommandProcessingResult, commandProcessingResult);
     }
 
@@ -358,7 +353,6 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
 
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
@@ -378,9 +372,8 @@ public class SynchronousCommandProcessingServiceTest {
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
         verify(commandSource, times(2)).getStatus();
-        assertEquals(CommandProcessingResultType.UNDER_PROCESSING.getValue(), commandSource.getStatus());
         verify(commandSourceService, never()).generateErrorInfo(any());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         assertEquals(actualCommandProcessingResult, commandProcessingResult);
     }
 
@@ -408,15 +401,13 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
         verify(commandSourceService).getCommandSource(commandId);
-        assertEquals(CommandProcessingResultType.PROCESSED.getValue(), commandSource.getStatus());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
 
         assertEquals(commandProcessingResult, actualCommandProcessingResult);
     }
@@ -424,8 +415,9 @@ public class SynchronousCommandProcessingServiceTest {
     @Test
     public void testExecuteCommandFails() {
         CommandWrapper commandWrapper = getCommandWrapper();
+        long commandId = 1L;
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
-        Long commandId = jsonCommand.commandId();
+        when(jsonCommand.commandId()).thenReturn(commandId);
 
         NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
         CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
@@ -584,7 +576,6 @@ public class SynchronousCommandProcessingServiceTest {
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idempotencyKey)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
 
         // When fetching the command source after failure, return the same mock
         when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
@@ -599,7 +590,7 @@ public class SynchronousCommandProcessingServiceTest {
         verify(commandSourceService, times(2)).processCommandAndSaveResult(any(NewCommandSourceHandler.class), any(JsonCommand.class),
                 any(CommandSource.class), any(AppUser.class), Mockito.anyBoolean(),
                 Mockito.<BiConsumer<CommandSource, CommandProcessingResult>>any());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         verify(commandSourceService, never()).generateErrorInfo(any());
 
         assertEquals(commandProcessingResult, result);

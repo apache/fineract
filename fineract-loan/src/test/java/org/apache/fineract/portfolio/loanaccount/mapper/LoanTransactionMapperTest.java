@@ -80,6 +80,8 @@ public class LoanTransactionMapperTest {
         LocalDate transactionDate = LocalDate.now(ZoneId.of("UTC"));
 
         // Setup transaction mocks
+        ExternalId loanExternalId = ExternalId.generate();
+        when(loan.getExternalId()).thenReturn(loanExternalId);
         when(loanTransaction.getId()).thenReturn(1L);
         when(loanTransaction.getTypeOf()).thenReturn(LoanTransactionType.REPAYMENT);
         when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
@@ -93,7 +95,7 @@ public class LoanTransactionMapperTest {
         when(loanTransaction.getExternalId()).thenReturn(ExternalId.generate());
         when(loanTransaction.isManuallyAdjustedOrReversed()).thenReturn(false);
         when(loanTransaction.getOffice()).thenReturn(Office.headOffice("Test Office", LocalDate.of(2022, 2, 12), null));
-        when(loanTransaction.getLoan().getNetDisbursalAmount()).thenReturn(BigDecimal.valueOf(2000));
+        when(loan.getNetDisbursalAmount()).thenReturn(BigDecimal.valueOf(2000));
 
         // Setup payment detail mocks
         when(paymentDetail.toData()).thenReturn(new PaymentDetailData(1L, PaymentTypeData.builder().id(1L).name("Cash").build(),
@@ -118,7 +120,7 @@ public class LoanTransactionMapperTest {
         assertNull(result.getOfficeId());
         assertEquals("Test Office", result.getOfficeName());
         assertEquals(1L, result.getLoanId());
-        assertEquals(loan.getExternalId(), result.getExternalLoanId());
+        assertEquals(loanExternalId, result.getExternalLoanId());
         assertEquals(BigDecimal.valueOf(2000), result.getNetDisbursalAmount());
         assertNotNull(result.getCurrency());
 

@@ -89,8 +89,9 @@ public class CheckDueInstallmentsBusinessStepTest {
     public void testInstallmentDueDateIsNotMatchingWithCurrentBusinessDate() {
         // given
         Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(Mockito.mock(LoanRepaymentScheduleInstallment.class)));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).getDueDate()).thenReturn(LocalDate.parse("2024-01-17"));
+        LoanRepaymentScheduleInstallment installment = Mockito.mock(LoanRepaymentScheduleInstallment.class);
+        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(installment));
+        Mockito.when(installment.getDueDate()).thenReturn(LocalDate.parse("2024-01-17"));
 
         // when
         underTest.execute(loan);
@@ -103,9 +104,10 @@ public class CheckDueInstallmentsBusinessStepTest {
     public void testSingleInstallmentDueDateIsMatchingWithCurrentBusinessDateAndNotFullyPayed() {
         // given
         Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(Mockito.mock(LoanRepaymentScheduleInstallment.class)));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).isNotFullyPaidOff()).thenReturn(true);
+        LoanRepaymentScheduleInstallment installment = Mockito.mock(LoanRepaymentScheduleInstallment.class);
+        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(installment));
+        Mockito.when(installment.getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
+        Mockito.when(installment.isNotFullyPaidOff()).thenReturn(true);
 
         // when
         underTest.execute(loan);
@@ -122,9 +124,10 @@ public class CheckDueInstallmentsBusinessStepTest {
     public void testSingleInstallmentDueDateIsMatchingWithCurrentBusinessDateAndFullyPayed() {
         // given
         Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(Mockito.mock(LoanRepaymentScheduleInstallment.class)));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).isNotFullyPaidOff()).thenReturn(false);
+        LoanRepaymentScheduleInstallment installment = Mockito.mock(LoanRepaymentScheduleInstallment.class);
+        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(installment));
+        Mockito.when(installment.getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
+        Mockito.when(installment.isNotFullyPaidOff()).thenReturn(false);
 
         // when
         underTest.execute(loan);
@@ -137,15 +140,16 @@ public class CheckDueInstallmentsBusinessStepTest {
     public void testMultipleInstallmentDueDateIsMatchingWithCurrentBusinessDateAndNotFullyPayedButSingleEventIsGenerated() {
         // given
         Loan loan = Mockito.mock(Loan.class);
-        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(
-                List.of(Mockito.mock(LoanRepaymentScheduleInstallment.class), Mockito.mock(LoanRepaymentScheduleInstallment.class)));
+        LoanRepaymentScheduleInstallment downPayment = Mockito.mock(LoanRepaymentScheduleInstallment.class);
+        LoanRepaymentScheduleInstallment installment = Mockito.mock(LoanRepaymentScheduleInstallment.class);
+        Mockito.when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(downPayment, installment));
         // first one is a down payment installment
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(0).isNotFullyPaidOff()).thenReturn(true);
-        Mockito.lenient().when(loan.getRepaymentScheduleInstallments().get(0).isDownPayment()).thenReturn(true);
+        Mockito.when(downPayment.getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
+        Mockito.when(downPayment.isNotFullyPaidOff()).thenReturn(true);
+        Mockito.lenient().when(downPayment.isDownPayment()).thenReturn(true);
         // this one is a real installment
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(1).getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
-        Mockito.when(loan.getRepaymentScheduleInstallments().get(1).isNotFullyPaidOff()).thenReturn(true);
+        Mockito.when(installment.getDueDate()).thenReturn(LocalDate.parse("2024-01-16"));
+        Mockito.when(installment.isNotFullyPaidOff()).thenReturn(true);
 
         // when
         underTest.execute(loan);

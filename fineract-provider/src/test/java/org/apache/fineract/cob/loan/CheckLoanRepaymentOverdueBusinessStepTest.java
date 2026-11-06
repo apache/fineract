@@ -114,7 +114,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
@@ -141,7 +141,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
                         BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         // when
@@ -169,7 +169,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallmentPaidOff);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
@@ -199,7 +199,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         // product configuration overrides global configuration
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(1);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
@@ -219,7 +219,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         when(loanForProcessing.getStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
         // then - No Business Event raised
@@ -243,7 +243,7 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(1);
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         // when

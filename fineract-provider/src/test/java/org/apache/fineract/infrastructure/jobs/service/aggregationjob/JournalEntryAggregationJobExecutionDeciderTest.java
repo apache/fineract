@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.service.aggregationjob;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -60,15 +61,14 @@ public class JournalEntryAggregationJobExecutionDeciderTest {
     @BeforeEach
     public void setUp() {
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
-        when(jobExecution.getExecutionContext().get(JournalEntryAggregationJobConstant.AGGREGATED_ON_DATE)).thenReturn(aggregatedOnDate);
+        when(executionContext.get(JournalEntryAggregationJobConstant.AGGREGATED_ON_DATE)).thenReturn(aggregatedOnDate);
     }
 
     @Test
     public void testDecideContinueExecution() {
         // Arrange
         LocalDate lastAggregatedOnDate = aggregatedOnDate.minusDays(1);
-        when(jobExecution.getExecutionContext().get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE))
-                .thenReturn(lastAggregatedOnDate);
+        when(executionContext.get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE)).thenReturn(lastAggregatedOnDate);
 
         // Act
         FlowExecutionStatus status = decider.decide(jobExecution, stepExecution);
@@ -82,9 +82,8 @@ public class JournalEntryAggregationJobExecutionDeciderTest {
     @MethodSource("provideNoOpExecutionScenarios")
     public void testDecideNoOpExecution(LocalDate lastAggregatedOnDate, String scenarioDescription) {
         // Arrange
-        when(jobExecution.getExecutionContext().get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE))
+        when(executionContext.get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE))
                 .thenReturn(lastAggregatedOnDate);
-        when(jobExecution.getExitStatus()).thenReturn(ExitStatus.NOOP);
 
         // Act
         FlowExecutionStatus status = decider.decide(jobExecution, stepExecution);
@@ -92,8 +91,7 @@ public class JournalEntryAggregationJobExecutionDeciderTest {
         // Assert
         assertEquals(JournalEntryAggregationJobConstant.NO_OP_EXECUTION, status.getName(),
                 "Should perform no-op execution when " + scenarioDescription);
-        assertEquals(ExitStatus.NOOP, jobExecution.getExitStatus(),
-                "Exit status should remain NOOP for scenario: " + scenarioDescription);
+        verify(jobExecution).setExitStatus(ExitStatus.NOOP);
     }
 
     private static Stream<Arguments> provideNoOpExecutionScenarios() {
@@ -105,7 +103,7 @@ public class JournalEntryAggregationJobExecutionDeciderTest {
     @Test
     public void testDecideFirstTimeExecution() {
         // Arrange
-        when(jobExecution.getExecutionContext().get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE))
+        when(executionContext.get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE))
                 .thenReturn(null);
 
         // Act
@@ -120,8 +118,7 @@ public class JournalEntryAggregationJobExecutionDeciderTest {
     public void testDecideContinueExecutionWithMultipleDaysDifference() {
         // Arrange
         LocalDate lastAggregatedOnDate = aggregatedOnDate.minusDays(5);
-        when(jobExecution.getExecutionContext().get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE))
-                .thenReturn(lastAggregatedOnDate);
+        when(executionContext.get(JournalEntryAggregationJobConstant.LAST_AGGREGATED_ON_DATE)).thenReturn(lastAggregatedOnDate);
 
         // Act
         FlowExecutionStatus status = decider.decide(jobExecution, stepExecution);

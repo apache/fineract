@@ -108,7 +108,7 @@ public class DatatableReadServiceImplTest {
         when(sqlGenerator.alias(anyString(), nullable(String.class))).thenReturn("\"cf1\"");
         when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
         when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
-        DatabaseType dialect = databaseTypeResolver.databaseType();
+        DatabaseType dialect = DatabaseType.POSTGRESQL;
 
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, emptyList(), null, false,
                 false, dialect);
@@ -146,7 +146,7 @@ public class DatatableReadServiceImplTest {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
         when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
 
-        DatabaseType dialect = databaseTypeResolver.databaseType();
+        DatabaseType dialect = DatabaseType.POSTGRESQL;
         ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", columnType, 10L, false, false, emptyList(), null, false,
                 false, dialect);
         ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, emptyList(), null, false,
