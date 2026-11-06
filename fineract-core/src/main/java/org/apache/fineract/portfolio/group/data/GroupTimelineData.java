@@ -21,12 +21,14 @@ package org.apache.fineract.portfolio.group.data;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.Getter;
 
 /**
  * Immutable data object represent the important time-line events of a group/center.
  *
  */
 @SuppressWarnings("unused")
+@Getter
 public class GroupTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;

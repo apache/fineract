@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.util.Collection;
+import lombok.Getter;
 
 /**
  * Immutable data object for groups with clients due for disbursement or collection.
  */
+@Getter
 public final class JLGGroupData {
 
     private final Long groupId;

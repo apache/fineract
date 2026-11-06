@@ -42,9 +42,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +55,6 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -65,10 +62,8 @@ import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
@@ -81,11 +76,9 @@ import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPl
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
-import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
-import org.apache.fineract.portfolio.group.data.StaffCenterData;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadService;
@@ -101,10 +94,6 @@ public class CentersApiResource {
 
     private final PlatformSecurityContext context;
     private final CenterReadPlatformService centerReadPlatformService;
-    private final ToApiJsonSerializer<CenterData> centerApiJsonSerializer;
-    private final ToApiJsonSerializer<Object> toApiJsonSerializer;
-    private final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
@@ -117,6 +106,7 @@ public class CentersApiResource {
     private final SqlValidator sqlValidator;
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Center Template", operationId = "retrieveTemplateCenter", description = """
@@ -134,30 +124,25 @@ public class CentersApiResource {
     @AlternativeOperationId("retrieveTemplate_6")
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersTemplateResponse.class)))
-    public String retrieveTemplate(@Context final UriInfo uriInfo,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+    public CenterData retrieveTemplate(@QueryParam("command") @Parameter(description = "command") final String commandParam,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
         if (is(commandParam, "close")) {
-            final CenterData centerClosureTemplate = this.centerReadPlatformService.retrieveCenterWithClosureReasons();
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.centerApiJsonSerializer.serialize(settings, centerClosureTemplate,
-                    GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+            return this.centerReadPlatformService.retrieveCenterWithClosureReasons();
         }
 
         final CenterData template = this.centerReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService.retrieveTemplates(StatusEnum.CREATE.getValue(),
                 EntityTables.GROUP.getName(), null);
         template.setDatatables(datatableTemplates);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.centerApiJsonSerializer.serialize(settings, template, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+        return template;
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Centers", operationId = "retrieveAllCenters", description = """
             The default implementation supports pagination and sorting with the default pagination size set to 200 records. The parameter limit with description -1 will return all entries.
@@ -182,8 +167,7 @@ public class CentersApiResource {
     @AlternativeOperationId("retrieveAll_23")
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersResponse.class)))
-    public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
+    public Object retrieveAll(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("name") @Parameter(description = "name") final String name,
@@ -198,13 +182,9 @@ public class CentersApiResource {
             @QueryParam("locale") @Parameter(description = "locale") final String locale) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (meetingDateParam != null && officeId != null) {
             LocalDate meetingDate = meetingDateParam.getDate("meetingDate", new DateFormat(dateFormat), locale);
-            Collection<StaffCenterData> staffCenterDataArray = this.centerReadPlatformService.retriveAllCentersByMeetingDate(officeId,
-                    meetingDate, staffId);
-            return this.toApiJsonSerializer.serialize(settings, staffCenterDataArray,
-                    GroupingTypesApiConstants.STAFF_CENTER_RESPONSE_DATA_PARAMETERS);
+            return this.centerReadPlatformService.retriveAllCentersByMeetingDate(officeId, meetingDate, staffId);
         }
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
@@ -215,15 +195,13 @@ public class CentersApiResource {
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
                 .name(name).hierarchy(hierarchy).offset(offset).orderBy(orderBy).sortOrder(sortOrder).staffId(staffId).build();
         if (parameters.isPaged()) {
-            final Page<CenterData> centers = this.centerReadPlatformService.retrievePagedAll(searchParameters, parameters);
-            return this.toApiJsonSerializer.serialize(settings, centers, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+            return this.centerReadPlatformService.retrievePagedAll(searchParameters, parameters);
         }
-
-        final Collection<CenterData> centers = this.centerReadPlatformService.retrieveAll(searchParameters, parameters);
-        return this.toApiJsonSerializer.serialize(settings, centers, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+        return this.centerReadPlatformService.retrieveAll(searchParameters, parameters);
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("{centerId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Center", operationId = "retrieveOneCenter", description = """
@@ -241,7 +219,7 @@ public class CentersApiResource {
     @AlternativeOperationId("retrieveOne_14")
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersCenterIdResponse.class)))
-    public String retrieveOne(@Context final UriInfo uriInfo,
+    public CenterData retrieveOne(@Context final UriInfo uriInfo,
             @PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
@@ -284,8 +262,7 @@ public class CentersApiResource {
             center = CenterData.withAssociations(center, groups, collectionMeetingCalendar);
         }
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.centerApiJsonSerializer.serialize(settings, center, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+        return center;
     }
 
     @POST
@@ -301,14 +278,13 @@ public class CentersApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersRequest.class)))
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCenter() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
     }
 
@@ -321,15 +297,14 @@ public class CentersApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PutCentersCenterIdRequest.class)))
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PutCentersCenterIdResponse.class)))
-    public String update(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
+    public CommandProcessingResult update(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateCenter(centerId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -338,16 +313,16 @@ public class CentersApiResource {
     @Operation(summary = "Delete a Center", operationId = "deleteCenter", description = "A Center can be deleted if it is in pending state and has no association - groups, loans or savings")
     @AlternativeOperationId("delete_10")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.DeleteCentersCenterIdResponse.class)))
-    public String delete(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId) {
+    public CommandProcessingResult delete(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteCenter(centerId) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @POST
+    @JsonLocalDateArrayFormat
     @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -381,40 +356,31 @@ public class CentersApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersCenterIdRequest.class)))
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.PostCentersCenterIdResponse.class)))
-    public String activate(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
+    public Object activate(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-        CommandProcessingResult result = null;
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.activateCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "generateCollectionSheet")) {
             final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
-            final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateCenterCollectionSheet(centerId,
-                    query);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
+            return this.collectionSheetReadPlatformService.generateCenterCollectionSheet(centerId, query);
         } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveCenterCollectionSheet(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "associateGroups")) {
             final CommandWrapper commandRequest = builder.associateGroupsToCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "disassociateGroups")) {
             final CommandWrapper commandRequest = builder.disassociateGroupsFromCenter(centerId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
                     "saveCollectionSheet", "close", "associateGroups", "disassociateGroups" });
@@ -427,6 +393,7 @@ public class CentersApiResource {
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("{centerId}/accounts")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Center accounts overview", operationId = "retrieveGroupAccountsCenter", description = """
@@ -443,18 +410,12 @@ public class CentersApiResource {
             centers/9/accounts""")
     @AlternativeOperationId("retrieveGroupAccount")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CentersApiResourceSwagger.GetCentersCenterIdAccountsResponse.class)))
-    public String retrieveGroupAccount(@PathParam("centerId") @Parameter(description = "centerId") final Long centerId,
-            @Context final UriInfo uriInfo) {
+    public AccountSummaryCollectionData retrieveGroupAccount(
+            @PathParam("centerId") @Parameter(description = "centerId") final Long centerId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
-        final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(centerId);
-
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
-                Arrays.asList("loanAccounts", "savingsAccounts", "memberLoanAccounts", "memberSavingsAccounts"));
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
+        return this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(centerId);
     }
 
     @GET
@@ -474,11 +435,11 @@ public class CentersApiResource {
     @AlternativeOperationId("postCentersTemplate")
     @RequestBody(description = "Upload centers template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String postCentersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(mediaType = "*/*", schema = @Schema(type = "string")))
+    public Long postCentersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.CENTERS.toString(),
-                uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.CENTERS.toString(), uploadedInputStream, fileDetail, locale,
+                dateFormat);
     }
 }

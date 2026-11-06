@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
@@ -28,6 +29,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 
 @SuppressWarnings("unused")
+@Getter
 public class SavingsSummaryCustom {
 
     private final Long id;

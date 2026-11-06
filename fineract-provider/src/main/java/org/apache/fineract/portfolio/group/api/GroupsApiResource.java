@@ -46,7 +46,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -59,16 +58,13 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
@@ -84,7 +80,6 @@ import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformServic
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
-import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
@@ -114,12 +109,6 @@ public class GroupsApiResource {
     private final GroupReadPlatformService groupReadPlatformService;
     private final CenterReadPlatformService centerReadPlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
-    private final ToApiJsonSerializer<Object> toApiJsonSerializer;
-    private final ToApiJsonSerializer<GroupGeneralData> groupGeneralApiJsonSerializer;
-    private final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
-    private final ToApiJsonSerializer<GLIMContainer> glimContainerToApiJsonSerializer;
-    private final ToApiJsonSerializer<GSIMContainer> gsimContainerToApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
@@ -135,6 +124,7 @@ public class GroupsApiResource {
     private final SqlValidator sqlValidator;
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Group Template", operationId = "retrieveTemplateGroup", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n\n"
@@ -143,8 +133,7 @@ public class GroupsApiResource {
             + "groups/template?centerId=1&staffInSelectedOfficeOnly=true")
     @AlternativeOperationId("retrieveTemplate_7")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsTemplateResponse.class)))
-    public String retrieveTemplate(@Context final UriInfo uriInfo,
-            @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
+    public GroupGeneralData retrieveTemplate(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("center") @Parameter(description = "center") final boolean isCenterGroup,
             @QueryParam("centerId") @Parameter(description = "centerId") final Long centerId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
@@ -153,10 +142,7 @@ public class GroupsApiResource {
         context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
         if (is(commandParam, "close")) {
-            final GroupGeneralData groupClosureTemplate = groupReadPlatformService.retrieveGroupWithClosureReasons();
-            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return groupGeneralApiJsonSerializer.serialize(settings, groupClosureTemplate,
-                    GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+            return groupReadPlatformService.retrieveGroupWithClosureReasons();
         }
 
         final List<DatatableData> datatableTemplates = entityDatatableChecksReadService.retrieveTemplates(StatusEnum.CREATE.getValue(),
@@ -164,28 +150,24 @@ public class GroupsApiResource {
         if (centerId != null) {
             final GroupGeneralData centerGroupTemplate = centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
             centerGroupTemplate.setDatatables(datatableTemplates);
-            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return groupGeneralApiJsonSerializer.serialize(settings, centerGroupTemplate,
-                    GroupingTypesApiConstants.CENTER_GROUP_RESPONSE_DATA_PARAMETERS);
+            return centerGroupTemplate;
         }
 
         final GroupGeneralData groupTemplate = groupReadPlatformService.retrieveTemplate(officeId, isCenterGroup,
                 staffInSelectedOfficeOnly);
         groupTemplate.setDatatables(datatableTemplates);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return groupGeneralApiJsonSerializer.serialize(settings, groupTemplate, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        return groupTemplate;
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Groups", operationId = "retrieveAllGroups", description = "The default implementation of listing Groups returns 200 entries with support for pagination and sorting. Using the parameter limit with description -1 returns all entries.\n\n"
             + "Example Requests:\n\n" + "\n\n" + "groups\n\n" + "\n\n" + "groups?fields=name,officeName,joinedDate\n\n" + "\n\n"
             + "groups?offset=10&limit=50\n\n" + "\n\n" + "groups?orderBy=name&sortOrder=DESC")
     @AlternativeOperationId("retrieveAll_24")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsResponse.class)))
-    public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
+    public Object retrieveAll(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("name") @Parameter(description = "name") final String name,
@@ -204,28 +186,26 @@ public class GroupsApiResource {
         sqlValidator.validate(hierarchy);
         final PaginationParameters parameters = PaginationParameters.builder().paged(Boolean.TRUE.equals(paged)).limit(limit).offset(offset)
                 .orderBy(orderBy).sortOrder(sortOrder).build();
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
                 .name(name).hierarchy(hierarchy).offset(offset).orderBy(orderBy).sortOrder(sortOrder).staffId(staffId)
                 .orphansOnly(orphansOnly).build();
         if (parameters.isPaged()) {
-            final Page<GroupGeneralData> groups = groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
-            return toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+            return groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
         }
-
-        final Collection<GroupGeneralData> groups = groupReadPlatformService.retrieveAll(searchParameters, parameters);
-        return toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        return groupReadPlatformService.retrieveAll(searchParameters, parameters);
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("{groupId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Group", operationId = "retrieveOneGroup", description = "Retrieve group information.\n\n"
             + "Example Requests:\n\n" + "\n\n" + "groups/1\n\n" + "\n\n" + "groups/1?associations=clientMembers")
     @AlternativeOperationId("retrieveOne_15")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdResponse.class)))
-    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
+    public GroupGeneralData retrieveOne(@Context final UriInfo uriInfo,
+            @PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @QueryParam("roleId") @Parameter(description = "roleId") final Long roleId) {
 
@@ -233,7 +213,6 @@ public class GroupsApiResource {
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
         GroupGeneralData group = groupReadPlatformService.retrieveOne(groupId);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         // associations
         Collection<ClientData> membersOfGroup = null;
@@ -316,7 +295,7 @@ public class GroupsApiResource {
             group = GroupGeneralData.withTemplate(templateGroup, group);
         }
 
-        return groupGeneralApiJsonSerializer.serialize(settings, group, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        return group;
     }
 
     @POST
@@ -328,14 +307,13 @@ public class GroupsApiResource {
     @AlternativeOperationId("create_8")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createGroup() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @POST
@@ -347,15 +325,14 @@ public class GroupsApiResource {
     @AlternativeOperationId("unassignLoanOfficer")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class)))
-    public String unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
+    public CommandProcessingResult unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .unassignGroupStaff(groupId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
     }
 
@@ -367,15 +344,14 @@ public class GroupsApiResource {
     @AlternativeOperationId("update_13")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdResponse.class)))
-    public String update(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
+    public CommandProcessingResult update(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateGroup(groupId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -384,16 +360,16 @@ public class GroupsApiResource {
     @Operation(summary = "Delete a Group", operationId = "deleteGroup", description = "A group can be deleted if it is in pending state and has no associations - clients, loans or savings")
     @AlternativeOperationId("delete_11")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.DeleteGroupsGroupIdResponse.class)))
-    public String delete(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId) {
+    public CommandProcessingResult delete(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteGroup(groupId) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @POST
+    @JsonLocalDateArrayFormat
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -431,63 +407,49 @@ public class GroupsApiResource {
     @AlternativeOperationId("activateOrGenerateCollectionSheet")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdResponse.class)))
-    public String activateOrGenerateCollectionSheet(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
+    public Object activateOrGenerateCollectionSheet(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @QueryParam("roleId") @Parameter(description = "roleId") final Long roleId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-        CommandProcessingResult result = null;
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.activateGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "associateClients")) {
             final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "disassociateClients")) {
             final CommandWrapper commandRequest = builder.disassociateClientsFromGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "generateCollectionSheet")) {
             final JsonElement parsedQuery = fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, fromJsonHelper);
-            final JLGCollectionSheetData collectionSheet = collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId, query);
-            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
+            return collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId, query);
         } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveGroupCollectionSheet(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "unassignStaff")) {
             final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "assignStaff")) {
             final CommandWrapper commandRequest = builder.assignGroupStaff(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "assignRole")) {
             final CommandWrapper commandRequest = builder.assignRole(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "unassignRole")) {
             final CommandWrapper commandRequest = builder.unassignRole(groupId, roleId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "updateRole")) {
             final CommandWrapper commandRequest = builder.updateRole(groupId, roleId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "transferClients")) {
             final CommandWrapper commandRequest = builder.transferClientsBetweenGroups(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
                     "saveCollectionSheet", "unassignStaff", "assignRole", "unassignRole", "updateassignRole" });
@@ -500,6 +462,7 @@ public class GroupsApiResource {
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("{groupId}/accounts")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Group accounts overview", operationId = "retrieveAccountsGroup", description = "Retrieves details of all Loan and Savings accounts associated with this group.\n\n"
@@ -507,18 +470,11 @@ public class GroupsApiResource {
             + "groups/1/accounts?fields=loanAccounts,savingsAccounts,memberLoanAccounts,\n\n" + "memberSavingsAccounts")
     @AlternativeOperationId("retrieveAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdAccountsResponse.class)))
-    public String retrieveAccounts(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
-            @Context final UriInfo uriInfo) {
+    public AccountSummaryCollectionData retrieveAccounts(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId) {
 
         context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final AccountSummaryCollectionData groupAccount = accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
-
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts",
-                "groupLoanIndividualMonitoringAccounts", "savingsAccounts", "memberLoanAccounts", "memberSavingsAccounts"));
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
+        return accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
     }
 
     @GET
@@ -538,21 +494,23 @@ public class GroupsApiResource {
     @AlternativeOperationId("postGroupTemplate")
     @RequestBody(description = "Upload group template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String postGroupTemplate(@FormDataParam("file") InputStream uploadedInputStream,
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(mediaType = "*/*", schema = @Schema(type = "string")))
+    public Long postGroupTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(GlobalEntityType.GROUPS.toString(), uploadedInputStream,
-                fileDetail, locale, dateFormat);
-        return toApiJsonSerializer.serialize(importDocumentId);
+        return bulkImportWorkbookService.importWorkbook(GlobalEntityType.GROUPS.toString(), uploadedInputStream, fileDetail, locale,
+                dateFormat);
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("{groupId}/glimaccounts")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve GLIM Accounts for Group", operationId = "retrieveGlimAccountsGroup")
     @AlternativeOperationId("retrieveglimAccounts")
-    public String retrieveglimAccounts(@PathParam("groupId") final Long groupId,
-            @QueryParam("parentLoanAccountNo") final String parentLoanAccountNo, @Context final UriInfo uriInfo) {
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string")))
+    public List<GLIMContainer> retrieveglimAccounts(@PathParam("groupId") final Long groupId,
+            @QueryParam("parentLoanAccountNo") final String parentLoanAccountNo) {
         context.authenticatedUser().validateHasReadPermission("GROUP");
         List<GLIMContainer> glimContainer = Collections.emptyList();
         if (parentLoanAccountNo == null) {
@@ -562,23 +520,19 @@ public class GroupsApiResource {
                     parentLoanAccountNo);
         }
 
-        final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
-                Arrays.asList("groupId", "accountNumber", "childGLIMAccounts", "memberLoanAccounts", "parentPrincipalAmount"));
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return glimContainerToApiJsonSerializer.serialize(settings, glimContainer, GLIM_ACCOUNTS_DATA_PARAMETERS);
+        return glimContainer;
 
     }
 
     @GET
+    @JsonLocalDateArrayFormat
     @Path("{groupId}/gsimaccounts")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve GSIM Accounts for Group", operationId = "retrieveGsimAccountsGroup")
     @AlternativeOperationId("retrieveGsimAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdGsimAccountsResponse.class))))
-    public String retrieveGsimAccounts(@PathParam("groupId") final Long groupId,
-            @QueryParam("parentGSIMAccountNo") final String parentGSIMAccountNo, @QueryParam("parentGSIMId") final Long parentGSIMId,
-            @Context final UriInfo uriInfo) {
+    public List<GSIMContainer> retrieveGsimAccounts(@PathParam("groupId") final Long groupId,
+            @QueryParam("parentGSIMAccountNo") final String parentGSIMAccountNo, @QueryParam("parentGSIMId") final Long parentGSIMId) {
         List<GSIMContainer> gsimContainer;
         context.authenticatedUser().validateHasReadPermission("GROUP");
 
@@ -591,11 +545,7 @@ public class GroupsApiResource {
 
         }
 
-        final Set<String> GSIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
-                Arrays.asList("gsimId", "groupId", "accountNumber", "childGSIMAccounts", "parentBalance", "savingsStatus"));
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return gsimContainerToApiJsonSerializer.serialize(settings, gsimContainer, GSIM_ACCOUNTS_DATA_PARAMETERS);
+        return gsimContainer;
 
     }
 
