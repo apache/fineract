@@ -223,10 +223,11 @@ public class LoanChargeBackStepDef extends AbstractStepDef {
                 .setWithdrawTransfer(false).setRejectTransfer(false).setChargePayment(false).setRefund(false).setRefundForActiveLoans(false)
                 .setCreditBalanceRefund(false).setChargeback(true).setInterestPaymentWaiver(false).setChargeAdjustment(false)
                 .setChargeoff(false).setDownPayment(false).setReAge(false).setReAmortize(false).setAccrualActivity(false)
-                .setInterestRefund(false).setAccrualAdjustment(false).setCapitalizedIncome(false).setCapitalizedIncomeAmortization(false)
-                .setCapitalizedIncomeAdjustment(false).setCapitalizedIncomeAmortizationAdjustment(false).setContractTermination(false)
-                .setBuyDownFee(false).setBuyDownFeeAdjustment(false).setBuyDownFeeAmortization(false)
-                .setBuyDownFeeAmortizationAdjustment(false).setLoanWithdrawal(false).build();
+                .setInterestRefund(false).setFeeRefund(false).setAccrualAdjustment(false).setCapitalizedIncome(false)
+                .setCapitalizedIncomeAmortization(false).setCapitalizedIncomeAdjustment(false)
+                .setCapitalizedIncomeAmortizationAdjustment(false).setContractTermination(false).setBuyDownFee(false)
+                .setBuyDownFeeAdjustment(false).setBuyDownFeeAmortization(false).setBuyDownFeeAmortizationAdjustment(false)
+                .setLoanWithdrawal(false).build();
 
         // verify payload for loanId, transactionId, transactionType, amount
         eventAssertion.assertEvent(LoanChargebackTransactionEvent.class, transactionId).extractingData(LoanTransactionDataV1::getLoanId)

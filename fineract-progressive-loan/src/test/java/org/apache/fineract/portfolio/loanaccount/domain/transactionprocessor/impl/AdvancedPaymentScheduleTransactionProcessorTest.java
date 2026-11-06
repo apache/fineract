@@ -111,11 +111,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AdvancedPaymentScheduleTransactionProcessorTest {
 
     private final LocalDate transactionDate = LocalDate.of(2023, 7, 11);
+    private static final LocalDate JAN_15 = LocalDate.of(2026, 1, 15);
     private static final MonetaryCurrency MONETARY_CURRENCY = new MonetaryCurrency("USD", 2, 1);
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
     private AdvancedPaymentScheduleTransactionProcessor underTest;
@@ -1200,6 +1202,138 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // then
         Assertions.assertEquals(originalTransaction, repayment2);
+    }
+
+    @Test
+    public void handleFeeRefundRecalculatesAReplayCopyFromTheRelationOfTheOriginal() {
+        final LoanTransaction feeRefund = feeRefund(feeRefundLoan(), 5L, "10", "600", JAN_15);
+        final LoanTransaction copy = LoanTransaction.copyTransactionProperties(feeRefund);
+        final ProgressiveTransactionCtx ctx = feeRefundCtx();
+        ctx.getChangedTransactionDetail().addTransactionChange(new TransactionChangeData(feeRefund, copy));
+
+        underTest.processLatestTransaction(copy, ctx);
+
+        Assertions.assertEquals(0, new BigDecimal("15").compareTo(copy.getAmount()));
+        Assertions.assertEquals(0, BigDecimal.TEN.compareTo(feeRefund.getAmount()));
+    }
+
+    @Test
+    public void handleFeeRefundRecalculatesANewFeeRefundInPlace() {
+        final LoanTransaction feeRefund = feeRefund(feeRefundLoan(), null, "10", "600", JAN_15);
+
+        underTest.processLatestTransaction(feeRefund, feeRefundCtx());
+
+        Assertions.assertEquals(0, new BigDecimal("15").compareTo(feeRefund.getAmount()));
+    }
+
+    @Test
+    public void handleFeeRefundIsCappedByTheFeeRefundsOfEarlierRefunds() {
+        final Loan loan = feeRefundLoan();
+        loan.getLoanTransactions().add(feeRefund(loan, 6L, "15", "600", LocalDate.of(2026, 1, 10)));
+        final LoanTransaction reversedFeeRefund = feeRefund(loan, 7L, "20", "800", LocalDate.of(2026, 1, 12));
+        reversedFeeRefund.reverse();
+        loan.getLoanTransactions().add(reversedFeeRefund);
+        loan.getLoanTransactions().add(feeRefund(loan, 8L, "20", "800", LocalDate.of(2026, 1, 20)));
+        final LoanTransaction feeRefund = feeRefund(loan, null, "25", "1000", JAN_15);
+
+        underTest.processLatestTransaction(feeRefund, feeRefundCtx());
+
+        Assertions.assertEquals(0, BigDecimal.TEN.compareTo(feeRefund.getAmount()));
+    }
+
+    @Test
+    public void handleFeeRefundDoesNotCountLaterFeeRefundsAlreadyReplayed() {
+        // accelerated maturity replay: a Fee refund is replayed again after the later ones were processed
+        final Loan loan = feeRefundLoan();
+        final LoanTransaction laterFeeRefund = feeRefund(loan, 6L, "20", "800", LocalDate.of(2026, 1, 20));
+        loan.getLoanTransactions().add(laterFeeRefund);
+        final LoanTransaction feeRefund = feeRefund(loan, 5L, "5", "200", JAN_15);
+        loan.getLoanTransactions().add(feeRefund);
+        final LoanTransaction copy = LoanTransaction.copyTransactionProperties(feeRefund);
+        final ProgressiveTransactionCtx ctx = feeRefundCtx();
+        ctx.getChangedTransactionDetail().addTransactionChange(new TransactionChangeData(feeRefund, copy));
+        ctx.getAlreadyProcessedTransactions().add(laterFeeRefund);
+        ctx.getAlreadyProcessedTransactions().add(feeRefund);
+
+        underTest.processLatestTransaction(copy, ctx);
+
+        Assertions.assertTrue(copy.isNotReversed());
+        Assertions.assertEquals(0, new BigDecimal("5").compareTo(copy.getAmount()));
+    }
+
+    @Test
+    public void handleFeeRefundReversesWithoutAllocationWhenNothingIsLeftToRefund() {
+        final Loan loan = feeRefundLoan();
+        loan.getLoanTransactions().add(feeRefund(loan, 6L, "25", "1000", LocalDate.of(2026, 1, 10)));
+        final LoanTransaction feeRefund = feeRefund(loan, null, "10", "400", JAN_15);
+
+        underTest.processLatestTransaction(feeRefund, feeRefundCtx());
+
+        Assertions.assertTrue(feeRefund.isReversed());
+        Mockito.verify(loan, never()).getPaymentAllocationRules();
+    }
+
+    @Test
+    public void handleFeeRefundKeepsTheAmountWithoutARelatedRefund() {
+        final LoanTransaction simulated = LoanTransaction.feeRefund(feeRefundLoan(), BigDecimal.TEN, JAN_15, null);
+
+        underTest.processLatestTransaction(simulated, feeRefundCtx());
+
+        Assertions.assertEquals(0, BigDecimal.TEN.compareTo(simulated.getAmount()));
+    }
+
+    @Test
+    public void handleFeeRefundKeepsTheAmountOfTheLatestTransactionWithoutProgressiveContext() {
+        final LoanTransaction feeRefund = feeRefund(feeRefundLoan(), null, "10", "600", JAN_15);
+
+        underTest.processLatestTransaction(feeRefund, new TransactionCtx(MONETARY_CURRENCY, List.of(), Set.of(),
+                new MoneyHolder(Money.zero(MONETARY_CURRENCY)), null, List.of()));
+
+        Assertions.assertEquals(0, BigDecimal.TEN.compareTo(feeRefund.getAmount()));
+    }
+
+    private static ProgressiveTransactionCtx feeRefundCtx() {
+        return new ProgressiveTransactionCtx(MONETARY_CURRENCY, List.of(), Set.of(), new MoneyHolder(Money.zero(MONETARY_CURRENCY)),
+                new ChangedTransactionDetail(), null, List.of());
+    }
+
+    // 1000 disbursed with a fee of 25; Fee refunds of earlier refunds are added to its transactions
+    private static Loan feeRefundLoan() {
+        final Loan loan = mock(Loan.class);
+        final LoanTransaction disbursement = mock(LoanTransaction.class);
+        lenient().when(disbursement.isNotReversed()).thenReturn(true);
+        lenient().when(disbursement.isDisbursement()).thenReturn(true);
+        lenient().when(disbursement.getTransactionDate()).thenReturn(LocalDate.of(2026, 1, 1));
+        lenient().when(disbursement.getAmount()).thenReturn(BigDecimal.valueOf(1000));
+        final LoanCharge fee = mock(LoanCharge.class);
+        lenient().when(fee.isActive()).thenReturn(true);
+        lenient().when(fee.isDueAtDownPayment()).thenReturn(true);
+        lenient().when(fee.getDueLocalDate()).thenReturn(LocalDate.of(2026, 1, 1));
+        lenient().when(fee.amount()).thenReturn(BigDecimal.valueOf(25));
+        lenient().when(loan.getLoanTransactions()).thenReturn(new ArrayList<>(List.of(disbursement)));
+        lenient().when(loan.getLoanCharges()).thenReturn(Set.of(fee));
+        lenient().when(loan.getCurrency()).thenReturn(MONETARY_CURRENCY);
+        final LoanPaymentAllocationRule allocationRule = mock(LoanPaymentAllocationRule.class);
+        lenient().when(allocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
+        lenient().when(loan.getPaymentAllocationRules()).thenReturn(List.of(allocationRule));
+        final LoanProductRelatedDetail productDetail = mock(LoanProductRelatedDetail.class);
+        lenient().when(productDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
+        lenient().when(loan.getLoanProductRelatedDetail()).thenReturn(productDetail);
+        return loan;
+    }
+
+    // Fee refund on the date of its refund
+    private static LoanTransaction feeRefund(final Loan loan, final Long id, final String amount, final String refundAmount,
+            final LocalDate date) {
+        final LoanTransaction feeRefund = LoanTransaction.feeRefund(loan, new BigDecimal(amount), date, null);
+        ReflectionTestUtils.setField(feeRefund, "id", id);
+        final LoanTransaction refund = mock(LoanTransaction.class);
+        lenient().when(refund.getAmount()).thenReturn(new BigDecimal(refundAmount));
+        lenient().when(refund.getTransactionDate()).thenReturn(date);
+        lenient().when(refund.isNotReversed()).thenReturn(true);
+        feeRefund.getLoanTransactionRelations()
+                .add(LoanTransactionRelation.linkToTransaction(feeRefund, refund, LoanTransactionRelationTypeEnum.RELATED));
+        return feeRefund;
     }
 
     @Test

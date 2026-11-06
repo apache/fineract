@@ -70,6 +70,8 @@ public interface LoanTransactionTypeDTO {
 
     boolean isInterestRefund();
 
+    boolean isFeeRefund();
+
     boolean isMerchantIssuedRefund();
 
     boolean isPayoutRefund();

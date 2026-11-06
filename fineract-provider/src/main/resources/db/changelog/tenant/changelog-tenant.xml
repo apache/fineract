@@ -301,4 +301,6 @@
     <include file="parts/0279_add_disbursement_detail_to_loan_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0280_add_replaced_loan_charge_to_loan_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0281_add_down_payment_fee_override_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0282_add_fee_refund_to_r_enum_value.xml" relativeToChangelogFile="true" />
+    <include file="parts/0283_fee_refund_business_events.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -66,6 +66,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCom
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
@@ -294,6 +295,7 @@ public final class LoanApplicationTerms {
     private LoanScheduleProcessingType loanScheduleProcessingType;
     private boolean enableAccrualActivityPosting;
     private List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes;
+    private List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes;
     private LoanChargeOffBehaviour chargeOffBehaviour;
     private boolean interestRecognitionOnDisbursementDate;
     private DaysInYearCustomStrategyType daysInYearCustomStrategy;
@@ -669,9 +671,9 @@ public final class LoanApplicationTerms {
             final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
+            final boolean interestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final boolean enableBuyDownFee, final LoanBuyDownFeeCalculationType buyDownFeeCalculationType,
             final LoanBuyDownFeeStrategy buyDownFeeStrategy, final LoanBuyDownFeeIncomeType buyDownFeeIncomeType,
@@ -696,10 +698,10 @@ public final class LoanApplicationTerms {
                 fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans, enableDownPayment,
                 disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
-                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, allowFullTermForTranche,
-                monthEndDueDateStrategy);
+                supportedFeeRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy,
+                enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType,
+                enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee,
+                allowFullTermForTranche, monthEndDueDateStrategy);
 
     }
 
@@ -774,14 +776,14 @@ public final class LoanApplicationTerms {
                 isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled, disbursedAmountPercentageForDownPayment,
                 isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType, loanScheduleProcessingType,
                 fixedLength, loanProductRelatedDetail.isEnableAccrualActivityPosting(),
-                loanProductRelatedDetail.getSupportedInterestRefundTypes(), loanProductRelatedDetail.getChargeOffBehaviour(),
-                loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(), loanProductRelatedDetail.getDaysInYearCustomStrategy(),
-                loanProductRelatedDetail.isEnableIncomeCapitalization(), loanProductRelatedDetail.getCapitalizedIncomeCalculationType(),
-                loanProductRelatedDetail.getCapitalizedIncomeStrategy(), loanProductRelatedDetail.getCapitalizedIncomeType(),
-                loanProductRelatedDetail.isEnableBuyDownFee(), loanProductRelatedDetail.getBuyDownFeeCalculationType(),
-                loanProductRelatedDetail.getBuyDownFeeStrategy(), loanProductRelatedDetail.getBuyDownFeeIncomeType(),
-                loanProductRelatedDetail.isMerchantBuyDownFee(), allowFullTermForTranche,
-                loanProductRelatedDetail.getMonthEndDueDateStrategy());
+                loanProductRelatedDetail.getSupportedInterestRefundTypes(), loanProductRelatedDetail.getSupportedFeeRefundTypes(),
+                loanProductRelatedDetail.getChargeOffBehaviour(), loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate(),
+                loanProductRelatedDetail.getDaysInYearCustomStrategy(), loanProductRelatedDetail.isEnableIncomeCapitalization(),
+                loanProductRelatedDetail.getCapitalizedIncomeCalculationType(), loanProductRelatedDetail.getCapitalizedIncomeStrategy(),
+                loanProductRelatedDetail.getCapitalizedIncomeType(), loanProductRelatedDetail.isEnableBuyDownFee(),
+                loanProductRelatedDetail.getBuyDownFeeCalculationType(), loanProductRelatedDetail.getBuyDownFeeStrategy(),
+                loanProductRelatedDetail.getBuyDownFeeIncomeType(), loanProductRelatedDetail.isMerchantBuyDownFee(),
+                allowFullTermForTranche, loanProductRelatedDetail.getMonthEndDueDateStrategy());
     }
 
     private LoanApplicationTerms(final CurrencyData currency, final Integer loanTermFrequency,
@@ -812,7 +814,8 @@ public final class LoanApplicationTerms {
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean isAutoRepaymentForDownPaymentEnabled,
             final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength, boolean enableAccrualActivityPosting,
-            final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
+            final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
+            final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
             final boolean interestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
             final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
@@ -920,6 +923,7 @@ public final class LoanApplicationTerms {
         this.loanScheduleProcessingType = loanScheduleProcessingType;
         this.fixedLength = fixedLength;
         this.supportedInterestRefundTypes = supportedInterestRefundTypes;
+        this.supportedFeeRefundTypes = supportedFeeRefundTypes;
         this.chargeOffBehaviour = chargeOffBehaviour;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
         this.daysInYearCustomStrategy = daysInYearCustomStrategy;
@@ -1811,10 +1815,11 @@ public final class LoanApplicationTerms {
                 this.daysInYearType.getValue(), this.interestRecalculationEnabled, this.isEqualAmortization, this.isDownPaymentEnabled,
                 this.disbursedAmountPercentageForDownPayment, this.isAutoRepaymentForDownPaymentEnabled, this.loanScheduleType,
                 this.loanScheduleProcessingType, this.fixedLength, this.enableAccrualActivityPosting, this.supportedInterestRefundTypes,
-                this.chargeOffBehaviour, this.interestRecognitionOnDisbursementDate, this.daysInYearCustomStrategy,
-                this.enableIncomeCapitalization, this.capitalizedIncomeCalculationType, this.capitalizedIncomeStrategy,
-                this.capitalizedIncomeType, this.installmentAmountInMultiplesOf, this.enableBuyDownFee, this.buyDownFeeCalculationType,
-                this.buyDownFeeStrategy, this.buyDownFeeIncomeType, this.merchantBuyDownFee, this.monthEndDueDateStrategy);
+                this.supportedFeeRefundTypes, this.chargeOffBehaviour, this.interestRecognitionOnDisbursementDate,
+                this.daysInYearCustomStrategy, this.enableIncomeCapitalization, this.capitalizedIncomeCalculationType,
+                this.capitalizedIncomeStrategy, this.capitalizedIncomeType, this.installmentAmountInMultiplesOf, this.enableBuyDownFee,
+                this.buyDownFeeCalculationType, this.buyDownFeeStrategy, this.buyDownFeeIncomeType, this.merchantBuyDownFee,
+                this.monthEndDueDateStrategy);
     }
 
     public ILoanConfigurationDetails toLoanConfigurationDetails() {

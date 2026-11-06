@@ -609,6 +609,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT ->
                 handleRepayment(loanTransaction, ctx);
             case INTEREST_REFUND -> handleInterestRefund(loanTransaction, ctx);
+            case FEE_REFUND -> handleFeeRefund(loanTransaction, ctx);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, ctx);
             case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, ctx);
             case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
@@ -717,6 +718,29 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         }
         handleRepayment(loanTransaction, ctx);
+    }
+
+    // As for Interest refund, the amount is recalculated on replay and a refund that ends at zero is reversed.
+    private void handleFeeRefund(final LoanTransaction loanTransaction, final TransactionCtx ctx) {
+        if (ctx instanceof ProgressiveTransactionCtx progCtx) {
+            final LoanTransaction refund = findRelatedRefundOfFeeRefund(loanTransaction, progCtx);
+            if (refund != null) {
+                loanTransaction.updateAmount(DownPaymentFees.refundAmount(loanTransaction.getLoan(), refund));
+                if (MathUtil.isZero(loanTransaction.getAmount())) {
+                    loanTransaction.reverse();
+                    return;
+                }
+            }
+        }
+        handleRepayment(loanTransaction, ctx);
+    }
+
+    private LoanTransaction findRelatedRefundOfFeeRefund(final LoanTransaction feeRefund, final ProgressiveTransactionCtx ctx) {
+        final LoanTransaction original = ctx.getChangedTransactionDetail().getTransactionChanges().stream()
+                .filter(change -> feeRefund.equals(change.getNewTransaction())).map(TransactionChangeData::getOldTransaction)
+                .filter(Objects::nonNull).findFirst().orElse(feeRefund);
+        return original.getLoanTransactionRelations(relation -> LoanTransactionRelationTypeEnum.RELATED.equals(relation.getRelationType()))
+                .stream().map(LoanTransactionRelation::getToTransaction).findFirst().orElse(null);
     }
 
     private boolean validateInterestRefundTransactionRelation(final LoanTransaction interestRefundTransaction) {
@@ -1593,7 +1617,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
         oldTransaction.getLoanChargesPaid().clear();
 
-        if (newTransaction.getTypeOf().isInterestRefund()) {
+        if (newTransaction.getTypeOf().isInterestRefund() || newTransaction.getTypeOf().isFeeRefund()) {
             newTransaction.getLoanTransactionRelations().stream().filter(
                     r -> r.getToTransaction().getTypeOf().isMerchantIssuedRefund() || r.getToTransaction().getTypeOf().isPayoutRefund())
                     .filter(r -> r.getToTransaction().isReversed())

@@ -149,6 +149,8 @@ public final class ExternalEventConfigurationTestData {
             "LoanTransactionAccrualActivityPreBusinessEvent", //
             "LoanTransactionInterestRefundPostBusinessEvent", //
             "LoanTransactionInterestRefundPreBusinessEvent", //
+            "LoanTransactionFeeRefundPostBusinessEvent", //
+            "LoanTransactionFeeRefundPreBusinessEvent", //
             "LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent", //
             "LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent", //
             "LoanTransactionContractTerminationPostBusinessEvent", //
