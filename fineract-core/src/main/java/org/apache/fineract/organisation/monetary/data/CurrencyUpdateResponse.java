@@ -18,12 +18,10 @@
  */
 package org.apache.fineract.organisation.monetary.data;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,10 +50,4 @@ public class CurrencyUpdateResponse implements Serializable {
             """)
     private List<String> currencies;
 
-    @Deprecated(forRemoval = true)
-    @JsonProperty("changes")
-    public Map<String, Object> getChanges() {
-        // TODO: remove this one day... we should never use hashmaps in such trivial cases!!!
-        return Map.of("currencies", currencies);
-    }
 }
