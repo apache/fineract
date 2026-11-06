@@ -190,6 +190,10 @@ public class ClientChargesApiResource {
             + "Mandatory Fields:" + "transactionDate and amount " + ""
             + "\"Pay either a part of or the entire due amount for a charge.(command=paycharge)\n" + "\n" + "Waive a Client Charge:\n"
             + "\n" + "\n" + "This API provides the facility of waiving off the remaining amount on a client charge (command=waive)\n\n"
+            + "Optional savingsAccountId funds the payment through a savings withdrawal. Both currencies and offices must match; "
+            + "accounting must be enabled on both sides or disabled on both. The savings product's transfer withdrawal-fee setting applies. "
+            + "Cash payment details cannot be combined with savings funding. Withdrawal permission and access to the source account "
+            + "are required. Undo the client transaction to reverse both legs atomically. "
             + "Showing request/response for 'Pay a Client Charge'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdResponse.class)))

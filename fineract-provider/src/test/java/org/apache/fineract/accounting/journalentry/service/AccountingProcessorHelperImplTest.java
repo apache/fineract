@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,6 +87,8 @@ class AccountingProcessorHelperImplTest {
     private ChargeRepositoryWrapper chargeRepositoryWrapper;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private ClientTransactionRepository clientTransactionRepository;
 
     @InjectMocks
     private AccountingProcessorHelperImpl helper;

@@ -202,8 +202,9 @@ public class ClientApiConstants {
             chargeCalculationTypeParamName, currencyParamName, amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName,
             amountOrPercentageParamName, amountParamName, amountPaidParamName, chargeOptionsParamName, transactionsParamName));
 
-    protected static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,
-            officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName, submittedOnDateParamName));
+    protected static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(idParamName, transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName,
+                    officeIdParamName, officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName,
+                    submittedOnDateParamName, "savingsAccountId", "savingsTransactionId"));
 
 }

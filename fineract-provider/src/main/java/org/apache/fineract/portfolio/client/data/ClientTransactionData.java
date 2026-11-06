@@ -42,6 +42,11 @@ public final class ClientTransactionData {
     private final boolean reversed;
     private final Long clientChargeId;
 
+    @lombok.Setter
+    private Long savingsAccountId;
+    @lombok.Setter
+    private Long savingsTransactionId;
+
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
 

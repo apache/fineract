@@ -28,6 +28,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,10 +47,14 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 @Entity
 @Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
 public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
+
+    @Version
+    private Long version;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", nullable = false)
@@ -62,6 +67,18 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Lo
     @ManyToOne(optional = true)
     @JoinColumn(name = "payment_detail_id", nullable = true)
     private PaymentDetail paymentDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "funding_savings_transaction_id", unique = true)
+    private SavingsAccountTransaction fundingSavingsTransaction;
+
+    public SavingsAccountTransaction getFundingSavingsTransaction() {
+        return fundingSavingsTransaction;
+    }
+
+    public void setFundingSavingsTransaction(SavingsAccountTransaction transaction) {
+        this.fundingSavingsTransaction = transaction;
+    }
 
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
@@ -153,6 +170,7 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Lo
         thisTransactionData.put("date", getTransactionDate());
         thisTransactionData.put("currencyCode", this.currencyCode);
         thisTransactionData.put("amount", this.amount);
+        thisTransactionData.put("savingsFunded", fundingSavingsTransaction != null);
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());

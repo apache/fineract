@@ -112,6 +112,19 @@ public class ClientChargeDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
+        if (this.fromApiJsonHelper.parameterExists("savingsAccountId", element)) {
+            final Long savingsAccountId = this.fromApiJsonHelper.extractLongNamed("savingsAccountId", element);
+            baseDataValidator.reset().parameter("savingsAccountId").value(savingsAccountId).notNull().longGreaterThanZero();
+            for (String parameter : List.of(ClientApiConstants.paymentTypeIdParamName, ClientApiConstants.transactionAccountNumberParamName,
+                    ClientApiConstants.checkNumberParamName, ClientApiConstants.routingCodeParamName,
+                    ClientApiConstants.receiptNumberParamName, ClientApiConstants.bankNumberParamName)) {
+                if (this.fromApiJsonHelper.parameterExists(parameter, element)) {
+                    baseDataValidator.reset().parameter(parameter)
+                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.with.savings.funding");
+                }
+            }
+        }
+
         final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(ClientApiConstants.amountParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.amountParamName).value(amount).notNull().positiveAmount();
 

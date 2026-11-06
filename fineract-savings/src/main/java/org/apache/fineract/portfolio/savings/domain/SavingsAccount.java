@@ -1823,11 +1823,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.product;
     }
 
-    private Boolean isCashBasedAccountingEnabledOnSavingsProduct() {
+    public Boolean isCashBasedAccountingEnabledOnSavingsProduct() {
         return this.product.isCashBasedAccountingEnabled();
     }
 
-    private Boolean isAccrualBasedAccountingEnabledOnSavingsProduct() {
+    public Boolean isAccrualBasedAccountingEnabledOnSavingsProduct() {
         return this.product.isAccrualBasedAccountingEnabled();
     }
 

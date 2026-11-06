@@ -24,15 +24,21 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientCharge;
 import org.apache.fineract.portfolio.client.domain.ClientChargePaidBy;
+import org.apache.fineract.portfolio.client.domain.ClientChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientTransactionCannotBeUndoneException;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +49,13 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
     private final ClientRepositoryWrapper clientRepository;
     private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final SavingsAccountAssembler savingsAccountAssembler;
+    private final PlatformSecurityContext context;
+    private final ClientChargeRepositoryWrapper clientChargeRepository;
 
     @Override
+    @Transactional
     public CommandProcessingResult undo(Long clientId, Long transactionId) {
 
         final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
@@ -54,6 +65,20 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
         // validate that transaction can be undone
         if (clientTransaction.isReversed()) {
             throw new ClientTransactionCannotBeUndoneException(clientId, transactionId);
+        }
+
+        SavingsAccountTransaction funding = clientTransaction.getFundingSavingsTransaction();
+        if (funding != null) {
+            context.authenticatedUser().validateHasPermissionTo("UNDOTRANSACTION_SAVINGSACCOUNT");
+            Long savingsId = funding.getSavingsAccount().getId();
+            savingsAccountAssembler.lockInIdOrder(savingsId);
+            savingsAccountAssembler.assembleFromInUserScope(savingsId, false);
+        }
+        for (ClientChargePaidBy paidBy : clientTransaction.getClientChargePaidByCollection()) {
+            clientChargeRepository.findOneForUpdate(paidBy.getClientCharge().getId());
+        }
+        if (funding != null) {
+            savingsAccountWritePlatformService.undoTransaction(funding.getSavingsAccount().getId(), funding.getId(), true);
         }
 
         // mark transaction as reversed
