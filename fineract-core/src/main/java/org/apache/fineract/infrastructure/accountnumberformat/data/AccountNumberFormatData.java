@@ -81,4 +81,8 @@ public class AccountNumberFormatData implements Serializable {
         return this.prefixTypeOptions;
     }
 
+    public String getPrefixCharacter() {
+        return this.prefixCharacter;
+    }
+
 }

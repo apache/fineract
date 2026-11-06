@@ -21,14 +21,11 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.feign.ObjectMapperFactory;
+import org.apache.fineract.client.models.FineractEntityToEntityMappingData;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
@@ -83,10 +80,9 @@ public class EntityToEntityMappingIntegrationTest extends FeignLoanTestBase {
     }
 
     private Long getOfficeToLoanProductRelationId() {
-        JsonNode mappingTypes = readTree(ok(() -> fineractClient().fineractEntity().retrieveAll3()));
-        Long relId = StreamSupport.stream(mappingTypes.spliterator(), false)
-                .filter(type -> OFFICE_ACCESS_TO_LOAN_PRODUCTS.equals(type.path("mappingTypes").asText()))
-                .map(type -> type.get("id").asLong()).findFirst().orElse(null);
+        Long relId = ok(() -> fineractClient().fineractEntity().retrieveAll3()).stream()
+                .filter(type -> OFFICE_ACCESS_TO_LOAN_PRODUCTS.equals(type.getMappingTypes())).map(type -> type.getId()).findFirst()
+                .orElse(null);
         assertNotNull(relId, "office_access_to_loan_products relation must exist");
         return relId;
     }
@@ -106,15 +102,7 @@ public class EntityToEntityMappingIntegrationTest extends FeignLoanTestBase {
         return FineractFeignClientHelper.createNewFineractFeignClient(username, PASSWORD);
     }
 
-    private List<Long> fromIdsOf(String json) {
-        return StreamSupport.stream(readTree(json).spliterator(), false).map(mapping -> mapping.get("fromId").asLong()).toList();
-    }
-
-    private static JsonNode readTree(String json) {
-        try {
-            return ObjectMapperFactory.getShared().readTree(json);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to parse entity mapping response", e);
-        }
+    private List<Long> fromIdsOf(List<FineractEntityToEntityMappingData> mappings) {
+        return mappings.stream().map(FineractEntityToEntityMappingData::getFromId).toList();
     }
 }

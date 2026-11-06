@@ -36,10 +36,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.annotation.PartialResponseParameters;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.jobs.data.SchedulerDetailData;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
@@ -54,16 +52,11 @@ public class SchedulerApiResource {
 
     private final PlatformSecurityContext context;
     private final JobRegisterService jobRegisterService;
-    private final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
-    public SchedulerApiResource(final PlatformSecurityContext context, final JobRegisterService jobRegisterService,
-            final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
+    public SchedulerApiResource(final PlatformSecurityContext context, final JobRegisterService jobRegisterService) {
         this.context = context;
         this.jobRegisterService = jobRegisterService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
     }
 
     @GET
@@ -72,13 +65,11 @@ public class SchedulerApiResource {
             + "\n" + "Example Requests:\n" + "\n" + "scheduler")
     @AlternativeOperationId("retrieveStatus")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class)))
-    public String retrieveStatus(@Context final UriInfo uriInfo) {
+    @PartialResponseParameters({ SchedulerJobApiConstants.schedulerStatusParamName })
+    public SchedulerDetailData retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        final SchedulerDetailData schedulerDetailData = new SchedulerDetailData().setActive(isSchedulerRunning);
-        return this.toApiJsonSerializer.serialize(settings, schedulerDetailData,
-                SchedulerJobApiConstants.SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS);
+        return new SchedulerDetailData().setActive(isSchedulerRunning);
     }
 
     @POST
