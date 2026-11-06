@@ -340,7 +340,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(loanChargeAssembler.createNewFromJson(eq(loan), eq(chargeDefinition), any(JsonCommand.class), eq(overdueDueDate)))
                 .thenReturn(penalty);
         OverdueLoanScheduleData overdueInstallmentData = new OverdueLoanScheduleData(LOAN_ID, 1L, "15 January 2024", BigDecimal.TEN,
-                "dd MMMM yyyy", "en", BigDecimal.TEN, BigDecimal.ZERO, 1);
+                "dd MMMM yyyy", "en", BigDecimal.TEN, BigDecimal.ZERO, 1, ChargeCalculationType.FLAT.getValue());
 
         try (MockedStatic<DateUtils> mockedDateUtils = mockStatic(DateUtils.class)) {
             mockedDateUtils.when(DateUtils::getBusinessLocalDate).thenReturn(BUSINESS_DATE_AFTER);

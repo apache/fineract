@@ -336,6 +336,15 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19)
     private BigDecimal maxOutstandingLoanBalance;
 
+    @Column(name = "overdue_charge_id")
+    private Long overdueChargeId;
+
+    @Column(name = "overdue_charge_amount", scale = 6, precision = 19)
+    private BigDecimal overdueChargeAmount;
+
+    @Column(name = "overdue_charge_calculation_type")
+    private Integer overdueChargeCalculationType;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy(value = "expectedDisbursementDate, id")
     private List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
@@ -519,6 +528,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.transactionProcessingStrategyName = transactionProcessingStrategy.getName();
 
         this.loanProduct = loanProduct;
+        snapshotOverdueCharge(loanProduct);
         this.loanStatus = loanStatus;
         if (loanCharges != null && !loanCharges.isEmpty()) {
             this.charges = associateChargesWithThisLoan(loanCharges);
@@ -683,6 +693,38 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void updateLoanProduct(final LoanProduct loanProduct) {
         this.loanProduct = loanProduct;
+        snapshotOverdueCharge(loanProduct);
+    }
+
+    private void snapshotOverdueCharge(final LoanProduct loanProduct) {
+        final Charge overdueCharge = loanProduct.getOverdueInstallmentCharge();
+        this.overdueChargeId = overdueCharge == null ? null : overdueCharge.getId();
+        this.overdueChargeAmount = overdueCharge == null ? null : overdueCharge.getAmount();
+        this.overdueChargeCalculationType = overdueCharge == null ? null : overdueCharge.getChargeCalculation();
+    }
+
+    /**
+     * Returns the overdue-installment charge amount to apply for the given charge definition. The loan's own snapshot
+     * is used only while it still refers to the same charge; if the product's overdue-installment charge has since been
+     * swapped for a different one, the snapshot is stale and the live charge amount is used instead.
+     */
+    public BigDecimal getOverdueChargeAmountOrDefault(final Charge overdueCharge) {
+        if (this.overdueChargeAmount != null && overdueCharge.getId().equals(this.overdueChargeId)) {
+            return this.overdueChargeAmount;
+        }
+        return overdueCharge.getAmount();
+    }
+
+    /**
+     * Companion of {@link #getOverdueChargeAmountOrDefault(Charge)} for the charge calculation type: the snapshot
+     * amount is only meaningful together with the calculation type it was taken with (a flat 100 and a 100% rate are
+     * the same number).
+     */
+    public Integer getOverdueChargeCalculationTypeOrDefault(final Charge overdueCharge) {
+        if (this.overdueChargeCalculationType != null && overdueCharge.getId().equals(this.overdueChargeId)) {
+            return this.overdueChargeCalculationType;
+        }
+        return overdueCharge.getChargeCalculation();
     }
 
     public void updateFund(final Fund fund) {

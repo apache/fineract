@@ -60,4 +60,5 @@
   <include relativeToChangelogFile="true" file="parts/1035_add_tax_to_loan_charge.xml"/>
   <include relativeToChangelogFile="true" file="parts/1036_link_unlinked_charge_adjustments.xml"/>
   <include relativeToChangelogFile="true" file="parts/1037_add_semi_monthly_repayment_frequency.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1038_add_overdue_charge_amount_to_loan.xml"/>
 </databaseChangeLog>
