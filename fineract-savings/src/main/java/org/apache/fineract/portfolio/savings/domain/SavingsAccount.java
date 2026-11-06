@@ -137,6 +137,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
     private static final SavingsAccountInterestCalculator INTEREST_CALCULATOR = new SavingsAccountInterestCalculator();
+    private static final SavingsAccountLockPeriodCalculator LOCK_PERIOD_CALCULATOR = new SavingsAccountLockPeriodCalculator();
 
     @Version
     int version;
@@ -2667,33 +2668,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     }
 
     private LocalDate calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
-
-        LocalDate lockedInUntilLocalDate = null;
-        final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
-        switch (lockinPeriodFrequencyType) {
-            case INVALID:
-                // SEMI_MONTHLY is a loan repayment frequency and is never offered as a savings lock-in period, so it
-                // leaves the account unlocked just like an unset frequency does.
-            case SEMI_MONTHLY:
-            break;
-            case DAYS:
-                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency);
-            break;
-            case WEEKS:
-                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency);
-            break;
-            case MONTHS:
-                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency);
-            break;
-            case YEARS:
-                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency);
-            break;
-            case WHOLE_TERM:
-                LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
-            break;
-        }
-
-        return lockedInUntilLocalDate;
+        return LOCK_PERIOD_CALCULATOR.calculateDateAccountIsLockedUntil(activationLocalDate, this.lockinPeriodFrequency,
+                PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType));
     }
 
     public Group group() {
