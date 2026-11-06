@@ -175,18 +175,22 @@ public class MyCustomBusinessStep implements BusinessStep<Loan> {
 
 [source]
 ----
-public class LoanCOBItemProcessor implements ItemProcessor<Loan, Loan> {
+public class LoanCOBItemWriter implements ItemWriter<Loan> {
     @Override
-    public Loan process(Loan loan) {
+    public void write(Chunk<? extends Loan> loans) {
         List<BusinessStep<Loan>> bSteps = getBusinessSteps();
-        Loan result = loan;
-        for (BusinessStep<Loan> bStep : bSteps) {
-            result = bStep.process(result);
+        for (Loan loan : loans) {
+            Loan result = loan;
+            for (BusinessStep<Loan> bStep : bSteps) {
+                result = bStep.process(result);
+            }
+            save(result);
         }
-        return result;
     }
 }
 ----
+
+The business steps run in the item writer rather than in an item processor. When one loan fails, Spring Batch rolls the chunk back and writes each of its loans again in a transaction of its own, so only the failing loan is skipped and the others are closed as usual.
 
 === Business step configuration
 

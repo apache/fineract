@@ -33,8 +33,8 @@ public class WorkingCapitalChunkProcessingLoanItemListener extends AbstractLoanI
 
     public WorkingCapitalChunkProcessingLoanItemListener(
             @Qualifier("workingCapitalLoanLockingService") LockingService workingCapitalLoanAccountLockLockingService,
-            @Qualifier("requiresNewTransactionJdbcTemplate") TransactionTemplate requiresNewTransactionJdbcTemplate) {
-        super(workingCapitalLoanAccountLockLockingService, requiresNewTransactionJdbcTemplate);
+            @Qualifier("requiresNewTransactionTemplate") TransactionTemplate requiresNewTransactionTemplate) {
+        super(workingCapitalLoanAccountLockLockingService, requiresNewTransactionTemplate);
     }
 
     @Override

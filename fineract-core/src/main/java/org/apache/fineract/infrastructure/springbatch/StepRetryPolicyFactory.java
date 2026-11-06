@@ -58,4 +58,18 @@ public final class StepRetryPolicyFactory {
                 .delay(Duration.ZERO) //
                 .build();
     }
+
+    /**
+     * A policy that makes exactly one attempt per item.
+     * <p>
+     * For steps whose items fail in a way that dooms the chunk transaction. Batch 6 retries an item inside the
+     * transaction it failed in, so once that transaction is marked rollback-only - as any exception leaving a
+     * participating {@code @Transactional}, or a failed JPA flush, marks it - every further attempt runs against it in
+     * vain. Recovery then comes from scan mode alone, which writes each item again in a transaction of its own.
+     *
+     * @return a policy that never retries
+     */
+    public static RetryPolicy noRetryPolicy() {
+        return immediateRetryPolicy(1, Throwable.class);
+    }
 }

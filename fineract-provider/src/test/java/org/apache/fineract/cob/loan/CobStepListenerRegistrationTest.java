@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
@@ -57,12 +58,15 @@ class CobStepListenerRegistrationTest {
         BeforeStepLockingItemReaderHelper lockingHelper = mock(BeforeStepLockingItemReaderHelper.class);
         COBBusinessStepService businessStepService = mock(COBBusinessStepService.class);
         ProgressiveLoanModelProcessingService modelProcessingService = mock(ProgressiveLoanModelProcessingService.class);
+        LockingService lockingService = mock(LockingService.class);
 
         return Stream.of(//
                 Arguments.of("LoanItemReader", new LoanItemReader(loanRepository, lockingHelper)), //
                 Arguments.of("InlineCOBLoanItemReader", new InlineCOBLoanItemReader(loanRepository)), //
-                Arguments.of("LoanItemProcessor", new LoanItemProcessor(businessStepService, modelProcessingService)), //
-                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)));
+                Arguments.of("LoanItemWriter",
+                        new LoanItemWriter(businessStepService, modelProcessingService, lockingService, loanRepository)), //
+                Arguments.of("InlineCOBLoanItemWriter",
+                        new InlineCOBLoanItemWriter(businessStepService, modelProcessingService, lockingService, loanRepository)));
     }
 
     @ParameterizedTest(name = "{0} registers exactly once as a step listener")

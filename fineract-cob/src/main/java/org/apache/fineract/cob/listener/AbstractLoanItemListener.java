@@ -36,20 +36,38 @@ import org.springframework.batch.core.annotation.OnWriteError;
 import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * Records COB failures on the account locks, so that the accounts stay locked with the reason attached.
+ * <p>
+ * The error is saved in a transaction of its own, committed whatever happens to the chunk transaction the failure
+ * occurred in, which by then is usually marked rollback-only. That transaction must come from the JPA transaction
+ * manager: the chunk runs in a JPA transaction, and a JDBC {@code DataSourceTransactionManager} does not recognise the
+ * JDBC connection the JPA one exposes as an existing transaction, so its {@code REQUIRES_NEW} suspends nothing and runs
+ * on the chunk's own connection. The update then rolls back together with the chunk, and the commit of the
+ * rollback-only connection throws {@code UnexpectedRollbackException}.
+ * <p>
+ * Saving the error never throws. Spring Batch 6 calls {@code onWriteError} before it decides whether the chunk can be
+ * recovered by skipping, so an exception from here would replace the original failure and fail the step instead of
+ * letting the failing account be skipped.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractLoanItemListener<S extends AbstractPersistableCustom<Long>> {
 
     private final LockingService loanLockingService;
-    private final TransactionTemplate requiresNewTransactionJdbcTemplate;
+    private final TransactionTemplate requiresNewTransactionTemplate;
 
     private void updateAccountLockWithError(List<Long> loanIds, String msg, Throwable e) {
-        requiresNewTransactionJdbcTemplate.executeWithoutResult(status -> {
-            String stacktrace = ThrowableSerialization.serialize(e);
-            for (Long loanId : loanIds) {
-                loanLockingService.updateLockError(loanId, getLockOwner(), String.format(msg, loanId), stacktrace);
-            }
-        });
+        try {
+            requiresNewTransactionTemplate.executeWithoutResult(status -> {
+                String stacktrace = ThrowableSerialization.serialize(e);
+                for (Long loanId : loanIds) {
+                    loanLockingService.updateLockError(loanId, getLockOwner(), String.format(msg, loanId), stacktrace);
+                }
+            });
+        } catch (RuntimeException saveFailure) {
+            log.error("Could not save the COB error on the locks of loans {}", loanIds, saveFailure);
+        }
     }
 
     @OnReadError
@@ -85,9 +103,15 @@ public abstract class AbstractLoanItemListener<S extends AbstractPersistableCust
         log.warn("Skipping was triggered during processing of Loan (id={})", item.getId());
     }
 
+    /**
+     * Called when scan mode skips an account whose business steps or write failed on their own. {@code onWriteError}
+     * has already recorded the failure of the whole chunk on this account's lock; this replaces it with the account's
+     * own failure.
+     */
     @OnSkipInWrite
     public void onSkipInWrite(@NonNull S item, @NonNull Throwable e) {
-        log.warn("Skipping was triggered during writing of Loan (id={})", item.getId());
+        log.warn("Skipping was triggered during writing of Loan (id={}) due to: {}", item.getId(), ThrowableSerialization.serialize(e));
+        updateAccountLockWithError(List.of(item.getId()), "Loan (id: %d) writing is failed", e);
     }
 
     protected abstract LockOwner getLockOwner();
