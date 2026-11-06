@@ -126,6 +126,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
+        Long transferTransactionId = null;
         boolean isInterestTransfer = false;
         boolean isAccountTransfer = true;
         Long fromLoanAccountId = null;
@@ -160,6 +161,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromSavingsAccount, toSavingsAccount, withdrawal, deposit);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = getCreatedAccountTransferTransactionId(accountTransferDetails);
 
         } else if (isSavingsToLoanAccountTransfer(fromAccountType, toAccountType)) {
             //
@@ -191,6 +193,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = getCreatedAccountTransferTransactionId(accountTransferDetails);
 
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
             // FIXME - kw - ADD overpaid loan to savings account transfer
@@ -216,11 +219,12 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     fromLoanAccount, toSavingsAccount, deposit, loanRefundTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferDetailId = accountTransferDetails.getId();
+            transferTransactionId = getCreatedAccountTransferTransactionId(accountTransferDetails);
 
         }
 
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //
-                .withEntityId(transferDetailId);
+                .withEntityId(transferDetailId).withSubEntityId(transferTransactionId);
 
         if (PortfolioAccountType.SAVINGS.equals(fromAccountType)) {
             builder.withSavingsId(fromSavingsAccountId);
@@ -230,6 +234,19 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         }
 
         return builder.with(changes).build();
+    }
+
+    private static Long getCreatedAccountTransferTransactionId(final AccountTransferDetails accountTransferDetails) {
+        final List<AccountTransferTransaction> transactions = accountTransferDetails.getAccountTransferTransactions();
+        if (transactions.size() != 1) {
+            throw new IllegalStateException("A new account transfer must contain exactly one account transfer transaction");
+        }
+
+        final Long transactionId = transactions.get(0).getId();
+        if (transactionId == null) {
+            throw new IllegalStateException("The account transfer transaction must be persisted before returning its id");
+        }
+        return transactionId;
     }
 
     @Override

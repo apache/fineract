@@ -133,12 +133,15 @@ public class AccountTransferOfficeHierarchyAccessIntegrationTest extends FeignSa
         Long clientB = createClientInOffice(officeBId);
         Long toSavingsInOfficeB = createApproveActivateSavings(clientB, productId, today);
 
-        Long transferInOfficeA = transferTransactionId(
-                ok(() -> transfer(fineractClient(), today, officeAId, clientA, fromSavingsId, officeAId, clientA, toSavingsInOfficeA))
-                        .getResourceId());
-        Long transferAcrossOffices = transferTransactionId(
-                ok(() -> transfer(fineractClient(), today, officeAId, clientA, fromSavingsId, officeBId, clientB, toSavingsInOfficeB))
-                        .getResourceId());
+        PostAccountTransfersResponse transferInOfficeAResponse = ok(
+                () -> transfer(fineractClient(), today, officeAId, clientA, fromSavingsId, officeAId, clientA, toSavingsInOfficeA));
+        Long transferInOfficeA = transferTransactionId(transferInOfficeAResponse.getResourceId());
+        assertEquals(transferInOfficeAResponse.getSubResourceId(), transferInOfficeA);
+
+        PostAccountTransfersResponse transferAcrossOfficesResponse = ok(
+                () -> transfer(fineractClient(), today, officeAId, clientA, fromSavingsId, officeBId, clientB, toSavingsInOfficeB));
+        Long transferAcrossOffices = transferTransactionId(transferAcrossOfficesResponse.getResourceId());
+        assertEquals(transferAcrossOfficesResponse.getSubResourceId(), transferAcrossOffices);
 
         FineractFeignClient officeAUser = createUserInOffice(officeAId, UNDO_PERMISSIONS);
         FineractFeignClient officeBUser = createUserInOffice(officeBId, UNDO_PERMISSIONS);
