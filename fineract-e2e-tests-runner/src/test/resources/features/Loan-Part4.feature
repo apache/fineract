@@ -1201,12 +1201,12 @@ Feature: Loan - Part4
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 June 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 0    | 01 June 2024      |           | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 0.0  | 0.0        | 0.0  | 250.0       |
-      | 2  | 30   | 01 July 2024      |           | 502.4           | 247.6         | 7.4      | 0.0  | 0.0       | 255.0  | 0.0  | 0.0        | 0.0  | 255.0       |
-      | 3  | 31   | 01 August 2024    |           | 252.52          | 249.88        | 5.12     | 0.0  | 0.0       | 255.0  | 0.0  | 0.0        | 0.0  | 255.0       |
-      | 4  | 31   | 01 September 2024 |           | 0.0             | 252.52        | 2.57     | 0.0  | 0.0       | 255.09 | 0.0  | 0.0        | 0.0  | 255.09      |
+      | 2  | 30   | 01 July 2024      |           | 502.38          | 247.62        | 7.38     | 0.0  | 0.0       | 255.0  | 0.0  | 0.0        | 0.0  | 255.0       |
+      | 3  | 31   | 01 August 2024    |           | 252.49          | 249.89        | 5.11     | 0.0  | 0.0       | 255.0  | 0.0  | 0.0        | 0.0  | 255.0       |
+      | 4  | 31   | 01 September 2024 |           | 0.0             | 252.49        | 2.57     | 0.0  | 0.0       | 255.06 | 0.0  | 0.0        | 0.0  | 255.06      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1000.0        | 15.09    | 0.0  | 0.0       | 1015.09 | 0.0  | 0.0        | 0.0  | 1015.09     |
+      | 1000.0        | 15.06    | 0.0  | 0.0       | 1015.06 | 0.0  | 0.0        | 0.0  | 1015.06     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 June 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
@@ -1218,13 +1218,13 @@ Feature: Loan - Part4
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 June 2024      |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 0    | 01 June 2024      |           | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0  | 0.0  | 0.0        | 0.0  | 250.0       |
-      | 2  | 30   | 01 July 2024      |           | 629.4           | 120.6         | 7.4      | 0.0  | 0.0       | 128.0  | 0.0  | 0.0        | 0.0  | 128.0       |
-      | 3  | 31   | 01 August 2024    |           | 507.81          | 121.59        | 6.41     | 0.0  | 0.0       | 128.0  | 0.0  | 0.0        | 0.0  | 128.0       |
-      | 4  | 31   | 01 September 2024 |           | 384.99          | 122.82        | 5.18     | 0.0  | 0.0       | 128.0  | 0.0  | 0.0        | 0.0  | 128.0       |
-      | 5  | 30   | 01 October 2024   |           | 0.0             | 384.99        | 3.8      | 0.0  | 0.0       | 388.79 | 0.0  | 0.0        | 0.0  | 388.79      |
+      | 2  | 30   | 01 July 2024      |           | 629.38          | 120.62        | 7.38     | 0.0  | 0.0       | 128.0  | 0.0  | 0.0        | 0.0  | 128.0       |
+      | 3  | 31   | 01 August 2024    |           | 507.78          | 121.6         | 6.4      | 0.0  | 0.0       | 128.0  | 0.0  | 0.0        | 0.0  | 128.0       |
+      | 4  | 31   | 01 September 2024 |           | 384.94          | 122.84        | 5.16     | 0.0  | 0.0       | 128.0  | 0.0  | 0.0        | 0.0  | 128.0       |
+      | 5  | 30   | 01 October 2024   |           | 0.0             | 384.94        | 3.79     | 0.0  | 0.0       | 388.73 | 0.0  | 0.0        | 0.0  | 388.73      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1000.0        | 22.79    | 0.0  | 0.0       | 1022.79 | 0.0  | 0.0        | 0.0  | 1022.79     |
+      | 1000.0        | 22.73    | 0.0  | 0.0       | 1022.73 | 0.0  | 0.0        | 0.0  | 1022.73     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 June 2024     | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
