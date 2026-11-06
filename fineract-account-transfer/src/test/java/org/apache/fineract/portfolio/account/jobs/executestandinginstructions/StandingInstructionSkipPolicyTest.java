@@ -31,6 +31,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 
 class StandingInstructionSkipPolicyTest {
@@ -50,6 +51,16 @@ class StandingInstructionSkipPolicyTest {
     @Test
     void aTransientDatabaseFailureIsSkipped() {
         assertThat(skipPolicy.shouldSkip(new CannotAcquireLockException("lock wait timeout"), 0)).isTrue();
+    }
+
+    /**
+     * A transfer that finds an account changed since its snapshot (SavingsAccountRepositoryWrapper#lockInIdOrder) or
+     * loses a version check must be replayed and, failing again, recorded against its instruction rather than fail the
+     * step.
+     */
+    @Test
+    void anOptimisticLockConflictIsSkipped() {
+        assertThat(skipPolicy.shouldSkip(new ObjectOptimisticLockingFailureException(Object.class, 9L), 0)).isTrue();
     }
 
     /**
