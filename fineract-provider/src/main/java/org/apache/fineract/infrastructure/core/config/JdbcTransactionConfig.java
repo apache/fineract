@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.core.config;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedDataSourceTransactionManager;
-import org.apache.fineract.infrastructure.core.persistence.RequiresNewJdbcTransactionTemplate;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.beans.factory.ObjectProvider;
@@ -30,6 +29,7 @@ import org.springframework.boot.transaction.autoconfigure.TransactionManagerCust
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration(proxyBeanMethods = false)
@@ -48,13 +48,14 @@ public class JdbcTransactionConfig {
     }
 
     /**
-     * Refuses to start inside a JPA transaction, where a JDBC {@code REQUIRES_NEW} would silently run on the JPA
-     * transaction's connection - see {@link RequiresNewJdbcTransactionTemplate}. Use the JPA
-     * {@code requiresNewTransactionTemplate} there.
+     * A transaction of its own, also inside a JPA transaction, which {@link ExtendedDataSourceTransactionManager}
+     * suspends for it.
      */
     @Bean("requiresNewTransactionJdbcTemplate")
     public TransactionTemplate requiresNewTransactionJdbcTemplate(
             @Qualifier("jdbcTransactionManager") PlatformTransactionManager jdbcTransactionManager) {
-        return new RequiresNewJdbcTransactionTemplate(jdbcTransactionManager);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(jdbcTransactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return transactionTemplate;
     }
 }

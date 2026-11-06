@@ -19,12 +19,11 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.config.jpa.JpaTransactionConfig;
-import org.apache.fineract.infrastructure.core.persistence.RequiresNewJdbcTransactionTemplate;
+import org.apache.fineract.infrastructure.core.persistence.ExtendedDataSourceTransactionManager;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.junit.jupiter.api.Test;
@@ -82,22 +81,16 @@ public class TransactionManagerDataSourceInvariantTest {
     }
 
     @Test
-    void requiresNewJdbcTemplateIsTheGuardedOneOnTheJdbcTransactionManager() {
+    void requiresNewJdbcTemplateIsARequiresNewTemplateOnTheJdbcTransactionManager() {
         PlatformTransactionManager jdbcTransactionManager = new JdbcTransactionConfig().jdbcTransactionManager(writeModeProperties(),
                 mock(RoutingDataSource.class), noTransactionManagerCustomizers(), noCallbacks());
 
         TransactionTemplate template = new JdbcTransactionConfig().requiresNewTransactionJdbcTemplate(jdbcTransactionManager);
 
-        assertThat(template).as("the JDBC REQUIRES_NEW template must refuse to run inside a JPA transaction")
-                .isInstanceOf(RequiresNewJdbcTransactionTemplate.class);
+        assertThat(jdbcTransactionManager).as("only the extended JDBC manager recognises an enclosing JPA transaction")
+                .isInstanceOf(ExtendedDataSourceTransactionManager.class);
         assertThat(template.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         assertThat(template.getTransactionManager()).isSameAs(jdbcTransactionManager);
-    }
-
-    @Test
-    void requiresNewJdbcTemplateRejectsATransactionManagerThatIsNotJdbc() {
-        assertThatThrownBy(() -> new RequiresNewJdbcTransactionTemplate(mock(JpaTransactionManager.class)))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private static FineractProperties writeModeProperties() {

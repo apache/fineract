@@ -89,10 +89,8 @@ public class WorkingCapitalLoanInlineCOBConfig {
     public Step inlineWorkingCapitalLoanCOBStep(WorkingCapitalInlineCOBLoanItemReader inlineWorkingCapitalLoanCobWorkerItemReader,
             InlineWorkingCapitalLoanCOBWorkerItemWriter inlineWorkingCapitalLoanCobWorkerItemWriter,
             InlineWorkingCapitalLoanCOBWorkerItemListener inlineWorkingCapitalLoanCobLoanItemListener) {
-        ChunkOrientedStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = new StepBuilder(
-                "Inline Working Capital Loan COB Step", jobRepository)
-                .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(
-                        propertyService.getChunkSize(WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_JOB_NAME))
+        ChunkOrientedStepBuilder<Long, Long> stepBuilder = new StepBuilder("Inline Working Capital Loan COB Step", jobRepository)
+                .<Long, Long>chunk(propertyService.getChunkSize(WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_JOB_NAME))
                 .transactionManager(transactionManager).reader(inlineWorkingCapitalLoanCobWorkerItemReader)
                 .writer(inlineWorkingCapitalLoanCobWorkerItemWriter).listener(inlineWorkingCapitalLoanCobLoanItemListener);
         return stepBuilder.build();
@@ -110,7 +108,7 @@ public class WorkingCapitalLoanInlineCOBConfig {
     @JobScope
     @Bean
     public WorkingCapitalInlineCOBLoanItemReader inlineWorkingCapitalLoanCobWorkerItemReader() {
-        return new WorkingCapitalInlineCOBLoanItemReader(loanRepository);
+        return new WorkingCapitalInlineCOBLoanItemReader();
     }
 
     @Bean

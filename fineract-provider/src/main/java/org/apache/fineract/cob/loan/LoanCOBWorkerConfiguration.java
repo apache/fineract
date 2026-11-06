@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
@@ -87,9 +86,9 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
-        final ChunkOrientedStepBuilder<Loan, Loan> stepBuilder = stepBuilderFactory.get("Loan COB worker - Step")
+        final ChunkOrientedStepBuilder<Long, Long> stepBuilder = stepBuilderFactory.get("Loan COB worker - Step")
                 .inputChannel(inboundRequests) //
-                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())) //
+                .<Long, Long>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())) //
                 .reader(cobWorkerItemReader()) //
                 // No processor: the business steps run in the writer, where a failure is recovered by scan mode
                 // (see AbstractCOBItemWriter). A retry would only run again inside the doomed chunk transaction.
@@ -147,7 +146,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemReader cobWorkerItemReader() {
-        return new LoanItemReader(loanRepository, new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
+        return new LoanItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
     }
 
     @Bean

@@ -81,7 +81,7 @@ public class LoanItemListenerStepDefinitions implements En {
 
         When("LoanItemListener.onProcessError method executed", () -> {
             try {
-                loanItemListener.onProcessError(loan, exception);
+                loanItemListener.onProcessError(2L, exception);
             } finally {
                 ThreadLocalContextUtil.reset();
             }
@@ -102,7 +102,7 @@ public class LoanItemListenerStepDefinitions implements En {
 
         When("LoanItemListener.onWriteError method executed", () -> {
             try {
-                loanItemListener.onWriteError(exception, new Chunk<>(List.of(loan)));
+                loanItemListener.onWriteError(exception, new Chunk<>(List.of(3L)));
             } finally {
                 ThreadLocalContextUtil.reset();
             }

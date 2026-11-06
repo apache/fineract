@@ -19,9 +19,7 @@
 package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -74,10 +72,8 @@ class LoanItemWriterTest {
     private LoanRepository loanRepository;
 
     @Test
-    void runsTheBusinessStepsOnAFreshCopyAndReleasesTheLocksOnlyAfterFlushing() throws Exception {
+    void loadsEachLoanRunsItsBusinessStepsAndReleasesTheLocksOnlyAfterFlushing() throws Exception {
         LoanItemWriter writer = stepScopedWriter();
-        Loan stale1 = loanWithId(1L);
-        Loan stale2 = loanWithId(2L);
         Loan fresh1 = mock(Loan.class);
         Loan fresh2 = mock(Loan.class);
         Loan processed1 = loanWithId(1L);
@@ -87,11 +83,8 @@ class LoanItemWriterTest {
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, fresh1)).thenReturn(processed1);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, fresh2)).thenReturn(processed2);
 
-        writer.write(new Chunk<>(stale1, stale2));
+        writer.write(new Chunk<>(1L, 2L));
 
-        // The chunk items may be detached leftovers of a rolled-back transaction, so they must never reach the steps.
-        verify(cobBusinessStepService, never()).run(any(), eq(stale1));
-        verify(cobBusinessStepService, never()).run(any(), eq(stale2));
         verify(processed1).setLastClosedBusinessDate(BUSINESS_DATE);
         verify(processed2).setLastClosedBusinessDate(BUSINESS_DATE);
         InOrder inOrder = inOrder(loanRepository, lockingService);
@@ -110,7 +103,7 @@ class LoanItemWriterTest {
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan1)).thenReturn(loan1);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan2)).thenThrow(new BusinessStepException("step failed"));
 
-        assertThrows(BusinessStepException.class, () -> writer.write(new Chunk<>(loan1, loan2)));
+        assertThrows(BusinessStepException.class, () -> writer.write(new Chunk<>(1L, 2L)));
 
         verify(loanRepository, never()).saveAll(anyList());
         verify(loanRepository, never()).flush();
@@ -120,10 +113,9 @@ class LoanItemWriterTest {
     @Test
     void aLoanThatNoLongerExistsFailsTheWrite() {
         LoanItemWriter writer = stepScopedWriter();
-        Loan loan = loanWithId(1L);
         when(loanRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(BusinessStepException.class, () -> writer.write(new Chunk<>(loan)));
+        assertThrows(BusinessStepException.class, () -> writer.write(new Chunk<>(1L)));
 
         verifyNoInteractions(cobBusinessStepService, lockingService);
     }
@@ -137,7 +129,7 @@ class LoanItemWriterTest {
         when(modelProcessingService.hasValidModel(1L, ProgressiveLoanInterestScheduleModel.getModelVersion())).thenReturn(false);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan)).thenReturn(loan);
 
-        writer.write(new Chunk<>(loan));
+        writer.write(new Chunk<>(1L));
 
         InOrder inOrder = inOrder(modelProcessingService, cobBusinessStepService);
         inOrder.verify(modelProcessingService).recalculateModelAndSave(loan);
@@ -146,7 +138,7 @@ class LoanItemWriterTest {
 
     @Test
     void anEmptyChunkTouchesNothing() throws Exception {
-        stepScopedWriter().write(new Chunk<>());
+        stepScopedWriter().write(new Chunk<Long>());
 
         verifyNoInteractions(cobBusinessStepService, loanRepository, lockingService);
     }
@@ -156,7 +148,7 @@ class LoanItemWriterTest {
         LoanItemWriter writer = new LoanItemWriter(cobBusinessStepService, modelProcessingService, lockingService, loanRepository);
         writer.beforeStep(stepExecution(new ExecutionContext()));
 
-        assertThrows(IllegalStateException.class, () -> writer.write(new Chunk<>(mock(Loan.class))));
+        assertThrows(IllegalStateException.class, () -> writer.write(new Chunk<>(1L)));
     }
 
     @Test
@@ -170,7 +162,7 @@ class LoanItemWriterTest {
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan)).thenReturn(loan);
 
-        writer.write(new Chunk<>(loan));
+        writer.write(new Chunk<>(1L));
 
         verify(loan).setLastClosedBusinessDate(BUSINESS_DATE);
         verify(lockingService).deleteByLoanIdInAndLockOwner(List.of(1L), LockOwner.LOAN_INLINE_COB_PROCESSING);

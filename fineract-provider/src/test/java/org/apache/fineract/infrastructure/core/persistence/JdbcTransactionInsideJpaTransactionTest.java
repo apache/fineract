@@ -26,6 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +40,6 @@ import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.cob.exceptions.LockCannotBeAppliedException;
 import org.apache.fineract.cob.listener.CobWorkerStepListener;
 import org.apache.fineract.cob.loan.ApplyLoanLockTasklet;
 import org.apache.fineract.cob.service.RetrieveIdService;
@@ -67,19 +70,23 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Pins {@link RequiresNewJdbcTransactionTemplate} against a real EclipseLink JPA transaction manager and a real JDBC
- * transaction manager on one PostgreSQL {@code DataSource}: it refuses to start inside a JPA transaction, where it
- * would otherwise run on the JPA transaction's connection, and behaves as a plain, independent {@code REQUIRES_NEW}
- * everywhere else - including in the real COB worker path that uses it to apply the account locks.
+ * Pins how {@link ExtendedDataSourceTransactionManager} behaves inside a transaction of
+ * {@link ExtendedJpaTransactionManager} on the same PostgreSQL {@code DataSource}, and that
+ * {@link AfterTransactionWork} runs only once a transaction has completed and released its connection.
+ * <p>
+ * A plain {@code DataSourceTransactionManager} does not recognise the JPA transaction: it runs "its own" transaction on
+ * the JPA transaction's connection and commits it, or rolls it back with {@code UnexpectedRollbackException} when the
+ * JPA transaction is rollback-only. These tests pin that it now joins, suspends or refuses, as the propagation asks.
  */
 @Testcontainers(disabledWithoutDocker = true)
-class RequiresNewJdbcTransactionTemplateTest {
+class JdbcTransactionInsideJpaTransactionTest {
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -89,7 +96,7 @@ class RequiresNewJdbcTransactionTemplateTest {
     private AnnotationConfigApplicationContext context;
     private ExtendedJpaTransactionManager jpaTransactionManager;
     private ExtendedDataSourceTransactionManager jdbcTransactionManager;
-    private RequiresNewJdbcTransactionTemplate requiresNewJdbc;
+    private TransactionTemplate requiresNewJdbc;
     private JobRepository jobRepository;
     private JdbcTemplate jdbc;
 
@@ -99,6 +106,8 @@ class RequiresNewJdbcTransactionTemplateTest {
         pool.setJdbcUrl(POSTGRES.getJdbcUrl());
         pool.setUsername(POSTGRES.getUsername());
         pool.setPassword(POSTGRES.getPassword());
+        // Short enough that a test needing a second connection from a pool of one fails fast instead of waiting.
+        pool.setConnectionTimeout(1_000);
         RoutingDataSource dataSource = new RoutingDataSource() {
 
             @Override
@@ -116,7 +125,7 @@ class RequiresNewJdbcTransactionTemplateTest {
         jdbc.execute("create table probe_lock (loan_id bigint primary key, lock_owner varchar(50) not null)");
 
         factory = new LocalContainerEntityManagerFactoryBean();
-        factory.setPersistenceUnitName("requires-new-jdbc-" + UUID.randomUUID());
+        factory.setPersistenceUnitName("jdbc-in-jpa-" + UUID.randomUUID());
         factory.setDataSource(dataSource);
         factory.setPackagesToScan(VisibilityProbe.class.getPackageName());
         factory.setJpaVendorAdapter(new EclipseLinkJpaVendorAdapter());
@@ -124,10 +133,13 @@ class RequiresNewJdbcTransactionTemplateTest {
         factory.afterPropertiesSet();
         jpaTransactionManager = new ExtendedJpaTransactionManager(false);
         jpaTransactionManager.setEntityManagerFactory(factory.getObject());
+        // As JpaTransactionConfig and JdbcTransactionConfig configure them.
+        jpaTransactionManager.setValidateExistingTransaction(true);
         jpaTransactionManager.afterPropertiesSet();
         jdbcTransactionManager = new ExtendedDataSourceTransactionManager(false);
         jdbcTransactionManager.setDataSource(dataSource);
-        requiresNewJdbc = new RequiresNewJdbcTransactionTemplate(jdbcTransactionManager);
+        jdbcTransactionManager.setValidateExistingTransaction(true);
+        requiresNewJdbc = jdbcTemplate(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
         context = new AnnotationConfigApplicationContext();
         context.getBeanFactory().registerSingleton("dataSource", dataSource);
@@ -152,42 +164,116 @@ class RequiresNewJdbcTransactionTemplateTest {
     }
 
     @Test
-    void outsideAnyTransactionItCommits() {
+    void requiresNewOutsideAnyTransactionCommits() {
         requiresNewJdbc.executeWithoutResult(status -> insertProbe(1L, "jdbc"));
 
         assertThat(probeNames()).containsExactly("jdbc");
     }
 
     @Test
-    void insideAJpaTransactionItRefusesBeforeRunningAndLeavesTheJpaTransactionIntact() {
-        AtomicBoolean callbackRan = new AtomicBoolean();
-
-        new TransactionTemplate(jpaTransactionManager).executeWithoutResult(jpa -> {
+    void requiresNewInsideAJpaTransactionSuspendsItAndCommitsIndependently() {
+        assertThatThrownBy(() -> jpa().executeWithoutResult(outer -> {
             persistProbe(1L, "jpa");
-            assertThatThrownBy(() -> requiresNewJdbc.executeWithoutResult(status -> callbackRan.set(true)))
-                    .isInstanceOf(IllegalTransactionStateException.class).hasMessageContaining("requiresNewTransactionTemplate");
-            assertThat(jpa.isRollbackOnly()).as("the refusal must not doom the JPA transaction").isFalse();
+            requiresNewJdbc.executeWithoutResult(inner -> insertProbe(2L, "jdbc"));
+            assertThat(jdbcOnTheJpaConnectionSees(1L)).as("the JPA transaction must be intact after the inner one").isTrue();
+            throw new IllegalStateException("jpa rollback");
+        })).isInstanceOf(IllegalStateException.class);
+
+        assertThat(probeNames()).containsExactly("jdbc");
+    }
+
+    @Test
+    void requiresNewInsideARollbackOnlyJpaTransactionStillCommits() {
+        // The COB lock-error case: the chunk transaction is already doomed when the error is saved.
+        assertThatThrownBy(() -> jpa().executeWithoutResult(outer -> {
+            persistProbe(1L, "jpa");
+            markRollbackOnlyLikeAFailedBusinessStep();
+            requiresNewJdbc.executeWithoutResult(inner -> insertProbe(2L, "error"));
+        })).isInstanceOf(UnexpectedRollbackException.class);
+
+        assertThat(probeNames()).containsExactly("error");
+    }
+
+    @Test
+    void requiredInsideAJpaTransactionJoinsIt() {
+        TransactionTemplate requiredJdbc = jdbcTemplate(TransactionDefinition.PROPAGATION_REQUIRED);
+
+        assertThatThrownBy(() -> jpa().executeWithoutResult(outer -> {
+            persistProbe(1L, "jpa");
+            requiredJdbc.executeWithoutResult(inner -> insertProbe(2L, "jdbc"));
+            assertThat(probeNamesFromAnotherConnection()).as("joining must not commit the JPA work early").isEmpty();
+            throw new IllegalStateException("jpa rollback");
+        })).isInstanceOf(IllegalStateException.class);
+        assertThat(probeNames()).isEmpty();
+
+        jpa().executeWithoutResult(outer -> {
+            persistProbe(3L, "jpa");
+            requiredJdbc.executeWithoutResult(inner -> insertProbe(4L, "jdbc"));
+        });
+        assertThat(probeNames()).containsExactly("jpa", "jdbc");
+    }
+
+    @Test
+    void aFailingJdbcParticipantMarksTheJpaTransactionRollbackOnly() {
+        TransactionTemplate requiredJdbc = jdbcTemplate(TransactionDefinition.PROPAGATION_REQUIRED);
+
+        assertThatThrownBy(() -> jpa().executeWithoutResult(outer -> {
+            persistProbe(1L, "jpa");
+            try {
+                requiredJdbc.executeWithoutResult(inner -> {
+                    insertProbe(2L, "jdbc");
+                    throw new IllegalStateException("participant failed");
+                });
+            } catch (IllegalStateException expected) {
+                // The caller carries on, as callers of a failed @Transactional participant sometimes do.
+            }
+            assertThat(outer.isRollbackOnly()).isTrue();
+        })).isInstanceOf(UnexpectedRollbackException.class);
+
+        assertThat(probeNames()).isEmpty();
+    }
+
+    @Test
+    void notSupportedInsideAJpaTransactionRunsOutsideIt() {
+        TransactionTemplate notSupportedJdbc = jdbcTemplate(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+
+        assertThatThrownBy(() -> jpa().executeWithoutResult(outer -> {
+            persistProbe(1L, "jpa");
+            notSupportedJdbc.executeWithoutResult(inner -> insertProbe(2L, "auto-committed"));
+            throw new IllegalStateException("jpa rollback");
+        })).isInstanceOf(IllegalStateException.class);
+
+        assertThat(probeNames()).containsExactly("auto-committed");
+    }
+
+    @Test
+    void nestedInsideAJpaTransactionIsRefusedWithoutHarmingIt() {
+        TransactionTemplate nestedJdbc = jdbcTemplate(TransactionDefinition.PROPAGATION_NESTED);
+
+        jpa().executeWithoutResult(outer -> {
+            persistProbe(1L, "jpa");
+            assertThatThrownBy(() -> nestedJdbc.executeWithoutResult(inner -> insertProbe(2L, "never")))
+                    .isInstanceOf(IllegalTransactionStateException.class);
         });
 
-        assertThat(callbackRan).isFalse();
         assertThat(probeNames()).containsExactly("jpa");
     }
 
     @Test
-    void insideAJpaTransactionWhoseConnectionJdbcAlreadyUsedItRefuses() {
-        new TransactionTemplate(jpaTransactionManager).executeWithoutResult(jpa -> {
-            // Materialises the JPA transaction's connection through DataSourceUtils, as JdbcTemplate code inside a
-            // JPA transaction does all over Fineract.
-            insertProbe(1L, "jdbc in jpa");
-            assertThatThrownBy(() -> requiresNewJdbc.executeWithoutResult(status -> insertProbe(2L, "never")))
-                    .isInstanceOf(IllegalTransactionStateException.class);
-        });
+    void aWriteJoiningAReadOnlyJpaTransactionIsRefused() {
+        TransactionTemplate readOnlyJpa = jpa();
+        readOnlyJpa.setReadOnly(true);
+        TransactionTemplate requiredJdbc = jdbcTemplate(TransactionDefinition.PROPAGATION_REQUIRED);
 
-        assertThat(probeNames()).containsExactly("jdbc in jpa");
+        readOnlyJpa.executeWithoutResult(
+                outer -> assertThatThrownBy(() -> requiredJdbc.executeWithoutResult(inner -> insertProbe(1L, "never")))
+                        .isInstanceOf(IllegalTransactionStateException.class));
+
+        assertThat(probeNames()).isEmpty();
     }
 
     @Test
-    void insideAJdbcTransactionItSuspendsItAndCommitsIndependently() {
+    void insideAJdbcTransactionRequiresNewStillSuspendsIt() {
         assertThatThrownBy(() -> new TransactionTemplate(jdbcTransactionManager).executeWithoutResult(outer -> {
             insertProbe(1L, "outer");
             requiresNewJdbc.executeWithoutResult(inner -> insertProbe(2L, "inner"));
@@ -198,27 +284,14 @@ class RequiresNewJdbcTransactionTemplateTest {
     }
 
     @Test
-    void whereTheJpaTransactionIsSuspendedItRunsIndependently() {
-        TransactionTemplate notSupported = new TransactionTemplate(jpaTransactionManager);
-        notSupported.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-
-        assertThatThrownBy(() -> new TransactionTemplate(jpaTransactionManager).executeWithoutResult(jpa -> {
-            persistProbe(1L, "jpa");
-            notSupported.executeWithoutResult(suspended -> requiresNewJdbc.executeWithoutResult(status -> insertProbe(2L, "jdbc")));
-            throw new IllegalStateException("jpa rollback");
-        })).isInstanceOf(IllegalStateException.class);
-
-        assertThat(probeNames()).containsExactly("jdbc");
-    }
-
-    @Test
-    void theCobWorkerStepListenerAppliesTheLocksThroughIt() throws Exception {
-        // The real COB path: CobWorkerStepListener.beforeStep -> ApplyLoanLockTasklet -> this template, in a
-        // chunk-oriented step on the JPA transaction manager, as LoanCOBWorkerConfiguration builds it.
+    void theCobWorkerStepListenerAppliesTheLocksThroughTheJdbcTemplate() throws Exception {
+        // The real COB path: CobWorkerStepListener.beforeStep -> ApplyLoanLockTasklet ->
+        // requiresNewTransactionJdbcTemplate,
+        // in a chunk-oriented step on the JPA transaction manager, as LoanCOBWorkerConfiguration builds it.
         CobWorkerStepListener listener = new CobWorkerStepListener((contribution, chunkContext) -> RepeatStatus.FINISHED,
                 applyLoanLockTasklet(), (contribution, chunkContext) -> RepeatStatus.FINISHED);
         Step step = new StepBuilder("worker", jobRepository).<Long, Long>chunk(10).transactionManager(jpaTransactionManager)
-                .reader(new IteratorItemReader<>(List.<Long>of())).writer(RequiresNewJdbcTransactionTemplateTest::writeNothing)
+                .reader(new IteratorItemReader<>(List.<Long>of())).writer(JdbcTransactionInsideJpaTransactionTest::writeNothing)
                 .listener(listener).build();
 
         StepExecution execution = workerStepExecution();
@@ -229,20 +302,114 @@ class RequiresNewJdbcTransactionTemplateTest {
     }
 
     @Test
-    void theLockTaskletFailsLoudlyIfItIsEverRunInsideAJpaTransaction() throws Exception {
-        // What the guard turns a misuse into: as a tasklet step on the JPA transaction manager, every attempt is
-        // refused, the tasklet's own retries run out, and the step fails without having written a single lock.
+    void theLockTaskletAppliesItsLocksIndependentlyEvenInsideAJpaTransaction() throws Exception {
+        // Inside a JPA tasklet transaction the JDBC REQUIRES_NEW used to run on - and commit - the JPA connection.
         Step step = new StepBuilder("worker", jobRepository).tasklet(applyLoanLockTasklet(), jpaTransactionManager).build();
 
         StepExecution execution = workerStepExecution();
         step.execute(execution);
 
-        StepExecution result = jobRepository.getStepExecution(execution.getId());
-        assertThat(result.getStatus()).isEqualTo(BatchStatus.FAILED);
-        assertThat(execution.getFailureExceptions())
-                .anySatisfy(failure -> assertThat(failure).hasRootCauseInstanceOf(IllegalTransactionStateException.class)
-                        .satisfies(f -> assertThat(causeChain(f)).anyMatch(LockCannotBeAppliedException.class::isInstance)));
-        assertThat(jdbc.queryForObject("select count(*) from probe_lock", Integer.class)).isZero();
+        assertThat(jobRepository.getStepExecution(execution.getId()).getStatus()).isEqualTo(BatchStatus.COMPLETED);
+        assertThat(jdbc.queryForList("select loan_id from probe_lock order by loan_id", Long.class)).containsExactly(1L, 2L);
+    }
+
+    @Test
+    void workAfterCompletionRunsOnceTheTransactionHasReleasedItsConnection() {
+        // One connection: the chunk transaction holds it, so the work can only run once it is given back.
+        usePoolOfSize(1);
+        AtomicBoolean ranInside = new AtomicBoolean();
+
+        assertThatThrownBy(() -> jpa().executeWithoutResult(outer -> {
+            persistProbe(1L, "jpa");
+            AfterTransactionWork.runAfterCompletion(() -> requiresNewJdbc.executeWithoutResult(status -> insertProbe(2L, "after")));
+            ranInside.set(probeNamesFromAnotherConnectionOrNull() != null);
+            throw new IllegalStateException("rollback");
+        })).isInstanceOf(IllegalStateException.class);
+
+        assertThat(ranInside).as("no second connection may be needed while the transaction is open").isFalse();
+        assertThat(probeNames()).containsExactly("after");
+    }
+
+    @Test
+    void workRegisteredByAnOuterTransactionWaitsForItNotForAnInnerOne() {
+        AtomicBoolean ran = new AtomicBoolean();
+        AtomicBoolean ranBeforeOuterCompleted = new AtomicBoolean();
+        TransactionTemplate requiresNewJpa = jpa();
+        requiresNewJpa.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        jpa().executeWithoutResult(outer -> {
+            AfterTransactionWork.runAfterCompletion(() -> ran.set(true));
+            requiresNewJpa.executeWithoutResult(inner -> persistProbe(1L, "inner"));
+            ranBeforeOuterCompleted.set(ran.get());
+        });
+
+        assertThat(ranBeforeOuterCompleted).isFalse();
+        assertThat(ran).isTrue();
+    }
+
+    @Test
+    void workRunsInTheOrderItWasRegisteredAndAFailureDoesNotStopTheRest() {
+        jpa().executeWithoutResult(outer -> {
+            AfterTransactionWork.runAfterCompletion(() -> insertProbe(1L, "first"));
+            AfterTransactionWork.runAfterCompletion(() -> {
+                throw new IllegalStateException("broken work");
+            });
+            AfterTransactionWork.runAfterCompletion(() -> insertProbe(2L, "third"));
+        });
+
+        assertThat(probeNames()).containsExactly("first", "third");
+    }
+
+    private TransactionTemplate jpa() {
+        return new TransactionTemplate(jpaTransactionManager);
+    }
+
+    private TransactionTemplate jdbcTemplate(int propagation) {
+        TransactionTemplate template = new TransactionTemplate(jdbcTransactionManager);
+        template.setPropagationBehavior(propagation);
+        return template;
+    }
+
+    private void markRollbackOnlyLikeAFailedBusinessStep() {
+        try {
+            jpa().executeWithoutResult(participating -> {
+                throw new IllegalStateException("business step failed");
+            });
+        } catch (IllegalStateException expected) {
+            // The participating transaction has marked the enclosing one rollback-only, as @Transactional does.
+        }
+    }
+
+    private void usePoolOfSize(int size) {
+        pool.setMaximumPoolSize(size);
+        pool.setMinimumIdle(0);
+        pool.getHikariPoolMXBean().softEvictConnections();
+    }
+
+    private boolean jdbcOnTheJpaConnectionSees(Long id) {
+        return jdbc.queryForObject("select count(*) from visibility_probe where id = ?", Integer.class, id) == 1;
+    }
+
+    private List<String> probeNamesFromAnotherConnection() {
+        List<String> names = new ArrayList<>();
+        try (Connection connection = pool.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("select name from visibility_probe order by id")) {
+            while (resultSet.next()) {
+                names.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+        return names;
+    }
+
+    private List<String> probeNamesFromAnotherConnectionOrNull() {
+        try {
+            return probeNamesFromAnotherConnection();
+        } catch (IllegalStateException noConnection) {
+            return null;
+        }
     }
 
     private ApplyLoanLockTasklet applyLoanLockTasklet() {
@@ -267,14 +434,6 @@ class RequiresNewJdbcTransactionTemplateTest {
 
     private static void writeNothing(Chunk<? extends Long> items) {
         // The step has nothing to write; only its beforeStep matters here.
-    }
-
-    private static List<Throwable> causeChain(Throwable failure) {
-        List<Throwable> chain = new ArrayList<>();
-        for (Throwable current = failure; current != null && !chain.contains(current); current = current.getCause()) {
-            chain.add(current);
-        }
-        return chain;
     }
 
     private void persistProbe(Long id, String name) {

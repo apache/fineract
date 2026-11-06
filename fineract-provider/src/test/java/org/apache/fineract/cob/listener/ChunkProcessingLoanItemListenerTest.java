@@ -26,12 +26,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,8 +51,6 @@ class ChunkProcessingLoanItemListenerTest {
     private LockingService lockingService;
     @Mock
     private PlatformTransactionManager transactionManager;
-    @Mock
-    private Loan loan;
 
     private ChunkProcessingLoanItemListener listener;
 
@@ -60,11 +59,16 @@ class ChunkProcessingLoanItemListenerTest {
         listener = new ChunkProcessingLoanItemListener(lockingService, new TransactionTemplate(transactionManager));
     }
 
+    @AfterEach
+    void tearDown() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clear();
+        }
+    }
+
     @Test
     void skipInWriteRecordsTheLoansOwnFailure() {
-        when(loan.getId()).thenReturn(1L);
-
-        listener.onSkipInWrite(loan, new IllegalStateException("business step failed for this loan"));
+        listener.onSkipInWrite(1L, new IllegalStateException("business step failed for this loan"));
 
         ArgumentCaptor<String> stacktrace = ArgumentCaptor.forClass(String.class);
         verify(lockingService).updateLockError(eq(1L), eq(LockOwner.LOAN_COB_CHUNK_PROCESSING), eq("Loan (id: 1) writing is failed"),
@@ -74,20 +78,49 @@ class ChunkProcessingLoanItemListenerTest {
     }
 
     @Test
+    void aFailedChunkSaysItsLoansWereRolledBackWithIt() {
+        listener.onWriteError(new IllegalStateException("chunk failed"), new Chunk<>(List.of(1L, 2L)));
+
+        verify(lockingService).updateLockError(eq(1L), eq(LockOwner.LOAN_COB_CHUNK_PROCESSING),
+                eq("Loan (id: 1) was rolled back with its failed chunk"), anyString());
+        verify(lockingService).updateLockError(eq(2L), eq(LockOwner.LOAN_COB_CHUNK_PROCESSING),
+                eq("Loan (id: 2) was rolled back with its failed chunk"), anyString());
+    }
+
+    @Test
+    void aFailedSingleLoanChunkIsThatLoansOwnFailure() {
+        listener.onWriteError(new IllegalStateException("loan failed"), new Chunk<>(List.of(3L)));
+
+        verify(lockingService).updateLockError(eq(3L), eq(LockOwner.LOAN_COB_CHUNK_PROCESSING), eq("Loan (id: 3) writing is failed"),
+                anyString());
+    }
+
+    @Test
+    void insideATransactionTheErrorIsNotSavedBeforeTheTransactionCompletes() {
+        TransactionSynchronizationManager.initSynchronization();
+
+        listener.onWriteError(new IllegalStateException("chunk failed"), new Chunk<>(List.of(1L, 2L)));
+        listener.onSkipInWrite(1L, new IllegalStateException("loan failed"));
+
+        // Saved by the transaction manager once the chunk transaction has released its connection and row locks.
+        verifyNoInteractions(lockingService, transactionManager);
+        assertThat(TransactionSynchronizationManager.getSynchronizations()).hasSize(2);
+    }
+
+    @Test
     void aFailureToSaveTheErrorNeverEscapesTheWriteErrorCallback() {
         // Batch 6 calls onWriteError before deciding to enter scan mode; an exception from here would fail the step.
-        when(loan.getId()).thenReturn(1L);
-        doThrow(new UnexpectedRollbackException("rolled back")).when(lockingService).updateLockError(anyLong(), eq(LockOwner.LOAN_COB_CHUNK_PROCESSING),
-                anyString(), anyString());
+        doThrow(new UnexpectedRollbackException("rolled back")).when(lockingService).updateLockError(anyLong(),
+                eq(LockOwner.LOAN_COB_CHUNK_PROCESSING), anyString(), anyString());
 
-        assertThatNoException().isThrownBy(() -> listener.onWriteError(new IllegalStateException("chunk failed"), new Chunk<>(List.of(loan))));
+        assertThatNoException()
+                .isThrownBy(() -> listener.onWriteError(new IllegalStateException("chunk failed"), new Chunk<>(List.of(1L))));
     }
 
     @Test
     void aFailureToSaveTheErrorNeverEscapesTheSkipCallback() {
-        when(loan.getId()).thenReturn(1L);
         doThrow(new UnexpectedRollbackException("rolled back")).when(transactionManager).commit(any());
 
-        assertThatNoException().isThrownBy(() -> listener.onSkipInWrite(loan, new IllegalStateException("loan failed")));
+        assertThatNoException().isThrownBy(() -> listener.onSkipInWrite(1L, new IllegalStateException("loan failed")));
     }
 }

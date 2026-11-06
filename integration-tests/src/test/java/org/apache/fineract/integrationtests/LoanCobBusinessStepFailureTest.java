@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -31,9 +32,11 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanCOBCatchUpHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -52,19 +55,26 @@ public class LoanCobBusinessStepFailureTest extends FeignLoanTestBase {
 
     @Test
     public void aFailingLoanIsSkippedAndTheRestOfItsChunkIsClosed() {
-        Long glClosureId = null;
-        Long failingLoanId = null;
+        String previousChargeAccrualDate = globalConfigurationHelper
+                .retrieveConfigurationByName(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE).getStringValue();
         try {
-            enableBusinessDateAndSubmittedDateChargeAccrual(COB_DATE);
-            final Long clientId = createClient();
-            failingLoanId = createSingleRepaymentLoan(clientId, createLoanProduct(accrualProduct()));
-            addFeeCharge(failingLoanId, "14 March 2023");
-            final Long healthyLoanId = createSingleRepaymentLoan(clientId,
-                    createLoanProduct(accrualProduct().accountingRule(ACCOUNTING_NONE)));
+            setChargeAccrualDate("submitted-date");
+            runAt("03 March 2023", this::runCobWithOneFailingLoan);
+        } finally {
+            setChargeAccrualDate(previousChargeAccrualDate);
+        }
+    }
 
-            glClosureId = ok(() -> fineractClient().accountingClosure().createGLClosure(new PostGlClosuresRequest().officeId(HEAD_OFFICE_ID)
-                    .closingDate(COB_DATE).dateFormat("yyyy-MM-dd").locale("en").comments("FINERACT-3004"))).getResourceId();
-
+    private void runCobWithOneFailingLoan() {
+        final Long clientId = createClient();
+        final Long failingLoanId = createSingleRepaymentLoan(clientId, createLoanProduct(accrualProduct()));
+        addFeeCharge(failingLoanId, "14 March 2023");
+        final Long healthyLoanId = createSingleRepaymentLoan(clientId, createLoanProduct(accrualProduct().accountingRule(ACCOUNTING_NONE)));
+        final Long closureId = ok(() -> fineractClient().accountingClosure().createGLClosure(new PostGlClosuresRequest()
+                .officeId(HEAD_OFFICE_ID).closingDate(COB_DATE).dateFormat("yyyy-MM-dd").locale("en").comments("FINERACT-3004")))
+                .getResourceId();
+        boolean closureDeleted = false;
+        try {
             updateBusinessDate(Utils.dateFormatter.format(COB_DATE.plusDays(1)));
             // Fails the test unless the job run is recorded as a success.
             schedulerHelper.executeAndAwaitJob("Loan COB");
@@ -72,24 +82,34 @@ public class LoanCobBusinessStepFailureTest extends FeignLoanTestBase {
             assertThat(getLoanDetails(healthyLoanId).getLastClosedBusinessDate()).as("the healthy loan of the chunk must be closed")
                     .isEqualTo(COB_DATE);
             assertThat(lockOf(healthyLoanId)).as("the healthy loan must be unlocked").isEmpty();
-
             assertThat(getLoanDetails(failingLoanId).getLastClosedBusinessDate()).as("the failing loan must not be closed")
                     .isNotEqualTo(COB_DATE);
             LoanAccountLock lock = lockOf(failingLoanId).orElseThrow(() -> new AssertionError("the failing loan must stay locked"));
             assertThat(lock.getError()).isEqualTo("Loan (id: " + failingLoanId + ") writing is failed");
             assertThat(lock.getStacktrace()).as("the lock must carry the business step's own failure")
                     .contains("JournalEntryInvalidException");
+
+            executeVoid(() -> fineractClient().accountingClosure().deleteGLClosure(closureId));
+            closureDeleted = true;
+            runCobCatchUp();
+
+            assertThat(getLoanDetails(failingLoanId).getLastClosedBusinessDate()).as("a later run must take the failing loan over")
+                    .isEqualTo(COB_DATE);
+            assertThat(lockOf(failingLoanId)).as("and release its lock").isEmpty();
         } finally {
-            if (glClosureId != null) {
-                Long closureId = glClosureId;
+            if (!closureDeleted) {
                 executeVoid(() -> fineractClient().accountingClosure().deleteGLClosure(closureId));
+                // Catch-up takes over the error lock left by the failed run, so nothing leaks into later classes.
+                runCobCatchUp();
             }
-            if (failingLoanId != null) {
-                // With the closure gone the loan's COB succeeds; this releases its lock for the lifecycle cleanup.
-                executeInlineCOB(failingLoanId);
-            }
-            resetBusinessDateAndChargeAccrual();
         }
+    }
+
+    private void runCobCatchUp() {
+        FeignLoanCOBCatchUpHelper catchUpHelper = new FeignLoanCOBCatchUpHelper(fineractClient());
+        catchUpHelper.executeLoanCOBCatchUp();
+        Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1))
+                .until(() -> !catchUpHelper.isLoanCOBCatchUpRunning());
     }
 
     private Optional<LoanAccountLock> lockOf(Long loanId) {
@@ -97,19 +117,9 @@ public class LoanCobBusinessStepFailureTest extends FeignLoanTestBase {
         return locks == null ? Optional.empty() : locks.stream().filter(lock -> loanId.equals(lock.getLoanId())).findFirst();
     }
 
-    private void enableBusinessDateAndSubmittedDateChargeAccrual(LocalDate businessDate) {
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                new PutGlobalConfigurationsRequest().enabled(true));
-        updateBusinessDate(Utils.dateFormatter.format(businessDate));
+    private void setChargeAccrualDate(String value) {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
-                new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
-    }
-
-    private void resetBusinessDateAndChargeAccrual() {
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
-                new PutGlobalConfigurationsRequest().stringValue("due-date"));
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                new PutGlobalConfigurationsRequest().enabled(false));
+                new PutGlobalConfigurationsRequest().stringValue(value));
     }
 
     private void addFeeCharge(Long loanId, String dueDate) {

@@ -32,7 +32,6 @@ import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -73,9 +72,8 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
     @Bean(WORKING_CAPITAL_LOAN_COB_WORKER_STEP)
     public Step workingCapitalLoanCOBWorkerStep(final WorkingCapitalLoanCOBWorkerItemReader reader,
             final WorkingCapitalLoanCOBWorkerItemWriter writer) {
-        final ChunkOrientedStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = stepBuilderFactory
-                .get(WORKING_CAPITAL_LOAN_COB_WORKER_STEP).inputChannel(inboundRequests)
-                .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(WORKING_CAPITAL_JOB_NAME)) //
+        final ChunkOrientedStepBuilder<Long, Long> stepBuilder = stepBuilderFactory.get(WORKING_CAPITAL_LOAN_COB_WORKER_STEP)
+                .inputChannel(inboundRequests).<Long, Long>chunk(propertyService.getChunkSize(WORKING_CAPITAL_JOB_NAME)) //
                 .reader(reader) //
                 // No processor and no retries: the business steps run in the writer, where scan mode recovers a
                 // failure - see AbstractCOBItemWriter and LoanCOBWorkerConfiguration#loanCOBWorkerStep.
@@ -121,8 +119,7 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public WorkingCapitalLoanCOBWorkerItemReader workingCapitalLoanCOBWorkerItemReader() {
-        return new WorkingCapitalLoanCOBWorkerItemReader(workingCapitalLoanRepository,
-                new BeforeStepLockingItemReaderHelper(retrieveIdService, wpcLoanLockingService));
+        return new WorkingCapitalLoanCOBWorkerItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, wpcLoanLockingService));
     }
 
     @Bean

@@ -61,8 +61,8 @@ class CobStepListenerRegistrationTest {
         LockingService lockingService = mock(LockingService.class);
 
         return Stream.of(//
-                Arguments.of("LoanItemReader", new LoanItemReader(loanRepository, lockingHelper)), //
-                Arguments.of("InlineCOBLoanItemReader", new InlineCOBLoanItemReader(loanRepository)), //
+                Arguments.of("LoanItemReader", new LoanItemReader(lockingHelper)), //
+                Arguments.of("InlineCOBLoanItemReader", new InlineCOBLoanItemReader()), //
                 Arguments.of("LoanItemWriter",
                         new LoanItemWriter(businessStepService, modelProcessingService, lockingService, loanRepository)), //
                 Arguments.of("InlineCOBLoanItemWriter",

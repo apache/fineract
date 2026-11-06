@@ -58,16 +58,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * every other account commits its business steps, its last closed business date and the release of its lock together.
  * That is what Spring Batch 5 achieved by replaying the chunk without the skipped item.
  * <p>
- * Each account is loaded again before its business steps run. In scan mode the chunk items are entities of the
- * rolled-back chunk transaction, detached and possibly changed in memory by business steps that never committed;
- * running the steps over them again would apply those changes twice.
+ * The items are account ids, and each account is loaded here, in the transaction its business steps run in. Loading in
+ * the reader would put a failure to load into the read phase, where Batch 6 skips it inside the chunk transaction it
+ * has already doomed; and in scan mode the entities of the rolled-back chunk transaction would come back detached,
+ * possibly changed in memory by business steps that never committed, so running the steps over them again would apply
+ * those changes twice.
  * <p>
  * The persistence context is flushed before the locks are released, so that a failure the database reports only on
  * flush - an optimistic lock conflict on the account's version, a constraint violation - is raised inside the write and
  * so takes part in scan mode, instead of surfacing at commit, outside the write, where Batch fails the step.
  */
 @RequiredArgsConstructor
-public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<Long>> implements ItemWriter<I>, StepExecutionListener {
+public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<Long>> implements ItemWriter<Long>, StepExecutionListener {
 
     private final COBBusinessStepService cobBusinessStepService;
     private final LockingService lockingService;
@@ -80,14 +82,14 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
     private LocalDate businessDate;
 
     @Override
-    public void write(@NonNull Chunk<? extends I> items) throws Exception {
-        if (items.isEmpty()) {
+    public void write(@NonNull Chunk<? extends Long> accountIds) throws Exception {
+        if (accountIds.isEmpty()) {
             return;
         }
         TreeMap<Long, String> businessStepMap = getBusinessStepMap(getBusinessSteps());
-        List<I> processedItems = new ArrayList<>(items.size());
-        for (I item : items) {
-            processedItems.add(runBusinessSteps(businessStepMap, item));
+        List<I> processedItems = new ArrayList<>(accountIds.size());
+        for (Long accountId : accountIds) {
+            processedItems.add(runBusinessSteps(businessStepMap, accountId));
         }
         repository.saveAll(processedItems);
         repository.flush();
@@ -95,16 +97,16 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
         lockingService.deleteByLoanIdInAndLockOwner(ids, getLockOwner());
     }
 
-    private I runBusinessSteps(TreeMap<Long, String> businessStepMap, I item) throws Exception {
-        I current = beforeBusinessSteps(reload(item));
+    private I runBusinessSteps(TreeMap<Long, String> businessStepMap, Long accountId) throws Exception {
+        I current = beforeBusinessSteps(load(accountId));
         I processed = cobBusinessStepService.run(businessStepMap, current);
         setLastRun(processed);
         return processed;
     }
 
-    private I reload(I item) {
-        Long id = item.getId();
-        return repository.findById(id).orElseThrow(() -> new BusinessStepException("COB account (id: " + id + ") does not exist"));
+    private I load(Long accountId) {
+        return repository.findById(accountId)
+                .orElseThrow(() -> new BusinessStepException("COB account (id: " + accountId + ") does not exist"));
     }
 
     @SuppressWarnings("unchecked")

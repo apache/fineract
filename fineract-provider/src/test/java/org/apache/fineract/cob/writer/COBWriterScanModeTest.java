@@ -19,8 +19,6 @@
 package org.apache.fineract.cob.writer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
@@ -36,7 +34,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
 import org.apache.fineract.cob.COBBusinessStep;
@@ -76,9 +73,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -150,9 +145,12 @@ class COBWriterScanModeTest {
         factory.afterPropertiesSet();
         transactionManager = new ExtendedJpaTransactionManager(false);
         transactionManager.setEntityManagerFactory(factory.getObject());
+        // As JpaTransactionConfig and JdbcTransactionConfig configure them.
+        transactionManager.setValidateExistingTransaction(true);
         transactionManager.afterPropertiesSet();
         jdbcTransactionManager = new ExtendedDataSourceTransactionManager(false);
         jdbcTransactionManager.setDataSource(dataSource);
+        jdbcTransactionManager.setValidateExistingTransaction(true);
 
         context = new AnnotationConfigApplicationContext();
         context.getBeanFactory().registerSingleton("dataSource", dataSource);
@@ -228,54 +226,60 @@ class COBWriterScanModeTest {
     }
 
     @Test
-    void aJdbcRequiresNewTransactionInsideARollbackOnlyJpaTransactionLosesTheLockError() {
-        // Why the lock listener saves errors through the JPA transaction manager.
-        lockedAccounts(1L);
-        TransactionTemplate jdbcRequiresNew = requiresNew(jdbcTransactionManager);
-        AtomicReference<Throwable> saveFailure = new AtomicReference<>();
+    void theErrorIsSavedEvenWhenTheFailedTransactionHeldTheLockRow() throws Exception {
+        // A failed attempt that had written to the account's lock row holds a row lock on it until it rolls back; an
+        // error
+        // saved while it is still open would wait behind it. Fail fast instead of hanging if that ever comes back.
+        jdbc.execute("ALTER DATABASE " + POSTGRES.getDatabaseName() + " SET lock_timeout = '3s'");
+        pool.getHikariPoolMXBean().softEvictConnections();
+        lockedAccounts(1L, 2L);
+        businessSteps.beforeRun = account -> {
+            if (account.getId() == 2L) {
+                jdbc.update("update cob_probe_lock set error = 'in flight' where loan_id = 2");
+                throw new BusinessStepException("business step failed for account 2");
+            }
+        };
 
-        assertThatThrownBy(() -> new TransactionTemplate(transactionManager).executeWithoutResult(chunk -> {
-            markRollbackOnlyLikeAFailedBusinessStep();
-            saveFailure.set(catchThrowable(() -> jdbcRequiresNew.executeWithoutResult(status -> saveLockError(1L))));
-        })).isInstanceOf(UnexpectedRollbackException.class);
+        StepExecution result = runWorkerStep(List.of(1L, 2L), 2);
 
-        assertThat(saveFailure.get()).isInstanceOf(UnexpectedRollbackException.class);
-        assertThat(jdbc.queryForObject("select error from cob_probe_lock where loan_id = 1", String.class)).isNull();
+        assertThat(result.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+        assertThat(lockedAccountIds()).containsExactly(2L);
+        assertThat(jdbc.queryForObject("select error from cob_probe_lock where loan_id = 2", String.class))
+                .isEqualTo("Loan (id: 2) writing is failed");
     }
 
     @Test
-    void aJpaRequiresNewTransactionInsideARollbackOnlyJpaTransactionKeepsTheLockError() {
-        lockedAccounts(1L);
-        TransactionTemplate jpaRequiresNew = requiresNew(transactionManager);
+    void anAccountThatCannotBeLoadedIsSkippedAloneInsteadOfSilentlyLosingItsChunk() throws Exception {
+        // Reading hands out ids only; the account is loaded in the write, where its failure enters scan mode.
+        lockedAccounts(1L, 2L, 3L);
+        jdbc.execute("delete from cob_probe_account where id = 2");
 
-        assertThatThrownBy(() -> new TransactionTemplate(transactionManager).executeWithoutResult(chunk -> {
-            markRollbackOnlyLikeAFailedBusinessStep();
-            jpaRequiresNew.executeWithoutResult(status -> saveLockError(1L));
-        })).isInstanceOf(UnexpectedRollbackException.class);
+        StepExecution result = runWorkerStep(List.of(1L, 2L, 3L), 3);
 
-        assertThat(jdbc.queryForObject("select error from cob_probe_lock where loan_id = 1", String.class)).isEqualTo("failed");
+        assertThat(result.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+        assertThat(result.getWriteSkipCount()).isEqualTo(1);
+        assertThat(account(1L)).containsEntry("runs", 1).containsEntry("last_closed_business_date", Date.valueOf(BUSINESS_DATE));
+        assertThat(account(3L)).containsEntry("runs", 1).containsEntry("last_closed_business_date", Date.valueOf(BUSINESS_DATE));
+        assertThat(lockedAccountIds()).containsExactly(2L);
+        assertThat(jdbc.queryForObject("select stacktrace from cob_probe_lock where loan_id = 2", String.class)).contains("does not exist");
     }
 
     private StepExecution runWorkerStep(List<Long> ids, int chunkSize) throws Exception {
         Queue<Long> remaining = new ArrayDeque<>(ids);
-        ItemReader<CobProbeAccount> reader = () -> {
-            Long id = remaining.poll();
-            return id == null ? null : accounts.findById(id).orElseThrow();
-        };
+        ItemReader<Long> reader = remaining::poll;
         ExecutionContext jobContext = new ExecutionContext();
         jobContext.put(COBConstant.BUSINESS_DATE_PARAMETER_NAME, BUSINESS_DATE);
         JobExecution job = jobRepository.createJobExecution(
                 jobRepository.createJobInstance("cob-" + UUID.randomUUID(), new JobParameters()), new JobParameters(), jobContext);
         StepExecution execution = jobRepository.createStepExecution("worker", job);
-        Step step = new StepBuilder("worker", jobRepository).<CobProbeAccount, CobProbeAccount>chunk(chunkSize)
-                .transactionManager(transactionManager) //
+        Step step = new StepBuilder("worker", jobRepository).<Long, Long>chunk(chunkSize).transactionManager(transactionManager) //
                 .reader(reader) //
                 .writer(new ProbeWriter(businessSteps, lockingService, accounts)) //
                 .faultTolerant() //
                 .retryPolicy(StepRetryPolicyFactory.noRetryPolicy()) //
                 .skip(Exception.class) //
                 .skipLimit(101) //
-                .listener(new ChunkProcessingLoanItemListener(lockingService, requiresNew(transactionManager))) //
+                .listener(new ChunkProcessingLoanItemListener(lockingService, requiresNewTransactionTemplate())) //
                 .build();
         step.execute(execution);
         return jobRepository.getStepExecution(execution.getId());
@@ -297,20 +301,6 @@ class COBWriterScanModeTest {
         return jdbc.queryForList("select loan_id from cob_probe_lock order by loan_id", Long.class);
     }
 
-    private void markRollbackOnlyLikeAFailedBusinessStep() {
-        try {
-            new TransactionTemplate(transactionManager).executeWithoutResult(participating -> {
-                throw new BusinessStepException("business step failed");
-            });
-        } catch (BusinessStepException expected) {
-            // The participating transaction has marked the enclosing one rollback-only, as @Transactional does.
-        }
-    }
-
-    private void saveLockError(Long id) {
-        jdbc.update("update cob_probe_lock set error = 'failed' where loan_id = ?", id);
-    }
-
     /** Commits on a connection of its own, as another node updating the account would. */
     private void updateVersionConcurrently(Long id) {
         try (Connection connection = pool.getConnection(); Statement statement = connection.createStatement()) {
@@ -321,8 +311,8 @@ class COBWriterScanModeTest {
         }
     }
 
-    private static TransactionTemplate requiresNew(PlatformTransactionManager manager) {
-        TransactionTemplate template = new TransactionTemplate(manager);
+    private TransactionTemplate requiresNewTransactionTemplate() {
+        TransactionTemplate template = new TransactionTemplate(transactionManager);
         template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return template;
     }

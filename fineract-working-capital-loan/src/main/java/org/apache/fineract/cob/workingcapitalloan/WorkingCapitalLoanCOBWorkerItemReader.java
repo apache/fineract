@@ -22,23 +22,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.exceptions.LockedReadException;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ItemReader;
 
-@Slf4j
+/**
+ * Hands the ids of the loans to close to the writer, which loads each loan itself; see {@code AbstractLoanItemReader}
+ * for why reading touches no database.
+ */
 @RequiredArgsConstructor
-public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<WorkingCapitalLoan>, StepExecutionListener {
+public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<Long>, StepExecutionListener {
 
-    private final WorkingCapitalLoanRepository repository;
     private final BeforeStepLockingItemReaderHelper itemReaderHelper;
 
     @Setter(AccessLevel.PROTECTED)
@@ -46,21 +43,12 @@ public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<Working
 
     @Nullable
     @Override
-    public WorkingCapitalLoan read() throws Exception {
-        final Long loanId = remainingData.poll();
-        if (loanId != null) {
-            try {
-                return repository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
-            } catch (Exception e) {
-                throw new LockedReadException(loanId, e);
-            }
-        }
-        return null;
+    public Long read() {
+        return remainingData.poll();
     }
 
     @Override
     public void beforeStep(@NonNull StepExecution stepExecution) {
         setRemainingData(itemReaderHelper.filterRemainingData(stepExecution));
     }
-
 }

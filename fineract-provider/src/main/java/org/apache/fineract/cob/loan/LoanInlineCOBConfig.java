@@ -89,8 +89,8 @@ public class LoanInlineCOBConfig {
 
     @Bean
     public Step inlineLoanCOBStep() {
-        ChunkOrientedStepBuilder<Loan, Loan> stepBuilder = new StepBuilder("Inline Loan COB Step", jobRepository)
-                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).transactionManager(transactionManager)
+        ChunkOrientedStepBuilder<Long, Long> stepBuilder = new StepBuilder("Inline Loan COB Step", jobRepository)
+                .<Long, Long>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).transactionManager(transactionManager)
                 .reader(inlineCobWorkerItemReader()).writer(inlineCobWorkerItemWriter()).listener(inlineCobLoanItemListener());
         return stepBuilder.build();
     }
@@ -105,7 +105,7 @@ public class LoanInlineCOBConfig {
     @JobScope
     @Bean
     public InlineCOBLoanItemReader inlineCobWorkerItemReader() {
-        return new InlineCOBLoanItemReader(loanRepository);
+        return new InlineCOBLoanItemReader();
     }
 
     @Bean
