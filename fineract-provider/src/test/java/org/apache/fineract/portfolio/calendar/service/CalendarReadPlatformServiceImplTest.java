@@ -34,13 +34,17 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.junit.timezone.WithSystemTimeZone;
+import org.apache.fineract.junit.timezone.WithSystemTimeZoneExtension;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+@ExtendWith(WithSystemTimeZoneExtension.class)
 class CalendarReadPlatformServiceImplTest {
 
     private JdbcTemplate jdbcTemplate;
@@ -117,6 +121,28 @@ class CalendarReadPlatformServiceImplTest {
     private void historyRows(final ResultSet rs) {
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(Object[].class)))
                 .thenAnswer(invocation -> List.of(((RowMapper<?>) invocation.getArgument(1)).mapRow(rs, 0)));
+    }
+
+    @Test
+    void nextEligibleMeetingDateUsesCalendarStartDateWhenThereIsNoLastMeeting() {
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final CalendarData calendar = new CalendarData().setStartDate(today.minusWeeks(1)).setRecurrence("FREQ=WEEKLY;INTERVAL=1");
+
+        final LocalDate nextMeetingDate = service.generateNextEligibleMeetingDateForCollection(calendar, null);
+
+        assertThat(nextMeetingDate).isEqualTo(today);
+    }
+
+    @Test
+    @WithSystemTimeZone("Asia/Kolkata")
+    void nextEligibleMeetingDateFollowsLastMeetingDate() {
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final CalendarData calendar = new CalendarData().setStartDate(today.minusWeeks(1)).setRecurrence("FREQ=WEEKLY;INTERVAL=1");
+
+        final LocalDate nextMeetingDate = service.generateNextEligibleMeetingDateForCollection(calendar, today.minusDays(1));
+
+        // today is not a meeting day, so the search starts one interval ahead and skips the meeting at today + 6
+        assertThat(nextMeetingDate).isEqualTo(today.plusDays(13));
     }
 
     private void mapRowsWith(final ResultSet rs) {
