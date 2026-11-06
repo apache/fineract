@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
-import static org.apache.fineract.client.feign.util.FeignCalls.ok;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
