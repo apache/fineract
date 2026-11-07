@@ -95,7 +95,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
 
             final Supplier<DocumentCreateResponse> response = dispatcher.dispatch(command);
 
-            var unused = response.get();
+            log.debug("Updated import document {}", response.get().getResourceId());
 
             importRepository.saveAndFlush(event.getImportDocument());
         } catch (Exception e) {

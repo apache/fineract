@@ -37,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -125,7 +124,7 @@ public class BatchApiServiceImpl implements BatchApiService {
             boolean enclosingTransaction) {
         BatchRequestContextHolder.setIsEnclosingTransaction(enclosingTransaction);
         try {
-            return enclosingTransaction ? callInTransaction(transaction -> {}, () -> handleRequestNodes(requestList, uriInfo))
+            return enclosingTransaction ? callInTransaction(() -> handleRequestNodes(requestList, uriInfo))
                     : handleRequestNodes(requestList, uriInfo);
         } finally {
             BatchRequestContextHolder.resetIsEnclosingTransaction();
@@ -137,12 +136,9 @@ public class BatchApiServiceImpl implements BatchApiService {
      *
      * @param request
      *            the enclosing supplier of the command
-     * @param transactionConfigurator
-     *            consumer to configure the transaction behavior and isolation
      * @return
      */
-    private List<BatchResponse> callInTransaction(Consumer<TransactionTemplate> transactionConfigurator,
-            Supplier<List<BatchResponse>> request) {
+    private List<BatchResponse> callInTransaction(Supplier<List<BatchResponse>> request) {
         Retry retry = retryConfigurationAssembler.getRetryConfigurationForBatchApiWithEnclosingTransaction();
         List<BatchResponse> responseList = new ArrayList<>();
         Supplier<List<BatchResponse>> batchSupplier = () -> {
@@ -152,7 +148,6 @@ public class BatchApiServiceImpl implements BatchApiService {
                 if (transactionManager instanceof ExtendedJpaTransactionManager extendedJpaTransactionManager) {
                     transactionTemplate.setReadOnly(extendedJpaTransactionManager.isReadOnly());
                 }
-                transactionConfigurator.accept(transactionTemplate);
                 return transactionTemplate.execute(status -> {
                     BatchRequestContextHolder.setEnclosingTransaction(status);
                     responseList.addAll(request.get());

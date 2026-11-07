@@ -44,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -979,7 +980,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Long parentLoanId = loanId;
 
-        var unused = glimRepository.findById(parentLoanId).orElseThrow();
+        if (!glimRepository.existsById(parentLoanId)) {
+            throw new NoSuchElementException("No value present");
+        }
 
         JsonArray repayments = command.arrayOfParameterNamed("formDataArray");
         JsonCommand childCommand;

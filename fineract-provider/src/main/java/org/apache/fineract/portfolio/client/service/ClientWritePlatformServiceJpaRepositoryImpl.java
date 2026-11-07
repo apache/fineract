@@ -236,8 +236,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
-                var unused = this.savingsProductRepository.findById(savingsProductId)
-                        .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                if (!this.savingsProductRepository.existsById(savingsProductId)) {
+                    throw new SavingsProductNotFoundException(savingsProductId);
+                }
             }
 
             boolean isEntity = false;
@@ -583,8 +584,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
                 final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
                 if (savingsProductId != null) {
-                    var unused = this.savingsProductRepository.findById(savingsProductId)
-                            .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                    if (!this.savingsProductRepository.existsById(savingsProductId)) {
+                        throw new SavingsProductNotFoundException(savingsProductId);
+                    }
                 }
                 clientForUpdate.updateSavingsProduct(savingsProductId);
             }

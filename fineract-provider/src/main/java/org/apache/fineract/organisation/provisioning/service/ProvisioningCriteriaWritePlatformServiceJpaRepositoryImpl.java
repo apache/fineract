@@ -85,8 +85,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
 
     @Override
     public CommandProcessingResult deleteProvisioningCriteria(Long criteriaId) {
-        var unused = this.provisioningCriteriaRepository.findById(criteriaId)
-                .orElseThrow(() -> new ProvisioningCriteriaNotFoundException(criteriaId));
+        if (!this.provisioningCriteriaRepository.existsById(criteriaId)) {
+            throw new ProvisioningCriteriaNotFoundException(criteriaId);
+        }
         if (this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryDataByCriteriaId(criteriaId) != null) {
             throw new ProvisioningCriteriaCannotBeDeletedException(criteriaId);
         }
