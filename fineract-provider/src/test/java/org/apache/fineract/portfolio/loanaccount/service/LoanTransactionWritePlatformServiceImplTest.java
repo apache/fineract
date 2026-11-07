@@ -37,8 +37,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -46,7 +44,6 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDoma
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentService;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,8 +71,6 @@ class LoanTransactionWritePlatformServiceImplTest {
     @Mock
     private LoanUtilService loanUtilService;
     @Mock
-    private LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
-    @Mock
     private LoanLifecycleStateMachine loanLifecycleStateMachine;
     @Mock
     private org.apache.fineract.infrastructure.core.service.ExternalIdFactory externalIdFactory;
@@ -93,10 +88,6 @@ class LoanTransactionWritePlatformServiceImplTest {
     private LoanTransactionProcessingService loanTransactionProcessingService;
     @Mock
     private LoanBalanceService loanBalanceService;
-    @Mock
-    private LoanRepositoryWrapper loanRepositoryWrapper;
-    @Mock
-    private NoteRepository noteRepository;
     @Mock
     private LoanReadPlatformService loanReadPlatformService;
     @Mock

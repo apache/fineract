@@ -19,11 +19,14 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
+import java.util.Map;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 public interface ILoanUtilService {
@@ -44,4 +47,10 @@ public interface ILoanUtilService {
     void validateRepaymentTransactionType(LoanTransactionType repaymentTransactionType);
 
     void checkClientOrGroupActive(Loan loan);
+
+    void createNote(Loan loan, JsonCommand command, Map<String, Object> changes);
+
+    void saveNote(Loan loan, String noteText);
+
+    void createTransactionNote(Loan loan, LoanTransaction transaction, String noteText, Map<String, Object> changes);
 }

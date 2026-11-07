@@ -24,23 +24,17 @@ import com.google.gson.JsonObject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -56,10 +50,6 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.group.domain.Group;
-import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -70,8 +60,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
@@ -92,12 +80,8 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionVa
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentParameter;
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -112,7 +96,6 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
-    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final ExternalIdFactory externalIdFactory;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
@@ -122,8 +105,6 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
     private final LoanJournalEntryPoster journalEntryPoster;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanBalanceService loanBalanceService;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final NoteRepository noteRepository;
     private final LoanReadPlatformService loanReadPlatformService;
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanAdjustmentService loanAdjustmentService;
@@ -243,9 +224,9 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newInterestPaymentWaiverTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(newInterestPaymentWaiverTransaction, false, false);
 
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
-        saveNote(noteText, loan, newInterestPaymentWaiverTransaction);
+        this.loanUtilService.createTransactionNote(loan, newInterestPaymentWaiverTransaction, noteText, null);
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 true);
@@ -343,13 +324,6 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         }
     }
 
-    private void saveNote(String noteText, Loan loan, LoanTransaction loanTransaction) {
-        if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, loanTransaction, noteText);
-            this.noteRepository.save(note);
-        }
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
@@ -362,7 +336,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
             final String defaultUserMessage = "The loan cannot reopened as it is foreclosed.";
             throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage, loanId);
         }
-        checkClientOrGroupActive(loan);
+        this.loanUtilService.checkClientOrGroupActive(loan);
 
         businessEventNotifierService.notifyPreBusinessEvent(
                 new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust)));
@@ -475,7 +449,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
                     "Loan transaction:" + transactionId + " chargeback not allowed as loan product is interest recalculation enabled",
                     transactionId);
         }
-        checkClientOrGroupActive(loan);
+        this.loanUtilService.checkClientOrGroupActive(loan);
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
 
@@ -515,14 +489,10 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         // Create journal entries immediately for this transaction
         journalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
 
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParamName);
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-            Note note = Note.loanTransactionNote(loan, newTransaction, noteText);
-            this.noteRepository.save(note);
-        }
+        this.loanUtilService.createTransactionNote(loan, newTransaction, noteText, changes);
 
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargebackTransactionBusinessEvent(newTransaction));
@@ -570,7 +540,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
 
         Loan loan = this.loanAssembler.assembleFromInUserScope(loanId);
         loanTransactionValidator.validateTransaction(loan, LoanTransactionType.WAIVE_INTEREST, command.json());
-        checkClientOrGroupActive(loan);
+        this.loanUtilService.checkClientOrGroupActive(loan);
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         Money unrecognizedIncome = transactionAmountAsMoney.zero();
@@ -605,14 +575,10 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
 
         this.loanTransactionRepository.saveAndFlush(waiveInterestTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(waiveInterestTransaction, false, false);
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, waiveInterestTransaction, noteText);
-            this.noteRepository.save(note);
-        }
+        this.loanUtilService.createTransactionNote(loan, waiveInterestTransaction, noteText, changes);
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 true);
@@ -766,7 +732,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         // Create payment details
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         // Create note
-        createNote(loan, command, changes);
+        this.loanUtilService.createNote(loan, command, changes);
         // Create refund transaction(s)
         final Boolean interestRefundCalculation = command.booleanObjectValueOfParameterNamed("interestRefundCalculation");
         Pair<LoanTransaction, LoanTransaction> refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
@@ -779,7 +745,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
 
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         // Calculate and apply delinquency tag (if applicable)
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
         // disable all active standing orders linked to this loan if status
@@ -878,7 +844,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        createNote(loan, command, changes);
+        this.loanUtilService.createNote(loan, command, changes);
 
         final LoanTransaction interestRefundTxn = loanAccountDomainService.createManualInterestRefundWithAmount(loan, targetTransaction,
                 amount, paymentDetail, txnExternalId);
@@ -922,7 +888,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         }
         loanLifecycleStateMachine.determineAndTransition(loan, interestRefundTxn.getTransactionDate());
 
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
         loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
 
@@ -947,8 +913,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
                 .build();
     }
 
-    @Override
-    public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction) {
+    /* package */ void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction) {
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
 
         if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
@@ -961,51 +926,5 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
         }
         loanLifecycleStateMachine.determineAndTransition(loan, chargebackTransaction.getTransactionDate());
-    }
-
-    private void checkClientOrGroupActive(final Loan loan) {
-        final Client client = loan.client();
-        if (client != null && client.isNotActive()) {
-            throw new ClientNotActiveException(client.getId());
-        }
-        final Group group = loan.group();
-        if (group != null && group.isNotActive()) {
-            throw new GroupNotActiveException(group.getId());
-        }
-    }
-
-    private void createNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
-        final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
-        }
-    }
-
-    private Loan saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
-        /*
-         * Due to the "saveAndFlushLoanWithDataIntegrityViolationChecks" method the loan is saved and flushed in the
-         * middle of the transaction. EclipseLink is in some situations are saving inconsistently the newly created
-         * associations, like the newly created repayment schedule installments. The save and flush cannot be removed
-         * safely till any native queries are used as part of this transaction either. See:
-         * this.loanAccountDomainService.recalculateAccruals(loan);
-         */
-        try {
-            loanRepaymentScheduleInstallmentRepository.saveAll(loan.getRepaymentScheduleInstallments());
-            return this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("external_id_unique")) {
-                baseDataValidator.reset().parameter(LoanApiConstants.externalIdParameterName).failWithCode("value.must.be.unique");
-            }
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors, e);
-            }
-            throw e;
-        }
     }
 }

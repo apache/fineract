@@ -74,12 +74,12 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -140,7 +140,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     private ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     @Mock
-    private LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
+    private LoanAccountService loanAccountService;
 
     @Mock
     private LoanRepositoryWrapper loanRepositoryWrapper;
@@ -207,7 +207,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     public void setUp() {
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DateUtils.parseLocalDate("2025-05-20"))));
-
+        lenient().when(loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(any(Loan.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -972,16 +973,6 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
         assertEquals(expectedResult, actualResult);
         verify(loanTransactionWritePlatformService).makeManualInterestRefund(LOAN_ID, 2L, command);
-    }
-
-    @Test
-    public void handleChargebackTransaction_shouldDelegateToLoanTransactionWritePlatformService() {
-        Loan mockLoan = mock(Loan.class);
-        LoanTransaction mockTxn = mock(LoanTransaction.class);
-
-        loanWritePlatformService.handleChargebackTransaction(mockLoan, mockTxn);
-
-        verify(loanTransactionWritePlatformService).handleChargebackTransaction(mockLoan, mockTxn);
     }
 
     private static final class DisbursementFixture {

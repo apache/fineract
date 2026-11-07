@@ -21,9 +21,12 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
@@ -52,9 +55,11 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 
 @RequiredArgsConstructor
@@ -315,6 +320,35 @@ public class LoanUtilService implements ILoanUtilService {
         final Group group = loan.group();
         if (group != null && group.isNotActive()) {
             throw new GroupNotActiveException(group.getId());
+        }
+    }
+
+    @Override
+    public void createNote(final Loan loan, final JsonCommand command, final Map<String, Object> changes) {
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
+            saveNote(loan, noteText);
+        }
+    }
+
+    @Override
+    public void saveNote(final Loan loan, final String noteText) {
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.loanNote(loan, noteText);
+            this.noteRepository.save(note);
+        }
+    }
+
+    @Override
+    public void createTransactionNote(final Loan loan, final LoanTransaction transaction, final String noteText,
+            final Map<String, Object> changes) {
+        if (StringUtils.isNotBlank(noteText)) {
+            if (changes != null) {
+                changes.put("note", noteText);
+            }
+            final Note note = Note.loanTransactionNote(loan, transaction, noteText);
+            this.noteRepository.save(note);
         }
     }
 
