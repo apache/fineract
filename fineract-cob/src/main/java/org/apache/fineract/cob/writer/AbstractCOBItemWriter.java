@@ -21,7 +21,6 @@ package org.apache.fineract.cob.writer;
 import static org.apache.fineract.cob.data.BusinessStepNameAndOrder.getBusinessStepMap;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -36,6 +35,7 @@ import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.resolver.BusinessDateResolver;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.persistence.AfterTransactionWork;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.listener.StepExecutionListener;
@@ -87,21 +87,19 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
             return;
         }
         TreeMap<Long, String> businessStepMap = getBusinessStepMap(getBusinessSteps());
-        List<I> processedItems = new ArrayList<>(accountIds.size());
         for (Long accountId : accountIds) {
-            processedItems.add(runBusinessSteps(businessStepMap, accountId));
+            runBusinessSteps(businessStepMap, accountId);
         }
-        repository.saveAll(processedItems);
+        // The accounts were loaded in this transaction and are managed, so flushing writes their changes; saving them
+        // as well would only merge, and cascade the merge through every association of the account, to no effect.
         repository.flush();
-        List<Long> ids = processedItems.stream().map(AbstractPersistableCustom::getId).toList();
-        lockingService.deleteByLoanIdInAndLockOwner(ids, getLockOwner());
+        lockingService.deleteByLoanIdInAndLockOwner(List.copyOf(accountIds.getItems()), getLockOwner());
     }
 
-    private I runBusinessSteps(TreeMap<Long, String> businessStepMap, Long accountId) throws Exception {
+    private void runBusinessSteps(TreeMap<Long, String> businessStepMap, Long accountId) throws Exception {
         I current = beforeBusinessSteps(load(accountId));
         I processed = cobBusinessStepService.run(businessStepMap, current);
         setLastRun(processed);
-        return processed;
     }
 
     private I load(Long accountId) {
@@ -122,8 +120,13 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
         businessDate = BusinessDateResolver.resolve(stepExecution);
     }
 
+    /**
+     * Saves any COB error still waiting for its transaction's cleanup (see {@code AbstractLoanItemListener}), so that
+     * none is left behind on this thread when the step ends.
+     */
     @Override
     public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
+        AfterTransactionWork.runReadyWork();
         return ExitStatus.COMPLETED;
     }
 

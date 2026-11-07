@@ -21,6 +21,8 @@ package org.apache.fineract.infrastructure.core.persistence;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -36,6 +38,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>
  * Without an active transaction synchronization the work runs at once. A failure of one piece of work is logged and
  * does not prevent the others from running, nor reaches the transaction manager.
+ * <p>
+ * Work that completes under a transaction no Fineract transaction manager cleans up - one run by another manager, or a
+ * scope that has synchronization but no actual transaction - waits on its thread until the next Fineract transaction
+ * there cleans up, or until a caller drains it with {@link #runReadyWork()} at a point of its own, as the COB writers
+ * do at the end of their step. Pooled threads serve every tenant, so the work keeps the tenant and data source context
+ * it was registered under and runs in it, whichever tenant the thread serves when it runs.
  */
 @Slf4j
 public final class AfterTransactionWork {
@@ -54,22 +62,24 @@ public final class AfterTransactionWork {
             runSafely(work);
             return;
         }
+        Runnable inRegisteringContext = inContext(ThreadLocalContextUtil.getTenant(), ThreadLocalContextUtil.getDataSourceContext(), work);
         // Held by the transaction's own synchronization until that transaction completes: work registered by an outer
         // transaction must not run when an inner one, started inside it, completes first.
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 
             @Override
             public void afterCompletion(int status) {
-                READY.get().addLast(work);
+                READY.get().addLast(inRegisteringContext);
             }
         });
     }
 
     /**
      * Runs the work of the transactions that have completed on this thread. Called by the Fineract transaction managers
-     * once a transaction's resources have been cleaned up.
+     * once a transaction's resources have been cleaned up, and by callers that must not leave work behind on the
+     * thread, at a point where no transaction is open, such as the end of a batch step.
      */
-    static void runReadyWork() {
+    public static void runReadyWork() {
         if (RUNNING.get()) {
             // Work that opens a transaction of its own reaches here again when that transaction cleans up; the outer
             // call carries on with the queue.
@@ -89,6 +99,21 @@ public final class AfterTransactionWork {
             RUNNING.remove();
             READY.remove();
         }
+    }
+
+    private static Runnable inContext(FineractPlatformTenant tenant, String dataSourceContext, Runnable work) {
+        return () -> {
+            FineractPlatformTenant previousTenant = ThreadLocalContextUtil.getTenant();
+            String previousDataSourceContext = ThreadLocalContextUtil.getDataSourceContext();
+            ThreadLocalContextUtil.setTenant(tenant);
+            ThreadLocalContextUtil.setDataSourceContext(dataSourceContext);
+            try {
+                work.run();
+            } finally {
+                ThreadLocalContextUtil.setTenant(previousTenant);
+                ThreadLocalContextUtil.setDataSourceContext(previousDataSourceContext);
+            }
+        };
     }
 
     private static void runSafely(Runnable work) {

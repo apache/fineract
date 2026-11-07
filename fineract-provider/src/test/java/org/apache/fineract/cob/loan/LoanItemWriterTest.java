@@ -88,9 +88,10 @@ class LoanItemWriterTest {
         verify(processed1).setLastClosedBusinessDate(BUSINESS_DATE);
         verify(processed2).setLastClosedBusinessDate(BUSINESS_DATE);
         InOrder inOrder = inOrder(loanRepository, lockingService);
-        inOrder.verify(loanRepository).saveAll(List.of(processed1, processed2));
         inOrder.verify(loanRepository).flush();
         inOrder.verify(lockingService).deleteByLoanIdInAndLockOwner(List.of(1L, 2L), LockOwner.LOAN_COB_CHUNK_PROCESSING);
+        // The loans are managed by the chunk transaction: flushing writes them, a save would only merge them again.
+        verify(loanRepository, never()).saveAll(anyList());
     }
 
     @Test
