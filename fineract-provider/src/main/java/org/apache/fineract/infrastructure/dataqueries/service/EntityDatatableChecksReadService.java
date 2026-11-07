@@ -18,18 +18,14 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import java.util.List;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
 
-public interface EntityDatatableChecksReadService {
+public interface EntityDatatableChecksReadService extends EntityDatatableTemplatesReadService {
 
     EntityDataTableChecksTemplateData retrieveTemplate();
-
-    List<DatatableData> retrieveTemplates(Integer status, String entity, Long productId);
 
     Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
 }
