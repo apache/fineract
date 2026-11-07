@@ -37,7 +37,7 @@ public final class FineractFeignClientHelper {
     }
 
     public static FineractFeignClient createNewFineractFeignClient(String username, String password) {
-        return createNewFineractFeignClient(username, password, builder -> {});
+        return createNewFineractFeignClient(username, password, false);
     }
 
     public static FineractFeignClient createNewFineractFeignClient(String username, String password, boolean debugEnabled) {

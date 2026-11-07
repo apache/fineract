@@ -36,7 +36,9 @@ public class ClientSavingsReadServiceImpl implements ClientSavingsReadService {
 
     @Override
     public void validateSavingsProductExists(final Long savingsProductId) {
-        this.savingsProductRepository.findById(savingsProductId).orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+        if (!this.savingsProductRepository.existsById(savingsProductId)) {
+            throw new SavingsProductNotFoundException(savingsProductId);
+        }
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -123,7 +124,9 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
     public CommandProcessingResult makeGLIMLoanRepayment(final Long loanId, final JsonCommand command) {
         final Long parentLoanId = loanId;
 
-        glimRepository.findById(parentLoanId).orElseThrow();
+        if (!glimRepository.existsById(parentLoanId)) {
+            throw new NoSuchElementException("No value present");
+        }
 
         JsonArray repayments = command.arrayOfParameterNamed("formDataArray");
         JsonCommand childCommand;
