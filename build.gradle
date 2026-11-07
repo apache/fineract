@@ -214,6 +214,7 @@ allprojects  {
             error(
                     "DefaultCharset",
                     "StringSplitter",
+                    "StringCaseLocaleUsage",
                     "MutablePublicArray",
                     "EqualsGetClass",
                     "FutureReturnValueIgnored"
