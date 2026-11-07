@@ -152,15 +152,15 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
 
     @Test
     void aTransactionTypeWithoutAGlRuleFailsTheJobWithAClearError() {
-        // the job doesn't create withholding tax today, and selectAccountId gives it no GL accounts
-        final SavingsAccountTransactionData withholdTax = transaction(SavingsAccountTransactionType.WITHHOLD_TAX, "5", null, null, null);
-        final SavingsAccountData account = accountWith(withholdTax, CASH_BASED);
+        // the job posts interest, overdraft interest and the tax withheld on interest, never a deposit
+        final SavingsAccountTransactionData deposit = transaction(SavingsAccountTransactionType.DEPOSIT, "5", null, null, null);
+        final SavingsAccountData account = accountWith(deposit, CASH_BASED);
         when(savingsAccountWritePlatformService.postInterest(account, false, null, false)).thenReturn(account);
         poster.setSavingAccounts(List.of(account));
 
         assertThatThrownBy(poster::postInterest).isInstanceOfSatisfying(JobExecutionException.class,
                 failure -> assertThat(failure.getCauses()).singleElement().isInstanceOf(IllegalStateException.class)
-                        .extracting(Throwable::getMessage).asString().contains("savingsAccountTransactionType.withholdTax"));
+                        .extracting(Throwable::getMessage).asString().contains("savingsAccountTransactionType.deposit"));
         verify(jdbcTemplate, never()).batchUpdate(startsWith("INSERT INTO acc_gl_journal_entry"), anyList());
     }
 
