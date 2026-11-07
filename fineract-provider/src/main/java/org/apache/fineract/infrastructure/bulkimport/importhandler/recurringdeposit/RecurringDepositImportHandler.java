@@ -72,25 +72,37 @@ public class RecurringDepositImportHandler implements ImportHandler {
         List<SavingsApproval> approvalDates = new ArrayList<>();
         List<SavingsActivation> activationDates = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, savings, approvalDates, activationDates, statuses, locale, dateFormat);
-        return importEntity(workbook, savings, approvalDates, activationDates, statuses, dateFormat);
+        int errorCount = readExcelFile(workbook, savings, approvalDates, activationDates, statuses, locale, dateFormat);
+        return importEntity(workbook, savings, approvalDates, activationDates, statuses, dateFormat, errorCount);
     }
 
-    private void readExcelFile(final Workbook workbook, final List<RecurringDepositAccountData> savings,
+    private int readExcelFile(final Workbook workbook, final List<RecurringDepositAccountData> savings,
             final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates, final List<String> statuses,
             final String locale, final String dateFormat) {
+        int errorCount = 0;
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.ROWHEADER_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, RecurringDepositConstants.STATUS_COL)) {
-                savings.add(readSavings(workbook, row, statuses, locale, dateFormat));
-                approvalDates.add(readSavingsApproval(row, locale, dateFormat));
-                activationDates.add(readSavingsActivation(row, locale, dateFormat));
+                try {
+                    RecurringDepositAccountData savingsAccount = readSavings(workbook, row, statuses, locale, dateFormat);
+                    SavingsApproval approvalDate = readSavingsApproval(row, locale, dateFormat);
+                    SavingsActivation activationDate = readSavingsActivation(row, locale, dateFormat);
+                    savings.add(savingsAccount);
+                    approvalDates.add(approvalDate);
+                    activationDates.add(activationDate);
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount++;
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(savingsSheet, rowIndex, errorMessage, RecurringDepositConstants.STATUS_COL);
+                }
             }
         }
 
+        return errorCount;
     }
 
     private SavingsActivation readSavingsActivation(final Row row, final String locale, final String dateFormat) {
@@ -228,7 +240,8 @@ public class RecurringDepositImportHandler implements ImportHandler {
             }
             recurringFrequencyTypeEnum = new EnumOptionData(recurringFrequencyTypeId, null, null);
         }
-        LocalDate depositStartDate = ImportHandlerUtils.readAsDate(RecurringDepositConstants.DEPOSIT_START_DATE_COL, row, dateFormat, locale);
+        LocalDate depositStartDate = ImportHandlerUtils.readAsDate(RecurringDepositConstants.DEPOSIT_START_DATE_COL, row, dateFormat,
+                locale);
         Boolean allowWithdrawal = ImportHandlerUtils.readAsBoolean(RecurringDepositConstants.ALLOW_WITHDRAWAL_COL, row);
         Boolean isMandatoryDeposit = ImportHandlerUtils.readAsBoolean(RecurringDepositConstants.IS_MANDATORY_DEPOSIT_COL, row);
         Boolean inheritCalendar = ImportHandlerUtils.readAsBoolean(RecurringDepositConstants.FREQ_SAME_AS_GROUP_CENTER_COL, row);
@@ -273,10 +286,9 @@ public class RecurringDepositImportHandler implements ImportHandler {
 
     private Count importEntity(final Workbook workbook, final List<RecurringDepositAccountData> savings,
             final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates, final List<String> statuses,
-            final String dateFormat) {
+            final String dateFormat, int errorCount) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         int progressLevel = 0;
         Long savingsId = null;
         String errorMessage = "";

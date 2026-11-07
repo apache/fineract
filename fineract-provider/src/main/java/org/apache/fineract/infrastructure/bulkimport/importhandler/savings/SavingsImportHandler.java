@@ -76,23 +76,35 @@ public class SavingsImportHandler implements ImportHandler {
         List<SavingsApproval> approvalDates = new ArrayList<>();
         List<SavingsActivation> activationDates = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, savings, approvalDates, activationDates, statuses, locale, dateFormat);
-        return importEntity(workbook, savings, approvalDates, activationDates, statuses, dateFormat);
+        int errorCount = readExcelFile(workbook, savings, approvalDates, activationDates, statuses, locale, dateFormat);
+        return importEntity(workbook, savings, approvalDates, activationDates, statuses, dateFormat, errorCount);
     }
 
-    public void readExcelFile(final Workbook workbook, final List<SavingsAccountData> savings, final List<SavingsApproval> approvalDates,
+    public int readExcelFile(final Workbook workbook, final List<SavingsAccountData> savings, final List<SavingsApproval> approvalDates,
             final List<SavingsActivation> activationDates, final List<String> statuses, final String locale, final String dateFormat) {
+        int errorCount = 0;
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, SavingsConstants.STATUS_COL)) {
-                savings.add(readSavings(workbook, row, statuses, locale, dateFormat));
-                approvalDates.add(readSavingsApproval(row, locale, dateFormat));
-                activationDates.add(readSavingsActivation(row, locale, dateFormat));
+                try {
+                    SavingsAccountData savingsAccount = readSavings(workbook, row, statuses, locale, dateFormat);
+                    SavingsApproval approvalDate = readSavingsApproval(row, locale, dateFormat);
+                    SavingsActivation activationDate = readSavingsActivation(row, locale, dateFormat);
+                    savings.add(savingsAccount);
+                    approvalDates.add(approvalDate);
+                    activationDates.add(activationDate);
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount++;
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(savingsSheet, rowIndex, errorMessage, SavingsConstants.STATUS_COL);
+                }
             }
         }
+        return errorCount;
     }
 
     private SavingsActivation readSavingsActivation(Row row, String locale, String dateFormat) {
@@ -269,10 +281,9 @@ public class SavingsImportHandler implements ImportHandler {
     }
 
     public Count importEntity(final Workbook workbook, final List<SavingsAccountData> savings, final List<SavingsApproval> approvalDates,
-            final List<SavingsActivation> activationDates, final List<String> statuses, final String dateFormat) {
+            final List<SavingsActivation> activationDates, final List<String> statuses, final String dateFormat, int errorCount) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         int progressLevel = 0;
         String errorMessage = "";
         Long savingsId = null;

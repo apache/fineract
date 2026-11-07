@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -62,11 +63,13 @@ public class ClientEntityImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
-        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat, locale);
+        AtomicInteger errorCount = new AtomicInteger();
+        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, errorCount);
+        return importEntity(workbook, clients, dateFormat, locale, errorCount.get());
     }
 
-    private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            AtomicInteger errorCount) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(clientSheet, 0);
@@ -74,7 +77,14 @@ public class ClientEntityImportHandler implements ImportHandler {
             Row row;
             row = clientSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ClientEntityConstants.STATUS_COL)) {
-                clients.add(readClient(workbook, row, locale, dateFormat));
+                try {
+                    clients.add(readClient(workbook, row, locale, dateFormat));
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount.incrementAndGet();
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(clientSheet, rowIndex, errorMessage, ClientEntityConstants.STATUS_COL);
+                }
             }
         }
         return clients;
@@ -94,7 +104,8 @@ public class ClientEntityImportHandler implements ImportHandler {
             staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
         }
         LocalDate incorportionDate = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_DATE_COL, row, dateFormat, locale);
-        LocalDate incorporationTill = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL, row, dateFormat, locale);
+        LocalDate incorporationTill = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL, row, dateFormat,
+                locale);
         String mobileNo = null;
         if (ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row) != null) {
             mobileNo = Objects.requireNonNull(ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row)).toString();
@@ -195,11 +206,11 @@ public class ClientEntityImportHandler implements ImportHandler {
                 locale, dateFormat);
     }
 
-    private Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, final String locale) {
+    private Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, final String locale,
+            int errorCount) {
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
 
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage;
 
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
