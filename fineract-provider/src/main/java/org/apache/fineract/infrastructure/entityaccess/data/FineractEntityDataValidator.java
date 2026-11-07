@@ -158,11 +158,15 @@ public class FineractEntityDataValidator {
     }
 
     public void checkForLoanProducts(final Long id) {
-        var unused = this.loanProductRepository.findById(id).orElseThrow(() -> new LoanProductNotFoundException(id));
+        if (!this.loanProductRepository.existsById(id)) {
+            throw new LoanProductNotFoundException(id);
+        }
     }
 
     public void checkForSavingsProducts(final Long id) {
-        var unused = this.savingsProductRepository.findById(id).orElseThrow(() -> new SavingsProductNotFoundException(id));
+        if (!this.savingsProductRepository.existsById(id)) {
+            throw new SavingsProductNotFoundException(id);
+        }
     }
 
     public void checkForCharges(final Long id) {
@@ -170,7 +174,9 @@ public class FineractEntityDataValidator {
     }
 
     public void checkForRoles(final Long id) {
-        var unused = this.roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
+        if (!this.roleRepository.existsById(id)) {
+            throw new RoleNotFoundException(id);
+        }
     }
 
     public void validateForUpdate(final String json) {
