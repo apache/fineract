@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.infrastructure.security.utils.TableColumnReader;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -64,11 +65,12 @@ public class DataQueriesAutoConfiguration {
             final DataTableValidator dataTableValidator, final NamedParameterJdbcTemplate namedParameterJdbcTemplate,
             final DatatableKeywordGenerator datatableKeywordGenerator, final SearchUtil searchUtil,
             final BusinessEventNotifierService businessEventNotifierService, final DatatableReadService datatableReadService,
-            final DatatableUtil datatableUtil, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository) {
+            final DatatableUtil datatableUtil, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
+            final TableColumnReader tableColumnReader) {
         return new DatatableWriteServiceImpl(jdbcTemplate, databaseTypeResolver, sqlGenerator, context, fromJsonHelper, genericDataService,
                 fromApiJsonDeserializer, configurationDomainService, codeReadPlatformService, dataTableValidator,
                 namedParameterJdbcTemplate, datatableKeywordGenerator, searchUtil, businessEventNotifierService, datatableReadService,
-                datatableUtil, globalConfigurationRepository);
+                datatableUtil, globalConfigurationRepository, tableColumnReader);
     }
 
 }

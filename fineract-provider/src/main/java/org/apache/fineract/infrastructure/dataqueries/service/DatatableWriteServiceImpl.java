@@ -105,6 +105,7 @@ import org.apache.fineract.infrastructure.event.business.domain.datatable.Datata
 import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryUpdatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.TableColumnReader;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataAccessException;
@@ -149,6 +150,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     private final DatatableReadService datatableReadService;
     private final DatatableUtil datatableUtil;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
+    private final TableColumnReader tableColumnReader;
 
     @Transactional
     @Override
@@ -287,6 +289,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             log.debug("SQL:: {}", sqlBuilder);
 
             jdbcTemplate.execute(sqlBuilder.toString());
+            tableColumnReader.evict(datatableName);
 
             // create indexes
             if (multiRow) {
@@ -382,6 +385,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                     }
 
                     this.jdbcTemplate.execute(sqlBuilder.toString());
+                    tableColumnReader.evict(datatableName);
 
                     deregisterDatatable(datatableName);
                     registerDatatable(datatableName, entityName, entitySubType);
@@ -418,6 +422,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 }
                 sqlBuilder.append(constrainBuilder);
                 this.jdbcTemplate.execute(sqlBuilder.toString());
+                tableColumnReader.evict(datatableName);
                 deleteColumnCodeMapping(codeMappings);
             }
             if (addColumns != null) {
@@ -441,6 +446,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 }
                 sqlBuilder.append(constrainBuilder);
                 jdbcTemplate.execute(sqlBuilder.toString());
+                tableColumnReader.evict(datatableName);
                 createIndexesForTable(datatableName, addColumns);
                 registerColumnCodeMapping(codeMappings);
             }
@@ -472,6 +478,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 try {
                     if (!sqlBuilder.isEmpty()) {
                         jdbcTemplate.execute(sqlBuilder.toString());
+                        tableColumnReader.evict(datatableName);
                     }
                     deleteColumnCodeMapping(removeMappings);
                     registerColumnCodeMapping(codeMappings);
@@ -549,6 +556,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             final String sql = "DROP TABLE " + sqlGenerator.escape(datatableName);
             sqlArray[0] = sql;
             this.jdbcTemplate.batchUpdate(sqlArray);
+            tableColumnReader.evict(datatableName);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

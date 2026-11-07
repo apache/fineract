@@ -18,80 +18,43 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @RequiredArgsConstructor
 @Component
 public class ColumnValidator {
 
     private final SqlValidator sqlValidator;
-    private final JdbcTemplate jdbcTemplate;
+    private final TableColumnReader tableColumnReader;
 
     private void validateColumn(Map<String, Set<String>> tableColumnMap) {
-        DataSource dataSource = Objects.requireNonNull(this.jdbcTemplate.getDataSource());
-        Connection connection = DataSourceUtils.getConnection(dataSource);
+        for (Map.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
+            Set<String> columns = entry.getValue();
+            Set<String> tableColumns = tableColumnReader.readColumns(entry.getKey());
 
-        try {
-            DatabaseMetaData dbMetaData = connection.getMetaData();
+            if (!columns.isEmpty() && tableColumns.isEmpty()) {
+                throw new PlatformApiDataValidationException("error.msg.invalid.table.column", "Invalid table or column name detected",
+                        entry.getKey(), columns);
+            }
 
-            for (Map.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
-                Set<String> columns = entry.getValue();
-
-                try (ResultSet resultSet = dbMetaData.getColumns(null, null, entry.getKey(), null)) {
-                    Set<String> tableColumns = getTableColumns(resultSet);
-
-                    if (!columns.isEmpty() && tableColumns.isEmpty()) {
-                        throw new PlatformApiDataValidationException("error.msg.invalid.table.column",
-                                "Invalid table or column name detected", entry.getKey(), columns);
-                    }
-
-                    for (String requestedColumn : columns) {
-                        if (!tableColumns.contains(requestedColumn)) {
-                            throw new PlatformApiDataValidationException("error.msg.invalid.table.column",
-                                    "Invalid table column name detected", entry.getKey(), requestedColumn);
-                        }
-                    }
+            for (String requestedColumn : columns) {
+                if (!tableColumns.contains(requestedColumn)) {
+                    throw new PlatformApiDataValidationException("error.msg.invalid.table.column", "Invalid table column name detected",
+                            entry.getKey(), requestedColumn);
                 }
             }
-        } catch (SQLException e) {
-            throw new PlatformApiDataValidationException("error.msg.database.access.error",
-                    "Database access error during column validation", e.getMessage(), e);
-        } finally {
-            DataSourceUtils.releaseConnection(connection, dataSource);
         }
-    }
-
-    private Set<String> getTableColumns(final ResultSet rs) {
-        Set<String> columns = new HashSet<>();
-        try {
-            while (rs.next()) {
-                columns.add(rs.getString("column_name"));
-            }
-        } catch (SQLException e) {
-            log.error("Problem occurred in getTableColumns function", e);
-        }
-        return columns;
     }
 
     public void validateSqlInjection(String schema, String... conditions) {
