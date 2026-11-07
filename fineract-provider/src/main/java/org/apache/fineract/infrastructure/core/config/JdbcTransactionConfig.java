@@ -19,8 +19,6 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
-
 import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedDataSourceTransactionManager;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
@@ -31,6 +29,7 @@ import org.springframework.boot.transaction.autoconfigure.TransactionManagerCust
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration(proxyBeanMethods = false)
@@ -48,11 +47,15 @@ public class JdbcTransactionConfig {
         return transactionManager;
     }
 
+    /**
+     * A transaction of its own, also inside a JPA transaction, which {@link ExtendedDataSourceTransactionManager}
+     * suspends for it.
+     */
     @Bean("requiresNewTransactionJdbcTemplate")
     public TransactionTemplate requiresNewTransactionJdbcTemplate(
             @Qualifier("jdbcTransactionManager") PlatformTransactionManager jdbcTransactionManager) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(jdbcTransactionManager);
-        transactionTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return transactionTemplate;
     }
 }

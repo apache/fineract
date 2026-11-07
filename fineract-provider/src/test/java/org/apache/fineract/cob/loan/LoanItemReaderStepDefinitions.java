@@ -20,10 +20,10 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.google.common.base.Splitter;
 import io.cucumber.java8.En;
@@ -38,12 +38,10 @@ import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.cob.exceptions.LockedReadException;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.cob.service.RetrieveIdService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.JobInstance;
@@ -61,12 +59,9 @@ public class LoanItemReaderStepDefinitions implements En {
 
     private LockingService lockingService = mock(LockingService.class);
 
-    private LoanItemReader loanItemReader = new LoanItemReader(loanRepository,
-            new BeforeStepLockingItemReaderHelper(retrieveIdService, lockingService));
+    private LoanItemReader loanItemReader = new LoanItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, lockingService));
 
-    private Loan loan = mock(Loan.class);
-
-    private Loan resultItem;
+    private Long resultItem;
 
     public LoanItemReaderStepDefinitions() {
         Given("/^The LoanItemReader.read method with loanIds (.*)$/", (String loanIds) -> {
@@ -108,9 +103,6 @@ public class LoanItemReaderStepDefinitions implements En {
                     .thenReturn(List.of(loanAccountLockNegativeNumberTest));
 
             loanItemReader.beforeStep(stepExecution);
-
-            lenient().when(this.loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-            lenient().when(this.loanRepository.findById(-1L)).thenThrow(new RuntimeException("fail"));
         });
 
         When("LoanItemReader.read method executed", () -> {
@@ -118,17 +110,17 @@ public class LoanItemReaderStepDefinitions implements En {
         });
 
         Then("The LoanItemReader.read result should match", () -> {
-            assertEquals(loan, resultItem);
+            assertEquals(1L, resultItem);
         });
 
         Then("The LoanItemReader.read result null", () -> {
             assertNull(resultItem);
         });
 
-        Then("throw exception LoanItemReader.read method", () -> {
-            assertThrows(LockedReadException.class, () -> {
-                resultItem = this.loanItemReader.read();
-            });
+        Then("The LoanItemReader.read returns the loan id without loading the loan", () -> {
+            assertEquals(-1L, this.loanItemReader.read());
+            // A loan that cannot be loaded must fail in the writer, where scan mode skips it alone.
+            verifyNoInteractions(loanRepository);
         });
     }
 }
