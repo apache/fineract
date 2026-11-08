@@ -58,6 +58,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartValidator;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
@@ -224,7 +225,11 @@ public class FixedDepositProduct extends SavingsProduct {
                                 deletedCharts.put(idParamName, chartId);
                             }
                         } else {
-                            chart.update(chartCommand, chartsChanges, baseDataValidator, this.setOfCharts(), this.currency().getCode());
+                            chart.update(chartCommand, chartsChanges, baseDataValidator, this.currency().getCode());
+                            if (chartCommand.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
+                                InterestRateChartValidator.validateChartSlabs(chart, baseDataValidator);
+                            }
+                            InterestRateChartValidator.validateNoOverlapWithOtherCharts(chart, this.setOfCharts(), baseDataValidator);
                         }
                     } else {
                         // assemble chart
