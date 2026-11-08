@@ -49,6 +49,8 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Tag(name = "Fineract Entity", description = "")
+@PartialResponseParameters({ FineractEntityApiResourceConstants.mapId, FineractEntityApiResourceConstants.relId,
+        FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType })
 @RequiredArgsConstructor
 public class FineractEntityApiResource {
 
@@ -73,8 +75,6 @@ public class FineractEntityApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "retrieveOne")
     @AlternativeOperationId("retrieveOne_4")
-    @PartialResponseParameters({ FineractEntityApiResourceConstants.mapId, FineractEntityApiResourceConstants.relId,
-            FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType })
     public Collection<FineractEntityToEntityMappingData> retrieveOne(@PathParam("mapId") final Long mapId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.ENTITY_MAPPING_RESOURCE_NAME);
@@ -85,8 +85,6 @@ public class FineractEntityApiResource {
     @GET
     @Path("/{mapId}/{fromId}/{toId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @PartialResponseParameters({ FineractEntityApiResourceConstants.mapId, FineractEntityApiResourceConstants.relId,
-            FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType })
     public Collection<FineractEntityToEntityMappingData> getEntityToEntityMappings(@PathParam("mapId") final Long mapId,
             @PathParam("fromId") final Long fromId, @PathParam("toId") final Long toId, @Context final UriInfo uriInfo) {
 

@@ -59,6 +59,15 @@ import org.springframework.stereotype.Component;
 @Path("/v1/" + ReportMailingJobConstants.REPORT_MAILING_JOB_RESOURCE_NAME)
 @Component
 @Tag(name = "Report Mailing Jobs", description = "This resource allows you to create a scheduled job that runs a report and sents it by email to specified email addresses.\n\nThe scheduled job can be configured to run once or on a regular basis (once a day, twice a week, etc)")
+@PartialResponseParameters({ ReportMailingJobConstants.ID_PARAM_NAME, ReportMailingJobConstants.NAME_PARAM_NAME,
+        ReportMailingJobConstants.DESCRIPTION_PARAM_NAME, ReportMailingJobConstants.RECURRENCE_PARAM_NAME,
+        ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME,
+        ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_PARAM_NAME,
+        ReportMailingJobConstants.STRETCHY_REPORT_PARAM_NAME, ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME,
+        ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME,
+        ReportMailingJobConstants.PREVIOUS_RUN_DATE_TIME_PARAM_NAME, ReportMailingJobConstants.NEXT_RUN_DATE_TIME_PARAM_NAME,
+        ReportMailingJobConstants.PREVIOUS_RUN_STATUS, ReportMailingJobConstants.PREVIOUS_RUN_ERROR_LOG,
+        ReportMailingJobConstants.PREVIOUS_RUN_ERROR_MESSAGE, ReportMailingJobConstants.NUMBER_OF_RUNS })
 @RequiredArgsConstructor
 public class ReportMailingJobApiResource {
 
@@ -121,15 +130,6 @@ public class ReportMailingJobApiResource {
             + "\n" + "reportmailingjobs/1\n" + "\n" + "\n" + "reportmailingjobs/1?template=true")
     @AlternativeOperationId("retrieveReportMailingJob")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportMailingJobApiResourceSwagger.GetReportMailingJobsResponse.class)))
-    @PartialResponseParameters({ ReportMailingJobConstants.ID_PARAM_NAME, ReportMailingJobConstants.NAME_PARAM_NAME,
-            ReportMailingJobConstants.DESCRIPTION_PARAM_NAME, ReportMailingJobConstants.RECURRENCE_PARAM_NAME,
-            ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME,
-            ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_PARAM_NAME,
-            ReportMailingJobConstants.STRETCHY_REPORT_PARAM_NAME, ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME,
-            ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME,
-            ReportMailingJobConstants.PREVIOUS_RUN_DATE_TIME_PARAM_NAME, ReportMailingJobConstants.NEXT_RUN_DATE_TIME_PARAM_NAME,
-            ReportMailingJobConstants.PREVIOUS_RUN_STATUS, ReportMailingJobConstants.PREVIOUS_RUN_ERROR_LOG,
-            ReportMailingJobConstants.PREVIOUS_RUN_ERROR_MESSAGE, ReportMailingJobConstants.NUMBER_OF_RUNS })
     public ReportMailingJobData retrieveReportMailingJob(@PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser()
@@ -154,15 +154,6 @@ public class ReportMailingJobApiResource {
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "reportmailingjobs/template")
     @AlternativeOperationId("retrieveReportMailingJobTemplate")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportMailingJobApiResourceSwagger.GetReportMailingJobsTemplate.class)))
-    @PartialResponseParameters({ ReportMailingJobConstants.ID_PARAM_NAME, ReportMailingJobConstants.NAME_PARAM_NAME,
-            ReportMailingJobConstants.DESCRIPTION_PARAM_NAME, ReportMailingJobConstants.RECURRENCE_PARAM_NAME,
-            ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME,
-            ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_PARAM_NAME,
-            ReportMailingJobConstants.STRETCHY_REPORT_PARAM_NAME, ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME,
-            ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME,
-            ReportMailingJobConstants.PREVIOUS_RUN_DATE_TIME_PARAM_NAME, ReportMailingJobConstants.NEXT_RUN_DATE_TIME_PARAM_NAME,
-            ReportMailingJobConstants.PREVIOUS_RUN_STATUS, ReportMailingJobConstants.PREVIOUS_RUN_ERROR_LOG,
-            ReportMailingJobConstants.PREVIOUS_RUN_ERROR_MESSAGE, ReportMailingJobConstants.NUMBER_OF_RUNS })
     public ReportMailingJobData retrieveReportMailingJobTemplate(@Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser()
                 .validateHasReadPermission(ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME);
@@ -175,15 +166,6 @@ public class ReportMailingJobApiResource {
     @Operation(summary = "List Report Mailing Jobs", operationId = "retrieveAllReportMailingJobs", description = "Example Requests:\n"
             + "\n" + "reportmailingjobs")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportMailingJobApiResourceSwagger.GetReportMailingJobsResponse.class))))
-    @PartialResponseParameters({ ReportMailingJobConstants.ID_PARAM_NAME, ReportMailingJobConstants.NAME_PARAM_NAME,
-            ReportMailingJobConstants.DESCRIPTION_PARAM_NAME, ReportMailingJobConstants.RECURRENCE_PARAM_NAME,
-            ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME,
-            ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_PARAM_NAME,
-            ReportMailingJobConstants.STRETCHY_REPORT_PARAM_NAME, ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME,
-            ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME,
-            ReportMailingJobConstants.PREVIOUS_RUN_DATE_TIME_PARAM_NAME, ReportMailingJobConstants.NEXT_RUN_DATE_TIME_PARAM_NAME,
-            ReportMailingJobConstants.PREVIOUS_RUN_STATUS, ReportMailingJobConstants.PREVIOUS_RUN_ERROR_LOG,
-            ReportMailingJobConstants.PREVIOUS_RUN_ERROR_MESSAGE, ReportMailingJobConstants.NUMBER_OF_RUNS })
     public Page<ReportMailingJobData> retrieveAllReportMailingJobs(@Context final UriInfo uriInfo,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,

@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonZonedDateTimeEpochFormat;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 
 /**
@@ -33,6 +34,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonZonedDateTimeEpochFormat
 public final class ReportMailingJobData {
 
     private Long id;

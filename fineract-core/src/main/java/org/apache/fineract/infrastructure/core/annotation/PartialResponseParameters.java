@@ -31,9 +31,13 @@ import java.lang.annotation.Target;
  * It carries the set the GSON based serialization used to receive as {@code supportedResponseParameters}: a requested
  * field outside the set is rejected, and a supported field that was not requested is dropped from the response. Without
  * this annotation a partial response keeps only the requested names.
+ *
+ * <p>
+ * It can be declared on the resource class, which applies it to every method, and a method can declare its own set to
+ * override the one on the class.
  */
 @Documented
-@Target(ElementType.METHOD)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PartialResponseParameters {
 
