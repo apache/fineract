@@ -16,27 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "ASSIGNSTAFF")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class AssignGroupStaffCommandHandler implements NewCommandSourceHandler {
+public class GroupAssignStaffCommandHandler implements CommandHandler<GroupAssignStaffRequest, GroupAssignStaffResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupAssignStaff", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.assignGroupOrCenterStaff(command.entityId(), command);
+    @Transactional
+    public GroupAssignStaffResponse handle(Command<GroupAssignStaffRequest> command) {
+        return writePlatformService.assignGroupStaff(command.getPayload());
+    }
+
+    @Override
+    public GroupAssignStaffResponse fallback(Command<GroupAssignStaffRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
