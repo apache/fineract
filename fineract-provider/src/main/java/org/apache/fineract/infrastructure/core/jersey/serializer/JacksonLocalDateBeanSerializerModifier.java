@@ -24,32 +24,39 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.jersey.converter.LocalDateJsonConverter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArraySerializer;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonZonedDateTimeEpochSerializer;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonZonedDateTimeEpochFormat;
 
 public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifier {
 
     private final JsonSerializer<?> localDateSerializer = new JacksonSerializerAdapter<>(new LocalDateJsonConverter());
     private final JsonSerializer<?> localDateArraySerializer = new JacksonLocalDateArraySerializer();
+    private final JsonSerializer<?> zonedDateTimeEpochSerializer = new JacksonZonedDateTimeEpochSerializer();
 
     @Override
     @SuppressWarnings("unchecked")
     public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc,
             List<BeanPropertyWriter> beanProperties) {
         if (beanDesc.getBeanClass().isAnnotationPresent(JsonLocalDateArrayFormat.class)) {
-            assignLocalDateSerializer(beanProperties, (JsonSerializer<Object>) localDateArraySerializer);
+            assignSerializer(beanProperties, LocalDate.class, (JsonSerializer<Object>) localDateArraySerializer);
         } else {
-            assignLocalDateSerializer(beanProperties, (JsonSerializer<Object>) localDateSerializer);
+            assignSerializer(beanProperties, LocalDate.class, (JsonSerializer<Object>) localDateSerializer);
+        }
+        if (beanDesc.getBeanClass().isAnnotationPresent(JsonZonedDateTimeEpochFormat.class)) {
+            assignSerializer(beanProperties, ZonedDateTime.class, (JsonSerializer<Object>) zonedDateTimeEpochSerializer);
         }
 
         return beanProperties;
     }
 
-    private void assignLocalDateSerializer(List<BeanPropertyWriter> beanProperties, JsonSerializer<Object> serializer) {
+    private void assignSerializer(List<BeanPropertyWriter> beanProperties, Class<?> propertyType, JsonSerializer<Object> serializer) {
         for (BeanPropertyWriter writer : beanProperties) {
-            if (LocalDate.class.equals(writer.getType().getRawClass())) {
+            if (propertyType.equals(writer.getType().getRawClass())) {
                 writer.assignSerializer(serializer);
             }
         }

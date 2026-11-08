@@ -57,6 +57,9 @@ import org.springframework.stereotype.Component;
 @Path(AccountNumberFormatConstants.resourceRelativeURL)
 @Component
 @Tag(name = "Account number format", description = "Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts.")
+@PartialResponseParameters({ AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
+        AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
+        AccountNumberFormatConstants.prefixTypeOptionsParamName })
 @RequiredArgsConstructor
 public class AccountNumberFormatsApiResource {
 
@@ -72,9 +75,6 @@ public class AccountNumberFormatsApiResource {
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "\n" + "Example Request:\n" + "\n" + "accountnumberformats/template")
     @AlternativeOperationId("retrieveTemplate_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsResponseTemplate.class)))
-    @PartialResponseParameters({ AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
-            AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
-            AccountNumberFormatConstants.prefixTypeOptionsParamName })
     public AccountNumberFormatData retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
@@ -89,9 +89,6 @@ public class AccountNumberFormatsApiResource {
             + "\n" + "accountnumberformats\n" + "\n" + "\n" + "accountnumberformats?fields=accountType,prefixType")
     @AlternativeOperationId("retrieveAll_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class))))
-    @PartialResponseParameters({ AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
-            AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
-            AccountNumberFormatConstants.prefixTypeOptionsParamName })
     public List<AccountNumberFormatData> retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
@@ -107,9 +104,6 @@ public class AccountNumberFormatsApiResource {
             + "accountnumberformats/1?fields=accountType,prefixType")
     @AlternativeOperationId("retrieveOne")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class)))
-    @PartialResponseParameters({ AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
-            AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
-            AccountNumberFormatConstants.prefixTypeOptionsParamName })
     public AccountNumberFormatData retrieveOne(@Context final UriInfo uriInfo,
             @PathParam("accountNumberFormatId") @Parameter(description = "accountNumberFormatId") final Long accountNumberFormatId) {
 

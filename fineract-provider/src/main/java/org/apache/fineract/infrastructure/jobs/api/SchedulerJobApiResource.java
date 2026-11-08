@@ -71,6 +71,10 @@ import org.springframework.stereotype.Component;
 @Path("/v1/jobs")
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
+@PartialResponseParameters({ SchedulerJobApiConstants.jobIdentifierParamName, SchedulerJobApiConstants.displayNameParamName,
+        SchedulerJobApiConstants.nextRunTimeParamName, SchedulerJobApiConstants.initializingErrorParamName,
+        SchedulerJobApiConstants.cronExpressionParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
+        SchedulerJobApiConstants.currentlyRunningParamName, SchedulerJobApiConstants.lastRunHistoryObjParamName })
 @RequiredArgsConstructor
 @Tag(name = "SCHEDULER JOB", description = "Batch jobs (also known as cron jobs on Unix-based systems) are a series of back-end jobs executed on a computer at a particular time defined in job's cron expression.\n\n At any point, you can view the list of batch jobs scheduled to run along with other details specific to each job. Manually you can execute the jobs at any point of time.\n\n The scheduler status can be either \"Active\" or \"Standby\". If the scheduler status is Active, it indicates that all batch jobs are running/ will run as per the specified schedule.If the scheduler status is Standby, it will ensure all scheduled batch runs are suspended.")
 public class SchedulerJobApiResource {
@@ -87,10 +91,6 @@ public class SchedulerJobApiResource {
             + "\n" + "Example Requests:\n" + "\n" + "jobs")
     @AlternativeOperationId("retrieveAll_8")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class))))
-    @PartialResponseParameters({ SchedulerJobApiConstants.jobIdentifierParamName, SchedulerJobApiConstants.displayNameParamName,
-            SchedulerJobApiConstants.nextRunTimeParamName, SchedulerJobApiConstants.initializingErrorParamName,
-            SchedulerJobApiConstants.cronExpressionParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-            SchedulerJobApiConstants.currentlyRunningParamName, SchedulerJobApiConstants.lastRunHistoryObjParamName })
     public List<JobDetailData> retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SCHEDULER_RESOURCE_NAME);
         return this.schedulerJobRunnerReadService.findAllJobDetails();
@@ -102,10 +102,6 @@ public class SchedulerJobApiResource {
             + "Example Requests:\n" + "\n" + "jobs/5")
     @AlternativeOperationId("retrieveOne_5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class)))
-    @PartialResponseParameters({ SchedulerJobApiConstants.jobIdentifierParamName, SchedulerJobApiConstants.displayNameParamName,
-            SchedulerJobApiConstants.nextRunTimeParamName, SchedulerJobApiConstants.initializingErrorParamName,
-            SchedulerJobApiConstants.cronExpressionParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-            SchedulerJobApiConstants.currentlyRunningParamName, SchedulerJobApiConstants.lastRunHistoryObjParamName })
     public JobDetailData retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
             @Context final UriInfo uriInfo) {
         return retrieveOne(IdTypeResolver.resolveDefault(), Objects.toString(jobId, null));
@@ -116,10 +112,6 @@ public class SchedulerJobApiResource {
     @Operation(summary = "Retrieve a Job", description = "Returns the details of a Job bu shortName.\n" + "\n" + "Example Requests:\n"
             + "\n" + "jobs/short-name/SA_PINT")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.GetJobsResponse.class)))
-    @PartialResponseParameters({ SchedulerJobApiConstants.jobIdentifierParamName, SchedulerJobApiConstants.displayNameParamName,
-            SchedulerJobApiConstants.nextRunTimeParamName, SchedulerJobApiConstants.initializingErrorParamName,
-            SchedulerJobApiConstants.cronExpressionParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-            SchedulerJobApiConstants.currentlyRunningParamName, SchedulerJobApiConstants.lastRunHistoryObjParamName })
     public JobDetailData retrieveByShortName(
             @PathParam("shortName") @Parameter(required = true, description = SchedulerJobApiConstants.SHORT_NAME_PARAM) final String shortName,
             @Context final UriInfo uriInfo) {

@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
@@ -60,6 +62,9 @@ public class PartialResponseFilter implements ContainerResponseFilter {
 
     private final ObjectMapper objectMapper;
     private final UnsupportedParameterExceptionMapper unsupportedParameterExceptionMapper;
+
+    @Context
+    private ResourceInfo resourceInfo;
 
     @Override
     public void filter(final ContainerRequestContext requestContext, final ContainerResponseContext responseContext) {
@@ -115,7 +120,14 @@ public class PartialResponseFilter implements ContainerResponseFilter {
                 return new LinkedHashSet<>(Arrays.asList(partialResponseParameters.value()));
             }
         }
-        return null;
+        final Class<?> resourceClass = resourceInfo == null ? null : resourceInfo.getResourceClass();
+        final PartialResponseParameters onClass = resourceClass == null ? null
+                : resourceClass.getAnnotation(PartialResponseParameters.class);
+        return onClass == null ? null : new LinkedHashSet<>(Arrays.asList(onClass.value()));
+    }
+
+    void setResourceInfo(final ResourceInfo resourceInfo) {
+        this.resourceInfo = resourceInfo;
     }
 
     private Set<String> split(final String fields) {
