@@ -46,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
+import org.apache.fineract.accounting.journalentry.data.JournalEntrySource;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -87,8 +88,6 @@ public class JournalEntriesApiResource {
             "referenceNumber", "currency", "transactionDetails"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSION = "JOURNALENTRY";
-    private static final String ENTRY_SOURCE_MANUAL = "MANUAL";
-    private static final String ENTRY_SOURCE_SYSTEM = "SYSTEM";
 
     private final PlatformSecurityContext context;
     private final JournalEntryReadPlatformService journalEntryReadPlatformService;
@@ -163,9 +162,9 @@ public class JournalEntriesApiResource {
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
 
-        final Boolean manualEntry = parseEntrySource(entrySource);
+        final JournalEntrySource source = parseEntrySource(entrySource);
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
-                onlyManualEntries, manualEntry, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
+                onlyManualEntries, source, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
                 associationParametersData);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
@@ -308,16 +307,11 @@ public class JournalEntriesApiResource {
         return this.apiJsonSerializerService.serialize(importDocumentId);
     }
 
-    private static Boolean parseEntrySource(final String entrySource) {
+    private static JournalEntrySource parseEntrySource(final String entrySource) {
         if (StringUtils.isBlank(entrySource)) {
             return null;
         }
-        if (ENTRY_SOURCE_MANUAL.equalsIgnoreCase(entrySource)) {
-            return Boolean.TRUE;
-        }
-        if (ENTRY_SOURCE_SYSTEM.equalsIgnoreCase(entrySource)) {
-            return Boolean.FALSE;
-        }
-        throw new UnrecognizedQueryParamException("entrySource", entrySource, ENTRY_SOURCE_MANUAL, ENTRY_SOURCE_SYSTEM);
+        return Arrays.stream(JournalEntrySource.values()).filter(source -> source.name().equalsIgnoreCase(entrySource)).findFirst()
+                .orElseThrow(() -> new UnrecognizedQueryParamException("entrySource", entrySource, (Object[]) JournalEntrySource.values()));
     }
 }

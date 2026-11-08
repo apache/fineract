@@ -38,6 +38,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
+import org.apache.fineract.accounting.journalentry.data.JournalEntrySource;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.apache.fineract.accounting.journalentry.data.TransactionDetailData;
 import org.apache.fineract.accounting.journalentry.data.TransactionTypeEnumData;
@@ -241,7 +242,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final Boolean manualEntry, final LocalDate fromDate, final LocalDate toDate,
+            final Boolean onlyManualEntries, final JournalEntrySource entrySource, final LocalDate fromDate, final LocalDate toDate,
             final LocalDate submittedOnDateFrom, final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
             final JournalEntryAssociationParametersData associationParametersData) {
         GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
@@ -346,10 +347,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
         }
 
-        if (manualEntry != null) {
+        if (entrySource != null) {
             sqlBuilder.append(whereClose).append(" journalEntry.manual_entry = ?");
             whereClose = " and ";
-            objectArray[arrayPos] = manualEntry;
+            objectArray[arrayPos] = entrySource == JournalEntrySource.MANUAL;
             arrayPos = arrayPos + 1;
         }
 
