@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
@@ -94,6 +93,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSum
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+import org.apache.fineract.portfolio.savings.service.DepositAccountClosureWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountInterestRateChartReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountInterestRateChartReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.savings.service.DepositAccountOnHoldTransactionReadPlatformService;
@@ -102,6 +102,8 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountPreMatureCalc
 import org.apache.fineract.portfolio.savings.service.DepositAccountPreMatureCalculationPlatformServiceImpl;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.savings.service.DepositAccountTransactionWritePlatformService;
+import org.apache.fineract.portfolio.savings.service.DepositAccountWriteHelper;
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.savings.service.DepositApplicationProcessWritePlatformService;
@@ -110,12 +112,14 @@ import org.apache.fineract.portfolio.savings.service.DepositProductReadPlatformS
 import org.apache.fineract.portfolio.savings.service.DepositProductReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.savings.service.DepositsDropdownReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositsDropdownReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.savings.service.FixedDepositAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.FixedDepositProductWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.FixedDepositProductWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.savings.service.GroupSavingsIndividualMonitoringWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.GroupSavingsIndividualMonitoringWritePlatformServiceImpl;
+import org.apache.fineract.portfolio.savings.service.RecurringDepositAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.RecurringDepositProductWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.RecurringDepositProductWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountActivationService;
@@ -222,34 +226,95 @@ public class SavingsConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(DepositAccountWritePlatformService.class)
-    public DepositAccountWritePlatformService depositAccountWritePlatformService(PlatformSecurityContext context,
+    @ConditionalOnMissingBean(DepositAccountWriteHelper.class)
+    public DepositAccountWriteHelper depositAccountWriteHelper(SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            JournalEntryWritePlatformService journalEntryWritePlatformService) {
+        return new DepositAccountWriteHelper(savingsAccountTransactionRepository, journalEntryWritePlatformService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FixedDepositAccountWritePlatformService.class)
+    public FixedDepositAccountWritePlatformService fixedDepositAccountWritePlatformService(PlatformSecurityContext context,
             SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
             SavingsAccountTransactionRepository savingsAccountTransactionRepository, DepositAccountAssembler depositAccountAssembler,
             SavingsAccountPostInterestService savingsAccountPostInterestService,
             DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
-            SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
-            PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            JournalEntryWritePlatformService journalEntryWritePlatformService, DepositAccountDomainService depositAccountDomainService,
-            NoteRepository noteRepository, AccountTransfersReadPlatformService accountTransfersReadPlatformService,
-            ChargeRepositoryWrapper chargeRepository, SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService, DepositAccountDomainService depositAccountDomainService,
+            AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-            DepositAccountReadPlatformService depositAccountReadPlatformService, CalendarInstanceRepository calendarInstanceRepository,
-            ConfigurationDomainService configurationDomainService, HolidayRepositoryWrapper holidayRepository,
-            WorkingDaysRepositoryWrapper workingDaysRepository,
-            DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository
+            ConfigurationDomainService configurationDomainService,
+            DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            DepositAccountWriteHelper depositAccountWriteHelper) {
+        return new FixedDepositAccountWritePlatformService(context, savingAccountRepositoryWrapper, savingsAccountTransactionRepository,
+                depositAccountAssembler, savingsAccountPostInterestService, depositAccountTransactionDataValidator,
+                paymentDetailWritePlatformService, depositAccountDomainService, accountTransfersReadPlatformService,
+                accountAssociationsReadPlatformService, accountTransfersWritePlatformService, configurationDomainService,
+                depositAccountOnHoldTransactionRepository, depositAccountWriteHelper);
+    }
 
-    ) {
-        return new DepositAccountWritePlatformServiceJpaRepositoryImpl(context, savingAccountRepositoryWrapper,
-                savingsAccountTransactionRepository, depositAccountAssembler, savingsAccountPostInterestService,
-                depositAccountTransactionDataValidator, savingsAccountChargeDataValidator, paymentDetailWritePlatformService,
-                applicationCurrencyRepositoryWrapper, journalEntryWritePlatformService, depositAccountDomainService, noteRepository,
-                accountTransfersReadPlatformService, chargeRepository, savingsAccountChargeRepository,
-                accountAssociationsReadPlatformService, accountTransfersWritePlatformService, depositAccountReadPlatformService,
-                calendarInstanceRepository, configurationDomainService, holidayRepository, workingDaysRepository,
-                depositAccountOnHoldTransactionRepository);
+    @Bean
+    @ConditionalOnMissingBean(RecurringDepositAccountWritePlatformService.class)
+    public RecurringDepositAccountWritePlatformService recurringDepositAccountWritePlatformService(PlatformSecurityContext context,
+            SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
+            SavingsAccountTransactionRepository savingsAccountTransactionRepository, DepositAccountAssembler depositAccountAssembler,
+            SavingsAccountPostInterestService savingsAccountPostInterestService,
+            DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService, DepositAccountDomainService depositAccountDomainService,
+            AccountTransfersReadPlatformService accountTransfersReadPlatformService,
+            AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
+            AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+            CalendarInstanceRepository calendarInstanceRepository, ConfigurationDomainService configurationDomainService,
+            DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            DepositAccountWriteHelper depositAccountWriteHelper) {
+        return new RecurringDepositAccountWritePlatformService(context, savingAccountRepositoryWrapper, savingsAccountTransactionRepository,
+                depositAccountAssembler, savingsAccountPostInterestService, depositAccountTransactionDataValidator,
+                paymentDetailWritePlatformService, depositAccountDomainService, accountTransfersReadPlatformService,
+                accountAssociationsReadPlatformService, accountTransfersWritePlatformService, calendarInstanceRepository,
+                configurationDomainService, depositAccountOnHoldTransactionRepository, depositAccountWriteHelper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DepositAccountClosureWritePlatformService.class)
+    public DepositAccountClosureWritePlatformService depositAccountClosureWritePlatformService(PlatformSecurityContext context,
+            SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper, DepositAccountAssembler depositAccountAssembler,
+            DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService, DepositAccountDomainService depositAccountDomainService,
+            NoteRepository noteRepository, ConfigurationDomainService configurationDomainService,
+            DepositAccountWriteHelper depositAccountWriteHelper) {
+        return new DepositAccountClosureWritePlatformService(context, savingAccountRepositoryWrapper, depositAccountAssembler,
+                depositAccountTransactionDataValidator, paymentDetailWritePlatformService, depositAccountDomainService, noteRepository,
+                configurationDomainService, depositAccountWriteHelper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DepositAccountTransactionWritePlatformService.class)
+    public DepositAccountTransactionWritePlatformService depositAccountTransactionWritePlatformService(PlatformSecurityContext context,
+            SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper, DepositAccountAssembler depositAccountAssembler,
+            SavingsAccountPostInterestService savingsAccountPostInterestService,
+            DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
+            SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService, DepositAccountDomainService depositAccountDomainService,
+            SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository, ConfigurationDomainService configurationDomainService,
+            HolidayRepositoryWrapper holidayRepository, WorkingDaysRepositoryWrapper workingDaysRepository,
+            DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            DepositAccountWriteHelper depositAccountWriteHelper) {
+        return new DepositAccountTransactionWritePlatformService(context, savingAccountRepositoryWrapper, depositAccountAssembler,
+                savingsAccountPostInterestService, depositAccountTransactionDataValidator, savingsAccountChargeDataValidator,
+                paymentDetailWritePlatformService, depositAccountDomainService, savingsAccountChargeRepository, configurationDomainService,
+                holidayRepository, workingDaysRepository, depositAccountOnHoldTransactionRepository, depositAccountWriteHelper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DepositAccountWritePlatformService.class)
+    public DepositAccountWritePlatformService depositAccountWritePlatformService(
+            FixedDepositAccountWritePlatformService fixedDepositAccountWritePlatformService,
+            RecurringDepositAccountWritePlatformService recurringDepositAccountWritePlatformService,
+            DepositAccountClosureWritePlatformService depositAccountClosureWritePlatformService,
+            DepositAccountTransactionWritePlatformService depositAccountTransactionWritePlatformService) {
+        return new DepositAccountWritePlatformServiceJpaRepositoryImpl(fixedDepositAccountWritePlatformService,
+                recurringDepositAccountWritePlatformService, depositAccountClosureWritePlatformService,
+                depositAccountTransactionWritePlatformService);
     }
 
     @Bean
