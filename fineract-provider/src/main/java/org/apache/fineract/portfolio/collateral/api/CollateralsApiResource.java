@@ -85,8 +85,7 @@ public class CollateralsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Loan Collaterals", description = "Example Requests:\n" + "\n" + "loans/1/collaterals\n" + "\n" + "\n"
-            + "loans/1/collaterals?fields=value,description")
+    @Operation(summary = "List Loan Collaterals", description = "Example Requests:\n" + "\n" + "loans/1/collaterals")
     public List<CollateralData> retrieveCollateralDetails(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
@@ -96,8 +95,7 @@ public class CollateralsApiResource {
     @GET
     @Path("{collateralId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Collateral", description = "Example Requests:\n" + "\n" + "/loans/1/collaterals/1\n" + "\n" + "\n"
-            + "/loans/1/collaterals/1?fields=description,description")
+    @Operation(summary = "Retrieve a Collateral", description = "Example Requests:\n" + "\n" + "/loans/1/collaterals/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.GetLoansLoanIdCollateralsResponse.class)))
     public CollateralData retrieveCollateralDetails(@Context final UriInfo uriInfo,
             @PathParam("loanId") @Parameter(description = "loanId") final Long loanId,

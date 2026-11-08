@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanproduct.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -1355,7 +1354,6 @@ public class LoanProductData implements Serializable {
         return this.id.hashCode();
     }
 
-    @JsonIgnore
     public boolean isInterestRecalculationEnabled() {
         return this.isInterestRecalculationEnabled;
     }
@@ -1496,12 +1494,10 @@ public class LoanProductData implements Serializable {
         return this.isLinkedToFloatingInterestRates;
     }
 
-    @JsonIgnore
     public boolean isLinkedToFloatingInterestRates() {
         return this.isLinkedToFloatingInterestRates;
     }
 
-    @JsonIgnore
     public boolean isFloatingInterestRateCalculationAllowed() {
         return this.isFloatingInterestRateCalculationAllowed;
     }
@@ -1514,7 +1510,6 @@ public class LoanProductData implements Serializable {
         return isEqualAmortization;
     }
 
-    @JsonIgnore
     public boolean isEqualAmortization() {
         return isEqualAmortization;
     }
@@ -1527,7 +1522,6 @@ public class LoanProductData implements Serializable {
         return allowPartialPeriodInterestCalculation;
     }
 
-    @JsonIgnore
     public boolean isRatesEnabled() {
         return isRatesEnabled;
     }

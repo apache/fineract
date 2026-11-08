@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -188,7 +187,6 @@ public class GroupGeneralData implements Serializable {
         this.timeline = null;
     }
 
-    @JsonIgnore
     public Integer getRowIndex() {
         return rowIndex;
     }
@@ -341,12 +339,10 @@ public class GroupGeneralData implements Serializable {
         return this.hierarchy;
     }
 
-    @JsonIgnore
     public boolean isChildGroup() {
         return this.centerId != null;
     }
 
-    @JsonIgnore
     public Long getParentId() {
         return this.centerId;
     }

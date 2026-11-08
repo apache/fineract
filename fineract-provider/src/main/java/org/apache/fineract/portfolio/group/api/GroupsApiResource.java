@@ -163,8 +163,8 @@ public class GroupsApiResource {
     @JsonLocalDateArrayFormat
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Groups", operationId = "retrieveAllGroups", description = "The default implementation of listing Groups returns 200 entries with support for pagination and sorting. Using the parameter limit with description -1 returns all entries.\n\n"
-            + "Example Requests:\n\n" + "\n\n" + "groups\n\n" + "\n\n" + "groups?fields=name,officeName,joinedDate\n\n" + "\n\n"
-            + "groups?offset=10&limit=50\n\n" + "\n\n" + "groups?orderBy=name&sortOrder=DESC")
+            + "Example Requests:\n\n" + "\n\n" + "groups\n\n" + "\n\n" + "groups?offset=10&limit=50\n\n" + "\n\n"
+            + "groups?orderBy=name&sortOrder=DESC")
     @AlternativeOperationId("retrieveAll_24")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsResponse.class)))
     public Object retrieveAll(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
@@ -466,8 +466,7 @@ public class GroupsApiResource {
     @Path("{groupId}/accounts")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Group accounts overview", operationId = "retrieveAccountsGroup", description = "Retrieves details of all Loan and Savings accounts associated with this group.\n\n"
-            + "\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/1/accounts\n\n" + "\n\n" + "\n\n"
-            + "groups/1/accounts?fields=loanAccounts,savingsAccounts,memberLoanAccounts,\n\n" + "memberSavingsAccounts")
+            + "\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/1/accounts")
     @AlternativeOperationId("retrieveAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdAccountsResponse.class)))
     public AccountSummaryCollectionData retrieveAccounts(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId) {

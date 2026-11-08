@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -116,7 +115,6 @@ public final class CenterData implements Serializable {
         this.officeName = null;
     }
 
-    @JsonIgnore
     public Integer getRowIndex() {
         return rowIndex;
     }

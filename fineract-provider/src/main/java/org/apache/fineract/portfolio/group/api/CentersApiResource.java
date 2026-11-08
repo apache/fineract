@@ -155,10 +155,6 @@ public class CentersApiResource {
 
 
 
-            centers?fields=name,officeName,joinedDate
-
-
-
             centers?offset=10&limit=50
 
 

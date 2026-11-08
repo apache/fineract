@@ -38,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.codes.data.CodeData;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -52,10 +51,6 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Funds", description = "")
 @RequiredArgsConstructor
 public class FundsApiResource {
-
-    /**
-     * The set of parameters that are supported in response for {@link CodeData}
-     */
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "FUND";
 
