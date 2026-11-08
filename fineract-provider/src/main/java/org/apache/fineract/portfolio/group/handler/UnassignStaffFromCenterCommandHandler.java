@@ -22,6 +22,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,18 @@ public class UnassignStaffFromCenterCommandHandler implements NewCommandSourceHa
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
+        final GroupUnassignStaffRequest request = GroupUnassignStaffRequest.builder() //
+                .groupId(command.entityId()) //
+                .staffId(command.longValueOfParameterNamed("staffId")) //
+                .build();
+
+        final GroupUnassignStaffResponse response = this.writePlatformService.unassignGroupStaff(request);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(response.getOfficeId()) //
+                .withGroupId(response.getGroupId()) //
+                .withEntityId(response.getResourceId()) //
+                .build();
     }
 }
