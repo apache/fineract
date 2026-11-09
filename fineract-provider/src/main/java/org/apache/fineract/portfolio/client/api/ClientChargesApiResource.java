@@ -83,10 +83,10 @@ public class ClientChargesApiResource {
             + "Example Requests:\n" + "clients/1/charges\n" + "\nclients/1/charges?offset=0&limit=5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.class)))
     public Page<ClientChargeData> retrieveAllClientCharges(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-                                                           @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @Parameter(description = "chargeStatus") final String chargeStatus,
-                                                           @QueryParam("pendingPayment") @Parameter(description = "pendingPayment") final Boolean pendingPayment,
-                                                           @Context final UriInfo uriInfo, @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
-                                                           @QueryParam("offset") @Parameter(description = "offset") final Integer offset) {
+            @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @Parameter(description = "chargeStatus") final String chargeStatus,
+            @QueryParam("pendingPayment") @Parameter(description = "pendingPayment") final Boolean pendingPayment,
+            @Context final UriInfo uriInfo, @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
         if (!(is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL)
                 || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)
@@ -98,8 +98,7 @@ public class ClientChargesApiResource {
         }
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
 
-        return this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus,
-                pendingPayment, searchParameters);
+        return this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus, pendingPayment, searchParameters);
     }
 
     private boolean is(final String commandParam, final String commandValue) {

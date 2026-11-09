@@ -78,10 +78,8 @@ public class InternalClientInformationApiResource implements InitializingBean {
         log.warn("------------------------------------------------------------");
 
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        return new ClientAuditFieldsData(client.getCreatedBy().orElse(null),
-                client.getCreatedDate().orElse(null),
-                client.getLastModifiedBy().orElse(null),
-                client.getLastModifiedDate().orElse(null));
+        return new ClientAuditFieldsData(client.getCreatedBy().orElse(null), client.getCreatedDate().orElse(null),
+                client.getLastModifiedBy().orElse(null), client.getLastModifiedDate().orElse(null));
     }
 
     public record ClientAuditFieldsData(Long createdBy, OffsetDateTime createdDate, Long lastModifiedBy, OffsetDateTime lastModifiedDate) {

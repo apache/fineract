@@ -134,23 +134,23 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveAll_21")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsResponse.class)))
     public Page<ClientData> retrieveAll(@Context final UriInfo uriInfo,
-                                        @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
-                                        @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
-                                        @QueryParam("displayName") @Parameter(description = "displayName") final String displayName,
-                                        @QueryParam("firstName") @Parameter(description = "firstName") final String firstname,
-                                        @QueryParam("lastName") @Parameter(description = "lastName") final String lastname,
-                                        @QueryParam("status") @Parameter(description = "status") final String status,
-                                        @QueryParam("underHierarchy") @Parameter(description = "underHierarchy") final String hierarchy,
-                                        @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
-                                        @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
-                                        @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-                                        @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
-                                        @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly,
-                                        @QueryParam("legalForm") final Integer legalForm,
-                                        @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId) {
+            @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
+            @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
+            @QueryParam("displayName") @Parameter(description = "displayName") final String displayName,
+            @QueryParam("firstName") @Parameter(description = "firstName") final String firstname,
+            @QueryParam("lastName") @Parameter(description = "lastName") final String lastname,
+            @QueryParam("status") @Parameter(description = "status") final String status,
+            @QueryParam("underHierarchy") @Parameter(description = "underHierarchy") final String hierarchy,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly,
+            @QueryParam("legalForm") final Integer legalForm,
+            @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId) {
 
-        return retrieveAll(officeId, externalId, displayName, firstname, lastname, status, legalForm, hierarchy, offset, limit,
-                orderBy, sortOrder, orphansOnly, staffId);
+        return retrieveAll(officeId, externalId, displayName, firstname, lastname, status, legalForm, hierarchy, offset, limit, orderBy,
+                sortOrder, orphansOnly, staffId);
     }
 
     @GET
@@ -265,7 +265,8 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveAssociatedAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public AccountSummaryCollectionData retrieveAssociatedAccounts(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
+    public AccountSummaryCollectionData retrieveAssociatedAccounts(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
         return retrieveClientAccounts(clientId, null);
     }
 
@@ -287,8 +288,7 @@ public class ClientsApiResource {
     public Long postClientTemplate(@QueryParam("legalFormType") final String legalFormType,
             @FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail,
             @FormDataParam("locale") final String locale, @FormDataParam("dateFormat") final String dateFormat) {
-        return bulkImportWorkbookService.importWorkbook(legalFormType, uploadedInputStream, fileDetail, locale,
-                dateFormat);
+        return bulkImportWorkbookService.importWorkbook(legalFormType, uploadedInputStream, fileDetail, locale, dateFormat);
     }
 
     @GET
@@ -336,7 +336,8 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveAssociatedAccounts_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public AccountSummaryCollectionData retrieveAssociatedAccounts(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
+    public AccountSummaryCollectionData retrieveAssociatedAccounts(
+            @PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
         return retrieveClientAccounts(null, externalId);
     }
 
@@ -431,10 +432,9 @@ public class ClientsApiResource {
         return retrieveClientTransferTemplate(null, externalId);
     }
 
-    public Page<ClientData> retrieveAll(final Long officeId, final String externalId, final String displayName,
-                                        final String firstname, final String lastname, final String status, final Integer legalForm, final String hierarchy,
-                                        final Integer offset, final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly,
-                                        final Long staffId) {
+    public Page<ClientData> retrieveAll(final Long officeId, final String externalId, final String displayName, final String firstname,
+            final String lastname, final String status, final Integer legalForm, final String hierarchy, final Integer offset,
+            final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly, final Long staffId) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
@@ -515,7 +515,8 @@ public class ClientsApiResource {
         return commandRequest;
     }
 
-    private ClientData retrieveClient(Long clientId, final String externalId, final boolean staffInSelectedOfficeOnly, final UriInfo uriInfo) {
+    private ClientData retrieveClient(Long clientId, final String externalId, final boolean staffInSelectedOfficeOnly,
+            final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
@@ -556,7 +557,8 @@ public class ClientsApiResource {
         return accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
     }
 
-    private CommandProcessingResult applyCommandOverClient(Long clientId, final String externalId, final String command, final String jsonPayload) {
+    private CommandProcessingResult applyCommandOverClient(Long clientId, final String externalId, final String command,
+            final String jsonPayload) {
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 

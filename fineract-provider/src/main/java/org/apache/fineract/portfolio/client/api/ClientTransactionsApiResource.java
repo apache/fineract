@@ -71,9 +71,10 @@ public class ClientTransactionsApiResource {
     @Operation(summary = "List Client Transactions", operationId = "retrieveAllClientTransactions", description = "The list capability of client transaction can support pagination."
             + "\n\n" + "Example Requests:\n\n" + "clients/189/transactions\n\n" + "clients/189/transactions?offset=10&limit=50")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class)))
-    public Page<ClientTransactionData> retrieveAllClientTransactions(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-                                                                     @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
-                                                                     @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
+    public Page<ClientTransactionData> retrieveAllClientTransactions(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
         return getAllClientTransactions(clientId, offset, limit);
@@ -289,8 +290,7 @@ public class ClientTransactionsApiResource {
     private Page<ClientTransactionData> getAllClientTransactions(Long clientId, Integer offset, Integer limit) {
 
         SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
-        return clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
-                searchParameters);
+        return clientTransactionReadPlatformService.retrieveAllTransactions(clientId, searchParameters);
     }
 
     private CommandProcessingResult undoTransaction(Long clientId, Long transactionId, String commandParam, String apiRequestBodyAsJson) {
