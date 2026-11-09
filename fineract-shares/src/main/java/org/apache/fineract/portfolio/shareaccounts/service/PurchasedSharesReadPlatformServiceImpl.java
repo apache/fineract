@@ -91,7 +91,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
                     amount, chargeAmount, amountPaid, paymentDetailData);
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
     }
