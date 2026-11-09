@@ -366,7 +366,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         }
         this.savingsAccountRepository.save(account);
         newTransactions.addAll(account.getSavingsAccountTransactionsWithPivotConfig());
-        this.savingsAccountTransactionRepository.saveAll(newTransactions);
+        // flush, so that the interest postings recalculated above have ids when their journal entries are booked
+        this.savingsAccountTransactionRepository.saveAllAndFlush(newTransactions);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false, backdatedTxnsAllowedTill);
 
         return reversal;
