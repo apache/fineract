@@ -40,6 +40,12 @@ public final class AuditCommandProperties implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Auditing is on as soon as the module is on the classpath; it has to be switched off explicitly. Losing the audit
+     * trail should be a decision, not the consequence of an unset property. These defaults are kept in step with
+     * {@code matchIfMissing} on the corresponding {@code @ConditionalOnProperty}; changing one without the other makes
+     * this class describe behaviour the application does not have.
+     */
     @Builder.Default
     private Boolean enabled = true;
     @Builder.Default

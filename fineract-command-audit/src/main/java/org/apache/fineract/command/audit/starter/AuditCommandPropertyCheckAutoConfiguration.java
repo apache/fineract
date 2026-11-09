@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.command.audit.starter;
 
-import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_CHECK_PACKAGE;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_CHECK_BASE_PACKAGE;
 
+import org.apache.fineract.command.audit.AuditCommandProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 
+// note: deliberately not conditional on the audit properties; the point is to report when auditing is off
 @AutoConfiguration
-@ComponentScan(COMMAND_AUDIT_HOOK_CHECK_PACKAGE)
+@EnableConfigurationProperties(AuditCommandProperties.class)
+@ComponentScan(COMMAND_AUDIT_CHECK_BASE_PACKAGE)
 public class AuditCommandPropertyCheckAutoConfiguration {}

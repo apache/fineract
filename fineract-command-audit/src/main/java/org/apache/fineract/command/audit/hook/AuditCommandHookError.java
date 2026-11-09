@@ -36,13 +36,21 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Order(COMMAND_AUDIT_HOOK_ERROR)
-@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, havingValue = "true", matchIfMissing = true)
 final class AuditCommandHookError implements CommandHookError<Object, Object> {
 
     private final CommandStore store;
 
     @Override
     public void onError(CommandContext<Object, Object> ctx) {
+        if (ctx.isSkipExecution()) {
+            // the command was never executed, so there is no execution to audit. Storing it here would also collide
+            // with the record that already owns this command's idempotency key.
+            log.debug("Skipping error audit for a command that was not executed");
+
+            return;
+        }
+
         final var now = Instant.now();
 
         ctx.setState(ERROR);

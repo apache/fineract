@@ -18,39 +18,44 @@
  */
 package org.apache.fineract.command.audit.check;
 
-import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED;
-import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED;
-import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_PRE_ENABLED;
-
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
+import org.apache.fineract.command.audit.AuditCommandProperties;
 import org.springframework.stereotype.Component;
 
+/**
+ * Reports at startup whether command auditing is actually switched on. Reads the bound property values rather than
+ * testing for their presence, so that an explicit {@code false} is reported as disabled.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Component
 final class AuditCommandPropertyCheck {
 
-    private final Environment environment;
+    private static final String RECOMMENDATION = "IT IS RECOMMENDED TO ENABLE THIS FEATURE IN PRODUCTION ENVIRONMENTS!";
+
+    private final AuditCommandProperties properties;
 
     @PostConstruct
-    public void check() {
-        if (environment.containsProperty(COMMAND_AUDIT_PROPERTY_HOOK_PRE_ENABLED)) {
-            log.info("Audit pre command hook enabled.");
-        } else {
-            log.warn("Audit pre command hook disabled! IT IS RECOMMENDED ENABLE THIS FEATURE IN PRODUCTION ENVIRONMENTS!");
+    void check() {
+        if (!Boolean.TRUE.equals(properties.getEnabled())) {
+            log.warn("Command audit is disabled! {}", RECOMMENDATION);
+
+            // the individual hooks are not created at all while the module is disabled
+            return;
         }
-        if (environment.containsProperty(COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED)) {
-            log.info("Audit post command hook enabled.");
+
+        report("pre", properties.getHookPreEnabled());
+        report("post", properties.getHookPostEnabled());
+        report("error", properties.getHookErrorEnabled());
+    }
+
+    private void report(String hook, Boolean enabled) {
+        if (Boolean.TRUE.equals(enabled)) {
+            log.info("Audit {} command hook enabled.", hook);
         } else {
-            log.warn("Audit post command hook disabled! IT IS RECOMMENDED ENABLE THIS FEATURE IN PRODUCTION ENVIRONMENTS!");
-        }
-        if (environment.containsProperty(COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED)) {
-            log.info("Audit error command hook enabled.");
-        } else {
-            log.warn("Audit error command hook disabled! IT IS RECOMMENDED ENABLE THIS FEATURE IN PRODUCTION ENVIRONMENTS!");
+            log.warn("Audit {} command hook disabled! {}", hook, RECOMMENDATION);
         }
     }
 }

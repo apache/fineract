@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Order(COMMAND_AUDIT_HOOK_BEFORE)
-@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_PRE_ENABLED, havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_PRE_ENABLED, havingValue = "true", matchIfMissing = true)
 final class AuditCommandHookBefore implements CommandHookBefore<Object, Object> {
 
     private final CommandStore store;

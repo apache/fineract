@@ -31,5 +31,5 @@ import org.springframework.context.annotation.ComponentScan;
 @AutoConfiguration
 @EnableConfigurationProperties({ CommandProperties.class, AuditCommandProperties.class })
 @ComponentScan(COMMAND_AUDIT_HOOK_BASE_PACKAGE)
-@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_ENABLED, havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_ENABLED, havingValue = "true", matchIfMissing = true)
 public class AuditCommandAutoConfiguration {}

@@ -40,14 +40,20 @@ public final class IdempotencyCommandProperties implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Idempotency is on as soon as the module is on the classpath; it has to be switched off explicitly. A repeated
+     * request quietly executing twice should be a decision, not the consequence of an unset property. These defaults
+     * are kept in step with {@code matchIfMissing} on the corresponding {@code @ConditionalOnProperty}; changing one
+     * without the other makes this class describe behaviour the application does not have.
+     */
     @Builder.Default
-    private Boolean enabled = false;
+    private Boolean enabled = true;
 
     @Builder.Default
-    private Boolean hookKeyHeaderPre = false;
+    private Boolean hookKeyHeaderPre = true;
 
     @Builder.Default
-    private Boolean hookCheckPre = false;
+    private Boolean hookCheckPre = true;
 
     @Builder.Default
     private String keyHeaderName = "Idempotency-Key";
