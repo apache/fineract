@@ -316,7 +316,7 @@ public class FeignWorkingCapitalLoanFlatAmortizationTest extends FeignIntegratio
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(Boolean.TRUE, loan.getStatus().getClosedObligationsMet(), "9000 + 1000 paid in full closes the loan");
+            assertEquals(Boolean.valueOf(true), loan.getStatus().getClosedObligationsMet(), "9000 + 1000 paid in full closes the loan");
 
             final List<GetWorkingCapitalLoanTransactionIdResponse> amortizations = amortizationTransactions(loanId);
             assertEquals(3, amortizations.size(), "one amortization per repayment");
@@ -403,7 +403,7 @@ public class FeignWorkingCapitalLoanFlatAmortizationTest extends FeignIntegratio
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(Boolean.TRUE, loan.getStatus().getClosedObligationsMet(), "9500 + 500 paid in full closes the loan");
+            assertEquals(Boolean.valueOf(true), loan.getStatus().getClosedObligationsMet(), "9500 + 500 paid in full closes the loan");
             final List<GetWorkingCapitalLoanTransactionIdResponse> amortizations = amortizationTransactions(loanId);
             assertEquals(3, amortizations.size(), "one amortization per repayment");
             assertEqualBigDecimal(new BigDecimal("495.00"), amortizations.get(2).getTransactionAmount(), "closing amortization");
@@ -470,7 +470,7 @@ public class FeignWorkingCapitalLoanFlatAmortizationTest extends FeignIntegratio
             wcLoanHelper.executeInlineWCCOB(loanId);
 
             final GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(Boolean.TRUE, loan.getStatus().getClosedObligationsMet(), "9000 paid in full closes the loan");
+            assertEquals(Boolean.valueOf(true), loan.getStatus().getClosedObligationsMet(), "9000 paid in full closes the loan");
             assertEquals(1, amortizationTransactions(loanId).size(), "the payoff earns nothing either");
             assertEquals(1, adjustmentTransactions(loanId).size(), "the payoff must not need a second adjustment");
             assertEqualBigDecimal(BigDecimal.ZERO, netAmortization(loanId), "fully paid: net amortization equals the fee, which is zero");

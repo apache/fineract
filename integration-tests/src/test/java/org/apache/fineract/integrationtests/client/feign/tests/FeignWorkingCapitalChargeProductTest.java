@@ -137,7 +137,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         assertEquals(CALCULATION_FLAT_CODE, charge.getChargeCalculationType().getCode(), "chargeCalculationType code");
         assertEquals(20.0, charge.getAmount().doubleValue(), "amount must round-trip");
         assertTrue(charge.getActive(), "the charge must be created active");
-        assertEquals(Boolean.FALSE, charge.getPenalty(), "a fee, not a penalty");
+        assertEquals(Boolean.valueOf(false), charge.getPenalty(), "a fee, not a penalty");
         assertEquals(CURRENCY_CODE, charge.getCurrency().getCode(), "currency");
     }
 
@@ -162,7 +162,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                 "a working capital charge product supports the penalty flag");
 
         final ChargeData charge = chargesHelper.getCharge(chargeId);
-        assertEquals(Boolean.TRUE, charge.getPenalty(), "the penalty flag must round-trip");
+        assertEquals(Boolean.valueOf(true), charge.getPenalty(), "the penalty flag must round-trip");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be Disbursement (1)");
         assertId(CALCULATION_FLAT, charge.getChargeCalculationType().getId(), "chargeCalculationType must be Flat (1)");
     }
@@ -377,7 +377,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
         final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertEquals(30.0, charge.getAmount().doubleValue(), "the new amount must be persisted");
-        assertEquals(Boolean.TRUE, charge.getPenalty(), "the penalty flag must survive an amount-only update");
+        assertEquals(Boolean.valueOf(true), charge.getPenalty(), "the penalty flag must survive an amount-only update");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be untouched by an amount-only update");
     }
 

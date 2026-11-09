@@ -65,8 +65,7 @@ public class LoanTransactionReadService {
             loanPredicate = cb.equal(loan.get("externalId"), externalId);
         }
 
-        query.select(root)
-                .where(cb.and(loanPredicate, root.get("typeOf").in(transactionTypes), cb.equal(root.get("reversed"), Boolean.FALSE)));
+        query.select(root).where(cb.and(loanPredicate, root.get("typeOf").in(transactionTypes), cb.equal(root.get("reversed"), false)));
 
         final List<Order> orders = new ArrayList<>();
         orders.add(cb.desc(root.get("dateOf")));

@@ -120,7 +120,7 @@ public class LoanProductOverAppliedAmountTest extends FeignLoanTestBase {
 
             // Verify that the loan was created and disbursed successfully
             assert loanDetails.getStatus() != null;
-            assertEquals(Boolean.TRUE, loanDetails.getStatus().getActive());
+            assertEquals(Boolean.valueOf(true), loanDetails.getStatus().getActive());
 
             // Verify the amounts
             assert loanDetails.getApprovedPrincipal() != null;

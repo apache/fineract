@@ -246,8 +246,9 @@ public abstract class FeignLoanTransactionAdjustmentTestBase extends FeignLoanTe
         assertAdjustRejected(loanId, refundId, LATER_DATE, 150.0, INTEREST_REFUND_ENABLED_ERROR);
 
         adjustLoanTransaction(loanId, refundId, LATER_DATE);
-        assertEquals(Boolean.TRUE, getTransaction(loanId, refundId).getManuallyReversed(), "Refund must be reversed");
-        assertEquals(Boolean.TRUE, getTransaction(loanId, interestRefundId).getManuallyReversed(), "Interest Refund must be reversed");
+        assertEquals(Boolean.valueOf(true), getTransaction(loanId, refundId).getManuallyReversed(), "Refund must be reversed");
+        assertEquals(Boolean.valueOf(true), getTransaction(loanId, interestRefundId).getManuallyReversed(),
+                "Interest Refund must be reversed");
         assertEquals(expectedType, getTransaction(loanId, refundId).getType().getValue());
     }
 
@@ -332,7 +333,7 @@ public abstract class FeignLoanTransactionAdjustmentTestBase extends FeignLoanTe
         assertNotEquals(originalTransactionId, newTransactionId, "Adjustment must create a new transaction");
 
         GetLoansLoanIdTransactions original = getTransaction(loanId, originalTransactionId);
-        assertEquals(Boolean.TRUE, original.getManuallyReversed(), "Original transaction must be reversed");
+        assertEquals(Boolean.valueOf(true), original.getManuallyReversed(), "Original transaction must be reversed");
         assertEquals(expectedType, original.getType().getValue());
 
         GetLoansLoanIdTransactions replacement = getTransaction(loanId, newTransactionId);

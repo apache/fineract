@@ -55,14 +55,14 @@ public class LoanAccountFraudTest extends FeignLoanTestBase {
             assertNotNull(getLoansLoanIdResponse);
 
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(false), getLoansLoanIdResponse.getFraud());
 
             changeLoanFraudState(loanId, true);
 
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(true), getLoansLoanIdResponse.getFraud());
             String statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
@@ -71,7 +71,7 @@ public class LoanAccountFraudTest extends FeignLoanTestBase {
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(false), getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
@@ -82,7 +82,7 @@ public class LoanAccountFraudTest extends FeignLoanTestBase {
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(true), getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
@@ -91,7 +91,7 @@ public class LoanAccountFraudTest extends FeignLoanTestBase {
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(false), getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
@@ -102,21 +102,21 @@ public class LoanAccountFraudTest extends FeignLoanTestBase {
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(true), getLoansLoanIdResponse.getFraud());
 
             changeLoanFraudState(loanId, false);
 
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(false), getLoansLoanIdResponse.getFraud());
 
             changeLoanFraudState(loanId, true);
 
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(true), getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
@@ -125,7 +125,7 @@ public class LoanAccountFraudTest extends FeignLoanTestBase {
             getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
-            assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
+            assertEquals(Boolean.valueOf(true), getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
         });

@@ -145,7 +145,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         final GetWorkingCapitalLoansLoanIdResponse loanData = loanHelper.getLoanDetails(loanIdHolder[0]);
         assertNotNull(loanData.getStatus());
         assertEquals("loanStatusType.active", loanData.getStatus().getCode());
-        assertEquals(Boolean.TRUE, loanData.getChargedOff());
+        assertEquals(Boolean.valueOf(true), loanData.getChargedOff());
 
         // Only principal was outstanding (no fees/penalties): Dr Charge-off expense 5000, Cr Loan portfolio 5000.
         final List<JournalEntryTransactionItem> entries = getJournalEntriesForWCTransaction(chargeOffTxnIdHolder[0]);
@@ -172,7 +172,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         final GetWorkingCapitalLoansLoanIdResponse loanData = loanHelper.getLoanDetails(loanIdHolder[0]);
         assertNotNull(loanData.getStatus());
         assertEquals("loanStatusType.active", loanData.getStatus().getCode());
-        assertNotEquals(Boolean.TRUE, loanData.getChargedOff());
+        assertNotEquals(Boolean.valueOf(true), loanData.getChargedOff());
 
         // The original 2 entries are reversed: querying the charge-off transaction now returns the originals plus their
         // reversals (Dr Loan portfolio 5000, Cr Charge-off expense 5000).
@@ -197,11 +197,11 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
             loanHelper.executeTransaction(loanIdHolder[0], "charge-off",
                     WorkingCapitalLoanRequestBuilders.chargeOff(DAY_2.format(API_DATE), null));
         });
-        assertEquals(Boolean.TRUE, loanHelper.getLoanDetails(loanIdHolder[0]).getChargedOff());
+        assertEquals(Boolean.valueOf(true), loanHelper.getLoanDetails(loanIdHolder[0]).getChargedOff());
 
         businessDateHelper.runAt(DAY_3.toString(), () -> loanHelper.executeTransaction(loanIdHolder[0], "UNDO-CHARGE-OFF",
                 WorkingCapitalLoanRequestBuilders.undoChargeOff(null)));
-        assertNotEquals(Boolean.TRUE, loanHelper.getLoanDetails(loanIdHolder[0]).getChargedOff());
+        assertNotEquals(Boolean.valueOf(true), loanHelper.getLoanDetails(loanIdHolder[0]).getChargedOff());
     }
 
     @Test
@@ -329,7 +329,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
 
         // The loan is still charged off - only the repayment was undone, not the charge-off itself.
         final GetWorkingCapitalLoansLoanIdResponse loanData = loanHelper.getLoanDetails(loanIdHolder[0]);
-        assertEquals(Boolean.TRUE, loanData.getChargedOff());
+        assertEquals(Boolean.valueOf(true), loanData.getChargedOff());
 
         final List<JournalEntryTransactionItem> entries = getJournalEntriesForWCTransaction(repaymentTxnIdHolder[0]);
         assertEquals(4, entries.size(), "Expected 4 journal entries (2 original + 2 reversal)");
@@ -483,7 +483,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
 
         // The final amortization transaction created at charge-off is now reversed...
         final GetWorkingCapitalLoanTransactionIdResponse reversedAmortTxn = loanHelper.getTransaction(loanIdHolder[0], amortTxnId);
-        assertEquals(Boolean.TRUE, reversedAmortTxn.getReversed(),
+        assertEquals(Boolean.valueOf(true), reversedAmortTxn.getReversed(),
                 "Expected the discount fee amortization transaction to be reversed after undo charge-off");
 
         // ...and its journal entries are reversed too (2 original + 2 reversal).
@@ -495,7 +495,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         assertJournalEntry(entries, "DEBIT", chargeOffExpenseAccount, discount.doubleValue());
 
         final GetWorkingCapitalLoansLoanIdResponse loanData = loanHelper.getLoanDetails(loanIdHolder[0]);
-        assertNotEquals(Boolean.TRUE, loanData.getChargedOff());
+        assertNotEquals(Boolean.valueOf(true), loanData.getChargedOff());
 
         businessDateHelper.runAt(DAY_4.toString(), () -> loanHelper.makeRepayment(loanIdHolder[0],
                 WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(1000), DAY_4.format(API_DATE))));
@@ -547,7 +547,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
             });
 
             final GetWorkingCapitalLoanTransactionIdResponse reversedAmortTxn = loanHelper.getTransaction(loanIdHolder[0], amortTxnId);
-            assertEquals(Boolean.TRUE, reversedAmortTxn.getReversed(),
+            assertEquals(Boolean.valueOf(true), reversedAmortTxn.getReversed(),
                     "Expected the final discount fee amortization to be reversed once the backdated adjustment zeroes the pool");
 
             final List<ExternalEventResponse> events = externalEventHelper.getExternalEventsByType(TRANSACTION_REVERSED_EVENT);
@@ -556,7 +556,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
                     .orElse(null);
             assertNotNull(event,
                     "Expected a " + TRANSACTION_REVERSED_EVENT + " for the reversed final amortization transaction " + amortTxnId);
-            assertEquals(Boolean.TRUE, ((HashMap) event.getPayLoad().get("transactionToAdjust")).get("reversed"));
+            assertEquals(Boolean.valueOf(true), ((HashMap) event.getPayLoad().get("transactionToAdjust")).get("reversed"));
         } finally {
             externalEventHelper.disableBusinessEvent(TRANSACTION_REVERSED_EVENT);
             externalEventHelper.disableBusinessEvent(DISCOUNT_FEE_AMORTIZATION_EVENT);
@@ -598,7 +598,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
             });
 
             final GetWorkingCapitalLoanTransactionIdResponse reversedAmortTxn = loanHelper.getTransaction(loanIdHolder[0], amortTxnId);
-            assertEquals(Boolean.TRUE, reversedAmortTxn.getReversed(),
+            assertEquals(Boolean.valueOf(true), reversedAmortTxn.getReversed(),
                     "Expected the final discount fee amortization to be reversed once the backdated adjustment zeroes the pool");
 
             final List<Long> adjustedTransactionIds = adjustedTransactionIds();
@@ -659,7 +659,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
             });
 
             final GetWorkingCapitalLoanTransactionIdResponse restatedAmortTxn = loanHelper.getTransaction(loanIdHolder[0], amortTxnId);
-            assertNotEquals(Boolean.TRUE, restatedAmortTxn.getReversed(), "Expected the final amortization to stay non-reversed");
+            assertNotEquals(Boolean.valueOf(true), restatedAmortTxn.getReversed(), "Expected the final amortization to stay non-reversed");
             FeignWorkingCapitalLoanHelper.assertEqualBigDecimal(expectedRestatedAmount, restatedAmortTxn.getTransactionAmount(),
                     "Expected the final amortization amount to be restated down to the remaining discount");
 
@@ -668,7 +668,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
                     .orElse(null);
             assertNotNull(event,
                     "Expected a " + DISCOUNT_FEE_AMORTIZATION_EVENT + " for the restated amortization transaction " + amortTxnId);
-            assertEquals(Boolean.FALSE, event.getPayLoad().get("reversed"));
+            assertEquals(Boolean.valueOf(false), event.getPayLoad().get("reversed"));
             FeignWorkingCapitalLoanHelper.assertEqualBigDecimal(expectedRestatedAmount,
                     toBigDecimal(event.getPayLoad().get("transactionAmount")), "Expected the event payload to carry the restated amount");
         } finally {
@@ -701,7 +701,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
         final Long[] adjustmentTxnIdHolder = new Long[1];
         businessDateHelper.runAt(DAY_3.toString(), () -> adjustmentTxnIdHolder[0] = loanHelper.makeDiscountFeeAdjustment(loanIdHolder[0],
                 WorkingCapitalLoanRequestBuilders.discountFeeAdjustment(discountTxnIdHolder[0], discount, DAY_1.format(API_DATE))));
-        assertEquals(Boolean.TRUE, loanHelper.getTransaction(loanIdHolder[0], amortTxnId).getReversed(),
+        assertEquals(Boolean.valueOf(true), loanHelper.getTransaction(loanIdHolder[0], amortTxnId).getReversed(),
                 "Expected the final amortization to be reversed once the pool is fully depleted");
 
         externalEventHelper.enableBusinessEvent(DISCOUNT_FEE_AMORTIZATION_EVENT);
@@ -714,7 +714,8 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
             });
 
             final GetWorkingCapitalLoanTransactionIdResponse revivedAmortTxn = loanHelper.getTransaction(loanIdHolder[0], amortTxnId);
-            assertNotEquals(Boolean.TRUE, revivedAmortTxn.getReversed(), "Expected the final amortization to be revived (non-reversed)");
+            assertNotEquals(Boolean.valueOf(true), revivedAmortTxn.getReversed(),
+                    "Expected the final amortization to be revived (non-reversed)");
             FeignWorkingCapitalLoanHelper.assertEqualBigDecimal(discount, revivedAmortTxn.getTransactionAmount(),
                     "Expected the revived amortization amount to be restored to the full discount");
 
@@ -723,7 +724,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
                     .orElse(null);
             assertNotNull(event,
                     "Expected a " + DISCOUNT_FEE_AMORTIZATION_EVENT + " for the revived amortization transaction " + amortTxnId);
-            assertEquals(Boolean.FALSE, event.getPayLoad().get("reversed"));
+            assertEquals(Boolean.valueOf(false), event.getPayLoad().get("reversed"));
             FeignWorkingCapitalLoanHelper.assertEqualBigDecimal(discount, toBigDecimal(event.getPayLoad().get("transactionAmount")),
                     "Expected the event payload to carry the revived amount");
         } finally {

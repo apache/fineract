@@ -360,7 +360,7 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
         final Map<String, Object> reversal = adjustEvents.getFirst().getPayLoad();
         final Map<String, Object> reversedTransaction = (Map<String, Object>) reversal.get("transactionToAdjust");
         assertEquals(reversedRepaymentId, toLong(reversedTransaction.get("id")), "id of the reversed repayment");
-        assertEquals(Boolean.TRUE, reversedTransaction.get("reversed"), "reversed flag of the reversed repayment");
+        assertEquals(Boolean.valueOf(true), reversedTransaction.get("reversed"), "reversed flag of the reversed repayment");
         assertNull(reversal.get("newTransactionDetail"), "new transaction detail of the reversal");
     }
 
