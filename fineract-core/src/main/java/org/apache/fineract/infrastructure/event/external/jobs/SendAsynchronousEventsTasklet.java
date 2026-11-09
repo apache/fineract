@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.external.config.TaskExecutorConstant;
+import org.apache.fineract.infrastructure.event.external.exception.ExternalEventMarkAsSentException;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
@@ -74,14 +75,10 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
-        try {
-            if (isDownstreamChannelEnabled()) {
-                List<ExternalEventView> events = getQueuedEventsBatch();
-                log.debug("Queued events size: {}", events.size());
-                sendEvents(events);
-            }
-        } catch (Exception e) {
-            log.error("Error occurred while processing events: ", e);
+        if (isDownstreamChannelEnabled()) {
+            List<ExternalEventView> events = getQueuedEventsBatch();
+            log.debug("Queued events size: {}", events.size());
+            sendEvents(events);
         }
         return RepeatStatus.FINISHED;
     }
@@ -134,14 +131,24 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
                 }
             }));
         });
+        ExternalEventMarkAsSentException first = null;
         for (Future<?> task : tasks) {
             try {
                 task.get();
             } catch (InterruptedException e) {
-                log.error("Interrupted while marking events as sent", e);
+                Thread.currentThread().interrupt();
+                tasks.forEach(f -> f.cancel(true));
+                throw new ExternalEventMarkAsSentException("Interrupted while marking events as sent", e);
             } catch (ExecutionException e) {
-                log.error("Exception while marking events as sent", e);
+                if (first == null) {
+                    first = new ExternalEventMarkAsSentException("Exception while marking events as sent", e);
+                } else {
+                    first.addSuppressed(e);
+                }
             }
+        }
+        if (first != null) {
+            throw first;
         }
     }
 

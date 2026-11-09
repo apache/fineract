@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.event.external.jobs;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -44,6 +46,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.apache.fineract.infrastructure.event.external.exception.ExternalEventMarkAsSentException;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventView;
@@ -162,7 +165,7 @@ class SendAsynchronousEventsTaskletTest {
     }
 
     @Test
-    public void givenBatchSize2WhenEventSendFailsThenExecutionStops() throws Exception {
+    public void givenBatchSize2WhenEventSendFailsThenExceptionPropagates() throws Exception {
         // given
         List<ExternalEventView> events = Arrays.asList(
                 createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L),
@@ -174,11 +177,9 @@ class SendAsynchronousEventsTaskletTest {
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
         doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
                 .sendEvents(Mockito.any());
-        // when
-        resultStatus = underTest.execute(stepContribution, chunkContext);
-        // then
+        // when & then
+        assertThrows(AcknowledgementTimeoutException.class, () -> underTest.execute(stepContribution, chunkContext));
         verify(repository, times(0)).markEventsSent(Mockito.any(), Mockito.any());
-        assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
 
     @Test
@@ -234,6 +235,46 @@ class SendAsynchronousEventsTaskletTest {
         // then
         verify(repository).findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), externalEventPageSizeArgumentCaptor.capture());
         assertThat(externalEventPageSizeArgumentCaptor.getValue().getPageSize()).isEqualTo(10);
+    }
+
+    @Test
+    public void givenMultiplePartitionsFailThenAllAreAwaitedAndSuppressed() throws Exception {
+        // given: partitionSize = 1 and 2 events with different aggregateRootIds -> 2 partition tasks
+        fineractProperties.getEvents().getExternal().setPartitionSize(1);
+        List<ExternalEventView> events = Arrays.asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "key1", 1L),
+                createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "key2", 2L));
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", ByteBuffer.wrap("dummy".getBytes(StandardCharsets.UTF_8)));
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
+        doThrow(new RuntimeException("DB failure")).when(transactionTemplate).execute(ArgumentMatchers.any());
+        // when & then
+        ExternalEventMarkAsSentException thrown = assertThrows(ExternalEventMarkAsSentException.class,
+                () -> underTest.execute(stepContribution, chunkContext));
+        // both partition tasks were awaited — the second error is suppressed, not lost
+        assertEquals(1, thrown.getSuppressed().length);
+        verify(eventProducer).sendEvents(Mockito.any());
+    }
+
+    @Test
+    public void givenMarkEventsAsSentFailsThenExceptionPropagates() throws Exception {
+        // given
+        List<ExternalEventView> events = Arrays
+                .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", ByteBuffer.wrap("dummy".getBytes(StandardCharsets.UTF_8)));
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
+        RuntimeException dbError = new RuntimeException("Database error while marking events as sent");
+        doThrow(dbError).when(transactionTemplate).execute(ArgumentMatchers.any());
+        // when & then
+        ExternalEventMarkAsSentException thrown = assertThrows(ExternalEventMarkAsSentException.class,
+                () -> underTest.execute(stepContribution, chunkContext));
+        assertThat(thrown.getCause()).isInstanceOf(ExecutionException.class);
+        assertThat(thrown.getCause().getCause()).isSameAs(dbError);
+        verify(eventProducer).sendEvents(Mockito.any());
     }
 
     private ExternalEventView createExternalEventView(String type, String category, String schema, byte[] data, String idempotencyKey,
