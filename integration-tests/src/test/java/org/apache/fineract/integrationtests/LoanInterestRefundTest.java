@@ -1433,7 +1433,7 @@ public class LoanInterestRefundTest extends FeignLoanTestBase {
             Assertions.assertNotNull(loanDetails.getTransactions());
             optInterestRefundTransaction = loanDetails.getTransactions().stream()
                     .filter(item -> Objects.equals(item.getType().getValue(), "Interest Refund")).findFirst();
-            assertEquals(Boolean.TRUE, optInterestRefundTransaction.orElseThrow().getManuallyReversed());
+            assertEquals(Boolean.valueOf(true), optInterestRefundTransaction.orElseThrow().getManuallyReversed());
         });
     }
 

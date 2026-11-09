@@ -187,7 +187,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             assertEqualBigDecimal(BigDecimal.valueOf(9000), loan.getBalance().getPrincipalPaid(), "Principal paid should be the full 9000");
             assertEqualBigDecimal(BigDecimal.ZERO, loan.getBalance().getOverpaymentAmount(), "There should be no overpayment");
             assertNotNull(loan.getStatus(), "Status should exist");
-            assertEquals(Boolean.TRUE, loan.getStatus().getClosedObligationsMet(),
+            assertEquals(Boolean.valueOf(true), loan.getStatus().getClosedObligationsMet(),
                     "Loan must be closed (obligations met) once the balance reaches exactly zero");
         });
     }
@@ -215,7 +215,8 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             assertEqualBigDecimal(BigDecimal.valueOf(3000), loan.getBalance().getOverpaymentAmount(),
                     "Overpayment should be the exact excess of 12000 - 9000 = 3000");
             assertNotNull(loan.getStatus(), "Status should exist");
-            assertEquals(Boolean.TRUE, loan.getStatus().getOverpaid(), "Loan must be overpaid when the repaid total exceeds the principal");
+            assertEquals(Boolean.valueOf(true), loan.getStatus().getOverpaid(),
+                    "Loan must be overpaid when the repaid total exceeds the principal");
         });
     }
 
@@ -239,7 +240,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
 
             final GetWorkingCapitalLoanTransactionIdResponse reversed = findTransactionById(wcLoanHelper.getTransactions(loanId),
                     repaymentTxnId);
-            assertEquals(Boolean.TRUE, reversed.getReversed(), "The undone repayment transaction must be flagged reversed");
+            assertEquals(Boolean.valueOf(true), reversed.getReversed(), "The undone repayment transaction must be flagged reversed");
 
             final GetWorkingCapitalLoansLoanIdResponse afterUndo = wcLoanHelper.getLoanDetails(loanId);
             assertNotNull(afterUndo.getBalance(), "Balance should exist after undo");
@@ -247,7 +248,8 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                     "Outstanding should be restored to the full 9000 after undo");
             assertEqualBigDecimal(BigDecimal.ZERO, afterUndo.getBalance().getPrincipalPaid(), "Principal paid should be restored to 0");
             assertEqualBigDecimal(BigDecimal.ZERO, afterUndo.getBalance().getOverpaymentAmount(), "No overpayment after undo");
-            assertEquals(Boolean.TRUE, afterUndo.getStatus().getActive(), "Loan must remain active after undoing a partial repayment");
+            assertEquals(Boolean.valueOf(true), afterUndo.getStatus().getActive(),
+                    "Loan must remain active after undoing a partial repayment");
         });
     }
 
@@ -263,13 +265,15 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                     WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(9000), "05 April 2026"));
 
             final GetWorkingCapitalLoansLoanIdResponse closed = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(Boolean.TRUE, closed.getStatus().getClosedObligationsMet(), "Loan should be closed after the full repayment");
+            assertEquals(Boolean.valueOf(true), closed.getStatus().getClosedObligationsMet(),
+                    "Loan should be closed after the full repayment");
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-04-10");
             wcLoanHelper.undoTransaction(loanId, closingTxnId, WorkingCapitalLoanRequestBuilders.undoTransaction());
 
             final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "Loan must be active again after undoing the closing repayment");
+            assertEquals(Boolean.valueOf(true), reopened.getStatus().getActive(),
+                    "Loan must be active again after undoing the closing repayment");
             assertEqualBigDecimal(BigDecimal.valueOf(9000), reopened.getBalance().getPrincipalOutstanding(),
                     "Outstanding should return to the full 9000 after undo");
             assertEqualBigDecimal(BigDecimal.ZERO, reopened.getBalance().getPrincipalPaid(), "Principal paid should be restored to 0");
@@ -347,19 +351,19 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-02");
             wcLoanHelper.makeRepayment(loan.loanId(), WorkingCapitalLoanRequestBuilders.repayment(NET_DISBURSEMENT, "02 January 2026"));
-            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getActive(),
+            assertEquals(Boolean.valueOf(true), wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getActive(),
                     "the loan still owes the 1000 discount fee, so it must stay active");
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-03");
             final Long adjustmentId = wcLoanHelper.makeDiscountFeeAdjustment(loan.loanId(),
                     WorkingCapitalLoanRequestBuilders.discountFeeAdjustment(DISCOUNT, "03 January 2026", loan.discountFeeTransactionId()));
-            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
+            assertEquals(Boolean.valueOf(true), wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
                     "the adjustment settles the last 1000, so the loan must close as obligations met");
 
             wcLoanHelper.undoTransaction(loan.loanId(), adjustmentId, WorkingCapitalLoanRequestBuilders.undoTransaction());
 
             final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loan.loanId());
-            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "undoing the adjustment must reopen the loan");
+            assertEquals(Boolean.valueOf(true), reopened.getStatus().getActive(), "undoing the adjustment must reopen the loan");
             assertEqualBigDecimal(DISCOUNT, reopened.getDiscountFee(), "the loan must carry its 1000 discount again");
             assertNotNull(reopened.getBalance(), "balance should exist after the undo");
             assertEqualBigDecimal(GROSS_OWED, reopened.getBalance().getPrincipal(), "the loan's principal must be the 10000 gross again");
@@ -416,14 +420,14 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
             final Long repaymentId = wcLoanHelper.makeRepayment(loan.loanId(),
                     WorkingCapitalLoanRequestBuilders.repayment(new BigDecimal("10100"), "06 January 2026"));
-            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
+            assertEquals(Boolean.valueOf(true), wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
                     "10100 settles the 10000 gross and the 100 fee, so the loan must close as obligations met");
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-07");
             wcLoanHelper.undoTransaction(loan.loanId(), repaymentId, WorkingCapitalLoanRequestBuilders.undoTransaction());
 
             final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loan.loanId());
-            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "undoing the closing repayment must reopen the loan");
+            assertEquals(Boolean.valueOf(true), reopened.getStatus().getActive(), "undoing the closing repayment must reopen the loan");
             assertEqualBigDecimal(DISCOUNT, reopened.getDiscountFee(), "the loan must still carry its 1000 discount");
             assertNotNull(reopened.getBalance(), "balance should exist after the undo");
             assertEqualBigDecimal(GROSS_OWED, reopened.getBalance().getPrincipal(), "the loan's principal must be the 10000 gross");
@@ -459,14 +463,14 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
             final Long repaymentId = wcLoanHelper.makeRepayment(loan.loanId(),
                     WorkingCapitalLoanRequestBuilders.repayment(GROSS_OWED, "06 January 2026"));
-            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
+            assertEquals(Boolean.valueOf(true), wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
                     "10000 settles the whole gross, so the loan must close as obligations met");
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-07");
             wcLoanHelper.undoTransaction(loan.loanId(), repaymentId, WorkingCapitalLoanRequestBuilders.undoTransaction());
 
             final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loan.loanId());
-            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "undoing the closing repayment must reopen the loan");
+            assertEquals(Boolean.valueOf(true), reopened.getStatus().getActive(), "undoing the closing repayment must reopen the loan");
             assertEqualBigDecimal(DISCOUNT, reopened.getDiscountFee(), "the loan must still carry its 1000 discount");
 
             final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loan.loanId());
@@ -494,7 +498,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                     WorkingCapitalLoanRequestBuilders.discountFeeAdjustment(DISCOUNT, "03 January 2026", loan.discountFeeTransactionId()));
 
             final GetWorkingCapitalLoansLoanIdResponse closed = wcLoanHelper.getLoanDetails(loan.loanId());
-            assertEquals(Boolean.TRUE, closed.getStatus().getClosedObligationsMet(), "the adjustment must close the loan");
+            assertEquals(Boolean.valueOf(true), closed.getStatus().getClosedObligationsMet(), "the adjustment must close the loan");
             assertEqualBigDecimal(BigDecimal.ZERO, closed.getDiscountFee(), "the whole discount has been given back");
 
             final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loan.loanId());
@@ -577,7 +581,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                     "Period 1 minimum payment must be the flat 500 breach amount");
             assertEqualBigDecimal(BREACH_MIN_PAYMENT_AMOUNT, breached.getOutstandingAmount(),
                     "Period 1 outstanding must be the full 500 while the minimum payment is unpaid");
-            assertEquals(Boolean.TRUE, breached.getBreach(), "Period 1 must be flagged breached once it elapses unpaid");
+            assertEquals(Boolean.valueOf(true), breached.getBreach(), "Period 1 must be flagged breached once it elapses unpaid");
 
             // A backdated repayment dated inside period 1 that covers the 500 minimum re-evaluates and clears the
             // breach.
@@ -586,7 +590,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             final WorkingCapitalLoanBreachScheduleData cleared = findBreachPeriod(wcLoanHelper.getBreachSchedule(loanId), 1);
             assertEqualBigDecimal(BigDecimal.ZERO, cleared.getOutstandingAmount(),
                     "Period 1 outstanding must drop to 0 after the backdated repayment covers the minimum payment");
-            assertEquals(Boolean.FALSE, cleared.getBreach(),
+            assertEquals(Boolean.valueOf(false), cleared.getBreach(),
                     "Period 1 breach flag must be cleared (false) after the backdated repayment covers the minimum payment");
         });
     }
@@ -603,7 +607,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             // 31 Mar (the period's last day) and flags it breached (500 minimum outstanding).
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-04-01");
             wcLoanHelper.executeInlineWCCOB(loanId);
-            assertEquals(Boolean.TRUE, findBreachPeriod(wcLoanHelper.getBreachSchedule(loanId), 1).getBreach(),
+            assertEquals(Boolean.valueOf(true), findBreachPeriod(wcLoanHelper.getBreachSchedule(loanId), 1).getBreach(),
                     "Period 1 must be breached before the clearing repayment");
 
             // A repayment dated inside period 1 that covers the 500 minimum clears the breach.
@@ -611,7 +615,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                     WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(500), "15 March 2026"));
             final WorkingCapitalLoanBreachScheduleData cleared = findBreachPeriod(wcLoanHelper.getBreachSchedule(loanId), 1);
             assertEqualBigDecimal(BigDecimal.ZERO, cleared.getOutstandingAmount(), "Period 1 outstanding cleared to 0 by the repayment");
-            assertEquals(Boolean.FALSE, cleared.getBreach(), "Period 1 breach cleared (false) by the repayment");
+            assertEquals(Boolean.valueOf(false), cleared.getBreach(), "Period 1 breach cleared (false) by the repayment");
 
             // Undoing the clearing repayment (business date 01 Apr is already past the 31 Mar period end) re-evaluates
             // and restores the breach.
@@ -620,7 +624,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             final WorkingCapitalLoanBreachScheduleData reverted = findBreachPeriod(wcLoanHelper.getBreachSchedule(loanId), 1);
             assertEqualBigDecimal(BREACH_MIN_PAYMENT_AMOUNT, reverted.getOutstandingAmount(),
                     "Period 1 outstanding must be restored to the full 500 after undoing the clearing repayment");
-            assertEquals(Boolean.TRUE, reverted.getBreach(),
+            assertEquals(Boolean.valueOf(true), reverted.getBreach(),
                     "Period 1 breach flag must be restored (true) after undoing the clearing repayment, since the period has already ended");
         });
     }

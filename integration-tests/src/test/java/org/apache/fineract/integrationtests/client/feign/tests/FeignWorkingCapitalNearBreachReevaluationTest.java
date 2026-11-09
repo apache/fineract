@@ -352,7 +352,7 @@ public class FeignWorkingCapitalNearBreachReevaluationTest extends FeignWorkingC
             deleteAllExternalEvents();
             final Long repaymentId = makeWcRepayment(loanId, PRINCIPAL, "03 January 2026");
 
-            assertEquals(Boolean.TRUE, getWcLoanDetails(loanId).getStatus().getClosedObligationsMet(),
+            assertEquals(Boolean.valueOf(true), getWcLoanDetails(loanId).getStatus().getClosedObligationsMet(),
                     "the 9000 repayment must close the loan");
             validateNearBreachStates(getBreachSchedule(loanId), nearBreachState(1, "9000", "0", false, false));
             assertNearBreachEvents(loanId, 1);
@@ -360,7 +360,7 @@ public class FeignWorkingCapitalNearBreachReevaluationTest extends FeignWorkingC
             deleteAllExternalEvents();
             undoWcTransaction(loanId, repaymentId);
 
-            assertEquals(Boolean.TRUE, getWcLoanDetails(loanId).getStatus().getActive(), "the undo must re-open the loan");
+            assertEquals(Boolean.valueOf(true), getWcLoanDetails(loanId).getStatus().getActive(), "the undo must re-open the loan");
             validateNearBreachStates(getBreachSchedule(loanId), nearBreachState(1, "0", "90", true, null));
             assertNearBreachEvents(loanId, 1);
         });

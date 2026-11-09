@@ -307,7 +307,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private List<StaffData> fetchStaff(final Long staffId) {
         List<StaffData> staff = null;
         if (staffId == null) {
-            staff = this.staffReadPlatformService.retrieveAllStaff(null, Boolean.FALSE, null);
+            staff = this.staffReadPlatformService.retrieveAllStaff(null, false, null);
         } else {
             staff = new ArrayList<>();
             staff.add(this.staffReadPlatformService.retrieveStaff(staffId));

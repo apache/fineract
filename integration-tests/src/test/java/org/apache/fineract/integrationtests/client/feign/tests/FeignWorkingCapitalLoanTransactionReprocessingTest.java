@@ -225,7 +225,7 @@ public class FeignWorkingCapitalLoanTransactionReprocessingTest extends FeignInt
                     "Overpayment should be 0 — the remaining 6500 is under the 9000 principal");
             assertEqualBigDecimal(BigDecimal.valueOf(2500), afterUndo.getBalance().getPrincipalOutstanding(),
                     "Principal outstanding should be 2500 (9000 - 6500)");
-            assertEquals(Boolean.TRUE, afterUndo.getStatus().getActive(), "Loan must be active after the undo");
+            assertEquals(Boolean.valueOf(true), afterUndo.getStatus().getActive(), "Loan must be active after the undo");
 
             // The remaining day-10 repayment must re-allocate its full 6500 to principal (was 6000 + 500 overpayment).
             List<GetWorkingCapitalLoanTransactionIdResponse> transactions = wcLoanHelper.getTransactions(loanId);

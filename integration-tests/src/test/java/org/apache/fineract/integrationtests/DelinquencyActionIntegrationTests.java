@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -672,7 +670,7 @@ public class DelinquencyActionIntegrationTests extends FeignLoanTestBase {
         Long loanProductId = createLoanProduct(product);
         GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
 
-        assertEquals(TRUE, getLoanProductsProductIdResponse.getEnableDownPayment());
+        assertEquals(Boolean.valueOf(true), getLoanProductsProductIdResponse.getEnableDownPayment());
         assertNotNull(getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment());
         assertEquals(0, getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE));
         assertEquals(autoDownPaymentEnabled, getLoanProductsProductIdResponse.getEnableAutoRepaymentForDownPayment());
@@ -702,7 +700,7 @@ public class DelinquencyActionIntegrationTests extends FeignLoanTestBase {
         Long loanProductId = createLoanProduct(product);
         GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
 
-        assertEquals(TRUE, getLoanProductsProductIdResponse.getEnableDownPayment());
+        assertEquals(Boolean.valueOf(true), getLoanProductsProductIdResponse.getEnableDownPayment());
         assertNotNull(getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment());
         assertEquals(0, getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE));
         assertEquals(autoDownPaymentEnabled, getLoanProductsProductIdResponse.getEnableAutoRepaymentForDownPayment());
@@ -774,7 +772,7 @@ public class DelinquencyActionIntegrationTests extends FeignLoanTestBase {
             assertEquals(1, pausePeriods.size());
             assertEquals(LocalDate.parse("20 January 2022", dateTimeFormatter), pausePeriods.get(0).getPausePeriodStart());
             assertEquals(LocalDate.parse("30 January 2022", dateTimeFormatter), pausePeriods.get(0).getPausePeriodEnd());
-            assertEquals(FALSE, pausePeriods.get(0).getActive());
+            assertEquals(Boolean.valueOf(false), pausePeriods.get(0).getActive());
         });
     }
 

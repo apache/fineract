@@ -373,11 +373,11 @@ public class SearchResourcesTest extends FeignIntegrationTest {
                 .minRequiredOpeningBalance(new BigDecimal(minimumOpeningBalance))).getResourceId();
         assertNotNull(savingsProductId);
         final Long savingsId = savingsHelper.submitApplication(clientId, savingsProductId, SAVINGS_SUBMITTED_DATE).getSavingsId();
-        assertEquals(Boolean.TRUE, savingsHelper.getSavingsStatus(savingsId).getSubmittedAndPendingApproval());
+        assertEquals(Boolean.valueOf(true), savingsHelper.getSavingsStatus(savingsId).getSubmittedAndPendingApproval());
         savingsHelper.approveSavings(savingsId, SAVINGS_APPROVED_DATE);
-        assertEquals(Boolean.TRUE, savingsHelper.getSavingsStatus(savingsId).getApproved());
+        assertEquals(Boolean.valueOf(true), savingsHelper.getSavingsStatus(savingsId).getApproved());
         savingsHelper.activateSavings(savingsId, SAVINGS_ACTIVATED_DATE);
-        assertEquals(Boolean.TRUE, savingsHelper.getSavingsStatus(savingsId).getActive());
+        assertEquals(Boolean.valueOf(true), savingsHelper.getSavingsStatus(savingsId).getActive());
         return savingsId;
     }
 

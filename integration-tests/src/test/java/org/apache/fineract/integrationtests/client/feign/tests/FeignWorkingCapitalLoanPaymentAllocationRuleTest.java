@@ -216,7 +216,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
             GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = wcLoanHelper.getTransactions(loanIdHolder[0]).stream()
                     .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
                     .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
-            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed());
+            assertEquals(Boolean.valueOf(true), reversedAdjustment.getReversed());
 
             GetBalance balance = balanceOf(loanIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.ZERO, balance.getPrincipalPaid());
@@ -271,7 +271,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
             GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = wcLoanHelper.getTransactions(loanIdHolder[0]).stream()
                     .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
                     .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
-            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed());
+            assertEquals(Boolean.valueOf(true), reversedAdjustment.getReversed());
 
             GetBalance afterUndo = balanceOf(loanIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.valueOf(40), afterUndo.getPrincipalPaid());
@@ -311,7 +311,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
             assertFalse(breachSchedule.isEmpty(), "Breach schedule should be populated");
             WorkingCapitalLoanBreachScheduleData periodAfterAdjustment = breachSchedule.getFirst();
             assertEqualBigDecimal(BigDecimal.ZERO, periodAfterAdjustment.getOutstandingAmount());
-            assertEquals(Boolean.FALSE, periodAfterAdjustment.getBreach(), "Breach period is fully covered, so not breached");
+            assertEquals(Boolean.valueOf(false), periodAfterAdjustment.getBreach(), "Breach period is fully covered, so not breached");
         });
         businessDateHelper.runAt("2026-08-30", () -> {
             FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
@@ -324,7 +324,8 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
             assertFalse(breachSchedule.isEmpty(), "Breach schedule should be populated");
             WorkingCapitalLoanBreachScheduleData periodAfterUndo = breachSchedule.getFirst();
             assertEqualBigDecimal(BigDecimal.valueOf(500), periodAfterUndo.getOutstandingAmount());
-            assertEquals(Boolean.TRUE, periodAfterUndo.getBreach(), "Undo brought back the shortfall on an already-elapsed period");
+            assertEquals(Boolean.valueOf(true), periodAfterUndo.getBreach(),
+                    "Undo brought back the shortfall on an already-elapsed period");
         });
     }
 

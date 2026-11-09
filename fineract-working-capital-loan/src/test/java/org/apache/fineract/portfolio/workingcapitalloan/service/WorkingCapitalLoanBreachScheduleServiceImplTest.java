@@ -288,7 +288,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.applyRepaymentUndo(loan, transactionDate, BigDecimal.valueOf(60));
 
         verify(nearBreachEvaluationService).rederiveNearBreach(List.of(openPeriod), NEAR_BREACH_PARAMETERS, LocalDate.of(2026, 5, 31));
-        assertEquals(Boolean.TRUE, openPeriod.getNearBreach());
+        assertEquals(Boolean.valueOf(true), openPeriod.getNearBreach());
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(WorkingCapitalLoanNearBreachChangeBusinessEvent.class));
     }
 
@@ -340,7 +340,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         underTest.reprocessBreachSchedule(loan);
 
-        assertEquals(Boolean.TRUE, closedOut.getNearBreach());
+        assertEquals(Boolean.valueOf(true), closedOut.getNearBreach());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any(WorkingCapitalLoanNearBreachChangeBusinessEvent.class));
     }
 
@@ -360,7 +360,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         assertBounds(splitPeriod, LocalDate.of(2026, 5, 25), LocalDate.of(2026, 5, 31), 7);
         verify(nearBreachEvaluationService).rederiveNearBreach(List.of(splitPeriod), NEAR_BREACH_PARAMETERS, LocalDate.of(2026, 5, 31));
-        assertEquals(Boolean.TRUE, splitPeriod.getNearBreach());
+        assertEquals(Boolean.valueOf(true), splitPeriod.getNearBreach());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any(WorkingCapitalLoanNearBreachChangeBusinessEvent.class));
     }
 
@@ -423,7 +423,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.reprocessBreachSchedule(loan);
 
         verify(repository, times(1)).findByLoanIdOrderByPeriodNumberAsc(LOAN_ID);
-        assertEquals(Boolean.TRUE, closedOut.getNearBreach());
+        assertEquals(Boolean.valueOf(true), closedOut.getNearBreach());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any(WorkingCapitalLoanNearBreachChangeBusinessEvent.class));
     }
 
@@ -486,7 +486,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.rederiveNearBreachIfReopened(loan, LoanStatus.CLOSED_OBLIGATIONS_MET);
 
         verify(nearBreachEvaluationService).rederiveNearBreach(List.of(openPeriod), NEAR_BREACH_PARAMETERS, LocalDate.of(2026, 5, 31));
-        assertEquals(Boolean.TRUE, openPeriod.getNearBreach());
+        assertEquals(Boolean.valueOf(true), openPeriod.getNearBreach());
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(WorkingCapitalLoanNearBreachChangeBusinessEvent.class));
     }
 
@@ -499,7 +499,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.rederiveNearBreachIfReopened(loan, LoanStatus.ACTIVE);
 
         verify(nearBreachEvaluationService, never()).rederiveNearBreach(anyList(), any(), any());
-        assertEquals(Boolean.FALSE, openPeriod.getNearBreach());
+        assertEquals(Boolean.valueOf(false), openPeriod.getNearBreach());
     }
 
     @Test
@@ -545,7 +545,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         service.applyRepayment(loan, transactionDate, BigDecimal.valueOf(60));
 
         // As of 2026-05-31 the 2026-05-29 checkpoint requires 3 x 33% of 100 = 99, and 60 was paid.
-        assertEquals(Boolean.TRUE, openPeriod.getNearBreach());
+        assertEquals(Boolean.valueOf(true), openPeriod.getNearBreach());
         verify(breachActionRepository, times(1)).isBreachDisabled(LOAN_ID);
         verify(nearBreachActionRepository, times(1)).findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(LOAN_ID,
                 NearBreachActionType.RESCHEDULE);
@@ -595,7 +595,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.applyRepayment(loan, transactionDate, BigDecimal.valueOf(100));
 
         verify(nearBreachEvaluationService, never()).rederiveNearBreach(anyList(), any(), any());
-        assertEquals(Boolean.TRUE, closedPeriod.getNearBreach());
+        assertEquals(Boolean.valueOf(true), closedPeriod.getNearBreach());
     }
 
     @Test
@@ -655,7 +655,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.applyRepaymentUndo(loan, transactionDate, BigDecimal.valueOf(100));
 
         assertEquals(0, BigDecimal.valueOf(100).compareTo(endedPeriod.getOutstandingAmount()));
-        assertEquals(Boolean.TRUE, endedPeriod.getBreach());
+        assertEquals(Boolean.valueOf(true), endedPeriod.getBreach());
     }
 
     @Test
@@ -671,7 +671,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         assertEquals(0, BigDecimal.ZERO.compareTo(resetPeriod.getPaidAmount()));
         assertEquals(0, BigDecimal.valueOf(100).compareTo(resetPeriod.getOutstandingAmount()));
-        assertEquals(Boolean.TRUE, resetPeriod.getBreach());
+        assertEquals(Boolean.valueOf(true), resetPeriod.getBreach());
     }
 
     @Test
@@ -742,9 +742,9 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.reprocessBreachSchedule(loan);
 
         assertEquals(0, BigDecimal.ZERO.compareTo(period1.getOutstandingAmount()));
-        assertEquals(Boolean.FALSE, period1.getBreach());
+        assertEquals(Boolean.valueOf(false), period1.getBreach());
         assertEquals(0, BigDecimal.valueOf(100).compareTo(period2.getOutstandingAmount()));
-        assertEquals(Boolean.TRUE, period2.getBreach());
+        assertEquals(Boolean.valueOf(true), period2.getBreach());
 
         assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
@@ -770,7 +770,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         assertFalse(normalPeriod.isReset());
         assertEquals(0, BigDecimal.ZERO.compareTo(resetPeriod.getOutstandingAmount()));
         assertEquals(0, BigDecimal.valueOf(100).compareTo(resetPeriod.getPaidAmount()));
-        assertEquals(Boolean.FALSE, resetPeriod.getBreach());
+        assertEquals(Boolean.valueOf(false), resetPeriod.getBreach());
 
         assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }

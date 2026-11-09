@@ -140,7 +140,7 @@ public class FeignDatatableHelper {
      */
     public JsonNode getDatatableEntries(String datatableName, Long apptableId) {
         String json = ok(
-                () -> fineractClient.dataTables().getDatatableEntries(datatableName, apptableId, Map.of(GENERIC_RESULT_SET, Boolean.TRUE)));
+                () -> fineractClient.dataTables().getDatatableEntries(datatableName, apptableId, Map.of(GENERIC_RESULT_SET, true)));
         try {
             return ObjectMapperFactory.getShared().readTree(json);
         } catch (JsonProcessingException e) {

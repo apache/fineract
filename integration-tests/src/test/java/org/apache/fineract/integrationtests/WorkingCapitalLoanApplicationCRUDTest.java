@@ -164,7 +164,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
                 .nearBreachFrequencyType(breachFrequencyType)//
                 .nearBreachThreshold(BigDecimal.valueOf(30.0)))//
                 .getResourceId(); //
-        final Long productId = createProductWithBreachAndNearBreach(breachId, nearBreachId, Boolean.FALSE);
+        final Long productId = createProductWithBreachAndNearBreach(breachId, nearBreachId, false);
         final Long clientId = createClient();
 
         final var json = new WorkingCapitalLoanApplicationTestBuilder() //
@@ -205,7 +205,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
         final String breachAmountCalculationType = "PERCENTAGE";
         final BigDecimal breachAmount = BigDecimal.valueOf(10);
         final Long breachId = createBreach(breachName, breachFrequency, breachFrequencyType, breachAmountCalculationType, breachAmount);
-        final Long productId = createProductWithBreachAndNearBreach(breachId, null, Boolean.TRUE);
+        final Long productId = createProductWithBreachAndNearBreach(breachId, null, true);
         final Long clientId = createClient();
         final String nearBreachName = Utils.randomStringGenerator("NearBreach", 20);
         final Long nearBreachId = nearBreachHelper.create(new WorkingCapitalNearBreachRequest() //
@@ -547,8 +547,8 @@ public class WorkingCapitalLoanApplicationCRUDTest {
             assertNotNull(matchedProduct);
             final GetConfigurableAttributes allowAttributeOverrides = matchedProduct.getAllowAttributeOverrides();
             assertNotNull(allowAttributeOverrides);
-            assertEquals(Boolean.TRUE, allowAttributeOverrides.getPeriodPaymentFrequency());
-            assertNotEquals(Boolean.TRUE, allowAttributeOverrides.getDiscountDefault());
+            assertEquals(Boolean.valueOf(true), allowAttributeOverrides.getPeriodPaymentFrequency());
+            assertNotEquals(Boolean.valueOf(true), allowAttributeOverrides.getDiscountDefault());
         } finally {
             productHelper.deleteWorkingCapitalLoanProductById(productId);
         }

@@ -114,7 +114,7 @@ public class LoanChargeEffectiveDueDateComparatorTest {
         LoanInstallmentCharge installmentCharge2 = new LoanInstallmentCharge();
         LoanRepaymentScheduleInstallment installment2 = new LoanRepaymentScheduleInstallment();
         ReflectionTestUtils.setField(installment2, "dueDate", null);
-        ReflectionTestUtils.setField(installmentCharge2, "paid", Boolean.TRUE);
+        ReflectionTestUtils.setField(installmentCharge2, "paid", true);
         ReflectionTestUtils.setField(installmentCharge2, "installment", installment2);
         ReflectionTestUtils.setField(lc4, "chargeTime", ChargeTimeType.INSTALMENT_FEE.getValue());
         ReflectionTestUtils.setField(lc4, "loanInstallmentCharge", Set.of(installmentCharge2));

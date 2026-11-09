@@ -800,7 +800,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).value(enableAccrualActivityPosting)
                     .ignoreIfNull().validateForBooleanValue();
             if (!AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
-                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).isOneOfTheseValues(Boolean.TRUE)
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).isOneOfTheseValues(true)
                         .failWithCode("should be false for non accrual accounting");
             }
         }

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -253,7 +252,7 @@ public class LoanRescheduleTestWithDownpayment extends FeignLoanTestBase {
         Long loanProductId = createLoanProduct(product);
         GetLoanProductsProductIdResponse retrieved = retrieveLoanProduct(loanProductId);
 
-        assertEquals(TRUE, retrieved.getEnableDownPayment());
+        assertEquals(Boolean.valueOf(true), retrieved.getEnableDownPayment());
         assertNotNull(retrieved.getDisbursedAmountPercentageForDownPayment());
         assertEquals(0, retrieved.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE_25));
         assertEquals(autoDownPaymentEnabled, retrieved.getEnableAutoRepaymentForDownPayment());
@@ -282,7 +281,7 @@ public class LoanRescheduleTestWithDownpayment extends FeignLoanTestBase {
         Long loanProductId = createLoanProduct(product);
         GetLoanProductsProductIdResponse retrieved = retrieveLoanProduct(loanProductId);
 
-        assertEquals(TRUE, retrieved.getEnableDownPayment());
+        assertEquals(Boolean.valueOf(true), retrieved.getEnableDownPayment());
         assertNotNull(retrieved.getDisbursedAmountPercentageForDownPayment());
         assertEquals(0, retrieved.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE_33));
         assertEquals(autoDownPaymentEnabled, retrieved.getEnableAutoRepaymentForDownPayment());
@@ -313,7 +312,7 @@ public class LoanRescheduleTestWithDownpayment extends FeignLoanTestBase {
         Long loanProductId = createLoanProduct(product);
         GetLoanProductsProductIdResponse retrieved = retrieveLoanProduct(loanProductId);
 
-        assertEquals(TRUE, retrieved.getEnableDownPayment());
+        assertEquals(Boolean.valueOf(true), retrieved.getEnableDownPayment());
         assertNotNull(retrieved.getDisbursedAmountPercentageForDownPayment());
         assertEquals(0, retrieved.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE_20));
         assertEquals(autoDownPaymentEnabled, retrieved.getEnableAutoRepaymentForDownPayment());

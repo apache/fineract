@@ -534,10 +534,11 @@ public class LoanWithdrawalTest extends FeignLoanTestBase {
             applyLoanWithdrawal(loanId, "31 March 2024");
 
             GetLoansLoanIdLoanTransactionEnumData withdrawalType = transactionType(loanId, LOAN_WITHDRAWAL);
-            assertEquals(Boolean.TRUE, withdrawalType.getLoanWithdrawal(), "Loan Withdrawal transaction has the loanWithdrawal flag");
-            assertEquals(Boolean.FALSE, withdrawalType.getContractTermination(),
+            assertEquals(Boolean.valueOf(true), withdrawalType.getLoanWithdrawal(),
+                    "Loan Withdrawal transaction has the loanWithdrawal flag");
+            assertEquals(Boolean.valueOf(false), withdrawalType.getContractTermination(),
                     "Loan Withdrawal transaction has no contractTermination flag");
-            assertEquals(Boolean.FALSE, transactionType(loanId, "Repayment").getLoanWithdrawal(),
+            assertEquals(Boolean.valueOf(false), transactionType(loanId, "Repayment").getLoanWithdrawal(),
                     "Repayment transaction has no loanWithdrawal flag");
 
             assertEquals(3L, getLoanTransactions(loanId).getTotalElements(), "Disbursement, Repayment and Loan Withdrawal");
@@ -551,9 +552,9 @@ public class LoanWithdrawalTest extends FeignLoanTestBase {
     @Test
     public void loanWithdrawalAndItsUndoRaiseTheirOwnBusinessEvents() {
         Map<String, Boolean> enabledByEventType = externalEventHelper.getEnabledByEventType();
-        assertEquals(Boolean.FALSE, enabledByEventType.get(WITHDRAWAL_POST_EVENT),
+        assertEquals(Boolean.valueOf(false), enabledByEventType.get(WITHDRAWAL_POST_EVENT),
                 WITHDRAWAL_POST_EVENT + " is registered, disabled by default");
-        assertEquals(Boolean.FALSE, enabledByEventType.get(WITHDRAWAL_UNDO_EVENT),
+        assertEquals(Boolean.valueOf(false), enabledByEventType.get(WITHDRAWAL_UNDO_EVENT),
                 WITHDRAWAL_UNDO_EVENT + " is registered, disabled by default");
 
         final Long loanId = disburseSpecSheetLoan();

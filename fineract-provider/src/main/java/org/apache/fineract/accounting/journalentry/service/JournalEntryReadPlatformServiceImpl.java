@@ -341,7 +341,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             if (onlyManualEntries) {
                 sqlBuilder.append(whereClose).append(" journalEntry.manual_entry = ?");
                 whereClose = " and ";
-                objectArray[arrayPos] = Boolean.TRUE;
+                objectArray[arrayPos] = true;
                 arrayPos = arrayPos + 1;
             }
         }

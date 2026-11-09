@@ -165,7 +165,7 @@ public class WorkingCapitalLoanDisbursementTest {
             assertNotNull(txn.getType());
             assertEquals("loanTransactionType.disbursement", txn.getType().getCode());
             assertEqualBigDecimal(BigDecimal.valueOf(5000), txn.getTransactionAmount());
-            assertNotEquals(Boolean.TRUE, txn.getReversed(), "Disbursement transaction should not be reversed");
+            assertNotEquals(Boolean.valueOf(true), txn.getReversed(), "Disbursement transaction should not be reversed");
             assertEqualBigDecimal(BigDecimal.valueOf(5000), txn.getPrincipalPortion());
             assertEqualBigDecimal(BigDecimal.ZERO, txn.getFeeChargesPortion());
             assertEqualBigDecimal(BigDecimal.ZERO, txn.getPenaltyChargesPortion());
@@ -380,7 +380,7 @@ public class WorkingCapitalLoanDisbursementTest {
             GetWorkingCapitalLoanTransactionsResponse loanTransactionsResponse = applicationHelper.retrieveTransactionsByLoanId(loanId);
             assertEquals(1, loanTransactionsResponse.getContent().size(), "After disburse there should be one transaction");
             final GetWorkingCapitalLoanTransactionIdResponse txn = loanTransactionsResponse.getContent().getFirst();
-            assertEquals(Boolean.TRUE, txn.getReversed(), "Expected transaction to be reversed");
+            assertEquals(Boolean.valueOf(true), txn.getReversed(), "Expected transaction to be reversed");
         });
     }
 
@@ -417,7 +417,7 @@ public class WorkingCapitalLoanDisbursementTest {
                 assertEquals(loanId, event.getAggregateRootId());
                 assertEquals(txn.getId(), ((Number) event.getPayLoad().get("id")).longValue());
                 assertEquals(loanId, ((Number) event.getPayLoad().get("wcLoanId")).longValue());
-                assertEquals(Boolean.FALSE, event.getPayLoad().get("reversed"));
+                assertEquals(Boolean.valueOf(false), event.getPayLoad().get("reversed"));
             });
         } finally {
             externalEventHelper.disableBusinessEvent(WC_DISBURSAL_TXN_EVENT);
@@ -459,7 +459,7 @@ public class WorkingCapitalLoanDisbursementTest {
                 assertEquals(loanId, event.getAggregateRootId());
                 assertEquals(txn.getId(), ((Number) event.getPayLoad().get("id")).longValue());
                 assertEquals(loanId, ((Number) event.getPayLoad().get("wcLoanId")).longValue());
-                assertEquals(Boolean.TRUE, event.getPayLoad().get("reversed"));
+                assertEquals(Boolean.valueOf(true), event.getPayLoad().get("reversed"));
             });
         } finally {
             externalEventHelper.disableBusinessEvent(WC_UNDO_DISBURSAL_TXN_EVENT);

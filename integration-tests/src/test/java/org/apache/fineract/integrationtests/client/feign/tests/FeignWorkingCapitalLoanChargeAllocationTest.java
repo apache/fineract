@@ -210,13 +210,14 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
             GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = wcLoanHelper.getTransactions(loanIdHolder[0]).stream()
                     .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
                     .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
-            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed(), "Charge adjustment transaction should be flagged reversed");
+            assertEquals(Boolean.valueOf(true), reversedAdjustment.getReversed(),
+                    "Charge adjustment transaction should be flagged reversed");
 
             WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid(), "Fee charge amount paid should be restored to 0");
             assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountOutstanding(),
                     "Fee charge outstanding should be restored to 100");
-            assertNotEquals(Boolean.TRUE, feeCharge.getPaid(), "Fee charge should no longer be flagged paid");
+            assertNotEquals(Boolean.valueOf(true), feeCharge.getPaid(), "Fee charge should no longer be flagged paid");
 
             GetBalance balance = balanceOf(loanIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.ZERO, balance.getFeePaid(), "Fee paid bucket should be restored to 0");
@@ -281,7 +282,8 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
             GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = transactions.stream()
                     .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
                     .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
-            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed(), "Charge adjustment transaction should be flagged reversed");
+            assertEquals(Boolean.valueOf(true), reversedAdjustment.getReversed(),
+                    "Charge adjustment transaction should be flagged reversed");
 
             WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountPaid(), "Fee charge amount paid restored to 100");
@@ -317,7 +319,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
 
             WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountPaid(), "Fee charge fully paid once, not lost");
-            assertEquals(Boolean.TRUE, feeCharge.getPaid(), "Fee charge should be flagged paid");
+            assertEquals(Boolean.valueOf(true), feeCharge.getPaid(), "Fee charge should be flagged paid");
         });
     }
 

@@ -58,7 +58,7 @@ class AdHocTest {
         Map<String, Object> changes = adHoc.update(command("{\"isActive\":true}"));
 
         assertTrue(adHoc.isActive());
-        assertEquals(Boolean.TRUE, changes.get("isActive"));
+        assertEquals(true, changes.get("isActive"));
     }
 
     @Test
@@ -68,7 +68,7 @@ class AdHocTest {
         Map<String, Object> changes = adHoc.update(command("{\"isActive\":false}"));
 
         assertFalse(adHoc.isActive());
-        assertEquals(Boolean.FALSE, changes.get("isActive"));
+        assertEquals(false, changes.get("isActive"));
     }
 
     @Test
