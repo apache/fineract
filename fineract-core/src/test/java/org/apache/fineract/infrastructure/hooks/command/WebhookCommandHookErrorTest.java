@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.HookableCommand;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -94,7 +95,7 @@ class WebhookCommandHookErrorTest {
         final IllegalStateException error = new IllegalStateException("not found");
         when(errorHandler.handle(error)).thenReturn(new ErrorInfo(404, 4001, NOT_FOUND_BODY, null));
 
-        underTest.onError(hookableCommand(), error);
+        underTest.onError(errorContext(hookableCommand(), error));
 
         final HookEvent event = publishedEvent();
         final HookEventSource source = (HookEventSource) event.getSource();
@@ -124,7 +125,7 @@ class WebhookCommandHookErrorTest {
     void shouldSendErrorMessageThatIsNotJsonAsIs() {
         when(errorHandler.handle(any())).thenReturn(new ErrorInfo(500, null, "Unexpected failure", null));
 
-        underTest.onError(hookableCommand(), new IllegalStateException("boom"));
+        underTest.onError(errorContext(hookableCommand(), new IllegalStateException("boom")));
 
         final JsonNode response = mapper.readTree(publishedEvent().getPayload()).get("response");
         assertEquals("Unexpected failure", response.get("errorMessage").asString());
@@ -137,7 +138,7 @@ class WebhookCommandHookErrorTest {
         TransactionSynchronizationManager.initSynchronization();
         when(errorHandler.handle(any())).thenReturn(new ErrorInfo(404, 4001, NOT_FOUND_BODY, null));
 
-        underTest.onError(hookableCommand(), new IllegalStateException("not found"));
+        underTest.onError(errorContext(hookableCommand(), new IllegalStateException("not found")));
 
         assertEquals("Exception", mapper.readTree(publishedEvent().getPayload()).get("status").asString());
         assertTrue(TransactionSynchronizationManager.getSynchronizations().isEmpty());
@@ -148,7 +149,7 @@ class WebhookCommandHookErrorTest {
         final Command<Object> command = new Command<>();
         command.setPayload(new TestRequest("contract.pdf", null));
 
-        underTest.onError(command, new IllegalStateException("not found"));
+        underTest.onError(errorContext(command, new IllegalStateException("not found")));
 
         verifyNoInteractions(eventPublisher, errorHandler);
     }
@@ -158,14 +159,14 @@ class WebhookCommandHookErrorTest {
         when(errorHandler.handle(any())).thenReturn(new ErrorInfo(404, 4001, NOT_FOUND_BODY, null));
         doThrow(new IllegalStateException("listener failed")).when(eventPublisher).publishEvent(any(HookEvent.class));
 
-        assertDoesNotThrow(() -> underTest.onError(hookableCommand(), new IllegalStateException("not found")));
+        assertDoesNotThrow(() -> underTest.onError(errorContext(hookableCommand(), new IllegalStateException("not found"))));
     }
 
     @Test
     void shouldNotMaskCommandErrorWhenMappingTheErrorFails() {
         when(errorHandler.handle(any())).thenThrow(new IllegalStateException("no mapper"));
 
-        assertDoesNotThrow(() -> underTest.onError(hookableCommand(), new IllegalStateException("not found")));
+        assertDoesNotThrow(() -> underTest.onError(errorContext(hookableCommand(), new IllegalStateException("not found"))));
         verifyNoInteractions(eventPublisher);
     }
 
@@ -195,5 +196,10 @@ class WebhookCommandHookErrorTest {
     }
 
     private record TestRequest(String name, @JsonIgnore InputStream stream) {
+    }
+
+    /** The hook takes the context now, so the command and the failure are handed over together. */
+    private static CommandContext<Object, Object> errorContext(Command<Object> command, Throwable error) {
+        return CommandContext.<Object, Object>builder().command(command).error(error).build();
     }
 }

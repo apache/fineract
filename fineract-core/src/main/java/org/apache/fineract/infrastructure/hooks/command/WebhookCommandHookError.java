@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.hooks.command;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookError;
 import org.apache.fineract.command.core.HookableCommand;
 import org.springframework.stereotype.Component;
@@ -31,12 +31,14 @@ import org.springframework.stereotype.Component;
  */
 @RequiredArgsConstructor
 @Component
-final class WebhookCommandHookError implements CommandHookError<Object> {
+final class WebhookCommandHookError implements CommandHookError<Object, Object> {
 
     private final WebhookCommandEventPublisher publisher;
 
     @Override
-    public void onError(Command<Object> command, Throwable error) {
+    public void onError(CommandContext<Object, Object> ctx) {
+        var command = ctx.getCommand();
+
         if (!(command instanceof HookableCommand hookable)) {
             return;
         }
@@ -44,6 +46,6 @@ final class WebhookCommandHookError implements CommandHookError<Object> {
         // Publish right away, as in the legacy command processing: when the handler fails, its work is rolled back, so
         // there is no commit to wait for. A hook can also fail after the handler has committed, e.g. when the audit
         // hook can't store the command. The event then reports the error the API returns, for a change that was saved.
-        publisher.publishError(hookable, command.getPayload(), error);
+        publisher.publishError(hookable, command.getPayload(), ctx.getError());
     }
 }
