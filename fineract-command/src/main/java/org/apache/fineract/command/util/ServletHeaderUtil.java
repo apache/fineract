@@ -26,6 +26,11 @@ public final class ServletHeaderUtil {
 
     private ServletHeaderUtil() {}
 
+    /**
+     * Reads a header of the request being served on the <strong>current thread</strong>. Returns {@code null} off that
+     * thread, because {@link RequestContextHolder} is not inheritable - so anything calling this from an asynchronous
+     * dispatcher silently gets nothing.
+     */
     public static String getHeader(String name, boolean searchParameter) {
         var attributes = RequestContextHolder.getRequestAttributes();
 
@@ -40,5 +45,26 @@ public final class ServletHeaderUtil {
         }
 
         return null;
+    }
+
+    /**
+     * Sets a header on the response being written on the <strong>current thread</strong>, and reports whether it could.
+     * Like {@link #getHeader(String, boolean)} this does nothing off that thread, and nothing once the response has
+     * been committed.
+     */
+    public static boolean setResponseHeader(String name, String value) {
+        var attributes = RequestContextHolder.getRequestAttributes();
+
+        if (attributes instanceof ServletRequestAttributes servletAttributes) {
+            var response = servletAttributes.getResponse();
+
+            if (response != null && !response.isCommitted()) {
+                response.setHeader(name, value);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

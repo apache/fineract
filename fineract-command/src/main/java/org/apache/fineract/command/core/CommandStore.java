@@ -26,9 +26,35 @@ public interface CommandStore {
 
     boolean existsByKey(String key);
 
-    boolean checkRequestInstanceByKey(String key, Class<?> clazz);
+    /**
+     * @return everything needed to answer a repeated request exactly as the original one was answered - the state, and
+     *         the status code and body it completed with. A command that completed, one that is still running and one
+     *         that failed cannot be answered the same way, so the caller has to be able to tell them apart. Never
+     *         {@code null}; an unknown key reports {@link CommandState#UNKNOWN}.
+     */
+    CommandReplay getReplayByKey(String key);
 
-    <T> T getResponseByKey(String key);
+    /**
+     * Records what the original request was answered with, for the parts a command cannot know: the status code always,
+     * and the body only when the command stored no result of its own. A stored result is never replaced, because a
+     * replay is rendered from that result rather than from captured text.
+     */
+    void recordResponse(String key, int statusCode, String body);
+
+    /**
+     * Atomically claims the command's idempotency key by persisting it, so that no other request can execute a command
+     * under the same key. Must not be retried, and the conflict must not be swallowed.
+     *
+     * @return {@code true} if the key was claimed by this call, {@code false} if it was already claimed
+     */
+    boolean claim(Command<?> command);
+
+    /**
+     * @return {@code true} if the given payload is identical to the request stored under that idempotency key.
+     *         Comparing the whole request, not just its type, is what stops a key reused for a different request from
+     *         replaying an unrelated response.
+     */
+    boolean matchesStoredRequest(String key, Object payload);
 
     void store(CommandContext<?, ?> ctx);
 }

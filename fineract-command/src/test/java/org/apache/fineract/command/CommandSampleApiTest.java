@@ -101,14 +101,16 @@ class CommandSampleApiTest {
     @Test
     void dummyApiSync() {
         final var content = "test-sync";
-        // final var idempotencyKey = UUID.randomUUID().toString();
+        final var idempotencyKey = UUID.randomUUID().toString();
 
         restTemplate.setInterceptors(interceptors);
 
-        // final var headers = new HttpHeaders();
-        // headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
+        // this module has no command store, so the key is only carried, not acted on; the idempotency behaviour itself
+        // is covered by IdempotencyCheckCommandHookTest and JdbcCommandStoreTest
+        final var headers = new HttpHeaders();
+        headers.add("Idempotency-Key", idempotencyKey);
 
-        final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), new HttpHeaders());
+        final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), headers);
 
         final var result = restTemplate.postForObject(baseUrl + "/sync", request, DummyResponse.class);
 
@@ -118,20 +120,10 @@ class CommandSampleApiTest {
         assertNotNull(result.getContent(), "Response body should not be null.");
         assertEquals(content.toUpperCase(Locale.ROOT), result.getContent(), "Wrong response content.");
 
-        // DummyResponse response = store.getResponseByKey(idempotencyKey);
-        //
-        // assertNotNull(response, "There should be a command entity stored with a response.");
-        // assertNotNull(response, "Response should not be null.");
-        // assertNotNull(response.getContent(), "Response body should not be null.");
-        // assertNotNull(response.getTenantId(), "Tenant ID should not be null.");
-        // assertEquals("dummy", response.getTenantId(), "Unexpected tenant ID.");
-        // assertEquals(content.toUpperCase(Locale.ROOT), response.getContent(), "Wrong response content.");
-        //
-        // log.warn("Command response: {}", response);
     }
 
     @Test
-    @Disabled // TODO: implement idempotency properly with backwards compatibility
+    @Disabled // needs a command store; see JdbcCommandStoreTest and IdempotencyCheckCommandHookTest
     void dummyApiIdempotencySync() {
         dummyApiIdempotency("/sync");
     }

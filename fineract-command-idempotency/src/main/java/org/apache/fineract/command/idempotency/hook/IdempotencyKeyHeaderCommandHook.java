@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Order(COMMAND_IDEMPOTENCY_HOOK_HEADERS_BEFORE)
-@ConditionalOnProperty(value = COMMAND_IDEMPOTENCY_PROPERTY_HOOK_KEY_HEADER_PRE, havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_IDEMPOTENCY_PROPERTY_HOOK_KEY_HEADER_PRE, havingValue = "true", matchIfMissing = true)
 final class IdempotencyKeyHeaderCommandHook implements CommandHookBefore<Object, Object> {
 
     private final IdempotencyCommandProperties properties;
@@ -46,7 +46,8 @@ final class IdempotencyKeyHeaderCommandHook implements CommandHookBefore<Object,
         var command = ctx.getCommand();
 
         if (StringUtils.isEmpty(command.getIdempotencyKey())) {
-            command.setIdempotencyKey(getHeader(properties.getKeyHeaderName(), true));
+            // header only: an idempotency key in the query string would be copied into access and proxy logs
+            command.setIdempotencyKey(getHeader(properties.getKeyHeaderName(), false));
         }
     }
 }

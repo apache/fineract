@@ -20,15 +20,40 @@ package org.apache.fineract.command.idempotency.starter;
 
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_HOOK_BASE_PACKAGE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_PROPERTY_ENABLED;
+import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_PROPERTY_HOOK_CHECK_PRE;
+import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_WEB_BASE_PACKAGE;
 
+import org.apache.fineract.command.core.CommandStore;
 import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
+import org.apache.fineract.command.idempotency.web.IdempotencyResponseCaptureFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.Ordered;
 
 @AutoConfiguration
 @EnableConfigurationProperties({ IdempotencyCommandProperties.class })
-@ComponentScan(COMMAND_IDEMPOTENCY_HOOK_BASE_PACKAGE)
-@ConditionalOnProperty(value = COMMAND_IDEMPOTENCY_PROPERTY_ENABLED, havingValue = "true")
-public class IdempotencyCommandAutoConfiguration {}
+@ComponentScan({ COMMAND_IDEMPOTENCY_HOOK_BASE_PACKAGE, COMMAND_IDEMPOTENCY_WEB_BASE_PACKAGE })
+@ConditionalOnProperty(value = COMMAND_IDEMPOTENCY_PROPERTY_ENABLED, havingValue = "true", matchIfMissing = true)
+public class IdempotencyCommandAutoConfiguration {
+
+    /**
+     * Fills in what a command could not record about its own answer: the status it was sent with, always, and the body
+     * itself only when the command stored no result of its own - a failure, or an answer that is not JSON. Ordered
+     * early so that it sees the response as the client will, and it steps aside entirely for requests that carry no
+     * key.
+     */
+    @Bean
+    @ConditionalOnProperty(value = COMMAND_IDEMPOTENCY_PROPERTY_HOOK_CHECK_PRE, havingValue = "true", matchIfMissing = true)
+    FilterRegistrationBean<IdempotencyResponseCaptureFilter> idempotencyResponseCaptureFilter(CommandStore store,
+            IdempotencyCommandProperties properties) {
+        var registration = new FilterRegistrationBean<>(new IdempotencyResponseCaptureFilter(store, properties));
+
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 100);
+
+        return registration;
+    }
+}

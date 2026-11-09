@@ -30,7 +30,12 @@ public final class IdempotencyCommandConstants {
             + ".hook-key-header-pre";
     public static final String COMMAND_IDEMPOTENCY_PROPERTY_HOOK_CHECK_PRE = COMMAND_IDEMPOTENCY_PROPERTIES_PREFIX + ".hook-check-pre";
     public static final String COMMAND_IDEMPOTENCY_PROPERTY_KEY_HEADER_NAME = COMMAND_IDEMPOTENCY_PROPERTIES_PREFIX + ".key-header-name";
-    public static final String COMMAND_IDEMPOTENCY_HOOK_BASE_PACKAGE = "org.apache.fineract.command.idempotency.hook";
+    public static final String COMMAND_IDEMPOTENCY_BASE_PACKAGE = "org.apache.fineract.command.idempotency";
+    public static final String COMMAND_IDEMPOTENCY_HOOK_BASE_PACKAGE = COMMAND_IDEMPOTENCY_BASE_PACKAGE + ".hook";
+    public static final String COMMAND_IDEMPOTENCY_WEB_BASE_PACKAGE = COMMAND_IDEMPOTENCY_BASE_PACKAGE + ".web";
+    public static final String COMMAND_IDEMPOTENCY_CHECK_BASE_PACKAGE = COMMAND_IDEMPOTENCY_BASE_PACKAGE + ".check";
+    /** Marks the request that claimed a key, so the capture filter knows whose answer it is looking at. */
+    public static final String COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE = "fineract.command.idempotency.claimedKey";
     public static final int COMMAND_IDEMPOTENCY_HOOK_HEADERS_BEFORE = 20;
     public static final int COMMAND_IDEMPOTENCY_HOOK_CHECK_BEFORE = 21;
 }
