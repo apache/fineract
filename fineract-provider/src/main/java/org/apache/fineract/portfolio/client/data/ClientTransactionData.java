@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.client.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
