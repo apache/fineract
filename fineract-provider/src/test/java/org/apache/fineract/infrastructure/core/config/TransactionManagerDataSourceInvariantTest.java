@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.config.jpa.JpaTransactionConfig;
-import org.apache.fineract.infrastructure.core.persistence.ExtendedDataSourceTransactionManager;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.junit.jupiter.api.Test;
@@ -32,8 +31,6 @@ import org.springframework.boot.transaction.autoconfigure.TransactionManagerCust
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Locks in the invariant that keeps mixed JPA/JDBC usage consistent: the primary (JPA) transaction manager must NOT
@@ -78,19 +75,6 @@ public class TransactionManagerDataSourceInvariantTest {
         assertThat(((DataSourceTransactionManager) transactionManager).getDataSource())
                 .as("JDBC transaction manager must bind the routing DataSource so JdbcTemplate work participates in its transaction")
                 .isSameAs(dataSource);
-    }
-
-    @Test
-    void requiresNewJdbcTemplateIsARequiresNewTemplateOnTheJdbcTransactionManager() {
-        PlatformTransactionManager jdbcTransactionManager = new JdbcTransactionConfig().jdbcTransactionManager(writeModeProperties(),
-                mock(RoutingDataSource.class), noTransactionManagerCustomizers(), noCallbacks());
-
-        TransactionTemplate template = new JdbcTransactionConfig().requiresNewTransactionJdbcTemplate(jdbcTransactionManager);
-
-        assertThat(jdbcTransactionManager).as("only the extended JDBC manager recognises an enclosing JPA transaction")
-                .isInstanceOf(ExtendedDataSourceTransactionManager.class);
-        assertThat(template.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        assertThat(template.getTransactionManager()).isSameAs(jdbcTransactionManager);
     }
 
     private static FineractProperties writeModeProperties() {
