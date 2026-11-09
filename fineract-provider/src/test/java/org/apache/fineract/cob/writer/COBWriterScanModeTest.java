@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
@@ -163,7 +164,7 @@ class COBWriterScanModeTest {
         accounts = new JpaRepositoryFactory(SharedEntityManagerCreator.createSharedEntityManager(factory.getObject()))
                 .getRepository(CobProbeAccountRepository.class);
         businessSteps = new ProbeBusinessSteps(new TransactionTemplate(transactionManager));
-        lockingService = new ProbeLockingService(jdbc);
+        lockingService = new ProbeLockingService(jdbc, new CopyOnWriteArrayList<>());
     }
 
     @AfterEach
@@ -198,6 +199,10 @@ class COBWriterScanModeTest {
         assertThat(account(3L)).containsEntry("runs", 1).containsEntry("last_closed_business_date", Date.valueOf(BUSINESS_DATE));
         assertThat(account(2L)).containsEntry("runs", 0).containsEntry("last_closed_business_date", Date.valueOf(PREVIOUS_BUSINESS_DATE));
         assertThat(lockedAccountIds()).containsExactly(2L);
+        // An error makes a lock overrulable by inline COB. Accounts 1 and 3 were still to be written in scan mode, so
+        // an
+        // error on their locks would have let inline COB close them for this date before the step closed them again.
+        assertThat(lockingService.errorsRecordedFor()).containsExactly(2L);
         Map<String, Object> lock = jdbc.queryForMap("select error, stacktrace from cob_probe_lock where loan_id = 2");
         assertThat(lock.get("error")).isEqualTo("Loan (id: 2) writing is failed");
         assertThat((String) lock.get("stacktrace")).contains("business step failed for account 2");
@@ -264,7 +269,34 @@ class COBWriterScanModeTest {
         assertThat(jdbc.queryForObject("select stacktrace from cob_probe_lock where loan_id = 2", String.class)).contains("does not exist");
     }
 
+    @Test
+    void theAccountThatExceedsTheSkipLimitIsLeftWithItsOwnError() throws Exception {
+        lockedAccounts(1L, 2L, 3L);
+        businessSteps.beforeRun = account -> {
+            if (account.getId() != 1L) {
+                throw new BusinessStepException("business step failed for account " + account.getId());
+            }
+        };
+
+        StepExecution result = runWorkerStep(List.of(1L, 2L, 3L), 3, 1);
+
+        assertThat(result.getStatus()).isEqualTo(BatchStatus.FAILED);
+        assertThat(account(1L)).containsEntry("runs", 1).containsEntry("last_closed_business_date", Date.valueOf(BUSINESS_DATE));
+        assertThat(lockedAccountIds()).containsExactly(2L, 3L);
+        // Account 2 is skipped; account 3 then exceeds the skip limit, which Batch reports to no item listener.
+        for (Long id : List.of(2L, 3L)) {
+            Map<String, Object> lock = jdbc.queryForMap("select error, stacktrace from cob_probe_lock where loan_id = ?", id);
+            assertThat(lock.get("error")).isEqualTo("Loan (id: " + id + ") writing is failed");
+            assertThat((String) lock.get("stacktrace")).startsWith(BusinessStepException.class.getName())
+                    .contains("business step failed for account " + id);
+        }
+    }
+
     private StepExecution runWorkerStep(List<Long> ids, int chunkSize) throws Exception {
+        return runWorkerStep(ids, chunkSize, 101);
+    }
+
+    private StepExecution runWorkerStep(List<Long> ids, int chunkSize, int skipLimit) throws Exception {
         Queue<Long> remaining = new ArrayDeque<>(ids);
         ItemReader<Long> reader = remaining::poll;
         ExecutionContext jobContext = new ExecutionContext();
@@ -278,7 +310,7 @@ class COBWriterScanModeTest {
                 .faultTolerant() //
                 .retryPolicy(StepRetryPolicyFactory.noRetryPolicy()) //
                 .skip(Exception.class) //
-                .skipLimit(101) //
+                .skipLimit(skipLimit) //
                 .listener(new ChunkProcessingLoanItemListener(lockingService, requiresNewTransactionTemplate())) //
                 .build();
         step.execute(execution);
@@ -373,7 +405,7 @@ class COBWriterScanModeTest {
         }
     }
 
-    private record ProbeLockingService(JdbcTemplate jdbc) implements LockingService {
+    private record ProbeLockingService(JdbcTemplate jdbc, List<Long> errorsRecordedFor) implements LockingService {
 
         @Override
         public void deleteByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner) {
@@ -382,6 +414,7 @@ class COBWriterScanModeTest {
 
         @Override
         public void updateLockError(Long loanId, LockOwner lockOwner, String error, String stacktrace) {
+            errorsRecordedFor.add(loanId);
             jdbc.update("update cob_probe_lock set error = ?, stacktrace = ? where loan_id = ? and lock_owner = ?", error, stacktrace,
                     loanId, lockOwner.name());
         }

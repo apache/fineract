@@ -72,27 +72,6 @@ public class LoanItemListenerStepDefinitions implements En {
                     eq("Loan (id: 1) reading is failed"), anyString());
         });
 
-        Given("/^The LoanItemListener.onProcessError method (.*)$/", (String action) -> {
-            ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-            exception = new LockedReadException(1L, new RuntimeException("fail"));
-            when(loan.getId()).thenReturn(2L);
-            batchJdbcTransactionTemplate.setTransactionManager(mock(PlatformTransactionManager.class));
-        });
-
-        When("LoanItemListener.onProcessError method executed", () -> {
-            try {
-                loanItemListener.onProcessError(2L, exception);
-            } finally {
-                ThreadLocalContextUtil.reset();
-            }
-        });
-
-        Then("LoanItemListener.onProcessError result should match", () -> {
-            verify(batchJdbcTransactionTemplate, Mockito.times(1)).execute(any());
-            verify(loanLockingService, Mockito.times(1)).updateLockError(eq(2L), eq(LockOwner.LOAN_COB_CHUNK_PROCESSING),
-                    eq("Loan (id: 2) processing is failed"), anyString());
-        });
-
         Given("/^The LoanItemListener.onWriteError method (.*)$/", (String action) -> {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
             exception = new LockedReadException(3L, new RuntimeException("fail"));

@@ -33,6 +33,7 @@ import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
+import org.apache.fineract.cob.exceptions.COBAccountFailedException;
 import org.apache.fineract.cob.resolver.BusinessDateResolver;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.persistence.AfterTransactionWork;
@@ -67,6 +68,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * The persistence context is flushed before the locks are released, so that a failure the database reports only on
  * flush - an optimistic lock conflict on the account's version, a constraint violation - is raised inside the write and
  * so takes part in scan mode, instead of surfacing at commit, outside the write, where Batch fails the step.
+ * <p>
+ * A failure that can be put down to one account - its loading, its business steps, or the flush of a chunk of that
+ * account alone - is raised as a {@link COBAccountFailedException} naming it, so that {@code AbstractLoanItemListener}
+ * records the failure on that account's lock and not on its chunk's, also where no scan follows to single it out.
  */
 @RequiredArgsConstructor
 public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<Long>> implements ItemWriter<Long>, StepExecutionListener {
@@ -88,12 +93,26 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
         }
         TreeMap<Long, String> businessStepMap = getBusinessStepMap(getBusinessSteps());
         for (Long accountId : accountIds) {
-            runBusinessSteps(businessStepMap, accountId);
+            try {
+                runBusinessSteps(businessStepMap, accountId);
+            } catch (Exception e) {
+                throw new COBAccountFailedException(accountId, e);
+            }
         }
-        // The accounts were loaded in this transaction and are managed, so flushing writes their changes; saving them
-        // as well would only merge, and cascade the merge through every association of the account, to no effect.
-        repository.flush();
-        lockingService.deleteByLoanIdInAndLockOwner(List.copyOf(accountIds.getItems()), getLockOwner());
+        List<Long> ids = List.copyOf(accountIds.getItems());
+        try {
+            // The accounts were loaded in this transaction and are managed, so flushing writes their changes; saving
+            // them as well would only merge, and cascade the merge through every association of the account, to no
+            // effect.
+            repository.flush();
+            lockingService.deleteByLoanIdInAndLockOwner(ids, getLockOwner());
+        } catch (RuntimeException e) {
+            // A flush covers the whole chunk, so its failure belongs to one account only when the chunk has one.
+            if (ids.size() == 1) {
+                throw new COBAccountFailedException(ids.getFirst(), e);
+            }
+            throw e;
+        }
     }
 
     private void runBusinessSteps(TreeMap<Long, String> businessStepMap, Long accountId) throws Exception {
