@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
+import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
@@ -2015,6 +2017,28 @@ public class LoanProductsRequestFactory {
         return defaultLoanProductsRequestLP2InterestDailyRecalculation()//
                 .charges(List.of(new LoanProductChargeData().id(chargeId)))//
                 .paymentAllocation(createDefaultPaymentAllocation());//
+    }
+
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiWithCreditAllocation(final List<CreditAllocationData> creditAllocation) {
+        return defaultLoanProductsRequestLP2Emi()//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .paymentAllocation(createDefaultPaymentAllocation())//
+                .creditAllocation(creditAllocation);
+    }
+
+    public static CreditAllocationData createCreditAllocation(final String transactionType, final String creditAllocationStrategy,
+            final List<String> creditAllocationRules) {
+        final CreditAllocationData creditAllocationData = new CreditAllocationData().transactionType(transactionType)
+                .creditAllocationStrategy(creditAllocationStrategy);
+        if (creditAllocationRules != null) {
+            final List<CreditAllocationOrder> creditAllocationOrders = new ArrayList<>();
+            for (int i = 0; i < creditAllocationRules.size(); i++) {
+                creditAllocationOrders.add(new CreditAllocationOrder().creditAllocationRule(creditAllocationRules.get(i)).order(i + 1));
+            }
+            creditAllocationData.setCreditAllocationOrder(creditAllocationOrders);
+        }
+        return creditAllocationData;
     }
 
     private List<AdvancedPaymentData> createDefaultPaymentAllocation() {

@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PR
 
 import java.util.List;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule;
@@ -85,6 +86,25 @@ public class LoanProductCreditAllocationRuleMergerTest {
     }
 
     @Test
+    public void testMergerStrategySwitchedToPrincipalOnly() {
+        LoanProduct loanProduct = new LoanProduct();
+
+        LoanProductCreditAllocationRule rule1 = createRule(CreditAllocationTransactionType.CHARGEBACK,
+                List.of(PENALTY, FEE, INTEREST, PRINCIPAL));
+        LoanProductCreditAllocationRule rule2 = new LoanProductCreditAllocationRule(null, CreditAllocationTransactionType.CHARGEBACK,
+                List.of(), CreditAllocationStrategy.PRINCIPAL_ONLY);
+
+        loanProduct.getCreditAllocationRules().add(rule1);
+
+        boolean result = underTest.updateCreditAllocationRules(loanProduct, List.of(rule2));
+        Assertions.assertTrue(result);
+        Assertions.assertEquals(1, loanProduct.getCreditAllocationRules().size());
+        Assertions.assertEquals(CreditAllocationStrategy.PRINCIPAL_ONLY,
+                loanProduct.getCreditAllocationRules().get(0).getAllocationStrategy());
+        Assertions.assertEquals(List.of(), loanProduct.getCreditAllocationRules().get(0).getAllocationTypes());
+    }
+
+    @Test
     public void testMergerExistingDeleted() {
         LoanProduct loanProduct = new LoanProduct();
 
@@ -100,7 +120,7 @@ public class LoanProductCreditAllocationRuleMergerTest {
 
     public LoanProductCreditAllocationRule createRule(CreditAllocationTransactionType transactionType,
             List<AllocationType> allocationTypeList) {
-        return new LoanProductCreditAllocationRule(null, transactionType, allocationTypeList);
+        return new LoanProductCreditAllocationRule(null, transactionType, allocationTypeList, CreditAllocationStrategy.RULE_BASED);
     }
 
 }
