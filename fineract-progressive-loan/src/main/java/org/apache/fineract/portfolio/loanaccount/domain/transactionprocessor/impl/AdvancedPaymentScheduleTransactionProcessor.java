@@ -508,8 +508,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         lastRegularInstallmentOptional.ifPresent(lastRegularInstallment -> {
             final MonetaryCurrency currency = loan.getCurrency();
+            // Only the charged amounts are merged, so an additional installment that something was paid, waived or
+            // written off on is kept: merging it would drop what settled it (a re-age keeps such an installment)
+            final Predicate<LoanRepaymentScheduleInstallment> isMerged = i -> i.isAdditional() && i.getDueDate() != null
+                    && i.getDueDate().isBefore(newMaturityDate) && !hasSettledAmounts(i, currency);
             installments.stream() //
-                    .filter(i -> i.isAdditional() && i.getDueDate() != null && i.getDueDate().isBefore(newMaturityDate))
+                    .filter(isMerged) //
                     .forEach(additionalInstallment -> {
                         final Money mergedFees = lastRegularInstallment.getFeeChargesCharged(currency)
                                 .plus(additionalInstallment.getFeeChargesCharged(currency));
@@ -525,7 +529,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         });
                     });
 
-            installments.removeIf(i -> i.isAdditional() && i.getDueDate() != null && i.getDueDate().isBefore(newMaturityDate));
+            installments.removeIf(isMerged);
         });
     }
 
@@ -4101,11 +4105,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         emiCalculator.reAgeEqualAmortization(model, transactionDate, EMICalculatorDataMapper.toLoanReAgeParameterData(loanReAgeParameter),
                 outstandingBalances.fees.add(outstandingBalances.penalties), calculatedFees.add(calculatedPenalties), amountsNotInModel);
 
-        // an additional installment that falls within the re-aged schedule is dropped, unless something was paid on it:
-        // its outstanding amounts were lifted above, so it holds only what was paid, which must stay paid
+        // an additional installment that falls within the re-aged schedule is dropped, unless something was paid,
+        // waived or written off on it: its outstanding amounts were lifted above, so it holds only what settled it,
+        // which must stay settled
         installments.removeIf(i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
                 && !i.isAdditional())
-                || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && i.getTotalPaid(currency).isZero()));
+                || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && !hasSettledAmounts(i, currency)));
 
         installments.stream().filter(i -> i.isAdditional() && i.getDueDate().isAfter(model.getMaturityDate())).forEach(i -> {
             i.setFromDate(model.getMaturityDate());
@@ -4472,6 +4477,22 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final Money missingFromModel = MathUtil.negativeToZero(installmentsOutstandingPrincipal.minus(modelOutstandingPrincipal));
         return new OutstandingDetails(MathUtil.min(additionalOutstandingPrincipal, missingFromModel, false),
                 MathUtil.negativeToZero(additionalOutstandingInterest));
+    }
+
+    /**
+     * Whether anything was paid, waived or written off on the installment. Such an installment cannot be dropped or
+     * merged into another one without losing these amounts.
+     */
+    private static boolean hasSettledAmounts(final LoanRepaymentScheduleInstallment installment, final MonetaryCurrency currency) {
+        return installment.getTotalPaid(currency) //
+                .plus(installment.getInterestWaived(currency)) //
+                .plus(installment.getFeeChargesWaived(currency)) //
+                .plus(installment.getPenaltyChargesWaived(currency)) //
+                .plus(installment.getPrincipalWrittenOff(currency)) //
+                .plus(installment.getInterestWrittenOff(currency)) //
+                .plus(installment.getFeeChargesWrittenOff(currency)) //
+                .plus(installment.getPenaltyChargesWrittenOff(currency)) //
+                .isGreaterThanZero();
     }
 
     /**

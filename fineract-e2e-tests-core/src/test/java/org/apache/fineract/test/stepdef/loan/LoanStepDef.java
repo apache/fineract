@@ -2536,6 +2536,7 @@ public class LoanStepDef extends AbstractStepDef {
             Map.entry("Interest outstanding", GetLoansLoanIdSummary::getInterestOutstanding),
             Map.entry("Fees charged", GetLoansLoanIdSummary::getFeeChargesCharged),
             Map.entry("Fees paid", GetLoansLoanIdSummary::getFeeChargesPaid),
+            Map.entry("Fees waived", GetLoansLoanIdSummary::getFeeChargesWaived),
             Map.entry("Fees outstanding", GetLoansLoanIdSummary::getFeeChargesOutstanding),
             Map.entry("Penalties charged", GetLoansLoanIdSummary::getPenaltyChargesCharged),
             Map.entry("Penalties paid", GetLoansLoanIdSummary::getPenaltyChargesPaid),
