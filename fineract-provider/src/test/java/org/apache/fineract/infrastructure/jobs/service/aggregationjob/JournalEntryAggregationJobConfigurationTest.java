@@ -96,7 +96,7 @@ class JournalEntryAggregationJobConfigurationTest {
         when(tenantDataSourceFactory.create(any())).thenReturn(dataSource);
         given(fineractProperties.getJob()).willReturn(fineractJobProperties);
         given(fineractJobProperties.getJournalEntryAggregation()).willReturn(journalEntryAggregationProperties);
-        given(fineractJobProperties.getJournalEntryAggregation().getChunkSize()).willReturn(5);
+        given(journalEntryAggregationProperties.getChunkSize()).willReturn(5);
         JobSynchronizationManager.register(jobExecution);
         assertNotNull(configuration.journalEntryAggregation(), "The journalEntryDailyAggregationJob bean should not be null");
     }

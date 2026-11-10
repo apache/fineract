@@ -331,17 +331,17 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
         LoanSummary summary = LoanSummary.create(BigDecimal.TEN);
         summary.zeroFields();
-        loan = new LoanBuilder(loanProduct).withId(LOAN_ID).withLoanStatus(LoanStatus.ACTIVE).withCharges(Set.of(charge))
+        Loan chargedOffLoan = new LoanBuilder(loanProduct).withId(LOAN_ID).withLoanStatus(LoanStatus.ACTIVE).withCharges(Set.of(charge))
                 .withSummary(summary).withClient(client).build();
 
-        LoanTransaction t1 = LoanTransaction.chargeOff(loan, DateUtils.parseLocalDate("2025-05-13"), ExternalId.empty());
+        LoanTransaction t1 = LoanTransaction.chargeOff(chargedOffLoan, DateUtils.parseLocalDate("2025-05-13"), ExternalId.empty());
         t1.reverse();
-        LoanTransaction t2 = LoanTransaction.chargeOff(loan, DateUtils.parseLocalDate("2025-05-10"), ExternalId.empty());
+        LoanTransaction t2 = LoanTransaction.chargeOff(chargedOffLoan, DateUtils.parseLocalDate("2025-05-10"), ExternalId.empty());
 
-        loan.addLoanTransaction(t1);
-        loan.addLoanTransaction(t2);
+        chargedOffLoan.addLoanTransaction(t1);
+        chargedOffLoan.addLoanTransaction(t2);
 
-        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(loan);
+        when(loanAssembler.assembleFromInUserScope(anyLong())).thenReturn(chargedOffLoan);
 
         command = mock(JsonCommand.class);
         when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(DateUtils.parseLocalDate("2025-05-12"));
