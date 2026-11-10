@@ -62,6 +62,7 @@ public class LoanTransactionDTO {
 
     /** In case chargeback and overpayment the below field contains the distribution payment **/
     private final BigDecimal principalPaid;
+    private final BigDecimal interestPaid;
     private final BigDecimal feePaid;
     private final BigDecimal penaltyPaid;
 

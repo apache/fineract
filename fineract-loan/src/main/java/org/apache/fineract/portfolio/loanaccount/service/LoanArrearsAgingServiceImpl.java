@@ -41,6 +41,10 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalance
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDisbursalBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanAddChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanWaiveChargeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanReAgeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reaging.LoanUndoReAgeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reamortization.LoanReAmortizeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.reamortization.LoanUndoReAmortizeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanForeClosurePostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanRefundPostBusinessEvent;
@@ -95,6 +99,14 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                 new LoanForeClosureEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanBalanceChangedBusinessEvent.class,
                 new LoanBalanceChangedEventListener());
+        // re-aging and re-amortization move the outstanding amounts to other installments, so what is overdue changes
+        businessEventNotifierService.addPostBusinessEventListener(LoanReAgeBusinessEvent.class, event -> handleArrearsForLoan(event.get()));
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoReAgeBusinessEvent.class,
+                event -> handleArrearsForLoan(event.get()));
+        businessEventNotifierService.addPostBusinessEventListener(LoanReAmortizeBusinessEvent.class,
+                event -> handleArrearsForLoan(event.get()));
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoReAmortizeBusinessEvent.class,
+                event -> handleArrearsForLoan(event.get()));
     }
 
     @Override
