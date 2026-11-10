@@ -397,23 +397,19 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
             final boolean enableBuyDownFee, final boolean merchantBuyDownFee) {
-        /***
-         * Variable tracks all accounting mapping properties that have been updated
-         ***/
+        // Variable tracks all accounting mapping properties that have been updated
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
 
-        /***
-         * If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
-         * of mappings
-         ***/
+        // If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
+        // of mappings
         if (accountingRuleChanged) {
             this.deserializer.validateForLoanProductCreate(command.json());
             this.loanProductToGLAccountMappingHelper.deleteLoanProductToGLAccountMapping(loanProductId);
             createLoanProductToGLAccountMapping(loanProductId, command);
             changes = this.loanProductToGLAccountMappingHelper.populateChangesForNewLoanProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-        } /*** else examine and update individual changes ***/
+        } // else examine and update individual changes
         else {
             this.loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
                     accountingRuleType, enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee);
@@ -435,24 +431,20 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Transactional
     public Map<String, Object> updateSavingsProductToGLAccountMapping(final Long savingsProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId, final DepositAccountType accountType) {
-        /***
-         * Variable tracks all accounting mapping properties that have been updated
-         ***/
+        // Variable tracks all accounting mapping properties that have been updated
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
-        /***
-         * If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
-         * of mappings
-         ***/
+        // If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
+        // of mappings
         if (accountingRuleChanged) {
             this.deserializer.validateForSavingsProductCreate(command.json(), accountType);
             this.savingsProductToGLAccountMappingHelper.deleteSavingsProductToGLAccountMapping(savingsProductId);
             createSavingProductToGLAccountMapping(savingsProductId, command, accountType);
             changes = this.savingsProductToGLAccountMappingHelper.populateChangesForNewSavingsProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-        } /*** else examine and update individual changes ***/
+        } // else examine and update individual changes
         else {
             this.savingsProductToGLAccountMappingHelper.handleChangesToSavingsProductToGLAccountMappings(savingsProductId, changes, element,
                     accountingRuleType);
@@ -467,23 +459,19 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Transactional
     public Map<String, Object> updateShareProductToGLAccountMapping(final Long shareProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final int accountingRuleTypeId) {
-        /***
-         * Variable tracks all accounting mapping properties that have been updated
-         ***/
+        // Variable tracks all accounting mapping properties that have been updated
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
-        /***
-         * If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
-         * of mappings
-         ***/
+        // If the accounting rule has been changed, delete all existing mapping for the product and recreate a new set
+        // of mappings
         if (accountingRuleChanged) {
             this.shareProductToGLAccountMappingHelper.deleteSharesProductToGLAccountMapping(shareProductId);
             createShareProductToGLAccountMapping(shareProductId, command);
             changes = this.shareProductToGLAccountMappingHelper.populateChangesForNewSharesProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-        } /*** else examine and update individual changes ***/
+        } // else examine and update individual changes
         else {
             this.shareProductToGLAccountMappingHelper.handleChangesToSharesProductToGLAccountMappings(shareProductId, changes, element,
                     accountingRuleType);

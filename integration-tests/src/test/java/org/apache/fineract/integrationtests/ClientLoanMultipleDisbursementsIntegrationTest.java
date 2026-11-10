@@ -116,16 +116,13 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
      */
     @Test
     public void checkThatAllMultiDisbursalsAppearOnLoanScheduleAndOutStandingBalanceIsZeroTest() {
-        /***
-         * Create loan product with allowing multiple disbursals
-         */
+
+        // Create loan product with allowing multiple disbursals
         boolean allowMultipleDisbursals = true;
         final Long loanProductID = createLoanProduct(allowMultipleDisbursals);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
         final String principal = "12,000.00";
 
         LOG.info("-----------------------------------10 Tranches--------------------------------------");
@@ -195,16 +192,12 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
 
     @Test
     public void checkThatAllMultiDisbursalsAppearOnLoanScheduleAndOutStandingBalanceIsZeroButLoanGotReopenedTest() {
-        /***
-         * Create loan product with allowing multiple disbursals
-         */
+        // Create loan product with allowing multiple disbursals
         boolean allowMultipleDisbursals = true;
         final Long loanProductID = createLoanProduct(allowMultipleDisbursals);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
         final String principal = "12,000.00";
 
         LOG.info("-----------------------------------2 Tranches--------------------------------------");
@@ -268,16 +261,12 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
 
     @Test
     public void checkThatAllMultiDisbursalsAppearOnLoanScheduleAndOutStandingBalanceIsZeroButLoanGotReopenedFromOverPaidTest() {
-        /***
-         * Create loan product with allowing multiple disbursals
-         */
+        // Create loan product with allowing multiple disbursals
         boolean allowMultipleDisbursals = true;
         final Long loanProductID = createLoanProduct(allowMultipleDisbursals);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
         final String principal = "12,000.00";
 
         LOG.info("-----------------------------------2 Tranches--------------------------------------");

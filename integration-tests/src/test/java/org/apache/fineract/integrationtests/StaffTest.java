@@ -67,17 +67,17 @@ public class StaffTest extends FeignIntegrationTest {
 
         final StaffCreateRequest request = requestWithJoiningDate().officeId(HEAD_OFFICE_ID).firstname(firstname()).lastname(lastname());
 
-        /** Long firstname test */
+        // Long firstname test
         request.firstname(Utils.uniqueRandomStringGenerator("michael_", 43));
         assertValidationError(staffHelper.createStaffExpectingError(request));
         request.firstname(firstname());
 
-        /** Long lastname test */
+        // Long lastname test
         request.lastname(Utils.uniqueRandomStringGenerator("Doe_", 47));
         assertValidationError(staffHelper.createStaffExpectingError(request));
         request.lastname(lastname());
 
-        /** Long mobileNo test */
+        // Long mobileNo test
         request.mobileNo(Utils.uniqueRandomStringGenerator("num_", 47));
         assertValidationError(staffHelper.createStaffExpectingError(request));
     }
@@ -196,17 +196,17 @@ public class StaffTest extends FeignIntegrationTest {
 
         final StaffUpdateRequest request = new StaffUpdateRequest().firstname(firstname).lastname(lastname);
 
-        /** Test long firstname */
+        // Test long firstname
         request.firstname(firstnameLong);
         assertValidationError(staffHelper.updateStaffExpectingError(1L, request));
         request.firstname(firstname);
 
-        /** Test long lastname */
+        // Test long lastname
         request.lastname(lastnameLong);
         assertValidationError(staffHelper.updateStaffExpectingError(1L, request));
         request.lastname(lastname);
 
-        /** Long mobileNo test */
+        // Long mobileNo test
         request.mobileNo(Utils.uniqueRandomStringGenerator("num_", 47));
         assertValidationError(staffHelper.updateStaffExpectingError(1L, request));
     }

@@ -2881,15 +2881,11 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         final Long clientID = createClient();
         verifyClientCreatedOnServer(clientID);
 
-        /***
-         * Create loan product with RBI strategy
-         */
+        // Create loan product with RBI strategy
         final Long loanProductID = createLoanProduct(100, 0, RBI_INDIA_STRATEGY);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
         final Long savingsId = null;
         final String principal = "12,000.00";
 
@@ -2915,18 +2911,14 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         GetLoansLoanIdRepaymentPeriod firstInstallment = loanSchedule.get(1);
         validateNumberForEqual("3200", String.valueOf(firstInstallment.getTotalOutstandingForPeriod()));
 
-        /***
-         * Make payment for installment #1
-         */
+        // Make payment for installment #1
         makeRepayment("20 October 2011", Float.parseFloat("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = getLoanRepaymentSchedule(loanID);
         firstInstallment = loanSchedule.get(1);
         validateNumberForEqual("0.00", String.valueOf(firstInstallment.getTotalOutstandingForPeriod()));
 
-        /***
-         * Verify 2nd and 3rd repayments dues before making excess payment for installment no 2
-         */
+        // Verify 2nd and 3rd repayments dues before making excess payment for installment no 2
         GetLoansLoanIdRepaymentPeriod secondInstallment = loanSchedule.get(2);
         GetLoansLoanIdRepaymentPeriod thirdInstallment = loanSchedule.get(3);
 
@@ -2936,19 +2928,15 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         validateNumberForEqual("3000", String.valueOf(secondInstallment.getPrincipalOutstanding()));
         validateNumberForEqual("3100", String.valueOf(thirdInstallment.getPrincipalOutstanding()));
 
-        /***
-         * Make payment for installment #2
-         */
+        // Make payment for installment #2
         makeRepayment("20 November 2011", Float.parseFloat("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = getLoanRepaymentSchedule(loanID);
-        /***
-         * Verify 2nd and 3rd repayments after making excess payment for installment no 2
-         */
+        // Verify 2nd and 3rd repayments after making excess payment for installment no 2
         secondInstallment = loanSchedule.get(2);
         validateNumberForEqual("0.00", String.valueOf(secondInstallment.getTotalOutstandingForPeriod()));
 
-        /***
+        /*
          * According to RBI Excess payment should go to principal portion of next installment, but as interest
          * recalculation is not implemented, it wont make any difference to schedule even though if we made excess
          * payment, so excess payments will behave the same as regular payment with the excess amount
@@ -2960,16 +2948,12 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         validateNumberForEqual("0", String.valueOf(thirdInstallment.getInterestPaid()));
         validateNumberForEqual("100.00", String.valueOf(thirdInstallment.getInterestOutstanding()));
 
-        /***
-         * Make payment with due amount of 3rd installment on 4th installment date
-         */
+        // Make payment with due amount of 3rd installment on 4th installment date
         makeRepayment("20 January 2012", Float.parseFloat("3200"), loanID);
         loanSchedule.clear();
         loanSchedule = getLoanRepaymentSchedule(loanID);
 
-        /***
-         * Verify overdue interests are deducted first and then remaining amount for interest portion of due installment
-         */
+        // Verify overdue interests are deducted first and then remaining amount for interest portion of due installment
         thirdInstallment = loanSchedule.get(3);
         GetLoansLoanIdRepaymentPeriod fourthInstallment = loanSchedule.get(4);
 
@@ -2982,9 +2966,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
         makeRepayment("20 January 2012", Float.parseFloat("3000"), loanID);
 
-        /***
-         * verify loan is closed as we paid full amount
-         */
+        // verify loan is closed as we paid full amount
         verifyLoanAccountIsClosed(loanID);
 
     }
@@ -3915,10 +3897,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         final Long clientID = createClient();
         verifyClientCreatedOnServer(clientID);
 
-        /***
-         * Create loan product with Default STYLE strategy
-         */
-
+        // Create loan product with Default STYLE strategy
         final Account assetAccount = accountHelper.createAssetAccount();
         final Account incomeAccount = accountHelper.createIncomeAccount();
         final Account expenseAccount = accountHelper.createExpenseAccount();
@@ -3928,9 +3907,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                 overpaymentAccount);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
         final Long savingsId = null;
         final String principal = "12,000.00";
 
@@ -4085,9 +4062,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         final Long clientID = createClient();
         verifyClientCreatedOnServer(clientID);
 
-        /***
-         * Create loan product with Default STYLE strategy
-         */
+        // Create loan product with Default STYLE strategy
 
         final Account assetAccount = accountHelper.createAssetAccount();
         final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -4100,9 +4075,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         // LoanProductTestBuilder.FLAT_BALANCE);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
         final Long savingsId = null;
         final String principal = "12,000.00";
 
@@ -4267,9 +4240,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         savingsHelper.activateSavings(savingsId, SAVINGS_TRANSACTION_DATE);
         assertTrue(savingsHelper.getSavingsDetails(savingsId).getStatus().getActive());
 
-        /***
-         * Create loan product with Default STYLE strategy
-         */
+        // Create loan product with Default STYLE strategy
 
         final Account assetAccount = accountHelper.createAssetAccount();
         final Account incomeAccount = accountHelper.createIncomeAccount();
@@ -4280,9 +4251,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                 overpaymentAccount);
         Assertions.assertNotNull(loanProductID);
 
-        /***
-         * Apply for loan application and verify loan status
-         */
+        // Apply for loan application and verify loan status
 
         final String principal = "12,000.00";
 
