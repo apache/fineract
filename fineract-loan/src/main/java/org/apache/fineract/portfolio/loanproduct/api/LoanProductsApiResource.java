@@ -74,7 +74,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
-import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableTemplatesReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -179,7 +179,7 @@ public class LoanProductsApiResource {
     private final ConfigurationDomainService configurationDomainService;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
+    private final EntityDatatableTemplatesReadService entityDatatableTemplatesReadService;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -257,8 +257,8 @@ public class LoanProductsApiResource {
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
         loanProduct = handleTemplate(loanProduct);
-        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService.retrieveTemplates(StatusEnum.CREATE.getValue(),
-                EntityTables.LOAN_PRODUCT.getName(), null);
+        final List<DatatableData> datatableTemplates = this.entityDatatableTemplatesReadService
+                .retrieveTemplates(StatusEnum.CREATE.getValue(), EntityTables.LOAN_PRODUCT.getName(), null);
         loanProduct.setDatatables(datatableTemplates);
 
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);

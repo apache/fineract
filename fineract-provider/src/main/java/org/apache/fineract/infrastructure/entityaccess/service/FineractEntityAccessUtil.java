@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class FineractEntityAccessUtil {
+public class FineractEntityAccessUtil implements FineractEntityVisibilityService {
 
     private final PlatformSecurityContext context;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
@@ -105,6 +105,7 @@ public class FineractEntityAccessUtil {
 
     }
 
+    @Override
     public <T> List<T> filterVisibleToOffice_ifGlobalConfigEnabled(final FineractEntityAccessType accessType, final Long officeId,
             final Collection<T> entities, final Function<T, Long> idExtractor) {
         final GlobalConfigurationPropertyData property = this.globalConfigurationRepository

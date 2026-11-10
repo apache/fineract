@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityVisibilityService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -87,7 +87,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final RateReadService rateReadService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final FineractEntityAccessUtil fineractEntityAccessUtil;
+    private final FineractEntityVisibilityService fineractEntityVisibilityService;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanProductRepository loanProductRepository;
 
@@ -189,7 +189,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     }
 
     private List<LoanProductData> visibleToOffice(final List<LoanProductData> products, final Long officeId) {
-        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(
+        return this.fineractEntityVisibilityService.filterVisibleToOffice_ifGlobalConfigEnabled(
                 FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, officeId, products, LoanProductData::getId);
     }
 
