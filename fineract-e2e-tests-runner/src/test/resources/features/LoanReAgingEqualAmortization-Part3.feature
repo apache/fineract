@@ -3815,12 +3815,14 @@ Feature: LoanReAgingEqualAmortization - Part3
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
       | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
     Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
 #   --- Moving a re-aged due date must keep the additional installment the 20 was repaid on ---
     When Admin sets the business date to "23 October 2026"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
     Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
     Then Loan summary has the following data:
       | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
       | 600.0               | 620.0          | 50.0                  | 30.0                  | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 30.0              |
@@ -3836,7 +3838,7 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
       | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
       | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
-      | 8  | 47   | 30 November 2026  | 23 October 2026 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 8  | 40   | 30 November 2026  | 23 October 2026 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
       | 9  | 30   | 30 December 2026  | 23 October 2026 | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
       | 10 | 31   | 30 January 2027   | 23 October 2026 | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
     Then Loan summary has the following data:
@@ -3863,12 +3865,14 @@ Feature: LoanReAgingEqualAmortization - Part3
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
       | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
     Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
 #   --- Moving a re-aged due date must keep the fee paid on the additional installment ---
     When Admin sets the business date to "23 October 2026"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
     Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
     Then Loan summary has the following data:
       | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
       | 600.0               | 1169.69        | 579.69                | 10.0                  | 20.31            | 20.31         | 0.0                  | 10.0         | 10.0      | 0.0              | 10.0              |
@@ -3887,7 +3891,7 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
       | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
       | 7  | 6    | 20 October 2026   | 22 October 2026 | 0.0             | 569.69        | 0.0      | 10.0 | 0.0       | 579.69 | 579.69 | 0.0        | 10.0   | 0.0         |
-      | 8  | 47   | 30 November 2026  | 23 October 2026 | 6.67            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
+      | 8  | 41   | 30 November 2026  | 23 October 2026 | 6.67            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
       | 9  | 30   | 30 December 2026  | 23 October 2026 | 3.34            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
       | 10 | 31   | 30 January 2027   | 23 October 2026 | 0.0             | 3.34          | 0.0      | 0.0  | 0.0       | 3.34   | 3.34   | 3.34       | 0.0    | 0.0         |
     Then Loan summary has the following data:
@@ -3915,12 +3919,14 @@ Feature: LoanReAgingEqualAmortization - Part3
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
       | 1               | MONTHS        | 22 November 2026 | 3                    |
     Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
 #   --- Moving a re-aged due date must keep the additional installment the 20 was repaid on ---
     When Admin sets the business date to "23 October 2026"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
     Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
     When Loan Pay-off is made on "23 October 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Repayment schedule has 10 periods, with the following data for periods:
@@ -3933,10 +3939,11 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
       | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
       | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
-      | 8  | 47   | 30 November 2026  | 23 October 2026 | 20.33           | 9.67          | 6.67     | 0.0  | 0.0       | 16.34  | 16.34  | 16.34      | 0.0    | 0.0         |
+      | 8  | 40   | 30 November 2026  | 23 October 2026 | 20.33           | 9.67          | 6.67     | 0.0  | 0.0       | 16.34  | 16.34  | 16.34      | 0.0    | 0.0         |
       | 9  | 30   | 30 December 2026  | 23 October 2026 | 10.16           | 10.17         | 0.0      | 0.0  | 0.0       | 10.17  | 10.17  | 10.17      | 0.0    | 0.0         |
       | 10 | 31   | 30 January 2027   | 23 October 2026 | 0.0             | 10.16         | 0.0      | 0.0  | 0.0       | 10.16  | 10.16  | 10.16      | 0.0    | 0.0         |
     Then Loan has 650 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
 
   @AdvancedPaymentAllocation
   Scenario: Verify re-aging after maturity - UC12: waived charge on the additional installment stays waived
@@ -3956,6 +3963,7 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
       | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
       | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan Repayment schedule periods do not overlap
     Then Loan summary has the following data:
       | Principal disbursed | Principal paid | Principal outstanding | Interest charged | Interest outstanding | Fees charged | Fees paid | Fees waived | Fees outstanding | Total outstanding |
       | 600.0               | 200.0          | 400.0                 | 20.31            | 20.31                | 10.0         | 0.0       | 10.0        | 0.0              | 420.31            |
