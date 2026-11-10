@@ -261,7 +261,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client accounts overview", operationId = "retrieveAllClientAccounts", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n "
-            + "\n" + "clients/1/accounts\n" + "\n" + "clients/1/accounts?fields=loanAccounts,savingsAccounts")
+            + "\n" + "clients/1/accounts")
     @AlternativeOperationId("retrieveAssociatedAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
@@ -332,7 +332,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client accounts overview", operationId = "retrieveAllClientAccountsByExternalId", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n "
-            + "\n" + "clients/123-456/accounts\n" + "\n" + "clients/123-456/accounts?fields=loanAccounts,savingsAccounts")
+            + "\n" + "clients/123-456/accounts")
     @AlternativeOperationId("retrieveAssociatedAccounts_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")

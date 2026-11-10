@@ -84,7 +84,7 @@ public class ClientTransactionsApiResource {
     @Path("{clientId}/transactions/{transactionId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransaction", description = "Example Requests:\n"
-            + "clients/1/transactions/1\n" + "\n" + "\n" + "clients/1/transactions/1?fields=id,officeName")
+            + "clients/1/transactions/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
     public ClientTransactionData retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
@@ -136,8 +136,7 @@ public class ClientTransactionsApiResource {
     @Path("external-id/{clientExternalId}/transactions/{transactionId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByClientExternalId", description = "Example Requests:\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1\n" + "\n" + "\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1?fields=id,officeName")
+            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1")
     @AlternativeOperationId("retrieveClientTransaction_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
     public ClientTransactionData retrieveClientTransaction(
@@ -183,8 +182,7 @@ public class ClientTransactionsApiResource {
     @Path("{clientId}/transactions/external-id/{transactionExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByTransactionExternalId", description = "Example Requests:\n"
-            + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854\n" + "\n" + "\n"
-            + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?fields=id,officeName")
+            + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854")
     @AlternativeOperationId("retrieveClientTransaction_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
     public ClientTransactionData retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
@@ -207,9 +205,7 @@ public class ClientTransactionsApiResource {
     @Path("external-id/{clientExternalId}/transactions/external-id/{transactionExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByClientAndTransactionExternalId", description = "Example Requests:\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854\n"
-            + "\n" + "\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?fields=id,officeName")
+            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854")
     @AlternativeOperationId("retrieveClientTransaction_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
     public ClientTransactionData retrieveClientTransaction(

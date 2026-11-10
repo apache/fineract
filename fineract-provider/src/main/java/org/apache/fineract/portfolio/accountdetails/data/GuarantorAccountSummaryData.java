@@ -19,12 +19,14 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 
 /**
  * Immutable data object for loan accounts.
  */
+@Getter
 @SuppressWarnings("unused")
 public class GuarantorAccountSummaryData {
 
