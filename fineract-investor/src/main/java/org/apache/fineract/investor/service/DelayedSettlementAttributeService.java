@@ -18,7 +18,21 @@
  */
 package org.apache.fineract.investor.service;
 
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+
 public interface DelayedSettlementAttributeService {
 
+    /**
+     * Whether the SETTLEMENT_MODEL in force for the loan is DELAYED_SETTLEMENT: the loan-level copy if the loan has
+     * one, otherwise the loan product.
+     */
     boolean isEnabled(Long loanId, Long loanProductId);
+
+    /**
+     * Whether a pending sale was initiated under delayed settlement. This is decided by the transfers of the loan, not
+     * by the SETTLEMENT_MODEL attribute, which may have changed between the initiation and the execution of the sale:
+     * an intermediary sale, and the investor sale that follows an active intermediary sale, can only be initiated under
+     * delayed settlement.
+     */
+    boolean isSaleUnderDelayedSettlement(ExternalAssetOwnerTransfer saleTransfer);
 }

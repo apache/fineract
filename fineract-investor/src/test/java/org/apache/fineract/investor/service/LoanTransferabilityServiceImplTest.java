@@ -20,6 +20,7 @@ package org.apache.fineract.investor.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -29,7 +30,6 @@ import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,9 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class LoanTransferabilityServiceImplTest {
 
-    private static final Long LOAN_ID = 2L;
-    private static final Long LOAN_PRODUCT_ID = 1L;
-
     private static Stream<Arguments> amountDataProvider() {
         return Stream.of(Arguments.of(BigDecimal.ONE, true), Arguments.of(BigDecimal.ZERO, false),
                 Arguments.of(BigDecimal.ONE.negate(), false));
@@ -54,23 +51,12 @@ public class LoanTransferabilityServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("amountDataProvider")
-    void isTransferableWhenDelayedSettlementDisabled(final BigDecimal loanOutstandingAmount, final boolean expectedResult) {
+    void saleUnderDefaultSettlementIsValidated(final BigDecimal loanOutstandingAmount, final boolean expectedResult) {
         // given
         TestContext testContext = new TestContext();
-
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
-        when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
-        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanSummary.getTotalOutstanding()).thenReturn(loanOutstandingAmount);
-
-        Loan loan = Mockito.mock(Loan.class);
-        when(loan.getId()).thenReturn(LOAN_ID);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
-        when(loan.getSummary()).thenReturn(loanSummary);
-        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(false);
-
-        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
-        externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING);
+        Loan loan = loanWithOutstanding(loanOutstandingAmount);
+        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = transfer(ExternalTransferStatus.PENDING);
+        when(testContext.delayedSettlementAttributeService.isSaleUnderDelayedSettlement(externalAssetOwnerTransfer)).thenReturn(false);
 
         // when
         boolean result = testContext.testSubject.isTransferable(loan, externalAssetOwnerTransfer);
@@ -81,53 +67,48 @@ public class LoanTransferabilityServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("amountDataProvider")
-    void isTransferableWhenDelayedSettlementEnabledAndSellingToIntermediate(final BigDecimal loanOutstandingAmount,
-            final boolean expectedResult) {
+    void saleToIntermediaryIsValidated(final BigDecimal loanOutstandingAmount, final boolean expectedResult) {
         // given
         TestContext testContext = new TestContext();
-
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
-        when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
-        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanSummary.getTotalOutstanding()).thenReturn(loanOutstandingAmount);
-
-        Loan loan = Mockito.mock(Loan.class);
-        when(loan.getId()).thenReturn(LOAN_ID);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
-        when(loan.getSummary()).thenReturn(loanSummary);
-        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
-
-        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
-        externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING_INTERMEDIATE);
+        Loan loan = loanWithOutstanding(loanOutstandingAmount);
+        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = transfer(ExternalTransferStatus.PENDING_INTERMEDIATE);
 
         // when
         boolean result = testContext.testSubject.isTransferable(loan, externalAssetOwnerTransfer);
 
         // then
         assertEquals(expectedResult, result);
+        verifyNoInteractions(testContext.delayedSettlementAttributeService);
     }
 
     @Test
-    void isTransferableWhenDelayedSettlementEnabledAndSellingToInvestor() {
+    void saleFromIntermediaryToInvestorIsNotValidated() {
         // given
         TestContext testContext = new TestContext();
-
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
-        when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
-
         Loan loan = Mockito.mock(Loan.class);
-        when(loan.getId()).thenReturn(LOAN_ID);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
-        when(testContext.delayedSettlementAttributeService.isEnabled(LOAN_ID, LOAN_PRODUCT_ID)).thenReturn(true);
-
-        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
-        externalAssetOwnerTransfer.setStatus(ExternalTransferStatus.PENDING);
+        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = transfer(ExternalTransferStatus.PENDING);
+        when(testContext.delayedSettlementAttributeService.isSaleUnderDelayedSettlement(externalAssetOwnerTransfer)).thenReturn(true);
 
         // when
         boolean result = testContext.testSubject.isTransferable(loan, externalAssetOwnerTransfer);
 
         // then
         assertTrue(result);
+        verifyNoInteractions(loan);
+    }
+
+    private static Loan loanWithOutstanding(final BigDecimal loanOutstandingAmount) {
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        when(loanSummary.getTotalOutstanding()).thenReturn(loanOutstandingAmount);
+        Loan loan = Mockito.mock(Loan.class);
+        when(loan.getSummary()).thenReturn(loanSummary);
+        return loan;
+    }
+
+    private static ExternalAssetOwnerTransfer transfer(final ExternalTransferStatus status) {
+        ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
+        externalAssetOwnerTransfer.setStatus(status);
+        return externalAssetOwnerTransfer;
     }
 
     private static Stream<Arguments> declinedSubStatusDataProvider() {

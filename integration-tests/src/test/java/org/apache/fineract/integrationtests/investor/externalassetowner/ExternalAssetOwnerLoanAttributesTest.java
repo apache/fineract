@@ -353,6 +353,88 @@ public class ExternalAssetOwnerLoanAttributesTest extends ExternalAssetOwnerTran
         });
     }
 
+    // The settlement model of a sale is decided at initiation. A product switch to DEFAULT_SETTLEMENT before COB
+    // executes
+    // the intermediary sale must not freeze DEFAULT_SETTLEMENT on a loan that is ACTIVE_INTERMEDIATE, or the investor
+    // sale, a new intermediary sale, the buyback and the settlement model correction would all be rejected.
+    @Test
+    public void intermediarySaleExecutedAfterTheProductSwitchedToDefaultSettlementKeepsDelayedSettlement() {
+        final Long clientId = createClient();
+        final Long productId = createProductWithAttributes(attributes(SETTLEMENT_MODEL, DELAYED_SETTLEMENT));
+        final String intermediaryExternalId = UUID.randomUUID().toString();
+        final String investorExternalId = UUID.randomUUID().toString();
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> intermediarySaleTransferIdRef = new AtomicReference<>();
+
+        runAt("01 July 2026", () -> {
+            loanIdRef.set(createDisbursedLoan(clientId, productId, null));
+            intermediarySaleTransferIdRef
+                    .set(createIntermediarySaleTransfer(loanIdRef.get(), "2026-07-01", intermediaryExternalId).getResourceId());
+            updateProductAttribute(productId, SETTLEMENT_MODEL, DEFAULT_SETTLEMENT);
+        });
+
+        runAt("02 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+            assertEquals(ExternalTransferData.StatusEnum.ACTIVE_INTERMEDIATE,
+                    EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanId).getStatus());
+            assertLoanLevelCopy(EXTERNAL_ASSET_OWNER_HELPER.retrieveLoanAttributes(loanId), loanId, intermediarySaleTransferIdRef.get(),
+                    attributes(SETTLEMENT_MODEL, DELAYED_SETTLEMENT));
+
+            assertDoesNotThrow(() -> createSaleTransfer(loanId, "2026-07-02", UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                    investorExternalId, "1.0"), "the investor sale must follow the delayed settlement the loan was sold under");
+        });
+
+        runAt("03 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final ExternalTransferData active = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanId);
+            assertEquals(ExternalTransferData.StatusEnum.ACTIVE, active.getStatus());
+            assertEquals(investorExternalId, active.getOwner().getExternalId());
+            assertEquals(intermediaryExternalId, active.getPreviousOwner().getExternalId(),
+                    "the investor sale must record the intermediary as the previous owner");
+            assertLoanLevelCopy(EXTERNAL_ASSET_OWNER_HELPER.retrieveLoanAttributes(loanId), loanId, intermediarySaleTransferIdRef.get(),
+                    attributes(SETTLEMENT_MODEL, DELAYED_SETTLEMENT));
+        });
+    }
+
+    // The reverse: a default settlement sale whose product is switched to DELAYED_SETTLEMENT before COB executes it is
+    // executed, and kept, as a default settlement sale.
+    @Test
+    public void defaultSettlementSaleExecutedAfterTheProductSwitchedToDelayedSettlementKeepsDefaultSettlement() {
+        final Long clientId = createClient();
+        final Long productId = createProductWithAttributes(attributes(SETTLEMENT_MODEL, DEFAULT_SETTLEMENT));
+        final String ownerExternalId = UUID.randomUUID().toString();
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> saleTransferIdRef = new AtomicReference<>();
+
+        runAt("01 July 2026", () -> {
+            loanIdRef.set(createDisbursedLoan(clientId, productId, null));
+            saleTransferIdRef.set(sell(loanIdRef.get(), ownerExternalId, "2026-07-01"));
+            updateProductAttribute(productId, SETTLEMENT_MODEL, DELAYED_SETTLEMENT);
+        });
+
+        runAt("02 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final ExternalTransferData active = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanId);
+            assertEquals(ExternalTransferData.StatusEnum.ACTIVE, active.getStatus());
+            assertEquals(ownerExternalId, active.getOwner().getExternalId());
+            assertLoanLevelCopy(EXTERNAL_ASSET_OWNER_HELPER.retrieveLoanAttributes(loanId), loanId, saleTransferIdRef.get(),
+                    attributes(SETTLEMENT_MODEL, DEFAULT_SETTLEMENT));
+
+            createBuybackTransfer(loanId, "2026-07-02");
+        });
+
+        runAt("03 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+            assertNull(EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanId), "the buyback must end the ownership");
+        });
+    }
+
     @Test
     public void loanLevelCorrectionAffectsOnlyThisLoanAndOnlyLaterActivity() {
         final Long clientId = createClient();

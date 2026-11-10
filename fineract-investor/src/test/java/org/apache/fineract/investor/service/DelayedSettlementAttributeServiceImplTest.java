@@ -20,12 +20,21 @@ package org.apache.fineract.investor.service;
 
 import static org.apache.fineract.investor.data.attribute.SettlementModelExternalAssetOwnerLoanProductAttribute.DEFAULT_SETTLEMENT;
 import static org.apache.fineract.investor.data.attribute.SettlementModelExternalAssetOwnerLoanProductAttribute.DELAYED_SETTLEMENT;
+import static org.apache.fineract.investor.service.LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
+import org.apache.fineract.investor.data.ExternalTransferStatus;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -69,10 +78,49 @@ public class DelayedSettlementAttributeServiceImplTest {
         assertEquals(expectedResult, result);
     }
 
+    @Test
+    void intermediarySaleIsUnderDelayedSettlement() {
+        TestContext testContext = new TestContext();
+
+        assertTrue(testContext.testSubject.isSaleUnderDelayedSettlement(saleTransfer(ExternalTransferStatus.PENDING_INTERMEDIATE)));
+        verifyNoInteractions(testContext.externalAssetOwnerTransferRepository, testContext.externalAssetOwnerLoanAttributesReadService);
+    }
+
+    @Test
+    void saleFollowingAnActiveIntermediarySaleIsUnderDelayedSettlement() {
+        TestContext testContext = new TestContext();
+        when(testContext.externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(LOAN_ID,
+                List.of(ExternalTransferStatus.ACTIVE_INTERMEDIATE), FUTURE_DATE_9999_12_31))
+                .thenReturn(List.of(new ExternalAssetOwnerTransfer()));
+
+        assertTrue(testContext.testSubject.isSaleUnderDelayedSettlement(saleTransfer(ExternalTransferStatus.PENDING)));
+        verifyNoInteractions(testContext.externalAssetOwnerLoanAttributesReadService);
+    }
+
+    @Test
+    void saleWithoutAnActiveIntermediarySaleIsUnderDefaultSettlement() {
+        TestContext testContext = new TestContext();
+        when(testContext.externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(LOAN_ID,
+                List.of(ExternalTransferStatus.ACTIVE_INTERMEDIATE), FUTURE_DATE_9999_12_31)).thenReturn(List.of());
+
+        assertFalse(testContext.testSubject.isSaleUnderDelayedSettlement(saleTransfer(ExternalTransferStatus.PENDING)));
+        verifyNoInteractions(testContext.externalAssetOwnerLoanAttributesReadService);
+    }
+
+    private static ExternalAssetOwnerTransfer saleTransfer(final ExternalTransferStatus status) {
+        ExternalAssetOwnerTransfer transfer = new ExternalAssetOwnerTransfer();
+        transfer.setLoanId(LOAN_ID);
+        transfer.setStatus(status);
+        return transfer;
+    }
+
     private static class TestContext {
 
         @Mock
         private ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
+
+        @Mock
+        private ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
 
         @InjectMocks
         private DelayedSettlementAttributeServiceImpl testSubject;

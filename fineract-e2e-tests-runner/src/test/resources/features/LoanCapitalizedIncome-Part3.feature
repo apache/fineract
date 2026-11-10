@@ -189,7 +189,7 @@ Feature: Capitalized Income - Part3
     Then Deferred Capitalized Income contains the following data:
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 1.1              | 48.9                | 0.0             | 0.0                |
-    # --- Switch to IMMEDIATE: only the new capitalized income is recognized immediately ---
+    # --- Switch the loan attribute to IMMEDIATE: only the new capitalized income is recognized immediately ---
     When Admin sets external asset owner loan attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "04 July 2026" with "30" EUR transaction amount
     Then Loan Transactions tab has the following data without accruals:
@@ -482,7 +482,7 @@ Feature: Capitalized Income - Part3
     And Deferred Capitalized Income contains the following data:
       | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
       | 50.0   | 0.57             | 49.43               | 0.0             | 0.0                |
-    # --- Switch to IMMEDIATE and post 2nd capitalized income on still-sold loan: fully amortized at once ---
+    # --- Switch the loan attribute to IMMEDIATE and post 2nd capitalized income on still-sold loan: fully amortized at once ---
     When Admin sets external asset owner loan attribute "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY" value "IMMEDIATE" for the loan
     When Admin adds capitalized income with "AUTOPAY" payment type to the loan on "04 January 2026" with "5" EUR transaction amount
     Then Loan Transactions tab has the following data without accruals:

@@ -87,9 +87,14 @@ public class ExternalAssetOwnersApiResource {
 
     private static final String COMMAND_PARAM = "command";
     private static final String LOAN_ATTRIBUTES_GET_DESCRIPTION = "Retrieves the copy of the external asset owner loan product attributes "
-            + "taken when the loan was first sold. Attributes the loan product gains or changes later do not affect a loan with a copy. "
-            + "copiedFromTransferId is the id of the sale request (the pending transfer) whose execution created the copy. "
-            + "A loan without a copy follows its loan product attributes and is returned with hasLoanLevelCopy=false and no attributes.";
+            + "taken when COB executes the loan's first sale. From then on the copy decides the loan's external asset owner behaviour for the "
+            + "rest of its life, including resales, buybacks and later sales: attributes the loan product gains, changes or loses later do not "
+            + "affect it. An attribute that was not configured on the loan product when the copy was taken is not in the copy, and its default "
+            + "behaviour applies. SETTLEMENT_MODEL in the copy is the settlement model the sale was initiated under, even if the loan product "
+            + "changed before the sale was executed. copiedFromTransferId is the id of the sale request (the pending transfer) whose execution "
+            + "created the copy. A loan without a copy follows its loan product attributes and is returned with hasLoanLevelCopy=false and no "
+            + "attributes. There is no backfill: loans sold before the loan-level copy was introduced have no copy, keep following their "
+            + "loan product attributes, and get a copy, taken from the loan product attributes at that moment, the next time COB executes a sale of the loan.";
 
     private static final CommandHandlerRegistry<String, Long, String, CommandWrapper> COMMAND_HANDLER_REGISTRY = new CommandHandlerRegistry<>(
             Map.of(CANCEL_COMMAND_VALUE, (id, json) -> new CommandWrapperBuilder().cancelTransactionByIdToExternalAssetOwner(id).build(),
@@ -257,7 +262,10 @@ public class ExternalAssetOwnersApiResource {
                     + "It affects only this loan and only activity from this point onwards; already posted journal entries and events are not changed. "
                     + "It is intended for use outside COB: relative to a COB run already in progress for the loan, when the correction takes effect is undefined "
                     + "and it may apply to only part of that run. "
-                    + "The loan must already have a loan-level copy (taken when it was first sold), and SETTLEMENT_MODEL cannot be changed while a transfer is in progress. "
+                    + "The loan must already have a loan-level copy, which is taken when COB executes the loan's first sale. There is no backfill: "
+                    + "a loan sold before the loan-level copy was introduced has no copy until its next executed sale, follows its loan product "
+                    + "attributes until then, and is rejected with error.msg.externalAssetOwnerLoanAttribute.noLoanLevelCopy. "
+                    + "SETTLEMENT_MODEL cannot be changed while a transfer is in progress. "
                     + "Requires the UPDATE_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE permission and supports maker-checker.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
     @ApiResponse(responseCode = "403", description = "The loan has no loan-level copy, the attribute is invalid, or a transfer is in progress")

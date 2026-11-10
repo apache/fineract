@@ -20,6 +20,7 @@ package org.apache.fineract.investor.service;
 
 import static org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_KEY;
 import static org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_VALUE;
+import static org.apache.fineract.investor.data.attribute.SettlementModelExternalAssetOwnerLoanProductAttribute.DEFAULT_SETTLEMENT;
 import static org.apache.fineract.investor.data.attribute.SettlementModelExternalAssetOwnerLoanProductAttribute.DELAYED_SETTLEMENT;
 import static org.apache.fineract.investor.service.LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31;
 
@@ -34,6 +35,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanAttributeSnapshot;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanAttributeSnapshotRepository;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanAttributes;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerLoanAttributeException;
@@ -60,6 +62,7 @@ public class ExternalAssetOwnerLoanAttributesWriteServiceImpl implements Externa
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
     private final ExternalAssetOwnerAttributeValidator attributeValidator;
     private final LoanRepository loanRepository;
+    private final DelayedSettlementAttributeService delayedSettlementAttributeService;
 
     @Override
     public void copyLoanProductAttributesIfAbsent(final Loan loan, final ExternalAssetOwnerTransfer saleTransfer) {
@@ -69,9 +72,33 @@ public class ExternalAssetOwnerLoanAttributesWriteServiceImpl implements Externa
         final ExternalAssetOwnerLoanAttributeSnapshot snapshot = new ExternalAssetOwnerLoanAttributeSnapshot(loan.getId(),
                 saleTransfer.getId());
         firstValuePerKey(loan.productId()).forEach(snapshot::putAttribute);
+        alignSettlementModelWithExecutedSale(loan.getId(), snapshot, saleTransfer);
         snapshotRepository.saveAndFlush(snapshot);
         log.debug("Copied {} external asset owner loan product attributes of loan product {} to loan {} on transfer {}",
                 snapshot.getAttributes().size(), loan.productId(), loan.getId(), saleTransfer.getId());
+    }
+
+    /**
+     * The settlement model of a sale is decided when the sale is initiated, but the copy is taken when COB executes it.
+     * If the product's SETTLEMENT_MODEL changed in between, copying the product value would freeze a settlement model
+     * that contradicts the transfers of the loan, and no later sale or buyback of the loan would pass validation. The
+     * copy therefore records the settlement model the executed sale was initiated under.
+     */
+    private void alignSettlementModelWithExecutedSale(final Long loanId, final ExternalAssetOwnerLoanAttributeSnapshot snapshot,
+            final ExternalAssetOwnerTransfer saleTransfer) {
+        final String settlementModelKey = DELAYED_SETTLEMENT.getAttributeKey();
+        final String copiedValue = snapshot.getAttributes().stream()
+                .filter(attribute -> attribute.getAttributeKey().equals(settlementModelKey)).findFirst()
+                .map(ExternalAssetOwnerLoanAttributes::getAttributeValue).orElse(null);
+        final boolean copiedAsDelayed = DELAYED_SETTLEMENT.getAttributeValue().equalsIgnoreCase(copiedValue);
+        final boolean executedAsDelayed = delayedSettlementAttributeService.isSaleUnderDelayedSettlement(saleTransfer);
+        if (copiedAsDelayed == executedAsDelayed) {
+            return;
+        }
+        final String settlementModel = (executedAsDelayed ? DELAYED_SETTLEMENT : DEFAULT_SETTLEMENT).getAttributeValue();
+        log.warn("Loan {}: the loan product SETTLEMENT_MODEL is {} but transfer {} was initiated under {}; the loan-level copy keeps {}",
+                loanId, copiedValue, saleTransfer.getId(), settlementModel, settlementModel);
+        snapshot.putAttribute(settlementModelKey, settlementModel);
     }
 
     @Override

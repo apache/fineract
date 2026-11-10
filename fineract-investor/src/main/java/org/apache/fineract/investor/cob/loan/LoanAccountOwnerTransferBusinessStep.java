@@ -205,7 +205,7 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
 
     private ExternalAssetOwner determinePreviousOwnerAndCleanupIfNeeded(final Loan loan, final LocalDate settlementDate,
             final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        if (!delayedSettlementAttributeService.isEnabled(loan.getId(), loan.getLoanProduct().getId())
+        if (!delayedSettlementAttributeService.isSaleUnderDelayedSettlement(externalAssetOwnerTransfer)
                 || ExternalTransferStatus.PENDING_INTERMEDIATE == externalAssetOwnerTransfer.getStatus()) {
             // Use the loan mapping as the source of truth for the current owner.
             // If a mapping exists, this is an owner-to-owner transfer — expire the current active and clean up.

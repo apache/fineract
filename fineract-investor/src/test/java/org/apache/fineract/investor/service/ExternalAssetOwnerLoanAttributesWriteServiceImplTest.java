@@ -87,6 +87,9 @@ class ExternalAssetOwnerLoanAttributesWriteServiceImplTest {
     @Mock
     private LoanRepository loanRepository;
 
+    @Mock
+    private DelayedSettlementAttributeService delayedSettlementAttributeService;
+
     @InjectMocks
     private ExternalAssetOwnerLoanAttributesWriteServiceImpl underTest;
 
@@ -121,6 +124,65 @@ class ExternalAssetOwnerLoanAttributesWriteServiceImplTest {
         assertEquals(SALE_TRANSFER_ID, snapshot.getExternalAssetOwnerTransferId());
         assertEquals(Map.of(EXCLUDED_TRANSACTION_TYPES, "BUY_DOWN_FEE", BUY_DOWN_FEE_AMORTIZATION_STRATEGY, "IMMEDIATE"),
                 attributesOf(snapshot));
+    }
+
+    // product switched to DEFAULT_SETTLEMENT after the intermediary sale was initiated
+    @Test
+    void intermediarySaleKeepsDelayedSettlementWhenTheProductWasSwitchedToDefault() {
+        final ExternalAssetOwnerTransfer saleTransfer = saleTransfer();
+        when(delayedSettlementAttributeService.isSaleUnderDelayedSettlement(saleTransfer)).thenReturn(true);
+
+        final ExternalAssetOwnerLoanAttributeSnapshot snapshot = copyWithProductAttributes(saleTransfer,
+                productAttribute(SETTLEMENT_MODEL, "DEFAULT_SETTLEMENT"), productAttribute(EXCLUDED_TRANSACTION_TYPES, "BUY_DOWN_FEE"));
+
+        assertEquals(Map.of(SETTLEMENT_MODEL, "DELAYED_SETTLEMENT", EXCLUDED_TRANSACTION_TYPES, "BUY_DOWN_FEE"), attributesOf(snapshot));
+    }
+
+    // SETTLEMENT_MODEL deleted from the product after the intermediary sale was initiated
+    @Test
+    void intermediarySaleKeepsDelayedSettlementWhenTheProductNoLongerHasASettlementModel() {
+        final ExternalAssetOwnerTransfer saleTransfer = saleTransfer();
+        when(delayedSettlementAttributeService.isSaleUnderDelayedSettlement(saleTransfer)).thenReturn(true);
+
+        final ExternalAssetOwnerLoanAttributeSnapshot snapshot = copyWithProductAttributes(saleTransfer,
+                productAttribute(EXCLUDED_TRANSACTION_TYPES, "BUY_DOWN_FEE"));
+
+        assertEquals(Map.of(SETTLEMENT_MODEL, "DELAYED_SETTLEMENT", EXCLUDED_TRANSACTION_TYPES, "BUY_DOWN_FEE"), attributesOf(snapshot));
+    }
+
+    // product switched to DELAYED_SETTLEMENT after a default settlement sale was initiated
+    @Test
+    void defaultSettlementSaleKeepsDefaultSettlementWhenTheProductWasSwitchedToDelayed() {
+        final ExternalAssetOwnerTransfer saleTransfer = saleTransfer();
+        when(delayedSettlementAttributeService.isSaleUnderDelayedSettlement(saleTransfer)).thenReturn(false);
+
+        final ExternalAssetOwnerLoanAttributeSnapshot snapshot = copyWithProductAttributes(saleTransfer,
+                productAttribute(SETTLEMENT_MODEL, "DELAYED_SETTLEMENT"));
+
+        assertEquals(Map.of(SETTLEMENT_MODEL, "DEFAULT_SETTLEMENT"), attributesOf(snapshot));
+    }
+
+    @Test
+    void settlementModelMatchingTheSaleIsCopiedAsStored() {
+        final ExternalAssetOwnerTransfer saleTransfer = saleTransfer();
+        when(delayedSettlementAttributeService.isSaleUnderDelayedSettlement(saleTransfer)).thenReturn(true);
+
+        // values stored before validation became case sensitive may be lower case
+        final ExternalAssetOwnerLoanAttributeSnapshot snapshot = copyWithProductAttributes(saleTransfer,
+                productAttribute(SETTLEMENT_MODEL, "delayed_settlement"));
+
+        assertEquals(Map.of(SETTLEMENT_MODEL, "delayed_settlement"), attributesOf(snapshot));
+    }
+
+    @Test
+    void defaultSettlementSaleWithoutProductSettlementModelCopiesNoSettlementModel() {
+        final ExternalAssetOwnerTransfer saleTransfer = saleTransfer();
+        when(delayedSettlementAttributeService.isSaleUnderDelayedSettlement(saleTransfer)).thenReturn(false);
+
+        final ExternalAssetOwnerLoanAttributeSnapshot snapshot = copyWithProductAttributes(saleTransfer,
+                productAttribute(BUY_DOWN_FEE_AMORTIZATION_STRATEGY, "IMMEDIATE"));
+
+        assertEquals(Map.of(BUY_DOWN_FEE_AMORTIZATION_STRATEGY, "IMMEDIATE"), attributesOf(snapshot));
     }
 
     @Test
@@ -219,6 +281,22 @@ class ExternalAssetOwnerLoanAttributesWriteServiceImplTest {
         underTest.lockLoanLevelCopy(LOAN_ID);
 
         verify(snapshotRepository).findByLoanIdForUpdate(LOAN_ID);
+    }
+
+    private ExternalAssetOwnerLoanAttributeSnapshot copyWithProductAttributes(final ExternalAssetOwnerTransfer saleTransfer,
+            final ExternalTransferLoanProductAttributesData... productAttributes) {
+        final Loan loan = loan();
+        when(loan.productId()).thenReturn(LOAN_PRODUCT_ID);
+        when(snapshotRepository.existsByLoanId(LOAN_ID)).thenReturn(false);
+        when(loanProductAttributesReadService.retrieveAllLoanProductAttributesByLoanProductId(LOAN_PRODUCT_ID, null))
+                .thenReturn(new Page<>(List.of(productAttributes), productAttributes.length));
+        final ArgumentCaptor<ExternalAssetOwnerLoanAttributeSnapshot> snapshotCaptor = ArgumentCaptor
+                .forClass(ExternalAssetOwnerLoanAttributeSnapshot.class);
+
+        underTest.copyLoanProductAttributesIfAbsent(loan, saleTransfer);
+
+        verify(snapshotRepository).saveAndFlush(snapshotCaptor.capture());
+        return snapshotCaptor.getValue();
     }
 
     private void stubValidation(final String attributeKey, final String attributeValue, final String normalizedValue) {
