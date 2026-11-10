@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.io.Serializable;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
@@ -25,6 +27,7 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 /**
  * Immutable data object for role data.
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE)
 public class EntityDataTableChecksData implements Serializable {
 
     private final long id;
