@@ -27,9 +27,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.jersey.converter.JsonConverter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.DataqueriesJacksonMixins;
 import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonDeserializerAdapter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonSerializerAdapter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.ReportParameterDataMixin;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArrayModule;
+import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -51,6 +54,8 @@ public class JerseyJacksonConverterConfig {
                 .deserializers(mergedDeserializers.toArray(new JsonDeserializer[0])) //
                 .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES) //
                 .featuresToEnable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS) //
+                .mixIn(ReportParameterData.class, ReportParameterDataMixin.class) //
+                .mixIns(DataqueriesJacksonMixins.MIXINS) //
                 .build(); //
         objectMapper.registerModule(new JacksonLocalDateArrayModule());
         return objectMapper;

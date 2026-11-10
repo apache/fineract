@@ -69,16 +69,14 @@ public class EntityDatatableChecksApiResource {
             + "Example Request:\n" + "\n" + "entityDatatableChecks?offset=0&limit=15")
     @AlternativeOperationId("retrieveAll_6")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.PageGetEntityDatatableChecksResponse.class)))
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("status") @Parameter(description = "status") final Integer status,
+    public Page<EntityDataTableChecksData> retrieveAll(@Context final UriInfo uriInfo,
+            @QueryParam("status") @Parameter(description = "status") final Integer status,
             @QueryParam("entity") @Parameter(description = "entity") final String entity,
             @QueryParam("productId") @Parameter(description = "productId") final Long productId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
-        final Page<EntityDataTableChecksData> result = this.readEntityDatatableChecksService.retrieveAll(searchParameters, status, entity,
-                productId);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.readEntityDatatableChecksService.retrieveAll(searchParameters, status, entity, productId);
     }
 
     @GET
@@ -102,11 +100,10 @@ public class EntityDatatableChecksApiResource {
             + "entity, status, datatableName\n" + "\n" + "Non-Mandatory Fields : \n" + "productId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.PostEntityDatatableChecksTemplateRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.PostEntityDatatableChecksTemplateResponse.class)))
-    public String createEntityDatatableCheck(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult createEntityDatatableCheck(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createEntityDatatableChecks(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -116,15 +113,14 @@ public class EntityDatatableChecksApiResource {
     @Operation(summary = "Delete Entity-Datatable Checks", operationId = "deleteEntityDatatableCheck", description = "Deletes an existing Entity-Datatable Check")
     @AlternativeOperationId("deleteDatatable_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.DeleteEntityDatatableChecksTemplateResponse.class)))
-    public String deleteDatatable(
+    public CommandProcessingResult deleteDatatable(
             @PathParam("entityDatatableCheckId") @Parameter(description = "entityDatatableCheckId") final long entityDatatableCheckId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder()
                 .deleteEntityDatatableChecks(entityDatatableCheckId, apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }
