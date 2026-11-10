@@ -88,29 +88,32 @@ public class CreditBureauIntegrationApiResource {
     @RequestBody(description = "Fetch credit report", content = {
             @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CreditBureauIntegrationApiResourceSwagger.PostCreditReportRequest.class)) })
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
-    public String fetchCreditReport(@Context final UriInfo uriInfo, @RequestParam("params") final Map<String, Object> params) {
+    public CommandProcessingResult fetchCreditReport(@Context final UriInfo uriInfo,
+            @RequestParam("params") final Map<String, Object> params) {
 
         Gson gson = new Gson();
         final String json = gson.toJson(params);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().getCreditReport().withJson(json).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toCreditReportApiJsonSerializer.serialize(result);
+        return result;
 
     }
 
     // submit loan file of clients to Credit Bureau
+
     @POST
     @Path("addCreditReport")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Upload credit report", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String addCreditReport(@FormDataParam("file") final File creditReport, @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") final UriInfo uriInfo, @FormDataParam("file") FormDataContentDisposition fileDetail,
+    public String addCreditReport(@FormDataParam("file") final File creditReport,
+            @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") final UriInfo uriInfo,
             @QueryParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId) {
 
         final String responseMessage = this.creditReportWritePlatformService.addCreditReport(creditBureauId, creditReport, fileDetail);
-        return this.toCreditReportApiJsonSerializer.serialize(responseMessage);
+        return responseMessage;
     }
 
     // saves fetched-creditreport into database
@@ -118,7 +121,7 @@ public class CreditBureauIntegrationApiResource {
     @Path("saveCreditReport")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String saveCreditReport(@Parameter(hidden = true) final String apiRequestBodyAsJson,
+    public CommandProcessingResult saveCreditReport(@Parameter(hidden = true) final String apiRequestBodyAsJson,
             @QueryParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId,
             @QueryParam("nationalId") @Parameter(description = "nationalId") final String nationalId) {
 
@@ -128,7 +131,8 @@ public class CreditBureauIntegrationApiResource {
                 .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toCreditReportApiJsonSerializer.serialize(result);
+
+        return result;
 
     }
 
@@ -136,7 +140,8 @@ public class CreditBureauIntegrationApiResource {
     @GET
     @Path("creditReport/{creditBureauId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getSavedCreditReport(@PathParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId,
+    public Collection<CreditReportData> getSavedCreditReport(
+            @PathParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser();
@@ -144,7 +149,7 @@ public class CreditBureauIntegrationApiResource {
         final Collection<CreditReportData> creditReport = this.creditReportReadPlatformService.retrieveCreditReportDetails(creditBureauId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, creditReport, RESPONSE_DATA_PARAMETERS);
+        return creditReport;
 
     }
 
@@ -153,7 +158,8 @@ public class CreditBureauIntegrationApiResource {
     @Path("deleteCreditReport/{creditBureauId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteCreditReport(@PathParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId,
+    public CommandProcessingResult deleteCreditReport(
+            @PathParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCreditReport(creditBureauId).withJson(apiRequestBodyAsJson)
@@ -161,7 +167,7 @@ public class CreditBureauIntegrationApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toCreditReportApiJsonSerializer.serialize(result);
+        return result;
 
     }
 }

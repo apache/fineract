@@ -522,7 +522,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public @NonNull String disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson) {
+    public @NonNull CommandProcessingResult disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
 
@@ -531,11 +531,11 @@ public class InteropServiceImpl implements InteropService {
         final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
         CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @Override
-    public @NonNull String loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson) {
+    public @NonNull CommandProcessingResult loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
 
@@ -544,7 +544,7 @@ public class InteropServiceImpl implements InteropService {
         final CommandWrapper commandRequest = builder.loanRepaymentTransaction(loanId).build();
         CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
