@@ -50,6 +50,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         final Money zeroAmount = Money.zero(loanApplicationTerms.getCurrency(), mc);
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
         final ArrayList<LoanScheduleModelRepaymentPeriod> repaymentPeriods = new ArrayList<>(numberOfRepayments);
+        // a fixed length loan matures on this date whatever the working days and holidays are
+        final LocalDate fixedLengthMaturityDate = loanApplicationTerms.getFixedLength() != null
+                ? loanApplicationTerms.calculateMaxDateForFixedLength()
+                : null;
         LocalDate lastRepaymentDate = scheduleStartDate;
         LocalDate lastAdjustedRepaymentDate = scheduleStartDate;
         LocalDate nextRepaymentDate;
@@ -62,14 +66,19 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 nextRepaymentDate = generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, false);
             }
 
-            if (repaymentPeriodNumber == numberOfRepayments) { // last period
-                if (loanApplicationTerms.getFixedLength() != null
-                        && loanApplicationTerms.calculateMaxDateForFixedLength().compareTo(nextRepaymentDate) != 0) {
-                    nextRepaymentDate = loanApplicationTerms.calculateMaxDateForFixedLength();
-                }
+            final LocalDate adjustedRepaymentDate;
+            if (fixedLengthMaturityDate == null) {
+                adjustedRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO)
+                        .getChangedScheduleDate();
+            } else if (repaymentPeriodNumber == numberOfRepayments) {
+                nextRepaymentDate = fixedLengthMaturityDate;
+                adjustedRepaymentDate = fixedLengthMaturityDate;
+            } else {
+                final LocalDate followingRepaymentDate = repaymentPeriodNumber + 1 == numberOfRepayments ? fixedLengthMaturityDate
+                        : generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, false);
+                adjustedRepaymentDate = adjustRepaymentDateBefore(nextRepaymentDate, followingRepaymentDate, loanApplicationTerms,
+                        holidayDetailDTO);
             }
-            LocalDate adjustedRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO)
-                    .getChangedScheduleDate();
             repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastAdjustedRepaymentDate,
                     adjustedRepaymentDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
             lastRepaymentDate = nextRepaymentDate;
@@ -77,6 +86,18 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             isFirstRepayment = false;
         }
         return repaymentPeriods;
+    }
+
+    /**
+     * Moves the due date off a non-working day or holiday only when the moved date is still before the following due
+     * date, and otherwise keeps it where it is. On a fixed length loan this keeps every due date before the maturity
+     * date.
+     */
+    private LocalDate adjustRepaymentDateBefore(final LocalDate repaymentDate, final LocalDate followingRepaymentDate,
+            final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
+        final LocalDate adjustedRepaymentDate = adjustRepaymentDate(repaymentDate, loanApplicationTerms, holidayDetailDTO)
+                .getChangedScheduleDate();
+        return adjustedRepaymentDate.isBefore(followingRepaymentDate) ? adjustedRepaymentDate : repaymentDate;
     }
 
     @Override

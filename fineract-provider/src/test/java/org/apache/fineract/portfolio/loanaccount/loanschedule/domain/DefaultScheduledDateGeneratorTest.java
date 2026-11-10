@@ -21,11 +21,13 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.EMPTY_LIST;
 import static org.apache.fineract.organisation.monetary.domain.MonetaryCurrency.fromApplicationCurrency;
+import static org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY;
 import static org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY;
 import static org.apache.fineract.portfolio.calendar.service.CalendarUtils.FLOATING_TIMEZONE_PROPERTY_KEY;
 import static org.apache.fineract.portfolio.common.domain.DayOfWeekType.INVALID;
 import static org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy.FIRST_DAY_OF_NEXT_MONTH;
 import static org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy.LAST_DAY_OF_MONTH;
+import static org.apache.fineract.portfolio.common.domain.PeriodFrequencyType.DAYS;
 import static org.apache.fineract.portfolio.common.domain.PeriodFrequencyType.MONTHS;
 import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.CUMULATIVE;
 import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;
@@ -204,6 +206,63 @@ public class DefaultScheduledDateGeneratorTest {
     @WithSystemTimeZone(EUROPE_BERLIN_ID)
     @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
     @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithFixedLengthKeepsMaturityDateOnNonWorkingDay() {
+        // the maturity date, 22 Mar 2025, is a Saturday; the earlier Saturday due date, 22 Feb 2025, still moves
+        final List<LoanScheduleModelRepaymentPeriod> periods = progressivePeriods(3, MONTHS, 3, MOVE_TO_NEXT_WORKING_DAY.getValue(),
+                LocalDate.of(2024, 12, 22), LocalDate.of(2025, 1, 22));
+
+        assertThat(periods).extracting(LoanScheduleModelPeriod::periodDueDate).containsExactly(LocalDate.of(2025, 1, 22),
+                LocalDate.of(2025, 2, 24), LocalDate.of(2025, 3, 22));
+        assertPeriodsFollowEachOther(periods, LocalDate.of(2024, 12, 22));
+    }
+
+    @Test
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithFixedLengthDailyRepaymentsDoNotPassMaturityDate() {
+        // 6 and 7 Jan 2024 are a weekend; moving them to Monday 8 Jan would reach the following due date, which on
+        // 7 Jan is the fixed maturity date, so both stay where they are
+        final List<LoanScheduleModelRepaymentPeriod> periods = progressivePeriods(5, DAYS, 5, MOVE_TO_NEXT_WORKING_DAY.getValue(),
+                LocalDate.of(2024, 1, 3), null);
+
+        assertThat(periods).extracting(LoanScheduleModelPeriod::periodDueDate).containsExactly(LocalDate.of(2024, 1, 4),
+                LocalDate.of(2024, 1, 5), LocalDate.of(2024, 1, 6), LocalDate.of(2024, 1, 7), LocalDate.of(2024, 1, 8));
+        assertPeriodsFollowEachOther(periods, LocalDate.of(2024, 1, 3));
+    }
+
+    @Test
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithFixedLengthAndMoveToNextRepaymentMeetingDay() {
+        // 6 Apr 2024 is a Saturday; the next repayment meeting day is the fixed maturity date, 6 May 2024, so it stays
+        final List<LoanScheduleModelRepaymentPeriod> periods = progressivePeriods(3, MONTHS, 3,
+                MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue(), LocalDate.of(2024, 2, 6), LocalDate.of(2024, 3, 6));
+
+        assertThat(periods).extracting(LoanScheduleModelPeriod::periodDueDate).containsExactly(LocalDate.of(2024, 3, 6),
+                LocalDate.of(2024, 4, 6), LocalDate.of(2024, 5, 6));
+        assertPeriodsFollowEachOther(periods, LocalDate.of(2024, 2, 6));
+    }
+
+    @Test
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
+    public void test_generateRepaymentPeriodsWithMoveToNextRepaymentMeetingDayExtendsTerm() {
+        // without a fixed length the Saturday due date moves onto the next one and the term gets one period longer
+        final List<LoanScheduleModelRepaymentPeriod> periods = progressivePeriods(3, MONTHS, null,
+                MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue(), LocalDate.of(2024, 2, 6), LocalDate.of(2024, 3, 6));
+
+        assertThat(periods).extracting(LoanScheduleModelPeriod::periodDueDate).containsExactly(LocalDate.of(2024, 3, 6),
+                LocalDate.of(2024, 5, 6), LocalDate.of(2024, 6, 6));
+        assertPeriodsFollowEachOther(periods, LocalDate.of(2024, 2, 6));
+    }
+
+    @Test
+    @WithSystemTimeZone(EUROPE_BERLIN_ID)
+    @WithTenantContext(tenantTimeZoneId = EUROPE_BERLIN_ID)
+    @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
     public void test_AdjustRepaymentDate_Works_WithSameTenant_And_SystemTimeZone() {
         // given
         LocalDate dueRepaymentPeriodDate = LocalDate.of(2023, 11, 26);
@@ -337,14 +396,39 @@ public class DefaultScheduledDateGeneratorTest {
 
     private List<LocalDate> progressiveDueDates(final int numberOfRepayments, final String workingDaysRecurrence,
             final LocalDate disbursementDate, final LocalDate firstRepaymentDate) {
+        return progressivePeriods(numberOfRepayments, MONTHS, null, workingDaysRecurrence, MOVE_TO_NEXT_WORKING_DAY.getValue(),
+                disbursementDate, firstRepaymentDate).stream().map(LoanScheduleModelPeriod::periodDueDate).toList();
+    }
+
+    private List<LoanScheduleModelRepaymentPeriod> progressivePeriods(final int numberOfRepayments,
+            final PeriodFrequencyType repaymentFrequency, final Integer fixedLength, final int repaymentRescheduleType,
+            final LocalDate disbursementDate, final LocalDate firstRepaymentDate) {
+        return progressivePeriods(numberOfRepayments, repaymentFrequency, fixedLength, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR",
+                repaymentRescheduleType, disbursementDate, firstRepaymentDate);
+    }
+
+    private List<LoanScheduleModelRepaymentPeriod> progressivePeriods(final int numberOfRepayments,
+            final PeriodFrequencyType repaymentFrequency, final Integer fixedLength, final String workingDaysRecurrence,
+            final int repaymentRescheduleType, final LocalDate disbursementDate, final LocalDate firstRepaymentDate) {
         final ApplicationCurrency currency = new ApplicationCurrency("USD", "US Dollar", 2, 0, "currency.USD", "$");
         final Money principalAmount = Money.of(fromApplicationCurrency(currency), BigDecimal.valueOf(1000L));
-        final HolidayDetailDTO holidayDetailDTO = createHolidayDTO(workingDaysRecurrence);
+        final HolidayDetailDTO holidayDetailDTO = createHolidayDTO(workingDaysRecurrence, repaymentRescheduleType);
         final LoanApplicationTerms loanApplicationTerms = createLoanApplicationTerms(currency, principalAmount, disbursementDate,
-                disbursementDate, firstRepaymentDate, numberOfRepayments, MONTHS, null, null, holidayDetailDTO, PROGRESSIVE);
+                disbursementDate, firstRepaymentDate, numberOfRepayments, repaymentFrequency, fixedLength, null, holidayDetailDTO,
+                PROGRESSIVE);
 
         return underTest.generateRepaymentPeriods(new MathContext(12, RoundingMode.HALF_EVEN), disbursementDate, loanApplicationTerms,
-                holidayDetailDTO).stream().map(LoanScheduleModelPeriod::periodDueDate).toList();
+                holidayDetailDTO);
+    }
+
+    private static void assertPeriodsFollowEachOther(final List<LoanScheduleModelRepaymentPeriod> periods,
+            final LocalDate scheduleStartDate) {
+        LocalDate previousDueDate = scheduleStartDate;
+        for (final LoanScheduleModelRepaymentPeriod period : periods) {
+            assertThat(period.periodFromDate()).as("from date of period %d", period.periodNumber()).isEqualTo(previousDueDate);
+            assertThat(period.periodDueDate()).as("due date of period %d", period.periodNumber()).isAfter(period.periodFromDate());
+            previousDueDate = period.periodDueDate();
+        }
     }
 
     @ParameterizedTest(name = "{0}")
@@ -445,7 +529,11 @@ public class DefaultScheduledDateGeneratorTest {
     }
 
     private HolidayDetailDTO createHolidayDTO(final String workingDaysRecurrence) {
-        return new HolidayDetailDTO(false, EMPTY_LIST,
-                new WorkingDays(workingDaysRecurrence, MOVE_TO_NEXT_WORKING_DAY.getValue(), false, false), false, false);
+        return createHolidayDTO(workingDaysRecurrence, MOVE_TO_NEXT_WORKING_DAY.getValue());
+    }
+
+    private HolidayDetailDTO createHolidayDTO(final String workingDaysRecurrence, final int repaymentRescheduleType) {
+        return new HolidayDetailDTO(false, EMPTY_LIST, new WorkingDays(workingDaysRecurrence, repaymentRescheduleType, false, false), false,
+                false);
     }
 }
