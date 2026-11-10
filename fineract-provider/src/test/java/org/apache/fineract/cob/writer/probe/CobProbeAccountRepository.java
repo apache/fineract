@@ -16,22 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.writer.probe;
 
-import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
-import org.springframework.batch.core.step.StepExecution;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public class InlineCOBLoanItemProcessor extends AbstractLoanItemProcessor {
-
-    public InlineCOBLoanItemProcessor(COBBusinessStepService cobBusinessStepService,
-            ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService) {
-        super(cobBusinessStepService, progressiveLoanModelProcessingService);
-    }
-
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        setExecutionContext(stepExecution.getJobExecution().getExecutionContext());
-        setBusinessDate(stepExecution);
-    }
-}
+public interface CobProbeAccountRepository extends JpaRepository<CobProbeAccount, Long> {}

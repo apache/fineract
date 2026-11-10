@@ -20,44 +20,34 @@ package org.apache.fineract.cob.loan;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.exceptions.LockedReadException;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ItemReader;
-import org.springframework.data.repository.CrudRepository;
 
-@Slf4j
-@RequiredArgsConstructor
-public abstract class AbstractLoanItemReader<T extends AbstractPersistableCustom<Long>> implements ItemReader<T>, StepExecutionListener {
-
-    protected final CrudRepository<T, Long> loanRepository;
+/**
+ * Hands the ids of the accounts to close to the writer, which loads each account itself.
+ * <p>
+ * Reading touches no database on purpose. Spring Batch 6 skips a failed read inside the chunk transaction, and loading
+ * an account goes through a repository whose {@code @Transactional} would mark that transaction rollback-only on any
+ * failure: the rest of the chunk would then be written and silently rolled back with it. A failure to load an account
+ * in the writer instead enters scan mode, where only that account is skipped.
+ */
+public abstract class AbstractLoanItemReader implements ItemReader<Long>, StepExecutionListener {
 
     @Setter(AccessLevel.PROTECTED)
     private LinkedBlockingQueue<Long> remainingData;
 
     @Override
-    public T read() throws Exception {
-        final Long loanId = remainingData.poll();
-        if (loanId != null) {
-            try {
-                return loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
-            } catch (Exception e) {
-                throw new LockedReadException(loanId, e);
-            }
-        }
-        return null;
+    public @Nullable Long read() {
+        return remainingData.poll();
     }
 
     @Override
     public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
         return ExitStatus.COMPLETED;
     }
-
 }

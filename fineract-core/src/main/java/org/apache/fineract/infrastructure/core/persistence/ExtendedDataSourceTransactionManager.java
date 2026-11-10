@@ -59,6 +59,8 @@ public class ExtendedDataSourceTransactionManager extends DataSourceTransactionM
     protected void doCleanupAfterCompletion(@NonNull Object transaction) {
         super.doCleanupAfterCompletion(transaction);
         invokeLifecycleCallbacks(TransactionLifecycleCallback::afterCompletion);
+        // The connection is released by now; see AfterTransactionWork.
+        AfterTransactionWork.runReadyWork();
     }
 
     private void invokeLifecycleCallbacks(Consumer<TransactionLifecycleCallback> f) {

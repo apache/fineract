@@ -196,7 +196,9 @@ public class FineractProperties {
         // steps register no task executor at all - because concurrent item processing takes COB business step writes
         // out of the chunk transaction (see FINERACT-2621). Exposing a pool size would offer an override for a
         // correctness invariant, so the knob does not exist. Scale via partition-size and worker instances.
-        private Integer retryLimit;
+        // No retry limit either: Spring Batch 6 retries an item inside the chunk transaction it failed in, which a COB
+        // failure has already marked rollback-only, so a retry cannot succeed and one that seems to loses the chunk.
+        // See StepRetryPolicyFactory#noRetryPolicy.
         private Integer pollInterval;
         /**
          * Maximum number of skipped items tolerated per step execution (per partition). Independent of chunk size on

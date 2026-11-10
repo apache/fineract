@@ -30,16 +30,6 @@ Feature: COB Loan item Listener
       |run   |
 
   @cob
-  Scenario Outline: LoanItemListener.onProcessError - run test
-    Given The LoanItemListener.onProcessError method <action>
-    When LoanItemListener.onProcessError method executed
-    Then LoanItemListener.onProcessError result should match
-
-    Examples:
-      |action|
-      |run   |
-
-  @cob
   Scenario Outline: LoanItemListener.onWriteError - run test
     Given The LoanItemListener.onWriteError method <action>
     When LoanItemListener.onWriteError method executed

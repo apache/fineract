@@ -119,6 +119,8 @@ public class ExtendedJpaTransactionManager extends JpaTransactionManager {
     protected void doCleanupAfterCompletion(Object transaction) {
         super.doCleanupAfterCompletion(transaction);
         invokeLifecycleCallbacks(TransactionLifecycleCallback::afterCompletion);
+        // The EntityManager is closed and its connection released by now; see AfterTransactionWork.
+        AfterTransactionWork.runReadyWork();
     }
 
     private boolean isReadOnlyTx(Object transaction) {
