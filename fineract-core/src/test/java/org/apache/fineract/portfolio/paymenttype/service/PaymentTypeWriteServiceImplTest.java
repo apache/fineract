@@ -94,6 +94,36 @@ class PaymentTypeWriteServiceImplTest {
     }
 
     @Test
+    void updateWithOnlyNameAndDescriptionKeepsTheOtherFields() {
+        final PaymentType paymentType = new PaymentType("Chargeback", "Old description", false, 3L, "REPAYMENT_ADJUSTMENT_CHARGEBACK",
+                true);
+        when(repository.findById(PAYMENT_TYPE_ID)).thenReturn(Optional.of(paymentType));
+
+        service.updatePaymentType(
+                PaymentTypeUpdateRequest.builder().id(PAYMENT_TYPE_ID).name("Chargeback").description("New description").build());
+
+        assertEquals("New description", paymentType.getDescription());
+        assertEquals("REPAYMENT_ADJUSTMENT_CHARGEBACK", paymentType.getCodeName());
+        assertEquals(3L, paymentType.getPosition());
+        assertFalse(paymentType.getIsCashPayment());
+        assertTrue(paymentType.getIsSystemDefined());
+    }
+
+    @Test
+    void updateWithAllFieldsOverwritesThem() {
+        final PaymentType paymentType = new PaymentType("Cash", "Old description", true, 1L, "OLD_CODE", false);
+        when(repository.findById(PAYMENT_TYPE_ID)).thenReturn(Optional.of(paymentType));
+
+        service.updatePaymentType(PaymentTypeUpdateRequest.builder().id(PAYMENT_TYPE_ID).name("Cash").description("New description")
+                .isCashPayment(false).position(2L).codeName("NEW_CODE").build());
+
+        assertEquals("New description", paymentType.getDescription());
+        assertEquals("NEW_CODE", paymentType.getCodeName());
+        assertEquals(2L, paymentType.getPosition());
+        assertFalse(paymentType.getIsCashPayment());
+    }
+
+    @Test
     void updateDataIntegrityViolationIsReportedAsDataIntegrityIssueNotAsNotFound() {
         when(repository.findById(PAYMENT_TYPE_ID)).thenReturn(Optional.of(existingPaymentType(false)));
         when(repository.saveAndFlush(any(PaymentType.class))).thenThrow(new DataIntegrityViolationException("not-null violation",
