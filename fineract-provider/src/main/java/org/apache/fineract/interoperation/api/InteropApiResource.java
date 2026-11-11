@@ -52,8 +52,6 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.interoperation.data.InteropAccountData;
 import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
@@ -81,7 +79,6 @@ public class InteropApiResource {
 
     private final PlatformSecurityContext context;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final DefaultToApiJsonSerializer<CommandProcessingResult> jsonSerializer;
     private final InteropService interopService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceService;
 
@@ -102,7 +99,7 @@ public class InteropApiResource {
     public InteropAccountData getAccountDetails(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
             @Context UriInfo uriInfo) {
         InteropAccountData result = interopService.getAccountDetails(accountId);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
         return result;
     }
 
@@ -123,7 +120,7 @@ public class InteropApiResource {
                 : LocalDateTime.parse(toBookingDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         InteropTransactionsData result = interopService.getAccountTransactions(accountId, debit, credit, transactionsFrom, transactionsTo);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
         return result;
     }
 
@@ -135,7 +132,7 @@ public class InteropApiResource {
     public InteropIdentifiersResponseData getAccountIdentifiers(
             @PathParam("accountId") @Parameter(description = "accountId") String accountId, @Context UriInfo uriInfo) {
         InteropIdentifiersResponseData result = interopService.getAccountIdentifiers(accountId);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -149,7 +146,7 @@ public class InteropApiResource {
             @PathParam("idType") @Parameter(description = "idType") InteropIdentifierType idType,
             @PathParam("idValue") @Parameter(description = "idValue") String idValue, @Context UriInfo uriInfo) {
         InteropIdentifierAccountResponseData result = interopService.getAccountByIdentifier(idType, idValue, null);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -164,7 +161,7 @@ public class InteropApiResource {
             @PathParam("idValue") @Parameter(description = "idValue") String idValue,
             @PathParam("subIdOrType") @Parameter(description = "subIdOrType") String subIdOrType, @Context UriInfo uriInfo) {
         InteropIdentifierAccountResponseData result = interopService.getAccountByIdentifier(idType, idValue, subIdOrType);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -185,7 +182,7 @@ public class InteropApiResource {
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService
                 .logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -207,7 +204,7 @@ public class InteropApiResource {
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService
                 .logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -225,7 +222,7 @@ public class InteropApiResource {
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService
                 .logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -244,7 +241,7 @@ public class InteropApiResource {
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService
                 .logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -260,7 +257,7 @@ public class InteropApiResource {
         context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_REQUEST);
 
         InteropTransactionRequestResponseData result = interopService.getTransactionRequest(transactionCode, requestCode);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -278,7 +275,7 @@ public class InteropApiResource {
 
         InteropTransactionRequestResponseData result = (InteropTransactionRequestResponseData) commandsSourceService
                 .logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -294,7 +291,7 @@ public class InteropApiResource {
         context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_QUOTE);
 
         InteropQuoteResponseData result = interopService.getQuote(transactionCode, quoteCode);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -310,7 +307,7 @@ public class InteropApiResource {
         CommandWrapper commandRequest = new InteropWrapperBuilder().createQuotes().withJson(quotesJson).build();
 
         InteropQuoteResponseData result = (InteropQuoteResponseData) commandsSourceService.logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -326,7 +323,7 @@ public class InteropApiResource {
         context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_QUOTE);
 
         InteropTransferResponseData result = interopService.getTransfer(transactionCode, transferCode);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -355,7 +352,7 @@ public class InteropApiResource {
                 .withJson(quotesJson).build();
 
         InteropTransferResponseData result = (InteropTransferResponseData) commandsSourceService.logCommandSource(commandRequest);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }
@@ -368,7 +365,7 @@ public class InteropApiResource {
     public InteropKycResponseData getClientKyc(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
             @Context UriInfo uriInfo) {
         InteropKycResponseData result = interopService.getKyc(accountId);
-        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
 
         return result;
     }

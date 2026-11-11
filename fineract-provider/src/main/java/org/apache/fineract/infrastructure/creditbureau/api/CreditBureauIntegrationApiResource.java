@@ -51,8 +51,6 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditReportData;
 import org.apache.fineract.infrastructure.creditbureau.service.CreditReportReadPlatformService;
 import org.apache.fineract.infrastructure.creditbureau.service.CreditReportWritePlatformService;
@@ -63,6 +61,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 @Path("/v1/creditBureauIntegration")
 @Component
@@ -73,12 +73,10 @@ public class CreditBureauIntegrationApiResource {
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "creditBureauId", "nrc", "creditReport"));
 
     private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<CreditReportData> toCreditReportApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final CreditReportWritePlatformService creditReportWritePlatformService;
     private final CreditReportReadPlatformService creditReportReadPlatformService;
-    private final DefaultToApiJsonSerializer<CreditReportData> toApiJsonSerializer;
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationApiResource.class);
 
     @POST
@@ -101,19 +99,14 @@ public class CreditBureauIntegrationApiResource {
     }
 
     // submit loan file of clients to Credit Bureau
-
     @POST
     @Path("addCreditReport")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Upload credit report", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String addCreditReport(@FormDataParam("file") final File creditReport,
-            @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") final UriInfo uriInfo,
-            @QueryParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId) {
-
+    public JsonNode addCreditReport(@FormDataParam("file") final File creditReport, @FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") final UriInfo uriInfo, @FormDataParam("file") FormDataContentDisposition fileDetail, @QueryParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId) {
         final String responseMessage = this.creditReportWritePlatformService.addCreditReport(creditBureauId, creditReport, fileDetail);
-        return responseMessage;
+        return TextNode.valueOf(responseMessage);
     }
 
     // saves fetched-creditreport into database
@@ -147,8 +140,6 @@ public class CreditBureauIntegrationApiResource {
         this.context.authenticatedUser();
 
         final Collection<CreditReportData> creditReport = this.creditReportReadPlatformService.retrieveCreditReportDetails(creditBureauId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return creditReport;
 
     }
