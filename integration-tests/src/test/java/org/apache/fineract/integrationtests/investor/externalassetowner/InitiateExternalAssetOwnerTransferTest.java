@@ -86,7 +86,6 @@ public class InitiateExternalAssetOwnerTransferTest extends ExternalAssetOwnerTr
     private static final String LOAN_OWNERSHIP_TRANSFER_EVENT = "LoanOwnershipTransferBusinessEvent";
     private static final String TRANSACTION_SUMMARY_REPORT = "Transaction Summary Report with Asset Owner";
     private static final String SALE_COMMAND = "sale";
-    private static final String BUYBACK_COMMAND = "buyback";
 
     private static final String LOAN_SUBMITTED_ON_DATE = "02 March 2020";
     private static final String PENALTY_AMOUNT = "10";
@@ -1335,18 +1334,6 @@ public class InitiateExternalAssetOwnerTransferTest extends ExternalAssetOwnerTr
     private void assertNotReversed(Object reversed) {
         boolean notReversed = reversed instanceof Number number ? number.intValue() == 0 : Boolean.FALSE.equals(reversed);
         assertTrue(notReversed, "Expected a non-reversed transaction, but the report reported reversed=" + reversed);
-    }
-
-    private PostInitiateTransferResponse createBuybackTransfer(Long loanId, String settlementDate) {
-        return createBuybackTransfer(loanId, settlementDate, UUID.randomUUID().toString());
-    }
-
-    private PostInitiateTransferResponse createBuybackTransfer(Long loanId, String settlementDate, String transferExternalId) {
-        PostInitiateTransferResponse buybackResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanId, BUYBACK_COMMAND,
-                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat(DATE_FORMAT_ISO).locale(LoanTestData.LOCALE)
-                        .transferExternalId(transferExternalId));
-        assertEquals(transferExternalId, buybackResponse.getResourceExternalId());
-        return buybackResponse;
     }
 
     private void getAndValidateThereIsNoActiveMapping(Long loanId) {

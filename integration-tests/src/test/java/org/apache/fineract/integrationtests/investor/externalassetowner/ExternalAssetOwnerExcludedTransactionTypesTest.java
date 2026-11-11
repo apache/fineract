@@ -33,17 +33,8 @@ import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
-import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalAssetOwnerHelper;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestRateFrequencyType;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -59,7 +50,7 @@ import org.junit.jupiter.api.Test;
  * presence of externalOwnerId on the published event). A divergence between the trial balance and the event stream is
  * exactly the failure this feature can introduce.
  */
-public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTestBase {
+public class ExternalAssetOwnerExcludedTransactionTypesTest extends ExternalAssetOwnerTransferTest {
 
     private static final String EXCLUDED_TRANSACTION_TYPES = "EXCLUDED_TRANSACTION_TYPES";
     private static final String BUY_DOWN_FEE_TYPES = "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT";
@@ -72,9 +63,6 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
     private static Account incomeAccount;
     private static Account expenseAccount;
     private static Account liabilityAccount;
-
-    private final FeignExternalAssetOwnerHelper externalAssetOwnerHelper = new FeignExternalAssetOwnerHelper(
-            FineractFeignClientHelper.getFineractFeignClient());
 
     @BeforeAll
     public static void createGlAccounts() {
@@ -102,7 +90,7 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
                 "EXTERNAL_ASSET_OWNER_TRANSFER");
         EVENTS_UNDER_TEST.forEach(externalEventHelper::enableBusinessEvent);
         final Account transferAccount = accountHelper.createAssetAccount("transferInSuspense");
-        externalAssetOwnerHelper.setProperFinancialActivity(transferAccount);
+        EXTERNAL_ASSET_OWNER_HELPER.setProperFinancialActivity(transferAccount);
         // Start from an empty event store: a reused database can still hold events serialised with an older avro
         // schema, and reading those back fails before any assertion of ours runs.
         externalEventHelper.deleteAllExternalEvents();
@@ -116,10 +104,11 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         final String ownerExternalId = UUID.randomUUID().toString();
 
         final Long clientId = createClient();
-        final Long loanProductId = createLoanProduct(buyDownFeeProduct());
+        final Long loanProductId = createLoanProduct(
+                buyDownFeeProduct("BDF_EXCL_", assetAccount, incomeAccount, expenseAccount, liabilityAccount));
         // Configure BEFORE any transaction: the attribute cache is per node, so nothing in the test may depend on
         // mid-test cache propagation.
-        externalAssetOwnerHelper.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
+        EXTERNAL_ASSET_OWNER_HELPER.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
 
         runAt("01 July 2026", () -> {
             final Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 July 2026", 1000.0, 10.0, 6, null);
@@ -155,7 +144,8 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         final String ownerExternalId = UUID.randomUUID().toString();
 
         final Long clientId = createClient();
-        final Long loanProductId = createLoanProduct(buyDownFeeProduct());
+        final Long loanProductId = createLoanProduct(
+                buyDownFeeProduct("BDF_EXCL_", assetAccount, incomeAccount, expenseAccount, liabilityAccount));
 
         runAt("01 July 2026", () -> {
             final Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 July 2026", 1000.0, 10.0, 6, null);
@@ -175,8 +165,9 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
     @Test
     public void testOnAnUnownedLoanNothingIsTaggedWhetherOrNotTheTypeIsExcluded() {
         final Long clientId = createClient();
-        final Long loanProductId = createLoanProduct(buyDownFeeProduct());
-        externalAssetOwnerHelper.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
+        final Long loanProductId = createLoanProduct(
+                buyDownFeeProduct("BDF_EXCL_", assetAccount, incomeAccount, expenseAccount, liabilityAccount));
+        EXTERNAL_ASSET_OWNER_HELPER.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
 
         runAt("01 July 2026", () -> {
             final Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 July 2026", 1000.0, 10.0, 6, null);
@@ -194,8 +185,9 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         final String ownerExternalId = UUID.randomUUID().toString();
 
         final Long clientId = createClient();
-        final Long loanProductId = createLoanProduct(buyDownFeeProduct());
-        externalAssetOwnerHelper.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
+        final Long loanProductId = createLoanProduct(
+                buyDownFeeProduct("BDF_EXCL_", assetAccount, incomeAccount, expenseAccount, liabilityAccount));
+        EXTERNAL_ASSET_OWNER_HELPER.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
 
         runAt("01 July 2026", () -> {
             final Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 July 2026", 1000.0, 10.0, 6, null);
@@ -235,8 +227,9 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         final String secondOwnerExternalId = UUID.randomUUID().toString();
 
         final Long clientId = createClient();
-        final Long loanProductId = createLoanProduct(buyDownFeeProduct());
-        externalAssetOwnerHelper.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
+        final Long loanProductId = createLoanProduct(
+                buyDownFeeProduct("BDF_EXCL_", assetAccount, incomeAccount, expenseAccount, liabilityAccount));
+        EXTERNAL_ASSET_OWNER_HELPER.createLoanProductAttribute(loanProductId, EXCLUDED_TRANSACTION_TYPES, BUY_DOWN_FEE_TYPES);
 
         runAt("01 July 2026", () -> {
             final Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 July 2026", 1000.0, 10.0, 6, null);
@@ -257,28 +250,12 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
 
             assertUntaggedOnBothSurfaces(findTransactionId(loanId));
 
-            assertNotNull(externalAssetOwnerHelper.retrieveJournalEntriesOfOwner(firstOwnerExternalId).getJournalEntryData(),
+            assertNotNull(EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfOwner(firstOwnerExternalId).getJournalEntryData(),
                     "asset transfer journal entries must stay owner tagged");
         });
     }
 
     // --- assertions on both surfaces -------------------------------------------------------------------------------
-
-    private void assertUntaggedOnBothSurfaces(final Long loanTransactionId) {
-        final List<JournalEntryTransactionItem> entries = journalEntriesOf(loanTransactionId);
-        assertFalse(entries.isEmpty(), "expected journal entries for loan transaction " + loanTransactionId);
-        entries.forEach(entry -> assertNull(entry.getExternalAssetOwner(),
-                "journal entry of loan transaction " + loanTransactionId + " must not be attributed to any owner"));
-        assertEventOwner(loanTransactionId, null);
-    }
-
-    private void assertTaggedOnBothSurfaces(final Long loanTransactionId, final String ownerExternalId) {
-        final List<JournalEntryTransactionItem> entries = journalEntriesOf(loanTransactionId);
-        assertFalse(entries.isEmpty(), "expected journal entries for loan transaction " + loanTransactionId);
-        entries.forEach(entry -> assertEquals(ownerExternalId, entry.getExternalAssetOwner(),
-                "journal entry of loan transaction " + loanTransactionId + " must be attributed to the owner"));
-        assertEventOwner(loanTransactionId, ownerExternalId);
-    }
 
     /**
      * Reversal books a mirrored entry for every original line under the same loan transaction, so the transaction must
@@ -290,24 +267,6 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         entries.forEach(entry -> assertNull(entry.getExternalAssetOwner(),
                 "journal entry of reversed loan transaction " + loanTransactionId + " must not be attributed to any owner"));
         assertAdjustEventUntagged(loanTransactionId);
-    }
-
-    private List<JournalEntryTransactionItem> journalEntriesOf(final Long loanTransactionId) {
-        final List<JournalEntryTransactionItem> items = journalHelper.getJournalEntriesByTransactionId("L" + loanTransactionId)
-                .getPageItems();
-        return items == null ? List.of() : items;
-    }
-
-    private void assertEventOwner(final Long loanTransactionId, final String expectedOwnerExternalId) {
-        // External events are flushed as the surrounding transaction commits, so the event may not be readable the
-        // instant the API call returns. This mirrors verifyBusinessEvents in the test base.
-        Awaitility.await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).untilAsserted(() -> {
-            final List<Map<String, Object>> payloads = externalEventHelper.getAllExternalEvents().stream()
-                    .map(ExternalEventResponse::getPayLoad).filter(payload -> isTransactionPayload(payload, loanTransactionId)).toList();
-            assertFalse(payloads.isEmpty(), "expected an external event for loan transaction " + loanTransactionId);
-            payloads.forEach(payload -> assertEquals(expectedOwnerExternalId, payload.get("externalOwnerId"),
-                    "event of loan transaction " + loanTransactionId + " carries the wrong externalOwnerId"));
-        });
     }
 
     private void assertAdjustEventUntagged(final Long loanTransactionId) {
@@ -323,21 +282,10 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
         });
     }
 
-    /**
-     * A loan transaction payload, identified by id. externalOwnerId is deliberately not required to be present: the
-     * serialised record omits it when it is null, which is precisely the excluded case under test.
-     */
-    private boolean isTransactionPayload(final Map<String, Object> payload, final Long loanTransactionId) {
-        if (payload == null || payload.get("id") == null || payload.get("loanId") == null) {
-            return false;
-        }
-        return loanTransactionId.equals(Long.valueOf(String.valueOf(payload.get("id"))));
-    }
-
     // --- fixtures --------------------------------------------------------------------------------------------------
 
     private void sellLoanToInvestor(final Long loanId, final String ownerExternalId, final String settlementDate) {
-        externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
+        EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanId, "sale",
                 new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(UUID.randomUUID().toString()).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
     }
@@ -352,39 +300,5 @@ public class ExternalAssetOwnerExcludedTransactionTypesTest extends FeignLoanTes
                 .toList();
         assertFalse(matching.isEmpty(), "expected a buy down fee amortization transaction on loan " + loanId);
         return matching.getLast().getId();
-    }
-
-    private PostLoanProductsRequest buyDownFeeProduct() {
-        return withPeriodicAccrualAccounting(new PostLoanProductsRequest() //
-                .name(Utils.uniqueRandomStringGenerator("BDF_EXCL_", 6)) //
-                .shortName(Utils.uniqueRandomStringGenerator("", 4)) //
-                .currencyCode("USD") //
-                .digitsAfterDecimal(2) //
-                .principal(1000.0) //
-                .numberOfRepayments(6) //
-                .repaymentEvery(1) //
-                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L) //
-                .interestRatePerPeriod(10.0) //
-                .interestRateFrequencyType(InterestRateFrequencyType.YEARS) //
-                .amortizationType(AmortizationType.EQUAL_INSTALLMENTS) //
-                .interestType(InterestType.DECLINING_BALANCE) //
-                .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY) //
-                .daysInMonthType(30) //
-                .daysInYearType(360) //
-                .isInterestRecalculationEnabled(false) //
-                .transactionProcessingStrategyCode("advanced-payment-allocation-strategy") //
-                .paymentAllocation(List.of(createDefaultPaymentAllocation("NEXT_INSTALLMENT"))) //
-                .loanScheduleType("PROGRESSIVE") //
-                .loanScheduleProcessingType("HORIZONTAL") //
-                .enableBuyDownFee(true) //
-                .merchantBuyDownFee(true) //
-                .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT) //
-                .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION) //
-                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE) //
-                .locale("en") //
-                .dateFormat("dd MMMM yyyy"), assetAccount, incomeAccount, expenseAccount, liabilityAccount) //
-                .buyDownExpenseAccountId(expenseAccount.getAccountID().longValue()) //
-                .incomeFromBuyDownAccountId(incomeAccount.getAccountID().longValue()) //
-                .deferredIncomeLiabilityAccountId(liabilityAccount.getAccountID().longValue());
     }
 }
