@@ -1122,6 +1122,7 @@ public class DataValidatorBuilder {
      *
      * @return this {@code DataValidatorBuilder} for method chaining
      */
+    @SuppressWarnings("ReturnValueIgnored") // Parsing the pattern is the validation
     public DataValidatorBuilder validDateTimeFormatPattern() {
         if (this.value == null && this.ignoreNullValue) {
             return this;
@@ -1129,7 +1130,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null && this.value instanceof String pattern && !StringUtils.isBlank(pattern)) {
             try {
-                var unused = DateTimeFormatter.ofPattern(pattern);
+                DateTimeFormatter.ofPattern(pattern);
             } catch (final IllegalArgumentException e) {
                 String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".invalid.dateFormat.pattern";
                 String defaultEnglishMessage = "The parameter `" + this.parameter + "` has an invalid date/time pattern: `" + pattern
