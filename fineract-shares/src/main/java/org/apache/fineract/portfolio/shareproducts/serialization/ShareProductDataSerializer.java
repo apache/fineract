@@ -320,8 +320,6 @@ public class ShareProductDataSerializer {
             if (product.setTotalIssuedShares(sharesIssued)) {
                 actualChanges.put(ShareProductApiConstants.totalsharesissued_paramname, sharesIssued);
             }
-        } else {
-            product.setTotalIssuedShares(sharesIssued);
         }
 
         if (sharesIssued != null && product.getSubscribedShares() != null && sharesIssued < product.getSubscribedShares()) {
