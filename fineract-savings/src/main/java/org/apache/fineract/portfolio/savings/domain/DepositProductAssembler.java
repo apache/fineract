@@ -83,6 +83,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.data.SavingsProductValidator;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,6 +186,8 @@ public class DepositProductAssembler {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, charges, productTermAndPreClosure, charts,
                 minBalanceForInterestCalculation, withHoldTax, taxGroup, startDate, closeDate);
 
+        SavingsProductValidator.validateLockinDetails(fixedDepositProduct);
+
         // update product reference
         productTermAndPreClosure.updateProductReference(fixedDepositProduct);
 
@@ -280,6 +283,8 @@ public class DepositProductAssembler {
                 interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, charges,
                 productTermAndPreClosure, productRecurringDetail, charts, minBalanceForInterestCalculation, taxGroup, withHoldTax,
                 startDate, closeDate);
+
+        SavingsProductValidator.validateLockinDetails(recurringDepositProduct);
 
         // update product reference
         productTermAndPreClosure.updateProductReference(recurringDepositProduct);
