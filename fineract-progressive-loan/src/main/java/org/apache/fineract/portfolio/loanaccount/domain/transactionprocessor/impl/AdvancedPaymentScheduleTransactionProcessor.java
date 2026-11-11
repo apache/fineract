@@ -559,8 +559,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         for (int i = 0; i < scheduleModel.repaymentPeriods().size(); i++) {
             final RepaymentPeriod rp = scheduleModel.repaymentPeriods().get(i);
             // Check if this period already exists in installments
-            if (installments.stream().noneMatch(installment -> installment.getFromDate().equals(rp.getFromDate())
-                    && installment.getDueDate().equals(rp.getDueDate()))) {
+            if (findInstallmentOfRepaymentPeriod(installments, rp.getFromDate(), rp.getDueDate()).isEmpty()) {
 
                 final LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(loan, nextInstallmentNumber,
                         rp.getFromDate(), rp.getDueDate(), rp.getDuePrincipal().getAmount(), rp.getDueInterest().getAmount(), ZERO, ZERO,
@@ -992,7 +991,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                         // If already exists an additional installment just update the due date and
                         // principal from the Loan chargeback / CBR transaction
-                    } else if (currentInstallment.isAdditional()) {
+                    } else if (isTrailingAdditionalInstallment(currentInstallment, installmentToBeProcessed)) {
                         if (DateUtils.isAfter(transactionDate, currentInstallment.getDueDate())) {
                             currentInstallment.updateDueDate(transactionDate);
                         }
@@ -1182,7 +1181,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         } else {
             // (N+1)th installment case for post maturity date charge back
             LoanRepaymentScheduleInstallment instalment = ctx.getInstallments().stream()
-                    .filter(LoanRepaymentScheduleInstallment::isAdditional).findAny()
+                    .filter(i -> isTrailingAdditionalInstallment(i, ctx.getInstallments())).findAny()
                     .orElseGet(() -> createAdditionalInstalment(loanTransaction, ctx));
             // recognize principal, interest, fees and penalties portions
             recognizeAmountsAfterChargeback(ctx, loanTransaction.getTransactionDate(), instalment, chargebackAllocation);
@@ -1279,7 +1278,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                 // If already exists an additional installment just update the due date and
                 // principal from the Loan chargeback / CBR transaction
-            } else if (currentInstallment.isAdditional()) {
+            } else if (isTrailingAdditionalInstallment(currentInstallment, ctx.getInstallments())) {
                 if (DateUtils.isAfter(transactionDate, currentInstallment.getDueDate())) {
                     currentInstallment.updateDueDate(transactionDate);
                 }
@@ -1805,7 +1804,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .toList();
         if (candidateRepaymentInstallments.isEmpty()) {
             LoanRepaymentScheduleInstallment newInstallment;
-            if (installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional).findAny().isEmpty()) {
+            final Optional<LoanRepaymentScheduleInstallment> trailingAdditionalInstallment = installments.stream()
+                    .filter(i -> isTrailingAdditionalInstallment(i, installments)).findFirst();
+            if (trailingAdditionalInstallment.isEmpty()) {
                 newInstallment = new LoanRepaymentScheduleInstallment(disbursementTransaction.getLoan(), installments.size() + 1,
                         disbursementTransaction.getTransactionDate(), disbursementTransaction.getTransactionDate(),
                         Money.zero(currency).getAmount(), Money.zero(currency).getAmount(), Money.zero(currency).getAmount(),
@@ -1814,7 +1815,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 disbursementTransaction.getLoan().addLoanRepaymentScheduleInstallment(newInstallment);
                 installments.add(newInstallment);
             } else {
-                newInstallment = installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional).findFirst().orElseThrow();
+                newInstallment = trailingAdditionalInstallment.get();
                 newInstallment.updateDueDate(disbursementTransaction.getTransactionDate());
             }
             candidateRepaymentInstallments = Collections.singletonList(newInstallment);
@@ -3104,11 +3105,23 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return paidPortion;
     }
 
+    /**
+     * Finds the installment of a repayment period of the interest schedule model. The model does not hold the
+     * additional installments, so the installment that follows one kept within the schedule (a re-age keeps those that
+     * something was paid, waived or written off on) starts when that one ends, later than its repayment period. When no
+     * installment has the dates of the repayment period, the regular installment with its due date is taken.
+     */
+    private static Optional<LoanRepaymentScheduleInstallment> findInstallmentOfRepaymentPeriod(
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate fromDate, final LocalDate dueDate) {
+        return installments.stream().filter(i -> !i.isDownPayment() && fromDate.equals(i.getFromDate()) && dueDate.equals(i.getDueDate()))
+                .findFirst().or(() -> installments.stream()
+                        .filter(i -> !i.isDownPayment() && !i.isAdditional() && dueDate.equals(i.getDueDate())).findFirst());
+    }
+
     private void updateInstallmentsByRepaymentPeriods(LoanTransaction loanTransaction, ProgressiveTransactionCtx ctx) {
         ctx.getModel().repaymentPeriods().forEach(rm -> {
-            LoanRepaymentScheduleInstallment installment = ctx.getInstallments().stream().filter(
-                    ri -> ri.getFromDate().equals(rm.getFromDate()) && ri.getDueDate().equals(rm.getDueDate()) && !ri.isDownPayment())
-                    .findFirst().orElse(null);
+            LoanRepaymentScheduleInstallment installment = findInstallmentOfRepaymentPeriod(ctx.getInstallments(), rm.getFromDate(),
+                    rm.getDueDate()).orElse(null);
             if (installment != null) {
                 installment.updatePrincipal(rm.getDuePrincipal().getAmount());
                 installment.updateInterestCharged(rm.getDueInterest().getAmount());
@@ -4136,8 +4149,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             RepaymentPeriod rp = model.repaymentPeriods().get(index);
             if (rp.getDueDate().isBefore(transactionDate)) {
                 // update existing
-                Optional<LoanRepaymentScheduleInstallment> notReagedInstallment = installments.stream()
-                        .filter(i -> i.getDueDate().isEqual(rp.getDueDate()) && i.getFromDate().isEqual(rp.getFromDate())).findFirst();
+                Optional<LoanRepaymentScheduleInstallment> notReagedInstallment = findInstallmentOfRepaymentPeriod(installments,
+                        rp.getFromDate(), rp.getDueDate());
                 LoanRepaymentScheduleInstallment installment = notReagedInstallment.orElseThrow();
                 installment.setInterestCharged(installment.getInterestPaid());
                 installment.setPrincipal(installment.getPrincipalCompleted(currency).getAmount());
