@@ -39,7 +39,6 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -60,7 +59,6 @@ public class LoanWriteServiceHelper {
 
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanAccountDomainService loanAccountDomainService;
     private final NoteRepository noteRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
@@ -154,7 +152,7 @@ public class LoanWriteServiceHelper {
         }
     }
 
-    public Integer getNewGroupLoanCounter(final Loan loan) {
+    private Integer getNewGroupLoanCounter(final Loan loan) {
 
         Integer maxClientLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanCounter(loan.getGroupId(), AccountType.GROUP);
         if (maxClientLoanCounter == null) {
@@ -165,7 +163,7 @@ public class LoanWriteServiceHelper {
         return maxClientLoanCounter;
     }
 
-    public Integer getNewGroupLoanProductCounter(final Loan loan) {
+    private Integer getNewGroupLoanProductCounter(final Loan loan) {
 
         Integer maxLoanProductLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanProductCounter(loan.loanProduct().getId(),
                 loan.getGroupId(), AccountType.GROUP);
@@ -177,7 +175,7 @@ public class LoanWriteServiceHelper {
         return maxLoanProductLoanCounter;
     }
 
-    public void updateLoanCounter(final Loan loan, final List<Loan> loansToUpdateForLoanCounter, Integer newLoanCounter,
+    private void updateLoanCounter(final Loan loan, final List<Loan> loansToUpdateForLoanCounter, Integer newLoanCounter,
             Integer newLoanProductCounter) {
 
         final boolean includeInBorrowerCycle = loan.loanProduct().isIncludeInBorrowerCycle();
@@ -210,7 +208,7 @@ public class LoanWriteServiceHelper {
         this.loanRepositoryWrapper.save(loansToUpdateForLoanCounter);
     }
 
-    public Integer getNewClientOrJLGLoanCounter(final Loan loan) {
+    private Integer getNewClientOrJLGLoanCounter(final Loan loan) {
 
         Integer maxClientLoanCounter = this.loanRepositoryWrapper.getMaxClientOrJLGLoanCounter(loan.getClientId());
         if (maxClientLoanCounter == null) {
@@ -221,7 +219,7 @@ public class LoanWriteServiceHelper {
         return maxClientLoanCounter;
     }
 
-    public Integer getNewClientOrJLGLoanProductCounter(final Loan loan) {
+    private Integer getNewClientOrJLGLoanProductCounter(final Loan loan) {
 
         Integer maxLoanProductLoanCounter = this.loanRepositoryWrapper.getMaxClientOrJLGLoanProductCounter(loan.loanProduct().getId(),
                 loan.getClientId());
@@ -233,7 +231,7 @@ public class LoanWriteServiceHelper {
         return maxLoanProductLoanCounter;
     }
 
-    public void updateLoanCycleCounter(final List<Loan> loansToUpdate, final Loan loan) {
+    private void updateLoanCycleCounter(final List<Loan> loansToUpdate, final Loan loan) {
 
         final Integer currentLoanCounter = loan.getCurrentLoanCounter();
         final Integer currentLoanProductCounter = loan.getLoanProductLoanCounter();
@@ -271,7 +269,7 @@ public class LoanWriteServiceHelper {
 
     }
 
-    public List<LoanRepaymentScheduleInstallment> retrieveRepaymentScheduleFromModel(LoanScheduleModel model) {
+    private List<LoanRepaymentScheduleInstallment> retrieveRepaymentScheduleFromModel(LoanScheduleModel model) {
         final List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : model.getPeriods()) {
             if (scheduledLoanInstallment.isRepaymentPeriod() || scheduledLoanInstallment.isDownPaymentPeriod()) {

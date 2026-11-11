@@ -190,8 +190,8 @@ public class LoanDisbursementWritePlatformServiceImplTest {
     public void setUp() {
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DateUtils.parseLocalDate("2025-05-20"))));
-        ReflectionTestUtils.setField(loanDisbursementWritePlatformService, "loanWriteServiceHelper", new LoanWriteServiceHelper(context,
-                loanRepositoryWrapper, loanAccountDomainService, null, null, loanRepaymentScheduleInstallmentRepository, null));
+        ReflectionTestUtils.setField(loanDisbursementWritePlatformService, "loanWriteServiceHelper",
+                new LoanWriteServiceHelper(context, loanRepositoryWrapper, null, null, loanRepaymentScheduleInstallmentRepository, null));
     }
 
     private void setupMoneyHelper() {

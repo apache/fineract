@@ -492,11 +492,10 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanWriteServiceHelper.class)
     public LoanWriteServiceHelper loanWriteServiceHelper(PlatformSecurityContext context, LoanRepositoryWrapper loanRepositoryWrapper,
-            LoanAccountDomainService loanAccountDomainService, NoteRepository noteRepository,
-            LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+            NoteRepository noteRepository, LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
             LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository, LoanMapper loanMapper) {
-        return new LoanWriteServiceHelper(context, loanRepositoryWrapper, loanAccountDomainService, noteRepository,
-                loanScheduleHistoryWritePlatformService, loanRepaymentScheduleInstallmentRepository, loanMapper);
+        return new LoanWriteServiceHelper(context, loanRepositoryWrapper, noteRepository, loanScheduleHistoryWritePlatformService,
+                loanRepaymentScheduleInstallmentRepository, loanMapper);
     }
 
     @Bean
