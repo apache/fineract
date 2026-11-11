@@ -42,8 +42,7 @@ import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
-import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -65,7 +64,7 @@ class LoanItemWriterTest {
     @Mock
     private COBBusinessStepService cobBusinessStepService;
     @Mock
-    private ProgressiveLoanModelProcessingService modelProcessingService;
+    private ProgressiveLoanModelService modelProcessingService;
     @Mock
     private LockingService lockingService;
     @Mock
@@ -127,7 +126,7 @@ class LoanItemWriterTest {
         Loan loan = loanWithId(1L);
         when(loan.isProgressiveSchedule()).thenReturn(true);
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-        when(modelProcessingService.hasValidModel(1L, ProgressiveLoanInterestScheduleModel.getModelVersion())).thenReturn(false);
+        when(modelProcessingService.hasValidModel(1L)).thenReturn(false);
         when(cobBusinessStepService.run(BUSINESS_STEP_MAP, loan)).thenReturn(loan);
 
         writer.write(new Chunk<>(1L));
