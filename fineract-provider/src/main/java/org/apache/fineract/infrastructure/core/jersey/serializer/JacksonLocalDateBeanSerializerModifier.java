@@ -26,8 +26,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.jersey.converter.LocalDateJsonConverter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArraySerializer;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
@@ -39,17 +41,8 @@ public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifi
 
     private final JsonSerializer<LocalDate> localDateSerializer = new JacksonSerializerAdapter<>(new LocalDateJsonConverter());
     private final JsonSerializer<LocalDate> localDateArraySerializer = new JacksonLocalDateArraySerializer();
-    private final JsonSerializer<LocalDate> localDateDefaultSerializer = new JsonSerializer<>() {
-
-        @Override
-        public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (Boolean.TRUE.equals(LOCAL_DATE_ARRAY_FORMAT.get())) {
-                localDateArraySerializer.serialize(value, gen, provider);
-            } else {
-                localDateSerializer.serialize(value, gen, provider);
-            }
-        }
-    };
+    private final JsonSerializer<LocalDate> localDateDefaultSerializer = new LocalDateDefaultSerializer(localDateSerializer,
+            localDateArraySerializer);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -86,6 +79,23 @@ public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifi
     public interface IORunnable {
 
         void run() throws IOException;
+    }
+
+    /** Writes a date as an array while {@link #writeWithLocalDateArrayFormat} runs, and as a string otherwise. */
+    @RequiredArgsConstructor
+    private static final class LocalDateDefaultSerializer extends JsonSerializer<LocalDate> implements Serializable {
+
+        private final JsonSerializer<LocalDate> localDateSerializer;
+        private final JsonSerializer<LocalDate> localDateArraySerializer;
+
+        @Override
+        public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            if (Boolean.TRUE.equals(LOCAL_DATE_ARRAY_FORMAT.get())) {
+                localDateArraySerializer.serialize(value, gen, provider);
+            } else {
+                localDateSerializer.serialize(value, gen, provider);
+            }
+        }
     }
 
     private void assignLocalDateSerializer(List<BeanPropertyWriter> beanProperties, JsonSerializer<Object> serializer) {

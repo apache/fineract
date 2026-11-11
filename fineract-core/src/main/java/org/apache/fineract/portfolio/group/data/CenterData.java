@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -56,13 +57,19 @@ public final class CenterData implements Serializable {
 
     private final GroupTimelineData timeline;
     // associations
+    // Hidden from the OpenAPI schema, as are officeOptions and staffOptions: they lead to OfficeData, which documents
+    // externalId as an object and so changes the externalId attribute of the existing /v2/centers response
+    @Schema(hidden = true)
     private final Collection<GroupGeneralData> groupMembers;
 
     // template
+    @Schema(hidden = true)
     private final Collection<GroupGeneralData> groupMembersOptions;
     private final CalendarData collectionMeetingCalendar;
     private final Collection<CodeValueData> closureReasons;
+    @Schema(hidden = true)
     private final Collection<OfficeData> officeOptions;
+    @Schema(hidden = true)
     private final Collection<StaffData> staffOptions;
     private final BigDecimal totalCollected;
     private final BigDecimal totalOverdue;
