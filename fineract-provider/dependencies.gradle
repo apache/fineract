@@ -46,6 +46,7 @@ dependencies {
     implementation(project(path: ':fineract-loan-origination'))
     implementation(project(path: ':fineract-security'))
     implementation(project(path: ':fineract-working-capital-loan'))
+    implementation(project(path: ':fineract-querydsl'))
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat-runtime")
 
@@ -68,7 +69,6 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.springframework.boot:spring-boot-starter-batch-jdbc',
-            'org.springframework.boot:spring-boot-starter-data-jdbc',
             'org.springframework.boot:spring-boot-liquibase',
             'org.springframework.boot:spring-boot-gson',
             'org.springframework.batch:spring-batch-integration',
@@ -107,6 +107,8 @@ dependencies {
             'org.apache.tika:tika-core',
             'org.apache.tika:tika-parser-microsoft-module',
             'org.apache.tika:tika-parser-miscoffice-module',
+
+            'io.github.openfeign.querydsl:querydsl-sql-spring',
 
             'org.liquibase:liquibase-core',
 
