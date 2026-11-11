@@ -444,10 +444,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // Periods must not overlap. The dates of the repayment periods come from the model, which does not hold the
             // additional installments: one kept within the schedule ends after the next period starts, and one moved
             // to the new maturity date still starts at the old one. An installment starts when the previous one ends.
-            if (previousDueDate != null && !installment.isDownPayment() && installment.getFromDate().isBefore(previousDueDate)) {
-                installment.updateFromDate(previousDueDate);
+            // A down payment falls due within a repayment period (on a later disbursement date), so it is left out.
+            if (!installment.isDownPayment()) {
+                if (previousDueDate != null && installment.getFromDate().isBefore(previousDueDate)) {
+                    installment.updateFromDate(previousDueDate);
+                }
+                previousDueDate = installment.getDueDate();
             }
-            previousDueDate = installment.getDueDate();
         }
     }
 
