@@ -63,16 +63,17 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
             if (!Strings.CS.equals(request.getName(), paymentType.getName())) {
                 paymentType.setName(request.getName());
             }
-            if (!Strings.CS.equals(request.getDescription(), paymentType.getDescription())) {
+            // A field the request leaves out (null) keeps the stored value
+            if (request.getDescription() != null && !Strings.CS.equals(request.getDescription(), paymentType.getDescription())) {
                 paymentType.setDescription(request.getDescription());
             }
-            if (!Strings.CS.equals(request.getCodeName(), paymentType.getCodeName())) {
+            if (request.getCodeName() != null && !Strings.CS.equals(request.getCodeName(), paymentType.getCodeName())) {
                 paymentType.setCodeName(request.getCodeName());
             }
-            if (!Objects.equals(request.getPosition(), paymentType.getPosition())) {
+            if (request.getPosition() != null && !Objects.equals(request.getPosition(), paymentType.getPosition())) {
                 paymentType.setPosition(request.getPosition());
             }
-            if (!Objects.equals(request.getIsCashPayment(), paymentType.getIsCashPayment())) {
+            if (request.getIsCashPayment() != null && !Objects.equals(request.getIsCashPayment(), paymentType.getIsCashPayment())) {
                 paymentType.setIsCashPayment(request.getIsCashPayment());
             }
             if (request.getIsSystemDefined() != null && !Objects.equals(request.getIsSystemDefined(), paymentType.getIsSystemDefined())) {
