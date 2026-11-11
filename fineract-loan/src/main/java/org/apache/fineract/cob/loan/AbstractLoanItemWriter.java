@@ -23,31 +23,28 @@ import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.writer.AbstractCOBItemWriter;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
-import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelService;
 
 public abstract class AbstractLoanItemWriter extends AbstractCOBItemWriter<Loan> {
 
-    private final ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
+    private final ProgressiveLoanModelService progressiveLoanModelService;
 
-    protected AbstractLoanItemWriter(COBBusinessStepService cobBusinessStepService,
-            ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService, LockingService loanLockingService,
-            LoanRepository loanRepository) {
+    protected AbstractLoanItemWriter(COBBusinessStepService cobBusinessStepService, ProgressiveLoanModelService progressiveLoanModelService,
+            LockingService loanLockingService, LoanRepository loanRepository) {
         super(cobBusinessStepService, loanLockingService, loanRepository);
-        this.progressiveLoanModelProcessingService = progressiveLoanModelProcessingService;
+        this.progressiveLoanModelService = progressiveLoanModelService;
     }
 
     @Override
     protected Loan beforeBusinessSteps(Loan loan) {
         if (needToRebuildModel(loan)) {
-            progressiveLoanModelProcessingService.recalculateModelAndSave(loan);
+            progressiveLoanModelService.recalculateModelAndSave(loan);
         }
         return loan;
     }
 
     private boolean needToRebuildModel(Loan loan) {
-        return loan.isProgressiveSchedule() && !progressiveLoanModelProcessingService.hasValidModel(loan.getId(),
-                ProgressiveLoanInterestScheduleModel.getModelVersion());
+        return loan.isProgressiveSchedule() && !progressiveLoanModelService.hasValidModel(loan.getId());
     }
 
     @Override
