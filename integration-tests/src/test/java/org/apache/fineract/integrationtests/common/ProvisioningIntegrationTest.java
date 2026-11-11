@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetProvisioningCriteriaCriteriaIdResponse;
+import org.apache.fineract.client.models.LoanProductData;
 import org.apache.fineract.client.models.PageLoanProductProvisioningEntryData;
 import org.apache.fineract.client.models.PageProvisioningEntryData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -140,6 +141,43 @@ public class ProvisioningIntegrationTest extends FeignLoanTestBase {
         Assertions.assertTrue(entry.getJournalEntry());
         PageLoanProductProvisioningEntryData provisioningEntry = transactionHelper.retrieveProvisioningEntries(provisioningEntryId);
         Assertions.assertTrue(provisioningEntry.getPageItems().size() > 0);
+    }
+
+    @Test
+    public void testUpdateProvisioningCriteriaKeepsWhatTheRequestLeavesOut() {
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
+        final Long mappedProductId = createLoanProduct(false, NONE);
+        // A second product, which must not be attached by an update without loanProducts
+        createLoanProduct(false, NONE);
+        List<ProvisioningCategoryData> categories = transactionHelper.retrieveAllProvisioningCategories();
+        Account liability = accountHelper.createLiabilityAccount();
+        Account expense = accountHelper.createExpenseAccount();
+        final List<Integer> loanProducts = List.of(mappedProductId.intValue());
+        PostProvisioningCriteriaRequest criteriaRequest = ProvisioningHelper.buildProvisioningCriteriaRequest(loanProducts, categories,
+                liability, expense);
+        Long criteriaId = transactionHelper.createProvisioningCriteria(criteriaRequest).getResourceId();
+        try {
+            // Only the name
+            String newName = criteriaRequest.getCriteriaName() + " renamed";
+            transactionHelper.updateProvisioningCriteria(criteriaId, new PutProvisioningCriteriaRequest().criteriaName(newName));
+            GetProvisioningCriteriaCriteriaIdResponse renamed = transactionHelper.retrieveProvisioningCriteria(criteriaId);
+            Assertions.assertEquals(newName, renamed.getCriteriaName());
+            Assertions.assertEquals(List.of(mappedProductId), loanProductIds(renamed));
+            Assertions.assertEquals(criteriaRequest.getDefinitions().size(), renamed.getDefinitions().size());
+
+            // The definitions without the loan products
+            PutProvisioningCriteriaRequest definitionsOnly = ProvisioningHelper
+                    .buildUpdateProvisioningCriteriaRequest(loanProducts, categories, liability, expense, renamed.getDefinitions())
+                    .loanProducts(null);
+            transactionHelper.updateProvisioningCriteria(criteriaId, definitionsOnly);
+            Assertions.assertEquals(List.of(mappedProductId), loanProductIds(transactionHelper.retrieveProvisioningCriteria(criteriaId)));
+        } finally {
+            transactionHelper.deleteProvisioningCriteria(criteriaId);
+        }
+    }
+
+    private static List<Long> loanProductIds(GetProvisioningCriteriaCriteriaIdResponse criteria) {
+        return criteria.getLoanProducts().stream().map(LoanProductData::getId).toList();
     }
 
     private void validateProvisioningCriteria(PostProvisioningCriteriaRequest request, GetProvisioningCriteriaCriteriaIdResponse response) {

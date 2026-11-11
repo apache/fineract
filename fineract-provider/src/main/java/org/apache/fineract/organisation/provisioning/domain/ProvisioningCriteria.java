@@ -92,6 +92,11 @@ public class ProvisioningCriteria extends AbstractAuditableCustom {
             this.criteriaName = valueAsInput;
         }
 
+        // null when the request has no loanProducts: the mapping stays as it is
+        if (loanProducts == null) {
+            return actualChanges;
+        }
+
         Set<LoanProductProvisionCriteria> temp = new HashSet<>();
         Set<LoanProduct> productsTemp = new HashSet<>();
 
