@@ -24,15 +24,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.gson.JsonParser;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import java.time.MonthDay;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -46,11 +43,8 @@ class SavingsAccountChargeTest {
     void update_percentOfAmount_doesNotThrowAndRecalculatesDerivedFields() {
         final SavingsAccountCharge charge = withdrawalFeeCharge();
 
-        final Map<String, Object> changes = charge.update(command("""
-                {"amount": 7.5, "locale": "en"}
-                """));
+        charge.updateAmount(new BigDecimal("7.5"));
 
-        assertThat(changes).containsEntry("amount", new BigDecimal("7.5"));
         assertThat(percentage(charge)).isEqualByComparingTo("7.5");
         assertThat(amountPercentageAppliedTo(charge)).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(amount(charge)).isEqualByComparingTo(BigDecimal.ZERO);
@@ -64,11 +58,8 @@ class SavingsAccountChargeTest {
         setField(charge, "amount", new BigDecimal("100"));
         setField(charge, "amountOutstanding", new BigDecimal("100"));
 
-        final Map<String, Object> changes = charge.update(command("""
-                {"amount": 200, "locale": "en"}
-                """));
+        charge.updateAmount(new BigDecimal("200"));
 
-        assertThat(changes).containsEntry("amount", new BigDecimal("200"));
         assertThat(amount(charge)).isEqualByComparingTo("200");
         assertThat(amountOutstanding(charge)).isEqualByComparingTo("200");
     }
@@ -81,13 +72,12 @@ class SavingsAccountChargeTest {
         final BigDecimal percentageBefore = percentage(charge);
         final BigDecimal amountBefore = amount(charge);
 
-        assertThatThrownBy(() -> charge.update(command("""
-                {"amount": 7.5, "locale": "en"}
-                """))).isInstanceOf(PlatformApiDataValidationException.class).satisfies(exception -> {
-            final PlatformApiDataValidationException validationException = (PlatformApiDataValidationException) exception;
-            assertThat(validationException.getErrors()).extracting(ApiParameterError::getUserMessageGlobalisationCode)
-                    .containsExactly("validation.msg.charges.not.allowed.charge.calculation.type.for.savings");
-        });
+        assertThatThrownBy(() -> charge.updateAmount(new BigDecimal("7.5"))).isInstanceOf(PlatformApiDataValidationException.class)
+                .satisfies(exception -> {
+                    final PlatformApiDataValidationException validationException = (PlatformApiDataValidationException) exception;
+                    assertThat(validationException.getErrors()).extracting(ApiParameterError::getUserMessageGlobalisationCode)
+                            .containsExactly("validation.msg.charges.not.allowed.charge.calculation.type.for.savings");
+                });
 
         assertThat(percentage(charge)).isEqualByComparingTo(percentageBefore);
         assertThat(amount(charge)).isEqualByComparingTo(amountBefore);
@@ -107,11 +97,18 @@ class SavingsAccountChargeTest {
         final SavingsAccountCharge charge = withdrawalFeeCharge();
         setField(charge, "chargeCalculation", ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
 
-        assertThatCode(() -> charge.update(command("""
-                {"dueDate": "01 January 2025", "dateFormat": "dd MMMM yyyy", "locale": "en"}
-                """))).doesNotThrowAnyException();
+        assertThatCode(() -> charge.updateDueDate(LocalDate.of(2025, 1, 1))).doesNotThrowAnyException();
 
         assertThat(charge.getDueDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+    }
+
+    @Test
+    void update_feeOnMonthDayReportsOnlyEffectiveChanges() {
+        final SavingsAccountCharge charge = withdrawalFeeCharge();
+        final MonthDay monthDay = MonthDay.of(4, 15);
+
+        assertThat(charge.updateFeeOnMonthDay(monthDay)).isTrue();
+        assertThat(charge.updateFeeOnMonthDay(monthDay)).isFalse();
     }
 
     private static SavingsAccountCharge withdrawalFeeCharge() {
@@ -121,11 +118,6 @@ class SavingsAccountChargeTest {
 
         return SavingsAccountCharge.createNewWithoutSavingsAccount(chargeDefinition, new BigDecimal("5"), ChargeTimeType.WITHDRAWAL_FEE,
                 ChargeCalculationType.PERCENT_OF_AMOUNT, null, true, null, null);
-    }
-
-    private static JsonCommand command(final String json) {
-        return JsonCommand.from(json, JsonParser.parseString(json), new FromJsonHelper(), "savingsaccountcharges", 1L, null, null, null,
-                null, null, null, null, null, null, null, null, null);
     }
 
     private static BigDecimal percentage(final SavingsAccountCharge charge) {
