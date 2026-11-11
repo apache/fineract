@@ -69,7 +69,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
             return new CurrencyData(code, name, decimalPlaces, inMultiplesOf, displaySymbol, nameCode);
         }
 
-        public String schema() {
+        private String schema() {
             return " c.code as code, c.name as name, c.decimal_places as decimalPlaces,c.currency_multiplesof as inMultiplesOf, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode ";
         }
     }
