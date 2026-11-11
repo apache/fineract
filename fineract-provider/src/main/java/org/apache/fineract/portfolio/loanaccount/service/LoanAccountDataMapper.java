@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
-
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
