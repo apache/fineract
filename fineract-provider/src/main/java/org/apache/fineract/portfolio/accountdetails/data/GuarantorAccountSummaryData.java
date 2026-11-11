@@ -27,7 +27,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
  * Immutable data object for loan accounts.
  */
 @Getter
-@SuppressWarnings("unused")
 public class GuarantorAccountSummaryData {
 
     private final Long id;
