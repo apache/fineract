@@ -19,20 +19,25 @@
 package org.apache.fineract.template.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.apache.fineract.command.jdbc.store.mapping.CommandMapper;
+import org.apache.fineract.template.data.TemplateCreateRequest;
 import org.apache.fineract.template.data.TemplateData;
 import org.apache.fineract.template.data.TemplateMapperData;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateEntity;
 import org.apache.fineract.template.domain.TemplateRepository;
 import org.apache.fineract.template.domain.TemplateType;
+import org.apache.fineract.template.exception.TemplateTypeInvalidException;
 import org.apache.fineract.template.mapper.TemplateMapper;
 import org.apache.fineract.template.mapper.TemplateMapperDataMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,6 +92,35 @@ class TemplateDomainServiceImplTest {
         assertThat(response.getFirst().getName()).isEqualTo("anvay");
         assertThat(response.getFirst().getEntity()).isEqualTo("loan");
         assertThat(response.getFirst().getType()).isEqualTo("Document");
+    }
+
+    @Test
+    void createTemplateResolvesSmsByApiTypeId() {
+        TemplateCreateRequest request = TemplateCreateRequest.builder().name("sms-template").entity(0).type(2).text("Hello").build();
+        ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
+
+        service.createTemplate(request);
+
+        verify(templateRepository).saveAndFlush(templateCaptor.capture());
+        assertThat(templateCaptor.getValue().getType()).isEqualTo(TemplateType.SMS);
+    }
+
+    @Test
+    void createTemplateResolvesDocumentByApiTypeId() {
+        TemplateCreateRequest request = TemplateCreateRequest.builder().name("document-template").entity(0).type(0).text("Hello").build();
+        ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
+
+        service.createTemplate(request);
+
+        verify(templateRepository).saveAndFlush(templateCaptor.capture());
+        assertThat(templateCaptor.getValue().getType()).isEqualTo(TemplateType.DOCUMENT);
+    }
+
+    @Test
+    void createTemplateRejectsUnsupportedTypeId() {
+        TemplateCreateRequest request = TemplateCreateRequest.builder().name("unsupported-template").entity(0).type(1).text("Hello").build();
+
+        assertThatThrownBy(() -> service.createTemplate(request)).isInstanceOf(TemplateTypeInvalidException.class);
     }
 
     private TemplateData templateData() {
