@@ -429,4 +429,14 @@ public abstract class TestContextKey {
     public static final String WORKING_CAPITAL_LOAN_GET_TRANSACTIONS_RESPONSE = "workingCapitalLoanGetTransactionsResponse";
     public static final String WORKING_CAPITAL_LOAN_ADJUST_BY_DELTA_TRANSACTION_RESPONSE = "workingCapitalLoanAdjustByDeltaTransactionResponse";
     public static final String WORKING_CAPITAL_LOAN_OUTCOME_PREFIX = "workingCapitalLoanOutcome_";
+    public static final String CLIENT_IDEMPOTENT_REQUEST = "clientIdempotentRequest";
+    public static final String CLIENT_IDEMPOTENT_REQUEST_SECOND = "clientIdempotentRequestSecond";
+    public static final String CLIENT_IDEMPOTENT_KEY = "clientIdempotentKey";
+    public static final String CLIENT_IDEMPOTENT_KEY_SECOND = "clientIdempotentKeySecond";
+    public static final String CLIENT_IDEMPOTENT_LAST_ATTEMPT = "clientIdempotentLastAttempt";
+    public static final String CLIENT_IDEMPOTENT_LAST_REQUEST_IS_SECOND = "clientIdempotentLastRequestIsSecond";
+    public static final String CLIENT_IDEMPOTENT_FIRST_FAILURE_BODY = "clientIdempotentFirstFailureBody";
+    public static final String CLIENT_IDEMPOTENT_FIRST_SUCCESS_CLIENT_ID = "clientIdempotentFirstSuccessClientId";
+    public static final String CLIENT_IDEMPOTENT_SECOND_SUCCESS_CLIENT_ID = "clientIdempotentSecondSuccessClientId";
+    public static final String CLIENT_IDEMPOTENT_CONCURRENT_ATTEMPTS = "clientIdempotentConcurrentAttempts";
 }

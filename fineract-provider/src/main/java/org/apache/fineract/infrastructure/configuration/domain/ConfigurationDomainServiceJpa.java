@@ -20,7 +20,10 @@ package org.apache.fineract.infrastructure.configuration.domain;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -654,5 +657,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public Long retrievePayoffSchedulePreviewMaxTermPeriods() {
         return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS).getValue();
+    }
+
+    @Override
+    public Set<String> getIdempotencyRecoverableErrorCodes() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(
+                GlobalConfigurationConstants.IDEMPOTENCY_RECOVERABLE_ERROR_CODES);
+        if (!property.isEnabled() || StringUtils.isBlank(property.getStringValue())) {
+            return Set.of();
+        }
+        return Arrays.stream(property.getStringValue().split(",")).map(String::trim).filter(StringUtils::isNotEmpty)
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

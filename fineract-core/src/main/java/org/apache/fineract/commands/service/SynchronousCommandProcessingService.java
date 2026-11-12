@@ -82,6 +82,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final IdempotencyKeyResolver idempotencyKeyResolver;
     private final CommandSourceService commandSourceService;
     private final RetryConfigurationAssembler retryConfigurationAssembler;
+    private final RecoverableErrorClassifier recoverableErrorClassifier;
 
     private final FineractRequestContextHolder fineractRequestContextHolder;
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
@@ -219,7 +220,23 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         if (statusCode != SC_OK) {
             commandSource.setStatus(ERROR);
         }
-        commandSourceService.saveResult(commandSource);
+        if (!saveAsRecoverableError(executionContext, mappable)) {
+            commandSourceService.saveResult(commandSource);
+        }
+    }
+
+    private boolean saveAsRecoverableError(CommandExecutionContext executionContext, RuntimeException mappable) {
+        CommandSource commandSource = executionContext.commandSource();
+        try {
+            if (recoverableErrorClassifier.isRecoverable(mappable)) {
+                commandSourceService.saveRecoverableErrorResult(commandSource);
+                return true;
+            }
+        } catch (RuntimeException e) {
+            log.warn("Could not free idempotency key {} after a recoverable error, storing the failure under the original key",
+                    commandSource.getIdempotencyKey(), e);
+        }
+        return false;
     }
 
     private void storeCommandIdInContext(CommandSource savedCommandSource) {

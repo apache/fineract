@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AddressData;
+import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.ClientAuditFieldsData;
 import org.apache.fineract.client.models.ClientIdentifierRequest;
@@ -59,6 +60,7 @@ import org.apache.fineract.client.models.SortOrder;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.IdempotencyHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignClientHelper {
@@ -106,6 +108,11 @@ public class FeignClientHelper {
 
     public PostClientsResponse createClient(PostClientsRequest request) {
         return ok(() -> fineractClient.clients().createClient(request));
+    }
+
+    public ApiResponse<PostClientsResponse> createClientWithIdempotencyKey(PostClientsRequest request, String idempotencyKey) {
+        return ok(() -> fineractClient.clients().createClientWithHttpInfo(request,
+                Map.of(IdempotencyHelper.IDEMPOTENCY_KEY_HEADER, idempotencyKey)));
     }
 
     public PostClientsResponse createClientPending() {
