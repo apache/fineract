@@ -44,6 +44,8 @@ public interface LoanAccrualsProcessingService {
 
     void processAccrualsOnLoanClosure(@NonNull Loan loan, boolean addJournal);
 
+    void processAccrualsOnNpaLoanRepayment(@NonNull Loan loan);
+
     void processAccrualsOnLoanForeClosure(@NonNull Loan loan, @NonNull LocalDate foreClosureDate,
             @NonNull List<LoanTransaction> newAccrualTransactions);
 
