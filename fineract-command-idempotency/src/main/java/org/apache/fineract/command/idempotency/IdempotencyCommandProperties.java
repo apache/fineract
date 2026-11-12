@@ -69,6 +69,10 @@ public final class IdempotencyCommandProperties implements Serializable {
      * store gave up after its retries - would otherwise answer every repeat {@code 425 Too Early} for ever, and a
      * client following that advice retries for ever. Long enough that a slow command is not declared dead: the key is
      * never re-executed, but a repeat past this point is refused, and the caller has to use a new one.
+     *
+     * <p>
+     * Zero or empty switches the timeout off: a repeat of an unfinished claim is then answered {@code 425 Too Early}
+     * for as long as it stays unfinished, as in the legacy command processing. A negative value is refused at startup.
      */
     @Builder.Default
     private Duration claimTimeout = Duration.ofMinutes(10);

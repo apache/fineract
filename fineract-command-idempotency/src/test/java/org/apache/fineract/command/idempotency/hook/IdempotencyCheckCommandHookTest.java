@@ -221,6 +221,19 @@ class IdempotencyCheckCommandHookTest {
                 "A command that could still be running must not be declared dead.");
     }
 
+    @Test
+    void withTheTimeoutSwitchedOffAnUnfinishedClaimIsToldToComeBackHoweverOld() {
+        for (var timeout : new Duration[] { Duration.ZERO, null }) {
+            var legacy = new IdempotencyCheckCommandHook(store, IdempotencyCommandProperties.builder().claimTimeout(timeout).build(),
+                    new NoCustomIdempotencyDistinctor());
+
+            duplicate(new CommandReplay(UNDER_PROCESSING, null, null, Instant.now().minus(Duration.ofDays(30))));
+
+            assertThrows(CommandIdempotencyInProgressException.class, () -> legacy.onBefore(context(KEY)),
+                    "With no timeout (" + timeout + ") a claim is never declared abandoned, as in the legacy processing.");
+        }
+    }
+
     private void duplicate(CommandReplay replay) {
         when(store.claim(any())).thenReturn(false);
         when(store.getReplayByKey(KEY, "")).thenReturn(replay);

@@ -109,7 +109,8 @@ was recoverable, in which case the repeat is executed again. See <<Recoverable f
 | `425 Too Early`. The original has not finished, so there is nothing to replay yet and the caller should retry.
 
 | Still being processed, claimed longer ago than `claim-timeout`
-| `409 Conflict`, saying the command never finished. See <<A claim that never finishes>>.
+| `409 Conflict`, saying the command never finished. With the timeout switched off, `425 Too Early` as above. See
+<<A claim that never finishes>>.
 
 | Completed, but its stored result cannot be reconstructed
 | `409 Conflict`, saying so. The key has been used and its answer can no longer be produced - reporting a server error
@@ -207,6 +208,10 @@ Past `fineract.command.idempotency.claim-timeout`, such a claim is treated as ab
 `409 Conflict` instead. Nothing distinguishes a command that died from one that is merely slow, so age stands in for
 it: set the timeout comfortably above the slowest command rather than tightly, because the cost of being wrong is
 telling a caller their request failed while it is still running.
+
+The timeout is on by default, at 10 minutes. Setting `claim-timeout` to `0` (or leaving it empty) switches it off: an
+unfinished claim is then answered `425 Too Early` for as long as it stays unfinished, which is what the legacy command
+processing does. A negative value is refused at startup.
 
 IMPORTANT: The key is refused, not released. The command that claimed it may have reached the database before whatever
 stopped it, so running it again is exactly the duplicate this mechanism exists to prevent. Whether the original took

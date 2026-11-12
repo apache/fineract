@@ -75,6 +75,20 @@ final class IdempotencyCommandPropertyCheck {
         requireHook(COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED, audit.getHookPostEnabled(), "completed");
         requireHook(COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, audit.getHookErrorEnabled(), "failed");
 
+        var claimTimeout = idempotency.getClaimTimeout();
+
+        if (claimTimeout != null && claimTimeout.isNegative()) {
+            // a negative age is always exceeded, so every unfinished claim - including one still running - would be
+            // declared abandoned; zero is how the timeout is switched off
+            throw new IllegalStateException("fineract.command.idempotency.claim-timeout must not be negative, but is " + claimTimeout
+                    + ". Use 0 to switch the timeout off.");
+        }
+
+        if (claimTimeout == null || claimTimeout.isZero()) {
+            log.info("Command idempotency claim timeout is off: a repeat of an unfinished command is answered 425 Too Early for as "
+                    + "long as it stays unfinished.");
+        }
+
         log.info("Command idempotency is enabled.");
     }
 

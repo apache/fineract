@@ -160,11 +160,21 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
      * claiming the key and recording the outcome, or the store gave up writing it. Nothing distinguishes the two from
      * the row, so age stands in for it. Treated as abandoned only well past the point where a command could still be
      * working, because the cost of being wrong is telling a caller their request failed while it is still running.
+     *
+     * <p>
+     * With no timeout configured - zero or empty - no claim is ever treated as abandoned, and a repeat of an unfinished
+     * one is answered {@code 425 Too Early} for as long as it stays unfinished, which is what the legacy command
+     * processing does.
      */
     private boolean abandoned(CommandReplay replay) {
         var claimedAt = replay.claimedAt();
+        var timeout = properties.getClaimTimeout();
 
-        return claimedAt != null && claimedAt.isBefore(Instant.now().minus(properties.getClaimTimeout()));
+        if (timeout == null || timeout.isZero()) {
+            return false;
+        }
+
+        return claimedAt != null && claimedAt.isBefore(Instant.now().minus(timeout));
     }
 
     /**

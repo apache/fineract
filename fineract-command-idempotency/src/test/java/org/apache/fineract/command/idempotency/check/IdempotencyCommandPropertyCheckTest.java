@@ -89,6 +89,26 @@ class IdempotencyCommandPropertyCheckTest {
     }
 
     @Test
+    void aClaimTimeoutOfZeroSwitchesTheTimeoutOffAndStarts() {
+        contextRunner.withPropertyValues("fineract.command.idempotency.claim-timeout=0").run(context -> assertThat(context)
+                .as("Zero is how the timeout is switched off, which is the legacy behaviour.").hasNotFailed());
+    }
+
+    @Test
+    void anEmptyClaimTimeoutSwitchesTheTimeoutOffAndStarts() {
+        contextRunner.withPropertyValues("fineract.command.idempotency.claim-timeout=").run(context -> assertThat(context)
+                .as("An empty value, as an unset environment variable gives, is the same as zero.").hasNotFailed());
+    }
+
+    @Test
+    void aNegativeClaimTimeoutRefusesToStart() {
+        contextRunner.withPropertyValues("fineract.command.idempotency.claim-timeout=-1m")
+                .run(context -> assertThat(context)
+                        .as("A negative age is always exceeded, so even a running command would be declared abandoned.").hasFailed()
+                        .getFailure().rootCause().isInstanceOf(IllegalStateException.class).hasMessageContaining("claim-timeout"));
+    }
+
+    @Test
     void bothOffStarts() {
         contextRunner.withPropertyValues("fineract.command.idempotency.enabled=false", "fineract.command.audit.enabled=false").run(
                 context -> assertThat(context).as("Neither feature is on, so nothing is written to the command table.").hasNotFailed());
