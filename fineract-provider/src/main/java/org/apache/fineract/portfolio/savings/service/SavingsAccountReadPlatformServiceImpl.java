@@ -192,7 +192,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
         sqlBuilder.append(" where o.hierarchy like ?");
 
-        final Object[] objectArray = new Object[2];
+        // hierarchy + externalId + officeId + birthdayMonth + birthdayDay
+        final Object[] objectArray = new Object[5];
         objectArray[0] = hierarchySearchString;
         int arrayPos = 1;
         if (searchParameters != null) {
@@ -211,6 +212,15 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             if (searchParameters.getOfficeId() != null) {
                 sqlBuilder.append("and c.office_id =?");
                 objectArray[arrayPos] = searchParameters.getOfficeId();
+                arrayPos = arrayPos + 1;
+            }
+            if (searchParameters.isBirthdayFilterRequested()) {
+                // EXTRACT is supported by both MariaDB/MySQL and PostgreSQL; group accounts have no client and are
+                // excluded
+                sqlBuilder.append(" and extract(month from c.date_of_birth) = ? and extract(day from c.date_of_birth) = ?");
+                objectArray[arrayPos] = searchParameters.getBirthdayMonth();
+                arrayPos = arrayPos + 1;
+                objectArray[arrayPos] = searchParameters.getBirthdayDay();
                 arrayPos = arrayPos + 1;
             }
             if (searchParameters.isOrderByRequested()) {
