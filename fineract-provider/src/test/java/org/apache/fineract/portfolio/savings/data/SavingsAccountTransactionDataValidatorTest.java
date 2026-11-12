@@ -20,11 +20,14 @@ package org.apache.fineract.portfolio.savings.data;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.mock;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.BackdatedTransactionValidationService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -55,5 +58,33 @@ class SavingsAccountTransactionDataValidatorTest {
                     assertThat(exception.getErrors())
                             .anyMatch(error -> SavingsApiConstants.transactionAmountParamName.equals(error.getParameterName()));
                 });
+    }
+
+    @Test
+    void missingPaymentTypeWithPaymentDetailsIsReportedOnce() {
+        assertThat(paymentTypeErrors("")).containsExactly("The parameter `paymentTypeId` is mandatory.");
+    }
+
+    @Test
+    void paymentTypeNotGreaterThanZeroWithPaymentDetailsIsReportedOnce() {
+        assertThat(paymentTypeErrors("\"paymentTypeId\": 0,")).containsExactly("The parameter `paymentTypeId` must be greater than 0.");
+    }
+
+    private List<String> paymentTypeErrors(String paymentType) {
+        JsonCommand command = new JsonCommand(1L, fromJsonHelper.parse("""
+                {
+                  "dateFormat": "dd MMMM yyyy",
+                  "locale": "en",
+                  "transactionDate": "01 March 2026",
+                  "transactionAmount": 10,
+                  %s
+                  "receiptNumber": "RCPT-1"
+                }
+                """.formatted(paymentType)), fromJsonHelper);
+
+        PlatformApiDataValidationException exception = catchThrowableOfType(PlatformApiDataValidationException.class,
+                () -> validator.validate(command));
+        return exception.getErrors().stream().filter(error -> SavingsApiConstants.paymentTypeIdParamName.equals(error.getParameterName()))
+                .map(ApiParameterError::getDefaultUserMessage).toList();
     }
 }

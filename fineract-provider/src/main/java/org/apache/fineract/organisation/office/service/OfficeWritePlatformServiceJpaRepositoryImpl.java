@@ -231,7 +231,10 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         final Long userOfficeId = currentUser.getOffice().getId();
         final Office userOffice = this.officeRepositoryWrapper.findOfficeHierarchy(userOfficeId);
         if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) {
-            throw new NoAuthorizationException("User does not have sufficient priviledges to act on the provided office.");
+            if (officeId != null) {
+                this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
+            }
+            throw new NoAuthorizationException("User does not have sufficient privileges to act on the provided office.");
         }
 
         Office officeToReturn = userOffice;
