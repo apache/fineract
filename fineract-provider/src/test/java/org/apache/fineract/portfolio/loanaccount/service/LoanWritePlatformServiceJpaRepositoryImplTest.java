@@ -207,7 +207,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     public void setUp() {
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DateUtils.parseLocalDate("2025-05-20"))));
-        lenient().when(loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(any(Loan.class)))
+        lenient().when(loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(any(Loan.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
     }
 

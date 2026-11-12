@@ -224,7 +224,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newInterestPaymentWaiverTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(newInterestPaymentWaiverTransaction, false, false);
 
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
 
         this.loanUtilService.createTransactionNote(loan, newInterestPaymentWaiverTransaction, noteText, null);
 
@@ -489,7 +489,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         // Create journal entries immediately for this transaction
         journalEntryPoster.postJournalEntriesForLoanTransaction(newTransaction, false, false);
 
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParamName);
         this.loanUtilService.createTransactionNote(loan, newTransaction, noteText, changes);
@@ -575,7 +575,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
 
         this.loanTransactionRepository.saveAndFlush(waiveInterestTransaction);
         journalEntryPoster.postJournalEntriesForLoanTransaction(waiveInterestTransaction, false, false);
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         this.loanUtilService.createTransactionNote(loan, waiveInterestTransaction, noteText, changes);
@@ -745,7 +745,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
 
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
         // Calculate and apply delinquency tag (if applicable)
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
         // disable all active standing orders linked to this loan if status
@@ -888,7 +888,7 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         }
         loanLifecycleStateMachine.determineAndTransition(loan, interestRefundTxn.getTransactionDate());
 
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
         loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
         loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
 

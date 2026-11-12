@@ -463,7 +463,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         if (!changes.isEmpty()) {
             loan.updateLoanScheduleDependentDerivedFields();
-            loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
 
             this.loanUtilService.createNote(loan, command, changes);
             // auto create standing instruction
@@ -501,7 +501,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // totalOutstanding, etc.). Without this, those fields remain stale from the saveAndFlush above,
             // causing the loan balance to appear higher than what the client actually owes.
             loanBalanceService.updateLoanSummaryDerivedFields(loan);
-            this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
         }
         updateRecurringCalendarDatesForInterestRecalculation(loan);
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
@@ -787,7 +787,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             if (!changes.isEmpty()) {
                 this.loanUtilService.createNote(loan, command, changes);
-                loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+                loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
             }
             final Set<LoanCharge> loanCharges = loan.getActiveCharges();
             final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
@@ -888,7 +888,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
                 loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
-            loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
             this.accountTransfersWritePlatformService.reverseAllTransactions(loanId, PortfolioAccountType.LOAN);
             this.loanUtilService.createNote(loan, command, changes);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
@@ -1713,7 +1713,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 true);
@@ -1855,7 +1855,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
         }
 
-        loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             createLoanScheduleArchive(loan, scheduleGeneratorDTO);
         }
@@ -1919,7 +1919,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
             }
 
-            loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
             loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan,
                     loan.isInterestBearingAndInterestRecalculationEnabled(), true);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
@@ -1927,7 +1927,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanScheduleService.recalculateScheduleFromLastTransaction(loan, null, existingTransactionIds, existingReversedTransactionIds,
                     true);
             loanBalanceService.updateLoanSummaryDerivedFields(loan);
-            loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
         }
         return loan;
@@ -2094,7 +2094,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = undoLastDisbursal(scheduleGeneratorDTO, loan);
 
         if (!changes.isEmpty()) {
-            loan = this.loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loan = this.loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(loan);
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
             if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
