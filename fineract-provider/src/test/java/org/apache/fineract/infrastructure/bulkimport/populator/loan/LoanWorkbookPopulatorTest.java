@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.bulkimport.populator.loan;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -28,6 +29,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ClientSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ExtrasSheetPopulator;
@@ -40,8 +44,11 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class LoanWorkbookPopulatorTest {
 
@@ -144,6 +151,28 @@ class LoanWorkbookPopulatorTest {
             assertDoesNotThrow(() -> populator.populate(workbook, DATE_FORMAT));
 
             assertEquals(1, definedNamesStartingWith(workbook, "CHARGE_NAME_"));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "Gold Plan", "Gold-Plan", "Gold & Silver" })
+    void repaymentStrategyFormulaResolvesTheProductStrategy(String productName) throws Exception {
+        LoanProductData product = mock(LoanProductData.class, RETURNS_DEEP_STUBS);
+        when(product.getId()).thenReturn(1L);
+        when(product.getName()).thenReturn(productName);
+        when(product.getTransactionProcessingStrategyName()).thenReturn("Creocore Unique");
+        when(product.getRepaymentFrequencyType().getValue()).thenReturn("Months");
+        when(product.getStartDate()).thenReturn(null);
+        when(product.getCloseDate()).thenReturn(null);
+
+        try (Workbook workbook = new HSSFWorkbook()) {
+            populator(new LoanProductSheetPopulator(List.of(product)), new ChargeSheetPopulator(List.of())).populate(workbook, DATE_FORMAT);
+            String productChoice = workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME).getRow(1).getCell(1)
+                    .getStringCellValue();
+            Row loanRow = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME).getRow(1);
+            loanRow.createCell(LoanConstants.PRODUCT_COL).setCellValue(productChoice);
+
+            assertEquals("Creocore Unique", ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL, loanRow));
         }
     }
 }
