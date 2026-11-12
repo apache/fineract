@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -53,8 +54,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementDa
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -68,6 +69,7 @@ import org.springframework.stereotype.Service;
 public class LoanImportHandler implements ImportHandler {
 
     public static final String EMPTY_STR = "";
+    private static final String REPAYMENT_STRATEGY_LABEL = "Repayment Strategy";
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
@@ -235,16 +237,7 @@ public class LoanImportHandler implements ImportHandler {
             arrearsTolerance = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row));
         }
 
-        String loanRepaymentScheduleTransactionProcessorStrategy = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL,
-                row);
-        LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(loanRepaymentScheduleTransactionProcessorStrategy);
-
-        String repaymentStrategyCode = "mifos-standard-strategy";
-
-        if (loanRepaymentScheduleTransactionProcessor != null) {
-            repaymentStrategyCode = loanRepaymentScheduleTransactionProcessor.getCode();
-        }
+        String repaymentStrategyCode = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL, row);
         Integer graceOnPrincipalPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
         Integer graceOnInterestPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL, row);
         Integer graceOnInterestCharged = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_CHARGED_COL, row);
@@ -428,6 +421,17 @@ public class LoanImportHandler implements ImportHandler {
         return Count.instance(successCount, errorCount);
     }
 
+    private String resolveRepaymentStrategyCode(final String repaymentStrategy) {
+        if (StringUtils.isBlank(repaymentStrategy)) {
+            throw new IllegalArgumentException(REPAYMENT_STRATEGY_LABEL + " is mandatory");
+        }
+        try {
+            return loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(repaymentStrategy).getCode();
+        } catch (LoanTransactionProcessingStrategyNotFoundException e) {
+            throw new IllegalArgumentException(REPAYMENT_STRATEGY_LABEL + " '" + repaymentStrategy + "' not recognised", e);
+        }
+    }
+
     private void writeLoanErrorMessage(final Workbook workbook, final String loanId, final String errorMessage, final int progressLevel,
             final Cell statusCell, final Cell errorReportCell, final Row row) {
         String status = EMPTY_STR;
@@ -520,6 +524,8 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private CommandProcessingResult importLoan(final List<LoanAccountData> loans, final int rowIndex, final String dateFormat) {
+        LoanAccountData loan = loans.get(rowIndex);
+        loan.setTransactionProcessingStrategyCode(resolveRepaymentStrategyCode(loan.getTransactionProcessingStrategyCode()));
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, loans.get(rowIndex).getLocale()));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataValueSerializer());
