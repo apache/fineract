@@ -20,6 +20,7 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import java.util.concurrent.ThreadPoolExecutor;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
@@ -32,6 +33,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @Configuration
 public class SpringConfig {
@@ -59,10 +62,24 @@ public class SpringConfig {
                 .queueCapacity(queueCapacity).build();
 
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setTaskDecorator(SpringConfig::isolateFromCallerThread);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
 
         return executor;
+    }
+
+    static Runnable isolateFromCallerThread(Runnable task) {
+        Runnable preservingContext = ThreadLocalContextUtil.preservingContext(task);
+        return () -> {
+            RequestAttributes callerRequest = RequestContextHolder.getRequestAttributes();
+            RequestContextHolder.resetRequestAttributes();
+            try {
+                preservingContext.run();
+            } finally {
+                RequestContextHolder.setRequestAttributes(callerRequest);
+            }
+        };
     }
 
     @Bean
