@@ -26,6 +26,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import tools.jackson.databind.JsonNode;
@@ -71,6 +72,9 @@ public class CommandEntity implements Serializable {
     @Column("rejected_by_username")
     private String rejectedByUsername;
 
+    @Column("custom_idempotency_distinctor")
+    private String customIdempotencyDistinctor;
+
     @Column("entity_name")
     private String entityName;
 
@@ -79,6 +83,14 @@ public class CommandEntity implements Serializable {
 
     @Column("idempotency_key")
     private String idempotencyKey;
+
+    /**
+     * The HTTP status the original request was answered with, so a repeat of it can be answered identically. Written
+     * only by the store's targeted update; a full-row save must not reset it, hence read-only here.
+     */
+    @ReadOnlyProperty
+    @Column("response_status_code")
+    private Integer responseStatusCode;
 
     @Column("state")
     private org.apache.fineract.command.core.CommandState state;

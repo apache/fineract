@@ -25,4 +25,6 @@
     <include relativeToChangelogFile="true" file="parts/0001_command_init.xml"/>
     <include relativeToChangelogFile="true" file="parts/0002_command_fix_structure.xml"/>
     <include relativeToChangelogFile="true" file="parts/0003_command_action_entity.xml"/>
+    <include relativeToChangelogFile="true" file="parts/0004_idempotency_key_unique.xml"/>
+    <include relativeToChangelogFile="true" file="parts/0005_command_response_cache.xml"/>
 </databaseChangeLog>
