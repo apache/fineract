@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookBefore;
-import org.apache.fineract.command.core.CommandProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -40,17 +39,12 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(value = COMMAND_PROPERTY_HOOKS_SERVLET_HEADERS_ENABLED, havingValue = "true", matchIfMissing = true)
 final class ServletHeadersCommandHook implements CommandHookBefore<Object, Object> {
 
-    private final CommandProperties properties;
-
     @Override
     public void onBefore(CommandContext<Object, Object> ctx) {
         var command = ctx.getCommand();
 
         if (StringUtils.isEmpty(command.getIpAddress())) {
             command.setIpAddress(getHeader(COMMAND_HTTP_HEADER_IP, false));
-        }
-        if (StringUtils.isEmpty(command.getIdempotencyKey())) {
-            command.setIdempotencyKey(getHeader(properties.getIdemPotencyKeyHeaderName(), false));
         }
     }
 }

@@ -32,6 +32,14 @@ public final class AuditCommandConstants {
     public static final String COMMAND_AUDIT_BASE_PACKAGE = "org.apache.fineract.command.audit";
     public static final String COMMAND_AUDIT_HOOK_BASE_PACKAGE = COMMAND_AUDIT_BASE_PACKAGE + ".hook";
     public static final String COMMAND_AUDIT_CHECK_BASE_PACKAGE = COMMAND_AUDIT_BASE_PACKAGE + ".check";
+    /**
+     * The audit hooks' bean names. Other modules that depend on the hooks (idempotency does) look them up by these
+     * names to check that they are actually registered, rather than inferring it from the properties that switch them
+     * on.
+     */
+    public static final String COMMAND_AUDIT_HOOK_BEFORE_BEAN_NAME = "auditCommandHookBefore";
+    public static final String COMMAND_AUDIT_HOOK_AFTER_BEAN_NAME = "auditCommandHookAfter";
+    public static final String COMMAND_AUDIT_HOOK_ERROR_BEAN_NAME = "auditCommandHookError";
     public static final int COMMAND_AUDIT_HOOK_BEFORE = 30;
     public static final int COMMAND_AUDIT_HOOK_AFTER = 30;
     public static final int COMMAND_AUDIT_HOOK_ERROR = 30;

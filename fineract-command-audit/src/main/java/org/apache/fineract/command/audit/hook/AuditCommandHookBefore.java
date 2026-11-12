@@ -19,6 +19,7 @@
 package org.apache.fineract.command.audit.hook;
 
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_BEFORE;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_BEFORE_BEAN_NAME;
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_PRE_ENABLED;
 import static org.apache.fineract.command.core.CommandState.UNDER_PROCESSING;
 
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Component(COMMAND_AUDIT_HOOK_BEFORE_BEAN_NAME)
 @Order(COMMAND_AUDIT_HOOK_BEFORE)
 @ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_PRE_ENABLED, havingValue = "true", matchIfMissing = true)
 final class AuditCommandHookBefore implements CommandHookBefore<Object, Object> {

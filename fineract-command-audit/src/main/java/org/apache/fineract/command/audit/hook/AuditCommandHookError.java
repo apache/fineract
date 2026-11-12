@@ -19,6 +19,7 @@
 package org.apache.fineract.command.audit.hook;
 
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_ERROR;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_ERROR_BEAN_NAME;
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED;
 import static org.apache.fineract.command.core.CommandState.ERROR;
 
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Component(COMMAND_AUDIT_HOOK_ERROR_BEAN_NAME)
 @Order(COMMAND_AUDIT_HOOK_ERROR)
 @ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, havingValue = "true", matchIfMissing = true)
 final class AuditCommandHookError implements CommandHookError<Object, Object> {

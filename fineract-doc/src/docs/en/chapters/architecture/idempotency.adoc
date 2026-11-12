@@ -17,7 +17,7 @@ If no idempotency key is assigned to the request, the system will generate one f
 2. The system checks there are already executed commands with the same `idempotency key` and `action name` and `entity name`
 3. The action based on the result of the check
   * If the request is completed the system return with the already generated result
-  * If not completed, return HTTP 409 response
+  * If not completed, return HTTP 425 response, so the caller knows to come back rather than that something went wrong
   * If the request is not completed, we process the requests and store the results in the database
 
 
@@ -32,5 +32,142 @@ In batch requests, you can set the idempotency key for every batch item, in the 
 == Result of the request
 
 * When the request is already executed and completed, the system will return a `x-served-from-cache` header with the value `true` in the response and return the original request body.
-* When the request is already executed but still not completed, the system will return to HTTP 409 error code
+* When the request is already executed but still not completed, the system will return a HTTP 425 Too Early error code
 * When the request is not executed, the system runs it normally and stores the result in the date
+
+
+== Idempotency in the new command processing
+
+The new command processing implements idempotency as command hooks, in the `fineract-command-idempotency` module.
+It answers a repeated request the same way the legacy processing does - the same `x-served-from-cache` header, the
+same `425 Too Early` while the original is still running, the same status and body once it has finished. By default
+a key is scoped the way the legacy processing scopes it; see <<Scope of an idempotency key>> for the stricter
+alternative.
+
+=== Configuration
+
+Idempotency is on as soon as the module is on the classpath; a repeated request quietly executing twice should be a
+decision rather than the consequence of an unset property.
+
+[source,properties]
+----
+fineract.command.idempotency.enabled=true
+fineract.command.idempotency.key-header-name=Idempotency-Key
+fineract.command.idempotency.hook-key-header-pre=true
+fineract.command.idempotency.hook-check-pre=true
+fineract.command.idempotency.custom-distinctor=ENTITY_NAME_AND_ACTION_NAME
+----
+
+The key is read from the HTTP header only. It is deliberately not read from a query parameter, because keys in query
+strings are copied into access and proxy logs.
+
+=== How it works
+
+1. The key is taken from the request header.
+2. The command is written to the command store immediately, before it is executed, claiming the key. The claim relies
+   on a unique constraint, so of several requests arriving at once with the same key exactly one wins and the others
+   are answered from the store. The command itself can never run twice.
+3. The command runs, and the result it produces is stored against the claimed row by the audit hooks. A command that
+   produces no result of its own - one that failed, whose answer is rendered from an exception - has the answer the
+   client was sent recorded instead. See <<What a repeat is answered from>>.
+
+=== What a repeat is answered from
+
+A completed command is replayed from the result object it produced. The stored result is read back into the object it
+was and handed to the web layer, which renders it with the same serializer that rendered the original answer and
+derives the same status code from it. The two answers are identical because they are the same object rendered the same
+way, so nothing about the original response has to have been recorded - neither its bytes nor its status.
+
+A command that produced no result of its own has nothing to hand back. That is the case for a failure, whose answer is
+rendered from an exception rather than from a result, and it is the only case where the answer itself is recorded: the
+response as it went out, together with the status code it went out with, because a replay of it is thrown rather than
+returned and nothing else could say what status to use. `response_status_code` is therefore set for those commands and
+empty for every other.
+
+NOTE: Only a JSON answer can be recorded, because the column holds JSON. An answer of any other kind - a file download,
+an empty body - is logged instead of stored, and a repeat of that key is answered with the status and an empty body.
+
+=== Result of a repeated request
+
+Every answer served from the command store carries `x-served-from-cache: true`, and no further command record is
+written for it: the record that owns the key already describes the command, and a second one would claim an execution
+that never happened.
+
+[cols="1,3"]
+|===
+| State of the original command | Answer to the repeat
+
+| Completed
+| The original status code and body.
+
+| Failed
+| The original status code and body, so a repeat of a failure fails exactly as the original did.
+
+| Still being processed
+| `425 Too Early`. The original has not finished, so there is nothing to replay yet and the caller should retry.
+
+| Completed, but its stored result cannot be reconstructed
+| `409 Conflict`, saying so. The key has been used and its answer can no longer be produced - reporting a server error
+would say the request failed, and an empty body would say it succeeded with nothing to return. Neither is true. Only a
+command that completed stores a result, so the command did take effect: it must not be sent again under a new key.
+
+| Any other state, or a key used for a different request
+| `409 Conflict`.
+|===
+
+=== Scope of an idempotency key
+
+An idempotency key is unique together with a _distinctor_: a value computed from the command when its key is claimed
+and stored beside the key in `m_command.custom_idempotency_distinctor`. The command record is unique on the pair, and a
+repeat is matched - and replayed - only against the record with the same key and the same distinctor.
+`fineract.command.idempotency.custom-distinctor` chooses how the distinctor is computed:
+
+[cols="1,2,3"]
+|===
+| Value | Distinctor | Scope of a key
+
+| `ENTITY_NAME_AND_ACTION_NAME` (default)
+| `EntityAndActionNameCustomIdempotencyDistinctor`: the command's entity name and action name, as `m_permission` spells
+them, joined with `\|` - for example `LOAN\|CREATE`.
+| Unique per tenant, entity and action, the way the legacy command processing scopes a key.
+
+| `NONE`
+| `NoCustomIdempotencyDistinctor`: always the empty string.
+| Unique per tenant across all commands.
+|===
+
+An application can replace the distinctor altogether by defining its own `CustomIdempotencyDistinctor` bean. Its value
+must be the same for every repeat of a request, must not be `null` and must fit the 255-character column; a value that
+does not is refused before the key is claimed.
+
+IMPORTANT: Under `NONE` the new processing is stricter than the legacy one: the same key sent to two different
+endpoints is rejected with `409 Conflict` for the second rather than executed. Clients that derive the key from
+something reused across calls, such as a correlation id, then have to send a distinct key per request.
+
+A repeat is also only replayed when it carries the same request as the original. A key reused for the same endpoint
+with a different body is rejected with `409 Conflict` instead of being answered with the earlier result, which would
+otherwise report success for something that was never carried out.
+
+=== Requires auditing
+
+Claiming a key writes the command record, but the idempotency hooks never write it again: it is the audit hooks that
+move a command out of `UNDER_PROCESSING` and store what it produced. Idempotency therefore cannot work without
+auditing, and an application configured with idempotency enabled and `fineract.command.audit.enabled=false` refuses to
+start rather than failing later in a way that only shows up on a client's second request.
+
+The same applies to the two audit hooks that record how a command finished, which can be switched off on their own:
+with idempotency enabled, `fineract.command.audit.hook-post-enabled=false` (nothing records a completed command) or
+`fineract.command.audit.hook-error-enabled=false` (nothing records a failed one) also refuses to start. The before hook
+is not required, because claiming the key has already written the record it would write.
+
+Every result type a command handler returns has to be readable back from the store, since a repeat is answered by
+reading it back. A test walks every handler on the classpath and fails for a result type Jackson cannot construct, such
+as a Lombok `@Builder` class without `@NoArgsConstructor` and `@AllArgsConstructor`.
+
+See the command auditing chapter for what is recorded and when.
+
+=== Reliability
+
+Every write to the command record is retried - claiming the key, recording how the command finished, recording a
+repeat, and recording an answer. A claim that loses to contention is tried again; a claim that loses to the unique
+constraint is not, because that is the answer rather than a failure, and it means another request already owns the key.

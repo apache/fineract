@@ -19,6 +19,7 @@
 package org.apache.fineract.command.audit.hook;
 
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_AFTER;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_AFTER_BEAN_NAME;
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED;
 
 import java.time.Instant;
@@ -33,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Component(COMMAND_AUDIT_HOOK_AFTER_BEAN_NAME)
 @Order(COMMAND_AUDIT_HOOK_AFTER)
 @ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED, havingValue = "true", matchIfMissing = true)
 final class AuditCommandHookAfter implements CommandHookAfter<Object, Object> {

@@ -48,9 +48,6 @@ public final class CommandProperties implements Serializable {
     @Builder.Default
     private Map<String, Boolean> hooks = new HashMap<>();
 
-    @Builder.Default
-    private String idemPotencyKeyHeaderName = "Idempotency-Key";
-
     /**
      * The core hooks are on unless switched off. These defaults are kept in step with {@code matchIfMissing} on the
      * corresponding {@code @ConditionalOnProperty}; changing one without the other makes this class describe behaviour
