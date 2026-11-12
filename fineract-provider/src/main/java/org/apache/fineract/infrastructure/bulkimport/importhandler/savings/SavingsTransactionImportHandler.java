@@ -23,7 +23,9 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -65,20 +67,30 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, savingsTransactions, dateFormat, locale);
+        Map<Integer, RuntimeException> rowErrors = new LinkedHashMap<>();
+        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        Count count = importEntity(workbook, savingsTransactions, dateFormat, locale);
+        Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
+        int failedRows = ImportHandlerUtils.writeRowErrors(sheet, rowErrors, TransactionConstants.STATUS_COL);
+        return Count.instance(count.getSuccessCount(), count.getErrorCount() + failedRows);
     }
 
-    private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, RuntimeException> rowErrors) {
         List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.TRANSACTION_TYPE_COL,
+                TransactionConstants.NOTE_COL);
         Long savingsAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsTransactionSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL)) {
-                savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
+                try {
+                    savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
+                } catch (RuntimeException ex) {
+                    rowErrors.put(rowIndex, ex);
+                }
             }
         }
         return savingsTransactions;
