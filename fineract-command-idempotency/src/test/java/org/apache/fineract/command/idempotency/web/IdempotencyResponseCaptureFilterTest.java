@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.command.idempotency.web;
 
+import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -83,7 +84,7 @@ class IdempotencyResponseCaptureFilterTest {
         var csv = "id,amount\n7,1.50\n";
         var response = runWith("text/csv", csv);
 
-        verify(store).recordResponse(eq(KEY), eq(200), isNull());
+        verify(store).recordResponse(eq(KEY), eq(""), eq(200), isNull());
 
         assertFalse(logged().contains("id,amount"), "The body must not reach the log: responses here carry customer data.");
         assertTrue(
@@ -96,7 +97,7 @@ class IdempotencyResponseCaptureFilterTest {
 
     @Test
     void anAnswerThatCannotBeRecordedIsReportedWithoutItsBody() throws Exception {
-        doThrow(new IllegalStateException("the database is unavailable")).when(store).recordResponse(eq(KEY), eq(200),
+        doThrow(new IllegalStateException("the database is unavailable")).when(store).recordResponse(eq(KEY), eq(""), eq(200),
                 eq("{\"amount\":1.50}"));
 
         runWith("application/json", "{\"amount\":1.50}");
@@ -111,16 +112,31 @@ class IdempotencyResponseCaptureFilterTest {
     void aJsonAnswerIsRecordedRatherThanLogged() throws Exception {
         runWith("application/json", "{\"amount\":1.50}");
 
-        verify(store).recordResponse(KEY, 200, "{\"amount\":1.50}");
+        verify(store).recordResponse(KEY, "", 200, "{\"amount\":1.50}");
 
         assertTrue(logged().isEmpty(), "Nothing is lost on the ordinary path, so nothing is logged about it.");
     }
 
+    @Test
+    void theAnswerIsRecordedAgainstTheDistinctorTheKeyWasClaimedWith() throws Exception {
+        runWith("application/json", "{\"amount\":1.50}", "PAYMENTTYPE|CREATE");
+
+        verify(store).recordResponse(KEY, "PAYMENTTYPE|CREATE", 200, "{\"amount\":1.50}");
+    }
+
     private MockHttpServletResponse runWith(String contentType, String body) throws Exception {
+        return runWith(contentType, body, null);
+    }
+
+    private MockHttpServletResponse runWith(String contentType, String body, String distinctor) throws Exception {
         var request = new MockHttpServletRequest("POST", "/commands");
 
         request.addHeader(IdempotencyCommandProperties.builder().build().getKeyHeaderName(), KEY);
         request.setAttribute(COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE, KEY);
+
+        if (distinctor != null) {
+            request.setAttribute(COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE, distinctor);
+        }
 
         var response = new MockHttpServletResponse();
         var chain = new MockFilterChain() {

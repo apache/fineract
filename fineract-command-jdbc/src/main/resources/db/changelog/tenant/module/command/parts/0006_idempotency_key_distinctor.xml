@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <!--
+        Three changesets rather than one: MySQL commits every DDL statement on its own, so a changeset that failed half
+        way could not simply be run again. Split, each one either ran or did not.
+    -->
+    <changeSet author="fineract" id="command-00008" context="postgresql,mysql">
+        <comment>
+            What an idempotency key is unique together with, as the configured CustomIdempotencyDistinctor computes it
+            when the key is claimed. The empty string means nothing distinguishes the key, which is what every existing
+            row gets and what a command without a key is stored with: not null, so that the composite unique constraint
+            below compares two empty values as equal rather than treating two nulls as distinct.
+        </comment>
+        <addColumn tableName="m_command">
+            <column name="custom_idempotency_distinctor" type="varchar(255)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="command-00009" context="postgresql,mysql">
+        <comment>
+            Make the idempotency key unique together with its distinctor. Added before the key-only constraint is
+            dropped, so there is no moment at which the key is not unique. Every existing row has the empty distinctor
+            and the key-only constraint already holds, so no existing row can violate this one.
+        </comment>
+        <addUniqueConstraint
+                tableName="m_command"
+                columnNames="idempotency_key, custom_idempotency_distinctor"
+                constraintName="m_command_idempotency_key_distinctor_unique"/>
+    </changeSet>
+    <changeSet author="fineract" id="command-00010" context="postgresql,mysql">
+        <comment>
+            Drop the key-only unique constraint, which would otherwise still refuse the same key under a different
+            distinctor.
+        </comment>
+        <dropUniqueConstraint tableName="m_command" constraintName="m_command_idempotency_key_unique"/>
+        <rollback>
+            <!--
+                Fails when a key has since been stored under more than one distinctor: the stricter constraint cannot
+                be restored over those rows without deciding which of them to rename, and that is not a rollback's call.
+            -->
+            <addUniqueConstraint
+                    tableName="m_command"
+                    columnNames="idempotency_key"
+                    constraintName="m_command_idempotency_key_unique"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

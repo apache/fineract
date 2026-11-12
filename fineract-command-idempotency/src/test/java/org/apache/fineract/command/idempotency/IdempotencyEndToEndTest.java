@@ -61,6 +61,9 @@ import org.springframework.web.client.RestTemplate;
 @ContextConfiguration(classes = TestConfiguration.class)
 public class IdempotencyEndToEndTest extends CommandBaseTest {
 
+    /** The distinctor of the {@code /sync} command under the default, {@code ENTITY_NAME_AND_ACTION_NAME}. */
+    private static final String SYNC = "DUMMY|CREATE";
+
     @LocalServerPort
     private int port;
 
@@ -142,22 +145,6 @@ public class IdempotencyEndToEndTest extends CommandBaseTest {
     }
 
     @Test
-    public void aKeyIsUniqueAcrossCommandsNotOnlyWithinOne() {
-        var key = UUID.randomUUID().toString();
-
-        var first = post("/sync", "hello", key);
-
-        assertTrue(first.getStatusCode().is2xxSuccessful(), "The first request must be processed.");
-
-        // deliberately stricter than the old command processing, which scopes a key by action and entity name and so
-        // would execute this. A key here identifies one command for the whole tenant.
-        var otherCommand = post("/error", "boom", key);
-
-        assertEquals(409, otherCommand.getStatusCode().value(),
-                "Reusing a key for a different command must be rejected, not executed and not replayed.");
-    }
-
-    @Test
     public void concurrentRepeatsExecuteTheCommandOnlyOnce() throws Exception {
         var threads = 6;
         var key = UUID.randomUUID().toString();
@@ -201,6 +188,8 @@ public class IdempotencyEndToEndTest extends CommandBaseTest {
 
         inFlight.setPayload(DummyRequest.builder().content("hello").build());
         inFlight.setIdempotencyKey(key);
+        // as the hook would have claimed it under the default distinctor
+        inFlight.setCustomIdempotencyDistinctor(SYNC);
         inFlight.setCreatedAt(java.time.Instant.now());
 
         // claim the key without ever completing it, which is what another node mid-request looks like
@@ -218,7 +207,7 @@ public class IdempotencyEndToEndTest extends CommandBaseTest {
 
         post("/sync", "hello", key);
 
-        var recorded = repository.findOneByIdempotencyKey(key).orElseThrow();
+        var recorded = repository.findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(key, SYNC).orElseThrow();
 
         assertEquals(CommandState.PROCESSED, recorded.getState(), "A processed command must be audited as processed.");
         assertNotNull(recorded.getResponse(), "The result the command produced must be recorded.");
@@ -228,10 +217,12 @@ public class IdempotencyEndToEndTest extends CommandBaseTest {
         post("/sync", "hello", key);
         post("/sync", "hello", key);
 
-        assertEquals(1, repository.findAll().stream().filter(e -> key.equals(e.getIdempotencyKey())).count(),
-                "Repeats must not add command records.");
+        assertEquals(1,
+                repository.findAll().stream()
+                        .filter(e -> key.equals(e.getIdempotencyKey()) && SYNC.equals(e.getCustomIdempotencyDistinctor())).count(),
+                "Repeats must not add command records under the key and its distinctor.");
 
-        var afterRepeats = repository.findOneByIdempotencyKey(key).orElseThrow();
+        var afterRepeats = repository.findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(key, SYNC).orElseThrow();
 
         assertEquals(CommandState.PROCESSED, afterRepeats.getState(), "A repeat must not change the recorded outcome.");
     }

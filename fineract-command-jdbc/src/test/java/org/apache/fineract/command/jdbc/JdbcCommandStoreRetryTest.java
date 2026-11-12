@@ -82,13 +82,13 @@ class JdbcCommandStoreRetryTest {
 
     @Test
     void recordingTheAnswerIsRetried() {
-        when(repository.updateResponse(anyString(), anyInt(), any())).thenThrow(new ConcurrencyFailureException("contention"));
+        when(repository.updateResponse(anyString(), anyString(), anyInt(), any())).thenThrow(new ConcurrencyFailureException("contention"));
 
         contextRunner.run(context -> {
             var store = context.getBean(CommandStore.class);
 
-            assertThat(catchFailure(() -> store.recordResponse("a-key", 400, "{}"))).isInstanceOf(ConcurrencyFailureException.class);
-            verify(repository, times(MAX_ATTEMPTS)).updateResponse(anyString(), anyInt(), any());
+            assertThat(catchFailure(() -> store.recordResponse("a-key", "", 400, "{}"))).isInstanceOf(ConcurrencyFailureException.class);
+            verify(repository, times(MAX_ATTEMPTS)).updateResponse(anyString(), anyString(), anyInt(), any());
         });
     }
 

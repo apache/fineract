@@ -25,8 +25,10 @@ import static org.apache.fineract.command.idempotency.IdempotencyCommandConstant
 
 import org.apache.fineract.command.core.CommandStore;
 import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
+import org.apache.fineract.command.idempotency.distinctor.CustomIdempotencyDistinctor;
 import org.apache.fineract.command.idempotency.web.IdempotencyResponseCaptureFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -55,5 +57,15 @@ public class IdempotencyCommandAutoConfiguration {
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 100);
 
         return registration;
+    }
+
+    /**
+     * What an idempotency key is unique together with, as {@code fineract.command.idempotency.custom-distinctor}
+     * selects. Backs off for a distinctor the application defines itself.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    CustomIdempotencyDistinctor customIdempotencyDistinctor(IdempotencyCommandProperties properties) {
+        return properties.getCustomDistinctor().create();
     }
 }

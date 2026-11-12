@@ -22,11 +22,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CollateralProductUpdateResponse implements Serializable {
 
     @Serial
@@ -38,6 +42,8 @@ public class CollateralProductUpdateResponse implements Serializable {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Schema(name = "CollateralProductUpdateChanges")
     public static class Changes implements Serializable {
 

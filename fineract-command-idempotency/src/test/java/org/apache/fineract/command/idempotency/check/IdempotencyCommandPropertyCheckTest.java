@@ -26,12 +26,13 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 /**
- * Covers the four ways idempotency and auditing can be configured against each other.
+ * Covers the ways idempotency and auditing can be configured against each other.
  *
  * <p>
- * Only one of them is a mistake, and it is the one that would otherwise go unnoticed: idempotency on, auditing off.
- * Nothing fails at startup, the first request for a key is answered normally, and the breakage shows up only when a
- * client retries - as a 425 that never resolves. The point of the check is to turn that into a startup failure.
+ * The mistakes are the ones that would otherwise go unnoticed: idempotency on with auditing off, or with the audit hook
+ * that records a completed or a failed command off. Nothing fails at startup, the first request for a key is answered
+ * normally, and the breakage shows up only when a client retries - as a 425 that does not resolve. The point of the
+ * check is to turn that into a startup failure.
  */
 class IdempotencyCommandPropertyCheckTest {
 
@@ -55,6 +56,36 @@ class IdempotencyCommandPropertyCheckTest {
         contextRunner.withPropertyValues("fineract.command.audit.enabled=false").run(context -> assertThat(context)
                 .as("A claimed key would never leave UNDER_PROCESSING, so every repeat would answer 425 for ever.").hasFailed().getFailure()
                 .rootCause().isInstanceOf(IllegalStateException.class).hasMessageContaining("fineract.command.audit.enabled"));
+    }
+
+    @Test
+    void idempotencyWithoutTheAfterHookRefusesToStart() {
+        contextRunner.withPropertyValues("fineract.command.audit.hook-post-enabled=false").run(context -> assertThat(context)
+                .as("Nothing would record a completed command, so its repeats would be told it never finished.").hasFailed().getFailure()
+                .rootCause().isInstanceOf(IllegalStateException.class).hasMessageContaining("fineract.command.audit.hook-post-enabled"));
+    }
+
+    @Test
+    void idempotencyWithoutTheErrorHookRefusesToStart() {
+        contextRunner.withPropertyValues("fineract.command.audit.hook-error-enabled=false")
+                .run(context -> assertThat(context)
+                        .as("Nothing would record a failed command, so its repeats would never be answered with the failure.").hasFailed()
+                        .getFailure().rootCause().isInstanceOf(IllegalStateException.class)
+                        .hasMessageContaining("fineract.command.audit.hook-error-enabled"));
+    }
+
+    @Test
+    void idempotencyWithoutTheBeforeHookStarts() {
+        contextRunner.withPropertyValues("fineract.command.audit.hook-pre-enabled=false").run(
+                context -> assertThat(context).as("Claiming the key already writes the row the before hook would write.").hasNotFailed());
+    }
+
+    @Test
+    void auditHooksOffWithoutIdempotencyStarts() {
+        contextRunner
+                .withPropertyValues("fineract.command.idempotency.enabled=false", "fineract.command.audit.hook-post-enabled=false",
+                        "fineract.command.audit.hook-error-enabled=false")
+                .run(context -> assertThat(context).as("Without idempotency nothing depends on the hooks.").hasNotFailed());
     }
 
     @Test

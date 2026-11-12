@@ -46,6 +46,9 @@ import org.apache.fineract.command.core.exception.CommandIdempotencyFailedExcept
 import org.apache.fineract.command.core.exception.CommandIdempotencyInProgressException;
 import org.apache.fineract.command.core.exception.CommandIdempotencyProcessedException;
 import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
+import org.apache.fineract.command.idempotency.distinctor.CustomIdempotencyDistinctor;
+import org.apache.fineract.command.idempotency.distinctor.EntityAndActionNameCustomIdempotencyDistinctor;
+import org.apache.fineract.command.idempotency.distinctor.NoCustomIdempotencyDistinctor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,7 +67,7 @@ class IdempotencyCheckCommandHookTest {
 
     @BeforeEach
     void setUp() {
-        hook = new IdempotencyCheckCommandHook(store, IdempotencyCommandProperties.builder().build());
+        hook = new IdempotencyCheckCommandHook(store, IdempotencyCommandProperties.builder().build(), new NoCustomIdempotencyDistinctor());
     }
 
     @Test
@@ -86,7 +89,7 @@ class IdempotencyCheckCommandHookTest {
         hook.onBefore(ctx);
 
         assertFalse(ctx.isSkipExecution(), "The request that claims the key must be executed.");
-        verify(store, never()).getReplayByKey(anyString());
+        verify(store, never()).getReplayByKey(anyString(), anyString());
     }
 
     @Test
@@ -100,7 +103,7 @@ class IdempotencyCheckCommandHookTest {
         assertEquals(425, exception.getStatusCode(), "An unfinished command must answer 425 Too Early.");
         assertTrue(ctx.isSkipExecution(), "An in-flight command must not be executed a second time.");
         // the request is not compared here: there is nothing stored to compare a response against yet
-        verify(store, never()).matchesStoredRequest(anyString(), any());
+        verify(store, never()).matchesStoredRequest(anyString(), anyString(), any());
     }
 
     @Test
@@ -110,7 +113,7 @@ class IdempotencyCheckCommandHookTest {
         var stored = Map.of("resourceId", 7);
 
         duplicate(new CommandReplay(PROCESSED, null, stored, Instant.now()));
-        when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
+        when(store.matchesStoredRequest(KEY, "", "request-payload")).thenReturn(true);
 
         hook.onBefore(ctx);
 
@@ -127,7 +130,7 @@ class IdempotencyCheckCommandHookTest {
         // no result object to hand back, so the answer captured as it went out is replayed as the text it is, and
         // the status has to come from the record because nothing else can derive it
         duplicate(new CommandReplay(PROCESSED, 201, "{\"resourceId\":7}", Instant.now()));
-        when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
+        when(store.matchesStoredRequest(KEY, "", "request-payload")).thenReturn(true);
 
         var exception = assertThrows(CommandIdempotencyProcessedException.class, () -> hook.onBefore(ctx));
 
@@ -142,7 +145,7 @@ class IdempotencyCheckCommandHookTest {
         var stored = Map.of("error", "bad request");
 
         duplicate(new CommandReplay(ERROR, 400, stored, Instant.now()));
-        when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
+        when(store.matchesStoredRequest(KEY, "", "request-payload")).thenReturn(true);
 
         // this is what the old processing does: a repeat of a failure fails identically rather than being retried
         var exception = assertThrows(CommandIdempotencyFailedException.class, () -> hook.onBefore(ctx));
@@ -157,7 +160,7 @@ class IdempotencyCheckCommandHookTest {
         var ctx = context(KEY);
 
         duplicate(new CommandReplay(PROCESSED, 200, Map.of(), Instant.now()));
-        when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(false);
+        when(store.matchesStoredRequest(KEY, "", "request-payload")).thenReturn(false);
 
         var exception = assertThrows(CommandIdempotencyConflictException.class, () -> hook.onBefore(ctx));
 
@@ -169,7 +172,7 @@ class IdempotencyCheckCommandHookTest {
         var ctx = context(KEY);
 
         duplicate(new CommandReplay(UNKNOWN, null, null, Instant.now()));
-        when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
+        when(store.matchesStoredRequest(KEY, "", "request-payload")).thenReturn(true);
 
         assertThrows(CommandIdempotencyConflictException.class, () -> hook.onBefore(ctx));
     }
@@ -179,7 +182,7 @@ class IdempotencyCheckCommandHookTest {
         var ctx = context(KEY);
 
         when(store.claim(any())).thenReturn(false);
-        when(store.getReplayByKey(KEY)).thenThrow(new IllegalStateException("Cannot rehydrate a stored command result"));
+        when(store.getReplayByKey(KEY, "")).thenThrow(new IllegalStateException("Cannot rehydrate a stored command result"));
 
         var exception = assertThrows(CommandIdempotencyConflictException.class, () -> hook.onBefore(ctx));
 
@@ -187,6 +190,10 @@ class IdempotencyCheckCommandHookTest {
                 "The key has been used and its answer cannot be produced, which is neither a success nor a failure of this request.");
         assertTrue(String.valueOf(exception.getResponse()).contains("cannot be reconstructed"),
                 "The answer must say what went wrong rather than coming back empty.");
+        assertTrue(String.valueOf(exception.getResponse()).contains("was carried out"),
+                "Only a completed command stores a result, so the answer must say the command took effect.");
+        assertTrue(String.valueOf(exception.getResponse()).contains("Do not send it again"),
+                "Inviting a retry under a new key would execute a command that already took effect a second time.");
     }
 
     @Test
@@ -216,7 +223,65 @@ class IdempotencyCheckCommandHookTest {
 
     private void duplicate(CommandReplay replay) {
         when(store.claim(any())).thenReturn(false);
-        when(store.getReplayByKey(KEY)).thenReturn(replay);
+        when(store.getReplayByKey(KEY, "")).thenReturn(replay);
+    }
+
+    @Test
+    void theDistinctorIsOnTheCommandBeforeItsKeyIsClaimed() {
+        var scoped = hookWith(new EntityAndActionNameCustomIdempotencyDistinctor());
+        var ctx = context(KEY);
+
+        when(store.claim(any())).thenAnswer(invocation -> {
+            assertEquals("DOCUMENT|CREATE", invocation.<Command<?>>getArgument(0).getCustomIdempotencyDistinctor(),
+                    "The key is unique together with the distinctor, so the claim has to carry it.");
+
+            return true;
+        });
+
+        scoped.onBefore(ctx);
+
+        assertEquals("DOCUMENT|CREATE", ctx.getCommand().getCustomIdempotencyDistinctor());
+        assertFalse(ctx.isSkipExecution(), "A command that claimed its key must be executed.");
+    }
+
+    @Test
+    void aRepeatIsLookedUpUnderItsOwnDistinctor() {
+        var scoped = hookWith(new EntityAndActionNameCustomIdempotencyDistinctor());
+        var ctx = context(KEY);
+        var replay = new CommandReplay(ERROR, 400, "{\"error\":\"bad request\"}", Instant.now());
+
+        when(store.claim(any())).thenReturn(false);
+        when(store.getReplayByKey(KEY, "DOCUMENT|CREATE")).thenReturn(replay);
+        when(store.matchesStoredRequest(KEY, "DOCUMENT|CREATE", "request-payload")).thenReturn(true);
+
+        var exception = assertThrows(CommandIdempotencyFailedException.class, () -> scoped.onBefore(ctx));
+
+        assertEquals(400, exception.getStatusCode(), "The repeat must be answered from the row with the same key and distinctor.");
+    }
+
+    @Test
+    void aDistinctorThatReturnsNothingIsRefusedBeforeTheKeyIsClaimed() {
+        var broken = hookWith(command -> null);
+
+        var exception = assertThrows(IllegalStateException.class, () -> broken.onBefore(context(KEY)));
+
+        assertTrue(exception.getMessage().contains("empty string"), "The message must say what to return instead.");
+        verifyNoInteractions(store);
+    }
+
+    @Test
+    void aDistinctorTooLongForItsColumnIsRefusedBeforeTheKeyIsClaimed() {
+        var broken = hookWith(command -> "x".repeat(CustomIdempotencyDistinctor.MAX_LENGTH + 1));
+
+        var exception = assertThrows(IllegalStateException.class, () -> broken.onBefore(context(KEY)));
+
+        assertTrue(exception.getMessage().contains(String.valueOf(CustomIdempotencyDistinctor.MAX_LENGTH)),
+                "The message must name the limit.");
+        verifyNoInteractions(store);
+    }
+
+    private IdempotencyCheckCommandHook hookWith(CustomIdempotencyDistinctor distinctor) {
+        return new IdempotencyCheckCommandHook(store, IdempotencyCommandProperties.builder().build(), distinctor);
     }
 
     private static CommandContext<Object, Object> context(String key) {

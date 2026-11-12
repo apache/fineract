@@ -40,8 +40,9 @@ In batch requests, you can set the idempotency key for every batch item, in the 
 
 The new command processing implements idempotency as command hooks, in the `fineract-command-idempotency` module.
 It answers a repeated request the same way the legacy processing does - the same `x-served-from-cache` header, the
-same `425 Too Early` while the original is still running, the same status and body once it has finished - with one
-deliberate difference described under <<Scope of an idempotency key>>.
+same `425 Too Early` while the original is still running, the same status and body once it has finished. By default
+a key is scoped the way the legacy processing scopes it; see <<Scope of an idempotency key>> for the stricter
+alternative.
 
 === Configuration
 
@@ -55,6 +56,7 @@ fineract.command.idempotency.key-header-name=Idempotency-Key
 fineract.command.idempotency.hook-key-header-pre=true
 fineract.command.idempotency.hook-check-pre=true
 fineract.command.idempotency.claim-timeout=10m
+fineract.command.idempotency.custom-distinctor=ENTITY_NAME_AND_ACTION_NAME
 ----
 
 The key is read from the HTTP header only. It is deliberately not read from a query parameter, because keys in query
@@ -110,7 +112,8 @@ that never happened.
 
 | Completed, but its stored result cannot be reconstructed
 | `409 Conflict`, saying so. The key has been used and its answer can no longer be produced - reporting a server error
-would say the request failed, and an empty body would say it succeeded with nothing to return. Neither is true.
+would say the request failed, and an empty body would say it succeeded with nothing to return. Neither is true. Only a
+command that completed stores a result, so the command did take effect: it must not be sent again under a new key.
 
 | Any other state, or a key used for a different request
 | `409 Conflict`.
@@ -118,12 +121,32 @@ would say the request failed, and an empty body would say it succeeded with noth
 
 === Scope of an idempotency key
 
-An idempotency key is unique per tenant across all commands.
+An idempotency key is unique together with a _distinctor_: a value computed from the command when its key is claimed
+and stored beside the key in `m_command.custom_idempotency_distinctor`. The command record is unique on the pair, and a
+repeat is matched - and replayed - only against the record with the same key and the same distinctor.
+`fineract.command.idempotency.custom-distinctor` chooses how the distinctor is computed:
 
-IMPORTANT: This differs from the legacy command processing, where a key is scoped by action and entity name, so the
-same key could be used on two different endpoints. Under the new processing the second of those requests is rejected
-with `409 Conflict` rather than executed. Clients that derive the key from something reused across calls, such as a
-correlation id, have to send a distinct key per request.
+[cols="1,2,3"]
+|===
+| Value | Distinctor | Scope of a key
+
+| `ENTITY_NAME_AND_ACTION_NAME` (default)
+| `EntityAndActionNameCustomIdempotencyDistinctor`: the command's entity name and action name, as `m_permission` spells
+them, joined with `\|` - for example `LOAN\|CREATE`.
+| Unique per tenant, entity and action, the way the legacy command processing scopes a key.
+
+| `NONE`
+| `NoCustomIdempotencyDistinctor`: always the empty string.
+| Unique per tenant across all commands.
+|===
+
+An application can replace the distinctor altogether by defining its own `CustomIdempotencyDistinctor` bean. Its value
+must be the same for every repeat of a request, must not be `null` and must fit the 255-character column; a value that
+does not is refused before the key is claimed.
+
+IMPORTANT: Under `NONE` the new processing is stricter than the legacy one: the same key sent to two different
+endpoints is rejected with `409 Conflict` for the second rather than executed. Clients that derive the key from
+something reused across calls, such as a correlation id, then have to send a distinct key per request.
 
 A repeat is also only replayed when it carries the same request as the original. A key reused for the same endpoint
 with a different body is rejected with `409 Conflict` instead of being answered with the earlier result, which would
@@ -135,6 +158,18 @@ Claiming a key writes the command record, but the idempotency hooks never write 
 move a command out of `UNDER_PROCESSING` and store what it produced. Idempotency therefore cannot work without
 auditing, and an application configured with idempotency enabled and `fineract.command.audit.enabled=false` refuses to
 start rather than failing later in a way that only shows up on a client's second request.
+
+The same applies to the two audit hooks that record how a command finished, which can be switched off on their own:
+with idempotency enabled, `fineract.command.audit.hook-post-enabled=false` (nothing records a completed command) or
+`fineract.command.audit.hook-error-enabled=false` (nothing records a failed one) also refuses to start. The before hook
+is not required, because claiming the key has already written the record it would write.
+
+The claim is always stored with the time it was made, which is what <<A claim that never finishes>> measures. It is
+taken from the timestamp hook when that is on, and from the moment of the claim when it is not.
+
+Every result type a command handler returns has to be readable back from the store, since a repeat is answered by
+reading it back. A test walks every handler on the classpath and fails for a result type Jackson cannot construct, such
+as a Lombok `@Builder` class without `@NoArgsConstructor` and `@AllArgsConstructor`.
 
 See the command auditing chapter for what is recorded and when.
 

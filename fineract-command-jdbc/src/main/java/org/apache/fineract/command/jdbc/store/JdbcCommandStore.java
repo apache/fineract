@@ -27,6 +27,7 @@ import static org.apache.fineract.command.core.CommandState.UNKNOWN;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -67,20 +68,20 @@ public class JdbcCommandStore implements CommandStore {
     }
 
     @Override
-    public Command<Object> getByKey(String key) {
-        return repository.findOneByIdempotencyKey(key).map(mapper::map).orElse(null);
+    public Command<Object> getByKey(String key, String distinctor) {
+        return repository.findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(key, distinctor).map(mapper::map).orElse(null);
     }
 
     @Override
-    public boolean existsByKey(String key) {
-        return repository.existsByIdempotencyKey(key);
+    public boolean existsByKey(String key, String distinctor) {
+        return repository.existsByIdempotencyKeyAndCustomIdempotencyDistinctor(key, distinctor);
     }
 
     @Override
-    public CommandReplay getReplayByKey(String key) {
-        return repository.findOneByIdempotencyKey(key)
+    public CommandReplay getReplayByKey(String key, String distinctor) {
+        return repository.findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(key, distinctor)
                 .map(entity -> new CommandReplay(entity.getState(), entity.getResponseStatusCode(),
-                        replayResponse(key, entity.getResponse()), entity.getCreatedAt()))
+                        replayResponse(key, distinctor, entity.getResponse()), entity.getCreatedAt()))
                 .orElseGet(() -> new CommandReplay(UNKNOWN, null, null, null));
     }
 
@@ -93,7 +94,7 @@ public class JdbcCommandStore implements CommandStore {
      * A command that produced no result of its own leaves only what was captured as it went out, and that is replayed
      * as the text it was stored as. Re-rendering it would change the bytes: a decimal written as 1.50 comes back 1.5.
      */
-    private Object replayResponse(String key, JsonNode stored) {
+    private Object replayResponse(String key, String distinctor, JsonNode stored) {
         if (isNull(stored)) {
             return null;
         }
@@ -102,20 +103,27 @@ public class JdbcCommandStore implements CommandStore {
             return jsonMapper.map(stored);
         }
 
-        return repository.findResponseTextByIdempotencyKey(key).orElse(null);
+        return repository.findResponseTextByIdempotencyKey(key, distinctor).orElse(null);
     }
 
     @Override
     @Retry(name = "commandStore")
-    public void recordResponse(String key, int statusCode, String body) {
-        var updated = repository.updateResponse(key, statusCode, body);
+    public void recordResponse(String key, String distinctor, int statusCode, String body) {
+        var updated = repository.updateResponse(key, distinctor, statusCode, body);
 
-        log.debug("Recorded response {} for idempotency key {} ({} row(s))", statusCode, key, updated);
+        log.debug("Recorded response {} for idempotency key {} (distinctor '{}', {} row(s))", statusCode, key, distinctor, updated);
     }
 
     @Override
     @Retry(name = "commandStore")
     public boolean claim(Command<?> command) {
+        // the claim's age is what tells an abandoned claim from a running one, so it must never be stored without one.
+        // The timestamp hook normally sets it as the request arrives, but it can be switched off; set on the command
+        // rather than only on the row, so that the audit hooks rewriting the row later keep the same value
+        if (isNull(command.getCreatedAt())) {
+            command.setCreatedAt(Instant.now());
+        }
+
         final var commandEntity = mapper.map(command);
 
         commandEntity.setState(UNDER_PROCESSING);
@@ -124,12 +132,14 @@ public class JdbcCommandStore implements CommandStore {
             repository.save(commandEntity);
             command.setCommandId(commandEntity.getId());
 
-            log.debug("Claimed idempotency key {} with command id {}", command.getIdempotencyKey(), commandEntity.getId());
+            log.debug("Claimed idempotency key {} (distinctor '{}') with command id {}", command.getIdempotencyKey(),
+                    command.getCustomIdempotencyDistinctor(), commandEntity.getId());
 
             return true;
         } catch (RuntimeException e) {
             if (isDuplicateKey(e)) {
-                log.debug("Idempotency key {} is already claimed", command.getIdempotencyKey());
+                log.debug("Idempotency key {} (distinctor '{}') is already claimed", command.getIdempotencyKey(),
+                        command.getCustomIdempotencyDistinctor());
 
                 return false;
             }
@@ -139,7 +149,7 @@ public class JdbcCommandStore implements CommandStore {
     }
 
     @Override
-    public boolean matchesStoredRequest(String key, Object payload) {
+    public boolean matchesStoredRequest(String key, String distinctor, Object payload) {
         if (isNull(payload)) {
             return false;
         }
@@ -147,7 +157,7 @@ public class JdbcCommandStore implements CommandStore {
         // compared as text rather than as parsed nodes: the stored text was written by this same mapper, so an
         // identical request produces identical text, while parsing would round a decimal through a double and make
         // two amounts that differ only in their last digits look like the same request
-        return repository.findRequestTextByIdempotencyKey(key)
+        return repository.findRequestTextByIdempotencyKey(key, distinctor)
                 .map(stored -> stored.equals(objectMapper.writeValueAsString(jsonMapper.map(payload)))).orElse(false);
     }
 

@@ -36,6 +36,10 @@ public final class IdempotencyCommandConstants {
     public static final String COMMAND_IDEMPOTENCY_CHECK_BASE_PACKAGE = COMMAND_IDEMPOTENCY_BASE_PACKAGE + ".check";
     /** Marks the request that claimed a key, so the capture filter knows whose answer it is looking at. */
     public static final String COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE = "fineract.command.idempotency.claimedKey";
+    /** The distinctor the claimed key is unique together with; the capture filter needs both to find the row. */
+    public static final String COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE = "fineract.command.idempotency.claimedDistinctor";
+    public static final String COMMAND_IDEMPOTENCY_PROPERTY_CUSTOM_DISTINCTOR = COMMAND_IDEMPOTENCY_PROPERTIES_PREFIX
+            + ".custom-distinctor";
     public static final int COMMAND_IDEMPOTENCY_HOOK_HEADERS_BEFORE = 20;
     public static final int COMMAND_IDEMPOTENCY_HOOK_CHECK_BEFORE = 21;
 }

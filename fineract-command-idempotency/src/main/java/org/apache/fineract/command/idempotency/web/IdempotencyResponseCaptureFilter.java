@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.command.idempotency.web;
 
+import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE;
 
 import jakarta.servlet.FilterChain;
@@ -88,10 +89,12 @@ public class IdempotencyResponseCaptureFilter extends OncePerRequestFilter {
             return;
         }
 
+        // the key is unique together with its distinctor, so both are needed to find the row this request claimed
+        var distinctor = (String) request.getAttribute(COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE);
         var body = replayableBody(key, wrapper);
 
         try {
-            store.recordResponse(key, wrapper.getStatus(), body);
+            store.recordResponse(key, distinctor == null ? "" : distinctor, wrapper.getStatus(), body);
         } catch (RuntimeException e) {
             // the command itself has been processed and answered; failing here must not change that outcome. The
             // record is left claiming an outcome it cannot produce, so the failure is logged loudly - but with the

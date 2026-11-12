@@ -35,6 +35,13 @@ public abstract class Command<T> implements Serializable {
 
     private String idempotencyKey;
 
+    /**
+     * What {@link #idempotencyKey} is unique together with: a command row is unique on the pair, and a repeat is
+     * matched only against the row with the same key and the same distinctor. Set when the key is claimed; the empty
+     * string, the column's default, when nothing distinguishes it - including for a command that carries no key at all.
+     */
+    private String customIdempotencyDistinctor = "";
+
     private String ipAddress;
 
     private Instant createdAt;
@@ -72,6 +79,14 @@ public abstract class Command<T> implements Serializable {
      * before the command is stored.
      */
     public abstract String entityName();
+
+    /**
+     * The column is {@code NOT NULL}, and an absent distinctor means "none", so {@code null} is stored as the empty
+     * string rather than rejected by the database.
+     */
+    public void setCustomIdempotencyDistinctor(String customIdempotencyDistinctor) {
+        this.customIdempotencyDistinctor = customIdempotencyDistinctor == null ? "" : customIdempotencyDistinctor;
+    }
 
     /** The action this command performs on {@link #entityName()}, again as {@code m_permission} spells it. */
     public abstract String actionName();

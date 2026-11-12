@@ -19,6 +19,8 @@
 package org.apache.fineract.command.idempotency.check;
 
 import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_ENABLED;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_PROPERTY_ENABLED;
 
 import jakarta.annotation.PostConstruct;
@@ -37,6 +39,13 @@ import org.springframework.stereotype.Component;
  * idempotency without them and the first request for a key succeeds, the row stays {@code UNDER_PROCESSING} for ever,
  * and every repeat of that key is answered {@code 425 Too Early} - the key is poisoned, silently, and only from the
  * second request onwards. That is worth failing a startup over rather than warning about.
+ *
+ * <p>
+ * Switching auditing on as a whole is not enough: the after hook records a command that completed and the error hook
+ * one that failed, and each can be switched off on its own. Without the after hook every successful command stays
+ * claimed; without the error hook every failed one does. Either way a repeat is told to retry until the claim times
+ * out, and is then told the command never finished - which, for a command that completed, is untrue. The before hook is
+ * not required: claiming the key has already written the row it would write.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -63,6 +72,18 @@ final class IdempotencyCommandPropertyCheck {
                     + "ever. Enable auditing, or set " + COMMAND_IDEMPOTENCY_PROPERTY_ENABLED + "=false.");
         }
 
+        requireHook(COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED, audit.getHookPostEnabled(), "completed");
+        requireHook(COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, audit.getHookErrorEnabled(), "failed");
+
         log.info("Command idempotency is enabled.");
+    }
+
+    private static void requireHook(String property, Boolean enabled, String outcome) {
+        if (!Boolean.TRUE.equals(enabled)) {
+            throw new IllegalStateException("Command idempotency is enabled but " + property + " is not: it is the audit hook that "
+                    + "records a command that " + outcome + ", so without it such a command stays under processing and every "
+                    + "repeat of its idempotency key is refused instead of being answered. Enable the hook, or set "
+                    + COMMAND_IDEMPOTENCY_PROPERTY_ENABLED + "=false.");
+        }
     }
 }

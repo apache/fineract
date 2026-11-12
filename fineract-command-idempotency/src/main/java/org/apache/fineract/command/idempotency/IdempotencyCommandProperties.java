@@ -28,6 +28,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
+import org.apache.fineract.command.idempotency.distinctor.CustomIdempotencyDistinctorType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Builder
@@ -71,4 +72,12 @@ public final class IdempotencyCommandProperties implements Serializable {
      */
     @Builder.Default
     private Duration claimTimeout = Duration.ofMinutes(10);
+
+    /**
+     * What an idempotency key is unique together with. {@code ENTITY_NAME_AND_ACTION_NAME}, the default, scopes it to
+     * the command's entity and action, the way the legacy command processing does; {@code NONE} makes a key unique per
+     * tenant across all commands. See {@link CustomIdempotencyDistinctorType}.
+     */
+    @Builder.Default
+    private CustomIdempotencyDistinctorType customDistinctor = CustomIdempotencyDistinctorType.ENTITY_NAME_AND_ACTION_NAME;
 }

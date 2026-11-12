@@ -22,6 +22,7 @@ import static org.apache.fineract.command.core.CommandState.ERROR;
 import static org.apache.fineract.command.core.CommandState.PROCESSED;
 import static org.apache.fineract.command.core.CommandState.UNDER_PROCESSING;
 import static org.apache.fineract.command.core.exception.AbstractCommandIdempotencyException.IDEMPOTENT_CACHE_HEADER;
+import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_HOOK_CHECK_BEFORE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_PROPERTY_HOOK_CHECK_PRE;
@@ -31,6 +32,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.apache.fineract.command.core.CommandReplay;
@@ -40,6 +42,7 @@ import org.apache.fineract.command.core.exception.CommandIdempotencyFailedExcept
 import org.apache.fineract.command.core.exception.CommandIdempotencyInProgressException;
 import org.apache.fineract.command.core.exception.CommandIdempotencyProcessedException;
 import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
+import org.apache.fineract.command.idempotency.distinctor.CustomIdempotencyDistinctor;
 import org.apache.fineract.command.util.ServletHeaderUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -58,6 +61,8 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
 
     private final IdempotencyCommandProperties properties;
 
+    private final CustomIdempotencyDistinctor distinctor;
+
     @Override
     public void onBefore(CommandContext<Object, Object> ctx) {
         var command = ctx.getCommand();
@@ -67,10 +72,16 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
             return;
         }
 
+        // the key is unique together with its distinctor, so the distinctor has to be on the command before it is
+        // claimed
+        var distinctorValue = distinctorFor(command);
+
+        command.setCustomIdempotencyDistinctor(distinctorValue);
+
         // claiming the key is what detects duplicates: the unique constraint means exactly one concurrent request can
         // win, whereas a read-only check followed by execution lets every racer through
         if (store.claim(command)) {
-            rememberClaimForResponseCapture(key);
+            rememberClaimForResponseCapture(key, distinctorValue);
 
             return;
         }
@@ -79,10 +90,10 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
         ctx.setSkipExecution(true);
         ctx.setSkipHooks(true);
 
-        var replay = replayFor(key);
+        var replay = replayFor(key, distinctorValue);
 
-        log.warn("Duplicate idempotency key detected: {} (state = {}, user = {}, ip = {})", key, replay.state(),
-                command.getInitiatedByUsername(), command.getIpAddress());
+        log.warn("Duplicate idempotency key detected: {} (distinctor = '{}', state = {}, user = {}, ip = {})", key, distinctorValue,
+                replay.state(), command.getInitiatedByUsername(), command.getIpAddress());
 
         if (UNDER_PROCESSING.equals(replay.state())) {
             if (abandoned(replay)) {
@@ -93,7 +104,7 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
             throw new CommandIdempotencyInProgressException(key, replay.response());
         }
 
-        if (!store.matchesStoredRequest(key, command.getPayload())) {
+        if (!store.matchesStoredRequest(key, distinctorValue, command.getPayload())) {
             // replaying here would answer a question that was never asked
             throw new CommandIdempotencyConflictException(key, null);
         }
@@ -120,17 +131,23 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
      * deserialises - leaves the original answer unreachable. Letting that surface as a server error would say the
      * request failed, and answering with an empty body would say it succeeded with no content; both are untrue. The key
      * has been used and its answer cannot be produced, so the request is refused and told why.
+     *
+     * <p>
+     * Only a command that completed stores a result of its own, so a result that will not rehydrate means the command
+     * was carried out. The answer says so, and must not suggest sending it again under a new key: that would carry it
+     * out a second time, which is the duplicate this mechanism exists to prevent.
      */
-    private CommandReplay replayFor(String key) {
+    private CommandReplay replayFor(String key, String distinctorValue) {
         try {
-            return store.getReplayByKey(key);
+            return store.getReplayByKey(key, distinctorValue);
         } catch (RuntimeException e) {
             log.error("Cannot reconstruct the stored result for idempotency key {}", key, e);
 
             throw new CommandIdempotencyConflictException(key,
                     Map.of("idempotencyKey", key, "error",
-                            "The result stored under this idempotency key cannot be reconstructed, so the original answer "
-                                    + "cannot be replayed. Retry with a new idempotency key."),
+                            "The command sent with this idempotency key was carried out, but the result stored for it cannot "
+                                    + "be reconstructed, so the original answer cannot be replayed. Do not send it again "
+                                    + "under a new idempotency key: that would carry it out a second time."),
                     e);
         }
     }
@@ -205,11 +222,34 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
         }
     }
 
-    private static void rememberClaimForResponseCapture(String key) {
+    private static void rememberClaimForResponseCapture(String key, String distinctorValue) {
         var attributes = RequestContextHolder.getRequestAttributes();
 
         if (attributes != null) {
             attributes.setAttribute(COMMAND_IDEMPOTENCY_CLAIMED_KEY_ATTRIBUTE, key, RequestAttributes.SCOPE_REQUEST);
+            attributes.setAttribute(COMMAND_IDEMPOTENCY_CLAIMED_DISTINCTOR_ATTRIBUTE, distinctorValue, RequestAttributes.SCOPE_REQUEST);
         }
+    }
+
+    /**
+     * The configured distinctor's value for this command, refused here rather than by the database when it cannot be
+     * stored: the column does not take {@code null}, and a value longer than the column would fail the claim with a
+     * data error instead of a message that names the distinctor.
+     */
+    private String distinctorFor(Command<?> command) {
+        var value = distinctor.distinctorFor(command);
+
+        if (value == null) {
+            throw new IllegalStateException(distinctor.getClass().getName() + " returned no idempotency distinctor for "
+                    + command.getClass().getName() + "; return the empty string to distinguish nothing.");
+        }
+
+        if (value.length() > CustomIdempotencyDistinctor.MAX_LENGTH) {
+            throw new IllegalStateException(
+                    distinctor.getClass().getName() + " returned an idempotency distinctor of " + value.length() + " characters for "
+                            + command.getClass().getName() + "; at most " + CustomIdempotencyDistinctor.MAX_LENGTH + " can be stored.");
+        }
+
+        return value;
     }
 }

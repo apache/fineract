@@ -72,6 +72,9 @@ public class CommandEntity implements Serializable {
     @Column("rejected_by_username")
     private String rejectedByUsername;
 
+    @Column("custom_idempotency_distinctor")
+    private String customIdempotencyDistinctor;
+
     @Column("entity_name")
     private String entityName;
 

@@ -77,6 +77,10 @@ execution that never happened.
 | `idempotency_key`
 | The key the command was claimed under. See the idempotency chapter.
 
+| `custom_idempotency_distinctor`
+| What the key is unique together with, computed when the key was claimed. The empty string when nothing distinguishes
+it, including for a command without a key. See the idempotency chapter.
+
 | `response_status_code`
 | Only set for a command that produced no result of its own. See the idempotency chapter.
 |===
@@ -131,6 +135,10 @@ That makes auditing a prerequisite rather than a companion. An application confi
 auditing disabled refuses to start, naming the properties that conflict. Were it allowed to run, the first request
 under a key would be answered normally, its record would stay `UNDER_PROCESSING` for ever, and every repeat of that key
 would be answered `425 Too Early` - a failure that only appears on the second request and never resolves.
+
+The same holds for the after and error hooks individually: with idempotency enabled, switching off
+`fineract.command.audit.hook-post-enabled` or `fineract.command.audit.hook-error-enabled` also refuses to start. The
+before hook can be switched off, because claiming the key writes the record it would otherwise write.
 
 The reverse is fine and is a supported arrangement: auditing without idempotency records every command as usual, reads
 no idempotency key, and executes a repeated request again rather than replaying it.

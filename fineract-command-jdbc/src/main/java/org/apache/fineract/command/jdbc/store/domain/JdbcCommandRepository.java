@@ -27,9 +27,10 @@ import org.springframework.data.repository.query.QueryByExampleExecutor;
 
 public interface JdbcCommandRepository extends ListCrudRepository<CommandEntity, Long>, QueryByExampleExecutor<CommandEntity> {
 
-    Optional<CommandEntity> findOneByIdempotencyKey(String idempotencyKey);
+    Optional<CommandEntity> findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(String idempotencyKey,
+            String customIdempotencyDistinctor);
 
-    boolean existsByIdempotencyKey(String idempotencyKey);
+    boolean existsByIdempotencyKeyAndCustomIdempotencyDistinctor(String idempotencyKey, String customIdempotencyDistinctor);
 
     /**
      * Records what the original request was answered with, but only for a command that stored no result of its own.
@@ -46,23 +47,26 @@ public interface JdbcCommandRepository extends ListCrudRepository<CommandEntity,
     @Query("""
             UPDATE m_command
             SET response_status_code = :statusCode, response = :body
-            WHERE idempotency_key = :idempotencyKey AND response IS NULL
+            WHERE idempotency_key = :idempotencyKey AND custom_idempotency_distinctor = :distinctor AND response IS NULL
             """)
-    int updateResponse(@Param("idempotencyKey") String idempotencyKey, @Param("statusCode") int statusCode, @Param("body") String body);
+    int updateResponse(@Param("idempotencyKey") String idempotencyKey, @Param("distinctor") String distinctor,
+            @Param("statusCode") int statusCode, @Param("body") String body);
 
     /**
      * Reads the stored response as the exact text it was stored as, for the fallback case where there is no result
      * object to rehydrate. Going through the mapped JSON node would re-render it, and re-rendering changes the bytes: a
      * decimal written as 1.50 comes back as 1.5.
      */
-    @Query("SELECT response FROM m_command WHERE idempotency_key = :idempotencyKey")
-    Optional<String> findResponseTextByIdempotencyKey(@Param("idempotencyKey") String idempotencyKey);
+    @Query("SELECT response FROM m_command WHERE idempotency_key = :idempotencyKey AND custom_idempotency_distinctor = :distinctor")
+    Optional<String> findResponseTextByIdempotencyKey(@Param("idempotencyKey") String idempotencyKey,
+            @Param("distinctor") String distinctor);
 
     /**
      * Reads the stored request as the exact text it was stored as, for comparing a retry against it. Comparing parsed
      * nodes instead would collapse a decimal to a double, so two amounts differing beyond a double's precision would
      * compare equal and the wrong answer would be replayed.
      */
-    @Query("SELECT request FROM m_command WHERE idempotency_key = :idempotencyKey")
-    Optional<String> findRequestTextByIdempotencyKey(@Param("idempotencyKey") String idempotencyKey);
+    @Query("SELECT request FROM m_command WHERE idempotency_key = :idempotencyKey AND custom_idempotency_distinctor = :distinctor")
+    Optional<String> findRequestTextByIdempotencyKey(@Param("idempotencyKey") String idempotencyKey,
+            @Param("distinctor") String distinctor);
 }

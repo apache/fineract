@@ -119,6 +119,20 @@ public class CommandIdempotencyKeyMigrationTest {
             assertEquals(3, count(connection, "idempotency_key IS NULL"), "The unique constraint must not apply to null keys.");
 
             assertThrows(SQLException.class, () -> insert(connection, 103, "KEEP-1-duplicate-2"), "A suffixed key must be unique as well.");
+
+            // every row that predates the distinctor gets the empty one, and so does a row inserted without one
+            assertEquals(count(connection, "1 = 1"), count(connection, "custom_idempotency_distinctor = ''"),
+                    "Existing rows and rows inserted without a distinctor must get the empty one, never null.");
+
+            // the key is unique together with its distinctor, not on its own
+            insert(connection, 104, "KEEP-1", "LOAN|CREATE");
+            assertEquals(2, count(connection, "idempotency_key = 'KEEP-1'"), "The same key under another distinctor must be accepted.");
+            assertThrows(SQLException.class, () -> insert(connection, 105, "KEEP-1", "LOAN|CREATE"),
+                    "The same key under the same distinctor must still be rejected.");
+
+            // the key-only constraint cannot be restored over a key stored under two distinctors, which is the
+            // rollback's documented limit; the test removes the row so that it can roll back past it
+            delete(connection, 104);
         }
 
         rollbackUniqueConstraint(container, context);
@@ -141,13 +155,13 @@ public class CommandIdempotencyKeyMigrationTest {
     }
 
     /**
-     * Reverts the unique constraint, which means also reverting the response-cache and action/entity changesets stacked
-     * on top of it. Both databases apply the same number of changesets from that point on, so this count has to grow
-     * with every part added after 0003.
+     * Reverts the unique constraint, which means also reverting the response-cache, action/entity and distinctor
+     * changesets stacked on top of it. Both databases apply the same number of changesets from that point on, so this
+     * count has to grow with every changeset added after 0003.
      */
     private void rollbackUniqueConstraint(JdbcDatabaseContainer<?> container, String context) throws Exception {
         try (var connection = connect(container); var liquibase = liquibase(connection)) {
-            liquibase.rollback(3, new Contexts(context), new LabelExpression());
+            liquibase.rollback(6, new Contexts(context), new LabelExpression());
         }
     }
 
@@ -162,6 +176,23 @@ public class CommandIdempotencyKeyMigrationTest {
             resultSet.next();
 
             return resultSet.getInt(1);
+        }
+    }
+
+    private static void insert(Connection connection, long id, String key, String distinctor) throws SQLException {
+        try (var statement = connection.prepareStatement(
+                "INSERT INTO m_command (id, idempotency_key, custom_idempotency_distinctor, state) VALUES (?, ?, ?, 'PROCESSED')")) {
+            statement.setLong(1, id);
+            statement.setString(2, key);
+            statement.setString(3, distinctor);
+            statement.executeUpdate();
+        }
+    }
+
+    private static void delete(Connection connection, long id) throws SQLException {
+        try (var statement = connection.prepareStatement("DELETE FROM m_command WHERE id = ?")) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
         }
     }
 

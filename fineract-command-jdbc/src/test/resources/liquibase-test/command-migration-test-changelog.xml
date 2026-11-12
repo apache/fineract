@@ -73,5 +73,6 @@
     <include file="db/changelog/tenant/module/command/parts/0003_idempotency_key_unique.xml"/>
     <include file="db/changelog/tenant/module/command/parts/0004_command_response_cache.xml"/>
     <include file="db/changelog/tenant/module/command/parts/0005_command_action_entity.xml"/>
+    <include file="db/changelog/tenant/module/command/parts/0006_idempotency_key_distinctor.xml"/>
 
 </databaseChangeLog>
