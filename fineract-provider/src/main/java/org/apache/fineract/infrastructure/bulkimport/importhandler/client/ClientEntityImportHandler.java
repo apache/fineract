@@ -84,10 +84,9 @@ public class ClientEntityImportHandler implements ImportHandler {
         Long legalFormId = 2L;
         String name = ImportHandlerUtils.readAsString(ClientEntityConstants.NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientEntityConstants.OFFICE_NAME_COL, row);
-        Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        if (officeId == 0L) {
-            officeId = null;
-        }
+        Long officeId = ImportHandlerUtils.requireLookupId(
+                ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName), "Office",
+                officeName);
         String staffName = ImportHandlerUtils.readAsString(ClientEntityConstants.STAFF_NAME_COL, row);
         Long staffId = null;
         if (staffName != null) {
@@ -95,10 +94,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         }
         LocalDate incorportionDate = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_DATE_COL, row);
         LocalDate incorporationTill = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL, row);
-        String mobileNo = null;
-        if (ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row) != null) {
-            mobileNo = Objects.requireNonNull(ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row)).toString();
-        }
+        String mobileNo = ImportHandlerUtils.readAsDigits(ClientEntityConstants.MOBILE_NO_COL, row, "Mobile number");
 
         String clientType = ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;

@@ -72,7 +72,8 @@ public class SavingsTransactionImportHandler implements ImportHandler {
     private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
         List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.TRANSACTION_TYPE_COL,
+                TransactionConstants.NOTE_COL);
         Long savingsAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;

@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -85,10 +84,9 @@ public class ClientPersonImportHandler implements ImportHandler {
         String lastName = ImportHandlerUtils.readAsString(ClientPersonConstants.LAST_NAME_COL, row);
         String middleName = ImportHandlerUtils.readAsString(ClientPersonConstants.MIDDLE_NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientPersonConstants.OFFICE_NAME_COL, row);
-        Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        if (officeId == 0L) {
-            officeId = null;
-        }
+        Long officeId = ImportHandlerUtils.requireLookupId(
+                ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName), "Office",
+                officeName);
         String staffName = ImportHandlerUtils.readAsString(ClientPersonConstants.STAFF_NAME_COL, row);
         Long staffId = null;
         if (staffName != null) {
@@ -101,10 +99,7 @@ public class ClientPersonImportHandler implements ImportHandler {
         if (!active) {
             activationDate = submittedOn;
         }
-        String mobileNo = null;
-        if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row) != null) {
-            mobileNo = Objects.requireNonNull(ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row)).toString();
-        }
+        String mobileNo = ImportHandlerUtils.readAsDigits(ClientPersonConstants.MOBILE_NO_COL, row, "Mobile number");
         LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
 
         String clientType = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_TYPE_COL, row);
