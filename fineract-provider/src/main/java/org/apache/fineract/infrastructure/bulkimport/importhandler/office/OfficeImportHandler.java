@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -61,13 +62,14 @@ public class OfficeImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        AtomicInteger errorCount = new AtomicInteger();
         Map<Integer, String> rowErrors = new HashMap<>();
-        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat, rowErrors);
-        return importEntity(workbook, offices, dateFormat, locale, rowErrors);
+        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat, errorCount, rowErrors);
+        return importEntity(workbook, offices, dateFormat, locale, errorCount.get(), rowErrors);
     }
 
     private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
-            final Map<Integer, String> rowErrors) {
+            final AtomicInteger errorCount, final Map<Integer, String> rowErrors) {
         List<OfficeData> offices = new ArrayList<>();
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
@@ -75,7 +77,11 @@ public class OfficeImportHandler implements ImportHandler {
             Row row;
             row = officeSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)) {
-                offices.add(readOffice(row, locale, dateFormat, rowErrors));
+                try {
+                    offices.add(readOffice(row, locale, dateFormat, rowErrors));
+                } catch (RuntimeException re) {
+                    ImportHandlerUtils.logReadExcelError(re, officeSheet, rowIndex, OfficeConstants.STATUS_COL, errorCount);
+                }
             }
         }
         return offices;
@@ -113,13 +119,13 @@ public class OfficeImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<OfficeData> offices, final String dateFormat, final String locale,
-            final Map<Integer, String> rowErrors) {
+            final int readErrorCount, final Map<Integer, String> rowErrors) {
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
 
         int successCount = 0;
-        int errorCount = 0;
+        int errorCount = readErrorCount;
         String errorMessage;
         for (OfficeData office : offices) {
             try {
