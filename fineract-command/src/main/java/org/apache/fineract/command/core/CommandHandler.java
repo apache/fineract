@@ -25,6 +25,16 @@ public interface CommandHandler<REQ, RES> {
 
     RES handle(Command<REQ> command);
 
+    /**
+     * The fallback a handler's {@code @Retry(fallbackMethod = "fallback")} names.
+     *
+     * <p>
+     * Every handler that names it has to redeclare it with its own response type, even when the override does nothing
+     * but call this one. resilience4j only takes a fallback whose return type fits the return type of the method it
+     * guards, and this default returns {@code RES}, which erases to {@code Object}; a {@code handle} method returning a
+     * concrete response does not accept that. Without the override the fallback is not found: resilience4j logs "No
+     * fallback method match found" on every call and runs without one.
+     */
     @SneakyThrows
     default RES fallback(Command<REQ> command, Throwable t) {
         // NOTE: any command handler can override this default to implement more specialized fallbacks.
