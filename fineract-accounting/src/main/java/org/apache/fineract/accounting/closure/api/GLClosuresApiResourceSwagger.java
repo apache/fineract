@@ -20,6 +20,8 @@ package org.apache.fineract.accounting.closure.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.List;
+import org.apache.fineract.organisation.office.data.OfficeData;
 
 /**
  * Swagger response and request schemas for GL Closures.
@@ -61,6 +63,7 @@ final class GLClosuresApiResourceSwagger {
         public String lastUpdatedByUsername;
         @Schema(example = "closed")
         public String comments;
+        public List<OfficeData> allowedOffices;
 
     }
 
