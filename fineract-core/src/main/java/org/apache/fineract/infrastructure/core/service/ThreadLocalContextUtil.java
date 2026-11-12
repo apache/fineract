@@ -20,11 +20,13 @@ package org.apache.fineract.infrastructure.core.service;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.cache.service.ThreadLocalCacheStore;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.springframework.cache.Cache;
 import org.springframework.util.Assert;
 
 /**
@@ -127,6 +129,35 @@ public final class ThreadLocalContextUtil {
         actionContext.remove();
         // Transaction-scoped cache entries must not survive from one request (or job execution) to the next.
         ThreadLocalCacheStore.remove();
+    }
+
+    public static Runnable preservingContext(final Runnable task) {
+        return () -> {
+            final String dataSource = contextHolder.get();
+            final FineractPlatformTenant tenant = tenantContext.get();
+            final String authToken = authTokenContext.get();
+            final HashMap<BusinessDateType, LocalDate> businessDates = businessDateContext.get();
+            final ActionContext action = actionContext.get();
+            final Map<String, Cache> caches = ThreadLocalCacheStore.detach();
+            try {
+                task.run();
+            } finally {
+                ThreadLocalCacheStore.attach(caches);
+                restore(contextHolder, dataSource);
+                restore(tenantContext, tenant);
+                restore(authTokenContext, authToken);
+                restore(businessDateContext, businessDates);
+                restore(actionContext, action);
+            }
+        };
+    }
+
+    private static <T> void restore(final ThreadLocal<T> local, final T value) {
+        if (value == null) {
+            local.remove();
+        } else {
+            local.set(value);
+        }
     }
 
 }
