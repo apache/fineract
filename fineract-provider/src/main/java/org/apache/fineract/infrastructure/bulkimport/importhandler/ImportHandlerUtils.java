@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
 import com.google.common.base.Splitter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -213,6 +214,26 @@ public final class ImportHandlerUtils {
             throw new IllegalArgumentException(columnLabel(colIndex, row) + " '" + value.trim() + "' not found");
         }
         return Long.parseLong(id);
+    }
+
+    public static String amountDigitsError(final BigDecimal amount, final Integer currencyDigits) {
+        if (amount != null && currencyDigits != null && amount.stripTrailingZeros().scale() > currencyDigits) {
+            return "Amount has more decimal places than the currency allows (" + currencyDigits + ")";
+        }
+        return null;
+    }
+
+    public static void requireAmountWithinCurrencyDigits(final BigDecimal amount, final Integer currencyDigits) {
+        final String error = amountDigitsError(amount, currencyDigits);
+        if (error != null) {
+            throw new IllegalArgumentException(error);
+        }
+    }
+
+    public static void requireSubmittedOnNotAfterActivation(final LocalDate submittedOn, final LocalDate activationDate) {
+        if (submittedOn != null && activationDate != null && DateUtils.isAfter(submittedOn, activationDate)) {
+            throw new IllegalArgumentException("Submitted On date cannot be after the Activation date");
+        }
     }
 
     public static Long requireLookupId(Long id, String label, String name) {

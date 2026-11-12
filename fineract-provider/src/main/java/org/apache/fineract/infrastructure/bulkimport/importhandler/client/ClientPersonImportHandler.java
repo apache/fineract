@@ -103,6 +103,8 @@ public class ClientPersonImportHandler implements ImportHandler {
         Boolean active = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ACTIVE_COL, row);
         if (!active) {
             activationDate = submittedOn;
+        } else {
+            ImportHandlerUtils.requireSubmittedOnNotAfterActivation(submittedOn, activationDate);
         }
         String mobileNo = ImportHandlerUtils.readAsDigits(ClientPersonConstants.MOBILE_NO_COL, row, "Mobile number");
         LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
