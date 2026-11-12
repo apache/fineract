@@ -436,22 +436,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             mergeAdditionalInstallmentsBeforeMaturityDate(installments, scheduleModel, loan);
         }
 
-        installments.sort(Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate));
-        int installmentNumber = 1;
-        LocalDate previousDueDate = null;
-        for (LoanRepaymentScheduleInstallment installment : installments) {
-            installment.updateInstallmentNumber(installmentNumber++);
-            // Periods must not overlap. The dates of the repayment periods come from the model, which does not hold the
-            // additional installments: one kept within the schedule ends after the next period starts, and one moved
-            // to the new maturity date still starts at the old one. An installment starts when the previous one ends.
-            // A down payment falls due within a repayment period (on a later disbursement date), so it is left out.
-            if (!installment.isDownPayment()) {
-                if (previousDueDate != null && installment.getFromDate().isBefore(previousDueDate)) {
-                    installment.updateFromDate(previousDueDate);
-                }
-                previousDueDate = installment.getDueDate();
-            }
-        }
+        // The dates of the repayment periods come from the model, which does not hold the additional installments: one
+        // kept within the schedule ends after the next period starts, and one moved to the new maturity date still
+        // starts at the old one
+        reprocessInstallments(installments);
     }
 
     private Optional<LoanTransaction> findLastActiveReAgeTransactionIn(List<LoanTransaction> transactions) {
@@ -3775,13 +3763,21 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return newInstallment;
     }
 
+    /**
+     * Numbers the installments in order of their due dates and lets each installment start when the previous one ends.
+     * A down payment falls due within a repayment period (on a later disbursement date), so it is left out of the
+     * chaining: its dates are kept, and the installment after it starts when the installment before it ends.
+     */
     private void reprocessInstallments(final List<LoanRepaymentScheduleInstallment> installments) {
         final AtomicInteger counter = new AtomicInteger(1);
         final AtomicReference<LocalDate> previousDueDate = new AtomicReference<>(null);
         installments.stream().sorted(LoanRepaymentScheduleInstallment::compareToByFromDueDate).forEachOrdered(i -> {
             i.updateInstallmentNumber(counter.getAndIncrement());
+            if (i.isDownPayment()) {
+                return;
+            }
             final LocalDate prev = previousDueDate.get();
-            if (prev != null && !i.getFromDate().isEqual(prev) && !i.isDownPayment()) {
+            if (prev != null && !i.getFromDate().isEqual(prev)) {
                 i.updateFromDate(prev);
             }
             previousDueDate.set(i.getDueDate());
