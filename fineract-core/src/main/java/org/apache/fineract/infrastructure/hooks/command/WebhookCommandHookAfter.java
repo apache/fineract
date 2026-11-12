@@ -41,7 +41,7 @@ final class WebhookCommandHookAfter implements CommandHookAfter<Object, Object> 
     public void onAfter(CommandContext<Object, Object> ctx) {
         var command = ctx.getCommand();
 
-        if (!(command instanceof HookableCommand hookable)) {
+        if (!(command instanceof HookableCommand)) {
             return;
         }
 
@@ -55,11 +55,11 @@ final class WebhookCommandHookAfter implements CommandHookAfter<Object, Object> 
 
                 @Override
                 public void afterCommit() {
-                    publisher.publishSuccess(hookable, command.getPayload(), response);
+                    publisher.publishSuccess(command, command.getPayload(), response);
                 }
             });
         } else {
-            publisher.publishSuccess(hookable, command.getPayload(), response);
+            publisher.publishSuccess(command, command.getPayload(), response);
         }
     }
 }

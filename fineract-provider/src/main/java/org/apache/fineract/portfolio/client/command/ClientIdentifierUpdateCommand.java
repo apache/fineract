@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ClientIdentifierUpdateCommand extends Command<ClientIdentifierUpdateRequest> {}
+public class ClientIdentifierUpdateCommand extends Command<ClientIdentifierUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CLIENTIDENTIFIER";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

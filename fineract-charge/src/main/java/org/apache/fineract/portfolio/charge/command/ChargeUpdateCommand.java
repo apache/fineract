@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.charge.data.ChargeUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ChargeUpdateCommand extends Command<ChargeUpdateRequest> {}
+public class ChargeUpdateCommand extends Command<ChargeUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CHARGE";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

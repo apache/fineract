@@ -23,7 +23,22 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
+import org.apache.fineract.portfolio.group.domain.GroupTypes;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupActivateCommand extends Command<GroupActivateRequest> {}
+public class GroupActivateCommand extends Command<GroupActivateRequest> {
+
+    /**
+     * Centers reuse this command; m_permission keeps their actions apart, so the entity follows the endpoint called.
+     */
+    @Override
+    public String entityName() {
+        return getPayload().getGroupingType() == GroupTypes.CENTER ? "CENTER" : "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "ACTIVATE";
+    }
+}

@@ -26,4 +26,15 @@ import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JobExecuteCommand extends Command<JobExecuteRequest> {}
+public class JobExecuteCommand extends Command<JobExecuteRequest> {
+
+    @Override
+    public String entityName() {
+        return "SCHEDULER";
+    }
+
+    @Override
+    public String actionName() {
+        return "EXECUTEJOB";
+    }
+}

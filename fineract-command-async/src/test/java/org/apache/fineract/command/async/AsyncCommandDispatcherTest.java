@@ -33,6 +33,7 @@ import org.apache.fineract.command.core.CommandHookAfter;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.apache.fineract.command.core.CommandHookError;
 import org.apache.fineract.command.implementation.DefaultCommandHookManager;
+import org.apache.fineract.command.test.sample.command.DummyCommand;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -62,7 +63,7 @@ class AsyncCommandDispatcherTest {
         };
         var dispatcher = dispatcher(List.of(answering), List.of(ctx -> calls.add("after")), List.of());
 
-        Object result = dispatcher.dispatch(new Command<>()).get();
+        Object result = dispatcher.dispatch(new DummyCommand()).get();
 
         assertEquals("replayed", result);
         assertEquals(0, handled.get());
@@ -74,7 +75,7 @@ class AsyncCommandDispatcherTest {
         List<Throwable> errors = new CopyOnWriteArrayList<>();
         var dispatcher = dispatcher(List.of(), List.of(), List.of(ctx -> errors.add(ctx.getError())));
 
-        assertThrows(RuntimeException.class, () -> dispatcher.dispatch(new Command<>()).get());
+        assertThrows(RuntimeException.class, () -> dispatcher.dispatch(new DummyCommand()).get());
 
         assertEquals(1, errors.size());
         assertSame(failure, errors.get(0));

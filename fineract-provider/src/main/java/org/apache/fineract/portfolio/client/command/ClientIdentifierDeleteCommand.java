@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ClientIdentifierDeleteCommand extends Command<ClientIdentifierDeleteRequest> {}
+public class ClientIdentifierDeleteCommand extends Command<ClientIdentifierDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "CLIENTIDENTIFIER";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

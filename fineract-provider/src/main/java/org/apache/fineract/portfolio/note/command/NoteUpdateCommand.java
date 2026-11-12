@@ -25,4 +25,16 @@ import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class NoteUpdateCommand extends Command<NoteUpdateRequest> {}
+public class NoteUpdateCommand extends Command<NoteUpdateRequest> {
+
+    /** A note is governed by the permission of whatever it is attached to, not by one note permission. */
+    @Override
+    public String entityName() {
+        return getPayload().getType().getPermissionEntityName();
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

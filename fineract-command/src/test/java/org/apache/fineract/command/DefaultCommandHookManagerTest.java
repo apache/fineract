@@ -24,12 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookAfter;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.apache.fineract.command.core.CommandHookError;
 import org.apache.fineract.command.implementation.DefaultCommandHookManager;
+import org.apache.fineract.command.test.sample.command.DummyCommand;
+import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -109,8 +110,8 @@ class DefaultCommandHookManagerTest {
         return new DefaultCommandHookManager(before, after, error);
     }
 
-    private static CommandContext<Object, Object> context() {
-        return CommandContext.<Object, Object>builder().command(new Command<>()).build();
+    private static CommandContext<DummyRequest, Object> context() {
+        return CommandContext.<DummyRequest, Object>builder().command(new DummyCommand()).build();
     }
 
     private CommandHookBefore before(String name) {

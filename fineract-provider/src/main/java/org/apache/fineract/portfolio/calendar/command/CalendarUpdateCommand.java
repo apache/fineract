@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CalendarUpdateCommand extends Command<CalendarUpdateRequest> {}
+public class CalendarUpdateCommand extends Command<CalendarUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CALENDAR";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

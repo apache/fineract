@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.account.data.request.StandingInstructionDel
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StandingInstructionDeleteCommand extends Command<StandingInstructionDeleteRequest> {}
+public class StandingInstructionDeleteCommand extends Command<StandingInstructionDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "STANDINGINSTRUCTION";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

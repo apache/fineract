@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.account.data.request.StandingInstructionCre
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StandingInstructionCreateCommand extends Command<StandingInstructionCreationRequest> {}
+public class StandingInstructionCreateCommand extends Command<StandingInstructionCreationRequest> {
+
+    @Override
+    public String entityName() {
+        return "STANDINGINSTRUCTION";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

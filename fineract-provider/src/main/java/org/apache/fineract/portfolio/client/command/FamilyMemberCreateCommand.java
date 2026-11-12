@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.client.data.FamilyMemberCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FamilyMemberCreateCommand extends Command<FamilyMemberCreateRequest> {}
+public class FamilyMemberCreateCommand extends Command<FamilyMemberCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "FAMILYMEMBERS";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

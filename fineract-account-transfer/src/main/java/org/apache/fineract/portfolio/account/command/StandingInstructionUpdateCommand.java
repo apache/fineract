@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.account.data.request.StandingInstructionUpd
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StandingInstructionUpdateCommand extends Command<StandingInstructionUpdateRequest> {}
+public class StandingInstructionUpdateCommand extends Command<StandingInstructionUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "STANDINGINSTRUCTION";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}
