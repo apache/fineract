@@ -2035,6 +2035,7 @@ Feature: Loan - Part2
       | 4  | 15   | 31 May 2023  |             | 500.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 187.5 | 187.5      | 0.0   | 62.5        |
       | 5  | 43   | 13 July 2023 |             | 250.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 25.0  | 25.0       | 0.0   | 225.0       |
       | 6  | 15   | 28 July 2023 |             | 0.0             | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 0.0   | 0.0        | 0.0   | 250.0       |
+    Then Loan Repayment schedule periods do not overlap
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1250.0        | 0        | 0.0  | 0         | 1250.0 | 650.0 | 400.0      | 250.0 | 600.0       |

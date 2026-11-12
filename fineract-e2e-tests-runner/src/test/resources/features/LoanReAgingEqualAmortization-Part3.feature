@@ -2185,7 +2185,7 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 2  | 31   | 21 June 2026      | 10 July 2026  | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 50.0  | 0.0        | 50.0 | 0.0         |
       |    |      | 25 June 2026      |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 3  | 0    | 25 June 2026      |               | 400.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
-      | 4  | 15   | 10 July 2026      | 10 July 2026  | 397.2           | 2.8           | 0.0      | 0.0  | 0.0       | 2.8    | 2.8   | 2.8        | 0.0  | 0.0         |
+      | 4  | 19   | 10 July 2026      | 10 July 2026  | 397.2           | 2.8           | 0.0      | 0.0  | 0.0       | 2.8    | 2.8   | 2.8        | 0.0  | 0.0         |
       | 5  | 0    | 10 July 2026      |               | 357.48          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
       | 6  | 31   | 10 August 2026    |               | 317.76          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
       | 7  | 31   | 10 September 2026 |               | 278.04          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
@@ -2284,7 +2284,7 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 2  | 31   | 21 June 2026      | 10 July 2026  | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 50.0  | 0.0        | 50.0 | 0.0         |
       |    |      | 25 June 2026      |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 3  | 0    | 25 June 2026      |               | 400.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
-      | 4  | 15   | 10 July 2026      | 10 July 2026  | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 100.0      | 0.0  | 0.0         |
+      | 4  | 19   | 10 July 2026      | 10 July 2026  | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 100.0      | 0.0  | 0.0         |
       | 5  | 0    | 10 July 2026      |               | 270.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
       | 6  | 31   | 10 August 2026    |               | 240.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
       | 7  | 31   | 10 September 2026 |               | 210.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
@@ -2384,7 +2384,7 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 2  | 31   | 21 June 2026      | 10 July 2026  | 230.67          | 69.33         | 0.0      | 0.0  | 0.0       | 69.33  | 69.33 | 19.33      | 50.0 | 0.0         |
       |    |      | 25 June 2026      |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 3  | 0    | 25 June 2026      |               | 380.67          | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
-      | 4  | 15   | 10 July 2026      | 10 July 2026  | 342.0           | 38.67         | 0.0      | 0.0  | 0.0       | 38.67  | 38.67 | 38.67      | 0.0  | 0.0         |
+      | 4  | 19   | 10 July 2026      | 10 July 2026  | 342.0           | 38.67         | 0.0      | 0.0  | 0.0       | 38.67  | 38.67 | 38.67      | 0.0  | 0.0         |
       | 5  | 0    | 10 July 2026      |               | 307.8           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
       | 6  | 31   | 10 August 2026    |               | 273.6           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
       | 7  | 31   | 10 September 2026 |               | 239.4           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
@@ -3793,3 +3793,379 @@ Feature: LoanReAgingEqualAmortization - Part3
       | ASSET     | 112601       | Loans Receivable          |        | 547.07 |
       | ASSET     | 112603       | Interest/Fee Receivable   |        | 40.67  |
       | LIABILITY | 145023       | Suspense/Clearing account | 587.74 |        |
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC9: repaid part of the additional installment stays paid after a due date reschedule
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+#   --- Moving a re-aged due date must keep the additional installment the 20 was repaid on ---
+    When Admin sets the business date to "23 October 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 620.0          | 50.0                  | 30.0                  | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 30.0              |
+    When Loan Pay-off is made on "23 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 40   | 30 November 2026  | 23 October 2026 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 9  | 30   | 30 December 2026  | 23 October 2026 | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 10 | 31   | 30 January 2027   | 23 October 2026 | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 650.0          | 50.0                  | 0.0                   | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 0.0               |
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC10: fee paid on the additional installment stays paid after a due date reschedule
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    And Customer makes "AUTOPAY" repayment on "20 October 2026" with 1000 EUR transaction amount
+    When Admin makes Credit Balance Refund transaction on "20 October 2026" with 579.69 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "15 October 2026" due date and 10 EUR transaction amount
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+#   --- Moving a re-aged due date must keep the fee paid on the additional installment ---
+    When Admin sets the business date to "23 October 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
+    Then Loan has 1169.69 principal paid and 579.69 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 1169.69        | 579.69                | 10.0                  | 20.31            | 20.31         | 0.0                  | 10.0         | 10.0      | 0.0              | 10.0              |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 15 October 2026 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    When Loan Pay-off is made on "23 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 6    | 20 October 2026   | 22 October 2026 | 0.0             | 569.69        | 0.0      | 10.0 | 0.0       | 579.69 | 579.69 | 0.0        | 10.0   | 0.0         |
+      | 8  | 41   | 30 November 2026  | 23 October 2026 | 6.67            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
+      | 9  | 30   | 30 December 2026  | 23 October 2026 | 3.34            | 3.33          | 0.0      | 0.0  | 0.0       | 3.33   | 3.33   | 3.33       | 0.0    | 0.0         |
+      | 10 | 31   | 30 January 2027   | 23 October 2026 | 0.0             | 3.34          | 0.0      | 0.0  | 0.0       | 3.34   | 3.34   | 3.34       | 0.0    | 0.0         |
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 1179.69        | 579.69                | 0.0                   | 20.31            | 20.31         | 0.0                  | 10.0         | 10.0      | 0.0              | 0.0               |
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC11: repaid part of the additional installment stays paid after a due date reschedule with default interest handling
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments |
+      | 1               | MONTHS        | 22 November 2026 | 3                    |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+#   --- Moving a re-aged due date must keep the additional installment the 20 was repaid on ---
+    When Admin sets the business date to "23 October 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+    When Loan Pay-off is made on "23 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 40   | 30 November 2026  | 23 October 2026 | 20.33           | 9.67          | 6.67     | 0.0  | 0.0       | 16.34  | 16.34  | 16.34      | 0.0    | 0.0         |
+      | 9  | 30   | 30 December 2026  | 23 October 2026 | 10.16           | 10.17         | 0.0      | 0.0  | 0.0       | 10.17  | 10.17  | 10.17      | 0.0    | 0.0         |
+      | 10 | 31   | 30 January 2027   | 23 October 2026 | 0.0             | 10.16         | 0.0      | 0.0  | 0.0       | 10.16  | 10.16  | 10.16      | 0.0    | 0.0         |
+    Then Loan has 650 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC12: waived charge on the additional installment stays waived
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+#   --- The charge due after maturity goes to the additional (N+1) installment and is waived ---
+    When Admin sets the business date to "22 October 2026"
+    And Admin adds "LOAN_SNOOZE_FEE" due date charge with "20 October 2026" due date and 10 EUR transaction amount
+    And Admin waives due date charge
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal outstanding | Interest charged | Interest outstanding | Fees charged | Fees paid | Fees waived | Fees outstanding | Total outstanding |
+      | 600.0               | 200.0          | 400.0                 | 20.31            | 20.31                | 10.0         | 0.0       | 10.0        | 0.0              | 420.31            |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 20 October 2026 | Flat             | 10.0 | 0.0  | 10.0   | 0.0         |
+    When Loan Pay-off is made on "22 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC13: chargeback after the re-age reaches the re-aged installments when an additional installment is kept
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+#   --- The kept additional installment is not the N+1 installment: the chargeback goes to the re-aged installments ---
+    When Admin sets the business date to "23 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 10 EUR transaction amount for Payment nr. 3
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan has 620 principal paid and 60 principal adjustments amount
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 620.0          | 60.0                  | 40.0                  | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 40.0              |
+    When Loan Pay-off is made on "23 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 10 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 32   | 22 November 2026  | 23 October 2026 | 20.0            | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 20.0       | 0.0    | 0.0         |
+      | 9  | 30   | 22 December 2026  | 23 October 2026 | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 10 | 31   | 22 January 2027   | 23 October 2026 | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+    Then Loan has 660 principal paid and 60 principal adjustments amount
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC14: extending the term after the re-age adds one period when an additional installment is kept
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+#   --- The re-aged installments start after the kept additional installment, not with their repayment periods ---
+    When Admin sets the business date to "23 October 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 22 December 2026   | 23 October 2026 |                 |                  |                 | 1          |                 |
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 620.0          | 50.0                  | 30.0                  | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 30.0              |
+    When Loan Pay-off is made on "23 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 11 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 32   | 22 November 2026  | 23 October 2026 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 9  | 30   | 22 December 2026  | 23 October 2026 | 13.33           | 6.67          | 0.0      | 0.0  | 0.0       | 6.67   | 6.67   | 6.67       | 0.0    | 0.0         |
+      | 10 | 31   | 22 January 2027   | 23 October 2026 | 6.67            | 6.66          | 0.0      | 0.0  | 0.0       | 6.66   | 6.66   | 6.66       | 0.0    | 0.0         |
+      | 11 | 31   | 22 February 2027  | 23 October 2026 | 0.0             | 6.67          | 0.0      | 0.0  | 0.0       | 6.67   | 6.67   | 6.67       | 0.0    | 0.0         |
+    Then Loan has 650 principal paid and 50 principal adjustments amount
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC15: extending the term after a due date reschedule adds one period when an additional installment is kept
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+    When Admin sets the business date to "23 October 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 22 November 2026   | 23 October 2026 | 30 November 2026 |                  |                 |            |                 |
+    When Admin sets the business date to "24 October 2026"
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 30 December 2026   | 24 October 2026 |                 |                  |                 | 1          |                 |
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan summary has the following data:
+      | Principal disbursed | Principal paid | Principal adjustments | Principal outstanding | Interest charged | Interest paid | Interest outstanding | Fees charged | Fees paid | Fees outstanding | Total outstanding |
+      | 600.0               | 620.0          | 50.0                  | 30.0                  | 20.31            | 20.31         | 0.0                  | 0.0          | 0.0       | 0.0              | 30.0              |
+    When Loan Pay-off is made on "24 October 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 11 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                 | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026 | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026 | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026 | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026 | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026   | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026   | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026 | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 40   | 30 November 2026  | 24 October 2026 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 9  | 30   | 30 December 2026  | 24 October 2026 | 13.33           | 6.67          | 0.0      | 0.0  | 0.0       | 6.67   | 6.67   | 6.67       | 0.0    | 0.0         |
+      | 10 | 31   | 30 January 2027   | 24 October 2026 | 6.67            | 6.66          | 0.0      | 0.0  | 0.0       | 6.66   | 6.66   | 6.66       | 0.0    | 0.0         |
+      | 11 | 23   | 22 February 2027  | 24 October 2026 | 0.0             | 6.67          | 0.0      | 0.0  | 0.0       | 6.67   | 6.67   | 6.67       | 0.0    | 0.0         |
+    Then Loan has 650 principal paid and 50 principal adjustments amount
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify re-aging after maturity - UC16: second re-age after the first re-aged installment is due when an additional installment is kept
+    When Admin sets the business date to "14 April 2026"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_IR_DAILY_TILL_PRECLOSE_LAST_INSTALLMENT_STRATEGY | 14 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 April 2026" with "600" amount and expected disbursement date on "14 April 2026"
+    When Admin successfully disburse the loan on "14 April 2026" with "600" EUR transaction amount
+    When Admin sets the business date to "20 April 2026"
+    And Customer makes "AUTOPAY" repayment on "20 April 2026" with 200 EUR transaction amount
+    When Admin sets the business date to "20 October 2026"
+    When Loan Pay-off is made on "20 October 2026"
+    When Admin sets the business date to "21 October 2026"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 50 EUR transaction amount for Payment nr. 1
+    And Customer makes "AUTOPAY" repayment on "21 October 2026" with 20 EUR transaction amount
+    When Admin sets the business date to "22 October 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 22 November 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    Then Loan Repayment schedule periods do not overlap
+    When Admin sets the business date to "25 November 2026"
+    When Admin creates a Loan re-aging transaction by Loan external ID with the following data:
+      | frequencyNumber | frequencyType | startDate        | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 25 December 2026 | 3                    | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan Repayment schedule periods do not overlap
+    Then Loan has 620 principal paid and 50 principal adjustments amount
+    When Loan Pay-off is made on "25 November 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    Then Loan Repayment schedule has 12 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 14 April 2026     |                  | 600.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 30   | 14 May 2026       | 20 October 2026  | 500.73          | 99.27         | 3.66     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 2  | 31   | 14 June 2026      | 20 October 2026  | 401.13          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 3  | 30   | 14 July 2026      | 20 October 2026  | 301.53          | 99.6          | 3.33     | 0.0  | 0.0       | 102.93 | 102.93 | 0.0        | 102.93 | 0.0         |
+      | 4  | 31   | 14 August 2026    | 20 October 2026  | 200.0           | 101.53        | 9.99     | 0.0  | 0.0       | 111.52 | 111.52 | 0.0        | 111.52 | 0.0         |
+      | 5  | 31   | 14 September 2026 | 20 April 2026    | 102.93          | 97.07         | 0.0      | 0.0  | 0.0       | 97.07  | 97.07  | 97.07      | 0.0    | 0.0         |
+      | 6  | 30   | 14 October 2026   | 20 April 2026    | 0.0             | 102.93        | 0.0      | 0.0  | 0.0       | 102.93 | 102.93 | 102.93     | 0.0    | 0.0         |
+      | 7  | 7    | 21 October 2026   | 22 October 2026  | 0.0             | 20.0          | 0.0      | 0.0  | 0.0       | 20.0   | 20.0   | 0.0        | 0.0    | 0.0         |
+      | 8  | 32   | 22 November 2026  | 25 November 2026 | 30.0            | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 9  | 3    | 25 November 2026  | 25 November 2026 | 30.0            | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0    | 0.0        | 0.0    | 0.0         |
+      | 10 | 30   | 25 December 2026  | 25 November 2026 | 20.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 11 | 31   | 25 January 2027   | 25 November 2026 | 10.0            | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+      | 12 | 31   | 25 February 2027  | 25 November 2026 | 0.0             | 10.0          | 0.0      | 0.0  | 0.0       | 10.0   | 10.0   | 10.0       | 0.0    | 0.0         |
+    Then Loan has 650 principal paid and 50 principal adjustments amount

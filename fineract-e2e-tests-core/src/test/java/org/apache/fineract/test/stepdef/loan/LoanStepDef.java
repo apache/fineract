@@ -2537,6 +2537,7 @@ public class LoanStepDef extends AbstractStepDef {
             Map.entry("Interest outstanding", GetLoansLoanIdSummary::getInterestOutstanding),
             Map.entry("Fees charged", GetLoansLoanIdSummary::getFeeChargesCharged),
             Map.entry("Fees paid", GetLoansLoanIdSummary::getFeeChargesPaid),
+            Map.entry("Fees waived", GetLoansLoanIdSummary::getFeeChargesWaived),
             Map.entry("Fees outstanding", GetLoansLoanIdSummary::getFeeChargesOutstanding),
             Map.entry("Penalties charged", GetLoansLoanIdSummary::getPenaltyChargesCharged),
             Map.entry("Penalties paid", GetLoansLoanIdSummary::getPenaltyChargesPaid),
@@ -2565,6 +2566,23 @@ public class LoanStepDef extends AbstractStepDef {
                     .isEqualTo(Double.parseDouble(expected.get(i)));
         }
         softly.assertAll();
+    }
+
+    @Then("Loan Repayment schedule periods do not overlap")
+    public void loanRepaymentSchedulePeriodsDoNotOverlap() {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "repaymentSchedule")));
+        final List<GetLoansLoanIdRepaymentPeriod> periods = loanDetailsResponse.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> p.getPeriod() != null && !Boolean.TRUE.equals(p.getDownPaymentPeriod())).toList();
+        for (int i = 1; i < periods.size(); i++) {
+            final GetLoansLoanIdRepaymentPeriod previous = periods.get(i - 1);
+            final GetLoansLoanIdRepaymentPeriod current = periods.get(i);
+            assertThat(current.getFromDate()).as("Installment %s of loan %s does not start when installment %s ends", current.getPeriod(),
+                    loanId, previous.getPeriod()).isEqualTo(previous.getDueDate());
+        }
     }
 
     @Then("Loan has {double} total unpaid payable due interest")
