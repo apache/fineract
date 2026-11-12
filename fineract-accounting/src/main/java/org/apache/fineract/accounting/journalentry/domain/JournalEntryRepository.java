@@ -30,6 +30,9 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false and journalEntry.manualEntry=true")
     List<JournalEntry> findUnReversedManualJournalEntriesByTransactionId(@Param("transactionId") String transactionId);
 
+    @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false and journalEntry.manualEntry=false order by journalEntry.id asc")
+    List<JournalEntry> findUnReversedSystemJournalEntriesByTransactionId(@Param("transactionId") String transactionId);
+
     @Query("select DISTINCT j.transactionId from JournalEntry j where j.transactionId not in (select DISTINCT je.transactionId from JournalEntry je where je.glAccount.id = :contraId)")
     List<String> findNonContraTransactionIds(@Param("contraId") Long contraId);
 

@@ -22,6 +22,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.mock;
 
+import com.querydsl.sql.PostgreSQLTemplates;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.SQLTemplates;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.List;
@@ -208,5 +211,17 @@ public class TestConfiguration {
     @Bean
     public GenericDataService genericDataService() {
         return mock(GenericDataService.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public SQLTemplates sqlTemplates() {
+        return PostgreSQLTemplates.builder().build();
+    }
+
+    @Primary
+    @Bean
+    public SQLQueryFactory sqlQueryFactory() {
+        return mock(SQLQueryFactory.class, RETURNS_MOCKS);
     }
 }

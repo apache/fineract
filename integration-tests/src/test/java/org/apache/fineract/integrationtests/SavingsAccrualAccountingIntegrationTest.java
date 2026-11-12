@@ -317,9 +317,89 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         });
     }
 
+    @Test
+    public void testReversingAJobPostedOverdraftInterestPostingNetsEveryAccountToZero() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            final PostSavingsProductsRequest product = withCashMappings(accrualProduct(OVERDRAFT_INTEREST_RATE), accounts)//
+                    .allowOverdraft(true)//
+                    .overdraftLimit(OVERDRAFT_LIMIT)//
+                    .nominalAnnualInterestRateOverdraft(BigDecimal.valueOf(OVERDRAFT_INTEREST_RATE));
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+            assertNotNull(savingsProductId, "Failed to create cash-based savings product with overdraft.");
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            withdraw(savingsAccountId, AMOUNT, startDateString());
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+            final SavingsAccountTransactionData posting = overdraftInterestPostingOf(savingsAccountId);
+
+            // the deposit lowers the overdraft, and with it the overdraft interest of the period, so the posting is
+            // reversed and posted again
+            deposit(savingsAccountId, BACKDATED_DEPOSIT, BACKDATED_DEPOSIT_DATE);
+
+            assertReversed(savingsAccountId, posting);
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(posting);
+            assertHasEntry(journalEntries, DEBIT, accounts.overdraftPortfolioControl(),
+                    "DEBIT to Overdraft Portfolio Control (Asset) Account not found for the job's overdraft interest posting.");
+            // the job books overdraft interest from its own rule; the reversal mirrors those entries
+            assertEveryAccountNetsToZero(journalEntries);
+        });
+    }
+
+    @Test
+    public void testUndoingCashBasedDepositsAndWithdrawalsNetsEveryAccountToZero() {
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            verifyUndoingDepositsAndWithdrawalsNetsEveryAccountToZero(withCashMappings(accrualProduct(INTEREST_RATE), accounts), accounts);
+        });
+    }
+
+    @Test
+    public void testUndoingAccrualDepositsAndWithdrawalsNetsEveryAccountToZero() {
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            verifyUndoingDepositsAndWithdrawalsNetsEveryAccountToZero(withMappings(accrualProduct(INTEREST_RATE), accounts), accounts);
+        });
+    }
+
     /**
-     * Reversals don't go through the job: the accounting processor rebuilds the entries of the reversed posting from
-     * its own rules and swaps debit and credit. They only cancel the job's entries if both book the same accounts.
+     * Every reversed savings transaction mirrors the entries stored for it, not only interest postings. The second
+     * withdrawal takes the account past zero, so it is booked in two parts: Savings Control for what was in credit and
+     * Overdraft Portfolio Control for the rest.
+     */
+    private void verifyUndoingDepositsAndWithdrawalsNetsEveryAccountToZero(final PostSavingsProductsRequest product,
+            final AccrualAccounts accounts) {
+        final Long savingsProductId = savingsProductHelper.createSavingsProduct(product//
+                .allowOverdraft(true)//
+                .overdraftLimit(OVERDRAFT_LIMIT)//
+                .nominalAnnualInterestRateOverdraft(BigDecimal.ZERO)).getResourceId();
+        assertNotNull(savingsProductId, "Failed to create savings product with overdraft.");
+        final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+        final Long depositId = deposit(savingsAccountId, AMOUNT, startDateString()).getResourceId();
+        final Long withdrawalId = withdraw(savingsAccountId, OVERDRAWN_BY.toPlainString(), startDateString()).getResourceId();
+        final Long overdrawingWithdrawalId = withdraw(savingsAccountId, AMOUNT, startDateString()).getResourceId();
+
+        // the deposit last, so that no undo takes the account past its overdraft limit
+        for (final Long transactionId : List.of(overdrawingWithdrawalId, withdrawalId, depositId)) {
+            savingsTransactionHelper.undoTransaction(savingsAccountId, transactionId);
+
+            final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(transactionId);
+            assertFalse(journalEntries.isEmpty(), "No journal entries found for savings transaction " + transactionId);
+            assertEveryAccountNetsToZero(journalEntries);
+        }
+        final List<JournalEntryTransactionItem> overdrawingWithdrawal = journalEntriesOf(overdrawingWithdrawalId);
+        assertHasEntry(overdrawingWithdrawal, DEBIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
+                "DEBIT to Overdraft Portfolio Control (Asset) Account not found for the withdrawal into overdraft.");
+        assertHasEntry(overdrawingWithdrawal, CREDIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
+                "CREDIT to Overdraft Portfolio Control (Asset) Account not found for the undo of the withdrawal into overdraft.");
+    }
+
+    /**
+     * Reversals don't go through the job: the accounting processor reverses the entries stored for the reversed
+     * posting, so they cancel the job's entries whichever rules booked them.
      */
     private void verifyReversedJobPostingNetsEveryAccountToZero(final Long savingsAccountId, final AccrualAccounts accounts) {
         schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
@@ -328,13 +408,21 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         // the deposit changes the interest of the posting period, so the posting is reversed and posted again
         deposit(savingsAccountId, BACKDATED_DEPOSIT, BACKDATED_DEPOSIT_DATE);
 
-        assertTrue(Boolean.TRUE.equals(savingsTransactionHelper.getTransaction(savingsAccountId, posting.getId()).getReversed()),
-                "The backdated deposit did not reverse the interest posting.");
+        assertReversed(savingsAccountId, posting);
         final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(posting);
         assertHasEntry(journalEntries, CREDIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
                 "CREDIT to Overdraft Portfolio Control (Asset) Account not found for the job's posting.");
         assertHasEntry(journalEntries, DEBIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
                 "DEBIT to Overdraft Portfolio Control (Asset) Account not found for the reversal of the job's posting.");
+        assertEveryAccountNetsToZero(journalEntries);
+    }
+
+    private void assertReversed(final Long savingsAccountId, final SavingsAccountTransactionData posting) {
+        assertTrue(Boolean.TRUE.equals(savingsTransactionHelper.getTransaction(savingsAccountId, posting.getId()).getReversed()),
+                "The backdated deposit did not reverse the posting.");
+    }
+
+    private void assertEveryAccountNetsToZero(final List<JournalEntryTransactionItem> journalEntries) {
         final Map<Long, BigDecimal> balances = journalEntries.stream()
                 .collect(Collectors.groupingBy(JournalEntryTransactionItem::getGlAccountId,
                         Collectors.reducing(BigDecimal.ZERO,
@@ -400,8 +488,12 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
     }
 
     private List<JournalEntryTransactionItem> journalEntriesOf(final SavingsAccountTransactionData transaction) {
+        return journalEntriesOf(transaction.getId());
+    }
+
+    private List<JournalEntryTransactionItem> journalEntriesOf(final Long transactionId) {
         final List<JournalEntryTransactionItem> pageItems = journalEntryHelper
-                .getJournalEntriesByTransactionId(SAVINGS_TRANSACTION_ID_PREFIX + transaction.getId()).getPageItems();
+                .getJournalEntriesByTransactionId(SAVINGS_TRANSACTION_ID_PREFIX + transactionId).getPageItems();
         return pageItems == null ? List.of() : pageItems;
     }
 

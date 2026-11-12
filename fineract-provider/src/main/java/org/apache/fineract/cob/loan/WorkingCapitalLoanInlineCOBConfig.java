@@ -28,7 +28,6 @@ import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.workingcapitalloan.InlineWorkingCapitalLoanCOBWorkerItemListener;
 import org.apache.fineract.cob.workingcapitalloan.InlineWorkingCapitalLoanCOBWorkerItemWriter;
 import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant;
-import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanInlineCOBWorkerItemProcessor;
 import org.apache.fineract.cob.workingcapitalloan.businessstep.WorkingCapitalLoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
@@ -61,8 +60,8 @@ public class WorkingCapitalLoanInlineCOBConfig {
     private final PlatformTransactionManager transactionManager;
     private final PropertyService propertyService;
     private final COBBusinessStepService cobBusinessStepService;
-    @Qualifier("requiresNewTransactionJdbcTemplate")
-    private final TransactionTemplate requiresNewTransactionJdbcTemplate;
+    @Qualifier("requiresNewTransactionTemplate")
+    private final TransactionTemplate requiresNewTransactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
     private final CustomJobParameterResolver customJobParameterResolver;
     @Qualifier("workingCapitalLoanLockingService")
@@ -88,16 +87,12 @@ public class WorkingCapitalLoanInlineCOBConfig {
 
     @Bean
     public Step inlineWorkingCapitalLoanCOBStep(WorkingCapitalInlineCOBLoanItemReader inlineWorkingCapitalLoanCobWorkerItemReader,
-            WorkingCapitalLoanInlineCOBWorkerItemProcessor inlineWorkingCapitalLoanCobWorkerItemProcessor,
             InlineWorkingCapitalLoanCOBWorkerItemWriter inlineWorkingCapitalLoanCobWorkerItemWriter,
             InlineWorkingCapitalLoanCOBWorkerItemListener inlineWorkingCapitalLoanCobLoanItemListener) {
-        ChunkOrientedStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = new StepBuilder(
-                "Inline Working Capital Loan COB Step", jobRepository)
-                .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(
-                        propertyService.getChunkSize(WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_JOB_NAME))
+        ChunkOrientedStepBuilder<Long, Long> stepBuilder = new StepBuilder("Inline Working Capital Loan COB Step", jobRepository)
+                .<Long, Long>chunk(propertyService.getChunkSize(WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_JOB_NAME))
                 .transactionManager(transactionManager).reader(inlineWorkingCapitalLoanCobWorkerItemReader)
-                .processor(inlineWorkingCapitalLoanCobWorkerItemProcessor).writer(inlineWorkingCapitalLoanCobWorkerItemWriter)
-                .listener(inlineWorkingCapitalLoanCobLoanItemListener);
+                .writer(inlineWorkingCapitalLoanCobWorkerItemWriter).listener(inlineWorkingCapitalLoanCobLoanItemListener);
         return stepBuilder.build();
     }
 
@@ -113,13 +108,7 @@ public class WorkingCapitalLoanInlineCOBConfig {
     @JobScope
     @Bean
     public WorkingCapitalInlineCOBLoanItemReader inlineWorkingCapitalLoanCobWorkerItemReader() {
-        return new WorkingCapitalInlineCOBLoanItemReader(loanRepository);
-    }
-
-    @JobScope
-    @Bean
-    public WorkingCapitalLoanInlineCOBWorkerItemProcessor inlineWorkingCapitalLoanCobWorkerItemProcessor() {
-        return new WorkingCapitalLoanInlineCOBWorkerItemProcessor(cobBusinessStepService, workingCapitalLoanModelProcessingService);
+        return new WorkingCapitalInlineCOBLoanItemReader();
     }
 
     @Bean
@@ -128,14 +117,18 @@ public class WorkingCapitalLoanInlineCOBConfig {
                 .build();
     }
 
+    // Job-scoped: the writer keeps the job's execution context and business date in instance fields, and inline COB
+    // jobs run concurrently.
+    @JobScope
     @Bean
     public InlineWorkingCapitalLoanCOBWorkerItemWriter inlineWorkingCapitalLoanCobWorkerItemWriter() {
-        return new InlineWorkingCapitalLoanCOBWorkerItemWriter(loanLockingService, loanRepository);
+        return new InlineWorkingCapitalLoanCOBWorkerItemWriter(cobBusinessStepService, workingCapitalLoanModelProcessingService,
+                loanLockingService, loanRepository);
     }
 
     @Bean
     public InlineWorkingCapitalLoanCOBWorkerItemListener inlineWorkingCapitalLoanCobLoanItemListener() {
-        return new InlineWorkingCapitalLoanCOBWorkerItemListener(loanLockingService, requiresNewTransactionJdbcTemplate);
+        return new InlineWorkingCapitalLoanCOBWorkerItemListener(loanLockingService, requiresNewTransactionTemplate);
     }
 
     @Bean

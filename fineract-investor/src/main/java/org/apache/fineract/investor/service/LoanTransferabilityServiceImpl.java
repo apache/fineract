@@ -33,7 +33,7 @@ public class LoanTransferabilityServiceImpl implements LoanTransferabilityServic
 
     @Override
     public boolean isTransferable(final Loan loan, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        if (shouldValidateTransferable(loan, externalAssetOwnerTransfer)) {
+        if (shouldValidateTransferable(externalAssetOwnerTransfer)) {
             return MathUtil.nullToDefault(loan.getSummary().getTotalOutstanding(), BigDecimal.ZERO).compareTo(BigDecimal.ZERO) > 0;
         }
 
@@ -49,15 +49,10 @@ public class LoanTransferabilityServiceImpl implements LoanTransferabilityServic
         return ExternalTransferSubStatus.BALANCE_ZERO;
     }
 
-    private boolean shouldValidateTransferable(final Loan loan, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
-        if (!delayedSettlementAttributeService.isEnabled(loan.getLoanProduct().getId())) {
-            // When delayed settlement is disabled, asset is directly sold to investor. Need to validate.
-            return true;
-        }
-
-        // When delayed settlement is enabled and asset is sold to intermediate. Need to validate.
-        return ExternalTransferStatus.PENDING_INTERMEDIATE == externalAssetOwnerTransfer.getStatus();
-
-        // When delayed settlement is enabled and asset is sold from intermediate to investor. No need to validate.
+    private boolean shouldValidateTransferable(final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
+        // A sale from the intermediary to the investor is not validated; every other sale is. Decided by the transfers
+        // rather than by the SETTLEMENT_MODEL attribute, which may have changed since the sale was initiated.
+        return ExternalTransferStatus.PENDING_INTERMEDIATE == externalAssetOwnerTransfer.getStatus()
+                || !delayedSettlementAttributeService.isSaleUnderDelayedSettlement(externalAssetOwnerTransfer);
     }
 }

@@ -86,4 +86,15 @@ final class ExternalAssetOwnersApiResourceSwagger {
         public Long resourceId;
     }
 
+    @Schema(description = "PutExternalAssetOwnerLoanAttributeRequest")
+    public static final class PutExternalAssetOwnerLoanAttributeRequest {
+
+        private PutExternalAssetOwnerLoanAttributeRequest() {}
+
+        @Schema(example = "EXCLUDED_TRANSACTION_TYPES")
+        public String attributeKey;
+
+        @Schema(example = "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT")
+        public String attributeValue;
+    }
 }

@@ -37,6 +37,8 @@ import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.apache.fineract.batch.exception.ErrorInfo;
@@ -47,6 +49,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.RollbackTransactionNotApprovedException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.commands.provider.CommandHandlerProvider;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -55,6 +58,7 @@ import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -62,12 +66,14 @@ import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -164,6 +170,7 @@ public class SynchronousCommandProcessingServiceTest {
         reset(idempotencyKeyResolver);
         reset(commandSourceService);
         reset(retryConfigurationAssembler);
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
@@ -450,6 +457,76 @@ public class SynchronousCommandProcessingServiceTest {
 
         verify(commandSourceService).getCommandSource(commandId);
         verify(commandSourceService).generateErrorInfo(runtimeException);
+    }
+
+    @Test
+    public void failedCommandPublishesHookEventWithExceptionStatusAndErrorResponse() {
+        Map<String, Object> payload = failCommandAndCaptureHookPayload(
+                new ErrorInfo(404, 4001, "{\"developerMessage\":\"Not found\",\"errors\":[]}", null));
+
+        assertEquals("Exception", payload.get("status"));
+        Map<?, ?> response = (Map<?, ?>) payload.get("response");
+        assertEquals("Not found", response.get("developerMessage"));
+        assertEquals(4001, response.get("errorCode"));
+        assertEquals(404, response.get("statusCode"));
+    }
+
+    @Test
+    public void failedCommandPublishesHookEventWithErrorMessageThatIsNotJsonAsIs() {
+        Map<String, Object> payload = failCommandAndCaptureHookPayload(new ErrorInfo(500, null, "Failed", null));
+
+        assertEquals("Exception", payload.get("status"));
+        Map<?, ?> response = (Map<?, ?>) payload.get("response");
+        assertEquals("Failed", response.get("errorMessage"));
+        assertEquals(500, response.get("statusCode"));
+    }
+
+    @Test
+    public void failedCommandPublishesHookEventWhenErrorHasNoBody() {
+        // ErrorHandler serializes a response without an entity to the JSON literal null
+        Map<String, Object> payload = failCommandAndCaptureHookPayload(new ErrorInfo(500, null, "null", null));
+
+        assertEquals("Exception", payload.get("status"));
+        assertEquals(500, ((Map<?, ?>) payload.get("response")).get("statusCode"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> failCommandAndCaptureHookPayload(ErrorInfo errorInfo) {
+        CommandWrapper commandWrapper = getCommandWrapper();
+        when(commandWrapper.entityName()).thenReturn("CLIENT");
+        when(commandWrapper.actionName()).thenReturn("CREATE");
+
+        long commandId = 1L;
+        JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(commandId);
+        when(jsonCommand.json()).thenReturn("{\"firstname\":\"John\"}");
+
+        RuntimeException failure = new RuntimeException("foo");
+        NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
+        when(commandHandler.processCommand(jsonCommand)).thenThrow(failure);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(commandHandler);
+        when(commandSourceService.generateErrorInfo(failure)).thenReturn(errorInfo);
+
+        when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
+        String idk = "idk";
+        when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(idk);
+        CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(commandId);
+        when(commandSourceService.findCommandSource(commandWrapper, idk)).thenReturn(null);
+        when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
+
+        AppUser appUser = Mockito.mock(AppUser.class);
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+        when(context.authenticatedUser()).thenReturn(appUser);
+        // Both serializers have the same erasure, so the constructor injection can swap them
+        ReflectionTestUtils.setField(underTest, "toApiJsonSerializer", toApiJsonSerializer);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1))));
+
+        assertEquals(failure, assertThrows(RuntimeException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false)));
+
+        ArgumentCaptor<Object> payload = ArgumentCaptor.forClass(Object.class);
+        verify(toApiJsonSerializer).serialize(payload.capture());
+        return (Map<String, Object>) payload.getValue();
     }
 
     @NonNull

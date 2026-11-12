@@ -18,17 +18,13 @@
  */
 package org.apache.fineract.investor.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
 import org.apache.fineract.investor.data.attribute.ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.junit.jupiter.api.Test;
@@ -43,26 +39,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ExcludedTransactionTypesServiceImplTest {
 
+    private static final Long LOAN_ID = 3L;
     private static final Long LOAN_PRODUCT_ID = 7L;
 
     @Mock
-    private ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+    private ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
 
     @InjectMocks
     private ExcludedTransactionTypesServiceImpl underTest;
 
     @ParameterizedTest
     @MethodSource("shortCircuitedArguments")
-    public void testUnresolvableInputIsNotExcludedWithoutReadingTheAttribute(String testName, Long loanProductId,
-            LoanTransactionType transactionType) {
-        assertFalse(underTest.isExcluded(loanProductId, transactionType), testName);
-        verifyNoInteractions(externalAssetOwnerLoanProductAttributesReadService);
+    public void testUnresolvableInputIsNotExcludedWithoutReadingTheAttribute(String testName, LoanTransactionType transactionType) {
+        assertFalse(underTest.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, transactionType), testName);
+        verifyNoInteractions(externalAssetOwnerLoanAttributesReadService);
     }
 
     private static Stream<Arguments> shortCircuitedArguments() {
-        return Stream.of(Arguments.of("null loan product id", null, LoanTransactionType.BUY_DOWN_FEE),
-                Arguments.of("null transaction type", LOAN_PRODUCT_ID, null),
-                Arguments.of("invalid transaction type", LOAN_PRODUCT_ID, LoanTransactionType.INVALID));
+        return Stream.of(Arguments.of("null transaction type", null),
+                Arguments.of("invalid transaction type", LoanTransactionType.INVALID));
     }
 
     @ParameterizedTest
@@ -71,7 +66,7 @@ public class ExcludedTransactionTypesServiceImplTest {
             boolean expected) {
         stubAttributeValue(attributeValue);
 
-        assertTrue(expected == underTest.isExcluded(LOAN_PRODUCT_ID, transactionType), testName);
+        assertEquals(expected, underTest.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, transactionType), testName);
     }
 
     private static Stream<Arguments> attributeValues() {
@@ -90,17 +85,13 @@ public class ExcludedTransactionTypesServiceImplTest {
 
     @Test
     public void testMissingAttributeIsNotExcluded() {
-        when(externalAssetOwnerLoanProductAttributesReadService.retrieveAllLoanProductAttributesByLoanProductId(eq(LOAN_PRODUCT_ID),
-                any())).thenReturn(new Page<>(List.of(), 0));
+        stubAttributeValue(null);
 
-        assertFalse(underTest.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE));
+        assertFalse(underTest.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE));
     }
 
     private void stubAttributeValue(final String attributeValue) {
-        ExternalTransferLoanProductAttributesData data = new ExternalTransferLoanProductAttributesData();
-        data.setAttributeKey(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY);
-        data.setAttributeValue(attributeValue);
-        when(externalAssetOwnerLoanProductAttributesReadService.retrieveAllLoanProductAttributesByLoanProductId(eq(LOAN_PRODUCT_ID),
-                eq(ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY))).thenReturn(new Page<>(List.of(data), 1));
+        when(externalAssetOwnerLoanAttributesReadService.resolveAttributeValue(LOAN_ID, LOAN_PRODUCT_ID,
+                ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY)).thenReturn(Optional.ofNullable(attributeValue));
     }
 }

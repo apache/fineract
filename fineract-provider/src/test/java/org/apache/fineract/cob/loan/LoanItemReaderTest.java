@@ -18,19 +18,19 @@
  */
 package org.apache.fineract.cob.loan;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -84,8 +84,7 @@ class LoanItemReaderTest {
     public void testLoanItemReaderSimple() throws Exception {
         // given
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "test", "UTC", null));
-        LoanItemReader loanItemReader = new LoanItemReader(loanRepository,
-                new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
+        LoanItemReader loanItemReader = new LoanItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
         when(stepExecution.getExecutionContext()).thenReturn(executionContext);
         when(stepExecution.getJobExecution()).thenReturn(jobExecution);
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
@@ -96,25 +95,22 @@ class LoanItemReaderTest {
         List<Long> accountLocks = Stream.of(1L, 2L, 3L, 4L, 5L).toList();
         when(loanLockingService.findLockIdsByLoanIdInAndLockOwner(List.of(1L, 2L, 3L, 4L, 5L), LockOwner.LOAN_COB_CHUNK_PROCESSING))
                 .thenReturn(accountLocks);
-        when(loanRepository.findById(anyLong())).thenReturn(Optional.of(loan));
 
         // when + then
         loanItemReader.beforeStep(stepExecution);
         for (long i = 1; i <= 5; i++) {
-            Loan myLoan = loanItemReader.read();
-            Assertions.assertEquals(loan, myLoan);
-            verify(loanRepository, times(1)).findById(i);
+            Assertions.assertEquals(i, loanItemReader.read());
         }
 
-        Mockito.verifyNoMoreInteractions(loanRepository);
+        // Reading hands out ids only; the writer loads each loan inside the write.
+        Mockito.verifyNoInteractions(loanRepository);
     }
 
     @Test
     public void testLoanItemReadNoOpenLoansFound() throws Exception {
         // given
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "test", "UTC", null));
-        LoanItemReader loanItemReader = new LoanItemReader(loanRepository,
-                new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
+        LoanItemReader loanItemReader = new LoanItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
         when(stepExecution.getExecutionContext()).thenReturn(executionContext);
         when(stepExecution.getJobExecution()).thenReturn(jobExecution);
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
@@ -125,10 +121,9 @@ class LoanItemReaderTest {
 
         // when + then
         loanItemReader.beforeStep(stepExecution);
-        Loan myLoan = loanItemReader.read();
-        Assertions.assertNull(myLoan);
+        Assertions.assertNull(loanItemReader.read());
 
-        Mockito.verifyNoMoreInteractions(loanRepository);
+        Mockito.verifyNoInteractions(loanRepository);
         Mockito.verifyNoInteractions(loanLockingService);
     }
 
@@ -136,8 +131,7 @@ class LoanItemReaderTest {
     public void testLoanItemReaderMultiThreadRead() throws Exception {
         // given
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "test", "UTC", null));
-        LoanItemReader loanItemReader = new LoanItemReader(loanRepository,
-                new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
+        LoanItemReader loanItemReader = new LoanItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
         when(stepExecution.getExecutionContext()).thenReturn(executionContext);
         when(stepExecution.getJobExecution()).thenReturn(jobExecution);
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
@@ -148,30 +142,24 @@ class LoanItemReaderTest {
         List<Long> accountLocks = IntStream.rangeClosed(1, 100).boxed().map(Long::valueOf).toList();
         when(loanLockingService.findLockIdsByLoanIdInAndLockOwner(IntStream.rangeClosed(1, 100).boxed().map(Long::valueOf).toList(),
                 LockOwner.LOAN_COB_CHUNK_PROCESSING)).thenReturn(accountLocks);
-        when(loanRepository.findById(anyLong())).thenReturn(Optional.of(loan));
 
         // when + then
         loanItemReader.beforeStep(stepExecution);
+        Set<Long> readIds = ConcurrentHashMap.newKeySet();
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         for (int i = 1; i <= 100; i++) {
             Future<?> notUsed = executorService.submit(() -> {
-                try {
-                    Loan myLoan = loanItemReader.read();
-                    Assertions.assertEquals(loan, myLoan);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Long id = loanItemReader.read();
+                Assertions.assertNotNull(id);
+                Assertions.assertTrue(readIds.add(id), "id " + id + " was read twice");
             });
         }
         executorService.shutdown();
         boolean b = executorService.awaitTermination(5L, TimeUnit.SECONDS);
         Assertions.assertTrue(b, "Executor did not terminate successfully");
 
-        // verify that this was called 100times, and for each loan it was called exactly once
-        for (long i = 1; i <= 100; i++) {
-            verify(loanRepository, times(1)).findById(i);
-        }
-
-        Mockito.verifyNoMoreInteractions(loanRepository);
+        // every id was handed out exactly once, and none of them was loaded by the reader
+        Assertions.assertEquals(LongStream.rangeClosed(1, 100).boxed().collect(Collectors.toSet()), readIds);
+        Mockito.verifyNoInteractions(loanRepository);
     }
 }

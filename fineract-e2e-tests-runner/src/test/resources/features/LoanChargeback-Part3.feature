@@ -1327,8 +1327,10 @@ Feature: LoanChargeback - Part3
       | Type      | Account code | Account name              | Debit | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 17.01  |
       | ASSET     | 112601       | Loans Receivable          | 16.43 |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   | 0.58  |        |
       | LIABILITY | 145023       | Suspense/Clearing account | 17.01 |        |
       | ASSET     | 112601       | Loans Receivable          |       | 16.43  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 0.58   |
     Then Loan has 68.03 outstanding amount
 
   @TestRailId:C110996
@@ -1385,10 +1387,12 @@ Feature: LoanChargeback - Part3
       | Type      | Account code | Account name              | Debit | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 32.01  |
       | ASSET     | 112601       | Loans Receivable          | 16.43 |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   | 0.58  |        |
       | ASSET     | 112603       | Interest/Fee Receivable   | 10.0  |        |
       | ASSET     | 112603       | Interest/Fee Receivable   | 5.0   |        |
       | LIABILITY | 145023       | Suspense/Clearing account | 32.01 |        |
       | ASSET     | 112601       | Loans Receivable          |       | 16.43  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 0.58   |
       | ASSET     | 112603       | Interest/Fee Receivable   |       | 10.0   |
       | ASSET     | 112603       | Interest/Fee Receivable   |       | 5.0    |
     And Loan Charges tab has the following data:

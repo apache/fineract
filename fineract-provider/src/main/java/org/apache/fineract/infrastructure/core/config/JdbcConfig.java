@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.config;
 
+import com.querydsl.sql.MySQLTemplates;
+import com.querydsl.sql.PostgreSQLTemplates;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.spring.SpringConnectionProvider;
+import com.querydsl.sql.spring.SpringExceptionTranslator;
+import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.context.annotation.Bean;
@@ -51,5 +57,18 @@ public class JdbcConfig {
     @Bean
     public NamedParameterJdbcTemplate namedParameterJdbcTemplate(RoutingDataSource dataSource) {
         return new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    @Bean
+    public com.querydsl.sql.Configuration querydslConfiguration(DatabaseTypeResolver databaseTypeResolver) {
+        var templates = databaseTypeResolver.isPostgreSQL() ? PostgreSQLTemplates.builder().build() : MySQLTemplates.builder().build();
+        com.querydsl.sql.Configuration config = new com.querydsl.sql.Configuration(templates);
+        config.setExceptionTranslator(new SpringExceptionTranslator());
+        return config;
+    }
+
+    @Bean
+    public SQLQueryFactory sqlQueryFactory(com.querydsl.sql.Configuration config, DataSource dataSource) {
+        return new SQLQueryFactory(config, new SpringConnectionProvider(dataSource));
     }
 }

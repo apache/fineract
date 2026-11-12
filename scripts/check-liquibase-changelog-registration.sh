@@ -134,6 +134,7 @@ list_includes() {
 # Tracked and untracked files, minus ignored ones: build/ holds copies of every
 # changelog. Index entries deleted from the working tree are dropped.
 git ls-files --cached --others --exclude-standard -- '*/db/changelog/*.xml' \
+    | grep -v '^fineract-querydsl/' \
     | while IFS= read -r f; do
         if [[ -f "$f" ]]; then echo "$f"; fi
     done | sort -u > "$TMP_DIR/files"

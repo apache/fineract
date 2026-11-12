@@ -634,23 +634,14 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     }
 
     @Test
-    void selectAccountId_cashBasedInterestPosting_debitsInterestOnSavings() {
+    void selectAccountId_interestPosting_leavesTheAccountsToTheSharedRules() {
         final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
 
         service.selectAccountId(transaction, savingsAccountWithGlAccounts(true));
-
-        verify(transaction).setAccountDebit(INTEREST_ON_SAVINGS_GL_ACCOUNT_ID);
-        verify(transaction).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
-    }
-
-    @Test
-    void selectAccountId_accrualInterestPosting_debitsInterestPayable() {
-        final SavingsAccountTransactionData transaction = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
-
         service.selectAccountId(transaction, savingsAccountWithGlAccounts(false));
 
-        verify(transaction).setAccountDebit(INTEREST_PAYABLE_GL_ACCOUNT_ID);
-        verify(transaction).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        verify(transaction, never()).setAccountDebit(any());
+        verify(transaction, never()).setAccountCredit(any());
     }
 
     @Test
@@ -693,8 +684,11 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         final SavingsAccountData account = savingsAccountWithGlAccounts(false);
         final SavingsAccountTransactionData existingDeposit = transactionOfType(SavingsAccountTransactionType.DEPOSIT);
         when(existingDeposit.getId()).thenReturn(1L);
-        final SavingsAccountTransactionData newPosting = transactionOfType(SavingsAccountTransactionType.INTEREST_POSTING);
+        // the job books overdraft interest from the accounts chosen here; an interest posting is booked from
+        // SavingsInterestPostingLegs and gets none (selectAccountId_interestPosting_leavesTheAccountsToTheSharedRules)
+        final SavingsAccountTransactionData newPosting = transactionOfType(SavingsAccountTransactionType.OVERDRAFT_INTEREST);
         when(newPosting.getId()).thenReturn(null);
+        when(newPosting.getRunningBalance()).thenReturn(new BigDecimal("-100"));
         when(account.getNominalAnnualInterestRate()).thenReturn(new BigDecimal("5"));
         when(account.getSavingsAccountTransactionData()).thenReturn(List.of(existingDeposit, newPosting));
         when(configurationDomainService.retrieveFinancialYearBeginningMonth()).thenReturn(1);
@@ -703,8 +697,9 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         service.postInterest(account, false, null, backdatedTxnsAllowedTill);
 
-        verify(newPosting).setAccountDebit(INTEREST_PAYABLE_GL_ACCOUNT_ID);
-        verify(newPosting).setAccountCredit(SAVINGS_CONTROL_GL_ACCOUNT_ID);
+        verify(newPosting).setAccountDebit(OVERDRAFT_PORTFOLIO_GL_ACCOUNT_ID);
+        verify(newPosting).setAccountCredit(INTEREST_RECEIVABLE_GL_ACCOUNT_ID);
+        verify(existingDeposit, never()).setAccountDebit(any());
         verify(existingDeposit, never()).setAccountCredit(any());
     }
 

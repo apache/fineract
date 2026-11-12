@@ -83,6 +83,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
     public CommandProcessingResult chargeOff(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateChargeOff(command, loan);
 
         final AppUser currentUser = this.context.authenticatedUser();
@@ -156,6 +157,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
     public CommandProcessingResult undoChargeOff(final Long loanId, final JsonCommand command) {
         final WorkingCapitalLoan loan = this.loanRepository.findById(loanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
+        context.validateAccessRights(loan.getOffice().getHierarchy());
         this.validator.validateUndoChargeOff(command, loan);
 
         final WorkingCapitalLoanTransaction chargeOffTransaction = this.transactionFinder.findChargedOffTransaction(loan)

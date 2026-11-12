@@ -77,6 +77,8 @@ public interface AccountingProcessorHelper {
             Integer accountTypeToBeCredited, Long savingsProductId, Long paymentTypeId, Long loanId, String transactionId,
             LocalDate transactionDate, BigDecimal amount, Boolean isReversal);
 
+    void createJournalEntriesForReversedSavingsTransaction(String transactionId, LocalDate transactionDate);
+
     void createJournalEntriesForLoan(Office office, String currencyCode, Integer accountTypeToBeDebited, Integer accountTypeToBeCredited,
             Long loanProductId, Long paymentTypeId, Long loanId, String transactionId, LocalDate transactionDate, BigDecimal amount);
 

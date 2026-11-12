@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -109,6 +110,117 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
                     installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
         });
+    }
+
+    @Test
+    public void simpleChargebackWithPrincipalOnlyCreditAllocation() {
+        runAt("01 January 2023", () -> {
+            Long clientId = createClient("01 January 2023");
+            Long loanProductId = createLoanProduct(createDefaultPaymentAllocation(), principalOnlyChargebackAllocation());
+            Long loanId = applyAndApproveLoan(clientId, loanProductId);
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
+
+            updateBusinessDate("20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
+
+            // the repayment paid 312 principal, 50 fee and 20 penalty, but the whole chargeback is recognized as
+            // principal
+            addChargebackForLoan(loanId, repaymentTransaction, 100.0);
+
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 1038.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+            );
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(412.0, 0, 50, 20, 100.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
+            );
+        });
+    }
+
+    @Test
+    public void chargebackWithPrincipalOnlyCreditAllocationWhenOverpaidMatchesLoanWithoutCreditAllocation() {
+        runAt("01 January 2023", () -> {
+            Long clientId = createClient("01 January 2023");
+            Long noCreditAllocationProductId = createLoanProductWithoutCreditAllocation(createDefaultPaymentAllocation());
+            Long principalOnlyProductId = createLoanProduct(createDefaultPaymentAllocation(), principalOnlyChargebackAllocation());
+
+            Long noCreditAllocationLoanId = applyOverpaidLoanWithChargeback(clientId, noCreditAllocationProductId);
+            Long principalOnlyLoanId = applyOverpaidLoanWithChargeback(clientId, principalOnlyProductId);
+
+            GetLoansLoanIdResponse expected = getLoanDetails(noCreditAllocationLoanId);
+            GetLoansLoanIdResponse actual = getLoanDetails(principalOnlyLoanId);
+            assertEquals(transactionSnapshot(expected), transactionSnapshot(actual));
+            assertEquals(repaymentScheduleSnapshot(expected), repaymentScheduleSnapshot(actual));
+            assertEquals(summarySnapshot(expected), summarySnapshot(actual));
+            assertEquals(journalEntrySnapshot(noCreditAllocationLoanId), journalEntrySnapshot(principalOnlyLoanId));
+
+            // sanity check that the scenario exercises the overpaid chargeback branches: the principal only fallback
+            // covers the
+            // overpayment first and recognizes only the remainder as principal
+            GetLoansLoanIdTransactions chargeback = actual.getTransactions().stream()
+                    .filter(t -> "Chargeback".equals(t.getType().getValue())).findFirst().orElseThrow();
+            assertEquals(0, BigDecimal.valueOf(50).compareTo(chargeback.getPrincipalPortion()));
+            assertEquals(0, BigDecimal.valueOf(50).compareTo(chargeback.getOverpaymentPortion()));
+        });
+    }
+
+    private Long applyOverpaidLoanWithChargeback(Long clientId, Long loanProductId) {
+        updateBusinessDate("01 January 2023");
+        Long loanId = applyAndApproveLoan(clientId, loanProductId);
+        disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+        addCharge(loanId, false, 50, "15 January 2023");
+        addCharge(loanId, true, 20, "20 January 2023");
+
+        updateBusinessDate("20 January 2023");
+        // 1250 principal + 70 charges = 1320, 50 overpaid
+        Long repaymentTransaction = addRepaymentForLoan(loanId, 1370.0, "20 January 2023");
+
+        updateBusinessDate("02 May 2023");
+        addChargebackForLoan(loanId, repaymentTransaction, 100.0);
+        return loanId;
+    }
+
+    private static List<String> transactionSnapshot(GetLoansLoanIdResponse loan) {
+        return loan.getTransactions().stream()
+                .map(t -> String.join("|", t.getType().getValue(), String.valueOf(t.getDate()), plain(t.getAmount()),
+                        plain(t.getPrincipalPortion()), plain(t.getInterestPortion()), plain(t.getFeeChargesPortion()),
+                        plain(t.getPenaltyChargesPortion()), plain(t.getOverpaymentPortion()), plain(t.getOutstandingLoanBalance()),
+                        String.valueOf(t.getManuallyReversed())))
+                .toList();
+    }
+
+    private static List<String> repaymentScheduleSnapshot(GetLoansLoanIdResponse loan) {
+        return loan.getRepaymentSchedule().getPeriods().stream()
+                .map(p -> String.join("|", String.valueOf(p.getFromDate()), String.valueOf(p.getDueDate()), plain(p.getPrincipalDue()),
+                        plain(p.getPrincipalOutstanding()), plain(p.getInterestDue()), plain(p.getFeeChargesDue()),
+                        plain(p.getPenaltyChargesDue()), plain(p.getTotalCredits()), plain(p.getTotalOutstandingForPeriod()),
+                        String.valueOf(p.getComplete())))
+                .toList();
+    }
+
+    private static String summarySnapshot(GetLoansLoanIdResponse loan) {
+        GetLoansLoanIdSummary summary = loan.getSummary();
+        return String.join("|", plain(summary.getPrincipalAdjustments()), plain(summary.getFeeAdjustments()),
+                plain(summary.getPenaltyAdjustments()), plain(summary.getTotalOutstanding()), plain(summary.getTotalOverdue()),
+                plain(loan.getTotalOverpaid()), String.valueOf(loan.getStatus().getCode()));
+    }
+
+    private static List<String> journalEntrySnapshot(Long loanId) {
+        return journalHelper.getJournalEntriesForLoan(loanId).getPageItems().stream()
+                .map(e -> String.join("|", String.valueOf(e.getGlAccountId()), e.getEntryType().getValue(),
+                        plain(BigDecimal.valueOf(e.getAmount())), String.valueOf(e.getTransactionDate()), String.valueOf(e.getReversed())))
+                .sorted().toList();
+    }
+
+    private static String plain(BigDecimal value) {
+        return value == null ? "null" : value.stripTrailingZeros().toPlainString();
     }
 
     @Test
@@ -1805,21 +1917,23 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
     }
 
     public Long createLoanProduct(AdvancedPaymentData defaultAllocation, CreditAllocationData creditAllocationData) {
-        PostLoanProductsRequest postLoanProductsRequest = loanProductWithAdvancedPaymentAllocationWith4Installments(defaultAllocation,
-                creditAllocationData);
-        return createLoanProduct(postLoanProductsRequest);
+        return createLoanProduct(
+                loanProductWithAdvancedPaymentAllocationWith4Installments(defaultAllocation, List.of(creditAllocationData)));
+    }
+
+    private Long createLoanProductWithoutCreditAllocation(AdvancedPaymentData defaultAllocation) {
+        return createLoanProduct(loanProductWithAdvancedPaymentAllocationWith4Installments(defaultAllocation, List.of()));
     }
 
     private PostLoanProductsRequest loanProductWithAdvancedPaymentAllocationWith4Installments(AdvancedPaymentData defaultAllocation,
-            CreditAllocationData creditAllocationData) {
+            List<CreditAllocationData> creditAllocations) {
         return createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().numberOfRepayments(4)//
                 .repaymentEvery(1)//
                 .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS.longValue())//
                 .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
                 .loanScheduleProcessingType(LoanScheduleProcessingType.VERTICAL.toString()) //
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")
-                .paymentAllocation(List.of(defaultAllocation, createRepaymentPaymentAllocation()))
-                .creditAllocation(List.of(creditAllocationData));
+                .paymentAllocation(List.of(defaultAllocation, createRepaymentPaymentAllocation())).creditAllocation(creditAllocations);
     }
 
     private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
@@ -1860,6 +1974,10 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
 
         advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
         return advancedPaymentData;
+    }
+
+    private CreditAllocationData principalOnlyChargebackAllocation() {
+        return new CreditAllocationData().transactionType("CHARGEBACK").creditAllocationStrategy("PRINCIPAL_ONLY");
     }
 
     private CreditAllocationData chargebackAllocation(String... allocationRules) {

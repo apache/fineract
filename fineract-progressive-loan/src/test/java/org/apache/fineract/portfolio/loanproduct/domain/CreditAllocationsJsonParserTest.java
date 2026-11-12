@@ -37,6 +37,7 @@ import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -86,10 +87,147 @@ public class CreditAllocationsJsonParserTest {
         Assertions.assertEquals(CreditAllocationTransactionType.CHARGEBACK, creditAllocationRules.get(0).getTransactionType());
         Assertions.assertEquals(4, creditAllocationRules.get(0).getAllocationTypes().size());
         Assertions.assertEquals(EnumSet.allOf(AllocationType.class).stream().toList(), creditAllocationRules.get(0).getAllocationTypes());
+        Assertions.assertEquals(CreditAllocationStrategy.RULE_BASED, creditAllocationRules.get(0).getAllocationStrategy());
 
-        Mockito.verify(creditAllocationsValidator, times(1)).validate(creditAllocationRules, ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+        Mockito.verify(creditAllocationsValidator, times(1))
+                .validate(List.of(new CreditAllocationRequest(CreditAllocationTransactionType.CHARGEBACK,
+                        CreditAllocationStrategy.RULE_BASED, EnumSet.allOf(AllocationType.class).stream().toList(), true)),
+                        ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
         Mockito.verify(creditAllocationsValidator, times(1)).validatePairOfOrderAndCreditAllocationType(createAllocationTypeList());
         Mockito.verifyNoMoreInteractions(creditAllocationsValidator);
+    }
+
+    @Test
+    public void testParseExplicitRuleBasedChargebackAllocation() throws JsonProcessingException {
+        // given
+        List<String> allocationRule = EnumSet.allOf(AllocationType.class).stream().map(Enum::name).toList();
+        Map<String, Object> creditAllocationEntry = createCreditAllocationEntry("CHARGEBACK", allocationRule);
+        creditAllocationEntry.put("creditAllocationStrategy", "RULE_BASED");
+
+        // when
+        CreditAllocationRequest request = parseSingleEntry(creditAllocationEntry);
+
+        // then
+        Assertions.assertEquals(CreditAllocationStrategy.RULE_BASED, request.allocationStrategy());
+        Assertions.assertEquals(EnumSet.allOf(AllocationType.class).stream().toList(), request.allocationTypes());
+        Assertions.assertTrue(request.creditAllocationOrderProvided());
+    }
+
+    @Test
+    public void testParsePrincipalOnlyChargebackAllocation() throws JsonProcessingException {
+        // given
+        Map<String, Object> creditAllocationEntry = new HashMap<>();
+        creditAllocationEntry.put("transactionType", "CHARGEBACK");
+        creditAllocationEntry.put("creditAllocationStrategy", "PRINCIPAL_ONLY");
+
+        // when
+        CreditAllocationRequest request = parseSingleEntry(creditAllocationEntry);
+
+        // then
+        Assertions.assertEquals(CreditAllocationTransactionType.CHARGEBACK, request.transactionType());
+        Assertions.assertEquals(CreditAllocationStrategy.PRINCIPAL_ONLY, request.allocationStrategy());
+        Assertions.assertEquals(List.of(), request.allocationTypes());
+        Assertions.assertFalse(request.creditAllocationOrderProvided());
+        Mockito.verify(creditAllocationsValidator, times(1)).validate(List.of(request), ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+        Mockito.verifyNoMoreInteractions(creditAllocationsValidator);
+    }
+
+    @Test
+    public void testParsePrincipalOnlyWithEmptyCreditAllocationOrderTreatsOrderAsNotProvided() throws JsonProcessingException {
+        // given
+        Map<String, Object> creditAllocationEntry = createCreditAllocationEntry("CHARGEBACK", List.of());
+        creditAllocationEntry.put("creditAllocationStrategy", "PRINCIPAL_ONLY");
+
+        // when
+        CreditAllocationRequest request = parseSingleEntry(creditAllocationEntry);
+
+        // then
+        Assertions.assertEquals(List.of(), request.allocationTypes());
+        Assertions.assertFalse(request.creditAllocationOrderProvided());
+    }
+
+    @Test
+    public void testParsePrincipalOnlyWithCreditAllocationOrderLeavesTheRejectionToTheValidator() throws JsonProcessingException {
+        // given
+        List<String> allocationRule = EnumSet.allOf(AllocationType.class).stream().map(Enum::name).toList();
+        Map<String, Object> creditAllocationEntry = createCreditAllocationEntry("CHARGEBACK", allocationRule);
+        creditAllocationEntry.put("creditAllocationStrategy", "PRINCIPAL_ONLY");
+
+        // when
+        CreditAllocationRequest request = parseSingleEntry(creditAllocationEntry);
+
+        // then the order is not parsed, only flagged
+        Assertions.assertEquals(List.of(), request.allocationTypes());
+        Assertions.assertTrue(request.creditAllocationOrderProvided());
+        Mockito.verify(creditAllocationsValidator, Mockito.never()).validatePairOfOrderAndCreditAllocationType(Mockito.any());
+    }
+
+    @Test
+    public void testParseRuleBasedWithoutCreditAllocationOrderLeavesTheRejectionToTheValidator() throws JsonProcessingException {
+        // given
+        Map<String, Object> creditAllocationEntry = new HashMap<>();
+        creditAllocationEntry.put("transactionType", "CHARGEBACK");
+
+        // when
+        CreditAllocationRequest request = parseSingleEntry(creditAllocationEntry);
+
+        // then
+        Assertions.assertEquals(CreditAllocationStrategy.RULE_BASED, request.allocationStrategy());
+        Assertions.assertEquals(List.of(), request.allocationTypes());
+        Assertions.assertFalse(request.creditAllocationOrderProvided());
+    }
+
+    @Test
+    public void testParseUnknownStrategyResultsInNoStrategy() throws JsonProcessingException {
+        // given
+        Map<String, Object> creditAllocationEntry = new HashMap<>();
+        creditAllocationEntry.put("transactionType", "CHARGEBACK");
+        creditAllocationEntry.put("creditAllocationStrategy", "UNKNOWN");
+
+        // when
+        CreditAllocationRequest request = parseSingleEntry(creditAllocationEntry);
+
+        // then
+        Assertions.assertNull(request.allocationStrategy());
+    }
+
+    @Test
+    public void testParseNonStringStrategyResultsInNoStrategy() throws JsonProcessingException {
+        // given
+        Map<String, Object> objectStrategyEntry = new HashMap<>();
+        objectStrategyEntry.put("transactionType", "CHARGEBACK");
+        objectStrategyEntry.put("creditAllocationStrategy", Map.of("value", "PRINCIPAL_ONLY"));
+        Map<String, Object> arrayStrategyEntry = new HashMap<>();
+        arrayStrategyEntry.put("transactionType", "CHARGEBACK");
+        arrayStrategyEntry.put("creditAllocationStrategy", List.of("PRINCIPAL_ONLY", "RULE_BASED"));
+
+        // when / then
+        Assertions.assertNull(parseSingleEntry(objectStrategyEntry).allocationStrategy());
+        Assertions.assertNull(parseSingleEntry(arrayStrategyEntry).allocationStrategy());
+    }
+
+    /**
+     * Parses a request with a single credit allocation entry and returns the parsed request handed to the validator,
+     * checking that the returned rule is built from it.
+     */
+    private CreditAllocationRequest parseSingleEntry(Map<String, Object> creditAllocationEntry) throws JsonProcessingException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("creditAllocation", List.of(creditAllocationEntry));
+        Mockito.clearInvocations(creditAllocationsValidator);
+        List<LoanProductCreditAllocationRule> creditAllocationRules = creditAllocationsJsonParser
+                .assembleLoanProductCreditAllocationRules(createJsonCommand(map), ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+        ArgumentCaptor<List<CreditAllocationRequest>> requests = ArgumentCaptor.captor();
+        Mockito.verify(creditAllocationsValidator).validate(requests.capture(), Mockito.eq(ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
+        Assertions.assertEquals(1, requests.getValue().size());
+        CreditAllocationRequest request = requests.getValue().get(0);
+
+        Assertions.assertEquals(1, creditAllocationRules.size());
+        LoanProductCreditAllocationRule rule = creditAllocationRules.get(0);
+        Assertions.assertEquals(request.transactionType(), rule.getTransactionType());
+        Assertions.assertEquals(request.allocationStrategy(), rule.getAllocationStrategy());
+        Assertions.assertEquals(request.allocationTypes(), rule.getAllocationTypes());
+        return request;
     }
 
     private static List<Pair<Integer, AllocationType>> createAllocationTypeList() {

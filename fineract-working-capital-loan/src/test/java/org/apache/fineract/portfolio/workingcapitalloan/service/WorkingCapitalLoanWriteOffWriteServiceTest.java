@@ -51,6 +51,7 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
@@ -133,6 +134,8 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
     @Mock
     private JsonCommand command;
 
+    @Mock
+    private Office office;
     @InjectMocks
     private WorkingCapitalLoanWriteOffWriteServiceImpl writeOffService;
 
@@ -147,6 +150,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
 
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
+        when(loan.getOffice()).thenReturn(office);
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getBalance()).thenReturn(WorkingCapitalLoanBalance.createFor(loan));
         when(loan.getLoanProduct()).thenReturn(loanProduct);
