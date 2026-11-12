@@ -49,4 +49,10 @@ public final class IdempotencyCommandConstants {
      */
     public static final int COMMAND_IDEMPOTENCY_HOOK_HEADERS_BEFORE = 20;
     public static final int COMMAND_IDEMPOTENCY_HOOK_CHECK_BEFORE = 21;
+    /**
+     * Before the audit error hook (30), which writes the row with whatever key the command then carries. The release
+     * depends on that hook running afterwards, which is why IdempotencyCommandPropertyCheck refuses to start without
+     * it.
+     */
+    public static final int COMMAND_IDEMPOTENCY_HOOK_RECOVERABLE_ERROR = 22;
 }

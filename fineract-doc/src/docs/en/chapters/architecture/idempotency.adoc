@@ -102,7 +102,8 @@ that never happened.
 | The original status code and body.
 
 | Failed
-| The original status code and body, so a repeat of a failure fails exactly as the original did.
+| The original status code and body, so a repeat of a failure fails exactly as the original did - unless the failure
+was recoverable, in which case the repeat is executed again. See <<Recoverable failures>>.
 
 | Still being processed, claimed within `claim-timeout`
 | `425 Too Early`. The original has not finished, so there is nothing to replay yet and the caller should retry.
@@ -152,6 +153,22 @@ something reused across calls, such as a correlation id, then have to send a dis
 A repeat is also only replayed when it carries the same request as the original. A key reused for the same endpoint
 with a different body is rejected with `409 Conflict` instead of being answered with the earlier result, which would
 otherwise report success for something that was never carried out.
+
+=== Recoverable failures
+
+Some failures are worth retrying under the same key: a lock that could not be taken, a dependency that was briefly
+unavailable. The new command processing treats them as the legacy one does. A failure is recoverable when its
+exception is marked `RecoverableError`, or when all of its error codes are listed in the
+`idempotency-recoverable-error-codes` global configuration.
+
+A command that failed recoverably gives its key up: its record is moved to `<key>_RE<id>`, where `<id>` is the
+record's own id, and a retry with the original key is executed as a new command. The failure stays on record under the
+moved key, together with the answer the client was sent. A key too long to take the suffix is replaced by the first 40
+hex characters of its SHA-256 hash. If the moved key is somehow already taken, or anything else stops the move, the
+failure stays under the original key, and a retry is answered with it as for any other failure.
+
+The rules come from the application through a `RecoverableCommandErrorClassifier` bean; Fineract provides one that
+applies the legacy rules. Without one, no failure is recoverable.
 
 === Requires auditing
 
