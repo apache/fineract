@@ -31,7 +31,7 @@ import tools.jackson.databind.node.StringNode;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public final class CommandJsonMapper {
+public final class JsonCommandMapper {
 
     private final ObjectMapper mapper;
 
