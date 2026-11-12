@@ -23,7 +23,9 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -37,6 +39,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.Saving
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -57,19 +60,27 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
     public static final String DEPOSIT = "Deposit";
     private static final Logger LOG = LoggerFactory.getLogger(FixedDepositTransactionImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
 
     @Autowired
-    public FixedDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public FixedDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
     }
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, savingsTransactions, dateFormat, locale);
+        Map<Integer, RuntimeException> rowErrors = new LinkedHashMap<>();
+        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        Count count = importEntity(workbook, savingsTransactions, dateFormat, locale);
+        Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME);
+        int failedRows = ImportHandlerUtils.writeRowErrors(sheet, rowErrors, TransactionConstants.STATUS_COL);
+        return Count.instance(count.getSuccessCount(), count.getErrorCount() + failedRows);
     }
 
-    public List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    public List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, RuntimeException> rowErrors) {
         List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
@@ -78,7 +89,11 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
             Row row;
             row = savingsTransactionSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL)) {
-                savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
+                try {
+                    savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
+                } catch (RuntimeException ex) {
+                    rowErrors.put(rowIndex, ex);
+                }
             }
         }
         return savingsTransactions;
@@ -99,6 +114,10 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
         BigDecimal amount = null;
         if (ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row) != null) {
             amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row));
+        }
+        if (savingsAccountId != null) {
+            ImportHandlerUtils.requireAmountWithinCurrencyDigits(amount,
+                    savingsAccountRepositoryWrapper.findCurrencyDigitsById(savingsAccountId));
         }
 
         LocalDate transactionDate = ImportHandlerUtils.readAsDate(TransactionConstants.TRANSACTION_DATE_COL, row);

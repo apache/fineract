@@ -19,9 +19,13 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler.office;
 
 import com.google.gson.GsonBuilder;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -35,6 +39,7 @@ import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerialize
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -57,11 +62,16 @@ public class OfficeImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, offices, dateFormat, locale);
+        Map<Integer, RuntimeException> rowErrors = new LinkedHashMap<>();
+        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        Count count = importEntity(workbook, offices, dateFormat, locale);
+        Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+        int failedRows = ImportHandlerUtils.writeRowErrors(sheet, rowErrors, OfficeConstants.STATUS_COL);
+        return Count.instance(count.getSuccessCount(), count.getErrorCount() + failedRows);
     }
 
-    private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, RuntimeException> rowErrors) {
         List<OfficeData> offices = new ArrayList<>();
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
@@ -69,7 +79,11 @@ public class OfficeImportHandler implements ImportHandler {
             Row row;
             row = officeSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)) {
-                offices.add(readOffice(row, locale, dateFormat));
+                try {
+                    offices.add(readOffice(row, locale, dateFormat));
+                } catch (RuntimeException ex) {
+                    rowErrors.put(rowIndex, ex);
+                }
             }
         }
         return offices;
@@ -77,12 +91,63 @@ public class OfficeImportHandler implements ImportHandler {
 
     private OfficeData readOffice(Row row, final String locale, final String dateFormat) {
         String officeName = ImportHandlerUtils.readAsString(OfficeConstants.OFFICE_NAME_COL, row);
-        Long parentId = ImportHandlerUtils.readAsLong(OfficeConstants.PARENT_OFFICE_ID_COL, row);
+        Long parentId = readParentOfficeId(row);
         LocalDate openedDate = ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL, row);
         String externalId = ImportHandlerUtils.readAsString(OfficeConstants.EXTERNAL_ID_COL, row);
         OfficeData office = OfficeData.importInstance(officeName, parentId, openedDate, ExternalIdFactory.produce(externalId));
         office.setImportFields(row.getRowNum(), locale, dateFormat);
         return office;
+    }
+
+    static Long readParentOfficeId(final Row row) {
+        final Cell parentIdCell = row.getCell(OfficeConstants.PARENT_OFFICE_ID_COL);
+        if (parentIdCell == null || parentIdCell.getCellType() == CellType.FORMULA) {
+            return ImportHandlerUtils.readAsLong(OfficeConstants.PARENT_OFFICE_ID_COL, row);
+        }
+        requireWholeNumber(parentIdCell);
+        final Long parentId = ImportHandlerUtils.readAsLong(OfficeConstants.PARENT_OFFICE_ID_COL, row);
+        final String parentName = ImportHandlerUtils.readAsString(OfficeConstants.PARENT_OFFICE_NAME_COL, row);
+        if (parentId != null && parentName != null && hasOfficeList(row.getSheet())) {
+            final Long namedId = findListedOfficeId(row.getSheet(), parentName);
+            if (namedId == null) {
+                throw new IllegalArgumentException("Parent Office '" + parentName + "' not found");
+            }
+            if (!namedId.equals(parentId)) {
+                throw new IllegalArgumentException("Parent Office '" + parentName + "' does not match Parent OfficeId " + parentId);
+            }
+        }
+        return parentId;
+    }
+
+    private static void requireWholeNumber(final Cell cell) {
+        BigDecimal typedId = null;
+        if (cell.getCellType() == CellType.NUMERIC) {
+            typedId = BigDecimal.valueOf(cell.getNumericCellValue());
+        } else if (cell.getCellType() == CellType.STRING && NumberUtils.isCreatable(cell.getStringCellValue().trim())) {
+            typedId = new BigDecimal(cell.getStringCellValue().trim());
+        }
+        if (typedId != null && typedId.stripTrailingZeros().scale() > 0) {
+            throw new IllegalArgumentException("Parent OfficeId must be a whole number");
+        }
+    }
+
+    private static Long findListedOfficeId(final Sheet sheet, final String officeName) {
+        for (Row lookupRow : sheet) {
+            if (lookupRow.getRowNum() > 0
+                    && officeName.equals(ImportHandlerUtils.readAsString(OfficeConstants.LOOKUP_OFFICE_COL, lookupRow))) {
+                return ImportHandlerUtils.readAsLong(OfficeConstants.LOOKUP_OFFICE_ID_COL, lookupRow);
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasOfficeList(final Sheet sheet) {
+        for (Row lookupRow : sheet) {
+            if (lookupRow.getRowNum() > 0 && ImportHandlerUtils.readAsLong(OfficeConstants.LOOKUP_OFFICE_ID_COL, lookupRow) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Count importEntity(final Workbook workbook, final List<OfficeData> offices, final String dateFormat, final String locale) {
