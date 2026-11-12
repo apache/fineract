@@ -25,4 +25,15 @@ import org.apache.fineract.organisation.staff.data.StaffUploadRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StaffUploadCommand extends Command<StaffUploadRequest> {}
+public class StaffUploadCommand extends Command<StaffUploadRequest> {
+
+    @Override
+    public String entityName() {
+        return "STAFF";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

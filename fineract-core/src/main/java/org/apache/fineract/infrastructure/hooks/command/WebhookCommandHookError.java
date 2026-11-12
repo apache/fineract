@@ -41,13 +41,13 @@ final class WebhookCommandHookError implements CommandHookError<Object, Object> 
 
         // a command whose execution was skipped never ran, so it did not fail: the error is about the request (e.g. a
         // refused repeat of an idempotency key), not about a change to announce
-        if (ctx.isSkipExecution() || !(command instanceof HookableCommand hookable)) {
+        if (ctx.isSkipExecution() || !(command instanceof HookableCommand)) {
             return;
         }
 
         // Publish right away, as in the legacy command processing: when the handler fails, its work is rolled back, so
         // there is no commit to wait for. A hook can also fail after the handler has committed, e.g. when the audit
         // hook can't store the command. The event then reports the error the API returns, for a change that was saved.
-        publisher.publishError(hookable, command.getPayload(), ctx.getError());
+        publisher.publishError(command, command.getPayload(), ctx.getError());
     }
 }

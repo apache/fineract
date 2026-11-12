@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRateCreateReques
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FloatingRateCreateCommand extends Command<FloatingRateCreateRequest> {}
+public class FloatingRateCreateCommand extends Command<FloatingRateCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "FLOATINGRATE";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

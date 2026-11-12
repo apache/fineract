@@ -35,6 +35,7 @@ import org.apache.fineract.command.core.CommandHookError;
 import org.apache.fineract.command.core.CommandState;
 import org.apache.fineract.command.implementation.DefaultCommandHookManager;
 import org.apache.fineract.command.implementation.SynchronousCommandDispatcher;
+import org.apache.fineract.command.test.sample.command.DummyCommand;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -64,7 +65,7 @@ class SynchronousCommandDispatcherTest {
         };
         var dispatcher = dispatcher(List.of(answering, ctx -> calls.add("before")), List.of(ctx -> calls.add("after")), List.of());
 
-        Object result = dispatcher.dispatch(new Command<>()).get();
+        Object result = dispatcher.dispatch(new DummyCommand()).get();
 
         assertEquals("replayed", result);
         assertEquals(0, handled.get(), "A command whose execution is skipped must not reach its handler.");
@@ -79,7 +80,7 @@ class SynchronousCommandDispatcherTest {
         };
         var dispatcher = dispatcher(List.of(answering, ctx -> calls.add("before")), List.of(ctx -> calls.add("after")), List.of());
 
-        Object result = dispatcher.dispatch(new Command<>()).get();
+        Object result = dispatcher.dispatch(new DummyCommand()).get();
 
         assertEquals("replayed", result);
         assertEquals(0, handled.get());
@@ -97,7 +98,7 @@ class SynchronousCommandDispatcherTest {
         List<Throwable> errors = new ArrayList<>();
         var dispatcher = dispatcher(List.of(refusing), List.of(), List.of(ctx -> errors.add(ctx.getError()), ctx -> calls.add("error2")));
 
-        var thrown = assertThrows(IllegalStateException.class, () -> dispatcher.dispatch(new Command<>()).get());
+        var thrown = assertThrows(IllegalStateException.class, () -> dispatcher.dispatch(new DummyCommand()).get());
 
         assertSame(refused, thrown);
         assertEquals(List.of(refused), errors, "The error hooks see the exception the hook threw.");
@@ -112,7 +113,7 @@ class SynchronousCommandDispatcherTest {
             seen.add(ctx.getResponse());
         };
         var dispatcher = dispatcher(List.of(recording), List.of(), List.of());
-        var supplier = dispatcher.dispatch(new Command<>());
+        var supplier = dispatcher.dispatch(new DummyCommand());
 
         supplier.get();
         supplier.get();

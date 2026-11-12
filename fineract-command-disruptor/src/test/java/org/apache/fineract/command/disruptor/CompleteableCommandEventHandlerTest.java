@@ -37,6 +37,8 @@ import org.apache.fineract.command.core.CommandHookError;
 import org.apache.fineract.command.disruptor.implementation.DisruptorCommandDispatcher.CommandEvent;
 import org.apache.fineract.command.disruptor.implementation.DisruptorCommandDispatcher.CompleteableCommandEventHandler;
 import org.apache.fineract.command.implementation.DefaultCommandHookManager;
+import org.apache.fineract.command.test.sample.command.DummyCommand;
+import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -90,9 +92,9 @@ class CompleteableCommandEventHandlerTest {
         assertEquals(0, handled.get());
     }
 
-    private static CommandEvent<Object, Object> event() {
-        var event = new CommandEvent<Object, Object>();
-        event.setContext(CommandContext.<Object, Object>builder().command(new Command<>()).build());
+    private static CommandEvent<DummyRequest, Object> event() {
+        var event = new CommandEvent<DummyRequest, Object>();
+        event.setContext(CommandContext.<DummyRequest, Object>builder().command(new DummyCommand()).build());
         event.setFuture(new CompletableFuture<>());
         return event;
     }
