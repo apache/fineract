@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!--
+        On PostgreSQL CHAR without a length is CHAR(1), so CAST(x AS CHAR) keeps only the first character
+        ("Portfolio at Risk %" 12.34 became "1"). Only the AS CHAR casts change; the rest of each query stays as it is.
+        The spacing between AS and CHAR varies in the stored SQL, hence regexp_replace rather than REPLACE.
+    -->
+    <changeSet author="fineract" id="postgresql-reports-cast-as-varchar" context="postgresql">
+        <sql>
+            UPDATE stretchy_report
+            SET report_sql = regexp_replace(report_sql, 'AS\s+CHAR\)', 'AS VARCHAR)', 'gi')
+            WHERE report_name IN ('Portfolio at Risk', 'Portfolio at Risk by Branch', 'Active Loans - Summary',
+                'Active Loans in last installment Summary', 'Active Loans Passed Final Maturity Summary', 'TxnRunningBalances')
+        </sql>
+    </changeSet>
+
+    <!--
+        Currency ids are currency codes (USD), used as l.currency_code = '${currencyId}'. With the parameter typed as
+        number, "USD" is rejected as not numeric and "-1" is bound as a bigint, which PostgreSQL cannot compare with
+        a varchar column.
+    -->
+    <changeSet author="fineract" id="report-parameter-currency-id-string-format">
+        <update tableName="stretchy_parameter">
+            <column name="parameter_FormatType" value="string"/>
+            <where>parameter_name = 'currencyIdSelectAll'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="fineract" id="postgresql-happy-birthday-report" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT c.id AS &quot;id&quot;, c.firstname AS &quot;firstName&quot;, c.middlename AS &quot;middleName&quot;,
+                c.lastname AS &quot;lastName&quot;, c.display_name AS &quot;fullName&quot;, c.mobile_no AS &quot;mobileNo&quot;,
+                CONCAT(REPEAT('..', ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name) AS &quot;officeName&quot;,
+                o.id AS &quot;officeNumber&quot;, c.date_of_birth AS &quot;dateOfBirth&quot;,
+                CASE WHEN c.date_of_birth IS NULL THEN 0 ELSE CAST(CEIL((CURRENT_DATE - c.date_of_birth) / 365.0) AS INTEGER) END AS &quot;age&quot;
+            FROM m_office o
+                JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, '%')
+                JOIN m_client c ON c.office_id = ounder.id
+                LEFT JOIN r_enum_value r ON r.enum_name = 'status_enum' AND r.enum_id = c.status_enum
+                LEFT JOIN m_staff ms ON ms.id = c.staff_id
+            WHERE o.id = ${officeId} AND c.status_enum = 300
+                AND (COALESCE(c.staff_id, -10) = ${loanOfficerId} OR -1 = ${loanOfficerId})
+                AND c.date_of_birth IS NOT NULL
+                AND EXTRACT(MONTH FROM c.date_of_birth) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(DAY FROM c.date_of_birth) = EXTRACT(DAY FROM CURRENT_DATE)
+            ORDER BY ounder.hierarchy, c.account_no"/>
+            <where>report_name = 'Happy Birthday'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="fineract" id="postgresql-txn-running-balances-report" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT CAST(${startDate} AS DATE) AS &quot;Transaction Date&quot;, 'Opening Balance' AS &quot;Transaction Type&quot;,
+                null AS &quot;Office&quot;, null AS &quot;Loan Officer&quot;, null AS &quot;Loan Account No&quot;, null AS &quot;Loan Product&quot;,
+                null AS &quot;Currency&quot;, null AS &quot;Client Account No&quot;, null AS &quot;Client&quot;, null AS &quot;Principal&quot;, null AS &quot;Interest&quot;,
+                COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 1 THEN COALESCE(txn.amount, 0.00)
+                    ELSE -1 * COALESCE(txn.principal_portion_derived, 0.00) END), 2), 0.00) AS &quot;Outstanding Principal&quot;,
+                COALESCE(round(sum(CASE WHEN txn.transaction_type_enum IN (2, 5, 8) THEN COALESCE(txn.interest_portion_derived, 0.00)
+                    ELSE 0 END), 2), 0.00) AS &quot;Interest Income&quot;,
+                COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 6 THEN COALESCE(txn.principal_portion_derived, 0.00)
+                    ELSE 0 END), 2), 0.00) AS &quot;Principal Write Off&quot;
+            FROM m_office o
+                JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, '%')
+                    AND ounder.hierarchy LIKE CONCAT('${currentUserHierarchy}', '%')
+                JOIN m_client c ON c.office_id = ounder.id
+                JOIN m_loan l ON l.client_id = c.id
+                JOIN m_product_loan lp ON lp.id = l.product_id
+                JOIN m_loan_transaction txn ON txn.loan_id = l.id
+                LEFT JOIN m_currency cur ON cur.code = l.currency_code
+            WHERE txn.is_reversed = false AND txn.transaction_type_enum NOT IN (10, 11)
+                AND o.id = ${officeId}
+                AND txn.transaction_date &lt; CAST(${startDate} AS DATE)
+            UNION ALL
+            SELECT txn.transaction_date AS &quot;Transaction Date&quot;,
+                CAST(COALESCE(re.enum_message_property, CONCAT('Unknown Transaction Type Value: ', txn.transaction_type_enum)) AS VARCHAR) AS &quot;Transaction Type&quot;,
+                ounder.name AS &quot;Office&quot;, lo.display_name AS &quot;Loan Officer&quot;, l.account_no AS &quot;Loan Account No&quot;,
+                lp.name AS &quot;Loan Product&quot;, COALESCE(cur.display_symbol, l.currency_code) AS &quot;Currency&quot;,
+                c.account_no AS &quot;Client Account No&quot;, c.display_name AS &quot;Client&quot;,
+                COALESCE(txn.principal_portion_derived, 0.00) AS &quot;Principal&quot;, COALESCE(txn.interest_portion_derived, 0.00) AS &quot;Interest&quot;,
+                COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 1 THEN COALESCE(txn.amount, 0.00)
+                    ELSE -1 * COALESCE(txn.principal_portion_derived, 0.00) END), 2), 0.00) AS &quot;Outstanding Principal&quot;,
+                COALESCE(round(sum(CASE WHEN txn.transaction_type_enum IN (2, 5, 8) THEN COALESCE(txn.interest_portion_derived, 0.00)
+                    ELSE 0 END), 2), 0.00) AS &quot;Interest Income&quot;,
+                COALESCE(round(sum(CASE WHEN txn.transaction_type_enum = 6 THEN COALESCE(txn.principal_portion_derived, 0.00)
+                    ELSE 0 END), 2), 0.00) AS &quot;Principal Write Off&quot;
+            FROM m_office o
+                JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, '%')
+                    AND ounder.hierarchy LIKE CONCAT('${currentUserHierarchy}', '%')
+                JOIN m_client c ON c.office_id = ounder.id
+                JOIN m_loan l ON l.client_id = c.id
+                LEFT JOIN m_staff lo ON lo.id = l.loan_officer_id
+                JOIN m_product_loan lp ON lp.id = l.product_id
+                JOIN m_loan_transaction txn ON txn.loan_id = l.id
+                LEFT JOIN m_currency cur ON cur.code = l.currency_code
+                LEFT JOIN r_enum_value re ON re.enum_name = 'transaction_type_enum' AND re.enum_id = txn.transaction_type_enum
+            WHERE txn.is_reversed = false AND txn.transaction_type_enum NOT IN (10, 11)
+                AND (COALESCE(l.loan_officer_id, -10) = ${loanOfficerId} OR -1 = ${loanOfficerId})
+                AND o.id = ${officeId}
+                AND txn.transaction_date &gt;= CAST(${startDate} AS DATE)
+                AND txn.transaction_date &lt;= CAST(${endDate} AS DATE)
+            GROUP BY txn.id, ounder.id, lo.id, l.id, lp.id, cur.id, c.id, re.enum_message_property"/>
+            <where>report_name = 'TxnRunningBalances'</where>
+        </update>
+    </changeSet>
+
+    <!--
+        MySQL 8 enables ONLY_FULL_GROUP_BY by default, and these three reports select columns that are not in their
+        GROUP BY, so MySQL rejects them before running them (MariaDB does not enable that mode, so they ran there).
+        The added columns are already fixed by the existing grouping (office name by office, display symbol by currency
+        code, month name by month), except in Active Loans in last installment Summary, where grouping by branch alone
+        also summed loans of different currencies into one row; it now groups by branch and currency like the
+        PostgreSQL copy. YEAR() returns INT UNSIGNED on MySQL, a column type report results cannot map, so the Year
+        column is cast to signed.
+    -->
+    <changeSet author="fineract" id="mysql-reports-only-full-group-by" context="mysql">
+        <sql>
+            UPDATE stretchy_report
+            SET report_sql = REPLACE(REPLACE(report_sql,
+                'group by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)',
+                'group by ounder.hierarchy, ounder.`name`, pl.`name`, l.currency_code, cur.display_symbol, year(l.expected_disbursedon_date), cast(year(l.expected_disbursedon_date) as signed), month(l.expected_disbursedon_date), monthname(l.expected_disbursedon_date)'),
+                'year(l.expected_disbursedon_date) as "Year"', 'cast(year(l.expected_disbursedon_date) as signed) as "Year"')
+            WHERE report_name = 'Loans Awaiting Disbursal Summary by Month';
+
+            UPDATE stretchy_report
+            SET report_sql = REPLACE(report_sql, 'group by ounder.hierarchy, l.currency_code',
+                'group by ounder.hierarchy, ounder.`name`, l.currency_code, cur.display_symbol')
+            WHERE report_name = 'Obligation Met Loans Summary';
+
+            UPDATE stretchy_report
+            SET report_sql = REPLACE(report_sql, 'group by lastInstallment.branchId)',
+                'group by lastInstallment.branchId, lastInstallment.Currency)')
+            WHERE report_name = 'Active Loans in last installment Summary';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
