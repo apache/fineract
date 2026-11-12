@@ -78,9 +78,10 @@ public class JdbcCommandStore implements CommandStore {
 
     @Override
     public CommandReplay getReplayByKey(String key) {
-        return repository.findOneByIdempotencyKey(key).map(
-                entity -> new CommandReplay(entity.getState(), entity.getResponseStatusCode(), replayResponse(key, entity.getResponse())))
-                .orElseGet(() -> new CommandReplay(UNKNOWN, null, null));
+        return repository.findOneByIdempotencyKey(key)
+                .map(entity -> new CommandReplay(entity.getState(), entity.getResponseStatusCode(),
+                        replayResponse(key, entity.getResponse()), entity.getCreatedAt()))
+                .orElseGet(() -> new CommandReplay(UNKNOWN, null, null, null));
     }
 
     /**

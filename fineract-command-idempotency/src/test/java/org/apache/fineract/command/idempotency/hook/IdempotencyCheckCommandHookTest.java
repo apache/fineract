@@ -34,6 +34,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandContext;
@@ -43,6 +45,7 @@ import org.apache.fineract.command.core.exception.CommandIdempotencyConflictExce
 import org.apache.fineract.command.core.exception.CommandIdempotencyFailedException;
 import org.apache.fineract.command.core.exception.CommandIdempotencyInProgressException;
 import org.apache.fineract.command.core.exception.CommandIdempotencyProcessedException;
+import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +64,7 @@ class IdempotencyCheckCommandHookTest {
 
     @BeforeEach
     void setUp() {
-        hook = new IdempotencyCheckCommandHook(store);
+        hook = new IdempotencyCheckCommandHook(store, IdempotencyCommandProperties.builder().build());
     }
 
     @Test
@@ -90,7 +93,7 @@ class IdempotencyCheckCommandHookTest {
     void anUnfinishedCommandAnswersTooEarly() {
         var ctx = context(KEY);
 
-        duplicate(new CommandReplay(UNDER_PROCESSING, null, null));
+        duplicate(new CommandReplay(UNDER_PROCESSING, null, null, Instant.now()));
 
         var exception = assertThrows(CommandIdempotencyInProgressException.class, () -> hook.onBefore(ctx));
 
@@ -106,7 +109,7 @@ class IdempotencyCheckCommandHookTest {
 
         var stored = Map.of("resourceId", 7);
 
-        duplicate(new CommandReplay(PROCESSED, null, stored));
+        duplicate(new CommandReplay(PROCESSED, null, stored, Instant.now()));
         when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
 
         hook.onBefore(ctx);
@@ -123,7 +126,7 @@ class IdempotencyCheckCommandHookTest {
 
         // no result object to hand back, so the answer captured as it went out is replayed as the text it is, and
         // the status has to come from the record because nothing else can derive it
-        duplicate(new CommandReplay(PROCESSED, 201, "{\"resourceId\":7}"));
+        duplicate(new CommandReplay(PROCESSED, 201, "{\"resourceId\":7}", Instant.now()));
         when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
 
         var exception = assertThrows(CommandIdempotencyProcessedException.class, () -> hook.onBefore(ctx));
@@ -138,7 +141,7 @@ class IdempotencyCheckCommandHookTest {
 
         var stored = Map.of("error", "bad request");
 
-        duplicate(new CommandReplay(ERROR, 400, stored));
+        duplicate(new CommandReplay(ERROR, 400, stored, Instant.now()));
         when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
 
         // this is what the old processing does: a repeat of a failure fails identically rather than being retried
@@ -153,7 +156,7 @@ class IdempotencyCheckCommandHookTest {
     void aKeyReusedForADifferentRequestConflicts() {
         var ctx = context(KEY);
 
-        duplicate(new CommandReplay(PROCESSED, 200, Map.of()));
+        duplicate(new CommandReplay(PROCESSED, 200, Map.of(), Instant.now()));
         when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(false);
 
         var exception = assertThrows(CommandIdempotencyConflictException.class, () -> hook.onBefore(ctx));
@@ -165,7 +168,7 @@ class IdempotencyCheckCommandHookTest {
     void anUnrecognisedStateConflictsRatherThanGuessing() {
         var ctx = context(KEY);
 
-        duplicate(new CommandReplay(UNKNOWN, null, null));
+        duplicate(new CommandReplay(UNKNOWN, null, null, Instant.now()));
         when(store.matchesStoredRequest(KEY, "request-payload")).thenReturn(true);
 
         assertThrows(CommandIdempotencyConflictException.class, () -> hook.onBefore(ctx));
@@ -184,6 +187,31 @@ class IdempotencyCheckCommandHookTest {
                 "The key has been used and its answer cannot be produced, which is neither a success nor a failure of this request.");
         assertTrue(String.valueOf(exception.getResponse()).contains("cannot be reconstructed"),
                 "The answer must say what went wrong rather than coming back empty.");
+    }
+
+    @Test
+    void aClaimThatNeverFinishedIsRefusedRatherThanAskedToRetryForEver() {
+        var ctx = context(KEY);
+
+        // claimed well past the timeout and still recorded as running: the command that claimed it never came back
+        duplicate(new CommandReplay(UNDER_PROCESSING, null, null, Instant.now().minus(Duration.ofHours(1))));
+
+        var exception = assertThrows(CommandIdempotencyConflictException.class, () -> hook.onBefore(ctx));
+
+        assertEquals(409, exception.getStatusCode(),
+                "425 would tell the caller to come back, and nothing will ever change, so they would retry for ever.");
+        assertTrue(String.valueOf(exception.getResponse()).contains("never finished"),
+                "The answer has to say why the key is unusable, or a caller cannot tell it from a transient 409.");
+    }
+
+    @Test
+    void aClaimThatIsStillWithinItsTimeIsToldToComeBack() {
+        var ctx = context(KEY);
+
+        duplicate(new CommandReplay(UNDER_PROCESSING, null, null, Instant.now().minus(Duration.ofMinutes(1))));
+
+        assertThrows(CommandIdempotencyInProgressException.class, () -> hook.onBefore(ctx),
+                "A command that could still be running must not be declared dead.");
     }
 
     private void duplicate(CommandReplay replay) {

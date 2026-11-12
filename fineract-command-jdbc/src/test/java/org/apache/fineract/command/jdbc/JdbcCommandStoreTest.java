@@ -214,6 +214,7 @@ public class JdbcCommandStoreTest extends CommandBaseTest {
 
         var inFlight = store.getReplayByKey(key);
         assertEquals(UNDER_PROCESSING, inFlight.state(), "A claimed key should report the command as in flight.");
+        assertNotNull(inFlight.claimedAt(), "When the key was claimed is what tells a slow command from an abandoned one.");
         assertNull(inFlight.statusCode(), "An in-flight command has not been answered yet.");
         assertNull(inFlight.response(), "An in-flight command has nothing to replay.");
 

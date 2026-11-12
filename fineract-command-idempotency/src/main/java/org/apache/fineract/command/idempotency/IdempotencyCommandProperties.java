@@ -22,6 +22,7 @@ import static org.apache.fineract.command.idempotency.IdempotencyCommandConstant
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Duration;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -57,4 +58,17 @@ public final class IdempotencyCommandProperties implements Serializable {
 
     @Builder.Default
     private String keyHeaderName = "Idempotency-Key";
+
+    /**
+     * How long a claimed command may stay unfinished before a repeat of its key is told the original will never
+     * complete, rather than being told to come back later.
+     *
+     * <p>
+     * A claim that is never resolved - the process died between claiming the key and recording the outcome, or the
+     * store gave up after its retries - would otherwise answer every repeat {@code 425 Too Early} for ever, and a
+     * client following that advice retries for ever. Long enough that a slow command is not declared dead: the key is
+     * never re-executed, but a repeat past this point is refused, and the caller has to use a new one.
+     */
+    @Builder.Default
+    private Duration claimTimeout = Duration.ofMinutes(10);
 }
