@@ -42,4 +42,6 @@ public final class IdempotencyCommandConstants {
             + ".custom-distinctor";
     public static final int COMMAND_IDEMPOTENCY_HOOK_HEADERS_BEFORE = 20;
     public static final int COMMAND_IDEMPOTENCY_HOOK_CHECK_BEFORE = 21;
+    /** Before the audit error hook (30), which writes the row with whatever key the command then carries. */
+    public static final int COMMAND_IDEMPOTENCY_HOOK_RECOVERABLE_ERROR = 22;
 }

@@ -24,6 +24,7 @@ import static org.apache.fineract.command.idempotency.IdempotencyCommandConstant
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_WEB_BASE_PACKAGE;
 
 import org.apache.fineract.command.core.CommandStore;
+import org.apache.fineract.command.core.RecoverableCommandErrorClassifier;
 import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
 import org.apache.fineract.command.idempotency.distinctor.CustomIdempotencyDistinctor;
 import org.apache.fineract.command.idempotency.web.IdempotencyResponseCaptureFilter;
@@ -67,5 +68,15 @@ public class IdempotencyCommandAutoConfiguration {
     @ConditionalOnMissingBean
     CustomIdempotencyDistinctor customIdempotencyDistinctor(IdempotencyCommandProperties properties) {
         return properties.getCustomDistinctor().create();
+    }
+
+    /**
+     * Treats no failure as recoverable, so every failure keeps its key, until the application says otherwise by
+     * defining its own classifier - Fineract does, with the rules of the legacy command processing.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    RecoverableCommandErrorClassifier recoverableCommandErrorClassifier() {
+        return error -> false;
     }
 }
