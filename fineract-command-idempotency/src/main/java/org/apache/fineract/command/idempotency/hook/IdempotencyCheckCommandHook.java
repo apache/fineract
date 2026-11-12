@@ -27,6 +27,7 @@ import static org.apache.fineract.command.idempotency.IdempotencyCommandConstant
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_HOOK_CHECK_BEFORE;
 import static org.apache.fineract.command.idempotency.IdempotencyCommandConstants.COMMAND_IDEMPOTENCY_PROPERTY_HOOK_CHECK_PRE;
 
+import java.time.Instant;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ import org.apache.fineract.command.core.exception.CommandIdempotencyConflictExce
 import org.apache.fineract.command.core.exception.CommandIdempotencyFailedException;
 import org.apache.fineract.command.core.exception.CommandIdempotencyInProgressException;
 import org.apache.fineract.command.core.exception.CommandIdempotencyProcessedException;
+import org.apache.fineract.command.idempotency.IdempotencyCommandProperties;
 import org.apache.fineract.command.idempotency.distinctor.CustomIdempotencyDistinctor;
 import org.apache.fineract.command.util.ServletHeaderUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -56,6 +58,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Object> {
 
     private final CommandStore store;
+
+    private final IdempotencyCommandProperties properties;
 
     private final CustomIdempotencyDistinctor distinctor;
 
@@ -92,6 +96,10 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
                 replay.state(), command.getInitiatedByUsername(), command.getIpAddress());
 
         if (UNDER_PROCESSING.equals(replay.state())) {
+            if (abandoned(replay)) {
+                throw abandonedClaim(key, replay);
+            }
+
             // the original has not finished, so there is nothing to replay yet and retrying is the right thing to do
             throw new CommandIdempotencyInProgressException(key, replay.response());
         }
@@ -142,6 +150,51 @@ final class IdempotencyCheckCommandHook implements CommandHookBefore<Object, Obj
                                     + "under a new idempotency key: that would carry it out a second time."),
                     e);
         }
+    }
+
+    /**
+     * Whether a claim has been unfinished for longer than any command should take.
+     *
+     * <p>
+     * A command that is recorded as running has either not finished yet or never will: the process died between
+     * claiming the key and recording the outcome, or the store gave up writing it. Nothing distinguishes the two from
+     * the row, so age stands in for it. Treated as abandoned only well past the point where a command could still be
+     * working, because the cost of being wrong is telling a caller their request failed while it is still running.
+     *
+     * <p>
+     * With no timeout configured - zero or empty - no claim is ever treated as abandoned, and a repeat of an unfinished
+     * one is answered {@code 425 Too Early} for as long as it stays unfinished, which is what the legacy command
+     * processing does.
+     */
+    private boolean abandoned(CommandReplay replay) {
+        var claimedAt = replay.claimedAt();
+        var timeout = properties.getClaimTimeout();
+
+        if (timeout == null || timeout.isZero()) {
+            return false;
+        }
+
+        return claimedAt != null && claimedAt.isBefore(Instant.now().minus(timeout));
+    }
+
+    /**
+     * Refuses a repeat whose original will never finish.
+     *
+     * <p>
+     * The alternative - answering {@code 425 Too Early} as for a command that is genuinely still running - tells the
+     * caller to come back, and nothing will ever change, so they retry for ever. The key is deliberately not released
+     * for another attempt: the first command may have reached the database before whatever stopped it, and running it
+     * again is the duplicate this whole mechanism exists to prevent.
+     */
+    private CommandIdempotencyConflictException abandonedClaim(String key, CommandReplay replay) {
+        log.error("Idempotency key {} has been under processing since {}, longer than the {} it is given; the command that "
+                + "claimed it never recorded an outcome", key, replay.claimedAt(), properties.getClaimTimeout());
+
+        return new CommandIdempotencyConflictException(key,
+                Map.of("idempotencyKey", key, "error",
+                        "The command that claimed this idempotency key never finished, so its answer cannot be produced and the "
+                                + "key cannot be reused. Whether it took effect has to be established before retrying, and a "
+                                + "retry needs a new idempotency key."));
     }
 
     /**

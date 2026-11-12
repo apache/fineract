@@ -168,6 +168,20 @@ public class JdbcCommandStoreTest extends CommandBaseTest {
     }
 
     @Test
+    public void aClaimIsAlwaysStoredWithItsTime() {
+        var key = UUID.randomUUID().toString();
+        var command = command(key, "hello");
+
+        // as when the timestamp hook is switched off
+        command.setCreatedAt(null);
+
+        assertTrue(store.claim(command));
+        assertNotNull(command.getCreatedAt(), "The claim time must be kept on the command, so the audit hooks write it back.");
+        assertNotNull(store.getReplayByKey(key, "").claimedAt(),
+                "Without a claim time an abandoned claim can never be told from a running one, and is answered 425 for ever.");
+    }
+
+    @Test
     public void aKeyIsUniqueTogetherWithItsDistinctor() {
         var key = UUID.randomUUID().toString();
         var loan = command(key, "hello");
@@ -274,6 +288,7 @@ public class JdbcCommandStoreTest extends CommandBaseTest {
 
         var inFlight = store.getReplayByKey(key, "");
         assertEquals(UNDER_PROCESSING, inFlight.state(), "A claimed key should report the command as in flight.");
+        assertNotNull(inFlight.claimedAt(), "When the key was claimed is what tells a slow command from an abandoned one.");
         assertNull(inFlight.statusCode(), "An in-flight command has not been answered yet.");
         assertNull(inFlight.response(), "An in-flight command has nothing to replay.");
 

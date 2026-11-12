@@ -55,6 +55,7 @@ fineract.command.idempotency.enabled=true
 fineract.command.idempotency.key-header-name=Idempotency-Key
 fineract.command.idempotency.hook-key-header-pre=true
 fineract.command.idempotency.hook-check-pre=true
+fineract.command.idempotency.claim-timeout=10m
 fineract.command.idempotency.custom-distinctor=ENTITY_NAME_AND_ACTION_NAME
 ----
 
@@ -103,8 +104,12 @@ that never happened.
 | Failed
 | The original status code and body, so a repeat of a failure fails exactly as the original did.
 
-| Still being processed
+| Still being processed, claimed within `claim-timeout`
 | `425 Too Early`. The original has not finished, so there is nothing to replay yet and the caller should retry.
+
+| Still being processed, claimed longer ago than `claim-timeout`
+| `409 Conflict`, saying the command never finished. With the timeout switched off, `425 Too Early` as above. See
+<<A claim that never finishes>>.
 
 | Completed, but its stored result cannot be reconstructed
 | `409 Conflict`, saying so. The key has been used and its answer can no longer be produced - reporting a server error
@@ -160,6 +165,9 @@ with idempotency enabled, `fineract.command.audit.hook-post-enabled=false` (noth
 `fineract.command.audit.hook-error-enabled=false` (nothing records a failed one) also refuses to start. The before hook
 is not required, because claiming the key has already written the record it would write.
 
+The claim is always stored with the time it was made, which is what <<A claim that never finishes>> measures. It is
+taken from the timestamp hook when that is on, and from the moment of the claim when it is not.
+
 Every result type a command handler returns has to be readable back from the store, since a repeat is answered by
 reading it back. A test walks every handler on the classpath and fails for a result type Jackson cannot construct, such
 as a Lombok `@Builder` class without `@NoArgsConstructor` and `@AllArgsConstructor`.
@@ -171,3 +179,23 @@ See the command auditing chapter for what is recorded and when.
 Every write to the command record is retried - claiming the key, recording how the command finished, recording a
 repeat, and recording an answer. A claim that loses to contention is tried again; a claim that loses to the unique
 constraint is not, because that is the answer rather than a failure, and it means another request already owns the key.
+
+=== A claim that never finishes
+
+A command is recorded as `UNDER_PROCESSING` from the moment its key is claimed until the audit hooks record how it
+finished. If nothing ever records that - the process dies in between, or the store gives up writing the row after its
+retries - the row stays `UNDER_PROCESSING` for good. Answering `425 Too Early` to every repeat would then tell the
+caller to come back for an answer that is never coming, and a caller following that advice retries for ever.
+
+Past `fineract.command.idempotency.claim-timeout`, such a claim is treated as abandoned and a repeat is refused with
+`409 Conflict` instead. Nothing distinguishes a command that died from one that is merely slow, so age stands in for
+it: set the timeout comfortably above the slowest command rather than tightly, because the cost of being wrong is
+telling a caller their request failed while it is still running.
+
+The timeout is on by default, at 10 minutes. Setting `claim-timeout` to `0` (or leaving it empty) switches it off: an
+unfinished claim is then answered `425 Too Early` for as long as it stays unfinished, which is what the legacy command
+processing does. A negative value is refused at startup.
+
+IMPORTANT: The key is refused, not released. The command that claimed it may have reached the database before whatever
+stopped it, so running it again is exactly the duplicate this mechanism exists to prevent. Whether the original took
+effect has to be established some other way, and a retry needs a new idempotency key.

@@ -46,9 +46,9 @@ import org.springframework.stereotype.Component;
  * <p>
  * Switching auditing on as a whole is not enough: the after hook records a command that completed and the error hook
  * one that failed, and each can be switched off on its own. Without the after hook every successful command stays
- * claimed; without the error hook every failed one does. Either way every repeat is answered {@code 425 Too Early} for
- * ever, even for a command that completed. The before hook is not required: claiming the key has already written the
- * row it would write.
+ * claimed; without the error hook every failed one does. Either way a repeat is told to retry until the claim times
+ * out, and is then told the command never finished - which, for a command that completed, is untrue. The before hook is
+ * not required: claiming the key has already written the row it would write.
  *
  * <p>
  * Both the properties and the hook beans are checked: the properties to name the switch an operator got wrong, the
@@ -83,6 +83,20 @@ final class IdempotencyCommandPropertyCheck {
 
         requireHook(COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED, audit.getHookPostEnabled(), COMMAND_AUDIT_HOOK_AFTER_BEAN_NAME, "completed");
         requireHook(COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, audit.getHookErrorEnabled(), COMMAND_AUDIT_HOOK_ERROR_BEAN_NAME, "failed");
+
+        var claimTimeout = idempotency.getClaimTimeout();
+
+        if (claimTimeout != null && claimTimeout.isNegative()) {
+            // a negative age is always exceeded, so every unfinished claim - including one still running - would be
+            // declared abandoned; zero is how the timeout is switched off
+            throw new IllegalStateException("fineract.command.idempotency.claim-timeout must not be negative, but is " + claimTimeout
+                    + ". Use 0 to switch the timeout off.");
+        }
+
+        if (claimTimeout == null || claimTimeout.isZero()) {
+            log.info("Command idempotency claim timeout is off: a repeat of an unfinished command is answered 425 Too Early for as "
+                    + "long as it stays unfinished.");
+        }
 
         log.info("Command idempotency is enabled.");
     }

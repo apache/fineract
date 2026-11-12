@@ -27,6 +27,7 @@ import static org.apache.fineract.command.core.CommandState.UNKNOWN;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -73,10 +74,10 @@ public class JdbcCommandStore implements CommandStore {
 
     @Override
     public CommandReplay getReplayByKey(String key, String distinctor) {
-        return repository
-                .findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(key, distinctor).map(entity -> new CommandReplay(entity.getState(),
-                        entity.getResponseStatusCode(), replayResponse(key, distinctor, entity.getResponse())))
-                .orElseGet(() -> new CommandReplay(UNKNOWN, null, null));
+        return repository.findOneByIdempotencyKeyAndCustomIdempotencyDistinctor(key, distinctor)
+                .map(entity -> new CommandReplay(entity.getState(), entity.getResponseStatusCode(),
+                        replayResponse(key, distinctor, entity.getResponse()), entity.getCreatedAt()))
+                .orElseGet(() -> new CommandReplay(UNKNOWN, null, null, null));
     }
 
     /**
@@ -111,6 +112,13 @@ public class JdbcCommandStore implements CommandStore {
     @Override
     @Retry(name = "commandStore")
     public boolean claim(Command<?> command) {
+        // the claim's age is what tells an abandoned claim from a running one, so it must never be stored without one.
+        // The timestamp hook normally sets it as the request arrives, but it can be switched off; set on the command
+        // rather than only on the row, so that the audit hooks rewriting the row later keep the same value
+        if (isNull(command.getCreatedAt())) {
+            command.setCreatedAt(Instant.now());
+        }
+
         final var commandEntity = mapper.map(command);
 
         commandEntity.setState(UNDER_PROCESSING);
