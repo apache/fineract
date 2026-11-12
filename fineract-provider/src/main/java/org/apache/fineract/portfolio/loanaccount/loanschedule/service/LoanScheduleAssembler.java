@@ -601,6 +601,7 @@ public class LoanScheduleAssembler {
                 loanScheduleType, loanScheduleProcessingType, fixedLength,
                 loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting(),
                 loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes(),
+                loanProduct.getLoanProductRelatedDetail().getSupportedFeeRefundTypes(),
                 loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour(), interestRecognitionOnDisbursementDate,
                 loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy(),
                 loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),

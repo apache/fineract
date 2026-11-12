@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFeeRefundPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.interestpauses.service.LoanAccountTransfersService;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
@@ -59,6 +60,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
+    private final LoanFeeRefundService loanFeeRefundService;
 
     @Override
     public void reprocessTransactions(final Loan loan) {
@@ -68,6 +70,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan,
                 allNonContraTransactionsPostDisbursement);
         handleChangedDetail(changedTransactionDetail);
+        restoreMissingFeeRefunds(loan, List.of());
     }
 
     @Override
@@ -76,6 +79,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         transactions.addAll(newTransactions);
         final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan, transactions);
         handleChangedDetail(changedTransactionDetail);
+        restoreMissingFeeRefunds(loan, newTransactions);
     }
 
     @Override
@@ -153,6 +157,27 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
             }
         }
         replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
+    }
+
+    /**
+     * Fee refunds of the refunds that have none but get a positive amount now, for example after the refund that used
+     * up the cap was undone. The second replay sees the same transactions as the first: the new ones are not on the
+     * loan yet, the callers add them after the replay.
+     */
+    private void restoreMissingFeeRefunds(final Loan loan, final List<LoanTransaction> newTransactions) {
+        final List<LoanTransaction> feeRefunds = loanFeeRefundService.createMissingFeeRefunds(loan);
+        if (feeRefunds.isEmpty()) {
+            return;
+        }
+        final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
+        transactions.addAll(newTransactions);
+        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan, transactions);
+        handleChangedDetail(changedTransactionDetail);
+        for (final LoanTransaction feeRefund : feeRefunds) {
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(feeRefund);
+            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(feeRefund, false, false);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionFeeRefundPostBusinessEvent(feeRefund));
+        }
     }
 
     private ChangedTransactionDetail reprocessTransactionsAndFetchChangedTransactions(final Loan loan,
