@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.cob.savings;
 
+import static org.apache.fineract.query.QMSavingsAccountLocks.mSavingsAccountLocks;
+
+import com.querydsl.sql.SQLQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.AbstractLockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -38,9 +41,9 @@ public class SavingsLockingServiceImpl extends AbstractLockingService {
                 UPDATE m_savings_account_locks SET version = version + 1, lock_owner = ?, lock_placed_on = ? WHERE savings_id = ?
             """;
 
-    public SavingsLockingServiceImpl(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
-            FineractProperties fineractProperties) {
-        super(jdbcTemplate, sqlGenerator, fineractProperties);
+    public SavingsLockingServiceImpl(final JdbcTemplate jdbcTemplate, final DatabaseSpecificSQLGenerator sqlGenerator,
+            final FineractProperties fineractProperties, final SQLQueryFactory queryFactory) {
+        super(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory, mSavingsAccountLocks, mSavingsAccountLocks.savingsId);
     }
 
     @Override

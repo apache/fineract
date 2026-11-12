@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.cob.domain;
 
+import static org.apache.fineract.query.QMLoanAccountLocks.mLoanAccountLocks;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +29,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.querydsl.sql.MySQLTemplates;
+import com.querydsl.sql.PostgreSQLTemplates;
+import com.querydsl.sql.SQLBindings;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.SQLTemplates;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,7 +57,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractLockingServiceTest {
+class LockingServiceSqlTest {
 
     private static final List<Long> LOAN_IDS = List.of(10L, 20L, 30L);
     private static final String TABLE_NAME = "test_locks";
@@ -62,13 +70,16 @@ class AbstractLockingServiceTest {
     private RoutingDataSource dataSource;
     @Mock
     private FineractProperties fineractProperties;
+    @Mock
+    private SQLQueryFactory queryFactory;
 
     private AbstractLockingService underTest;
 
     @BeforeEach
     void setUp() {
         final DatabaseSpecificSQLGenerator sqlGenerator = new DatabaseSpecificSQLGenerator(databaseTypeResolver, dataSource);
-        underTest = new AbstractLockingService(jdbcTemplate, sqlGenerator, fineractProperties) {
+        underTest = new AbstractLockingService(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory, mLoanAccountLocks,
+                mLoanAccountLocks.loanId) {
 
             @Override
             protected String getTableName() {
@@ -90,28 +101,38 @@ class AbstractLockingServiceTest {
     @Test
     void findLockIdsByLoanIdInOnMySqlUsesInClauseWithIndividualBindParameters() {
         when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.MYSQL);
+        final SQLQuery<Long> query = stubLockLookup(MySQLTemplates.builder().build());
 
-        underTest.findLockIdsByLoanIdIn(LOAN_IDS);
+        assertEquals(LOAN_IDS, underTest.findLockIdsByLoanIdIn(LOAN_IDS));
 
-        final ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).queryForList(sqlCaptor.capture(), eq(Long.class), eq(10L), eq(20L), eq(30L));
-        assertEquals("SELECT loan_id FROM " + TABLE_NAME + " WHERE loan_id IN (?,?,?)", sqlCaptor.getValue());
+        final SQLBindings bindings = query.getSQL();
+        assertTrue(bindings.getSQL().contains("where m_loan_account_locks.loan_id in"));
+        assertEquals(LOAN_IDS, bindings.getNullFriendlyBindings());
     }
 
     @Test
-    void findLockIdsByLoanIdInOnPostgresUsesAnyClauseWithArrayBindParameter() throws SQLException {
+    void findLockIdsByLoanIdInOnPostgresUsesAnyClauseWithArrayBindParameter() {
         when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
-        final Connection connection = mock(Connection.class);
-        final Array loanIdArray = mock(Array.class);
-        when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.createArrayOf(eq("bigint"), any(Long[].class))).thenReturn(loanIdArray);
+        final SQLQuery<Long> query = stubLockLookup(PostgreSQLTemplates.builder().build());
 
-        underTest.findLockIdsByLoanIdIn(LOAN_IDS);
+        assertEquals(LOAN_IDS, underTest.findLockIdsByLoanIdIn(LOAN_IDS));
 
-        final ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).queryForList(sqlCaptor.capture(), eq(Long.class), eq(loanIdArray));
-        assertEquals("SELECT loan_id FROM " + TABLE_NAME + " WHERE loan_id = ANY (?)", sqlCaptor.getValue());
-        verify(connection).createArrayOf("bigint", LOAN_IDS.toArray(Long[]::new));
+        final SQLBindings bindings = query.getSQL();
+        assertTrue(bindings.getSQL().contains("where m_loan_account_locks.loan_id = ANY (?)"));
+        assertEquals(1, bindings.getNullFriendlyBindings().size());
+        assertArrayEquals(LOAN_IDS.toArray(Long[]::new), (Long[]) bindings.getNullFriendlyBindings().getFirst());
+    }
+
+    private SQLQuery<Long> stubLockLookup(final SQLTemplates templates) {
+        final SQLQuery<Long> query = new SQLQuery<Long>(templates) {
+
+            @Override
+            public List<Long> fetch() {
+                return LOAN_IDS;
+            }
+        };
+        when(queryFactory.select(mLoanAccountLocks.loanId)).thenReturn(query.select(mLoanAccountLocks.loanId));
+        return query;
     }
 
     @Test
@@ -145,7 +166,7 @@ class AbstractLockingServiceTest {
     @MethodSource("emptyLoanIds")
     void findLockIdsByLoanIdInWithNoIdsSkipsQuery(final List<Long> loanIds) {
         assertTrue(underTest.findLockIdsByLoanIdIn(loanIds).isEmpty());
-        verifyNoInteractions(jdbcTemplate);
+        verifyNoInteractions(jdbcTemplate, queryFactory);
     }
 
     private static Stream<List<Long>> emptyLoanIds() {
