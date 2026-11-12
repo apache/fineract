@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -100,6 +101,8 @@ public class ClientPersonImportHandler implements ImportHandler {
         Boolean active = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ACTIVE_COL, row);
         if (!active) {
             activationDate = submittedOn;
+        } else {
+            requireSubmittedOnNotAfterActivation(submittedOn, activationDate);
         }
         String mobileNo = null;
         if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row) != null) {
@@ -216,4 +219,9 @@ public class ClientPersonImportHandler implements ImportHandler {
         return Count.instance(successCount, errorCount);
     }
 
+    static void requireSubmittedOnNotAfterActivation(final LocalDate submittedOn, final LocalDate activationDate) {
+        if (submittedOn != null && activationDate != null && DateUtils.isAfter(submittedOn, activationDate)) {
+            throw new IllegalArgumentException("Submitted On date cannot be after the Activation date");
+        }
+    }
 }

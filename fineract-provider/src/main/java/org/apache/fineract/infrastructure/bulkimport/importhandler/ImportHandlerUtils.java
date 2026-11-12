@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
 import com.google.common.base.Splitter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -70,6 +71,12 @@ public final class ImportHandlerUtils {
             noOfEntries++;
         }
         return noOfEntries;
+    }
+
+    public static void requireAmountWithinCurrencyDigits(final BigDecimal amount, final Integer currencyDigits) {
+        if (amount != null && currencyDigits != null && amount.stripTrailingZeros().scale() > currencyDigits) {
+            throw new IllegalArgumentException("Amount has more decimal places than the currency allows (" + currencyDigits + ")");
+        }
     }
 
     public static boolean isNotImported(Row row, int statusColumn) {
