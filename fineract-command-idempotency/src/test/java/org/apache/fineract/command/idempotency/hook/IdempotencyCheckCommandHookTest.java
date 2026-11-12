@@ -220,11 +220,25 @@ class IdempotencyCheckCommandHookTest {
     }
 
     private static CommandContext<Object, Object> context(String key) {
-        var command = new Command<Object>();
+        var command = new TestCommand();
 
         command.setIdempotencyKey(key);
         command.setPayload("request-payload");
 
         return CommandContext.builder().command(command).build();
+    }
+
+    /** Commands declare their names in code; a test fixture has to as well. */
+    private static final class TestCommand extends Command<Object> {
+
+        @Override
+        public String entityName() {
+            return "DOCUMENT";
+        }
+
+        @Override
+        public String actionName() {
+            return "CREATE";
+        }
     }
 }

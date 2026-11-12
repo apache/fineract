@@ -296,6 +296,20 @@ public class JdbcCommandStoreTest extends CommandBaseTest {
         assertEquals(400, store.getReplayByKey(key).statusCode(), "A full-row save must not wipe the recorded status.");
     }
 
+    @Test
+    public void theCommandRecordsWhatItActedOnAndWhatItDid() {
+        var key = UUID.randomUUID().toString();
+
+        store.claim(command(key, "hello"));
+
+        var claimed = repository.findOneByIdempotencyKey(key).orElseThrow();
+
+        // the names an audit search and a checker inbox look a command up by, and from which the approval permission
+        // is derived; a row without them is invisible to both
+        assertEquals("DUMMY", claimed.getEntityName(), "The entity the command acted on must be recorded.");
+        assertEquals("CREATE", claimed.getActionName(), "The action it performed must be recorded.");
+    }
+
     private static CommandContext<DummyRequest, DummyResponse> processed(String key, String content) {
         return CommandContext.<DummyRequest, DummyResponse>builder().command(command(key, content))
                 .response(DummyResponse.builder().content(content.toUpperCase(Locale.ROOT)).build()).state(PROCESSED).build();

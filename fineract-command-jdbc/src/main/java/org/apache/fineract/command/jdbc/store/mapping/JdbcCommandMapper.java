@@ -23,7 +23,7 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.jdbc.store.domain.CommandEntity;
-import org.mapstruct.InheritInverseConfiguration;
+import org.apache.fineract.command.jdbc.store.domain.StoredCommand;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -44,6 +44,8 @@ public interface JdbcCommandMapper {
     @Mapping(source = "ipAddress", target = "ipAddress")
     @Mapping(source = "idempotencyKey", target = "idempotencyKey")
     @Mapping(source = "error", target = "error")
+    @Mapping(expression = "java(source.entityName())", target = "entityName")
+    @Mapping(expression = "java(source.actionName())", target = "actionName")
     @Mapping(ignore = true, target = "state")
     @Mapping(ignore = true, target = "response")
     CommandEntity map(Command<?> source);
@@ -60,12 +62,15 @@ public interface JdbcCommandMapper {
     @Mapping(source = "source.rejectedByUsername", target = "rejectedByUsername")
     @Mapping(source = "source.payload", target = "request")
     @Mapping(source = "source.ipAddress", target = "ipAddress")
+    @Mapping(expression = "java(source.entityName())", target = "entityName")
+    @Mapping(expression = "java(source.actionName())", target = "actionName")
     @Mapping(source = "source.idempotencyKey", target = "idempotencyKey")
     @Mapping(source = "source.error", target = "error")
     @Mapping(source = "response", target = "response")
     @Mapping(ignore = true, target = "state")
     CommandEntity map(Command<?> source, Object response);
 
-    @InheritInverseConfiguration
-    Command<Object> map(CommandEntity source);
+    @Mapping(source = "id", target = "commandId")
+    @Mapping(source = "request", target = "payload")
+    StoredCommand<Object> map(CommandEntity source);
 }

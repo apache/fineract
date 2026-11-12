@@ -25,4 +25,15 @@ import org.apache.fineract.infrastructure.cache.data.CacheSwitchRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CacheSwitchCommand extends Command<CacheSwitchRequest> {}
+public class CacheSwitchCommand extends Command<CacheSwitchRequest> {
+
+    @Override
+    public String entityName() {
+        return "CACHE";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

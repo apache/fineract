@@ -25,4 +25,16 @@ import org.apache.fineract.infrastructure.documentmanagement.data.ImageDeleteReq
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ImageDeleteCommand extends Command<ImageDeleteRequest> {}
+public class ImageDeleteCommand extends Command<ImageDeleteRequest> {
+
+    /** {@code clients} and {@code staff} are separate permissions, so the entity follows what the request targets. */
+    @Override
+    public String entityName() {
+        return "staff".equalsIgnoreCase(getPayload().getEntityType()) ? "STAFFIMAGE" : "CLIENTIMAGE";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

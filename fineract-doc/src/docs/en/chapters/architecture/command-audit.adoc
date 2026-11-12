@@ -49,6 +49,10 @@ execution that never happened.
 |===
 | Column | Content
 
+| `entity_name`, `action_name`
+| What the command acted on and what it did, in the vocabulary of `m_permission` - `DOCUMENT`/`CREATE`,
+`BUSINESS_DATE`/`UPDATE`. See <<Why the names are mandatory>>.
+
 | `state`
 | `UNDER_PROCESSING`, `PROCESSED` or `ERROR`. `UNKNOWN` is reported for a key that has no record at all.
 
@@ -95,6 +99,28 @@ jobs that post interest and run close-of-business keep the narrower list they al
 If the writes still fail after their attempts are spent, the command itself is unaffected: it has already been
 processed and answered. A record that could not be written is logged, and, when the dead-letter queue is enabled, the
 command is written to it so that the trail can be reconstructed.
+
+== Why the names are mandatory
+
+`Command` declares `entityName()` and `actionName()` as abstract methods, so a command cannot be written without
+saying what it acts on. That is deliberate rather than convenient.
+
+Both names are read by position, not by meaning: the audit search and the checker inbox are defined in terms of them -
+the inbox returns "the `actionNames` and `entityNames` the requestor has Checker approval permissions for" - and
+maker-checker derives the permission that governs approval by joining them with `_CHECKER`, the way
+`PortfolioCommandSourceWritePlatformServiceImpl` does for the legacy processing. The approval columns are already on
+this table. A command whose names were missing would be stored with none of that, and would simply not appear in
+either view: no error, no failing test, just a row nobody can find. Hence abstract methods and `NOT NULL` columns
+rather than an optional interface.
+
+The names have to match the vocabulary already in `m_permission`, which is not always what the class name suggests -
+`CacheSwitchCommand` is `CACHE`/`UPDATE`, not `CACHE`/`SWITCH`, and the entity is `BUSINESS_DATE` rather than
+`BUSINESSDATE`. A few commands act on different entities depending on their payload: a note belongs to whatever it is
+attached to (`CLIENTNOTE`, `LOANNOTE`, ...) and an image to either `CLIENTIMAGE` or `STAFFIMAGE`, so those compute the
+name from the request rather than returning a constant.
+
+NOTE: Rows written before this column existed are backfilled as `UNKNOWN`. They were recorded when commands did not
+carry the names, and saying so is more honest than implying they acted on an entity with an empty name.
 
 == Relationship with idempotency
 

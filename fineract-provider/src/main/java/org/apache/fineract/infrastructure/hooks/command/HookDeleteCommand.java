@@ -25,4 +25,15 @@ import org.apache.fineract.infrastructure.hooks.data.HookDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class HookDeleteCommand extends Command<HookDeleteRequest> {}
+public class HookDeleteCommand extends Command<HookDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "HOOK";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

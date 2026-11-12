@@ -103,7 +103,7 @@ class JdbcCommandStoreRetryTest {
     }
 
     private static Command<Object> command() {
-        var command = new Command<>();
+        var command = new TestCommand();
 
         command.setIdempotencyKey("a-key");
 
@@ -117,6 +117,20 @@ class JdbcCommandStoreRetryTest {
         CommandStore commandStore(JdbcCommandMapper mapper, JdbcCommandRepository repository) {
             return new JdbcCommandStore(mapper, mock(JsonCommandMapper.class), repository, mock(tools.jackson.databind.ObjectMapper.class),
                     null);
+        }
+    }
+
+    /** Commands declare their names in code; a test fixture has to as well. */
+    private static final class TestCommand extends Command<Object> {
+
+        @Override
+        public String entityName() {
+            return "DOCUMENT";
+        }
+
+        @Override
+        public String actionName() {
+            return "CREATE";
         }
     }
 }

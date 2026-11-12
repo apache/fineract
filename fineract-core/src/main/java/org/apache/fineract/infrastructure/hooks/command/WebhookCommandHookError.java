@@ -39,13 +39,13 @@ final class WebhookCommandHookError implements CommandHookError<Object, Object> 
     public void onError(CommandContext<Object, Object> ctx) {
         var command = ctx.getCommand();
 
-        if (!(command instanceof HookableCommand hookable)) {
+        if (!(command instanceof HookableCommand)) {
             return;
         }
 
         // Publish right away, as in the legacy command processing: when the handler fails, its work is rolled back, so
         // there is no commit to wait for. A hook can also fail after the handler has committed, e.g. when the audit
         // hook can't store the command. The event then reports the error the API returns, for a change that was saved.
-        publisher.publishError(hookable, command.getPayload(), ctx.getError());
+        publisher.publishError(command, command.getPayload(), ctx.getError());
     }
 }

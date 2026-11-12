@@ -141,12 +141,13 @@ public class CommandIdempotencyKeyMigrationTest {
     }
 
     /**
-     * Reverts the unique constraint, which means also reverting the response-cache changeset stacked on top of it. Both
-     * databases apply the same number of changesets from that point on.
+     * Reverts the unique constraint, which means also reverting the response-cache and action/entity changesets stacked
+     * on top of it. Both databases apply the same number of changesets from that point on, so this count has to grow
+     * with every part added after 0003.
      */
     private void rollbackUniqueConstraint(JdbcDatabaseContainer<?> container, String context) throws Exception {
         try (var connection = connect(container); var liquibase = liquibase(connection)) {
-            liquibase.rollback(2, new Contexts(context), new LabelExpression());
+            liquibase.rollback(3, new Contexts(context), new LabelExpression());
         }
     }
 

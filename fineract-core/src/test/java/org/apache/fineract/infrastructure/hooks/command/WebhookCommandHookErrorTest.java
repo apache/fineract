@@ -146,7 +146,7 @@ class WebhookCommandHookErrorTest {
 
     @Test
     void shouldIgnoreCommandThatIsNotHookable() {
-        final Command<Object> command = new Command<>();
+        final Command<Object> command = new TestPlainCommand();
         command.setPayload(new TestRequest("contract.pdf", null));
 
         underTest.onError(errorContext(command, new IllegalStateException("not found")));
@@ -182,15 +182,29 @@ class WebhookCommandHookErrorTest {
         return command;
     }
 
-    private static final class TestHookableCommand extends Command<Object> implements HookableCommand {
+    /** A command that notifies no webhooks, to check that it is left alone. */
+    private static final class TestPlainCommand extends Command<Object> {
 
         @Override
-        public String hookEntityName() {
+        public String entityName() {
             return "DOCUMENT";
         }
 
         @Override
-        public String hookActionName() {
+        public String actionName() {
+            return "CREATE";
+        }
+    }
+
+    private static final class TestHookableCommand extends Command<Object> implements HookableCommand {
+
+        @Override
+        public String entityName() {
+            return "DOCUMENT";
+        }
+
+        @Override
+        public String actionName() {
             return "DELETE";
         }
     }
