@@ -70,7 +70,6 @@ import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -442,8 +441,6 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
         verifyLoanIsPending(loanID);
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
-        Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String LOAN_DISBURSEMENT_DATE = "2 June 2014";
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
@@ -798,7 +795,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         validateChargeExcludePrecission(flat, loanCharges, "50.0", "200", "0.0", "0.0");
 
         deleteLoanCharge(loanID, getloanCharge(flat, loanCharges).getId());
-        loanCharges = getLoanCharges(loanID);
+        getLoanCharges(loanID);
         loanSchedule = getLoanRepaymentSchedule(loanID);
         loanSchedule.remove(0);
         for (GetLoansLoanIdRepaymentPeriod installment : loanSchedule) {
@@ -919,7 +916,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
         // Loan Charges with US Locale using the amount as a number in the JSON body
         addInstallmentChargeWithLocale(loanID, flat, 50.05, Locale.US);
-        loanCharges = getLoanCharges(loanID);
+        getLoanCharges(loanID);
 
         loanSchedule = getLoanRepaymentSchedule(loanID);
         loanSchedule.remove(0);
@@ -929,7 +926,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
         // Loan Charges with other Locale using comma (,) as decimal delimiter
         addInstallmentChargeWithLocaleFormattedAmount(loanID, flat, "50,05", Locale.GERMAN);
-        loanCharges = getLoanCharges(loanID);
+        getLoanCharges(loanID);
 
         loanSchedule = getLoanRepaymentSchedule(loanID);
         loanSchedule.remove(0);
@@ -940,7 +937,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         // Loan Charges with German Locale (where the comma is the decimal delimiter) using the amount as a number in
         // the JSON body
         addInstallmentChargeWithLocale(loanID, flat, 50.05, Locale.GERMAN);
-        loanCharges = getLoanCharges(loanID);
+        getLoanCharges(loanID);
 
         loanSchedule = getLoanRepaymentSchedule(loanID);
         loanSchedule.remove(0);
@@ -1021,7 +1018,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
         approveLoan(fourMonthsfromNow, loanID);
 
-        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanID);
+        getLoanDetails(loanID);
         disburseLoanWithNetDisbursalAmount(fourMonthsfromNow, loanID);
 
         // check for disbursement fee: Principal 1,000 with 24% Annual Rate for 6 Months we have Total Interest of:
@@ -1059,7 +1056,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         verifyLoanIsApprovedAndWaitingForDisbursal(approveLoan("01 March 2014", loanID));
 
         // DISBURSE first Tranche
-        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanID);
+        getLoanDetails(loanID);
         GetLoansLoanIdResponse loanStatusHashMap = disburseLoanWithNetDisbursalAmount("20 March 2014", loanID);
         LOG.info("DISBURSE {}", loanStatusHashMap);
         verifyLoanIsActive(loanStatusHashMap);
@@ -2509,7 +2506,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             verifyLoanIsActive(disburseLoanWithNetDisbursalAmount("20 September 2011", loanID));
 
-            List<GetLoansLoanIdTransactions> loanTransactionDetails = getLoanDetails(loanID).getTransactions();
+            getLoanDetails(loanID).getTransactions();
             final LoanTestData.Journal[] assetAccountInitialEntry = {
                     journalEntry(Float.parseFloat("120.00"), assetAccount, JournalEntry.TransactionType.DEBIT.name()),
                     journalEntry(Float.parseFloat("12000.00"), assetAccount, JournalEntry.TransactionType.CREDIT.name()),
@@ -3428,7 +3425,6 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         todaysDate.add(Calendar.DAY_OF_MONTH, -2);
         Integer restDayOfMonth = getDayOfMonth(todaysDate);
         Integer restDayOfWeek = getDayOfWeek(todaysDate);
-        final String REST_START_DATE = dateFormat.format(todaysDate.getTime());
 
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
@@ -3552,7 +3548,6 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         todaysDate.add(Calendar.DAY_OF_MONTH, -7 * 3);
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.DAY_OF_MONTH, -2);
-        final String REST_START_DATE = dateFormat.format(todaysDate.getTime());
 
         Long overdueFeeChargeId = chargesHelper.createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(10.0))
                 .getResourceId();
@@ -4383,9 +4378,6 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         fourMonthsfromNowCalendar.setTime(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
         final String now = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
 
-        final String FROM_LOAN_ACCOUNT_TYPE = "1";
-        final String TO_SAVINGS_ACCOUNT_TYPE = "2";
-
         accountTransferHelper.refundLoanByTransfer(now, clientID, loanID, savingsId, transferAmountValue.toString());
 
         Float toSavingsBalance = Float.parseFloat(MINIMUM_OPENING_BALANCE);
@@ -4500,7 +4492,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         verifyLoanIsApprovedAndWaitingForDisbursal(approveLoan("20 September 2011", loanID));
 
         LOG.info("----------------------------------- DISBURSE LOAN ----------------------------------------");
-        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanID);
+        getLoanDetails(loanID);
         GetLoansLoanIdResponse loanStatusHashMap = disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "10,000.00");
         LOG.info("DISBURSE {}", loanStatusHashMap);
         verifyLoanIsActive(loanStatusHashMap);
@@ -4705,7 +4697,6 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         loanSchedule = getLoanRepaymentSchedule(loanID);
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         addRepaymentValues(expectedvalues, todaysDate, -1, false, "2482.76", "46.15", "0.0", "0.0");
         // early-repayment
         addRepaymentValues(expectedvalues, todaysDate, 5, true, "2504.13", "24.78", "0.0", "0.0");
@@ -5251,7 +5242,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             assertEquals(1010.0, Utils.getDoubleValue(loanSummary.getTotalOutstanding()));
 
             String externalId = UUID.randomUUID().toString();
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment((long) loanID, (long) penaltyLoanChargeId,
+            chargeAdjustment((long) loanID, (long) penaltyLoanChargeId,
                     new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).externalId(externalId));
 
             loanDetails = getLoanDetails(loanID);
@@ -5349,7 +5340,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                     .transactionDate("11 September 2022").locale("en").transactionAmount(5.0));
 
             externalId = UUID.randomUUID().toString();
-            chargeAdjustmentResponse = chargeAdjustment((long) loanID, (long) feeLoanChargeId,
+            chargeAdjustment((long) loanID, (long) feeLoanChargeId,
                     new PostLoansLoanIdChargesChargeIdRequest().amount(2.0).externalId(externalId));
 
             loanDetails = getLoanDetails(loanID);
@@ -5398,7 +5389,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             assertEquals("CREDIT", journalEntries.get(1).getEntryType().getValue());
 
             externalId = UUID.randomUUID().toString();
-            chargeAdjustmentResponse = chargeAdjustment((long) loanID, (long) penaltyLoanChargeId,
+            chargeAdjustment((long) loanID, (long) penaltyLoanChargeId,
                     new PostLoansLoanIdChargesChargeIdRequest().amount(7.0).externalId(externalId));
 
             loanDetails = getLoanDetails(loanID);
@@ -5464,7 +5455,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                     .transactionDate("13 September 2022").locale("en").transactionAmount(998.0));
 
             externalId = UUID.randomUUID().toString();
-            chargeAdjustmentResponse = chargeAdjustment((long) loanID, (long) feeLoanChargeId,
+            chargeAdjustment((long) loanID, (long) feeLoanChargeId,
                     new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).externalId(externalId));
 
             loanDetails = getLoanDetails(loanID);
@@ -5515,7 +5506,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
             externalId = UUID.randomUUID().toString();
-            chargeAdjustmentResponse = chargeAdjustment((long) loanID, (long) penaltyLoanChargeId,
+            chargeAdjustment((long) loanID, (long) penaltyLoanChargeId,
                     new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).externalId(externalId));
 
             loanDetails = getLoanDetails(loanID);
@@ -5863,8 +5854,8 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
             verifyLoanIsApprovedAndWaitingForDisbursal(approveLoan("02 September 2022", loanID));
 
-            GetLoansLoanIdResponse loanStatusHashMap = disburseLoanWithTransactionAmount(loanID, "02 September 2022", "1000");
-            loanStatusHashMap = disburseLoanWithTransactionAmount(loanID, "03 September 2022", "1000");
+            disburseLoanWithTransactionAmount(loanID, "02 September 2022", "1000");
+            GetLoansLoanIdResponse loanStatusHashMap = disburseLoanWithTransactionAmount(loanID, "03 September 2022", "1000");
             verifyLoanIsActive(loanStatusHashMap);
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
@@ -5953,9 +5944,8 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
             updateBusinessDate("08 September 2022");
 
-            PostLoansLoanIdTransactionsResponse loanRepaymentResponse = makeLoanRepayment((long) loanID,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022").locale("en")
-                            .transactionAmount(5.0));
+            makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 chargeOffLoan(loanID, new PostLoansLoanIdTransactionsRequest().transactionDate("04 September 2022").locale("en")
@@ -6624,9 +6614,8 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                     newClientId, loanProductId, "01 January 2023",
                     DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
             LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-            PostLoansLoanIdResponse approvedLoanResult = approveLoan(loanApplicationResult.getResourceId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
-                            .approvedOnDate("01 January 2023").locale("en"));
+            approveLoan(loanApplicationResult.getResourceId(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0))
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate("01 January 2023").locale("en"));
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             String loanDisbursementUUID = UUID.randomUUID().toString();
             PostLoansLoanIdResponse disbursedLoanResult = disburseLoan(loanApplicationResult.getResourceId(),
@@ -6634,23 +6623,19 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
             Long loanId = disbursedLoanResult.getResourceId();
             LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
-            PostLoansLoanIdChargesResponse penaltyLoanChargeResult = addLoanCharge(loanId,
-                    new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en")
-                            .amount(10.0).dueDate("10 January 2023"));
+            addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN)
+                    .locale("en").amount(10.0).dueDate("10 January 2023"));
             LOG.info("-------------------------------DO SOME PARTIAL REPAYMENTS-------------------------------------------");
             updateBusinessDate("07 January 2023");
             String firstRepaymentUUID = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse firstRepaymentResult = makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").locale("en")
-                            .transactionAmount(9.0).externalId(firstRepaymentUUID));
+            makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("07 January 2023").locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
             String secondRepaymentUUID = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse secondRepaymentResult = makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").locale("en")
-                            .transactionAmount(8.0).externalId(secondRepaymentUUID));
+            makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("07 January 2023").locale("en").transactionAmount(8.0).externalId(secondRepaymentUUID));
             String thirdRepaymentUUID = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse thirdRepaymentResult = makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").locale("en")
-                            .transactionAmount(7.0).externalId(thirdRepaymentUUID));
+            makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("07 January 2023").locale("en").transactionAmount(7.0).externalId(thirdRepaymentUUID));
             LOG.info("-------------------------------CHECK LOAN TRANSACTION ORDER-------------------------------------------");
             checkLoanTransactionOrder(loanId, loanDisbursementUUID, firstRepaymentUUID, secondRepaymentUUID, thirdRepaymentUUID);
             LOG.info(
@@ -6698,7 +6683,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
 
         approveLoan(fourMonthsfromNow, loanID);
 
-        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanID);
+        getLoanDetails(loanID);
         disburseLoanWithNetDisbursalAmount(fourMonthsfromNow, loanID);
 
         // check for disbursement fee: Principal 1,000 with 24% Annual Rate for 6 Months we have Total Interest of:

@@ -21,11 +21,8 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE;
 
 import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -37,8 +34,6 @@ import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
-
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     private static final String startDate = "22 April 2025";
     private static final String disbursementDate = "22 April 2024";
@@ -73,7 +68,7 @@ public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
             addRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(repaymentDate)
                     .locale("en").transactionAmount(repaymentAmount));
 
-            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+            getLoanDetails(loanId);
 
             verifyRepaymentSchedule(loanId, //
                     installment(800.0, null, "22 April 2024"), //

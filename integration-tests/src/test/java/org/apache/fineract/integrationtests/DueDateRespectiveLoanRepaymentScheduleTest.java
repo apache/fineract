@@ -28,9 +28,7 @@ import java.time.LocalDate;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -179,7 +177,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             Long firstChargeId = addLoanCharge(loanId, fee, "20 January 2023", 50.0).getResourceId();
             Long secondRepaymentId = addRepaymentForLoan(loanId, 100.00, "17 January 2023");
 
-            Long secondChargeId = addLoanCharge(loanId, penalty, "23 January 2023", 10.0).getResourceId();
+            addLoanCharge(loanId, penalty, "23 January 2023", 10.0).getResourceId();
 
             Long thirdRepaymentId = addRepaymentForLoan(loanId, 100.00, "20 January 2023");
 
@@ -461,9 +459,6 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
 
             response = getLoanDetails(loanId);
 
-            int repaymentOrderNo;
-            int accrualOrderNo;
-
             assertEquals(0.0, Utils.getDoubleValue(response.getSummary().getTotalOutstanding()));
             assertEquals(0.0, Utils.getDoubleValue(response.getRepaymentSchedule().getTotalOutstanding()));
             assertEquals(0.0, Utils.getDoubleValue(response.getRepaymentSchedule().getPeriods().get(1).getPenaltyChargesDue()));
@@ -640,9 +635,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.0, Utils.getDoubleValue(response.getTransactions().get(1).getOutstandingLoanBalance()));
             assertEquals(0, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
-            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("28 January 2023")
-                            .transactionAmount(0.0).locale("en"));
+            reverseLoanTransaction(loanId, firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                    .dateFormat("dd MMMM yyyy").transactionDate("28 January 2023").transactionAmount(0.0).locale("en"));
 
             updateBusinessDate("31 January 2023");
 
@@ -767,9 +761,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(firstChargeId, response.getTransactions().get(1).getLoanChargePaidByList().get(0).getChargeId());
             assertEquals(1, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
-            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("15 February 2023")
-                            .transactionAmount(0.0).locale("en"));
+            reverseLoanTransaction(loanId, firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                    .dateFormat("dd MMMM yyyy").transactionDate("15 February 2023").transactionAmount(0.0).locale("en"));
 
             Long secondChargeId = addLoanCharge(loanId, penalty, "15 February 2023", 15.0).getResourceId();
 
@@ -964,9 +957,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(firstChargeId, response.getTransactions().get(1).getLoanChargePaidByList().get(0).getChargeId());
             assertEquals(1, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
-            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("15 February 2023")
-                            .transactionAmount(0.0).locale("en"));
+            reverseLoanTransaction(loanId, firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                    .dateFormat("dd MMMM yyyy").transactionDate("15 February 2023").transactionAmount(0.0).locale("en"));
 
             Long secondChargeId = addLoanCharge(loanId, penalty, "15 February 2023", 15.0).getResourceId();
 
@@ -1039,9 +1031,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
 
             updateBusinessDate("07 March 2023");
 
-            PostLoansLoanIdTransactionsResponse secondReverseRepayment = reverseLoanTransaction(loanId, secondRepayment,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("07 March 2023")
-                            .transactionAmount(0.0).locale("en"));
+            reverseLoanTransaction(loanId, secondRepayment, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("07 March 2023").transactionAmount(0.0).locale("en"));
 
             Long thirdChargeId = addLoanCharge(loanId, penalty, "07 March 2023", 15.0).getResourceId();
 
@@ -1243,9 +1234,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(127.95, Utils.getDoubleValue(loanDetails.getTransactions().get(0).getOutstandingLoanBalance()));
 
             updateBusinessDate("17 June 2023");
-            PostLoansLoanIdTransactionsResponse merchantIssuedRefund1 = makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(125.0));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy")
+                    .transactionDate("17 June 2023").transactionAmount(125.0));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(6.6, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1272,8 +1262,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getFeeChargesPortion()));
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getOutstandingLoanBalance()));
 
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment(loanId, penalty1LoanChargeId,
-                    new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
+            chargeAdjustment(loanId, penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1302,9 +1291,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.7, Utils.getDoubleValue(loanDetails.getTransactions().get(2).getFeeChargesPortion()));
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getTransactions().get(2).getOutstandingLoanBalance()));
 
-            PostLoansLoanIdTransactionsResponse merchantIssuedRefund2 = makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(2.95));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy")
+                    .transactionDate("17 June 2023").transactionAmount(2.95));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1405,9 +1393,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
 
             updateBusinessDate("17 June 2023");
 
-            PostLoansLoanIdTransactionsResponse merchantIssuedRefund1 = makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(125.0));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy")
+                    .transactionDate("17 June 2023").transactionAmount(125.0));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(6.6, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1434,8 +1421,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getFeeChargesPortion()));
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getOutstandingLoanBalance()));
 
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment(loanId, penalty1LoanChargeId,
-                    new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
+            chargeAdjustment(loanId, penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1464,9 +1450,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.7, Utils.getDoubleValue(loanDetails.getTransactions().get(2).getFeeChargesPortion()));
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getTransactions().get(2).getOutstandingLoanBalance()));
 
-            PostLoansLoanIdTransactionsResponse merchantIssuedRefund2 = makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(2.95));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy")
+                    .transactionDate("17 June 2023").transactionAmount(2.95));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));

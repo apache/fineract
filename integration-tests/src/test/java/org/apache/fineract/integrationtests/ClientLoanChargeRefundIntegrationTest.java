@@ -346,14 +346,13 @@ public class ClientLoanChargeRefundIntegrationTest extends FeignLoanTestBase {
                 .getResourceId();
     }
 
-    private void disburseLoanOfAccountingRule(final String accountingType, final Double loanAmount, final String loanDate,
-            final boolean penalty) {
-        this.disbursedLoanID = fromStartToDisburseLoan(loanDate, loanAmount, penalty, accountingType, assetAccount, feeIncomeAccount,
-                expenseAccount, overpaymentAccount);
+    private void disburseLoanOfAccountingRule(final String accountingType, final Double loanAmount, final String loanDate) {
+        this.disbursedLoanID = fromStartToDisburseLoan(loanDate, loanAmount, accountingType, assetAccount, feeIncomeAccount, expenseAccount,
+                overpaymentAccount);
     }
 
-    private Long fromStartToDisburseLoan(String submitApproveDisburseDate, Double principal, final boolean penalty,
-            final String accountingRule, final Account... accounts) {
+    private Long fromStartToDisburseLoan(String submitApproveDisburseDate, Double principal, final String accountingRule,
+            final Account... accounts) {
 
         final Long clientId = createClient();
 
@@ -414,7 +413,7 @@ public class ClientLoanChargeRefundIntegrationTest extends FeignLoanTestBase {
     private Long disburseAddChargeAndRepay(final Double repaymentAmount, final LoanStatus expectedPostRepaymentStatus,
             final String accountingType, final boolean penalty) {
         final String loanDate = "01 January 2022";
-        disburseLoanOfAccountingRule(accountingType, fullLoan, loanDate, penalty);
+        disburseLoanOfAccountingRule(accountingType, fullLoan, loanDate);
 
         final Long charge = chargesHelper
                 .createLoanSpecifiedDueDateCharge(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST, 1.0d, penalty).getResourceId();

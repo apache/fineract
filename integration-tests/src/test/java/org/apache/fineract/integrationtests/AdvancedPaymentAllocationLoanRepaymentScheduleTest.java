@@ -3870,7 +3870,6 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         final String operationDate = "1 January 2024";
         runAt(operationDate, () -> {
             final Integer fixedLength = 119; // 120 days
-            final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
             final Integer numberOfRepayments = 4;
 
             Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
@@ -3943,7 +3942,6 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         final String operationDate = "1 January 2024";
         runAt(operationDate, () -> {
             final Integer fixedLength = 119; // 120 days
-            final Integer repaymentFrequencyType = RepaymentFrequencyType.DAYS;
             final Integer numberOfRepayments = 4;
 
             Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
@@ -4009,7 +4007,6 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     // 3. Disburse the loan and validate downpayment
     @Test
     public void uc136() {
-        AtomicLong createdLoanId = new AtomicLong();
         runAt("23 March 2024", () -> {
             // Rounding mode - HALF_DOWN
             globalConfigurationHelper.updateGlobalConfigurationInternal(GlobalConfigurationConstants.ROUNDING_MODE, 5L);
@@ -4033,11 +4030,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
     public void uc137() {
         runAt("22 February 2023", () -> {
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
-            AdvancedPaymentData defaultPaymentAllocation = createDefaultPaymentAllocationWithMixedGrouping();
+            accountHelper.createAssetAccount();
+            accountHelper.createIncomeAccount();
+            accountHelper.createExpenseAccount();
+            accountHelper.createLiabilityAccount();
 
             // First scenario (Legacy): Loan product no Advanced Payment Allocation and Cumulative Loan Schedule type
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(
@@ -4211,8 +4207,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .installmentAmountInMultiplesOf(null).numberOfRepayments(3).repaymentEvery(15).enableDownPayment(false);
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(product);
-            PostLoansRequest applicationRequest = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(),
-                    "23 March 2024", 1000.0, 3)
+            applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(), "23 March 2024", 1000.0, 3)
                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(15)
                     .enableDownPayment(true);
 
@@ -5953,9 +5948,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         });
 
         runAt("22 June 2025", () -> {
-            PostLoansLoanIdTransactionsResponse repayment = transactionHelper.makeLoanRepayment(createdLoanId.get(),
-                    new PostLoansLoanIdTransactionsRequest().transactionDate("22 June 2025").dateFormat("dd MMMM yyyy").locale("en")
-                            .transactionAmount(25.0));
+            transactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("22 June 2025").dateFormat("dd MMMM yyyy").locale("en").transactionAmount(25.0));
         });
 
         runAt("13 July 2025", () -> {

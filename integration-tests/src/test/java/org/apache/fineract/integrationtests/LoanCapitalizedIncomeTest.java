@@ -151,7 +151,6 @@ public class LoanCapitalizedIncomeTest extends FeignLoanTestBase {
     @Test
     public void testLoanDisbursementWithCapitalizedIncome() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
-        final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
 
         final Long clientId = createClient();
 
@@ -167,7 +166,7 @@ public class LoanCapitalizedIncomeTest extends FeignLoanTestBase {
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(300), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0);
+            addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0);
 
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> disburseLoan(loanId, BigDecimal.valueOf(200), "1 February 2024"));

@@ -25,12 +25,8 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignCreditBure
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CreditBureauConfigurationTest extends FeignIntegrationTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CreditBureauConfigurationTest.class);
 
     @Test
     public void creditBureauConfigurationTest() {
