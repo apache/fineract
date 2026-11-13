@@ -449,7 +449,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -591,7 +591,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

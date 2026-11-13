@@ -160,7 +160,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
                     passwordNeverExpire);
         }
 
-        public String schema() {
+        private String schema() {
             return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.password_never_expires as passwordNeverExpires, "
                     + " u.office_id as officeId, o.name as officeName, " + LinkedStaffMapper.SCHEMA + " from m_appuser u "
                     + " join m_office o on o.id = u.office_id left join m_staff s on s.id = u.staff_id left join m_office so on so.id = s.office_id"
@@ -202,7 +202,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             return AppUserData.dropdown(id, username);
         }
 
-        public String schema() {
+        private String schema() {
             return " u.id as id, u.username as username from m_appuser u "
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=false order by u.username";
         }

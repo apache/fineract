@@ -100,7 +100,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
             sql = sb.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.sql;
         }
 

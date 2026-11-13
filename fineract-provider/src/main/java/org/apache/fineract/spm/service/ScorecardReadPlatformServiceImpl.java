@@ -47,7 +47,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
                 left join m_surveys s ON s.id = sc.survey_id
                 left join m_appuser user ON user.id = sc.user_id\s""";
 
-        public String schema() {
+        private String schema() {
             return SCORECARD_SCHEMA;
         }
 
@@ -73,7 +73,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
                 from m_survey_scorecards sc
                 where sc.survey_id = ? and sc.client_id = ?\s""";
 
-        public String schema() {
+        private String schema() {
             return SCORECARD_VALUE_SCHEMA;
         }
 

@@ -105,7 +105,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     private static final class AuditMapper implements RowMapper<AuditData> {
 
-        public String schema(final boolean includeJson, final String hierarchy) {
+        private String schema(final boolean includeJson, final String hierarchy) {
 
             String commandAsJsonString = "";
             if (includeJson) {
@@ -634,7 +634,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             return new ProcessingResultLookup(id, status);
         }
 
-        public String schema() {
+        private String schema() {
             return " select enum_id as id, enum_value as status from r_enum_value where enum_name = 'processing_result_enum' "
                     + " order by enum_id";
         }

@@ -68,11 +68,11 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
         EmailMapper() {}
 
-        public String schema() {
+        private String schema() {
             return EMAIL_SCHEMA;
         }
 
-        public String tableName() {
+        private String tableName() {
             return "scheduled_email_messages_outbound";
         }
 

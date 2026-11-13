@@ -168,7 +168,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
                     + "from job job join job_run_history runHistory ON job.id=runHistory.job_id";
         }
 
-        public String schema() {
+        private String schema() {
             return sql;
         }
 

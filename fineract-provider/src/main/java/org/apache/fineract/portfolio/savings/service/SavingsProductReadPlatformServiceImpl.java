@@ -127,7 +127,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -214,7 +214,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
     private static final class SavingProductLookupMapper implements RowMapper<SavingsProductData> {
 
-        public String schema() {
+        private String schema() {
             return " sp.id as id, sp.name as name from m_savings_product sp";
         }
 
