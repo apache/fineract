@@ -129,22 +129,22 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
         LoanStatus newState = null;
 
         switch (loanEvent) {
-            case LOAN_REJECTED:
+            case LOAN_REJECTED -> {
                 if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
                     newState = rejectedTransition();
                 }
-            break;
-            case LOAN_APPROVED:
+            }
+            case LOAN_APPROVED -> {
                 if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
                     newState = approvedTransition();
                 }
-            break;
-            case LOAN_WITHDRAWN:
+            }
+            case LOAN_WITHDRAWN -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
                     newState = withdrawnByClientTransition();
                 }
-            break;
-            case LOAN_DISBURSED:
+            }
+            case LOAN_DISBURSED -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.APPROVED, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
                     newState = activeTransition();
                 } else if (from.isOverpaid() && loan.getTotalOverpaidAsMoney().isZero()) {
@@ -154,44 +154,43 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                         newState = activeTransition();
                     }
                 }
-            break;
-            case LOAN_APPROVAL_UNDO:
+            }
+            case LOAN_APPROVAL_UNDO -> {
                 if (from.hasStateOf(LoanStatus.APPROVED)) {
                     newState = submittedTransition();
                 }
-            break;
-            case LOAN_DISBURSAL_UNDO:
+            }
+            case LOAN_DISBURSAL_UNDO -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
                     newState = approvedTransition();
                 }
-            break;
-            case LOAN_CHARGE_PAYMENT:
-            case LOAN_REPAYMENT_OR_WAIVER, LOAN_CHARGEBACK:
+            }
+            case LOAN_CHARGE_PAYMENT, LOAN_REPAYMENT_OR_WAIVER, LOAN_CHARGEBACK -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
                     newState = activeTransition();
                 }
-            break;
-            case REPAID_IN_FULL:
+            }
+            case REPAID_IN_FULL -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.OVERPAID)) {
                     newState = closeObligationsMetTransition();
                 }
-            break;
-            case WRITE_OFF_OUTSTANDING:
+            }
+            case WRITE_OFF_OUTSTANDING -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
                     newState = closedWrittenOffTransition();
                 }
-            break;
-            case LOAN_RESCHEDULE:
+            }
+            case LOAN_RESCHEDULE -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
                     newState = closedRescheduleOutstandingAmountTransition();
                 }
-            break;
-            case LOAN_OVERPAYMENT:
+            }
+            case LOAN_OVERPAYMENT -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.ACTIVE)) {
                     newState = overpaidTransition();
                 }
-            break;
-            case LOAN_ADJUST_TRANSACTION:
+            }
+            case LOAN_ADJUST_TRANSACTION -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.CLOSED_WRITTEN_OFF,
                         LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT)) {
                     boolean isOverpaid = loan.getTotalOverpaid() != null && loan.getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
@@ -201,21 +200,19 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                         newState = activeTransition();
                     }
                 }
-            break;
-            case LOAN_INITIATE_TRANSFER:
-                newState = transferInProgress();
-            break;
-            case LOAN_REJECT_TRANSFER:
+            }
+            case LOAN_INITIATE_TRANSFER -> newState = transferInProgress();
+            case LOAN_REJECT_TRANSFER -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
                     newState = transferOnHold();
                 }
-            break;
-            case LOAN_WITHDRAW_TRANSFER:
+            }
+            case LOAN_WITHDRAW_TRANSFER -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
                     newState = activeTransition();
                 }
-            break;
-            case LOAN_COMPLETE_TRANSFER:
+            }
+            case LOAN_COMPLETE_TRANSFER -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
                     boolean isOverpaid = loan.getTotalOverpaid() != null && loan.getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
                     if (isOverpaid) {
@@ -226,29 +223,29 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                         newState = activeTransition();
                     }
                 }
-            break;
-            case WRITE_OFF_OUTSTANDING_UNDO:
+            }
+            case WRITE_OFF_OUTSTANDING_UNDO -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_WRITTEN_OFF)) {
                     newState = activeTransition();
                 }
-            break;
-            case LOAN_CREDIT_BALANCE_REFUND:
+            }
+            case LOAN_CREDIT_BALANCE_REFUND -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.OVERPAID)) {
                     newState = closeObligationsMetTransition();
                 }
-            break;
-            case LOAN_CHARGE_ADDED:
+            }
+            case LOAN_CHARGE_ADDED -> {
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
                     newState = activeTransition();
                 }
-            break;
-            case LOAN_CHARGE_ADJUSTMENT:
+            }
+            case LOAN_CHARGE_ADJUSTMENT -> {
                 if (from.hasStateOf(LoanStatus.CLOSED_OBLIGATIONS_MET)) {
                     newState = overpaidTransition();
                 }
-            break;
-            default:
-            break;
+            }
+            default -> {
+            }
         }
         return newState;
     }

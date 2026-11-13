@@ -36,22 +36,13 @@ public class AprCalculator {
             final DaysInYearType daysInYearType) {
         BigDecimal defaultAnnualNominalInterestRate = BigDecimal.ZERO;
         switch (interestPeriodFrequencyType) {
-            case DAYS:
+            case DAYS ->
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(getDaysInYear(daysInYearType)));
-            break;
-            case WEEKS:
-                defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(52));
-            break;
-            case MONTHS:
-                defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(12));
-            break;
-            case SEMI_MONTHLY:
-                defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(24));
-            break;
-            case YEARS:
-                defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(1));
-            break;
-            case WHOLE_TERM:
+            case WEEKS -> defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(52));
+            case MONTHS -> defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(12));
+            case SEMI_MONTHLY -> defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(24));
+            case YEARS -> defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(1));
+            case WHOLE_TERM -> {
                 final BigDecimal ratePerPeriod = interestRatePerPeriod.divide(BigDecimal.valueOf(numberOfRepayments * repaymentEvery), 8,
                         MoneyHelper.getRoundingMode());
 
@@ -76,9 +67,9 @@ public class AprCalculator {
                     case INVALID:
                     break;
                 }
-            break;
-            case INVALID:
-            break;
+            }
+            case INVALID -> {
+            }
         }
 
         return defaultAnnualNominalInterestRate;
