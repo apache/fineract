@@ -29,8 +29,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 @RequiredArgsConstructor
 public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTransactionBusinessEventService {
 
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanTransactionRepository loanTransactionRepository;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public void raiseTransactionReplayedEvents(final ChangedTransactionDetail changedTransactionDetail) {

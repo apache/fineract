@@ -40,8 +40,8 @@ import org.springframework.orm.jpa.JpaSystemException;
 @RequiredArgsConstructor
 public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
-    private final PaymentTypeRepository repository;
-    private final PaymentTypeCreateRequestMapper createRequestMapper;
+    protected final PaymentTypeRepository repository;
+    protected final PaymentTypeCreateRequestMapper createRequestMapper;
 
     @Override
     @CacheEvict(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")

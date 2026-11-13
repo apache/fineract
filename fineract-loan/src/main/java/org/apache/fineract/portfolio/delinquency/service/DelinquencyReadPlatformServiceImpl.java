@@ -72,21 +72,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatformService {
 
-    private final DelinquencyRangeRepository repositoryRange;
-    private final DelinquencyBucketRepository repositoryBucket;
-    private final DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
-    private final LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory;
-    private final DelinquencyRangeMapper mapperRange;
-    private final DelinquencyBucketMapper mapperBucket;
-    private final LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory;
-    private final LoanRepository loanRepository;
-    private final LoanDelinquencyDomainService loanDelinquencyDomainService;
-    private final LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
-    private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
-    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
-    private final ConfigurationDomainService configurationDomainService;
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationServiceDiscovery;
+    protected final DelinquencyRangeRepository repositoryRange;
+    protected final DelinquencyBucketRepository repositoryBucket;
+    protected final DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
+    protected final LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory;
+    protected final DelinquencyRangeMapper mapperRange;
+    protected final DelinquencyBucketMapper mapperBucket;
+    protected final LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory;
+    protected final LoanRepository loanRepository;
+    protected final LoanDelinquencyDomainService loanDelinquencyDomainService;
+    protected final LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
+    protected final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+    protected final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    protected final ConfigurationDomainService configurationDomainService;
+    protected final LoanTransactionRepository loanTransactionRepository;
+    protected final PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationServiceDiscovery;
 
     @Override
     public List<DelinquencyRangeData> retrieveAllDelinquencyRanges() {

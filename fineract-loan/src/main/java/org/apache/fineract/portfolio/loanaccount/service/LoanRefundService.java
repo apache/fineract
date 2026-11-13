@@ -31,9 +31,9 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanRefundValidat
 @RequiredArgsConstructor
 public class LoanRefundService {
 
-    private final LoanRefundValidator loanRefundValidator;
-    private final LoanTransactionProcessingService loadTransactionProcessingService;
-    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    protected final LoanRefundValidator loanRefundValidator;
+    protected final LoanTransactionProcessingService loadTransactionProcessingService;
+    protected final LoanLifecycleStateMachine loanLifecycleStateMachine;
 
     public void makeRefund(final Loan loan, final LoanTransaction loanTransaction) {
         loanRefundValidator.validateTransferRefund(loan, loanTransaction);
