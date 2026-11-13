@@ -293,8 +293,8 @@ Feature: Working Capital Loan Undo Transaction
       | totalPaidPrincipal   | 0.00    |
     # Second undo on the same (already reversed) transaction must fail with 403
     When Customer tries to undo "1"th "REPAYMENT" transaction made on "10 January 2026" on Working Capital loan and gets error:
-      | httpCode | errorMessage                                              |
-      | 400      | Failed data validation due to: transaction.already.undone |
+      | httpCode | errorMessage                                 |
+      | 403      | error.msg.wc.loan.transaction.already.undone |
 
   @TestRailId:C85335
   Scenario: Verify working capital loan undo transaction - UC5: undo disbursement via undo-transaction endpoint returns error (Negative)

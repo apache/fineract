@@ -828,5 +828,5 @@ Feature: Working Capital Loan Payout Refund
     And Customer makes "PAYOUT_REFUND" transaction on "10 January 2026" with 270.0 transaction amount on Working Capital loan
     And Customer undo "1"th "PAYOUT_REFUND" transaction made on "10 January 2026" on Working Capital loan
     Then Customer tries to undo "1"th "PAYOUT_REFUND" transaction made on "10 January 2026" on Working Capital loan and gets error:
-      | httpCode | errorMessage                |
-      | 400      | transaction.already.undone. |
+      | httpCode | errorMessage                                 |
+      | 403      | error.msg.wc.loan.transaction.already.undone |

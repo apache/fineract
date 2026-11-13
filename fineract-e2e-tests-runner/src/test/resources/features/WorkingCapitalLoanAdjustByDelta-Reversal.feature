@@ -308,8 +308,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - Reversals
       | totalPaidPrincipal   | 0.00    |
     # Second undo on the same (already reversed) transaction must fail with 403
     When Customer tries to undo "1"th "REPAYMENT" transaction made on "10 January 2026" on Working Capital loan and gets error:
-      | httpCode | errorMessage                                              |
-      | 400      | Failed data validation due to: transaction.already.undone |
+      | httpCode | errorMessage                                 |
+      | 403      | error.msg.wc.loan.transaction.already.undone |
 
   @TestRailId:C115228
   Scenario: Verify Working Capital Loan adjust by delta transaction - UC5: full decrease after credit balance refund does not resurrect refunded overpayment

@@ -274,8 +274,12 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         @Schema(example = "Discount applied")
         public String note;
         @Schema(example = "replacement-ext-001", description = "Optional external id for the created transaction. For command=adjust and command=adjustByDelta this is the id of the replacement, when there is one "
-                + "(same as term-loan adjust). The reversed transaction keeps its original external id. "
-                + "If omitted and auto-generation is enabled, a new id is generated for the replacement.")
+                + "(same as term-loan adjust). If omitted and auto-generation is enabled, a new id is generated for the replacement. "
+                + "Inheritance (command=adjust, adjustByDelta): set it to the external id of the transaction being adjusted and that "
+                + "external id moves to the replacement - it is removed from the reversed transaction, so the external id keeps "
+                + "pointing to the live transaction and the next adjustment can be sent against it again. A full reversal (new amount 0) "
+                + "has no replacement, so the external id stays on the reversed transaction. Any other value leaves the reversed "
+                + "transaction's external id where it is and must be unique (already.exists otherwise).")
         public String externalId;
         @Schema(description = "Optional nested payment details. If command=adjust or command=adjustByDelta then it is for the replacement, when there is one. "
                 + "If omitted / null, the original transaction's PaymentDetail is reused.")
@@ -295,11 +299,19 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public Long loanId;
         @Schema(example = "loan-ext-001")
         public String loanExternalId;
-        @Schema(example = "4")
+        @Schema(example = "4", description = "For command=adjust and adjustByDelta: the replacement transaction, or the reversed transaction when the "
+                + "adjustment reversed it in full")
         public Long resourceId;
         @Schema(example = "repayment-ext-001")
         public String resourceExternalId;
-        @Schema(example = "{}")
+        @Schema(example = "3", description = "For command=adjust and adjustByDelta with a replacement: the transaction that was actually reversed. "
+                + "When the command was sent by transaction external id, this is the transaction that external id pointed to when "
+                + "the command ran, which may be a later replacement than the one it pointed to when the request was sent")
+        public Long subResourceId;
+        @Schema(description = "External id of subResourceId after the adjustment: empty when the replacement inherited it")
+        public String subResourceExternalId;
+        @Schema(example = "{}", description = "For command=adjust and adjustByDelta with a replacement, adjustedTransaction describes the reversed "
+                + "transaction (id included) and externalIdInherited tells whether its external id moved to the replacement")
         public Map<String, Object> changes;
     }
 

@@ -58,6 +58,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateHistoryHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionAlreadyUndoneException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
@@ -828,7 +829,7 @@ public class WorkingCapitalLoanDataValidator {
         validateAdjustTransactionDate(baseDataValidator, loan,
                 this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName, element));
         validateTransactionReversalExternalId(baseDataValidator, element);
-        validateAdjustReplacementAttributes(baseDataValidator, element);
+        validateAdjustReplacementAttributes(baseDataValidator, element, transactionToAdjust);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
         // A well-formed delta that takes off more than the transaction carries breaks a rule of the loan, not of the
@@ -856,12 +857,13 @@ public class WorkingCapitalLoanDataValidator {
 
     /**
      * The guards shared by undo and both adjust commands: the transaction is still live and the loan is in a status a
-     * reversal is allowed in.
+     * reversal is allowed in. A reversed transaction is refused as a domain rule (403) straight away: no other error in
+     * the request can make it reversible again.
      */
     private void validateTransactionReversible(final DataValidatorBuilder baseDataValidator, final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction transaction, final String statusErrorCode) {
         if (transaction.isReversed()) {
-            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
+            throw new WorkingCapitalLoanTransactionAlreadyUndoneException(transaction.getId());
         }
 
         final LoanStatus loanStatus = loan.getLoanStatus();
@@ -887,9 +889,15 @@ public class WorkingCapitalLoanDataValidator {
         }
     }
 
-    private void validateAdjustReplacementAttributes(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+    private void validateAdjustReplacementAttributes(final DataValidatorBuilder baseDataValidator, final JsonElement element,
+            final WorkingCapitalLoanTransaction transactionToAdjust) {
         validateClassificationIdExists(baseDataValidator, element);
-        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+        // The adjusted transaction's own external id is allowed: it moves to the replacement (or stays where it is when
+        // there is no replacement). Any other value must still be unique.
+        final String externalId = fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.externalIdParameterName, element);
+        if (!transactionToAdjust.isExternalIdInheritedBy(ExternalIdFactory.produce(externalId))) {
+            validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+        }
         validateNote(baseDataValidator, element);
         validatePaymentDetails(baseDataValidator, element);
     }
@@ -1154,7 +1162,7 @@ public class WorkingCapitalLoanDataValidator {
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
 
         if (transaction.isReversed()) {
-            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
+            throw new WorkingCapitalLoanTransactionAlreadyUndoneException(transaction.getId());
         }
 
         if (!loan.isClosedWrittenOff()) {
@@ -1462,7 +1470,7 @@ public class WorkingCapitalLoanDataValidator {
         validateAdjustTransactionDate(baseDataValidator, loan, transactionDate);
 
         validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.reversalExternalIdParamName);
-        validateAdjustReplacementAttributes(baseDataValidator, element);
+        validateAdjustReplacementAttributes(baseDataValidator, element, transaction);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

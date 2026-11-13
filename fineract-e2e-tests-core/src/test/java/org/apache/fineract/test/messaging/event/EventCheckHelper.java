@@ -592,6 +592,17 @@ public class EventCheckHelper {
                 .extractingData(data -> data.getNewTransactionDetail().getReversed()).isEqualTo(false);
     }
 
+    public void workingCapitalLoanAdjustTransactionExternalIdMoveEventCheck(final Long loanId, final Long reversedTransactionId,
+            final Long newTransactionId, final String externalId) {
+        waitForTransactionCommit();
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, reversedTransactionId)//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalId()).isEqualTo(null)//
+                .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
+                .extractingData(data -> data.getNewTransactionDetail().getExternalId()).isEqualTo(externalId);
+    }
+
     private record ExpectedTransferAmounts(BigDecimal totalOutstanding, BigDecimal principal, BigDecimal fee, BigDecimal penalty,
             BigDecimal interest, BigDecimal overpayment) {
 

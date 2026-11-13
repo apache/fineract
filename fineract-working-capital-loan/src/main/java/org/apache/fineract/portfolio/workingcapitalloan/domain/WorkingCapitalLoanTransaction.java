@@ -231,6 +231,22 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         this.transactionAmount = amount != null ? amount : BigDecimal.ZERO;
     }
 
+    /**
+     * Whether an adjustment that asks for {@code requestedExternalId} on its replacement takes this transaction's own
+     * external id over, rather than asking for a new one.
+     */
+    public boolean isExternalIdInheritedBy(final ExternalId requestedExternalId) {
+        return externalId != null && !externalId.isEmpty() && externalId.equals(requestedExternalId);
+    }
+
+    /**
+     * Gives up the external id so a replacement can take it over: the column is unique, so the release has to reach the
+     * database before the replacement is inserted.
+     */
+    public void releaseExternalId() {
+        this.externalId = ExternalId.empty();
+    }
+
     public static WorkingCapitalLoanTransaction chargeAdjustment(final WorkingCapitalLoan loan, final ExternalId externalId,
             final BigDecimal amount, final LocalDate transactionDate, final PaymentDetail paymentDetail) {
         final WorkingCapitalLoanTransaction transaction = new WorkingCapitalLoanTransaction();
