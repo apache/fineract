@@ -42,7 +42,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
 
     private static final class FieldMapper implements RowMapper<FieldConfigurationData> {
 
-        public String schema() {
+        private String schema() {
             return "fld.id as fieldConfigurationId,fld.entity as entity,fld.subentity as subentity,fld.field as field,fld.is_enabled as is_enabled,"
                     + "fld.is_mandatory as is_mandatory,fld.validation_regex as validation_regex from m_field_configuration fld";
         }

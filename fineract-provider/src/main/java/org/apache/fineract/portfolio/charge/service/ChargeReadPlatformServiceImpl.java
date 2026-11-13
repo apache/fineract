@@ -283,7 +283,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     private static final class ChargeMapper implements RowMapper<ChargeData> {
 
-        public String chargeSchema() {
+        private String chargeSchema() {
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
                     + "c.charge_payment_mode_enum as chargePaymentMode, "
@@ -300,15 +300,15 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id " + " LEFT JOIN m_payment_type pt on pt.id = c.payment_type_id ";
         }
 
-        public String loanProductChargeSchema() {
+        private String loanProductChargeSchema() {
             return chargeSchema() + " join m_product_loan_charge plc on plc.charge_id = c.id";
         }
 
-        public String savingsProductChargeSchema() {
+        private String savingsProductChargeSchema() {
             return chargeSchema() + " join m_savings_product_charge spc on spc.charge_id = c.id";
         }
 
-        public String shareProductChargeSchema() {
+        private String shareProductChargeSchema() {
             return chargeSchema() + " join m_share_product_charge mspc on mspc.charge_id = c.id";
         }
 

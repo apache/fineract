@@ -53,7 +53,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
     private static final class ClientFamilyMembersMapper implements RowMapper<ClientFamilyMembersData> {
 
-        public String schema() {
+        private String schema() {
             return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.middlename AS middleName,"
                     + "fmb.lastname AS lastName,fmb.qualification AS qualification,fmb.mobile_number as mobileNumber,fmb.age as age,fmb.is_dependent as isDependent,cv.code_value AS relationship,fmb.relationship_cv_id AS relationshipId,"
                     + "c.code_value AS maritalStatus,fmb.marital_status_cv_id AS maritalStatusId,"

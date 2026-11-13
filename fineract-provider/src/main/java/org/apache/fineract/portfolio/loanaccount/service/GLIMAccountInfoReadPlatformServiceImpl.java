@@ -45,7 +45,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
     private static final class GLIMFieldsMapper implements RowMapper<GroupLoanIndividualMonitoringAccountData> {
 
-        public String schema() {
+        private String schema() {
             return "glim.id as glimId,ln.group_id as groupId,glim.account_number as accountNumber, ln.account_no as childAccountNumber,ln.principal_amount as childPrincipalAmount,glim.principal_amount as parentPrincipalAmount,glim.child_accounts_count as childAccountsCount,"
                     + "glim.loan_status_id as loanStatus from glim_accounts glim,m_loan ln where glim.id=ln.glim_id";
         }
@@ -184,7 +184,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
     private static final class GLIMMapper implements RowMapper<GroupLoanIndividualMonitoringAccountData> {
 
-        public String schema() {
+        private String schema() {
             return "glim.id as glimId,glim.group_id as groupId,glim.account_number as accountNumber,glim.principal_amount as principalAmount,glim.child_accounts_count as childAccountsCount,"
                     + "glim.loan_status_id as loanStatus from glim_accounts glim";
         }
@@ -210,7 +210,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
     private static final class GLIMRepaymentMapper implements RowMapper<GlimRepaymentTemplate> {
 
-        public String schema() {
+        private String schema() {
             return "glim.id as glimId,loan.group_id as groupId,client.id as clientId,glim.account_number as parentLoanAccountNo,"
                     + "glim.principal_amount as parentPrincipalAmount,loan.id as childLoanId,loan.account_no as childLoanAccountNo,loan.approved_principal as childPrincipalAmount,"
                     + "client.display_name as clientName from glim_accounts glim left join m_loan loan on loan.glim_id=glim.id "
