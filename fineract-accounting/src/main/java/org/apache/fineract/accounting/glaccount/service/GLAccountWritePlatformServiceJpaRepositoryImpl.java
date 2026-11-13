@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.accounting.glaccount.service;
 
+import static org.apache.fineract.query.QAccProductMapping.accProductMapping;
+
+import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.sql.SQLQueryFactory;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants;
@@ -47,9 +51,7 @@ import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.NonTransientDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +68,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private final ProductToGLAccountMappingRepository productToGLAccountMappingRepository;
     private final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
-    private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
 
     @Transactional
     @Override
@@ -175,14 +177,10 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     }
 
     private void validateForAttachedProduct(Long glAccountId) {
-        String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = ?";
-        try {
-            Integer count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
-            if (count == null || count > 0) {
-                throw new GLAccountDisableException();
-            }
-        } catch (EmptyResultDataAccessException e) {
-            LOG.error("Problem encountered in validateForAttachedProduct()", e);
+        Long count = queryFactory.select(Wildcard.count).from(accProductMapping).where(accProductMapping.glAccountId.eq(glAccountId))
+                .fetchOne();
+        if (count == null || count > 0) {
+            throw new GLAccountDisableException();
         }
     }
 
