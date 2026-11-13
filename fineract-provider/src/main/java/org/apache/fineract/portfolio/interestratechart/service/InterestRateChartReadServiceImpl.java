@@ -331,7 +331,7 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
         private final String schemaSql;
 
         @SuppressWarnings("unused")
-        private String schema() {
+        String schema() {
             return this.schemaSql;
         }
 
