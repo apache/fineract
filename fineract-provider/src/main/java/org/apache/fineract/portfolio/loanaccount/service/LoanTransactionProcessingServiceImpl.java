@@ -102,7 +102,12 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 && loanTransaction.getLoan().isInterestRecalculationEnabled()) {
             return processLatestTransactionProgressiveInterestRecalculation(advancedProcessor, loanTransaction.getLoan(), loanTransaction);
         }
-        return loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, ctx);
+        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor
+                .processLatestTransaction(loanTransaction, ctx);
+        if (loanRepaymentScheduleTransactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor) {
+            advancedProcessor.applyTransactionChanges(ctx);
+        }
+        return changedTransactionDetail;
     }
 
     @Override
@@ -255,6 +260,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         progressiveContext.setWrittenOff(loan.isClosedWrittenOff());
         progressiveContext.setContractTerminated(loan.isTerminatedEarly());
         ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
+        advancedProcessor.applyTransactionChanges(progressiveContext);
         if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
             modelRepository.writeInterestScheduleModel(loan, model);
         }

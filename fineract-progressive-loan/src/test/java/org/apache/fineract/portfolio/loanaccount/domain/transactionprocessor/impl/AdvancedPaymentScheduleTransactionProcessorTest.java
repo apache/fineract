@@ -77,6 +77,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
@@ -1380,6 +1381,225 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
                 new MoneyHolder(Money.zero(MONETARY_CURRENCY)), null, List.of()));
 
         Assertions.assertEquals(0, BigDecimal.TEN.compareTo(feeRefund.getAmount()));
+    }
+
+    @Test
+    public void accelerateMaturityReplayAddsTransactionOnlyOnTheCurrentInstallment() {
+        final LoanRepaymentScheduleInstallment current = accelerateInstallment(1, JAN_15.minusDays(14), JAN_15.plusDays(16));
+        final LoanRepaymentScheduleInstallment future = accelerateInstallment(2, JAN_15.plusDays(16), JAN_15.plusDays(46));
+        final LoanTransaction spilling = accelerateTransaction(JAN_15.minusDays(5), current, future);
+        final LoanTransaction currentOnly = accelerateTransaction(JAN_15.minusDays(4), current);
+
+        final List<LoanTransaction> replayed = new ArrayList<>(List.of(spilling));
+        final List<LoanRepaymentScheduleInstallment> reset = selectForAccelerateMaturity(current, List.of(current, future), replayed,
+                spilling, currentOnly);
+
+        Assertions.assertEquals(List.of(current), reset);
+        Assertions.assertEquals(List.of(spilling, currentOnly), replayed);
+    }
+
+    @Test
+    public void accelerateMaturityReplayResetsEveryInstallmentOfAnAddedTransaction() {
+        final LoanRepaymentScheduleInstallment past = accelerateInstallment(1, JAN_15.minusDays(44), JAN_15.minusDays(14));
+        final LoanRepaymentScheduleInstallment current = accelerateInstallment(2, JAN_15.minusDays(14), JAN_15.plusDays(16));
+        final LoanRepaymentScheduleInstallment future = accelerateInstallment(3, JAN_15.plusDays(16), JAN_15.plusDays(46));
+        final LoanTransaction spilling = accelerateTransaction(JAN_15.minusDays(2), current, future);
+        final LoanTransaction pastAndCurrent = accelerateTransaction(JAN_15.minusDays(10), past, current);
+        final LoanTransaction pastOnly = accelerateTransaction(JAN_15.minusDays(20), past);
+
+        final List<LoanTransaction> replayed = new ArrayList<>(List.of(spilling));
+        final List<LoanRepaymentScheduleInstallment> reset = selectForAccelerateMaturity(current, List.of(past, current, future), replayed,
+                spilling, pastAndCurrent, pastOnly);
+
+        Assertions.assertEquals(List.of(past, current), reset);
+        Assertions.assertEquals(Set.of(spilling, pastAndCurrent, pastOnly), Set.copyOf(replayed));
+    }
+
+    @Test
+    public void accelerateMaturityReplayDoesNotAddChargeback() {
+        final LoanRepaymentScheduleInstallment current = accelerateInstallment(1, JAN_15.minusDays(14), JAN_15.plusDays(16));
+        final LoanRepaymentScheduleInstallment future = accelerateInstallment(2, JAN_15.plusDays(16), JAN_15.plusDays(46));
+        final LoanTransaction spilling = accelerateTransaction(JAN_15.minusDays(5), current, future);
+        final LoanTransaction chargeback = accelerateTransaction(JAN_15.minusDays(4), current);
+        Mockito.lenient().when(chargeback.isChargeback()).thenReturn(true);
+
+        final List<LoanTransaction> replayed = new ArrayList<>(List.of(spilling));
+        selectForAccelerateMaturity(current, List.of(current, future), replayed, spilling, chargeback);
+
+        Assertions.assertEquals(List.of(spilling), replayed);
+    }
+
+    @Test
+    public void accelerateMaturityWithoutFutureAllocationReplaysNothing() {
+        final LoanRepaymentScheduleInstallment current = accelerateInstallment(1, JAN_15.minusDays(14), JAN_15.plusDays(16));
+        final LoanTransaction currentOnly = accelerateTransaction(JAN_15.minusDays(4), current);
+
+        final List<LoanTransaction> replayed = new ArrayList<>();
+        final List<LoanRepaymentScheduleInstallment> reset = selectForAccelerateMaturity(current, List.of(current), replayed, currentOnly);
+
+        Assertions.assertTrue(reset.isEmpty());
+        Assertions.assertTrue(replayed.isEmpty());
+    }
+
+    @Test
+    public void accelerateMaturityResetKeepsChargeWaivers() {
+        final LoanRepaymentScheduleInstallment installment = accelerateInstallment(1, JAN_15.minusDays(14), JAN_15.plusDays(16));
+        installment.setFeeChargesWaived(BigDecimal.TEN);
+        installment.setPenaltyChargesWaived(BigDecimal.ONE);
+        installment.setPrincipalCompleted(BigDecimal.TEN);
+
+        ReflectionTestUtils.invokeMethod(underTest, "resetKeepingChargeWaivers", installment, MONETARY_CURRENCY);
+
+        Assertions.assertEquals(0, BigDecimal.TEN.compareTo(installment.getFeeChargesWaived(MONETARY_CURRENCY).getAmount()));
+        Assertions.assertEquals(0, BigDecimal.ONE.compareTo(installment.getPenaltyChargesWaived(MONETARY_CURRENCY).getAmount()));
+        Assertions.assertTrue(installment.getPrincipalCompleted(MONETARY_CURRENCY).isZero());
+    }
+
+    @Test
+    public void accelerateMaturityUndoesOnlyPositiveChargePayments() {
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        final LoanCharge charge = mock(LoanCharge.class);
+        final LoanChargePaidBy paid = mock(LoanChargePaidBy.class);
+        final LoanChargePaidBy undone = mock(LoanChargePaidBy.class);
+        when(paid.getAmount()).thenReturn(BigDecimal.TEN);
+        when(paid.getLoanCharge()).thenReturn(charge);
+        when(paid.getInstallmentNumber()).thenReturn(2);
+        when(undone.getAmount()).thenReturn(BigDecimal.TEN.negate());
+        when(transaction.getLoanChargesPaid()).thenReturn(new LinkedHashSet<>(List.of(paid, undone)));
+
+        ReflectionTestUtils.invokeMethod(underTest, "undoChargePayments", transaction, MONETARY_CURRENCY);
+
+        Mockito.verify(charge, Mockito.times(1)).undoPaidOrPartiallyAmountBy(
+                Mockito.argThat(amount -> BigDecimal.TEN.compareTo(amount.getAmount()) == 0), Mockito.eq(2), Mockito.any());
+    }
+
+    @Test
+    public void accelerateMaturityWithClosedCurrentMovesMappingToCurrentInstallment() {
+        final LoanRepaymentScheduleInstallment past = accelerateInstallment(1, JAN_15.minusDays(44), JAN_15.minusDays(14));
+        final LoanRepaymentScheduleInstallment current = accelerateInstallment(2, JAN_15.minusDays(14), JAN_15);
+        final LoanRepaymentScheduleInstallment removed = accelerateInstallment(3, JAN_15.plusDays(16), JAN_15.plusDays(46));
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        final LoanTransactionToRepaymentScheduleMapping onPast = mapping(transaction, past, 40L);
+        final LoanTransactionToRepaymentScheduleMapping onRemoved = mapping(transaction, removed, 60L);
+        final Set<LoanTransactionToRepaymentScheduleMapping> mappings = new LinkedHashSet<>(List.of(onPast, onRemoved));
+        when(transaction.getLoanTransactionToRepaymentScheduleMappings()).thenReturn(mappings);
+
+        ReflectionTestUtils.invokeMethod(underTest, "moveMappingsToCurrentInstallment", List.of(transaction), List.of(removed), current,
+                MONETARY_CURRENCY);
+
+        Assertions.assertEquals(2, mappings.size());
+        Assertions.assertTrue(mappings.contains(onPast));
+        Assertions.assertFalse(mappings.contains(onRemoved));
+        Assertions.assertSame(removed, onRemoved.getInstallment());
+        final LoanTransactionToRepaymentScheduleMapping onCurrent = mappings.stream().filter(mapping -> mapping != onPast).findFirst()
+                .orElseThrow();
+        Assertions.assertSame(current, onCurrent.getInstallment());
+        Assertions.assertSame(transaction, onCurrent.getLoanTransaction());
+        Assertions.assertEquals(0, BigDecimal.valueOf(60L).compareTo(onCurrent.getAmount()));
+    }
+
+    @Test
+    public void accelerateMaturityWithClosedCurrentAddsMappingToExistingCurrentMapping() {
+        final LoanRepaymentScheduleInstallment current = accelerateInstallment(2, JAN_15.minusDays(14), JAN_15);
+        final LoanRepaymentScheduleInstallment removed = accelerateInstallment(3, JAN_15.plusDays(16), JAN_15.plusDays(46));
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        final LoanTransactionToRepaymentScheduleMapping onCurrent = mapping(transaction, current, 145L);
+        final LoanTransactionToRepaymentScheduleMapping onRemoved = mapping(transaction, removed, 255L);
+        final Set<LoanTransactionToRepaymentScheduleMapping> mappings = new LinkedHashSet<>(List.of(onCurrent, onRemoved));
+        when(transaction.getLoanTransactionToRepaymentScheduleMappings()).thenReturn(mappings);
+
+        ReflectionTestUtils.invokeMethod(underTest, "moveMappingsToCurrentInstallment", List.of(transaction), List.of(removed), current,
+                MONETARY_CURRENCY);
+
+        Assertions.assertEquals(Set.of(onCurrent), mappings);
+        Assertions.assertEquals(0, BigDecimal.valueOf(400L).compareTo(onCurrent.getAmount()));
+        Assertions.assertEquals(0, BigDecimal.valueOf(400L).compareTo(onCurrent.getPrincipalPortion()));
+    }
+
+    @Test
+    public void accelerateMaturityWithClosedCurrentKeepsPaidAmountsOfRemovedPeriods() {
+        final RepaymentPeriod removedPeriod = acceleratePeriod(JAN_15.plusDays(16));
+        final Money paidPrincipal = Money.of(MONETARY_CURRENCY, BigDecimal.valueOf(255L));
+        final Money paidInterest = Money.of(MONETARY_CURRENCY, BigDecimal.ONE);
+        when(removedPeriod.getPaidPrincipal()).thenReturn(paidPrincipal);
+        when(removedPeriod.getPaidInterest()).thenReturn(paidInterest);
+        final RepaymentPeriod currentPeriod = updatePeriodsAfterAccelerateMaturity(removedPeriod, true);
+
+        Mockito.verify(currentPeriod)
+                .addPaidPrincipalAmount(Mockito.argThat(amount -> BigDecimal.valueOf(255L).compareTo(amount.getAmount()) == 0));
+        Mockito.verify(currentPeriod).addPaidInterestAmount(Mockito.argThat(amount -> BigDecimal.ONE.compareTo(amount.getAmount()) == 0));
+    }
+
+    @Test
+    public void accelerateMaturityWithOpenCurrentDoesNotMovePaidAmountsOfRemovedPeriods() {
+        final RepaymentPeriod currentPeriod = updatePeriodsAfterAccelerateMaturity(acceleratePeriod(JAN_15.plusDays(16)), false);
+
+        Mockito.verify(currentPeriod, never()).addPaidPrincipalAmount(any());
+        Mockito.verify(currentPeriod, never()).addPaidInterestAmount(any());
+    }
+
+    // Runs the model part of accelerate maturity on JAN_15 with a current period and one removed period
+    private RepaymentPeriod updatePeriodsAfterAccelerateMaturity(final RepaymentPeriod removedPeriod, final boolean currentClosed) {
+        final RepaymentPeriod currentPeriod = acceleratePeriod(JAN_15.minusDays(14));
+        final ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.repaymentPeriods()).thenReturn(new ArrayList<>(List.of(currentPeriod, removedPeriod)));
+        final Money zero = Money.zero(MONETARY_CURRENCY);
+        when(emiCalculator.getPeriodInterestTillDate(any(), any(), any(), any(), Mockito.anyBoolean(), Mockito.anyBoolean()))
+                .thenReturn(zero);
+        final ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(MONETARY_CURRENCY, List.of(), Set.of(),
+                new MoneyHolder(Money.zero(MONETARY_CURRENCY)), new ChangedTransactionDetail(), model, List.of());
+
+        ReflectionTestUtils.invokeMethod(underTest, "updateRepaymentPeriodsAfterAccelerateMaturityDate", ctx, JAN_15, List.of(), List.of(),
+                currentClosed);
+        return currentPeriod;
+    }
+
+    private static RepaymentPeriod acceleratePeriod(final LocalDate fromDate) {
+        final RepaymentPeriod period = mock(RepaymentPeriod.class);
+        final Money zero = Money.zero(MONETARY_CURRENCY);
+        Mockito.lenient().when(period.getFromDate()).thenReturn(fromDate);
+        Mockito.lenient().when(period.getDuePrincipal()).thenReturn(zero);
+        Mockito.lenient().when(period.getInterestPeriods()).thenReturn(new ArrayList<>());
+        return period;
+    }
+
+    private static LoanTransactionToRepaymentScheduleMapping mapping(final LoanTransaction transaction,
+            final LoanRepaymentScheduleInstallment installment, final long principal) {
+        return LoanTransactionToRepaymentScheduleMapping.createFrom(transaction, installment,
+                Money.of(MONETARY_CURRENCY, BigDecimal.valueOf(principal)), Money.zero(MONETARY_CURRENCY), Money.zero(MONETARY_CURRENCY),
+                Money.zero(MONETARY_CURRENCY));
+    }
+
+    private List<LoanRepaymentScheduleInstallment> selectForAccelerateMaturity(final LoanRepaymentScheduleInstallment current,
+            final List<LoanRepaymentScheduleInstallment> installments, final List<LoanTransaction> replayed,
+            final LoanTransaction... loanTransactions) {
+        final Loan loan = mock(Loan.class);
+        Mockito.lenient().when(loan.getLoanTransactions()).thenReturn(new ArrayList<>(List.of(loanTransactions)));
+        final LoanTransaction chargeOff = mock(LoanTransaction.class);
+        Mockito.lenient().when(chargeOff.getLoan()).thenReturn(loan);
+        Mockito.lenient().when(chargeOff.getTransactionDate()).thenReturn(JAN_15);
+        final TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, Set.of(),
+                new MoneyHolder(Money.zero(MONETARY_CURRENCY)), new ChangedTransactionDetail(), List.of());
+        return ReflectionTestUtils.invokeMethod(underTest, "addTransactionsOfInstallmentsToReset", chargeOff, ctx, current, replayed);
+    }
+
+    private static LoanRepaymentScheduleInstallment accelerateInstallment(final int number, final LocalDate fromDate,
+            final LocalDate dueDate) {
+        return new LoanRepaymentScheduleInstallment(mock(Loan.class), number, fromDate, dueDate, BigDecimal.valueOf(100L), BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO);
+    }
+
+    private static LoanTransaction accelerateTransaction(final LocalDate date, final LoanRepaymentScheduleInstallment... allocatedTo) {
+        final LoanTransaction transaction = mock(LoanTransaction.class);
+        final Set<LoanTransactionToRepaymentScheduleMapping> mappings = new LinkedHashSet<>();
+        for (final LoanRepaymentScheduleInstallment installment : allocatedTo) {
+            final LoanTransactionToRepaymentScheduleMapping mapping = mock(LoanTransactionToRepaymentScheduleMapping.class);
+            Mockito.lenient().when(mapping.getInstallment()).thenReturn(installment);
+            mappings.add(mapping);
+        }
+        Mockito.lenient().when(transaction.getTransactionDate()).thenReturn(date);
+        Mockito.lenient().when(transaction.getLoanTransactionToRepaymentScheduleMappings()).thenReturn(mappings);
+        return transaction;
     }
 
     private static ProgressiveTransactionCtx feeRefundCtx() {
