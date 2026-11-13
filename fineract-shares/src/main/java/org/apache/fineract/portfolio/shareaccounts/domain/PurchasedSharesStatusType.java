@@ -40,24 +40,12 @@ public enum PurchasedSharesStatusType {
 
         PurchasedSharesStatusType enumeration = PurchasedSharesStatusType.INVALID;
         switch (type) {
-            case 100:
-                enumeration = PurchasedSharesStatusType.APPLIED;
-            break;
-            case 300:
-                enumeration = PurchasedSharesStatusType.APPROVED;
-            break;
-            case 400:
-                enumeration = PurchasedSharesStatusType.REJECTED;
-            break;
-            case 500:
-                enumeration = PurchasedSharesStatusType.PURCHASED;
-            break;
-            case 600:
-                enumeration = PurchasedSharesStatusType.REDEEMED;
-            break;
-            case 700:
-                enumeration = PurchasedSharesStatusType.CHARGE_PAYMENT;
-            break;
+            case 100 -> enumeration = PurchasedSharesStatusType.APPLIED;
+            case 300 -> enumeration = PurchasedSharesStatusType.APPROVED;
+            case 400 -> enumeration = PurchasedSharesStatusType.REJECTED;
+            case 500 -> enumeration = PurchasedSharesStatusType.PURCHASED;
+            case 600 -> enumeration = PurchasedSharesStatusType.REDEEMED;
+            case 700 -> enumeration = PurchasedSharesStatusType.CHARGE_PAYMENT;
         }
         return enumeration;
     }
