@@ -1490,6 +1490,7 @@ Feature: Charge-off - Part4
       | 26 July 2023     | Charge-off             | 6.12   | 5.84       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "ACTIVE"
 
+  @TestRailId:C123837
   Scenario: Verify accelerate maturity charge-off keeps a repayment allocated only to the current installment
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1500,6 +1501,7 @@ Feature: Charge-off - Part4
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
     When Admin sets the business date to "05 January 2026"
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "05 January 2026" with 400 EUR transaction amount and system-generated Idempotency key
+    # --- Merchant issued refunds + repayment (repayment allocated only to the current installment) ---
     When Admin sets the business date to "10 January 2026"
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 300 EUR transaction amount and system-generated Idempotency key
     And Customer makes "AUTOPAY" repayment on "10 January 2026" with 7.5 EUR transaction amount
@@ -1513,6 +1515,7 @@ Feature: Charge-off - Part4
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 1.87     | 0.0  | 0.0       | 1001.87 | 957.5 | 707.5      | 0.0  | 44.37       |
+    # --- Charge-off (accelerate maturity) ---
     When Admin sets the business date to "15 January 2026"
     And Admin does charge-off the loan on "15 January 2026"
     Then Loan has 44.37 outstanding amount
@@ -1534,6 +1537,7 @@ Feature: Charge-off - Part4
       | 10 January 2026  | Repayment              | 7.5    | 7.5       | 0.0      | 0.0  | 0.0       | 42.5         | false    | false    |
       | 15 January 2026  | Charge-off             | 44.37  | 42.5      | 1.87     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C123838
   Scenario: Verify accelerate maturity charge-off with a closed current installment counts once a refund dated in an unpaid earlier installment
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1542,6 +1546,7 @@ Feature: Charge-off - Part4
       | LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_ACCELERATE_MATURITY_FEE_REFUND | 01 January 2026   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    # --- Merchant issued refunds ---
     When Admin sets the business date to "05 January 2026"
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "05 January 2026" with 400 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "10 January 2026"
@@ -1558,6 +1563,7 @@ Feature: Charge-off - Part4
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 3.01     | 0.0  | 0.0       | 1003.01 | 800.0 | 550.0      | 0.0  | 203.01      |
+    # --- Charge-off (accelerate maturity) ---
     And Admin does charge-off the loan on "10 February 2026"
     # principal 750 - 400 - 150 = 200; interest till the charge-off date 3.60
     Then Loan has 203.6 outstanding amount
