@@ -30,6 +30,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -56,8 +58,12 @@ public class AdjustChargeCommandStrategyTest {
         final String responseBody = "{\"loanId\":13,\"resourceId\":16,\"subResourceId\":26,\"changes\":{\"amount\":10.0,"
                 + "\"transactionDate\":[2022,12,7],\"locale\":\"de_DE\"}}";
 
+        final CommandProcessingResult result = CommandProcessingResult.resourceResult(1L);
+
+        given(testContext.toApiJsonSerializer.serialize(result)).willReturn(responseBody);
+
         given(testContext.loanChargesApiResource.executeLoanCharge(eq(loanId), eq(loanChargeId), eq(command), eq(request.getBody())))
-                .willReturn(responseBody);
+                .willReturn(result);
 
         // when
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
@@ -139,6 +145,12 @@ public class AdjustChargeCommandStrategyTest {
         private LoanChargesApiResource loanChargesApiResource;
 
         /**
+         * The Mock serializer turning the {@link CommandProcessingResult} into the batch response body.
+         */
+        @Mock
+        private DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
+
+        /**
          * The class under test.
          */
         private final AdjustChargeCommandStrategy subjectToTest;
@@ -148,7 +160,7 @@ public class AdjustChargeCommandStrategyTest {
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new AdjustChargeCommandStrategy(loanChargesApiResource);
+            subjectToTest = new AdjustChargeCommandStrategy(loanChargesApiResource, toApiJsonSerializer);
         }
     }
 }
