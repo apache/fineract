@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import feign.Headers;
 import feign.RequestLine;
 import feign.Response;
 import java.util.Map;
@@ -33,6 +34,10 @@ public interface ServerPagesApi {
 
     @RequestLine("GET /actuator/info")
     ApiResponse<ActuatorInfo> actuatorInfoWithHttpInfo();
+
+    @RequestLine("GET /actuator/prometheus")
+    @Headers("Accept: text/plain")
+    Response actuatorPrometheus();
 
     @RequestLine("GET /swagger-ui/index.html")
     Response swaggerUi();
