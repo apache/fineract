@@ -266,23 +266,13 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
         }
 
         final SavingsPeriodFrequencyType depositPeriodFrequencyType = periodFrequencyType;
-        switch (depositPeriodFrequencyType) {
-            case DAYS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(depositFromDate, interestPostingUpToDate));
-            break;
-            case WEEKS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(depositFromDate, interestPostingUpToDate));
-            break;
-            case MONTHS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(depositFromDate, interestPostingUpToDate));
-            break;
-            case YEARS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(depositFromDate, interestPostingUpToDate));
-            break;
-            case INVALID:
-                actualDepositPeriod = this.depositPeriod;// default value
-            break;
-        }
+        actualDepositPeriod = switch (depositPeriodFrequencyType) {
+            case DAYS -> Math.toIntExact(ChronoUnit.DAYS.between(depositFromDate, interestPostingUpToDate));
+            case WEEKS -> Math.toIntExact(ChronoUnit.WEEKS.between(depositFromDate, interestPostingUpToDate));
+            case MONTHS -> Math.toIntExact(ChronoUnit.MONTHS.between(depositFromDate, interestPostingUpToDate));
+            case YEARS -> Math.toIntExact(ChronoUnit.YEARS.between(depositFromDate, interestPostingUpToDate));
+            case INVALID -> this.depositPeriod; // default value
+        };
         return actualDepositPeriod;
     }
 

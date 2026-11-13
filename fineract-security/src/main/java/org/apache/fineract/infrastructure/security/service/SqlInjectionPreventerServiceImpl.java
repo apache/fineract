@@ -76,33 +76,15 @@ public class SqlInjectionPreventerServiceImpl implements SqlInjectionPreventerSe
             char c = literal.charAt(i);
 
             switch (c) {
-                case '\0': // Null byte
-                    escaped.append("\\0");
-                break;
-                case '\'':
-                    escaped.append("\\'");
-                break;
-                case '\"':
-                    escaped.append("\\\"");
-                break;
-                case '\\':
-                    escaped.append("\\\\");
-                break;
-                case '\n':
-                    escaped.append("\\n");
-                break;
-                case '\r':
-                    escaped.append("\\r");
-                break;
-                case '\t':
-                    escaped.append("\\t");
-                break;
-                case '\032':
-                    escaped.append("\\Z");
-                break;
-                default:
-                    escaped.append(c);
-                break;
+                case '\0' -> escaped.append("\\0"); // Null byte
+                case '\'' -> escaped.append("\\'");
+                case '\"' -> escaped.append("\\\"");
+                case '\\' -> escaped.append("\\\\");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                case '\032' -> escaped.append("\\Z");
+                default -> escaped.append(c);
             }
         }
 

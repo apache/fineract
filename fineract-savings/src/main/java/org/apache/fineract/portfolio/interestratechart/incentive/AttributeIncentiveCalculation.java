@@ -28,23 +28,13 @@ public abstract class AttributeIncentiveCalculation {
     public boolean applyIncentive(ConditionType conditionType, Long attributeValue, Long actualValue) {
         boolean applyIncentive = false;
         int compareVal = actualValue.compareTo(attributeValue);
-        switch (conditionType) {
-            case LESSTHAN:
-                applyIncentive = compareVal < 0;
-            break;
-            case EQUAL:
-                applyIncentive = compareVal == 0;
-            break;
-            case NOT_EQUAL:
-                applyIncentive = compareVal != 0;
-            break;
-            case GREATERTHAN:
-                applyIncentive = compareVal > 0;
-            break;
-            default:
-                applyIncentive = false;
-            break;
-        }
+        applyIncentive = switch (conditionType) {
+            case LESSTHAN -> compareVal < 0;
+            case EQUAL -> compareVal == 0;
+            case NOT_EQUAL -> compareVal != 0;
+            case GREATERTHAN -> compareVal > 0;
+            default -> false;
+        };
         return applyIncentive;
     }
 }

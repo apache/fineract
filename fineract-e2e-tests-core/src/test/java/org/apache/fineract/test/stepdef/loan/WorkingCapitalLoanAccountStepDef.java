@@ -5350,24 +5350,21 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoansRequest createReq = testContext().get(TestContextKey.LOAN_CREATE_REQUEST);
         final String submissionDate = createReq.getSubmittedOnDate();
         switch (target) {
-            case SUBMITTED_AND_PENDING_APPROVAL:
-            break;
-            case APPROVED:
-                approveWCLoanOnDate(loanId, submissionDate, "9000");
-            break;
-            case ACTIVE:
+            case SUBMITTED_AND_PENDING_APPROVAL -> {
+            }
+            case APPROVED -> approveWCLoanOnDate(loanId, submissionDate, "9000");
+            case ACTIVE -> {
                 approveWCLoanOnDate(loanId, submissionDate, "9000");
                 disburseWCLoanOnDate(loanId, submissionDate, "9000");
-            break;
-            case CLOSED_OBLIGATIONS_MET:
+            }
+            case CLOSED_OBLIGATIONS_MET -> {
                 approveWCLoanOnDate(loanId, submissionDate, "9000");
                 disburseWCLoanOnDate(loanId, submissionDate, "9000");
                 final String nextDay = nextDay(submissionDate);
                 businessDateHelper.setBusinessDate(nextDay);
                 makeWorkingCapitalLoanRepayment(nextDay, 9000.0);
-            break;
-            default:
-                throw new IllegalArgumentException("Unsupported target status for bringWorkingCapitalLoanToStatus: " + status);
+            }
+            default -> throw new IllegalArgumentException("Unsupported target status for bringWorkingCapitalLoanToStatus: " + status);
         }
     }
 

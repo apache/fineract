@@ -154,9 +154,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
         final Long writeOffId = this.fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(),
                 element);
         switch (accountingRuleType) {
-            case NONE:
-            break;
-            case CASH_BASED:
+            case NONE -> {
+            }
+            case CASH_BASED -> {
                 changes.put(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), savingsControlId);
                 changes.put(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingsReferenceId);
                 changes.put(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), interestOnSavingsId);
@@ -166,8 +166,8 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 changes.put(SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), overdraftControlId);
                 changes.put(SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), incomeFromInterest);
                 changes.put(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), writeOffId);
-            break;
-            case ACCRUAL_PERIODIC:
+            }
+            case ACCRUAL_PERIODIC -> {
                 final Long feeReceivableId = this.fromApiJsonHelper
                         .extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
                 final Long penaltyReceivableId = this.fromApiJsonHelper
@@ -187,9 +187,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 changes.put(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), feeReceivableId);
                 changes.put(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), penaltyReceivableId);
                 changes.put(SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), interestPayableId);
-            break;
-            case ACCRUAL_UPFRONT:
-            break;
+            }
+            case ACCRUAL_UPFRONT -> {
+            }
         }
         return changes;
     }
@@ -205,9 +205,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     public void handleChangesToSavingsProductToGLAccountMappings(final Long savingsProductId, final Map<String, Object> changes,
             final JsonElement element, final AccountingRuleType accountingRuleType) {
         switch (accountingRuleType) {
-            case NONE:
-            break;
-            case CASH_BASED:
+            case NONE -> {
+            }
+            case CASH_BASED -> {
                 // asset
                 mergeSavingsToAssetAccountMappingChanges(element, SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(),
                         savingsProductId, CashAccountsForSavings.SAVINGS_REFERENCE.getValue(),
@@ -247,8 +247,8 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                         CashAccountsForSavings.TRANSFERS_SUSPENSE.toString(), changes);
                 createOrmergeSavingsToLiabilityAccountMappingChanges(element, SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(),
                         savingsProductId, CashAccountsForSavings.ESCHEAT_LIABILITY.getValue(), changes);
-            break;
-            case ACCRUAL_PERIODIC:
+            }
+            case ACCRUAL_PERIODIC -> {
                 // asset
                 mergeSavingsToAssetAccountMappingChanges(element, SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(),
                         savingsProductId, AccrualAccountsForSavings.SAVINGS_REFERENCE.getValue(),
@@ -307,10 +307,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
 
                 createOrmergeSavingsToLiabilityAccountMappingChanges(element, SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(),
                         savingsProductId, AccrualAccountsForSavings.ESCHEAT_LIABILITY.getValue(), changes);
-
-            break;
-            case ACCRUAL_UPFRONT:
-            break;
+            }
+            case ACCRUAL_UPFRONT -> {
+            }
         }
     }
 

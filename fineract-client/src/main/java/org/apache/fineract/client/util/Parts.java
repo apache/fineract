@@ -63,36 +63,21 @@ public final class Parts {
         }
         String ext = fileName.substring(dotPos + 1);
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
-        switch (ext) {
-            case "jpg":
-            case "jpeg":
-                return MediaType.get("image/jpeg");
-            case "png":
-                return MediaType.get("image/png");
-            case "tif":
-            case "tiff":
-                return MediaType.get("image/tiff");
-            case "gif":
-                return MediaType.get("image/gif");
-            case "pdf":
-                return MediaType.get("application/pdf");
-            case "docx":
-                return MediaType.get("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            case "doc":
-                return MediaType.get("application/msword");
-            case "xlsx":
-                return MediaType.get("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            case "xls":
-                return MediaType.get("application/vnd.ms-excel");
-            case "odt":
-                return MediaType.get("application/vnd.oasis.opendocument.text");
-            case "ods":
-                return MediaType.get("application/vnd.oasis.opendocument.spreadsheet");
-            case "txt":
-                return MediaType.get("text/plain");
-            default:
-                return null;
-        }
+        return switch (ext) {
+            case "jpg", "jpeg" -> MediaType.get("image/jpeg");
+            case "png" -> MediaType.get("image/png");
+            case "tif", "tiff" -> MediaType.get("image/tiff");
+            case "gif" -> MediaType.get("image/gif");
+            case "pdf" -> MediaType.get("application/pdf");
+            case "docx" -> MediaType.get("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            case "doc" -> MediaType.get("application/msword");
+            case "xlsx" -> MediaType.get("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            case "xls" -> MediaType.get("application/vnd.ms-excel");
+            case "odt" -> MediaType.get("application/vnd.oasis.opendocument.text");
+            case "ods" -> MediaType.get("application/vnd.oasis.opendocument.spreadsheet");
+            case "txt" -> MediaType.get("text/plain");
+            default -> null;
+        };
     }
 
     public static Optional<String> fileName(Response<?> response) {

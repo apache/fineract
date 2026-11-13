@@ -1919,88 +1919,38 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         }
 
         switch (fieldName) {
-            case NAME_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setName(fieldValue);
-            break;
-            case SHORT_NAME_FIELD:
-                defaultWorkingCapitalLoanProductCreateRequest.setShortName(fieldValue);
-            break;
-            case DESCRIPTION_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setDescription(fieldValue);
-            break;
-            case CURRENCY_CODE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setCurrencyCode(fieldValue);
-            break;
-            case DIGITS_AFTER_DECIMAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setDigitsAfterDecimal(valueInteger);
-            break;
-            case IN_MULTIPLES_OF_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setInMultiplesOf(valueInteger);
-            break;
-            case AMORTIZATION_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setAmortizationType(
-                        fieldValue == null ? null : PostWorkingCapitalLoanProductsRequest.AmortizationTypeEnum.valueOf(fieldValue));
-            break;
-            case NPV_DAY_COUNT_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setNpvDayCount(valueInteger);
-            break;
-            case PRINCIPAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setPrincipal(valueBigDecimal);
-            break;
-            case MIN_PRINCIPAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setMinPrincipal(valueBigDecimal);
-            break;
-            case MAX_PRINCIPAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setMaxPrincipal(valueBigDecimal);
-            break;
-            case DISCOUNT_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setDiscount(valueBigDecimal);
-            break;
-            case PERIOD_PAYMENT_RATE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setPeriodPaymentRate(valueBigDecimal);
-            break;
-            case MIN_PERIOD_PAYMENT_RATE_FIELD_NAME:
+            case NAME_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setName(fieldValue);
+            case SHORT_NAME_FIELD -> defaultWorkingCapitalLoanProductCreateRequest.setShortName(fieldValue);
+            case DESCRIPTION_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setDescription(fieldValue);
+            case CURRENCY_CODE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setCurrencyCode(fieldValue);
+            case DIGITS_AFTER_DECIMAL_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setDigitsAfterDecimal(valueInteger);
+            case IN_MULTIPLES_OF_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setInMultiplesOf(valueInteger);
+            case AMORTIZATION_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setAmortizationType(
+                    fieldValue == null ? null : PostWorkingCapitalLoanProductsRequest.AmortizationTypeEnum.valueOf(fieldValue));
+            case NPV_DAY_COUNT_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setNpvDayCount(valueInteger);
+            case PRINCIPAL_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setPrincipal(valueBigDecimal);
+            case MIN_PRINCIPAL_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setMinPrincipal(valueBigDecimal);
+            case MAX_PRINCIPAL_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setMaxPrincipal(valueBigDecimal);
+            case DISCOUNT_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setDiscount(valueBigDecimal);
+            case PERIOD_PAYMENT_RATE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setPeriodPaymentRate(valueBigDecimal);
+            case MIN_PERIOD_PAYMENT_RATE_FIELD_NAME ->
                 defaultWorkingCapitalLoanProductCreateRequest.setMinPeriodPaymentRate(valueBigDecimal);
-            break;
-            case MAX_PERIOD_PAYMENT_RATE_FIELD_NAME:
+            case MAX_PERIOD_PAYMENT_RATE_FIELD_NAME ->
                 defaultWorkingCapitalLoanProductCreateRequest.setMaxPeriodPaymentRate(valueBigDecimal);
-            break;
-            case REPAYMENT_FREQUENCY_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setRepaymentFrequencyType(
-                        fieldValue == null ? null : PostWorkingCapitalLoanProductsRequest.RepaymentFrequencyTypeEnum.valueOf(fieldValue));
-            break;
-            case REPAYMENT_EVERY_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setRepaymentEvery(valueInteger);
-            break;
-            case EXTERNAL_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setExternalId(fieldValue);
-            break;
-            case DELINQUENCY_BUCKET_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setDelinquencyBucketId(valueLong);
-            break;
-            case DELINQUENCY_GRACE_DAYS_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setDelinquencyGraceDays(valueInteger);
-            break;
-            case DELINQUENCY_START_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setDelinquencyStartType(fieldValue);
-            break;
-            case BREACH_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setBreachId(valueLong);
-            break;
-            case BREACH_GRACE_DAYS_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setBreachGraceDays(valueInteger);
-            break;
-            case BREACH_START_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setBreachStartType(fieldValue);
-            break;
-            case NEAR_BREACH_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setNearBreachId(valueLong);
-            break;
-            case LOCALE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductCreateRequest.setLocale(fieldValue);
-            break;
-            default:
-            break;
+            case REPAYMENT_FREQUENCY_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setRepaymentFrequencyType(
+                    fieldValue == null ? null : PostWorkingCapitalLoanProductsRequest.RepaymentFrequencyTypeEnum.valueOf(fieldValue));
+            case REPAYMENT_EVERY_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setRepaymentEvery(valueInteger);
+            case EXTERNAL_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setExternalId(fieldValue);
+            case DELINQUENCY_BUCKET_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setDelinquencyBucketId(valueLong);
+            case DELINQUENCY_GRACE_DAYS_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setDelinquencyGraceDays(valueInteger);
+            case DELINQUENCY_START_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setDelinquencyStartType(fieldValue);
+            case BREACH_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setBreachId(valueLong);
+            case BREACH_GRACE_DAYS_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setBreachGraceDays(valueInteger);
+            case BREACH_START_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setBreachStartType(fieldValue);
+            case NEAR_BREACH_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setNearBreachId(valueLong);
+            case LOCALE_FIELD_NAME -> defaultWorkingCapitalLoanProductCreateRequest.setLocale(fieldValue);
+            default -> {
+            }
         }
         return defaultWorkingCapitalLoanProductCreateRequest;
     }
@@ -2052,88 +2002,39 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         }
 
         switch (fieldName) {
-            case NAME_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setName(fieldValue);
-            break;
-            case SHORT_NAME_FIELD:
-                defaultWorkingCapitalLoanProductUpdateRequest.setShortName(fieldValue);
-            break;
-            case DESCRIPTION_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setDescription(fieldValue);
-            break;
-            case CURRENCY_CODE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setCurrencyCode(fieldValue);
-            break;
-            case DIGITS_AFTER_DECIMAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setDigitsAfterDecimal(valueInteger);
-            break;
-            case IN_MULTIPLES_OF_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setInMultiplesOf(valueInteger);
-            break;
-            case AMORTIZATION_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setAmortizationType(
-                        fieldValue == null ? null : PutWorkingCapitalLoanProductsProductIdRequest.AmortizationTypeEnum.valueOf(fieldValue));
-            break;
-            case NPV_DAY_COUNT_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setNpvDayCount(valueInteger);
-            break;
-            case PRINCIPAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setPrincipal(valueBigDecimal);
-            break;
-            case MIN_PRINCIPAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setMinPrincipal(valueBigDecimal);
-            break;
-            case DISCOUNT_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setDiscount(valueBigDecimal);
-            break;
-            case MAX_PRINCIPAL_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setMaxPrincipal(valueBigDecimal);
-            break;
-            case PERIOD_PAYMENT_RATE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setPeriodPaymentRate(valueBigDecimal);
-            break;
-            case MIN_PERIOD_PAYMENT_RATE_FIELD_NAME:
+            case NAME_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setName(fieldValue);
+            case SHORT_NAME_FIELD -> defaultWorkingCapitalLoanProductUpdateRequest.setShortName(fieldValue);
+            case DESCRIPTION_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setDescription(fieldValue);
+            case CURRENCY_CODE_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setCurrencyCode(fieldValue);
+            case DIGITS_AFTER_DECIMAL_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setDigitsAfterDecimal(valueInteger);
+            case IN_MULTIPLES_OF_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setInMultiplesOf(valueInteger);
+            case AMORTIZATION_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setAmortizationType(
+                    fieldValue == null ? null : PutWorkingCapitalLoanProductsProductIdRequest.AmortizationTypeEnum.valueOf(fieldValue));
+            case NPV_DAY_COUNT_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setNpvDayCount(valueInteger);
+            case PRINCIPAL_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setPrincipal(valueBigDecimal);
+            case MIN_PRINCIPAL_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setMinPrincipal(valueBigDecimal);
+            case DISCOUNT_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setDiscount(valueBigDecimal);
+            case MAX_PRINCIPAL_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setMaxPrincipal(valueBigDecimal);
+            case PERIOD_PAYMENT_RATE_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setPeriodPaymentRate(valueBigDecimal);
+            case MIN_PERIOD_PAYMENT_RATE_FIELD_NAME ->
                 defaultWorkingCapitalLoanProductUpdateRequest.setMinPeriodPaymentRate(valueBigDecimal);
-            break;
-            case MAX_PERIOD_PAYMENT_RATE_FIELD_NAME:
+            case MAX_PERIOD_PAYMENT_RATE_FIELD_NAME ->
                 defaultWorkingCapitalLoanProductUpdateRequest.setMaxPeriodPaymentRate(valueBigDecimal);
-            break;
-            case REPAYMENT_FREQUENCY_TYPE_FIELD_NAME:
+            case REPAYMENT_FREQUENCY_TYPE_FIELD_NAME ->
                 defaultWorkingCapitalLoanProductUpdateRequest.setRepaymentFrequencyType(fieldValue == null ? null
                         : PutWorkingCapitalLoanProductsProductIdRequest.RepaymentFrequencyTypeEnum.valueOf(fieldValue));
-            break;
-            case REPAYMENT_EVERY_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setRepaymentEvery(valueInteger);
-            break;
-            case EXTERNAL_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setExternalId(fieldValue);
-            break;
-            case DELINQUENCY_BUCKET_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setDelinquencyBucketId(valueLong);
-            break;
-            case DELINQUENCY_GRACE_DAYS_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setDelinquencyGraceDays(valueInteger);
-            break;
-            case DELINQUENCY_START_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setDelinquencyStartType(fieldValue);
-            break;
-            case BREACH_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setBreachId(valueLong);
-            break;
-            case BREACH_GRACE_DAYS_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setBreachGraceDays(valueInteger);
-            break;
-            case BREACH_START_TYPE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setBreachStartType(fieldValue);
-            break;
-            case NEAR_BREACH_ID_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setNearBreachId(valueLong);
-            break;
-            case LOCALE_FIELD_NAME:
-                defaultWorkingCapitalLoanProductUpdateRequest.setLocale(fieldValue);
-            break;
-            default:
-            break;
+            case REPAYMENT_EVERY_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setRepaymentEvery(valueInteger);
+            case EXTERNAL_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setExternalId(fieldValue);
+            case DELINQUENCY_BUCKET_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setDelinquencyBucketId(valueLong);
+            case DELINQUENCY_GRACE_DAYS_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setDelinquencyGraceDays(valueInteger);
+            case DELINQUENCY_START_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setDelinquencyStartType(fieldValue);
+            case BREACH_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setBreachId(valueLong);
+            case BREACH_GRACE_DAYS_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setBreachGraceDays(valueInteger);
+            case BREACH_START_TYPE_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setBreachStartType(fieldValue);
+            case NEAR_BREACH_ID_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setNearBreachId(valueLong);
+            case LOCALE_FIELD_NAME -> defaultWorkingCapitalLoanProductUpdateRequest.setLocale(fieldValue);
+            default -> {
+            }
         }
         return defaultWorkingCapitalLoanProductUpdateRequest;
     }

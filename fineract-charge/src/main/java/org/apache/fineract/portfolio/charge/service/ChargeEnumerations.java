@@ -36,81 +36,43 @@ public final class ChargeEnumerations {
     }
 
     public static EnumOptionData chargeTimeType(final ChargeTimeType type) {
-        EnumOptionData optionData = null;
-        switch (type) {
-            case DISBURSEMENT:
-                optionData = new EnumOptionData(ChargeTimeType.DISBURSEMENT.getValue().longValue(), ChargeTimeType.DISBURSEMENT.getCode(),
-                        "Disbursement");
-            break;
-            case SPECIFIED_DUE_DATE:
-                optionData = new EnumOptionData(ChargeTimeType.SPECIFIED_DUE_DATE.getValue().longValue(),
-                        ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
-            break;
-            case SAVINGS_ACTIVATION:
-                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_ACTIVATION.getValue().longValue(),
-                        ChargeTimeType.SAVINGS_ACTIVATION.getCode(), "Savings Activation");
-            break;
-            case SAVINGS_CLOSURE:
-                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_CLOSURE.getValue().longValue(),
-                        ChargeTimeType.SAVINGS_CLOSURE.getCode(), "Savings Closure");
-            break;
-            case WITHDRAWAL_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.WITHDRAWAL_FEE.getValue().longValue(),
-                        ChargeTimeType.WITHDRAWAL_FEE.getCode(), "Withdrawal Fee");
-            break;
-            case ANNUAL_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.ANNUAL_FEE.getValue().longValue(), ChargeTimeType.ANNUAL_FEE.getCode(),
-                        "Annual Fee");
-            break;
-            case MONTHLY_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.MONTHLY_FEE.getValue().longValue(), ChargeTimeType.MONTHLY_FEE.getCode(),
-                        "Monthly Fee");
-            break;
-            case WEEKLY_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.WEEKLY_FEE.getValue().longValue(), ChargeTimeType.WEEKLY_FEE.getCode(),
-                        "Weekly Fee");
-            break;
-            case INSTALMENT_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(),
-                        ChargeTimeType.INSTALMENT_FEE.getCode(), "Installment Fee");
-            break;
-            case OVERDUE_INSTALLMENT:
-                optionData = new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),
-                        ChargeTimeType.OVERDUE_INSTALLMENT.getCode(), "Overdue Fees");
-            break;
-            case OVERDRAFT_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(), ChargeTimeType.OVERDRAFT_FEE.getCode(),
-                        "Overdraft Fee");
-            break;
-            case TRANCHE_DISBURSEMENT:
-                optionData = new EnumOptionData(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue().longValue(),
-                        ChargeTimeType.TRANCHE_DISBURSEMENT.getCode(), "Tranche Disbursement");
-            break;
-            case SHAREACCOUNT_ACTIVATION:
-                optionData = new EnumOptionData(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue().longValue(),
-                        ChargeTimeType.SHAREACCOUNT_ACTIVATION.getCode(), "Share Account Activate");
-            break;
-
-            case SHARE_PURCHASE:
-                optionData = new EnumOptionData(ChargeTimeType.SHARE_PURCHASE.getValue().longValue(),
-                        ChargeTimeType.SHARE_PURCHASE.getCode(), "Share Purchase");
-            break;
-            case SHARE_REDEEM:
-                optionData = new EnumOptionData(ChargeTimeType.SHARE_REDEEM.getValue().longValue(), ChargeTimeType.SHARE_REDEEM.getCode(),
-                        "Share Redeem");
-            break;
-            case SAVINGS_NOACTIVITY_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue().longValue(),
-                        ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getCode(), "Saving No Activity Fee");
-            break;
-            case DOWN_PAYMENT:
-                optionData = new EnumOptionData(ChargeTimeType.DOWN_PAYMENT.getValue().longValue(), ChargeTimeType.DOWN_PAYMENT.getCode(),
-                        "Down Payment");
-            break;
-            default:
-                optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
-            break;
-        }
+        EnumOptionData optionData = switch (type) {
+            case DISBURSEMENT -> new EnumOptionData(ChargeTimeType.DISBURSEMENT.getValue().longValue(),
+                    ChargeTimeType.DISBURSEMENT.getCode(), "Disbursement");
+            case SPECIFIED_DUE_DATE -> new EnumOptionData(ChargeTimeType.SPECIFIED_DUE_DATE.getValue().longValue(),
+                    ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
+            case SAVINGS_ACTIVATION -> new EnumOptionData(ChargeTimeType.SAVINGS_ACTIVATION.getValue().longValue(),
+                    ChargeTimeType.SAVINGS_ACTIVATION.getCode(), "Savings Activation");
+            case SAVINGS_CLOSURE -> new EnumOptionData(ChargeTimeType.SAVINGS_CLOSURE.getValue().longValue(),
+                    ChargeTimeType.SAVINGS_CLOSURE.getCode(), "Savings Closure");
+            case WITHDRAWAL_FEE -> new EnumOptionData(ChargeTimeType.WITHDRAWAL_FEE.getValue().longValue(),
+                    ChargeTimeType.WITHDRAWAL_FEE.getCode(), "Withdrawal Fee");
+            case ANNUAL_FEE ->
+                new EnumOptionData(ChargeTimeType.ANNUAL_FEE.getValue().longValue(), ChargeTimeType.ANNUAL_FEE.getCode(), "Annual Fee");
+            case MONTHLY_FEE ->
+                new EnumOptionData(ChargeTimeType.MONTHLY_FEE.getValue().longValue(), ChargeTimeType.MONTHLY_FEE.getCode(), "Monthly Fee");
+            case WEEKLY_FEE ->
+                new EnumOptionData(ChargeTimeType.WEEKLY_FEE.getValue().longValue(), ChargeTimeType.WEEKLY_FEE.getCode(), "Weekly Fee");
+            case INSTALMENT_FEE -> new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(),
+                    ChargeTimeType.INSTALMENT_FEE.getCode(), "Installment Fee");
+            case OVERDUE_INSTALLMENT -> new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),
+                    ChargeTimeType.OVERDUE_INSTALLMENT.getCode(), "Overdue Fees");
+            case OVERDRAFT_FEE -> new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(),
+                    ChargeTimeType.OVERDRAFT_FEE.getCode(), "Overdraft Fee");
+            case TRANCHE_DISBURSEMENT -> new EnumOptionData(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue().longValue(),
+                    ChargeTimeType.TRANCHE_DISBURSEMENT.getCode(), "Tranche Disbursement");
+            case SHAREACCOUNT_ACTIVATION -> new EnumOptionData(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue().longValue(),
+                    ChargeTimeType.SHAREACCOUNT_ACTIVATION.getCode(), "Share Account Activate");
+            case SHARE_PURCHASE -> new EnumOptionData(ChargeTimeType.SHARE_PURCHASE.getValue().longValue(),
+                    ChargeTimeType.SHARE_PURCHASE.getCode(), "Share Purchase");
+            case SHARE_REDEEM -> new EnumOptionData(ChargeTimeType.SHARE_REDEEM.getValue().longValue(),
+                    ChargeTimeType.SHARE_REDEEM.getCode(), "Share Redeem");
+            case SAVINGS_NOACTIVITY_FEE -> new EnumOptionData(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue().longValue(),
+                    ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getCode(), "Saving No Activity Fee");
+            case DOWN_PAYMENT -> new EnumOptionData(ChargeTimeType.DOWN_PAYMENT.getValue().longValue(),
+                    ChargeTimeType.DOWN_PAYMENT.getCode(), "Down Payment");
+            default -> new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
+        };
         return optionData;
     }
 
@@ -119,30 +81,16 @@ public final class ChargeEnumerations {
     }
 
     public static EnumOptionData chargeAppliesTo(final ChargeAppliesTo type) {
-        EnumOptionData optionData = null;
-        switch (type) {
-            case LOAN:
-                optionData = new EnumOptionData(ChargeAppliesTo.LOAN.getValue().longValue(), ChargeAppliesTo.LOAN.getCode(), "Loan");
-            break;
-            case SAVINGS:
-                optionData = new EnumOptionData(ChargeAppliesTo.SAVINGS.getValue().longValue(), ChargeAppliesTo.SAVINGS.getCode(),
-                        "Savings");
-            break;
-            case CLIENT:
-                optionData = new EnumOptionData(ChargeAppliesTo.CLIENT.getValue().longValue(), ChargeAppliesTo.CLIENT.getCode(), "Client");
-            break;
-            case SHARES:
-                optionData = new EnumOptionData(ChargeAppliesTo.SHARES.getValue().longValue(), ChargeAppliesTo.SHARES.getCode(), "Shares");
-            break;
-            case WORKING_CAPITAL_LOAN:
-                optionData = new EnumOptionData(ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue().longValue(),
-                        ChargeAppliesTo.WORKING_CAPITAL_LOAN.getCode(), "Working Capital Loan");
-            break;
-            default:
-                optionData = new EnumOptionData(ChargeAppliesTo.INVALID.getValue().longValue(), ChargeAppliesTo.INVALID.getCode(),
-                        "Invalid");
-            break;
-        }
+        EnumOptionData optionData = switch (type) {
+            case LOAN -> new EnumOptionData(ChargeAppliesTo.LOAN.getValue().longValue(), ChargeAppliesTo.LOAN.getCode(), "Loan");
+            case SAVINGS ->
+                new EnumOptionData(ChargeAppliesTo.SAVINGS.getValue().longValue(), ChargeAppliesTo.SAVINGS.getCode(), "Savings");
+            case CLIENT -> new EnumOptionData(ChargeAppliesTo.CLIENT.getValue().longValue(), ChargeAppliesTo.CLIENT.getCode(), "Client");
+            case SHARES -> new EnumOptionData(ChargeAppliesTo.SHARES.getValue().longValue(), ChargeAppliesTo.SHARES.getCode(), "Shares");
+            case WORKING_CAPITAL_LOAN -> new EnumOptionData(ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue().longValue(),
+                    ChargeAppliesTo.WORKING_CAPITAL_LOAN.getCode(), "Working Capital Loan");
+            default -> new EnumOptionData(ChargeAppliesTo.INVALID.getValue().longValue(), ChargeAppliesTo.INVALID.getCode(), "Invalid");
+        };
         return optionData;
     }
 
@@ -151,33 +99,22 @@ public final class ChargeEnumerations {
     }
 
     public static EnumOptionData chargeCalculationType(final ChargeCalculationType type) {
-        EnumOptionData optionData = null;
-        switch (type) {
-            case FLAT:
-                optionData = new EnumOptionData(ChargeCalculationType.FLAT.getValue().longValue(), ChargeCalculationType.FLAT.getCode(),
-                        "Flat");
-            break;
-            case PERCENT_OF_AMOUNT:
-                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue().longValue(),
-                        ChargeCalculationType.PERCENT_OF_AMOUNT.getCode(), "% Amount");
-            break;
-            case PERCENT_OF_AMOUNT_AND_INTEREST:
-                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue().longValue(),
+        EnumOptionData optionData = switch (type) {
+            case FLAT ->
+                new EnumOptionData(ChargeCalculationType.FLAT.getValue().longValue(), ChargeCalculationType.FLAT.getCode(), "Flat");
+            case PERCENT_OF_AMOUNT -> new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue().longValue(),
+                    ChargeCalculationType.PERCENT_OF_AMOUNT.getCode(), "% Amount");
+            case PERCENT_OF_AMOUNT_AND_INTEREST ->
+                new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue().longValue(),
                         ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getCode(), "% Loan Amount + Interest");
-            break;
-            case PERCENT_OF_INTEREST:
-                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_INTEREST.getValue().longValue(),
-                        ChargeCalculationType.PERCENT_OF_INTEREST.getCode(), "% Interest");
-            break;
-            case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue().longValue(),
+            case PERCENT_OF_INTEREST -> new EnumOptionData(ChargeCalculationType.PERCENT_OF_INTEREST.getValue().longValue(),
+                    ChargeCalculationType.PERCENT_OF_INTEREST.getCode(), "% Interest");
+            case PERCENT_OF_DISBURSEMENT_AMOUNT ->
+                new EnumOptionData(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue().longValue(),
                         ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getCode(), "% Disbursement Amount");
-            break;
-            default:
-                optionData = new EnumOptionData(ChargeCalculationType.INVALID.getValue().longValue(),
-                        ChargeCalculationType.INVALID.getCode(), "Invalid");
-            break;
-        }
+            default -> new EnumOptionData(ChargeCalculationType.INVALID.getValue().longValue(), ChargeCalculationType.INVALID.getCode(),
+                    "Invalid");
+        };
         return optionData;
     }
 
@@ -186,17 +123,11 @@ public final class ChargeEnumerations {
     }
 
     public static EnumOptionData chargePaymentMode(final ChargePaymentMode type) {
-        EnumOptionData optionData = null;
-        switch (type) {
-            case ACCOUNT_TRANSFER:
-                optionData = new EnumOptionData(ChargePaymentMode.ACCOUNT_TRANSFER.getValue().longValue(),
-                        ChargePaymentMode.ACCOUNT_TRANSFER.getCode(), "Account transfer");
-            break;
-            default:
-                optionData = new EnumOptionData(ChargePaymentMode.REGULAR.getValue().longValue(), ChargePaymentMode.REGULAR.getCode(),
-                        "Regular");
-            break;
-        }
+        EnumOptionData optionData = switch (type) {
+            case ACCOUNT_TRANSFER -> new EnumOptionData(ChargePaymentMode.ACCOUNT_TRANSFER.getValue().longValue(),
+                    ChargePaymentMode.ACCOUNT_TRANSFER.getCode(), "Account transfer");
+            default -> new EnumOptionData(ChargePaymentMode.REGULAR.getValue().longValue(), ChargePaymentMode.REGULAR.getCode(), "Regular");
+        };
         return optionData;
     }
 

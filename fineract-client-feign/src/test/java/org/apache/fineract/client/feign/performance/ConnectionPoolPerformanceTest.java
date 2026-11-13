@@ -236,14 +236,11 @@ class ConnectionPoolPerformanceTest {
         for (int i = 0; i < 30; i++) {
             int endpoint = i % 3;
             futures.add(executor.submit(() -> {
-                switch (endpoint) {
-                    case 0:
-                        return api.getTest();
-                    case 1:
-                        return api.getTest2();
-                    default:
-                        return api.getTest3();
-                }
+                return switch (endpoint) {
+                    case 0 -> api.getTest();
+                    case 1 -> api.getTest2();
+                    default -> api.getTest3();
+                };
             }));
         }
 

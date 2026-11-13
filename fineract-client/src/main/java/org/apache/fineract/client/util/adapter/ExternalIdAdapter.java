@@ -39,12 +39,14 @@ public class ExternalIdAdapter extends TypeAdapter<ExternalId> {
     public ExternalId read(JsonReader in) throws IOException {
         ExternalId result = new ExternalId().empty(true);
         switch (in.peek()) {
-            case NULL:
+            case NULL -> {
                 in.nextNull();
                 return result;
-            default:
+            }
+            default -> {
                 String value = in.nextString();
                 return new ExternalId().empty(false).value(value);
+            }
         }
     }
 }
