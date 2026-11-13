@@ -154,7 +154,7 @@ public class WorkingCapitalLoanNearBreachConfigTest {
     public void testCreateNearBreachActionByExternalIdSucceeds() {
         final String externalId = "wcl-nb-ext-" + UUID.randomUUID().toString().substring(0, 8);
         final Long nearBreachId = createNearBreachTemplate(BigDecimal.valueOf(20), 7, "DAYS");
-        final Long loanId = createActiveLoanWithNearBreach(nearBreachId, externalId);
+        createActiveLoanWithNearBreach(nearBreachId, externalId);
         final BigDecimal newThreshold = BigDecimal.valueOf(55);
         final Integer newFrequency = 7;
         final String newFrequencyType = "DAYS";

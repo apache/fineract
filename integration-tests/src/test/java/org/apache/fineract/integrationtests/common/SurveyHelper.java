@@ -42,7 +42,7 @@ public class SurveyHelper {
     private static final String DEACTIVATE_COMMAND = "deactivate";
 
     public Long createSurvey(String name, String description, LocalDate validFrom, LocalDate validTo, List<String> questions) {
-        validateSurveyInputs(name, description, questions);
+        validateSurveyInputs(name, questions);
         SurveyData surveyData = buildSurveyData(name, description, validFrom, validTo, questions);
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().spmSurveys().createSurvey(surveyData));
         log.info("Survey created successfully: {}", name);
@@ -111,7 +111,7 @@ public class SurveyHelper {
         return survey.getCountryCode();
     }
 
-    private void validateSurveyInputs(String name, String description, List<String> questions) {
+    private void validateSurveyInputs(String name, List<String> questions) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Survey name cannot be null or empty");
         }

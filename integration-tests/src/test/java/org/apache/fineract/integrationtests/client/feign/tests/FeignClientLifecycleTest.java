@@ -219,7 +219,6 @@ public class FeignClientLifecycleTest extends FeignIntegrationTest {
     void testSearchClient() {
         String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
 
-        String uniqueLastName = Utils.randomStringGenerator("SearchTest_", 8);
         Long clientId = clientHelper.createClient(today);
 
         GetClientsClientIdResponse client = clientHelper.getClient(clientId);

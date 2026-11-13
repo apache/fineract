@@ -684,7 +684,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(postRemovalJournalEntries.getPageItems(), "Journal entry items should exist");
 
             // Validate that accrual adjustment entries were created
-            List<JournalEntryTransactionItem> accrualAdjustmentEntries = postRemovalJournalEntries.getPageItems().stream().filter(entry -> {
+            postRemovalJournalEntries.getPageItems().stream().filter(entry -> {
                 // Look for reversal entries that might indicate accrual adjustments
                 String transactionDetails = entry.getTransactionDetails() != null ? entry.getTransactionDetails().toString() : "";
                 return transactionDetails.contains("waive") || transactionDetails.contains("adjust");
@@ -767,7 +767,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertTrue(debitEntriesByGLAccount.size() > 0, "Should have debit entries for multiple GL accounts");
 
             // Test that charge ID resolution works correctly for multiple debit accounts
-            List<JournalEntryTransactionItem> chargeRelatedEntries = journalEntries.getPageItems().stream().filter(entry -> {
+            journalEntries.getPageItems().stream().filter(entry -> {
                 BigDecimal amount = BigDecimal.valueOf(entry.getAmount());
                 return amount.compareTo(BigDecimal.valueOf(500)) == 0 || amount.compareTo(BigDecimal.valueOf(300)) == 0
                         || amount.compareTo(BigDecimal.valueOf(150)) == 0;

@@ -391,7 +391,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         holidayId = HolidayHelper.activateHolidays(holidayId);
         Assertions.assertNotNull(holidayId);
 
-        GetHolidaysResponse holidayData = HolidayHelper.getHolidayById(holidayId);
+        HolidayHelper.getHolidayById(holidayId);
 
         List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
         String JobName = "Apply Holidays To Loans";
@@ -546,7 +546,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
                 liabilityAccount, incomeAccount, expenseAccount)).getResourceId();
 
         final Long clientID = clientHelper.createClient(DATE_OF_JOINING);
-        final Long savingsID = applyApproveAndActivateSavings(clientID, savingsProductID);
+        applyApproveAndActivateSavings(clientID, savingsProductID);
 
         // Checking initial Account entries.
         journalHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE,

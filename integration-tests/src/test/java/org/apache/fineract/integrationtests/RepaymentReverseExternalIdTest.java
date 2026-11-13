@@ -72,9 +72,8 @@ public class RepaymentReverseExternalIdTest extends FeignLoanTestBase {
 
             final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalId);
 
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction1 = makeLoanRepayment(loanExternalId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(firstRepaymentDate).locale("en")
-                            .transactionAmount(firstRepaymentAmount));
+            makeLoanRepayment(loanExternalId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate(firstRepaymentDate).locale("en").transactionAmount(firstRepaymentAmount));
 
             final PostLoansLoanIdTransactionsResponse repaymentTransaction2 = makeLoanRepayment(loanExternalId,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(secondRepaymentDate).locale("en")

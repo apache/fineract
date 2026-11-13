@@ -127,8 +127,6 @@ public class ProvisioningIntegrationTest extends FeignLoanTestBase {
         criteriaRequest = ProvisioningHelper.buildProvisioningCriteriaRequest(loanProducts, categories, liability, expense);
         createdCriteria = transactionHelper.createProvisioningCriteria(criteriaRequest);
         Assertions.assertNotNull(createdCriteria.getResourceId());
-        criteriaId = createdCriteria.getResourceId();
-
         ProvisionEntryRequest provisioningEntryRequest = ProvisioningHelper.createProvisioningEntryRequest();
         PostProvisioningEntriesResponse createdEntry = transactionHelper.createProvisioningEntries(provisioningEntryRequest);
         Long provisioningEntryId = createdEntry.getResourceId();

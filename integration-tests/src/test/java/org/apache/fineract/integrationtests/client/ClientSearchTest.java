@@ -27,7 +27,6 @@ import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostOfficesResponse;
@@ -306,8 +305,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         final Long documentType = 1L;
         PostClientsClientIdIdentifiersRequest identifierRequest = clientIdentifier(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
-        PostClientsClientIdIdentifiersResponse clientIdentifierResponse = clientHelper.createClientIdentifier(clientResponse.getClientId(),
-                identifierRequest);
+        clientHelper.createClientIdentifier(clientResponse.getClientId(), identifierRequest);
 
         PostClientsRequest request2 = ClientRequestBuilders.defaultClient();
         clientHelper.createClient(request2);

@@ -198,9 +198,7 @@ public final class Utils {
     public static String convertDateToURLFormat(final String dateToBeConvert) throws ParseException {
         final SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy", Locale.US);
         final SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String reformattedStr = "";
-
-        reformattedStr = newFormat.format(oldFormat.parse(dateToBeConvert));
+        String reformattedStr = newFormat.format(oldFormat.parse(dateToBeConvert));
 
         return reformattedStr;
     }

@@ -1620,7 +1620,6 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             loanExternalIdContainer[0] = loanExternalId;
         });
 
-        Long loanId = loanIdContainer[0];
         String loanExternalId = loanExternalIdContainer[0];
 
         runAt("01 January 2025", () -> {
