@@ -75,24 +75,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlatformService {
 
-    private final DelinquencyBucketParseAndValidator dataValidatorBucket;
-    private final DelinquencyRangeParseAndValidator dataValidatorRange;
-    private final DelinquencyRangeRepository repositoryRange;
-    private final DelinquencyBucketRepository repositoryBucket;
-    private final DelinquencyBucketMappingsRepository repositoryBucketMappings;
-    private final LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository;
-    private final LoanRepositoryWrapper loanRepository;
-    private final LoanProductRepository loanProductRepository;
-    private final LoanDelinquencyDomainService loanDelinquencyDomainService;
-    private final LoanInstallmentDelinquencyTagRepository loanInstallmentDelinquencyTagRepository;
-    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
-    private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
-    private final DelinquencyActionParseAndValidator delinquencyActionParseAndValidator;
-    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final DelinquencyWritePlatformServiceHelper delinquencyHelper;
-    private final DelinquencyMinimumPaymentPeriodAndRuleRepository delinquencyMinimumPaymentPeriodAndRuleRepository;
-    private final List<DelinquencyBucketUsageChecker> delinquencyBucketUsageCheckers;
+    protected final DelinquencyBucketParseAndValidator dataValidatorBucket;
+    protected final DelinquencyRangeParseAndValidator dataValidatorRange;
+    protected final DelinquencyRangeRepository repositoryRange;
+    protected final DelinquencyBucketRepository repositoryBucket;
+    protected final DelinquencyBucketMappingsRepository repositoryBucketMappings;
+    protected final LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository;
+    protected final LoanRepositoryWrapper loanRepository;
+    protected final LoanProductRepository loanProductRepository;
+    protected final LoanDelinquencyDomainService loanDelinquencyDomainService;
+    protected final LoanInstallmentDelinquencyTagRepository loanInstallmentDelinquencyTagRepository;
+    protected final DelinquencyReadPlatformService delinquencyReadPlatformService;
+    protected final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+    protected final DelinquencyActionParseAndValidator delinquencyActionParseAndValidator;
+    protected final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final DelinquencyWritePlatformServiceHelper delinquencyHelper;
+    protected final DelinquencyMinimumPaymentPeriodAndRuleRepository delinquencyMinimumPaymentPeriodAndRuleRepository;
+    protected final List<DelinquencyBucketUsageChecker> delinquencyBucketUsageCheckers;
 
     @Override
     public CommandProcessingResult createDelinquencyRange(JsonCommand command) {

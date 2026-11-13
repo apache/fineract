@@ -60,16 +60,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BuyDownFeeWritePlatformServiceImpl implements BuyDownFeePlatformService {
 
-    private final ProgressiveLoanTransactionValidator loanTransactionValidator;
-    private final LoanAssembler loanAssembler;
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final LoanJournalEntryPoster loanJournalEntryPoster;
-    private final ExternalIdFactory externalIdFactory;
-    private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final CodeValueRepository codeValueRepository;
-    private final TransactionBoundApplicationEventPublisher eventPublisher;
+    protected final ProgressiveLoanTransactionValidator loanTransactionValidator;
+    protected final LoanAssembler loanAssembler;
+    protected final LoanTransactionRepository loanTransactionRepository;
+    protected final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    protected final LoanJournalEntryPoster loanJournalEntryPoster;
+    protected final ExternalIdFactory externalIdFactory;
+    protected final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final CodeValueRepository codeValueRepository;
+    protected final TransactionBoundApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override

@@ -41,8 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ProgressivePossibleNextRepaymentCalculationServiceImpl extends AbstractPossibleNextRepaymentCalculationService {
 
-    private final InterestScheduleModelRepositoryWrapper interestScheduleModelRepository;
-    private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
+    protected final InterestScheduleModelRepositoryWrapper interestScheduleModelRepository;
+    protected final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
 
     @Override
     public BigDecimal calculateInterestRecalculationFutureOutstandingValue(Loan loan, LocalDate nextPaymentDueDate,

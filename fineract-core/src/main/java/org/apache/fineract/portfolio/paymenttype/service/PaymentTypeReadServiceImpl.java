@@ -29,8 +29,8 @@ import org.springframework.cache.annotation.Cacheable;
 @RequiredArgsConstructor
 public class PaymentTypeReadServiceImpl implements PaymentTypeReadService {
 
-    private final PaymentTypeRepository repository;
-    private final PaymentTypeMapper paymentTypeMapper;
+    protected final PaymentTypeRepository repository;
+    protected final PaymentTypeMapper paymentTypeMapper;
 
     @Override
     @Cacheable(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")

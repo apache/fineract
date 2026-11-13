@@ -30,8 +30,8 @@ import org.springframework.jdbc.core.RowMapper;
 @RequiredArgsConstructor
 public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final CurrencyRowMapper currencyRowMapper = new CurrencyRowMapper();
+    protected final JdbcTemplate jdbcTemplate;
+    protected final CurrencyRowMapper currencyRowMapper = new CurrencyRowMapper();
 
     @Override
     public List<CurrencyData> retrieveAllowedCurrencies() {

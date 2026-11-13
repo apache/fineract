@@ -53,7 +53,7 @@ import org.jspecify.annotations.NonNull;
 @RequiredArgsConstructor
 public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountInterestPostingService {
 
-    private final SavingsHelper savingsHelper;
+    protected final SavingsHelper savingsHelper;
 
     @Override
     public SavingsAccountData postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,

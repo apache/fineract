@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 @RequiredArgsConstructor
 public class LoanTransferabilityServiceImpl implements LoanTransferabilityService {
 
-    private final DelayedSettlementAttributeService delayedSettlementAttributeService;
+    protected final DelayedSettlementAttributeService delayedSettlementAttributeService;
 
     @Override
     public boolean isTransferable(final Loan loan, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {

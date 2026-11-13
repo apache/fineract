@@ -43,8 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainService {
 
-    private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
-    private final LoanTransactionReadService loanTransactionReadService;
+    protected final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    protected final LoanTransactionReadService loanTransactionReadService;
 
     @Override
     @Transactional(readOnly = true)

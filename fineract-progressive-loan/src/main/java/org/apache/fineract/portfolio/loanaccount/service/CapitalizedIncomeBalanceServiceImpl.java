@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncom
 @RequiredArgsConstructor
 public class CapitalizedIncomeBalanceServiceImpl implements CapitalizedIncomeBalanceService {
 
-    private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
+    protected final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
 
     @Override
     public Money calculateCapitalizedIncome(Loan loan) {

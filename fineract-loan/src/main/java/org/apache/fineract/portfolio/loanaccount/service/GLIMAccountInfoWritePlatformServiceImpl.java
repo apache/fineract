@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonit
 @RequiredArgsConstructor
 public class GLIMAccountInfoWritePlatformServiceImpl implements GLIMAccountInfoWritePlatformService {
 
-    private final GLIMAccountInfoRepository glimAccountRepository;
+    protected final GLIMAccountInfoRepository glimAccountRepository;
 
     @Override
     public GroupLoanIndividualMonitoringAccount createGLIMAccount(String accountNumber, Group group, BigDecimal principalAmount,
