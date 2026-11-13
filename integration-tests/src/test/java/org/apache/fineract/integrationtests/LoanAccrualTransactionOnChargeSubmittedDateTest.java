@@ -272,7 +272,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends FeignLoanTe
             checkAccrualTransaction(currentDate, 0.0, 0.0, 10.0, loanId);
 
             // Set business date
-            LocalDate futureDate = LocalDate.of(2023, 3, 4);
             updateBusinessDate("04 March 2023");
             // second disbursement regenerates the repayment schedule
             disburseLoan(loanId, LoanRequestBuilders.disburseLoan(300.0, "04 March 2023"));

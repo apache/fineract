@@ -230,9 +230,8 @@ public class LoanBuyDownFeeTest extends FeignLoanTestBase {
         runAt("05 September 2024", () -> {
             // Test with negative amount (should fail)
             try {
-                PostLoansLoanIdTransactionsResponse response = makeLoanBuyDownFee(loanId,
-                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 September 2024")
-                                .locale("en").transactionAmount(-100.0).note("Invalid negative amount"));
+                makeLoanBuyDownFee(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                        .transactionDate("05 September 2024").locale("en").transactionAmount(-100.0).note("Invalid negative amount"));
                 assertTrue(false, "Buy down fee with negative amount should have failed");
             } catch (Exception e) {
                 // Expected: validation should prevent negative amounts
@@ -241,9 +240,8 @@ public class LoanBuyDownFeeTest extends FeignLoanTestBase {
 
             // Test with zero amount (should fail)
             try {
-                PostLoansLoanIdTransactionsResponse response = makeLoanBuyDownFee(loanId,
-                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 September 2024")
-                                .locale("en").transactionAmount(0.0).note("Invalid zero amount"));
+                makeLoanBuyDownFee(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                        .transactionDate("05 September 2024").locale("en").transactionAmount(0.0).note("Invalid zero amount"));
                 assertTrue(false, "Buy down fee with zero amount should have failed");
             } catch (Exception e) {
                 // Expected: validation should prevent zero amounts

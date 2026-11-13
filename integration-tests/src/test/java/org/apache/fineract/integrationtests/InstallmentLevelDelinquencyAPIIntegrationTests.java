@@ -32,7 +32,6 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
-import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -442,9 +441,8 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends FeignLoanTes
             assertThat(loanResponse.getEnableInstallmentLevelDelinquency()).isFalse();
 
             // Modify installment level delinquency as true for loan
-            PutLoansLoanIdResponse loansModificationResponse = modifyLoanApplication(loanId, "modify",
-                    new PutLoansLoanIdRequest().clientId(clientId).productId(productId).loanType("individual")
-                            .enableInstallmentLevelDelinquency(true).locale("en").dateFormat(DATETIME_PATTERN));
+            modifyLoanApplication(loanId, "modify", new PutLoansLoanIdRequest().clientId(clientId).productId(productId)
+                    .loanType("individual").enableInstallmentLevelDelinquency(true).locale("en").dateFormat(DATETIME_PATTERN));
 
             // verify installment level delinquency setting for loan
             loanResponse = getLoanDetails(loanId);
@@ -543,7 +541,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends FeignLoanTes
 
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = createClient();
+            createClient();
 
             // Create Loan Product without delinquency bucket
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
@@ -567,7 +565,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends FeignLoanTes
 
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = createClient();
+            createClient();
 
             // Create Loan Product without delinquency bucket
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
