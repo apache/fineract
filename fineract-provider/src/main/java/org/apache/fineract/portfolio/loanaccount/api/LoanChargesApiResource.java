@@ -207,7 +207,7 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("executeLoanCharge")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesResponse.class)))
-    public String executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -222,7 +222,8 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("executeLoanCharge_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesResponse.class)))
-    public String executeLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult executeLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -237,7 +238,7 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("executeLoanCharge_2")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
-    public String executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -253,7 +254,7 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("executeLoanCharge_3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
-    public String executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -269,7 +270,8 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("executeLoanCharge_4")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
-    public String executeLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult executeLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -285,7 +287,8 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("executeLoanCharge_5")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
-    public String executeLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult executeLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -300,7 +303,7 @@ public class LoanChargesApiResource {
     @Operation(summary = "Update a Loan Charge", operationId = "updateLoanCharge", description = "Currently Loan Charges may be updated only if the Loan is not yet approved")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
-    public String updateLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult updateLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -315,7 +318,7 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("updateLoanCharge_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
-    public String updateLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult updateLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -330,7 +333,8 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("updateLoanCharge_2")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
-    public String updateLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult updateLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -345,7 +349,8 @@ public class LoanChargesApiResource {
     @AlternativeOperationId("updateLoanCharge_3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
-    public String updateLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult updateLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -357,7 +362,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanCharge", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
-    public String deleteLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult deleteLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId) {
 
         return deleteLoanCharge(loanId, null, loanChargeId, null);
@@ -369,7 +374,7 @@ public class LoanChargesApiResource {
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanChargeByChargeExternalId", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
     @AlternativeOperationId("deleteLoanCharge_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
-    public String deleteLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult deleteLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId) {
 
         return deleteLoanCharge(loanId, null, null, loanChargeExternalId);
@@ -381,7 +386,8 @@ public class LoanChargesApiResource {
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanChargeByLoanExternalId", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
     @AlternativeOperationId("deleteLoanCharge_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
-    public String deleteLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult deleteLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId) {
 
         return deleteLoanCharge(null, loanExternalId, loanChargeId, null);
@@ -393,13 +399,14 @@ public class LoanChargesApiResource {
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanChargeByLoanAndChargeExternalId", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
     @AlternativeOperationId("deleteLoanCharge_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
-    public String deleteLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public CommandProcessingResult deleteLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId) {
 
         return deleteLoanCharge(null, loanExternalId, null, loanChargeExternalId);
     }
 
-    private String deleteLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
+    private CommandProcessingResult deleteLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
             final String loanChargeExternalIdStr) {
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
@@ -412,7 +419,7 @@ public class LoanChargesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     private String retrieveLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
@@ -437,7 +444,7 @@ public class LoanChargesApiResource {
         return this.toApiJsonSerializer.serialize(settings, loanChargeData, RESPONSE_DATA_PARAMETERS);
     }
 
-    private String handleExecuteLoanCharge(final Long loanId, final String loanExternalIdStr, final String commandParam,
+    private CommandProcessingResult handleExecuteLoanCharge(final Long loanId, final String loanExternalIdStr, final String commandParam,
             final String apiRequestBodyAsJson) {
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
@@ -458,10 +465,10 @@ public class LoanChargesApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
-    private String handleExecuteLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
+    private CommandProcessingResult handleExecuteLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
             final String loanChargeExternalIdStr, final String commandParam, final String apiRequestBodyAsJson) {
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
@@ -488,10 +495,10 @@ public class LoanChargesApiResource {
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
-    private String updateLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
+    private CommandProcessingResult updateLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
             final String loanChargeExternalIdStr, final String apiRequestBodyAsJson) {
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
@@ -505,7 +512,7 @@ public class LoanChargesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     private String retrieveAllLoanCharges(final Long loanId, final String loanExternalIdStr, final UriInfo uriInfo) {

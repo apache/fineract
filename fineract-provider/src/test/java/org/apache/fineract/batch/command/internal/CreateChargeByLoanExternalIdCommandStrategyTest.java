@@ -31,6 +31,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -67,8 +69,11 @@ class CreateChargeByLoanExternalIdCommandStrategyTest {
         final BatchRequest batchRequest = getBatchRequest(loanExternalId, command);
         final String responseBody = "myResponseBody";
 
-        when(testContext.loanChargesApiResource.executeLoanCharge(loanExternalId, command, batchRequest.getBody()))
-                .thenReturn(responseBody);
+        final CommandProcessingResult result = CommandProcessingResult.resourceResult(1L);
+
+        when(testContext.toApiJsonSerializer.serialize(result)).thenReturn(responseBody);
+
+        when(testContext.loanChargesApiResource.executeLoanCharge(loanExternalId, command, batchRequest.getBody())).thenReturn(result);
 
         BatchResponse batchResponse = testContext.subjectToTest.execute(batchRequest, testContext.uriInfo);
 
@@ -123,6 +128,12 @@ class CreateChargeByLoanExternalIdCommandStrategyTest {
         private LoanChargesApiResource loanChargesApiResource;
 
         /**
+         * The Mock serializer turning the {@link CommandProcessingResult} into the batch response body.
+         */
+        @Mock
+        private DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
+
+        /**
          * The {@link CreateChargeByLoanExternalIdCommandStrategy} under test.
          */
         private final CreateChargeByLoanExternalIdCommandStrategy subjectToTest;
@@ -132,7 +143,7 @@ class CreateChargeByLoanExternalIdCommandStrategyTest {
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new CreateChargeByLoanExternalIdCommandStrategy(loanChargesApiResource);
+            subjectToTest = new CreateChargeByLoanExternalIdCommandStrategy(loanChargesApiResource, toApiJsonSerializer);
         }
     }
 }
