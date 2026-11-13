@@ -31,7 +31,6 @@ import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutDataTablesRequest;
 import org.apache.fineract.client.models.PutDataTablesRequestAddColumns;
 import org.apache.fineract.client.models.PutDataTablesRequestChangeColumns;
-import org.apache.fineract.client.models.PutDataTablesResponse;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -176,7 +175,7 @@ public class DatatableUniqueAndIndexColumnTest {
 
         // endregion
         // when
-        PutDataTablesResponse updateResponse = datatableHelper.updateDatatable(datatableName, updateRequest);
+        datatableHelper.updateDatatable(datatableName, updateRequest);
 
         // then
         GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);

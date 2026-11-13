@@ -38,12 +38,10 @@ public class JournalEntry {
 
     private final Float transactionAmount;
     private final TransactionType transactionType;
-    private final Integer officeId;
 
     public JournalEntry(final float transactionAmount, final TransactionType type) {
         this.transactionAmount = transactionAmount;
         this.transactionType = type;
-        this.officeId = null;
     }
 
     public Float getTransactionAmount() {

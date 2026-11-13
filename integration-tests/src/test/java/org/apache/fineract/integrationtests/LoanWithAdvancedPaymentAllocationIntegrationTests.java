@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -58,7 +57,7 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests extends FeignLoan
             Long loanProductId = createLoanProduct(createLoanProductRequest(assetAccount, expenseAccount, incomeAccount, overpaymentAccount,
                     feePenaltyAccount, defaultAllocation, repaymentPaymentAllocation));
             Assertions.assertNotNull(loanProductId);
-            GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
+            retrieveLoanProduct(loanProductId);
 
             Long clientId = createClient("01 January 2022");
             Long loanId = createLoanAccount(clientId, loanProductId, "02 January 2022");
