@@ -69,12 +69,12 @@ import org.apache.fineract.portfolio.tax.service.TaxUtils;
 @RequiredArgsConstructor
 public class LoanChargeService {
 
-    private final LoanChargeValidator loanChargeValidator;
-    private final LoanTransactionProcessingService loanTransactionProcessingService;
-    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
-    private final LoanBalanceService loanBalanceService;
-    private final LoanScheduleGeneratorService loanScheduleGeneratorService;
-    private final ChargeTaxApplicationService chargeTaxApplicationService;
+    protected final LoanChargeValidator loanChargeValidator;
+    protected final LoanTransactionProcessingService loanTransactionProcessingService;
+    protected final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    protected final LoanBalanceService loanBalanceService;
+    protected final LoanScheduleGeneratorService loanScheduleGeneratorService;
+    protected final ChargeTaxApplicationService chargeTaxApplicationService;
 
     public void recalculateAllCharges(final Loan loan) {
         Set<LoanCharge> charges = loan.getActiveCharges();

@@ -48,7 +48,7 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 @RequiredArgsConstructor
 public class InterestIncentiveAssembler {
 
-    private final FromJsonHelper fromApiJsonHelper;
+    protected final FromJsonHelper fromApiJsonHelper;
 
     public Collection<InterestIncentives> assembleIncentivesFrom(final JsonElement element, InterestRateChartSlab interestRateChartSlab,
             final Locale locale) {

@@ -35,7 +35,7 @@ import org.springframework.jdbc.core.RowMapper;
 @RequiredArgsConstructor
 public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountChargeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    protected final JdbcTemplate jdbcTemplate;
 
     @Override
     public Collection<ShareAccountChargeData> retrieveAccountCharges(Long accountId, String status) {

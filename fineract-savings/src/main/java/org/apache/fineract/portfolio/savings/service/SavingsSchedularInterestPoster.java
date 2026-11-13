@@ -63,14 +63,14 @@ public class SavingsSchedularInterestPoster {
 
     private static final String SAVINGS_TRANSACTION_IDENTIFIER = "S";
 
-    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final JdbcTemplate jdbcTemplate;
-    private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final PlatformSecurityContext platformSecurityContext;
+    protected final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    protected final JdbcTemplate jdbcTemplate;
+    protected final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    protected final PlatformSecurityContext platformSecurityContext;
 
-    private final List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
-    private Collection<SavingsAccountData> savingAccounts;
-    private boolean backdatedTxnsAllowedTill;
+    protected final List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
+    protected Collection<SavingsAccountData> savingAccounts;
+    protected boolean backdatedTxnsAllowedTill;
 
     // Runs through the JDBC transaction manager (not the primary JPA one) so READ_UNCOMMITTED is applied per-connection
     // by DataSourceTransactionManager rather than via EclipseLink's shared DatabaseLogin. This keeps the primary JPA
