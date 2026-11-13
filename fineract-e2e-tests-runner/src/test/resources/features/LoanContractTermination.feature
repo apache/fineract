@@ -1889,6 +1889,7 @@ Feature: Contract Termination
       | 01 February 2024 | Repayment            | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 May 2024      | Contract Termination | 85.26  | 83.57     | 1.69     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C123833
   Scenario: Verify contract termination keeps an Interest Refund allocated only to the current installment
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1898,6 +1899,7 @@ Feature: Contract Termination
     And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
     When Admin sets the business date to "05 January 2026"
+    # --- Merchant issued refund (creates an Interest Refund allocated only to the current installment) ---
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "05 January 2026" with 400 EUR transaction amount and system-generated Idempotency key
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
@@ -1910,6 +1912,7 @@ Feature: Contract Termination
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 1000.0        | 7.38     | 0.0  | 0.0       | 1007.38 | 650.53 | 400.53     | 0.0  | 356.85      |
     When Admin sets the business date to "10 January 2026"
+    # --- Contract termination ---
     And Admin successfully terminates loan contract
     Then Loan has sub status "Contract Termination"
     # principal 349.47 + interest 4.09
@@ -1930,6 +1933,7 @@ Feature: Contract Termination
       | 05 January 2026  | Merchant Issued Refund | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 350.0        | false    | false    |
       | 05 January 2026  | Interest Refund        | 0.53   | 0.53      | 0.0      | 0.0  | 0.0       | 349.47       | false    | false    |
       | 10 January 2026  | Contract Termination   | 353.56 | 349.47    | 4.09     | 0.0  | 0.0       | 0.0          | false    | false    |
+    # --- Undo contract termination ---
     When Admin sets the business date to "20 January 2026"
     When Admin successfully undoes loan contract termination
     Then Loan status will be "ACTIVE"
@@ -1952,6 +1956,7 @@ Feature: Contract Termination
       | 05 January 2026  | Interest Refund        | 0.53   | 0.53      | 0.0      | 0.0  | 0.0       | 349.47       | false    | false    |
       | 10 January 2026  | Contract Termination   | 353.56 | 349.47    | 4.09     | 0.0  | 0.0       | 0.0          | true     | false    |
 
+  @TestRailId:C123834
   Scenario: Verify contract termination counts once a later repayment allocated only to future installments
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1961,6 +1966,7 @@ Feature: Contract Termination
     And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
     When Admin sets the business date to "05 January 2026"
+    # --- Repayments (allocated to future installments only) ---
     And Customer makes "AUTOPAY" repayment on "05 January 2026" with 250 EUR transaction amount
     When Admin sets the business date to "07 January 2026"
     And Customer makes "AUTOPAY" repayment on "07 January 2026" with 300 EUR transaction amount
@@ -1975,6 +1981,7 @@ Feature: Contract Termination
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 800.0 | 550.0      | 0.0  | 200.0       |
     When Admin sets the business date to "10 January 2026"
+    # --- Contract termination ---
     And Admin successfully terminates loan contract
     Then Loan has sub status "Contract Termination"
     Then Loan has 200.0 outstanding amount
@@ -1995,6 +2002,7 @@ Feature: Contract Termination
       | 07 January 2026  | Repayment            | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 200.0        | false    | false    |
       | 10 January 2026  | Contract Termination | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C123835
   Scenario: Verify contract termination keeps the repayment of an overdue installment that a later refund closes and spills over
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -2004,8 +2012,10 @@ Feature: Contract Termination
     And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
     When Admin sets the business date to "10 January 2026"
+    # --- Repayment (pays the current installment) ---
     And Customer makes "AUTOPAY" repayment on "10 January 2026" with 100 EUR transaction amount
     When Admin sets the business date to "20 January 2026"
+    # --- Merchant issued refund ---
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "20 January 2026" with 300 EUR transaction amount and system-generated Idempotency key
     # the refund closes the overdue installment 2 and spills over; the current installment 3 stays open
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2018,6 +2028,7 @@ Feature: Contract Termination
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 650.0 | 250.0      | 150.0 | 350.0       |
+    # --- Contract termination ---
     When Admin sets the business date to "25 January 2026"
     And Admin successfully terminates loan contract
     Then Loan has sub status "Contract Termination"
@@ -2041,6 +2052,7 @@ Feature: Contract Termination
       | 20 January 2026  | Merchant Issued Refund | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 350.0        | false    | false    |
       | 25 January 2026  | Contract Termination   | 350.0  | 350.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C123836
   Scenario: Verify contract termination with a closed current installment counts once a refund dated in an unpaid earlier installment
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -2050,6 +2062,7 @@ Feature: Contract Termination
     And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
     When Admin sets the business date to "05 January 2026"
+    # --- Merchant issued refunds ---
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "05 January 2026" with 400 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "10 January 2026"
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 150 EUR transaction amount and system-generated Idempotency key
@@ -2065,6 +2078,7 @@ Feature: Contract Termination
     And Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 800.0 | 550.0      | 0.0  | 200.0       |
+    # --- Contract termination ---
     And Admin successfully terminates loan contract
     Then Loan has sub status "Contract Termination"
     # 750 - 400 - 150 = 200
