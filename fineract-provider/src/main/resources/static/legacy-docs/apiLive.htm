@@ -41068,6 +41068,15 @@ No Request Body:
                         	<br/>
                         	Set to "false" by default if not passed in explicity
                         </dd>
+                        <dt>entrySource</dt>
+                        <dd>
+                            String <span>optional</span>
+                        </dd>
+                        <dd>MANUAL returns manual entries, their reversals and opening
+                            balances; SYSTEM returns the entries posted by the system.
+                            Any other value is rejected. Combined with
+                            manualEntriesOnly=true, SYSTEM returns no entries.
+                        </dd>
                         <dt>fromDate</dt>
                         <dd>
                             Date<span>optional</span>

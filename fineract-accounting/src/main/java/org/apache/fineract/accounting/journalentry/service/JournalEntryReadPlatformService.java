@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.time.LocalDate;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
+import org.apache.fineract.accounting.journalentry.data.JournalEntrySource;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -29,8 +30,9 @@ public interface JournalEntryReadPlatformService {
 
     JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId, JournalEntryAssociationParametersData associationParametersData);
 
-    Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries, LocalDate fromDate,
-            LocalDate toDate, LocalDate submittedOnDateFrom, LocalDate submittedOnDateTo, String transactionId, Integer entityType,
+    Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries,
+            JournalEntrySource entrySource, LocalDate fromDate, LocalDate toDate, LocalDate submittedOnDateFrom,
+            LocalDate submittedOnDateTo, String transactionId, Integer entityType,
             JournalEntryAssociationParametersData associationParametersData);
 
     OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId, String currencyCode);

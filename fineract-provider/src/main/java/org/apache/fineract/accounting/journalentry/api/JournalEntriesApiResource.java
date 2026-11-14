@@ -46,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
+import org.apache.fineract.accounting.journalentry.data.JournalEntrySource;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -113,6 +114,8 @@ public class JournalEntriesApiResource {
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId,
             @QueryParam("manualEntriesOnly") @Parameter(description = "manualEntriesOnly") final Boolean onlyManualEntries,
+            @QueryParam("entrySource") @Parameter(description = "MANUAL returns manual entries, their reversals and opening balances; SYSTEM returns the entries posted by the system. Any other value is rejected. Combined with manualEntriesOnly=true, SYSTEM returns no entries.", schema = @Schema(allowableValues = {
+                    "MANUAL", "SYSTEM" })) final String entrySource,
             @QueryParam("fromDate") @Parameter(description = "fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") @Parameter(description = "toDate") final DateParam toDateParam,
             @QueryParam("submittedOnDateFrom") @Parameter(description = "submittedOnDateFrom") final DateParam submittedOnDateFromParam,
@@ -159,8 +162,9 @@ public class JournalEntriesApiResource {
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
 
+        final JournalEntrySource source = parseEntrySource(entrySource);
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
-                onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
+                onlyManualEntries, source, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
                 associationParametersData);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
@@ -253,7 +257,7 @@ public class JournalEntriesApiResource {
         this.context.authenticatedUser();
         String transactionId = "P" + entryId;
         SearchParameters params = SearchParameters.builder().limit(limit).offset(offset).build();
-        Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, null, null,
+        Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, null, null, null,
                 transactionId, PortfolioProductType.PROVISIONING.getValue(), null);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
@@ -301,5 +305,13 @@ public class JournalEntriesApiResource {
         final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.GL_JOURNAL_ENTRIES.toString(),
                 uploadedInputStream, fileDetail, locale, dateFormat);
         return this.apiJsonSerializerService.serialize(importDocumentId);
+    }
+
+    private static JournalEntrySource parseEntrySource(final String entrySource) {
+        if (StringUtils.isBlank(entrySource)) {
+            return null;
+        }
+        return Arrays.stream(JournalEntrySource.values()).filter(source -> source.name().equalsIgnoreCase(entrySource)).findFirst()
+                .orElseThrow(() -> new UnrecognizedQueryParamException("entrySource", entrySource, (Object[]) JournalEntrySource.values()));
     }
 }
