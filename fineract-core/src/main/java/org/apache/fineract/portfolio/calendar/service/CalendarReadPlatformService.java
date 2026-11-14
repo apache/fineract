@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
-import org.apache.fineract.portfolio.meeting.data.MeetingData;
 
 public interface CalendarReadPlatformService {
 
@@ -46,7 +45,7 @@ public interface CalendarReadPlatformService {
 
     CalendarData retrieveCollctionCalendarByEntity(Long entityId, Integer entityTypeId);
 
-    LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, MeetingData lastMeetingData);
+    LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, LocalDate lastMeetingDate);
 
     Boolean isCalendarAssociatedWithEntity(Long entityId, Long calendarId, Long entityTypeId);
 
