@@ -24,11 +24,13 @@ import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 /**
  * Immutable data object for office data.
  */
 @Getter
+@JsonLocalDateArrayFormat
 public class OfficeData implements Serializable {
 
     private final Long id;

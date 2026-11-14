@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.configuration.data;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+//import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.jersey.serializer.MaskedValueSerializer;
+//import org.apache.fineract.infrastructure.core.jersey.serializer.MaskedValueSerializer;
 
 @Data
 @NoArgsConstructor
@@ -33,7 +33,7 @@ public class ExternalServicesPropertiesData implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String name;
-    @JsonSerialize(using = MaskedValueSerializer.class)
+    // @JsonSerialize(using = MaskedValueSerializer.class)
     private String value;
 
 }

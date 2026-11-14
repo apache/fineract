@@ -23,10 +23,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonLocalDateArrayFormat
 public class HolidayData {
 
     @SuppressWarnings("unused")

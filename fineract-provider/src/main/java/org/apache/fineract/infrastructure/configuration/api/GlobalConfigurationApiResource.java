@@ -36,9 +36,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -47,11 +44,7 @@ import org.apache.fineract.infrastructure.configuration.data.GlobalConfiguration
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/configurations")
@@ -68,15 +61,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GlobalConfigurationApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("globalConfiguration"));
-
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CONFIGURATION";
-
-    private final PlatformSecurityContext context;
     private final ConfigurationReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<GlobalConfigurationData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<GlobalConfigurationPropertyData> propertyDataJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -86,15 +71,12 @@ public class GlobalConfigurationApiResource {
             + "Returns the list global enable/disable survey configurations.\n" + "\n" + "Example Requests:\n" + "\n"
             + "configurations/survey")
     @ApiResponse(responseCode = "200", description = "List of example \\n response \\nsurveys response   \\ngiven below", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class)))
-    public String retrieveConfiguration(@Context final UriInfo uriInfo,
+    public GlobalConfigurationData retrieveConfiguration(@Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("survey") @Parameter(description = "survey") final boolean survey) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration(survey);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
+        return configurationData;
     }
 
     @GET
@@ -104,15 +86,12 @@ public class GlobalConfigurationApiResource {
             + "\n" + "Example Requests:\n" + "\n" + "configurations/1")
     @AlternativeOperationId("retrieveOne_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationPropertyData.class)))
-    public String retrieveOne(@PathParam("configId") @Parameter(description = "configId") final Long configId,
+    public GlobalConfigurationPropertyData retrieveOne(@PathParam("configId") @Parameter(description = "configId") final Long configId,
             @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(configId);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.propertyDataJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
+        return configurationData;
     }
 
     @GET
@@ -121,14 +100,12 @@ public class GlobalConfigurationApiResource {
     @Operation(summary = "Retrieve Global Configuration", description = "Returns a global enable/disable configuration.\n" + "\n"
             + "Example Requests:\n" + "\n" + "configurations/name/enable-address")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationPropertyData.class)))
-    public String retrieveOneByName(@PathParam("name") @Parameter(description = "name") final String name, @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+    public GlobalConfigurationPropertyData retrieveOneByName(@PathParam("name") @Parameter(description = "name") final String name,
+            @Context final UriInfo uriInfo) {
 
         final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(name);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.propertyDataJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
+        return configurationData;
     }
 
     @PUT
@@ -140,7 +117,7 @@ public class GlobalConfigurationApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request: validation.msg.globalConfiguration.stringValue.is.not.one.of.expected.enumerations if stringValue is not one of the configuration's allowedValues")
-    public String updateConfiguration(@PathParam("configId") @Parameter(description = "configId") final Long configId,
+    public CommandProcessingResult updateConfiguration(@PathParam("configId") @Parameter(description = "configId") final Long configId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -150,7 +127,7 @@ public class GlobalConfigurationApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @PUT
@@ -161,7 +138,8 @@ public class GlobalConfigurationApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request: validation.msg.globalConfiguration.stringValue.is.not.one.of.expected.enumerations if stringValue is not one of the configuration's allowedValues")
-    public String updateConfigurationByName(@PathParam("configName") @Parameter(description = "configName") final String configName,
+    public CommandProcessingResult updateConfigurationByName(
+            @PathParam("configName") @Parameter(description = "configName") final String configName,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         // TODO: Would be better to support string based identifier in Commands and resolve the entity by name in the
@@ -175,6 +153,6 @@ public class GlobalConfigurationApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 }
