@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.client.models.PutRecurringDepositAccountsAccountIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignDepositTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositInterestCalculator;
 import org.apache.fineract.integrationtests.client.feign.modules.DepositRequestBuilders;
@@ -488,6 +489,37 @@ public class RecurringDepositTest extends FeignDepositTestBase {
         var changes = recurringDepositHelper.updateApplication(recurringDepositAccountId, DepositRequestBuilders.asUpdate(updated))
                 .getChanges();
         Assertions.assertNotNull(changes.getSubmittedOnDate(), "The update must report submittedOnDate as changed");
+    }
+
+    @Test
+    public void testRecurringDepositAccountUpdateWithoutRecurringFrequencyKeepsIt() {
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String submittedOnDate = dateFormat.format(todaysDate.getTime());
+
+        Long clientId = clientHelper.createClient();
+        Long recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, NONE);
+        Long recurringDepositAccountId = recurringDepositHelper.submitApplication(DepositRequestBuilders
+                .recurringDepositAccount(clientId, recurringDepositProductId, submittedOnDate, submittedOnDate, WHOLE_TERM)
+                .recurringFrequency(2)).getSavingsId();
+
+        // Only the deposit amount: the deposit frequency is not sent
+        final BigDecimal newDepositAmount = new BigDecimal("3000");
+        recurringDepositHelper.updateApplication(recurringDepositAccountId, new PutRecurringDepositAccountsAccountIdRequest()
+                .locale(SavingsTestData.LOCALE).mandatoryRecommendedDepositAmount(newDepositAmount));
+
+        var account = recurringDepositHelper.getAccount(recurringDepositAccountId);
+        assertEquals(0, newDepositAmount.compareTo(account.getMandatoryRecommendedDepositAmount()));
+        assertEquals(2, account.getRecurringFrequency());
+        assertEquals(SavingsTestData.PeriodFrequencyType.MONTHS, account.getRecurringFrequencyType().getId().intValue());
     }
 
     @Test

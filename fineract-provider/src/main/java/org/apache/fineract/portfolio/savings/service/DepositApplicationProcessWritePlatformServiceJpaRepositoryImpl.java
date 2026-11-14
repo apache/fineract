@@ -467,15 +467,23 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             // update calendar details
             if (!account.isCalendarInherited()) {
-                final LocalDate calendarStartDate = account.depositStartDate();
-                final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
-                final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
-                final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
-                final Integer repeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
-
                 CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                         accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
                 Calendar calendar = calendarInstance.getCalendar();
+
+                final LocalDate calendarStartDate = account.depositStartDate();
+                // A request without the deposit frequency keeps the current one
+                final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
+                final PeriodFrequencyType periodFrequencyType = frequencyType == null
+                        ? CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()))
+                        : PeriodFrequencyType.fromInt(frequencyType);
+                Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
+                if (frequency == null) {
+                    frequency = CalendarUtils.getInterval(calendar.getRecurrence());
+                    frequency = frequency == -1 ? 1 : frequency;
+                }
+                final Integer repeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
+
                 calendar.updateRepeatingCalendar(calendarStartDate, CalendarFrequencyType.from(periodFrequencyType), frequency,
                         repeatsOnDay, null);
                 this.calendarInstanceRepository.save(calendarInstance);
