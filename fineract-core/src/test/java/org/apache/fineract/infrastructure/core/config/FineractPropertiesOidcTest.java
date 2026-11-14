@@ -56,6 +56,11 @@ class FineractPropertiesOidcTest {
     }
 
     @Test
+    void defaultAudienceIsEmpty() {
+        assertThat(new FineractSecurityOidcFederationProperties().getAudience()).isEmpty();
+    }
+
+    @Test
     void defaultPostLogoutRedirectUriIsNull() {
         assertThat(new FineractSecurityOidcFederationProperties().getPostLogoutRedirectUri()).isNull();
     }

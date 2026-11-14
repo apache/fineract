@@ -264,39 +264,66 @@ class DynamicJwtIssuerAuthenticationManagerResolverTest {
 
     @Test
     void acceptsAccessTokenTypeOfRfc9068() {
-        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("at+jwt", ISSUER_KEYCLOAK))
-                .hasErrors()).isFalse();
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, null)
+                .validate(jwt("at+jwt", ISSUER_KEYCLOAK)).hasErrors()).isFalse();
     }
 
     @Test
     void acceptsAccessTokenTypeOfRfc9068AsFullMediaType() {
-        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK)
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, null)
                 .validate(jwt("application/at+jwt", ISSUER_KEYCLOAK)).hasErrors()).isFalse();
     }
 
     @Test
     void acceptsJwtTypeAndAbsentType() {
-        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("JWT", ISSUER_KEYCLOAK))
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, null).validate(jwt("JWT", ISSUER_KEYCLOAK))
                 .hasErrors()).isFalse();
-        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt(null, ISSUER_KEYCLOAK))
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, null).validate(jwt(null, ISSUER_KEYCLOAK))
                 .hasErrors()).isFalse();
     }
 
     @Test
     void rejectsOtherTokenTypes() {
-        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("dpop+jwt", ISSUER_KEYCLOAK))
-                .hasErrors()).isTrue();
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, null)
+                .validate(jwt("dpop+jwt", ISSUER_KEYCLOAK)).hasErrors()).isTrue();
     }
 
     @Test
     void rejectsTokenOfAnotherIssuer() {
-        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("at+jwt", ISSUER_GOOGLE))
-                .hasErrors()).isTrue();
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, null)
+                .validate(jwt("at+jwt", ISSUER_GOOGLE)).hasErrors()).isTrue();
     }
 
-    private static Jwt jwt(String type, String issuer) {
+    @Test
+    void acceptsAnyAudienceWhenNoneIsConfigured() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, "")
+                .validate(jwt("at+jwt", ISSUER_KEYCLOAK, "another-service")).hasErrors()).isFalse();
+    }
+
+    @Test
+    void acceptsTokenThatNamesTheConfiguredAudience() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, "fineract")
+                .validate(jwt("at+jwt", ISSUER_KEYCLOAK, "another-service", "fineract")).hasErrors()).isFalse();
+    }
+
+    @Test
+    void rejectsTokenForAnotherAudience() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, "fineract")
+                .validate(jwt("at+jwt", ISSUER_KEYCLOAK, "another-service")).hasErrors()).isTrue();
+    }
+
+    @Test
+    void rejectsTokenWithoutAudienceWhenOneIsConfigured() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK, "fineract")
+                .validate(jwt("at+jwt", ISSUER_KEYCLOAK)).hasErrors()).isTrue();
+    }
+
+    private static Jwt jwt(String type, String issuer, String... audience) {
         Jwt.Builder builder = Jwt.withTokenValue("token").header("alg", "ES256").issuer(issuer).subject("user").issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(300));
+        if (audience.length > 0) {
+            builder.audience(List.of(audience));
+        }
         return (type == null ? builder : builder.header("typ", type)).build();
     }
 }
