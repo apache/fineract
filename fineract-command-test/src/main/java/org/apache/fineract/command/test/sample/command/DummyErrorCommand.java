@@ -25,4 +25,15 @@ import org.apache.fineract.command.test.sample.data.DummyErrorRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DummyErrorCommand extends Command<DummyErrorRequest> {}
+public class DummyErrorCommand extends Command<DummyErrorRequest> {
+
+    @Override
+    public String entityName() {
+        return "DUMMY";
+    }
+
+    @Override
+    public String actionName() {
+        return "ERROR";
+    }
+}

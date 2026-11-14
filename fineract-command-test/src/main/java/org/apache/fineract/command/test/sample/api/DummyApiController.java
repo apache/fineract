@@ -28,6 +28,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.command.test.sample.command.DummyCommand;
+import org.apache.fineract.command.test.sample.command.DummyErrorCommand;
+import org.apache.fineract.command.test.sample.data.DummyErrorRequest;
+import org.apache.fineract.command.test.sample.data.DummyErrorResponse;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.apache.fineract.command.test.sample.data.DummyResponse;
 import org.springframework.scheduling.annotation.Async;
@@ -55,6 +58,18 @@ class DummyApiController {
         log.info("Tenant ID (unused): {}", tenantId);
 
         Supplier<DummyResponse> result = pipeline.dispatch(command);
+
+        return result.get();
+    }
+
+    /** Always fails, so that the behaviour of a failing command can be exercised over HTTP. */
+    @PostMapping("/error")
+    DummyErrorResponse dummyError(@RequestBody DummyErrorRequest request) {
+        var command = new DummyErrorCommand();
+
+        command.setPayload(request);
+
+        Supplier<DummyErrorResponse> result = pipeline.dispatch(command);
 
         return result.get();
     }

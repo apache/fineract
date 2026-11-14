@@ -25,4 +25,15 @@ import org.apache.fineract.command.test.sample.data.DummyRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DummyCommand extends Command<DummyRequest> {}
+public class DummyCommand extends Command<DummyRequest> {
+
+    @Override
+    public String entityName() {
+        return "DUMMY";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

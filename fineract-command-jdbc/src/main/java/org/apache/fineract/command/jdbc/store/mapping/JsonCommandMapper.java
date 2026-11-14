@@ -31,7 +31,7 @@ import tools.jackson.databind.node.StringNode;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public final class CommandJsonMapper {
+public final class JsonCommandMapper {
 
     private final ObjectMapper mapper;
 
@@ -46,10 +46,10 @@ public final class CommandJsonMapper {
         try {
             return (T) mapper.convertValue(source, Class.forName(canonicalName));
         } catch (Exception e) {
-            log.error("Error while mapping json node", e);
+            // returning null here would answer a repeated request with an empty body rather than with the answer it
+            // was given the first time, and say so only in the log
+            throw new IllegalStateException("Cannot rehydrate a stored command result of type " + canonicalName, e);
         }
-
-        return null;
     }
 
     public JsonNode map(Object source) {
