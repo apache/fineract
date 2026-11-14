@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.HookableCommand;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -88,7 +89,7 @@ class WebhookCommandHookAfterTest {
     void shouldPublishHookEventForHookableCommand() {
         final TestResponse response = new TestResponse(7L);
 
-        underTest.onAfter(hookableCommand(), response);
+        underTest.onAfter(afterContext(hookableCommand(), response));
 
         final HookEvent event = publishedEvent();
         final HookEventSource source = (HookEventSource) event.getSource();
@@ -113,7 +114,7 @@ class WebhookCommandHookAfterTest {
 
     @Test
     void shouldExposeOfficeAndClientAtTopLevelOfPayload() {
-        underTest.onAfter(hookableCommand(), new TestClientResponse(7L, 2L, 3L));
+        underTest.onAfter(afterContext(hookableCommand(), new TestClientResponse(7L, 2L, 3L)));
 
         final JsonNode payload = mapper.readTree(publishedEvent().getPayload());
         assertEquals(2L, payload.get("officeId").asLong());
@@ -125,10 +126,10 @@ class WebhookCommandHookAfterTest {
 
     @Test
     void shouldIgnoreCommandThatIsNotHookable() {
-        final Command<Object> command = new Command<>();
+        final Command<Object> command = new TestPlainCommand();
         command.setPayload(new TestRequest("contract.pdf", null));
 
-        underTest.onAfter(command, new TestResponse(7L));
+        underTest.onAfter(afterContext(command, new TestResponse(7L)));
 
         verifyNoInteractions(eventPublisher);
     }
@@ -137,7 +138,7 @@ class WebhookCommandHookAfterTest {
     void shouldDeferPublicationUntilEnclosingTransactionCommits() {
         TransactionSynchronizationManager.initSynchronization();
 
-        underTest.onAfter(hookableCommand(), new TestResponse(7L));
+        underTest.onAfter(afterContext(hookableCommand(), new TestResponse(7L)));
 
         verifyNoInteractions(eventPublisher);
 
@@ -150,7 +151,7 @@ class WebhookCommandHookAfterTest {
     void shouldNotFailCommandWhenPublishingFails() {
         doThrow(new IllegalStateException("listener failed")).when(eventPublisher).publishEvent(any(HookEvent.class));
 
-        assertDoesNotThrow(() -> underTest.onAfter(hookableCommand(), new TestResponse(7L)));
+        assertDoesNotThrow(() -> underTest.onAfter(afterContext(hookableCommand(), new TestResponse(7L))));
     }
 
     private HookEvent publishedEvent() {
@@ -165,15 +166,29 @@ class WebhookCommandHookAfterTest {
         return command;
     }
 
-    private static final class TestHookableCommand extends Command<Object> implements HookableCommand {
+    /** A command that notifies no webhooks, to check that it is left alone. */
+    private static final class TestPlainCommand extends Command<Object> {
 
         @Override
-        public String hookEntityName() {
+        public String entityName() {
             return "DOCUMENT";
         }
 
         @Override
-        public String hookActionName() {
+        public String actionName() {
+            return "CREATE";
+        }
+    }
+
+    private static final class TestHookableCommand extends Command<Object> implements HookableCommand {
+
+        @Override
+        public String entityName() {
+            return "DOCUMENT";
+        }
+
+        @Override
+        public String actionName() {
             return "CREATE";
         }
     }
@@ -185,5 +200,10 @@ class WebhookCommandHookAfterTest {
     }
 
     private record TestClientResponse(Long resourceId, Long officeId, Long clientId) {
+    }
+
+    /** The hook takes the context now, so the command and its result are handed over together. */
+    private static CommandContext<Object, Object> afterContext(Command<Object> command, Object response) {
+        return CommandContext.<Object, Object>builder().command(command).response(response).build();
     }
 }

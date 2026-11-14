@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixDelet
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProductMixDeleteCommand extends Command<ProductMixDeleteRequest> {}
+public class ProductMixDeleteCommand extends Command<ProductMixDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "PRODUCTMIX";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

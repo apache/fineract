@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSla
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class InterestRateChartSlabsCreateCommand extends Command<InterestRateChartSlabsCreateRequest> {}
+public class InterestRateChartSlabsCreateCommand extends Command<InterestRateChartSlabsCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CHARTSLAB";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

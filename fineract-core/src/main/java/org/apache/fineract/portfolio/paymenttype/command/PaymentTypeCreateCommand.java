@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PaymentTypeCreateCommand extends Command<PaymentTypeCreateRequest> {}
+public class PaymentTypeCreateCommand extends Command<PaymentTypeCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "PAYMENTTYPE";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}
