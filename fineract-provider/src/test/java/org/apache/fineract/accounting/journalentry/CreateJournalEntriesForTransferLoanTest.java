@@ -127,7 +127,7 @@ class CreateJournalEntriesForTransferLoanTest {
     private LoanDTO createLoanDTO(final LoanTransactionEnumData transactionType, final BigDecimal principalAmount) {
         LoanTransactionDTO loanTransactionDTO = new LoanTransactionDTO(TRANSACTION_OFFICE_ID, null, TRANSACTION_ID, TRANSACTION_DATE,
                 transactionType, TRANSACTION_AMOUNT, principalAmount, null, null, null, null, false, Collections.emptyList(),
-                Collections.emptyList(), false, "", null, null, null, null);
+                Collections.emptyList(), false, "", null, null, null, null, null);
 
         return new LoanDTO(LOAN_ID, LOAN_PRODUCT_ID, LOAN_OFFICE_ID, CURRENCY_CODE, false, true, true, List.of(loanTransactionDTO), false,
                 false, null, false, false, null, null, null);

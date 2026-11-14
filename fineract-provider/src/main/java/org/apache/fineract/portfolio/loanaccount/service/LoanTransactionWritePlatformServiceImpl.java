@@ -25,14 +25,15 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingSubResourceResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -67,6 +68,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationR
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.RefundTransactionResult;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
@@ -360,6 +362,11 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
                     "Interest refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
         }
 
+        if (transactionToAdjust.isFeeRefund()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
+                    "Fee refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
+        }
+
         Long commandId = command.commandId();
         final String noteText = command.stringValueOfParameterNamed("note");
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
@@ -385,6 +392,17 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
             if (!loanTransactionRelationRepository.findNonReversedInterestRefundsRelatedTo(transactionToAdjust).isEmpty()) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.adjust.not.allowed.when.interest.refund.exists",
                         "Loan transaction: " + transactionId + " cannot be adjusted as it has a linked interest refund transaction",
+                        transactionId);
+            }
+            if (loan.getSupportedFeeRefundTransactionTypes().contains(transactionToAdjust.getTypeOf())) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.loan.transaction.adjust.not.allowed.when.fee.refund.enabled", "Loan transaction: " + transactionId
+                                + " cannot be adjusted as fee refund is enabled for " + transactionToAdjust.getTypeOf().getCode(),
+                        transactionId);
+            }
+            if (!loanTransactionRelationRepository.findNonReversedFeeRefundsRelatedTo(transactionToAdjust).isEmpty()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.adjust.not.allowed.when.fee.refund.exists",
+                        "Loan transaction: " + transactionId + " cannot be adjusted as it has a linked fee refund transaction",
                         transactionId);
             }
         }
@@ -735,10 +753,10 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         this.loanUtilService.createNote(loan, command, changes);
         // Create refund transaction(s)
         final Boolean interestRefundCalculation = command.booleanObjectValueOfParameterNamed("interestRefundCalculation");
-        Pair<LoanTransaction, LoanTransaction> refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
+        final RefundTransactionResult refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
                 loanTransactionType, transactionDate, transactionAmount, paymentDetail, txnExternalId, interestRefundCalculation);
-        LoanTransaction refundTransaction = refundTransactions.getLeft();
-        LoanTransaction interestRefundTransaction = refundTransactions.getRight();
+        final LoanTransaction refundTransaction = refundTransactions.refund();
+        final List<LoanTransaction> derivedTransactions = refundTransactions.derivedTransactions();
         // Accrual reprocessing
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -753,35 +771,32 @@ public class LoanTransactionWritePlatformServiceImpl implements LoanTransactionW
         loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
         //// Mark Post Dated Check as paid., Do we need this for refund?
         loanAccountDomainService.updateAndSavePostDatedChecksForIndividualAccount(loan, refundTransaction);
-        if (interestRefundTransaction != null) {
-            loanAccountDomainService.updateAndSavePostDatedChecksForIndividualAccount(loan, interestRefundTransaction);
+        for (final LoanTransaction derivedTransaction : derivedTransactions) {
+            loanAccountDomainService.updateAndSavePostDatedChecksForIndividualAccount(loan, derivedTransaction);
         }
         // Collateral management
         loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, refundTransaction);
-        if (interestRefundTransaction != null) {
-            loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, interestRefundTransaction);
+        for (final LoanTransaction derivedTransaction : derivedTransactions) {
+            loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, derivedTransaction);
         }
         // Raise business events
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 true);
 
         journalEntryPoster.postJournalEntriesForLoanTransaction(refundTransaction, false, false);
-        if (interestRefundTransaction != null) {
-            journalEntryPoster.postJournalEntriesForLoanTransaction(interestRefundTransaction, false, false);
-        }
+        derivedTransactions.forEach(txn -> journalEntryPoster.postJournalEntriesForLoanTransaction(txn, false, false));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         Long entityId = refundTransaction.getId();
         ExternalId entityExternalId = refundTransaction.getExternalId();
-        Long subEntityId = interestRefundTransaction != null ? interestRefundTransaction.getId() : null;
-        ExternalId subEntityExternalId = interestRefundTransaction != null ? interestRefundTransaction.getExternalId() : null;
+        final List<CommandProcessingSubResourceResult> subResources = derivedTransactions.stream()
+                .map(txn -> new CommandProcessingSubResourceResult(txn.getId(), txn.getExternalId())).toList();
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withLoanId(loan.getId()) //
                 .withEntityId(entityId) //
                 .withEntityExternalId(entityExternalId) //
-                .withSubEntityId(subEntityId) //
-                .withSubEntityExternalId(subEntityExternalId) //
+                .withSubResources(subResources) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //

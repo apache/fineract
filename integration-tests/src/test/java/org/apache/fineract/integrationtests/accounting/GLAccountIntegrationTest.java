@@ -104,6 +104,36 @@ public class GLAccountIntegrationTest extends FeignLoanTestBase {
     }
 
     @Test
+    public void testDisableGLAccountWhileMappedToProduct() {
+        String uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
+        createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(newAccount.getResourceId())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        // DISABLE
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> accountHelper.updateGLAccount(newAccount.getResourceId(), new PutGLAccountsRequest().disabled(true)));
+        assertEquals(403, exception.getStatus());
+        assertTrue(exception.getMessage().contains("error.msg.glaccount.attached.to.product"));
+        assertEquals(Boolean.FALSE, accountHelper.getGLAccount(newAccount.getResourceId()).getDisabled());
+    }
+
+    @Test
+    public void testDisableGLAccountNotMappedToProduct() {
+        String uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
+
+        // DISABLE
+        accountHelper.updateGLAccount(newAccount.getResourceId(), new PutGLAccountsRequest().disabled(true));
+
+        assertEquals(Boolean.TRUE, accountHelper.getGLAccount(newAccount.getResourceId()).getDisabled());
+    }
+
+    @Test
     public void testDeleteGLAccountWhileThereIsJournalEntry() {
         runAt("01 January 2024", () -> {
             String uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);

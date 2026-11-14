@@ -70,8 +70,8 @@ public class LoanTransactionAdjustmentDataV1EnricherTest {
 
         stubActiveOwner();
         when(loanRepository.findLoanProductIdByLoanId(LOAN_ID)).thenReturn(Optional.of(LOAN_PRODUCT_ID));
-        when(excludedTransactionTypesService.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE)).thenReturn(true);
-        when(excludedTransactionTypesService.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.REPAYMENT)).thenReturn(false);
+        when(excludedTransactionTypesService.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE)).thenReturn(true);
+        when(excludedTransactionTypesService.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.REPAYMENT)).thenReturn(false);
 
         new LoanTransactionAdjustmentDataV1Enricher(new LoanTransactionDataV1Enricher(externalAssetOwnerTransferRepository,
                 externalIdMapper, excludedTransactionTypesService, loanRepository)).enrich(data);

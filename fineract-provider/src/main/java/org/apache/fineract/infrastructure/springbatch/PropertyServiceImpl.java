@@ -41,11 +41,6 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public Integer getRetryLimit(String jobName) {
-        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getRetryLimit);
-    }
-
-    @Override
     public Integer getSkipLimit(String jobName) {
         // Explicitly null-checked rather than going through getProperty(..), whose orElse(1) fallback would silently
         // collapse an unset skip limit to 1 instead of preserving the historical chunkSize + 1.

@@ -57,7 +57,8 @@ buildscript {
                 'fineract-e2e-tests-runner',
                 'fineract-progressive-loan',
                 'fineract-progressive-loan-embeddable-schedule-generator',
-                'fineract-working-capital-loan'
+                'fineract-working-capital-loan',
+                'fineract-querydsl'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -88,7 +89,8 @@ buildscript {
                 'fineract-document',
                 'fineract-progressive-loan',
                 'fineract-progressive-loan-embeddable-schedule-generator',
-                'fineract-working-capital-loan'
+                'fineract-working-capital-loan',
+                'fineract-querydsl'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
@@ -111,7 +113,6 @@ buildscript {
 }
 
 plugins {
-    id "org.barfuin.gradle.taskinfo" version "3.0.2"
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'com.diffplug.spotless' version '8.10.2' apply false
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
@@ -135,6 +136,7 @@ plugins {
     id 'org.cyclonedx.bom' version '3.4.1' apply false
     id 'com.docktape.swagger-brake' version '2.7.0' apply false
     id 'io.github.usekylis.java-architecture-metrics' version '0.1.1' apply false
+    id 'org.apache.fineract.querydsl.codegen' apply false
 }
 
 description = '''\
@@ -600,7 +602,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:13.4.2'
+        checkstyle 'com.puppycrawl.tools:checkstyle:14.4.0'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 

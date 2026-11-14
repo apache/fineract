@@ -20,17 +20,11 @@ package org.apache.fineract.cob.loan;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
 
-public class InlineCOBLoanItemReader extends AbstractLoanItemReader<Loan> {
-
-    public InlineCOBLoanItemReader(LoanRepository loanRepository) {
-        super(loanRepository);
-    }
+public class InlineCOBLoanItemReader extends AbstractLoanItemReader {
 
     @Override
     @SuppressWarnings({ "unchecked" })

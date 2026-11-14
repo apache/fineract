@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="fineract" id="1" context="postgresql">
+        <createTable tableName="m_external_asset_owner_loan_attribute_snapshot">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="loan_id" type="BIGINT">
+                <constraints nullable="false" unique="true" uniqueConstraintName="UQ_ext_asset_owner_loan_attr_snapshot_loan_id"/>
+            </column>
+            <column name="external_asset_owner_transfer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+        <createTable tableName="m_external_asset_owner_loan_attribute">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="snapshot_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_key" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_value" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="1" context="mysql">
+        <createTable tableName="m_external_asset_owner_loan_attribute_snapshot">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="loan_id" type="BIGINT">
+                <constraints nullable="false" unique="true" uniqueConstraintName="UQ_ext_asset_owner_loan_attr_snapshot_loan_id"/>
+            </column>
+            <column name="external_asset_owner_transfer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="DATETIME(6)"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME(6)"/>
+        </createTable>
+        <createTable tableName="m_external_asset_owner_loan_attribute">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="snapshot_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_key" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attribute_value" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="DATETIME(6)"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME(6)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="2">
+        <addUniqueConstraint tableName="m_external_asset_owner_loan_attribute" columnNames="snapshot_id, attribute_key"
+                             constraintName="UQ_ext_asset_owner_loan_attr_snapshot_key"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute_snapshot" baseColumnNames="loan_id"
+                                 constraintName="FK_ext_asset_owner_loan_attr_snapshot_loan_id"
+                                 referencedTableName="m_loan" referencedColumnNames="id"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute_snapshot"
+                                 baseColumnNames="external_asset_owner_transfer_id"
+                                 constraintName="FK_ext_asset_owner_loan_attr_snapshot_transfer_id"
+                                 referencedTableName="m_external_asset_owner_transfer" referencedColumnNames="id"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute_snapshot" baseColumnNames="created_by"
+                                 constraintName="FK_ext_asset_owner_loan_attr_snapshot_created_by"
+                                 referencedTableName="m_appuser" referencedColumnNames="id"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute_snapshot" baseColumnNames="last_modified_by"
+                                 constraintName="FK_ext_asset_owner_loan_attr_snapshot_modified_by"
+                                 referencedTableName="m_appuser" referencedColumnNames="id"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute" baseColumnNames="snapshot_id"
+                                 constraintName="FK_ext_asset_owner_loan_attr_snapshot_id"
+                                 referencedTableName="m_external_asset_owner_loan_attribute_snapshot" referencedColumnNames="id"
+                                 onDelete="CASCADE" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute" baseColumnNames="created_by"
+                                 constraintName="FK_ext_asset_owner_loan_attr_created_by"
+                                 referencedTableName="m_appuser" referencedColumnNames="id"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="m_external_asset_owner_loan_attribute" baseColumnNames="last_modified_by"
+                                 constraintName="FK_ext_asset_owner_loan_attr_modified_by"
+                                 referencedTableName="m_appuser" referencedColumnNames="id"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="3">
+        <insert tableName="m_permission">
+            <column name="grouping" value="investor"/>
+            <column name="code" value="UPDATE_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE"/>
+            <column name="entity_name" value="EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="investor"/>
+            <column name="code" value="UPDATE_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE_CHECKER"/>
+            <column name="entity_name" value="EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE"/>
+            <column name="action_name" value="UPDATE_CHECKER"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

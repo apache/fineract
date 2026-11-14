@@ -24,17 +24,13 @@ Feature: SpringBatch Infrastructure
     Given Property Service is initialized
     When partition size is fetched for "LOAN_COB"
     When chunk size is fetched for "LOAN_COB"
-    When retry limit is fetched for "LOAN_COB"
     Then partition size is 100
     Then chunk size is 100
-    Then retry limit is 5
 
   @springbatch
   Scenario: Verify that spring batch default properties are read correctly for non-existing job
     Given Property Service is initialized
     When partition size is fetched for "INVALID_JOB"
     When chunk size is fetched for "INVALID_JOB"
-    When retry limit is fetched for "INVALID_JOB"
     Then partition size is 1
     Then chunk size is 1
-    Then retry limit is 1

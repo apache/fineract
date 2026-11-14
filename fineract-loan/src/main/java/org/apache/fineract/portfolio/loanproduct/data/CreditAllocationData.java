@@ -28,6 +28,7 @@ import lombok.Getter;
 public class CreditAllocationData implements Serializable {
 
     private final String transactionType;
+    private final String creditAllocationStrategy;
     private final List<CreditAllocationOrder> creditAllocationOrder;
 
     @Getter

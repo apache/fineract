@@ -93,6 +93,7 @@ public class LoanSummaryData {
     private BigDecimal totalRepaymentTransactionReversed;
     private BigDecimal totalInterestPaymentWaiver;
     private BigDecimal totalInterestRefund;
+    private BigDecimal totalFeeRefund;
     private final Long chargeOffReasonId;
     private final String chargeOffReason;
 

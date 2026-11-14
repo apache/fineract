@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -68,6 +69,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.rate.data.RateData;
@@ -277,7 +279,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed, "
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, " + "lvi.minimum_gap as minimumGap, "
                     + "lvi.maximum_gap as maximumGap, dbuc.id as delinquencyBucketId, dbuc.name as delinquencyBucketName, "
-                    + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization, lp.loan_schedule_type as loanScheduleType, lp.loan_schedule_processing_type as loanScheduleProcessingType, lp.supported_interest_refund_types as supportedInterestRefundTypes, "
+                    + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization, lp.loan_schedule_type as loanScheduleType, lp.loan_schedule_processing_type as loanScheduleProcessingType, lp.supported_interest_refund_types as supportedInterestRefundTypes, lp.supported_fee_refund_types as supportedFeeRefundTypes, "
                     + "lp.charge_off_behaviour as chargeOffBehaviour, " //
                     + "lp.enable_income_capitalization as enableIncomeCapitalization, " //
                     + "lp.capitalized_income_calculation_type as capitalizedIncomeCalculationType, " //
@@ -550,6 +552,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         .map(LoanSupportedInterestRefundTypes::valueOf)
                         .map(LoanSupportedInterestRefundTypes::getValueAsStringEnumOptionData).toList();
             }
+            final String supportedFeeRefundTypesString = rs.getString("supportedFeeRefundTypes");
+            List<StringEnumOptionData> supportedFeeRefundTypes = List.of();
+            if (supportedFeeRefundTypesString != null && !supportedFeeRefundTypesString.isEmpty()) {
+                supportedFeeRefundTypes = Arrays.stream(supportedFeeRefundTypesString.split(",")).map(LoanSupportedFeeRefundTypes::valueOf)
+                        .map(LoanSupportedFeeRefundTypes::getValueAsStringEnumOptionData).toList();
+            }
             final String chargeOffBehaviourStr = rs.getString("chargeOffBehaviour");
             final LoanChargeOffBehaviour loanChargeOffBehaviour = LoanChargeOffBehaviour.valueOf(chargeOffBehaviourStr);
             final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
@@ -591,7 +599,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageForDownPayment,
                     enableAutoRepaymentForDownPayment, advancedPaymentData, creditAllocationData, repaymentStartDateType,
                     enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(), loanScheduleProcessingType.asEnumOptionData(),
-                    fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
+                    fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes,
                     loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate,
                     daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
                     capitalizedIncome, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
@@ -666,17 +674,21 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private static final class CreditAllocationDataMapper implements RowMapper<CreditAllocationData> {
 
         public String schema() {
-            return "transaction_type, allocation_types from m_loan_product_credit_allocation_rule";
+            return "transaction_type, allocation_strategy, allocation_types from m_loan_product_credit_allocation_rule";
         }
 
         @Override
         public CreditAllocationData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final String transactionType = rs.getString("transaction_type");
+            final String allocationStrategy = rs.getString("allocation_strategy");
             final String allocationTypes = rs.getString("allocation_types");
-            return new CreditAllocationData(transactionType, convert(allocationTypes));
+            return new CreditAllocationData(transactionType, allocationStrategy, convert(allocationTypes));
         }
 
         private List<CreditAllocationData.CreditAllocationOrder> convert(String allocationOrders) {
+            if (StringUtils.isBlank(allocationOrders)) {
+                return List.of();
+            }
             String[] allocationRule = allocationOrders.split(",");
             AtomicInteger order = new AtomicInteger(1);
             return Arrays.stream(allocationRule) //

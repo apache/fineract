@@ -64,6 +64,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -158,6 +159,7 @@ public class LoanProductData implements Serializable {
     private final Integer installmentAmountInMultiplesOf;
     private final EnumOptionData repaymentStartDateType;
     private final List<StringEnumOptionData> supportedInterestRefundTypes;
+    private final List<StringEnumOptionData> supportedFeeRefundTypes;
     private final StringEnumOptionData chargeOffBehaviour;
 
     // charges
@@ -210,6 +212,7 @@ public class LoanProductData implements Serializable {
 
     private final List<EnumOptionData> creditAllocationTransactionTypes;
     private final List<EnumOptionData> creditAllocationAllocationTypes;
+    private final List<EnumOptionData> creditAllocationStrategyOptions;
 
     private final List<EnumOptionData> loanScheduleTypeOptions;
     private final List<EnumOptionData> loanScheduleProcessingTypeOptions;
@@ -218,6 +221,7 @@ public class LoanProductData implements Serializable {
     private final List<FloatingRateData> floatingRateOptions;
     private final List<EnumOptionData> repaymentStartDateTypeOptions;
     private final List<StringEnumOptionData> supportedInterestRefundTypesOptions;
+    private final List<StringEnumOptionData> supportedFeeRefundTypesOptions;
     private final List<StringEnumOptionData> chargeOffBehaviourOptions;
 
     private final Boolean multiDisburseLoan;
@@ -382,6 +386,7 @@ public class LoanProductData implements Serializable {
         final EnumOptionData loanScheduleProcessingType = null;
         final boolean enableAccrualActivityPosting = false;
         final List<StringEnumOptionData> supportedInterestRefundTypes = null;
+        final List<StringEnumOptionData> supportedFeeRefundTypes = null;
         final StringEnumOptionData chargeOffBehaviour = null;
         final boolean interestRecognitionOnDisbursementDate = false;
         final StringEnumOptionData daysInYearTypeCustomStrategy = null;
@@ -417,10 +422,11 @@ public class LoanProductData implements Serializable {
                 delinquencyBucket, dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment,
                 disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment, paymentAllocation, creditAllocation,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearTypeCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, writeOffReasonsToExpenseMappings, writeOffReasonOptions, null);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour,
+                interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions, null);
 
     }
 
@@ -523,6 +529,7 @@ public class LoanProductData implements Serializable {
         final EnumOptionData loanScheduleProcessingType = null;
         final boolean enableAccrualActivityPosting = false;
         final List<StringEnumOptionData> supportedInterestRefundTypes = null;
+        final List<StringEnumOptionData> supportedFeeRefundTypes = null;
         final StringEnumOptionData chargeOffBehaviour = null;
         final boolean interestRecognitionOnDisbursementDate = false;
         final StringEnumOptionData daysInYearTypeCustomStrategy = null;
@@ -558,10 +565,11 @@ public class LoanProductData implements Serializable {
                 delinquencyBucket, dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment,
                 disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment, paymentAllocation, creditAllocation,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearTypeCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, writeOffReasonsToExpenseMappings, writeOffReasonOptions, null);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour,
+                interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions, null);
 
     }
 
@@ -671,6 +679,7 @@ public class LoanProductData implements Serializable {
         final EnumOptionData loanScheduleProcessingType = LoanScheduleProcessingType.HORIZONTAL.asEnumOptionData();
         final boolean enableAccrualActivityPosting = false;
         final List<StringEnumOptionData> supportedInterestRefundTypes = null;
+        final List<StringEnumOptionData> supportedFeeRefundTypes = null;
         final StringEnumOptionData chargeOffBehaviour = LoanChargeOffBehaviour.REGULAR.getValueAsStringEnumOptionData();
         final boolean interestRecognitionOnDisbursementDate = false;
         final StringEnumOptionData daysInYearTypeCustomStrategy = null;
@@ -707,10 +716,11 @@ public class LoanProductData implements Serializable {
                 delinquencyBucket, dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment,
                 disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment, paymentAllocation, creditAllocation,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearTypeCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, writeOffReasonsToExpenseMappings, writeOffReasonOptions, null);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour,
+                interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions, null);
 
     }
 
@@ -814,6 +824,7 @@ public class LoanProductData implements Serializable {
         final EnumOptionData loanScheduleProcessingType = null;
         final boolean enableAccrualActivityPosting = false;
         final List<StringEnumOptionData> supportedInterestRefundTypes = null;
+        final List<StringEnumOptionData> supportedFeeRefundTypes = null;
         final StringEnumOptionData chargeOffBehaviour = null;
         final boolean interestRecognitionOnDisbursementDate = false;
         final StringEnumOptionData daysInYearTypeCustomStrategy = null;
@@ -850,10 +861,11 @@ public class LoanProductData implements Serializable {
                 delinquencyBucket, dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, enableDownPayment,
                 disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment, paymentAllocation, creditAllocationData,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearTypeCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee, writeOffReasonsToExpenseMappings, writeOffReasonOptions, null);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour,
+                interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, enableBuyDownFee,
+                buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee, writeOffReasonsToExpenseMappings,
+                writeOffReasonOptions, null);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -914,13 +926,13 @@ public class LoanProductData implements Serializable {
             final EnumOptionData repaymentStartDateType, final boolean enableInstallmentLevelDelinquency,
             final EnumOptionData loanScheduleType, final EnumOptionData loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<StringEnumOptionData> supportedInterestRefundTypes,
-            StringEnumOptionData chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
-            final StringEnumOptionData daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final StringEnumOptionData capitalizedIncomeCalculationType, final StringEnumOptionData capitalizedIncomeStrategy,
-            final StringEnumOptionData capitalizedIncomeType, final boolean enableBuyDownFee,
-            final StringEnumOptionData buyDownFeeCalculationType, final StringEnumOptionData buyDownFeeStrategy,
-            final StringEnumOptionData buyDownFeeIncomeType, final boolean merchantBuyDownFee,
-            final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings,
+            final List<StringEnumOptionData> supportedFeeRefundTypes, StringEnumOptionData chargeOffBehaviour,
+            final boolean interestRecognitionOnDisbursementDate, final StringEnumOptionData daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final StringEnumOptionData capitalizedIncomeCalculationType,
+            final StringEnumOptionData capitalizedIncomeStrategy, final StringEnumOptionData capitalizedIncomeType,
+            final boolean enableBuyDownFee, final StringEnumOptionData buyDownFeeCalculationType,
+            final StringEnumOptionData buyDownFeeStrategy, final StringEnumOptionData buyDownFeeIncomeType,
+            final boolean merchantBuyDownFee, final List<AdvancedMappingToExpenseAccountData> writeOffReasonsToExpenseMappings,
             final List<CodeValueData> writeOffReasonOptions, final StringEnumOptionData monthEndDueDateStrategy) {
         this.id = id;
         this.name = name;
@@ -1067,6 +1079,7 @@ public class LoanProductData implements Serializable {
         this.advancedPaymentAllocationTypes = PaymentAllocationType.getValuesAsEnumOptionDataList();
         this.creditAllocationTransactionTypes = CreditAllocationTransactionType.getValuesAsEnumOptionDataList();
         this.creditAllocationAllocationTypes = AllocationType.getValuesAsEnumOptionDataList();
+        this.creditAllocationStrategyOptions = CreditAllocationStrategy.getValuesAsEnumOptionDataList();
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
         this.loanScheduleType = loanScheduleType;
         this.loanScheduleProcessingType = loanScheduleProcessingType;
@@ -1075,6 +1088,8 @@ public class LoanProductData implements Serializable {
         this.enableAccrualActivityPosting = enableAccrualActivityPosting;
         this.supportedInterestRefundTypes = supportedInterestRefundTypes;
         this.supportedInterestRefundTypesOptions = null;
+        this.supportedFeeRefundTypes = supportedFeeRefundTypes;
+        this.supportedFeeRefundTypesOptions = null;
         this.chargeOffBehaviour = chargeOffBehaviour;
         this.chargeOffBehaviourOptions = null;
         this.chargeOffReasonOptions = null;
@@ -1116,10 +1131,10 @@ public class LoanProductData implements Serializable {
             final List<EnumOptionData> advancedPaymentAllocationFutureInstallmentAllocationRules,
             final List<EnumOptionData> advancedPaymentAllocationTypes, final List<EnumOptionData> loanScheduleTypeOptions,
             final List<EnumOptionData> loanScheduleProcessingTypeOptions, final List<EnumOptionData> creditAllocationTransactionTypes,
-            final List<EnumOptionData> creditAllocationAllocationTypes,
+            final List<EnumOptionData> creditAllocationAllocationTypes, final List<EnumOptionData> creditAllocationStrategyOptions,
             final List<StringEnumOptionData> supportedInterestRefundTypesOptions,
-            final List<StringEnumOptionData> chargeOffBehaviourOptions, final List<CodeValueData> chargeOffReasonOptions,
-            final List<StringEnumOptionData> daysInYearCustomStrategyOptions,
+            final List<StringEnumOptionData> supportedFeeRefundTypesOptions, final List<StringEnumOptionData> chargeOffBehaviourOptions,
+            final List<CodeValueData> chargeOffReasonOptions, final List<StringEnumOptionData> daysInYearCustomStrategyOptions,
             final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions,
             final List<StringEnumOptionData> capitalizedIncomeStrategyOptions,
             final List<StringEnumOptionData> capitalizedIncomeTypeOptions,
@@ -1280,6 +1295,7 @@ public class LoanProductData implements Serializable {
         this.advancedPaymentAllocationFutureInstallmentAllocationRules = advancedPaymentAllocationFutureInstallmentAllocationRules;
         this.advancedPaymentAllocationTypes = advancedPaymentAllocationTypes;
         this.creditAllocationAllocationTypes = creditAllocationAllocationTypes;
+        this.creditAllocationStrategyOptions = creditAllocationStrategyOptions;
         this.creditAllocationTransactionTypes = creditAllocationTransactionTypes;
         this.enableInstallmentLevelDelinquency = productData.enableInstallmentLevelDelinquency;
         this.loanScheduleType = productData.getLoanScheduleType();
@@ -1289,6 +1305,8 @@ public class LoanProductData implements Serializable {
         this.enableAccrualActivityPosting = productData.enableAccrualActivityPosting;
         this.supportedInterestRefundTypesOptions = supportedInterestRefundTypesOptions;
         this.supportedInterestRefundTypes = productData.supportedInterestRefundTypes;
+        this.supportedFeeRefundTypesOptions = supportedFeeRefundTypesOptions;
+        this.supportedFeeRefundTypes = productData.supportedFeeRefundTypes;
         this.chargeOffBehaviour = productData.chargeOffBehaviour;
         this.chargeOffBehaviourOptions = chargeOffBehaviourOptions;
         this.chargeOffReasonOptions = chargeOffReasonOptions;

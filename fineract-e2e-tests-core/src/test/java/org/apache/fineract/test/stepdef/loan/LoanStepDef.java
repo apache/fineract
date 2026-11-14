@@ -67,6 +67,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -85,6 +86,8 @@ import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.DisbursementDetail;
@@ -104,6 +107,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSubStatus;
+import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTimeline;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
@@ -187,6 +191,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffUn
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionAccrualActivityPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionFeeRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionLoanWithdrawalPostBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -2508,6 +2513,78 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(totalInterestOutstandingExpected);
     }
 
+    @Then("Loan has {double} principal paid and {double} principal adjustments amount")
+    public void loanPrincipalPaidAndAdjustments(double principalPaidExpected, double principalAdjustmentsExpected) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+
+        assertThat(loanDetailsResponse.getSummary().getPrincipalPaid().doubleValue()).as("Wrong principal paid in the loan summary")
+                .isEqualTo(principalPaidExpected);
+        assertThat(loanDetailsResponse.getSummary().getPrincipalAdjustments().doubleValue())
+                .as("Wrong principal adjustments in the loan summary").isEqualTo(principalAdjustmentsExpected);
+    }
+
+    private static final Map<String, Function<GetLoansLoanIdSummary, BigDecimal>> LOAN_SUMMARY_FIELDS = Map.ofEntries(
+            Map.entry("Principal disbursed", GetLoansLoanIdSummary::getPrincipalDisbursed),
+            Map.entry("Principal paid", GetLoansLoanIdSummary::getPrincipalPaid),
+            Map.entry("Principal adjustments", GetLoansLoanIdSummary::getPrincipalAdjustments),
+            Map.entry("Principal outstanding", GetLoansLoanIdSummary::getPrincipalOutstanding),
+            Map.entry("Interest charged", GetLoansLoanIdSummary::getInterestCharged),
+            Map.entry("Interest paid", GetLoansLoanIdSummary::getInterestPaid),
+            Map.entry("Interest outstanding", GetLoansLoanIdSummary::getInterestOutstanding),
+            Map.entry("Fees charged", GetLoansLoanIdSummary::getFeeChargesCharged),
+            Map.entry("Fees paid", GetLoansLoanIdSummary::getFeeChargesPaid),
+            Map.entry("Fees waived", GetLoansLoanIdSummary::getFeeChargesWaived),
+            Map.entry("Fees outstanding", GetLoansLoanIdSummary::getFeeChargesOutstanding),
+            Map.entry("Penalties charged", GetLoansLoanIdSummary::getPenaltyChargesCharged),
+            Map.entry("Penalties paid", GetLoansLoanIdSummary::getPenaltyChargesPaid),
+            Map.entry("Penalties outstanding", GetLoansLoanIdSummary::getPenaltyChargesOutstanding),
+            Map.entry("Total repayment", GetLoansLoanIdSummary::getTotalRepayment),
+            Map.entry("Total outstanding", GetLoansLoanIdSummary::getTotalOutstanding));
+
+    @Then("Loan summary has the following data:")
+    public void loanSummaryHasData(final DataTable table) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        final GetLoansLoanIdSummary summary = loanDetailsResponse.getSummary();
+        assertThat(summary).as("Loan %s has no summary", loanId).isNotNull();
+
+        final List<String> header = table.row(0);
+        final List<String> expected = table.row(1);
+        final SoftAssertions softly = new SoftAssertions();
+        for (int i = 0; i < header.size(); i++) {
+            final Function<GetLoansLoanIdSummary, BigDecimal> field = LOAN_SUMMARY_FIELDS.get(header.get(i));
+            assertThat(field).as("Unknown loan summary column: %s", header.get(i)).isNotNull();
+            final BigDecimal actual = field.apply(summary);
+            softly.assertThat(actual == null ? 0.0 : actual.doubleValue()).as("Wrong %s in the summary of loan %s", header.get(i), loanId)
+                    .isEqualTo(Double.parseDouble(expected.get(i)));
+        }
+        softly.assertAll();
+    }
+
+    @Then("Loan Repayment schedule periods do not overlap")
+    public void loanRepaymentSchedulePeriodsDoNotOverlap() {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "repaymentSchedule")));
+        final List<GetLoansLoanIdRepaymentPeriod> periods = loanDetailsResponse.getRepaymentSchedule().getPeriods().stream()
+                .filter(p -> p.getPeriod() != null && !Boolean.TRUE.equals(p.getDownPaymentPeriod())).toList();
+        for (int i = 1; i < periods.size(); i++) {
+            final GetLoansLoanIdRepaymentPeriod previous = periods.get(i - 1);
+            final GetLoansLoanIdRepaymentPeriod current = periods.get(i);
+            assertThat(current.getFromDate()).as("Installment %s of loan %s does not start when installment %s ends", current.getPeriod(),
+                    loanId, previous.getPeriod()).isEqualTo(previous.getDueDate());
+        }
+    }
+
     @Then("Loan has {double} total unpaid payable due interest")
     public void loanTotalUnpaidPayableDueInterest(double totalUnpaidPayableDueInterestExpected) {
         PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -2563,6 +2640,41 @@ public class LoanStepDef extends AbstractStepDef {
         Double totalOverdueActual = loanDetailsResponse.getSummary().getTotalOverdue().doubleValue();
         assertThat(totalOverdueActual).as(ErrorMessageHelper.wrongAmountInTotalOverdue(totalOverdueActual, totalOverdueExpected))
                 .isEqualTo(totalOverdueExpected);
+    }
+
+    @Then("Loan has {double} total fee refund amount")
+    public void loanTotalFeeRefund(final double totalFeeRefundExpected) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanCreateResponse != null;
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        // summary is not returned for a loan that is not disbursed (e.g. after undo disbursal)
+        final GetLoansLoanIdSummary summary = Objects.requireNonNull(loanDetailsResponse).getSummary();
+        final BigDecimal totalFeeRefund = summary == null ? null : summary.getTotalFeeRefund();
+        final double totalFeeRefundActual = totalFeeRefund == null ? 0.0 : totalFeeRefund.doubleValue();
+        assertThat(totalFeeRefundActual)
+                .as("Wrong totalFeeRefund in loan summary. Actual: %s, expected: %s", totalFeeRefundActual, totalFeeRefundExpected)
+                .isEqualTo(totalFeeRefundExpected);
+    }
+
+    @Then("LoanTransactionFeeRefundPostBusinessEvent is raised on {string}")
+    public void checkLoanTransactionFeeRefundPostBusinessEvent(final String date) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
+        final Long feeRefundTransactionId = loanDetailsResponse.getTransactions().stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "loanTransactionType.feeRefund".equals(t.getType().getCode())
+                        && !Boolean.TRUE.equals(t.getManuallyReversed()))
+                .reduce((first, second) -> second)
+                .orElseThrow(() -> new IllegalStateException(String.format("No Fee Refund transaction found on %s", date))).getId();
+
+        eventAssertion.assertEventRaised(LoanTransactionFeeRefundPostEvent.class, feeRefundTransactionId);
     }
 
     @Then("Loan has {double} total interest overdue amount")
@@ -4158,6 +4270,119 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(template.getDelinquencyBucketOptions()).isNotNull();
         final List<String> bucketNames = template.getDelinquencyBucketOptions().stream().map(DelinquencyBucketData::getName).toList();
         assertThat(bucketNames).doesNotContainAnyElementsOf(table.asList());
+    }
+
+    @Then("Loan Product template has creditAllocationStrategyOptions:")
+    public void verifyLoanProductTemplateCreditAllocationStrategyOptions(final DataTable table) {
+        final GetLoanProductsTemplateResponse template = ok(() -> fineractClient.loanProducts().retrieveTemplateLoanProduct(false));
+        assertThat(template.getCreditAllocationStrategyOptions()).isNotNull();
+        final List<List<String>> expectedOptions = table.asMaps().stream().map(row -> List.of(row.get("Code"), row.get("Value"))).toList();
+        final List<List<String>> actualOptions = template.getCreditAllocationStrategyOptions().stream()
+                .map(option -> List.of(option.getCode(), option.getValue())).toList();
+        assertThat(actualOptions).as("creditAllocationStrategyOptions").containsExactlyElementsOf(expectedOptions);
+    }
+
+    @Then("Loan Product {string} has the following credit allocation:")
+    public void verifyLoanProductCreditAllocation(final String loanProductName, final DataTable table) {
+        final Long loanProductId = resolveLoanProductId(loanProductName);
+        final GetLoanProductsProductIdResponse product = ok(
+                () -> fineractClient.loanProducts().retrieveOneLoanProductUniversal(loanProductId, Map.of()));
+        assertThat(product.getCreditAllocation()).as("creditAllocation of loan product %s", loanProductName).isNotNull();
+        final List<List<String>> expected = table.asMaps().stream().map(row -> List.of(row.get("Transaction type"),
+                row.get("Credit allocation strategy"), Objects.requireNonNullElse(row.get("Credit allocation order"), ""))).toList();
+        final List<List<String>> actual = product.getCreditAllocation().stream()
+                .map(creditAllocation -> List.of(creditAllocation.getTransactionType(), creditAllocation.getCreditAllocationStrategy(),
+                        creditAllocationOrderAsString(creditAllocation)))
+                .toList();
+        assertThat(actual).as("creditAllocation of loan product %s", loanProductName).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Then("Admin failed to create a new Loan Product with {string} payment strategy, credit allocation strategy {string}, credit allocation order {string} and got an error {string}")
+    public void createLoanProductWithInvalidCreditAllocationFailed(final String paymentStrategy, final String creditAllocationStrategy,
+            final String creditAllocationOrder, final String errorMessage) {
+        final PostLoanProductsRequest request = loanProductsRequestFactory.defaultLoanProductsRequestLP2EmiWithCreditAllocation(
+                chargebackCreditAllocation(creditAllocationStrategy, creditAllocationOrder));
+        final TransactionProcessingStrategyCode strategyCode = TransactionProcessingStrategyCode.valueOf(paymentStrategy);
+        if (strategyCode != ADVANCED_PAYMENT_ALLOCATION) {
+            request.transactionProcessingStrategyCode(strategyCode.getValue())//
+                    .loanScheduleType("CUMULATIVE")//
+                    .paymentAllocation(null);
+        }
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(400);
+        assertThat(exception.getResponseBody()).contains(errorMessage);
+    }
+
+    @Given("Loan product {string} dedicated to this scenario exists with chargeback credit allocation strategy {string} and credit allocation order {string}")
+    public void ensureDedicatedCreditAllocationLoanProduct(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder) {
+        ensureCreditAllocationLoanProduct(loanProductName, creditAllocationStrategy, creditAllocationOrder, false);
+    }
+
+    @When("Admin creates a new Loan Product {string} with chargeback credit allocation strategy {string}, credit allocation order {string} and interest recalculation {string}")
+    public void createCreditAllocationLoanProduct(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder, final String interestRecalculation) {
+        ensureCreditAllocationLoanProduct(loanProductName, creditAllocationStrategy, creditAllocationOrder,
+                Boolean.parseBoolean(interestRecalculation));
+    }
+
+    private void ensureCreditAllocationLoanProduct(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder, final boolean interestRecalculation) {
+        if (findLoanProductIdByName(loanProductName).isPresent()) {
+            updateLoanProductChargebackCreditAllocation(loanProductName, creditAllocationStrategy, creditAllocationOrder);
+            return;
+        }
+        final PostLoanProductsRequest request = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2EmiWithCreditAllocation(
+                        chargebackCreditAllocation(creditAllocationStrategy, creditAllocationOrder))//
+                .name(loanProductName);
+        if (interestRecalculation) {
+            request.isInterestRecalculationEnabled(true)//
+                    .preClosureInterestCalculationStrategy(1)//
+                    .rescheduleStrategyMethod(4)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1);
+        }
+        ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
+    @When("Admin updates {string} loan product chargeback credit allocation to strategy {string} and credit allocation order {string}")
+    public void updateLoanProductChargebackCreditAllocation(final String loanProductName, final String creditAllocationStrategy,
+            final String creditAllocationOrder) {
+        final Long loanProductId = resolveLoanProductId(loanProductName);
+        final PutLoanProductsProductIdRequest request = new PutLoanProductsProductIdRequest()//
+                .locale(LOCALE_EN)//
+                .creditAllocation(chargebackCreditAllocation(creditAllocationStrategy, creditAllocationOrder));
+        ok(() -> fineractClient.loanProducts().updateLoanProduct(loanProductId, request));
+    }
+
+    private List<CreditAllocationData> chargebackCreditAllocation(final String creditAllocationStrategy,
+            final String creditAllocationOrder) {
+        return List.of(LoanProductsRequestFactory.createCreditAllocation("CHARGEBACK",
+                parseCreditAllocationStrategy(creditAllocationStrategy), parseCreditAllocationOrder(creditAllocationOrder)));
+    }
+
+    private String parseCreditAllocationStrategy(final String creditAllocationStrategy) {
+        return "NONE".equals(creditAllocationStrategy) ? null : creditAllocationStrategy;
+    }
+
+    private List<String> parseCreditAllocationOrder(final String creditAllocationOrder) {
+        return switch (creditAllocationOrder) {
+            case "NONE" -> null;
+            case "EMPTY" -> List.of();
+            default -> Arrays.stream(creditAllocationOrder.split(",")).map(String::trim).toList();
+        };
+    }
+
+    private String creditAllocationOrderAsString(final CreditAllocationData creditAllocation) {
+        if (creditAllocation.getCreditAllocationOrder() == null) {
+            return "";
+        }
+        return creditAllocation.getCreditAllocationOrder().stream()//
+                .sorted(Comparator.comparing(CreditAllocationOrder::getOrder))//
+                .map(CreditAllocationOrder::getCreditAllocationRule)//
+                .collect(Collectors.joining(","));
     }
 
     @Then("Admin failed to create a new Loan Product with field {string} invalid data {string} and got an error {string}")

@@ -1813,7 +1813,7 @@ Feature: LoanReAging - Part1
       | 1  | 0    | 01 January 2025  | 01 April 2025 | 500.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       |    |      | 16 January 2025  |               | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 2  | 0    | 16 January 2025  | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
-      | 3  | 16   | 01 February 2025 | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 February 2025 | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 4  | 28   | 01 March 2025    | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 5  | 31   | 01 April 2025    | 01 April 2025 | 600.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0  | 0.0        | 0.0  | 0.0         |
       | 6  | 0    | 01 April 2025    |               | 0.0             | 600.0         | 0.0      | 0.0  | 0.0       | 600.0 | 0.0  | 0.0        | 0.0  | 600.0       |
@@ -3234,3 +3234,27 @@ Feature: LoanReAging - Part1
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
 
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify that re-aging and undoing the re-aging refresh the overdue amount of the loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
+    When Admin sets the business date to "20 February 2024"
+    When Admin runs inline COB job for Loan
+#   --- the installments due on 16 January, 31 January and 15 February 2024 are overdue ---
+    Then Loan has 750 total overdue amount
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate     | numberOfInstallments |
+      | 1               | MONTHS        | 01 March 2024 | 6                    |
+#   --- the re-aged installments are due from 01 March 2024 on, nothing is overdue ---
+    Then Loan has 0 total overdue amount
+    When Admin successfully undo Loan re-aging transaction
+    Then Loan has 750 total overdue amount
+    When Loan Pay-off is made on "20 February 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

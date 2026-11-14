@@ -508,6 +508,17 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, newLoanTransaction));
     }
 
+    /**
+     * Whether the installment is the additional (N+1) installment that amounts credited after maturity go to. A re-age
+     * keeps an additional installment that something was paid, waived or written off on within the re-aged schedule:
+     * regular installments follow it, and amounts credited after the re-age belong to those.
+     */
+    protected static boolean isTrailingAdditionalInstallment(final LoanRepaymentScheduleInstallment installment,
+            final List<LoanRepaymentScheduleInstallment> installments) {
+        return installment.isAdditional() && installments.stream()
+                .noneMatch(i -> !i.isAdditional() && !i.isDownPayment() && i.getDueDate().isAfter(installment.getDueDate()));
+    }
+
     protected void processCreditTransaction(LoanTransaction loanTransaction, MoneyHolder overpaymentHolder, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments) {
         loanTransaction.resetDerivedComponents();
@@ -542,7 +553,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // If already exists an additional installment just update the due date and
                     // principal from the Loan chargeback / CBR transaction
-                } else if (currentInstallment.isAdditional()) {
+                } else if (isTrailingAdditionalInstallment(currentInstallment, installmentToBeProcessed)) {
                     if (DateUtils.isAfter(transactionDate, currentInstallment.getDueDate())) {
                         currentInstallment.updateDueDate(transactionDate);
                     }
