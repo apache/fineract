@@ -112,7 +112,7 @@ public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountCh
                     isActive, chargeamountorpercentage);
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
     }

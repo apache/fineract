@@ -553,7 +553,7 @@ class AccountingServiceImplTest {
             setupAccounts();
         }
 
-        public Loan createMockedLoan() {
+        private Loan createMockedLoan() {
             Loan loan = mock(Loan.class);
             when(loan.getId()).thenReturn(LOAN_ID);
             when(loan.productId()).thenReturn(LOAN_PRODUCT_ID);
@@ -570,7 +570,7 @@ class AccountingServiceImplTest {
             return loan;
         }
 
-        public Loan createMockedOverpaidLoan() {
+        private Loan createMockedOverpaidLoan() {
             Loan loan = mock(Loan.class);
             when(loan.getId()).thenReturn(LOAN_ID);
             when(loan.productId()).thenReturn(LOAN_PRODUCT_ID);
