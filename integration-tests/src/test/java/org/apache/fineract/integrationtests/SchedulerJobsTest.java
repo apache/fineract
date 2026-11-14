@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,7 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetJobsResponse;
+import org.apache.fineract.client.models.JobUpdateRequest;
+import org.apache.fineract.client.models.JobUpdateResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -111,19 +115,54 @@ public class SchedulerJobsTest extends FeignIntegrationTest {
     }
 
     private void updateJobStatus(Integer jobId) {
-        // Retrieving Scheduler Job by ID
         GetJobsResponse schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
-
         boolean active = !schedulerJob.getActive();
-
-        // Updating Scheduler Job
-        Map<String, Object> changes = SchedulerJobHelper.updateSchedulerJob(jobId, active);
-
+        JobUpdateResponse response = SchedulerJobHelper.updateSchedulerJob(jobId, active);
         // Verifying Scheduler Job updates
-        assertEquals(active, changes.get("active"), "Verifying Scheduler Job Updates");
+        assertEquals(active, response.getChanges().get("active"), "Verifying Scheduler Job Updates");
+    }
 
-        schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
-        assertEquals(active, schedulerJob.getActive(), "Verifying Get Scheduler Job");
+    @Test
+    public void testUpdateJobWithEmptyBodyFails() {
+        int jobId = anySchedulerJobId();
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient().schedulerJob().updateJobDetail((long) jobId, new JobUpdateRequest()));
+        assertEquals(400, exception.getStatus());
+    }
+
+    @Test
+    public void testUpdateJobWithInvalidCronExpressionFails() {
+        int jobId = anySchedulerJobId();
+        CallFailedRuntimeException exception = fail(() -> fineractClient().schedulerJob().updateJobDetail((long) jobId,
+                new JobUpdateRequest().cronExpression("not a valid cron expression")));
+        assertEquals(400, exception.getStatus());
+    }
+
+    @Test
+    public void testUpdateJobWithBlankDisplayNameFails() {
+        int jobId = anySchedulerJobId();
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient().schedulerJob().updateJobDetail((long) jobId, new JobUpdateRequest().displayName("   ")));
+        assertEquals(400, exception.getStatus());
+    }
+
+    @Test
+    public void testUpdateJobWithValidCronExpressionReschedulesJob() {
+        int jobId = anySchedulerJobId();
+        String originalCron = SchedulerJobHelper.getSchedulerJobById(jobId).getCronExpression();
+        String newCron = "0 0 0 1/1 * ? *";
+        try {
+            SchedulerJobHelper.updateSchedulerStatus(true);
+            JobUpdateResponse response = SchedulerJobHelper.updateSchedulerJob(jobId, new JobUpdateRequest().cronExpression(newCron));
+            assertEquals(newCron, response.getChanges().get("cronExpression"), "Verifying Scheduler Job Updates");
+            await().until(() -> SchedulerJobHelper.getSchedulerJobById(jobId).getNextRunTime(), Objects::nonNull);
+        } finally {
+            SchedulerJobHelper.updateSchedulerJob(jobId, new JobUpdateRequest().cronExpression(originalCron));
+        }
+    }
+
+    private int anySchedulerJobId() {
+        return SchedulerJobHelper.getAllSchedulerJobIds().stream().mapToInt(number -> number).min().orElseThrow();
     }
 
     @Test

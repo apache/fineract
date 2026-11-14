@@ -53,6 +53,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
+import org.apache.fineract.client.models.JobUpdateRequest;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
 import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
@@ -65,7 +66,6 @@ import org.apache.fineract.client.models.PostLoansRequestCollateralData;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -1473,15 +1473,14 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
             addSpecifiedDueDateCharge(loanId, penalty, penaltyCharge1AddedDate, "10");
 
             SchedulerJobHelper.updateSchedulerStatus(true);
-            SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/1 * * * * ?"));
-
+            SchedulerJobHelper.updateSchedulerJob(16L, new JobUpdateRequest().active(true).cronExpression("0/1 * * * * ?"));
             Thread.sleep(2000);
             GetLoansLoanIdResponse loanDetails = loanHelper.getLoanDetails(loanId, "transactions");
             assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(1).getDate());
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
-            SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0 2 0 1/1 * ? *"));
+            SchedulerJobHelper.updateSchedulerJob(16L, new JobUpdateRequest().cronExpression("0 2 0 1/1 * ? *"));
         }
     }
 
