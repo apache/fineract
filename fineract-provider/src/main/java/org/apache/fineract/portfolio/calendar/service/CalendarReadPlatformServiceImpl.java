@@ -52,7 +52,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
     private static final class CalendarDataMapper implements RowMapper<CalendarData> {
 
-        public String schema() {
+        private String schema() {
             return " select c.id as id, ci.id as calendarInstanceId, ci.entity_id as entityId, ci.entity_type_enum as entityTypeId, c.title as title, "
                     + " c.description as description, c.location as location, c.start_date as startDate, c.end_date as endDate, "
                     + " c.duration as duration, c.calendar_type_enum as typeId, c.repeating as repeating, "
@@ -463,7 +463,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
     private static final class CalendarDataFromHistoryMapper implements RowMapper<CalendarData> {
 
-        public String schema() {
+        private String schema() {
             return " select c.calendar_id as id, c.title as title, c.description as description, c.location as location, c.start_date as startDate, "
                     + " c.end_date as endDate, c.duration as duration, c.calendar_type_enum as typeId, c.repeating as repeating, "
                     + " c.recurrence as recurrence, c.remind_by_enum as remindById, c.first_reminder as firstReminder, c.second_reminder as secondReminder "

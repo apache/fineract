@@ -68,7 +68,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class TellerMapper implements RowMapper<TellerData> {
 
-        public String schema() {
+        private String schema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -324,7 +324,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class CashierMapper implements RowMapper<CashierData> {
 
-        public String schema() {
+        private String schema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -362,7 +362,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class CashierTransactionMapper implements RowMapper<CashierTransactionData> {
 
-        public String cashierTxnSchema() {
+        private String cashierTxnSchema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -381,7 +381,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             return sqlBuilder.toString();
         }
 
-        public String savingsTxnSchema() {
+        private String savingsTxnSchema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -419,7 +419,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             return sqlBuilder.toString();
         }
 
-        public String loansTxnSchema() {
+        private String loansTxnSchema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -457,7 +457,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             return sqlBuilder.toString();
         }
 
-        public String clientTxnSchema() {
+        private String clientTxnSchema() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -526,7 +526,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class CashierTransactionSummaryMapper implements RowMapper<CashierTransactionTypeTotalsData> {
 
-        public String cashierTxnSummarySchema(String nextDay) {
+        private String cashierTxnSummarySchema(String nextDay) {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 

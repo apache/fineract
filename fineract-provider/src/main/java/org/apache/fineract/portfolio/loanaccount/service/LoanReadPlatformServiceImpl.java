@@ -757,7 +757,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             return " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc."
                     + sqlGenerator.escape("name")
                     + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode from m_loan l join m_currency rc on rc."
@@ -786,7 +786,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             this.delinquencyReadPlatformService = delinquencyReadPlatformService;
         }
 
-        public String loanSchema() {
+        private String loanSchema() {
             return "l.id as id, l.account_no as accountNo, l.external_id as externalId, l.fund_id as fundId, f.name as fundName,"
                     + " l.loan_type_enum as loanType, l.loanpurpose_cv_id as loanPurposeId, cv.code_value as loanPurposeName,"
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
@@ -1305,7 +1305,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     private static final class MusoniOverdueLoanScheduleMapper implements RowMapper<OverdueLoanScheduleData> {
 
-        public String schema() {
+        private String schema() {
             return " ls.loan_id as loanId, ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
                     + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
                     + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
@@ -1703,7 +1703,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             return "dd.id as id, dd.loan_id as loanId, dd.expected_disburse_date as expectedDisbursementdate, dd.disbursedon_date as actualDisbursementdate, "
                     + "dd.principal as principal,dd.net_disbursal_amount as netDisbursalAmount, sum(lc.amount) as chargeAmount, coalesce(sum(cad.amount), 0) as disburseChargeAmount, "
                     + "lc.amount_waived_derived waivedAmount, coalesce(" + sqlGenerator.groupConcat("lc.id") + ", "
@@ -2172,7 +2172,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             // TODO: investigate whether it can be refactored to be more efficient
             final String principalDueExpression = "coalesce(ls.principal_amount, 0) - coalesce(ls.principal_writtenoff_derived, 0)"
                     + " - coalesce(ls.principal_completed_derived, 0)";

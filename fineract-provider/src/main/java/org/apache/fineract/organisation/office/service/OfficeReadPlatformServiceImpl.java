@@ -62,7 +62,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     private static final class OfficeMapper implements RowMapper<OfficeData> {
 
-        public String officeSchema() {
+        private String officeSchema() {
             return " o.id as id, o.name as name, " + nameDecoratedBaseOnHierarchy
                     + " as nameDecorated, o.external_id as externalId, o.opening_date as openingDate, o.hierarchy as hierarchy, parent.id as parentId, parent.name as parentName "
                     + "from m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id ";
@@ -87,7 +87,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     private static final class OfficeDropdownMapper implements RowMapper<OfficeData> {
 
-        public String schema() {
+        private String schema() {
             return " o.id as id, " + nameDecoratedBaseOnHierarchy + " as nameDecorated, o.name as name from m_office o ";
         }
 
@@ -110,7 +110,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             return " ot.id as id, ot.transaction_date as transactionDate, ot.from_office_id as fromOfficeId, fromoff.name as fromOfficeName, "
                     + " ot.to_office_id as toOfficeId, tooff.name as toOfficeName, ot.transaction_amount as transactionAmount, ot.description as description, "
                     + " ot.currency_code as currencyCode, rc.decimal_places as currencyDigits, rc.currency_multiplesof as inMultiplesOf, "

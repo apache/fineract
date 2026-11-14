@@ -60,7 +60,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
 
-        public String schema() {
+        private String schema() {
             return "lc.id as id, lc.external_id as externalId, c.id as chargeId, c.name as name, lc.submitted_on_date as submittedOnDate, " //
                     + "lc.amount as amountDue, lc.amount_paid_derived as amountPaid, lc.amount_waived_derived as amountWaived, " //
                     + "lc.amount_writtenoff_derived as amountWrittenOff, lc.amount_outstanding_derived as amountOutstanding, " //
@@ -193,7 +193,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
     private static final class LoanChargeMapperWithLoanId implements RowMapper<LoanChargeData> {
 
-        public String schema() {
+        private String schema() {
             return " lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, lc.amount_outstanding_derived as amountOutstanding, lc.submitted_on_date as submittedOnDate, "
                     + " lc.charge_time_enum as chargeTime, loan.id as loanId, loan.external_id as externalLoanId, lc.external_id as externalId from  m_loan_charge lc "
                     + " join m_loan loan on loan.id = lc.loan_id ";
@@ -232,7 +232,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
     private static final class LoanInstallmentChargeMapper implements RowMapper<LoanInstallmentChargeData> {
 
-        public String schema() {
+        private String schema() {
             return " lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, "
                     + "lic.amount_outstanding_derived as amountOutstanding, lic.amount as  amount, lic.is_paid_derived as paid, "
                     + "lic.amount_waived_derived as amountWaived, lic.waived as waived from  m_loan_installment_charge lic "
@@ -313,7 +313,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             schemaSql = sb.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

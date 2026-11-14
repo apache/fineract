@@ -88,7 +88,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
         private final LoanProductReadPlatformService loanProductReadPlatformService;
         private final Long productId;
 
-        public String schema() {
+        private String schema() {
             return "pm.product_id as productId, lp.name as name from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
         }
 

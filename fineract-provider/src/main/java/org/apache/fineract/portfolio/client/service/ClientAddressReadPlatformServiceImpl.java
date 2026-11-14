@@ -42,7 +42,7 @@ public class ClientAddressReadPlatformServiceImpl implements ClientAddressReadPl
 
     private static final class ClientAddrMapper implements RowMapper<ClientAddressData> {
 
-        public String schema() {
+        private String schema() {
             return "fld.id as fieldConfigurationId,fld.entity as entity,fld.table as entitytable,fld.field as field,fld.is_enabled as is_enabled,"
                     + "fld.is_mandatory as is_mandatory,fld.validation_regex as validation_regex from m_field_configuration fld";
         }
