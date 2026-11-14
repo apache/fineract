@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.monetary.starter;
 
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -36,8 +37,8 @@ public class OrganisationMonetaryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CurrencyReadPlatformService.class)
-    public CurrencyReadPlatformService currencyReadPlatformService(JdbcTemplate jdbcTemplate) {
-        return new CurrencyReadPlatformServiceImpl(jdbcTemplate);
+    public CurrencyReadPlatformService currencyReadPlatformService(JdbcTemplate jdbcTemplate, SQLQueryFactory queryFactory) {
+        return new CurrencyReadPlatformServiceImpl(jdbcTemplate, queryFactory);
     }
 
     @Bean
