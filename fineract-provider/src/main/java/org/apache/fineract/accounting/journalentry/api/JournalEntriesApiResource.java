@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;
@@ -198,7 +197,7 @@ public class JournalEntriesApiResource {
                     + "\n" + "Mandatory Fields\n" + "officeId, transactionDate\n\n" + "\ncredits- glAccountId, amount, comments\n\n "
                     + "\ndebits-  glAccountId, amount, comments\n\n " + "\n" + "Optional Fields\n"
                     + "paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber")
-    @RequestBody(content = @Content(schema = @Schema(implementation = JournalEntryCommand.class)))
+    @RequestBody(content = @Content(schema = @Schema(implementation = JournalEntriesApiResourceSwagger.PostJournalEntriesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = JournalEntriesApiResourceSwagger.PostJournalEntriesResponse.class)))
     public String createGLJournalEntry(@Parameter(hidden = true) final String jsonRequestBody,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {

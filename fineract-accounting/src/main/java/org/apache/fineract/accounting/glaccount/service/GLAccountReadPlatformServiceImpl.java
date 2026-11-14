@@ -18,8 +18,15 @@
  */
 package org.apache.fineract.accounting.glaccount.service;
 
+import static org.apache.fineract.query.QAccAccountingRule.accAccountingRule;
+import static org.apache.fineract.query.QAccGlAccount.accGlAccount;
+import static org.apache.fineract.query.QAccRuleTags.accRuleTags;
+
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountLookupProjection;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidClassificationException;
@@ -49,6 +57,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     private static final String NAME_DECORATED_BASE_ON_HIERARCHY = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
 
     private static final String SQL_AND = " and ";
 
@@ -253,22 +262,15 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountDataForLookup> retrieveAccountsByTagId(final Long ruleId, final Integer transactionType) {
-        final GLAccountDataLookUpMapper mapper = new GLAccountDataLookUpMapper();
-        final String sql = "Select " + GLAccountDataLookUpMapper.LOOKUP_SCHEMA + " where rule.id=? and tags.acc_type_enum=?";
-        return this.jdbcTemplate.query(sql, mapper, ruleId, transactionType);
+        if (ruleId == null || transactionType == null) {
+            return new ArrayList<>();
+        }
+
+        return baseQuery().where(accAccountingRule.id.eq(ruleId), accRuleTags.accTypeEnum.eq(transactionType)).fetch();
     }
 
-    private static final class GLAccountDataLookUpMapper implements RowMapper<GLAccountDataForLookup> {
-
-        private static final String LOOKUP_SCHEMA = " gl.id as id, gl.name as name, gl.gl_code as glCode from acc_accounting_rule rule join acc_rule_tags tags on tags.acc_rule_id = rule.id join acc_gl_account gl on gl.tag_id=tags.tag_id";
-
-        @Override
-        public GLAccountDataForLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String name = rs.getString("name");
-            final String glCode = rs.getString("glCode");
-
-            return new GLAccountDataForLookup().setId(id).setName(name).setGlCode(glCode);
-        }
+    private SQLQuery<GLAccountDataForLookup> baseQuery() {
+        return queryFactory.select(new GLAccountLookupProjection()).from(accAccountingRule).join(accRuleTags)
+                .on(accRuleTags.accRuleId.eq(accAccountingRule.id)).join(accGlAccount).on(accGlAccount.tagId.eq(accRuleTags.tagId));
     }
 }
