@@ -83,7 +83,7 @@ class RetryConfigurationAssemblerTest {
         // whether an UNDER_PROCESSING command is its own retry, so priming it here would suppress the idempotency guard
         Retry retry = underTest.getRetryConfigurationForInlineCob();
 
-        retry.getRetryConfig().getExceptionPredicate().test(new OptimisticLockException("stale"));
+        assertTrue(retry.getRetryConfig().getExceptionPredicate().test(new OptimisticLockException("stale")));
 
         assertNull(underTest.getLastException());
     }

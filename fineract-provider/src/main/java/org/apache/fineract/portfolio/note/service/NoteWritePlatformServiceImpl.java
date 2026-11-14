@@ -145,6 +145,7 @@ public class NoteWritePlatformServiceImpl implements NoteWritePlatformService {
         return NoteDeleteResponse.builder().resourceId(request.getId()).build();
     }
 
+    @SuppressWarnings("UnnecessaryDefaultInEnumSwitch") // Keeps a clear failure if a new note type is added
     private Pair<Note, Long> getNote(NoteType type, Long resourceId, Long noteId) {
         Note note = null;
         Long officeId = null;

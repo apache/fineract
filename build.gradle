@@ -210,7 +210,6 @@ allprojects  {
                     "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
                     "MultiVariableDeclaration", // Until errorprone recognizes Lombok
-                    "UnnecessaryDefaultInEnumSwitch", // FINERACT-1911
                     "StringConcatToTextBlock", // Error Prone 2.49.0 crashes on JDK 25, raised issue: https://github.com/google/error-prone/issues/5815
                     "AssertEqualsArgumentOrderChecker",
                     "RemoveUnusedImports"  // For generated code
@@ -647,7 +646,6 @@ configure(project.fineractJavaProjects) {
             disable(
                     // TODO Remove disabled checks from this list, by fixing remaining usages
                     "UnusedVariable",
-                    "TypeParameterUnusedInFormals",
                     "EmptyBlockTag",
                     "MissingSummary",
                     "InvalidParam",
@@ -655,12 +653,10 @@ configure(project.fineractJavaProjects) {
                     "AlmostJavadoc",
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
-                    "ReturnValueIgnored",
                     "DirectInvocationOnMock",
                     "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
-                    "MultiVariableDeclaration", // Until errorprone recognizes Lombok
-                    "UnnecessaryDefaultInEnumSwitch" // FINERACT-1911
+                    "MultiVariableDeclaration" // Until errorprone recognizes Lombok
                     )
             error(
                     "DefaultCharset",
@@ -728,13 +724,14 @@ configure(project.fineractJavaProjects) {
                     "ModifiedButNotUsed",
                     "InconsistentCapitalization",
                     "MissingOverride",
+                    "UnnecessaryDefaultInEnumSwitch",
+                    "TypeParameterUnusedInFormals",
                     // TODO enable these remaining checks (one by one)
                     // "InvalidBlockTag",
                     // "InconsistentOverloads",
                     // "MethodCanBeStatic",
                     // "Var",
                     // "ConstantField",
-                    // "UnnecessaryDefaultInEnumSwitch",
                     // "FieldCanBeFinal"
                     )
         }

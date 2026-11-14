@@ -1695,20 +1695,24 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         checkAndFetchLazyCollection(this.loanCollateralManagements);
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     private void checkAndFetchLazyCollection(Collection lazyCollection) {
         if (lazyCollection != null) {
             lazyCollection.size(); // NOSONAR
         }
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void initializeLoanOfficerHistory() {
         this.loanOfficerHistory.size(); // NOSONAR
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void initializeTransactions() {
         this.loanTransactions.size(); // NOSONAR
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void initializeRepaymentSchedule() {
         this.repaymentScheduleInstallments.size(); // NOSONAR
     }
