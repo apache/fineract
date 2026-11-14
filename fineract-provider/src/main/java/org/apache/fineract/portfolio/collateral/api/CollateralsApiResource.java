@@ -36,11 +36,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -63,9 +60,6 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Collateral", description = "In lending agreements, collateral is a borrower's pledge of specific property to a lender, to secure repayment of a loan. The collateral serves as protection for a lender against a borrower's default - that is, any borrower failing to pay the principal and interest under the terms of a loan obligation. If a borrower does default on a loan (due to insolvency or other event), that borrower forfeits (gives up) the property pledged as collateral - and the lender then becomes the owner of the collateral")
 @RequiredArgsConstructor
 public class CollateralsApiResource {
-
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "type", "value", "description", "allowedCollateralTypes", "currency"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSION = "COLLATERAL";
 
@@ -91,8 +85,7 @@ public class CollateralsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Loan Collaterals", description = "Example Requests:\n" + "\n" + "loans/1/collaterals\n" + "\n" + "\n"
-            + "loans/1/collaterals?fields=value,description")
+    @Operation(summary = "List Loan Collaterals", description = "Example Requests:\n" + "\n" + "loans/1/collaterals")
     public List<CollateralData> retrieveCollateralDetails(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
@@ -102,10 +95,9 @@ public class CollateralsApiResource {
     @GET
     @Path("{collateralId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Collateral", description = "Example Requests:\n" + "\n" + "/loans/1/collaterals/1\n" + "\n" + "\n"
-            + "/loans/1/collaterals/1?fields=description,description")
+    @Operation(summary = "Retrieve a Collateral", description = "Example Requests:\n" + "\n" + "/loans/1/collaterals/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.GetLoansLoanIdCollateralsResponse.class)))
-    public String retrieveCollateralDetails(@Context final UriInfo uriInfo,
+    public CollateralData retrieveCollateralDetails(@Context final UriInfo uriInfo,
             @PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long CollateralId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
@@ -119,7 +111,7 @@ public class CollateralsApiResource {
             collateralData = collateralData.template(collateralData, codeValues);
         }
 
-        return this.apiJsonSerializerService.serialize(settings, collateralData, RESPONSE_DATA_PARAMETERS);
+        return collateralData;
     }
 
     @POST

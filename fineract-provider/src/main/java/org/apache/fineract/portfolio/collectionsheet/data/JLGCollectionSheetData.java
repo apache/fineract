@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -29,6 +31,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 /**
  * Immutable data object for join liability group's collection sheet.
  */
+@Getter
 public final class JLGCollectionSheetData {
 
     private final LocalDate dueDate;
@@ -63,6 +66,7 @@ public final class JLGCollectionSheetData {
         this.paymentTypeOptions = paymentTypeOptions;
     }
 
+    @JsonIgnore
     public LocalDate getDate() {
         return this.dueDate;
     }
