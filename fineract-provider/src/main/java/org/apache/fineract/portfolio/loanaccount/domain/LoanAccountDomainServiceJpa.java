@@ -183,7 +183,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Nullable
-    private LoanTransaction createInterestRefundLoanTransaction(Loan loan, LoanTransaction refundTransaction) {
+    LoanTransaction createInterestRefundLoanTransaction(Loan loan, LoanTransaction refundTransaction) {
+        if (!loan.isInterestRecalculationEnabled()) {
+            // Without interest recalculation the total interest is fixed at origination and does not depend on the
+            // outstanding balance, so an early refund cannot save any interest. The simulation below pretends the
+            // refunded principal was never disbursed, which regenerates the schedule from a smaller principal and
+            // bypasses the recalculation flag entirely, producing a spurious refund (see FINERACT-3014).
+            return null;
+        }
 
         InterestRefundService interestRefundService = interestRefundServiceDelegate.lookupInterestRefundService(loan);
         if (interestRefundService == null) {
