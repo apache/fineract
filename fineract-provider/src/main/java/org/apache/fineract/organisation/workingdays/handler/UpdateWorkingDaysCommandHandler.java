@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.workingdays.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import java.util.Collections;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class UpdateWorkingDaysCommandHandler implements CommandHandler<WorkingDa
 
     private final WorkingDaysWritePlatformService workingDaysWritePlatformService;
 
+    @Retry(name = "commandWorkingDaysUpdate", fallbackMethod = "fallback")
     @Transactional
     @Override
     public WorkingDaysUpdateResponse handle(Command<WorkingDaysUpdateRequest> command) {
@@ -52,4 +54,8 @@ public class UpdateWorkingDaysCommandHandler implements CommandHandler<WorkingDa
                 .extendTermForRepaymentsOnHolidays(request.getExtendTermForRepaymentsOnHolidays()).build();
     }
 
+    @Override
+    public WorkingDaysUpdateResponse fallback(Command<WorkingDaysUpdateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
+    }
 }

@@ -19,9 +19,10 @@
 package org.apache.fineract.command.implementation;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookAfter;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.apache.fineract.command.core.CommandHookError;
@@ -41,17 +42,35 @@ public class DefaultCommandHookManager implements CommandHookManager {
     private final List<CommandHookError> errorHooks;
 
     @Override
-    public void before(Command command) {
-        beforeHooks.forEach(processor -> processor.onBefore(command));
+    public void before(CommandContext<?, ?> ctx) {
+        run("pre", beforeHooks, ctx, CommandHookBefore::onBefore);
     }
 
     @Override
-    public void after(Command command, Object response) {
-        afterHooks.forEach(processor -> processor.onAfter(command, response));
+    public void after(CommandContext<?, ?> ctx) {
+        run("post", afterHooks, ctx, CommandHookAfter::onAfter);
     }
 
     @Override
-    public void error(Command command, Throwable error) {
-        errorHooks.forEach(processor -> processor.onError(command, error));
+    public void error(CommandContext<?, ?> ctx) {
+        run("error", errorHooks, ctx, CommandHookError::onError);
+    }
+
+    private <H> void run(String phase, List<H> hooks, CommandContext ctx, BiConsumer<H, CommandContext> invoke) {
+        try {
+            for (var hook : hooks) {
+                invoke.accept(hook, ctx);
+
+                if (ctx.isSkipHooks()) {
+                    log.debug("Skipping remaining {} hooks after: {}", phase, hook.getClass().getCanonicalName());
+
+                    return;
+                }
+            }
+        } finally {
+            // skipHooks stops the rest of this phase only. It is cleared here, also when a hook throws, so that it
+            // never carries over: a before hook that sets it and then throws must not silence the error hooks
+            ctx.setSkipHooks(false);
+        }
     }
 }

@@ -19,6 +19,8 @@
 package org.apache.fineract.command.disruptor.implementation;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.fineract.command.core.CommandState.PROCESSED;
+import static org.apache.fineract.command.disruptor.DisruptorCommandConstants.COMMAND_DISRUPTOR_PROPERTY_ENABLED;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -31,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.command.core.CommandHandlerManager;
 import org.apache.fineract.command.core.CommandHookManager;
@@ -43,7 +46,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@ConditionalOnProperty(value = "fineract.command.disruptor.enabled", havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_DISRUPTOR_PROPERTY_ENABLED, havingValue = "true")
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class DisruptorCommandDispatcher implements CommandDispatcher, Closeable {
 
@@ -53,9 +56,7 @@ public class DisruptorCommandDispatcher implements CommandDispatcher, Closeable 
     public <REQ, RES> Supplier<RES> dispatch(Command<REQ> command) {
         requireNonNull(command, "Command must not be null");
 
-        CommandEvent<REQ, RES> processedEvent = next(command);
-
-        var future = processedEvent.getFuture();
+        var future = next(CommandContext.<REQ, RES>builder().command(command).build());
 
         return future::join;
     }
@@ -70,25 +71,36 @@ public class DisruptorCommandDispatcher implements CommandDispatcher, Closeable 
         disruptor.start();
     }
 
+    /**
+     * Ring buffer slots are reused, so each command needs a fresh future. It has to be created and handed back to the
+     * caller <i>before</i> the slot is published: from that moment the slot belongs to the consumer, which may already
+     * have completed and replaced anything read from it afterwards.
+     */
     @SuppressWarnings({ "unchecked" })
-    private <REQ, RES> CommandEvent<REQ, RES> next(Command<REQ> command) {
+    private <REQ, RES> CompletableFuture<RES> next(CommandContext<REQ, RES> ctx) {
         var ringBuffer = disruptor.getRingBuffer();
 
         var sequenceId = ringBuffer.next();
 
-        CommandEvent<REQ, RES> event = ringBuffer.get(sequenceId);
-        event.setCommand(command);
-        ringBuffer.publish(sequenceId);
+        try {
+            CommandEvent<REQ, RES> event = ringBuffer.get(sequenceId);
+            var future = new CompletableFuture<RES>();
 
-        return event;
+            event.setContext(ctx);
+            event.setFuture(future);
+
+            return future;
+        } finally {
+            ringBuffer.publish(sequenceId);
+        }
     }
 
     @Getter
     @Setter
     public static class CommandEvent<REQ, RES> {
 
-        private Command<REQ> command;
-        private CompletableFuture<RES> future = new CompletableFuture<>();
+        private CommandContext<REQ, RES> context;
+        private CompletableFuture<RES> future;
     }
 
     @RequiredArgsConstructor
@@ -100,18 +112,27 @@ public class DisruptorCommandDispatcher implements CommandDispatcher, Closeable 
 
         @Override
         public void onEvent(CommandEvent event, long sequence, boolean endOfBatch) {
-            var command = event.getCommand();
+            final var ctx = event.getContext();
 
             try {
-                hookManager.before(command);
+                hookManager.before(ctx);
 
-                var result = handlerManager.handle(command);
+                if (ctx.isSkipExecution()) {
+                    event.getFuture().complete(ctx.getResponse());
+                } else {
+                    var response = handlerManager.handle(ctx.getCommand());
 
-                hookManager.after(command, result);
+                    ctx.setResponse(response);
+                    ctx.setState(PROCESSED);
 
-                event.getFuture().complete(result);
+                    hookManager.after(ctx);
+
+                    event.getFuture().complete(ctx.getResponse());
+                }
             } catch (Exception e) {
-                hookManager.error(command, e);
+                ctx.setError(e);
+
+                hookManager.error(ctx);
 
                 event.getFuture().completeExceptionally(e);
             }
