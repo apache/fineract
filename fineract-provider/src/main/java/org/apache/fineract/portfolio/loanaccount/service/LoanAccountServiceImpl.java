@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -37,6 +38,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
 
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     @Override
     public LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
@@ -51,6 +53,27 @@ public class LoanAccountServiceImpl implements LoanAccountService {
     @Override
     public Loan saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
+            return this.loanRepositoryWrapper.saveAndFlush(loan);
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+            raiseValidationExceptionForUniqueConstraintViolation(e);
+            throw e;
+        }
+    }
+
+    /*
+     * Due to the "saveAndFlushLoanWithDataIntegrityViolationChecks" method the loan is saved and flushed in the middle
+     * of the transaction. EclipseLink is in some situations are saving inconsistently the newly created associations,
+     * like the newly created repayment schedule installments. The save and flush cannot be removed safely till any
+     * native queries are used as part of this transaction either. See:
+     * this.loanAccountDomainService.recalculateAccruals(loan);
+     *
+     * As a workaround, we iterate over and save each LoanRepaymentScheduleInstallment entity before saving and flushing
+     * the Loan entity.
+     */
+    @Override
+    public Loan saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(final Loan loan) {
+        try {
+            loanRepaymentScheduleInstallmentRepository.saveAll(loan.getRepaymentScheduleInstallments());
             return this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             raiseValidationExceptionForUniqueConstraintViolation(e);
