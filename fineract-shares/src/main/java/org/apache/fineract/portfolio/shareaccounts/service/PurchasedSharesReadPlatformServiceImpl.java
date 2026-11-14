@@ -35,7 +35,7 @@ import org.springframework.jdbc.core.RowMapper;
 @RequiredArgsConstructor
 public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    protected final JdbcTemplate jdbcTemplate;
 
     @Override
     public Collection<ShareAccountTransactionData> retrievePurchasedShares(Long accountId) {

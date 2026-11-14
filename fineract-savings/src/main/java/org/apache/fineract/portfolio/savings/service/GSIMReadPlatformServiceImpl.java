@@ -49,9 +49,9 @@ import org.springframework.jdbc.core.RowMapper;
 @RequiredArgsConstructor
 public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
-    private final ColumnValidator columnValidator;
+    protected final JdbcTemplate jdbcTemplate;
+    protected final PlatformSecurityContext context;
+    protected final ColumnValidator columnValidator;
 
     private static final class GSIMFieldsMapper implements RowMapper<GroupSavingsIndividualMonitoringAccountData> {
 

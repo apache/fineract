@@ -70,13 +70,13 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionVa
 @RequiredArgsConstructor
 public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanTransactionValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private final LoanTransactionValidator loanTransactionValidator;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
-    private final LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository;
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
+    protected final FromJsonHelper fromApiJsonHelper;
+    protected final LoanTransactionValidator loanTransactionValidator;
+    protected final LoanRepositoryWrapper loanRepositoryWrapper;
+    protected final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
+    protected final LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository;
+    protected final LoanTransactionRepository loanTransactionRepository;
+    protected final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
 
     private static final String TRANSACTION_DATE = "transactionDate";
     private static final String TRANSACTION_AMOUNT = "transactionAmount";

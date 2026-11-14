@@ -59,20 +59,20 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedIncomePlatformService {
 
-    private final ProgressiveLoanTransactionValidator loanTransactionValidator;
-    private final LoanAssembler loanAssembler;
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final LoanJournalEntryPoster journalEntryPoster;
-    private final ExternalIdFactory externalIdFactory;
-    private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
-    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
-    private final LoanBalanceService loanBalanceService;
-    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final CodeValueRepository codeValueRepository;
-    private final LoanScheduleService loanScheduleService;
-    private final TransactionBoundApplicationEventPublisher eventPublisher;
+    protected final ProgressiveLoanTransactionValidator loanTransactionValidator;
+    protected final LoanAssembler loanAssembler;
+    protected final LoanTransactionRepository loanTransactionRepository;
+    protected final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    protected final LoanJournalEntryPoster journalEntryPoster;
+    protected final ExternalIdFactory externalIdFactory;
+    protected final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
+    protected final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    protected final LoanBalanceService loanBalanceService;
+    protected final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final CodeValueRepository codeValueRepository;
+    protected final LoanScheduleService loanScheduleService;
+    protected final TransactionBoundApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override

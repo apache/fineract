@@ -32,9 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements PaymentDetailWritePlatformService {
 
-    private final PaymentDetailRepository paymentDetailRepository;
+    protected final PaymentDetailRepository paymentDetailRepository;
     // private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
-    private final PaymentTypeRepository paymentTypeRepository;
+    protected final PaymentTypeRepository paymentTypeRepository;
 
     @Override
     public PaymentDetail createPaymentDetail(final JsonCommand command, final Map<String, Object> changes) {

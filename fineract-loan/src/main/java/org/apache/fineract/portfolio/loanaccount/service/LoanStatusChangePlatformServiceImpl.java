@@ -31,8 +31,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 @RequiredArgsConstructor
 public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlatformService {
 
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
 
     @PostConstruct
     public void addListeners() {

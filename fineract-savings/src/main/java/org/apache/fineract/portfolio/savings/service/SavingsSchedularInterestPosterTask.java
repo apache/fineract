@@ -36,9 +36,9 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 @RequiredArgsConstructor
 public class SavingsSchedularInterestPosterTask implements Callable<Void> {
 
-    private final SavingsSchedularInterestPoster interestPoster;
+    protected final SavingsSchedularInterestPoster interestPoster;
     @Setter
-    private FineractContext context;
+    protected FineractContext context;
 
     @Override
     public Void call() throws JobExecutionException {

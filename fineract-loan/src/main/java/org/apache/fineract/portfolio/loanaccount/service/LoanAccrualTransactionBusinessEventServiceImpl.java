@@ -36,8 +36,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 @RequiredArgsConstructor
 public class LoanAccrualTransactionBusinessEventServiceImpl implements LoanAccrualTransactionBusinessEventService {
 
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanTransactionRepository loanTransactionRepository;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public void raiseBusinessEventForAccrualTransactions(final Loan loan, final List<Long> existingTransactionIds) {

@@ -35,8 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CapitalizedIncomeBalanceReadServiceImpl implements CapitalizedIncomeBalanceReadService {
 
-    private final LoanRepositoryWrapper loanRepository;
-    private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
+    protected final LoanRepositoryWrapper loanRepository;
+    protected final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
 
     @Override
     public LoanCapitalizedIncomeData fetchLoanCapitalizedIncomeData(final Long loanId) {

@@ -43,7 +43,7 @@ import org.jspecify.annotations.NonNull;
 @RequiredArgsConstructor
 public class ProgressiveLoanInterestScheduleModelParserServiceGsonImpl implements ProgressiveLoanInterestScheduleModelParserService {
 
-    private final Gson gsonSerializer = createSerializer();
+    protected final Gson gsonSerializer = createSerializer();
 
     private Gson createSerializer() {
         return new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe())

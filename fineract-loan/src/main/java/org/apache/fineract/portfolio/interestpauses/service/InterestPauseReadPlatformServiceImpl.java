@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class InterestPauseReadPlatformServiceImpl implements InterestPauseReadPlatformService {
 
-    private final LoanTermVariationsRepository loanTermVariationsRepository;
+    protected final LoanTermVariationsRepository loanTermVariationsRepository;
 
     @Override
     public List<InterestPauseResponseDto> retrieveInterestPauses(Long loanId) {

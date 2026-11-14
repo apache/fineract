@@ -69,11 +69,11 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 @RequiredArgsConstructor
 public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private final JdbcTemplate jdbcTemplate;
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    protected final JdbcTemplate jdbcTemplate;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @PostConstruct
     public void registerForNotification() {

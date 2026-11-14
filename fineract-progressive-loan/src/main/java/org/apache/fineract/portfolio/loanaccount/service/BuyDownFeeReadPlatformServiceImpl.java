@@ -32,8 +32,8 @@ import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanc
 @RequiredArgsConstructor
 public class BuyDownFeeReadPlatformServiceImpl implements BuyDownFeeReadPlatformService {
 
-    private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
-    private final LoanRepository loanRepository;
+    protected final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
+    protected final LoanRepository loanRepository;
 
     @Override
     public List<BuyDownFeeAmortizationDetails> retrieveLoanBuyDownFeeAmortizationDetails(final Long loanId) {

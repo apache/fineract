@@ -54,12 +54,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class InterestPauseWritePlatformServiceImpl implements InterestPauseWritePlatformService {
 
-    private final LoanTermVariationsRepository loanTermVariationsRepository;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanAssembler loanAssembler;
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanScheduleService loanScheduleService;
-    private final PlatformSecurityContext context;
+    protected final LoanTermVariationsRepository loanTermVariationsRepository;
+    protected final LoanRepositoryWrapper loanRepositoryWrapper;
+    protected final LoanAssembler loanAssembler;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final LoanScheduleService loanScheduleService;
+    protected final PlatformSecurityContext context;
 
     @Override
     public CommandProcessingResult createInterestPause(final ExternalId loanExternalId, final String startDateString,
