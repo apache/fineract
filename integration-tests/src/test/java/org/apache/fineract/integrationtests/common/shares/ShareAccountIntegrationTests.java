@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.shares;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.integrationtests.client.feign.modules.FeignErrors.errorGlobalisationCode;
 
 import java.math.BigDecimal;
@@ -109,9 +110,26 @@ public class ShareAccountIntegrationTests {
         Assertions.assertEquals(List.of(chargeId),
                 shareAccountHelper.getShareProduct(shareProductId).getCharges().stream().map(GetProductsCharges::getId).toList());
 
+        // A charge in another currency is checked against the product's currency (USD) and rejected
+        final Long eurChargeId = chargesHelper.createCharge(new ChargeRequest()//
+                .name(Utils.uniqueRandomStringGenerator("Charge_Share_EUR_", 8))//
+                .chargeAppliesTo(ChargeAppliesTo.SHARES.getValue())//
+                .chargeTimeType(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())//
+                .chargeCalculationType(ChargeCalculationType.FLAT.getValue())//
+                .amount(100.0)//
+                .currencyCode("EUR")//
+                .locale("en")//
+                .active(true)).getResourceId();
+        final CallFailedRuntimeException exception = fail(() -> FineractFeignClientHelper.getFineractFeignClient().products()
+                .updateShareProduct("share", shareProductId, new PutProductsTypeProductIdRequest().locale("en")
+                        .chargesSelected(Set.of(new PostProductsChargesSelected().id(eurChargeId)))));
+        Assertions.assertEquals(403, exception.getStatus());
+        Assertions.assertEquals("error.msg.charge.attach.to.share.product.invalid.currency", errorGlobalisationCode(exception));
+        Assertions.assertEquals(List.of(chargeId),
+                shareAccountHelper.getShareProduct(shareProductId).getCharges().stream().map(GetProductsCharges::getId).toList());
+
         // Removing it again
-        shareAccountHelper.updateShareProduct(shareProductId,
-                new PutProductsTypeProductIdRequest().locale("en").currencyCode("USD").chargesSelected(Set.of()));
+        shareAccountHelper.updateShareProduct(shareProductId, new PutProductsTypeProductIdRequest().locale("en").chargesSelected(Set.of()));
         Assertions.assertTrue(shareAccountHelper.getShareProduct(shareProductId).getCharges().isEmpty());
     }
 
