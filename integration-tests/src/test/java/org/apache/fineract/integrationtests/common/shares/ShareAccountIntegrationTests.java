@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common.shares;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.integrationtests.client.feign.modules.FeignErrors.errorGlobalisationCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AccountChargesRequest;
 import org.apache.fineract.client.models.AccountRequest;
@@ -32,7 +34,9 @@ import org.apache.fineract.client.models.GetAccountsCharges;
 import org.apache.fineract.client.models.GetAccountsPurchasedShares;
 import org.apache.fineract.client.models.GetAccountsSummary;
 import org.apache.fineract.client.models.GetAccountsTypeAccountIdResponse;
+import org.apache.fineract.client.models.GetProductsCharges;
 import org.apache.fineract.client.models.GetProductsTypeProductIdResponse;
+import org.apache.fineract.client.models.PostProductsChargesSelected;
 import org.apache.fineract.client.models.PostProductsTypeRequest;
 import org.apache.fineract.client.models.PutAccountsTypeAccountIdRequest;
 import org.apache.fineract.client.models.PutProductsTypeProductIdRequest;
@@ -93,6 +97,40 @@ public class ShareAccountIntegrationTests {
         Assertions.assertEquals(2000, updatedShareProductData.getTotalSharesIssued());
         LOG.info("------------------------------UPDATING SHARE PRODUCT COMPLETE---------------------------------------");
 
+    }
+
+    @Test
+    public void testUpdateShareProductCharges() {
+        final Long shareProductId = createShareProduct();
+        final Long chargeId = createShareCharge(ChargeTimeType.SHAREACCOUNT_ACTIVATION);
+
+        // Adding a charge, without the currency in the request
+        shareAccountHelper.updateShareProduct(shareProductId,
+                new PutProductsTypeProductIdRequest().locale("en").chargesSelected(Set.of(new PostProductsChargesSelected().id(chargeId))));
+        Assertions.assertEquals(List.of(chargeId),
+                shareAccountHelper.getShareProduct(shareProductId).getCharges().stream().map(GetProductsCharges::getId).toList());
+
+        // A charge in another currency is checked against the product's currency (USD) and rejected
+        final Long eurChargeId = chargesHelper.createCharge(new ChargeRequest()//
+                .name(Utils.uniqueRandomStringGenerator("Charge_Share_EUR_", 8))//
+                .chargeAppliesTo(ChargeAppliesTo.SHARES.getValue())//
+                .chargeTimeType(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())//
+                .chargeCalculationType(ChargeCalculationType.FLAT.getValue())//
+                .amount(100.0)//
+                .currencyCode("EUR")//
+                .locale("en")//
+                .active(true)).getResourceId();
+        final CallFailedRuntimeException exception = fail(() -> FineractFeignClientHelper.getFineractFeignClient().products()
+                .updateShareProduct("share", shareProductId, new PutProductsTypeProductIdRequest().locale("en")
+                        .chargesSelected(Set.of(new PostProductsChargesSelected().id(eurChargeId)))));
+        Assertions.assertEquals(403, exception.getStatus());
+        Assertions.assertEquals("error.msg.charge.attach.to.share.product.invalid.currency", errorGlobalisationCode(exception));
+        Assertions.assertEquals(List.of(chargeId),
+                shareAccountHelper.getShareProduct(shareProductId).getCharges().stream().map(GetProductsCharges::getId).toList());
+
+        // Removing it again
+        shareAccountHelper.updateShareProduct(shareProductId, new PutProductsTypeProductIdRequest().locale("en").chargesSelected(Set.of()));
+        Assertions.assertTrue(shareAccountHelper.getShareProduct(shareProductId).getCharges().isEmpty());
     }
 
     @Test
