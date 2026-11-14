@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ResourceInfo;
@@ -78,6 +80,8 @@ class PartialResponseFilterTest {
         final UriInfo uriInfo = mock(UriInfo.class);
         lenient().when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
         lenient().when(requestContext.getUriInfo()).thenReturn(uriInfo);
+        lenient().when(requestContext.getMethod()).thenReturn(HttpMethod.GET);
+        lenient().when(responseContext.getStatusInfo()).thenReturn(Response.Status.OK);
         lenient().when(responseContext.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
         lenient().when(responseContext.getEntityAnnotations()).thenReturn(new Annotation[0]);
     }
@@ -172,6 +176,40 @@ class PartialResponseFilterTest {
         assertFalse(item.has("id"));
         assertTrue(item.has("accountType"));
         assertNull(item.get("prefixType"), "null properties are not written in the first place");
+    }
+
+    @Test
+    void aWriteIsLeftAloneEvenWhenItsResourceIsAnnotated() {
+        withSupportedParameters(SUPPORTED);
+        when(requestContext.getMethod()).thenReturn(HttpMethod.POST);
+        queryParameters.putSingle("fields", "bogus");
+
+        underTest.filter(requestContext, responseContext);
+
+        verify(responseContext, never()).setStatus(anyInt());
+        verify(responseContext, never()).setEntity(any(), any(), any());
+    }
+
+    @Test
+    void anErrorResponseIsLeftAlone() {
+        withSupportedParameters(SUPPORTED);
+        when(responseContext.getStatusInfo()).thenReturn(Response.Status.NOT_FOUND);
+        queryParameters.putSingle("fields", "id");
+
+        underTest.filter(requestContext, responseContext);
+
+        verify(responseContext, never()).setEntity(any(), any(), any());
+    }
+
+    @Test
+    void anErrorResponseOnAnIncludeOnlyResourceIsNotPruned() {
+        withSupportedParameters();
+        when(responseContext.getStatusInfo()).thenReturn(Response.Status.NOT_FOUND);
+        queryParameters.putSingle("fields", "id");
+
+        underTest.filter(requestContext, responseContext);
+
+        verify(responseContext, never()).setEntity(any(), any(), any());
     }
 
     @Test
