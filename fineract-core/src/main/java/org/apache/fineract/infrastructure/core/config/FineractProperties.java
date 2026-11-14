@@ -598,6 +598,8 @@ public class FineractProperties {
             private boolean autoCreateUser = false;
             // Comma-separated role names assigned to auto-created users.
             private String defaultRoles = "";
+            // Audience a token must name in its aud claim. Empty: the audience is not checked.
+            private String audience = "";
             // Controls the RP-Initiated Logout URL format.
             // Values: keycloak | azure_ad | okta | auth0 | generic (default)
             private OidcFederationType provider = OidcFederationType.GENERIC;
@@ -620,6 +622,8 @@ public class FineractProperties {
                 private String jwksUri;
                 // Optional: per-issuer override for the username claim.
                 private String usernameClaim;
+                // Optional: per-issuer override for the audience.
+                private String audience;
             }
         }
 
