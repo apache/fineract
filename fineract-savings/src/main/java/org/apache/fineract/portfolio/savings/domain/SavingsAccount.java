@@ -2671,26 +2671,15 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         LocalDate lockedInUntilLocalDate = null;
         final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
         switch (lockinPeriodFrequencyType) {
-            case INVALID:
+            case INVALID, SEMI_MONTHLY -> {
                 // SEMI_MONTHLY is a loan repayment frequency and is never offered as a savings lock-in period, so it
                 // leaves the account unlocked just like an unset frequency does.
-            case SEMI_MONTHLY:
-            break;
-            case DAYS:
-                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency);
-            break;
-            case WEEKS:
-                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency);
-            break;
-            case MONTHS:
-                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency);
-            break;
-            case YEARS:
-                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency);
-            break;
-            case WHOLE_TERM:
-                LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
-            break;
+            }
+            case DAYS -> lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency);
+            case WEEKS -> lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency);
+            case MONTHS -> lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency);
+            case YEARS -> lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency);
+            case WHOLE_TERM -> LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
         }
 
         return lockedInUntilLocalDate;

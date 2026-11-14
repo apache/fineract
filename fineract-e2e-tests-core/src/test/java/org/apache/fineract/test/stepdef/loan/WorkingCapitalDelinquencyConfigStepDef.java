@@ -288,32 +288,17 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
         assert minimumPaymentPeriodAndRuleRequest != null;
 
         switch (fieldName) {
-            case "name":
-                delinquencyBucketRequest.setName(fieldValue);
-            break;
-            case "ranges":
-                delinquencyBucketRequest.setRanges(valueArrayList);
-            break;
-            case "bucketType":
-                delinquencyBucketRequest.setBucketType(fieldValue);
-            break;
-            case "minimumPaymentPeriodAndRule":
+            case "name" -> delinquencyBucketRequest.setName(fieldValue);
+            case "ranges" -> delinquencyBucketRequest.setRanges(valueArrayList);
+            case "bucketType" -> delinquencyBucketRequest.setBucketType(fieldValue);
+            case "minimumPaymentPeriodAndRule" ->
                 delinquencyBucketRequest.setMinimumPaymentPeriodAndRule(fieldValue == null ? null : minimumPaymentPeriodAndRuleRequest);
-            break;
-            case "frequency":
-                minimumPaymentPeriodAndRuleRequest.setFrequency(valueInt);
-            break;
-            case "frequencyType":
-                minimumPaymentPeriodAndRuleRequest.setFrequencyType(fieldValue);
-            break;
-            case "minimumPayment":
-                minimumPaymentPeriodAndRuleRequest.setMinimumPayment(valueBigDecimal);
-            break;
-            case "minimumPaymentType":
-                minimumPaymentPeriodAndRuleRequest.setMinimumPaymentType(fieldValue);
-            break;
-            default:
-            break;
+            case "frequency" -> minimumPaymentPeriodAndRuleRequest.setFrequency(valueInt);
+            case "frequencyType" -> minimumPaymentPeriodAndRuleRequest.setFrequencyType(fieldValue);
+            case "minimumPayment" -> minimumPaymentPeriodAndRuleRequest.setMinimumPayment(valueBigDecimal);
+            case "minimumPaymentType" -> minimumPaymentPeriodAndRuleRequest.setMinimumPaymentType(fieldValue);
+            default -> {
+            }
         }
         return delinquencyBucketRequest;
     }

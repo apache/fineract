@@ -254,7 +254,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     private void populateDerivedFields(final BigDecimal transactionAmount, final BigDecimal chargeAmount) {
 
         switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-            case INVALID:
+            case INVALID -> {
                 this.percentage = null;
                 this.amount = null;
                 this.amountPercentageAppliedTo = null;
@@ -262,8 +262,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
-            case FLAT:
+            }
+            case FLAT -> {
                 // A charge built by createNewWithoutSavingsAccount has no account (and so no currency) yet; its amount
                 // is rounded when it is attached to the account, see update(SavingsAccount).
                 final BigDecimal flatAmount = this.savingsAccount == null ? chargeAmount
@@ -275,8 +275,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = flatAmount;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
-            case PERCENT_OF_AMOUNT:
+            }
+            case PERCENT_OF_AMOUNT -> {
                 this.percentage = chargeAmount;
                 this.amountPercentageAppliedTo = transactionAmount;
                 this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
@@ -284,8 +284,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = calculateOutstanding();
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
-            case PERCENT_OF_AMOUNT_AND_INTEREST:
+            }
+            case PERCENT_OF_AMOUNT_AND_INTEREST -> {
                 this.percentage = null;
                 this.amount = null;
                 this.amountPercentageAppliedTo = null;
@@ -293,8 +293,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
-            case PERCENT_OF_INTEREST:
+            }
+            case PERCENT_OF_INTEREST -> {
                 this.percentage = null;
                 this.amount = null;
                 this.amountPercentageAppliedTo = null;
@@ -302,8 +302,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
-            case PERCENT_OF_DISBURSEMENT_AMOUNT:
+            }
+            case PERCENT_OF_DISBURSEMENT_AMOUNT -> {
                 this.percentage = null;
                 this.amount = null;
                 this.amountPercentageAppliedTo = null;
@@ -311,7 +311,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+            }
         }
     }
 

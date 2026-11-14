@@ -55,14 +55,10 @@ public enum ChargePaymentMode {
 
     public static ChargePaymentMode fromInt(final Integer paymentMode) {
         ChargePaymentMode chargeAppliesToType = ChargePaymentMode.REGULAR;
-        switch (paymentMode) {
-            case 1:
-                chargeAppliesToType = ACCOUNT_TRANSFER;
-            break;
-            default:
-                chargeAppliesToType = REGULAR;
-            break;
-        }
+        chargeAppliesToType = switch (paymentMode) {
+            case 1 -> ACCOUNT_TRANSFER;
+            default -> REGULAR;
+        };
         return chargeAppliesToType;
     }
 

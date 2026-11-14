@@ -45,20 +45,12 @@ public final class CashierTxnType implements Serializable {
         CashierTxnType retVal = null;
 
         switch (id) {
-            case 101:
-                retVal = ALLOCATE;
-            break;
-            case 102:
-                retVal = SETTLE;
-            break;
-            case 103:
-                retVal = INWARD_CASH_TXN;
-            break;
-            case 104:
-                retVal = OUTWARD_CASH_TXN;
-            break;
-            default:
-            break;
+            case 101 -> retVal = ALLOCATE;
+            case 102 -> retVal = SETTLE;
+            case 103 -> retVal = INWARD_CASH_TXN;
+            case 104 -> retVal = OUTWARD_CASH_TXN;
+            default -> {
+            }
         }
         return retVal;
     }

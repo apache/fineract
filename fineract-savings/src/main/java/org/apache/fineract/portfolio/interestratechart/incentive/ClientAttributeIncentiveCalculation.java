@@ -34,48 +34,41 @@ public class ClientAttributeIncentiveCalculation extends AttributeIncentiveCalcu
         final InterestIncentivesFields incentivesFields = incentiveDTO.incentives();
         boolean applyIncentive = false;
         switch (incentivesFields.attributeName()) {
-            case GENDER:
+            case GENDER -> {
                 if (client.genderId() != null) {
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             client.genderId());
                 }
-            break;
-            case AGE:
+            }
+            case AGE -> {
                 if (client.dateOfBirth() != null) {
                     final LocalDate dobLocalDate = client.dateOfBirth();
                     final int age = Math.toIntExact(ChronoUnit.YEARS.between(dobLocalDate, DateUtils.getBusinessLocalDate()));
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             (long) age);
                 }
-            break;
-            case CLIENT_TYPE:
+            }
+            case CLIENT_TYPE -> {
                 if (client.clientTypeId() != null) {
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             client.clientTypeId());
                 }
-            break;
-            case CLIENT_CLASSIFICATION:
+            }
+            case CLIENT_CLASSIFICATION -> {
                 if (client.clientClassificationId() != null) {
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             client.clientClassificationId());
                 }
-            break;
-
-            default:
-            break;
-
+            }
+            default -> {
+            }
         }
         if (applyIncentive) {
             switch (incentivesFields.incentiveType()) {
-                case FIXED:
-                    interest = incentivesFields.amount();
-                break;
-                case INCENTIVE:
-                    interest = interest.add(incentivesFields.amount());
-                break;
-                default:
-                break;
-
+                case FIXED -> interest = incentivesFields.amount();
+                case INCENTIVE -> interest = interest.add(incentivesFields.amount());
+                default -> {
+                }
             }
         }
 
