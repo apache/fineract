@@ -19,10 +19,10 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 /**
  * Permission rules for API endpoints whose authorization is enforced through request matchers rather than in the
@@ -31,287 +31,238 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
  */
 public final class ApiAuthorizationRules {
 
-    private static final PathPatternRequestMatcher.Builder API_MATCHER = PathPatternRequestMatcher.withDefaults();
     private static final String ALL_FUNCTIONS = "ALL_FUNCTIONS";
     private static final String ALL_FUNCTIONS_READ = "ALL_FUNCTIONS_READ";
     private static final String ALL_FUNCTIONS_WRITE = "ALL_FUNCTIONS_WRITE";
 
+    /**
+     * The rules in the order they are applied; the first rule that matches a request decides.
+     */
+    static final List<Rule> RULES = List.of(
+            // businessdate
+            rule(HttpMethod.GET, "/api/*/businessdate/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_BUSINESS_DATE"),
+            rule(HttpMethod.POST, "/api/*/businessdate", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_BUSINESS_DATE"),
+            // external
+            rule(HttpMethod.GET, "/api/*/externalevents/configuration", ALL_FUNCTIONS, ALL_FUNCTIONS_READ,
+                    "READ_EXTERNAL_EVENT_CONFIGURATION"),
+            rule(HttpMethod.PUT, "/api/*/externalevents/configuration", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "UPDATE_EXTERNAL_EVENT_CONFIGURATION"),
+            // cache
+            rule(HttpMethod.GET, "/api/*/caches", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CACHE"),
+            rule(HttpMethod.PUT, "/api/*/caches", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CACHE"),
+            // currency
+            rule(HttpMethod.GET, "/api/*/currencies", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CURRENCY"),
+            rule(HttpMethod.PUT, "/api/*/currencies", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CURRENCY"),
+            // notes: read
+            rule(HttpMethod.GET, "/api/*/clients/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENTNOTE"),
+            rule(HttpMethod.GET, "/api/*/loans/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOANNOTE"),
+            rule(HttpMethod.GET, "/api/*/loanTransactions/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOANTRANSACTIONNOTE"),
+            rule(HttpMethod.GET, "/api/*/savings/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SAVINGNOTE"),
+            rule(HttpMethod.GET, "/api/*/groups/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GROUPNOTE"),
+            // notes: create
+            rule(HttpMethod.POST, "/api/*/clients/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTNOTE"),
+            rule(HttpMethod.POST, "/api/*/loans/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_LOANNOTE"),
+            rule(HttpMethod.POST, "/api/*/loanTransactions/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_LOANTRANSACTIONNOTE"),
+            rule(HttpMethod.POST, "/api/*/savings/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_SAVINGNOTE"),
+            rule(HttpMethod.POST, "/api/*/groups/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUPNOTE"),
+            // notes: update
+            rule(HttpMethod.PUT, "/api/*/clients/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTNOTE"),
+            rule(HttpMethod.PUT, "/api/*/loans/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_LOANNOTE"),
+            rule(HttpMethod.PUT, "/api/*/loanTransactions/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_LOANTRANSACTIONNOTE"),
+            rule(HttpMethod.PUT, "/api/*/savings/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SAVINGNOTE"),
+            rule(HttpMethod.PUT, "/api/*/groups/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUPNOTE"),
+            // notes: delete
+            rule(HttpMethod.DELETE, "/api/*/clients/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTNOTE"),
+            rule(HttpMethod.DELETE, "/api/*/loans/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_LOANNOTE"),
+            rule(HttpMethod.DELETE, "/api/*/loanTransactions/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_LOANTRANSACTIONNOTE"),
+            rule(HttpMethod.DELETE, "/api/*/savings/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_SAVINGNOTE"),
+            rule(HttpMethod.DELETE, "/api/*/groups/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUPNOTE"),
+            // notes: share accounts and savings transactions
+            rule(HttpMethod.GET, "/api/*/accounts/share/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREACCOUNTNOTE"),
+            rule(HttpMethod.POST, "/api/*/accounts/share/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_SHAREACCOUNTNOTE"),
+            rule(HttpMethod.PUT, "/api/*/accounts/share/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SHAREACCOUNTNOTE"),
+            rule(HttpMethod.DELETE, "/api/*/accounts/share/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_SHAREACCOUNTNOTE"),
+            rule(HttpMethod.GET, "/api/*/savingsTransactions/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SAVINGSTRANSACTIONNOTE"),
+            rule(HttpMethod.POST, "/api/*/savingsTransactions/*/notes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "CREATE_SAVINGSTRANSACTIONNOTE"),
+            rule(HttpMethod.PUT, "/api/*/savingsTransactions/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "UPDATE_SAVINGSTRANSACTIONNOTE"),
+            rule(HttpMethod.DELETE, "/api/*/savingsTransactions/*/notes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "DELETE_SAVINGSTRANSACTIONNOTE"),
+            // document (any entity type; the permissions are the same for all of them)
+            rule(HttpMethod.GET, "/api/*/*/*/documents/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT"),
+            rule(HttpMethod.POST, "/api/*/*/*/documents", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT"),
+            rule(HttpMethod.PUT, "/api/*/*/*/documents/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT"),
+            rule(HttpMethod.DELETE, "/api/*/*/*/documents/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT"),
+            // image: clients
+            rule(HttpMethod.GET, "/api/*/clients/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT"),
+            rule(HttpMethod.POST, "/api/*/clients/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTIMAGE"),
+            rule(HttpMethod.PUT, "/api/*/clients/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTIMAGE"),
+            rule(HttpMethod.DELETE, "/api/*/clients/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTIMAGE"),
+            // collateral: clients
+            // NOTE: the "_CLIENT_COLLATERAL_PRODUCT" suffix is the legacy permission naming kept for
+            // backwards compatibility (entity_name = CLIENT_COLLATERAL_PRODUCT in the permission table)
+            rule(HttpMethod.GET, "/api/*/clients/*/collaterals", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.GET, "/api/*/clients/*/collaterals/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.POST, "/api/*/clients/*/collaterals", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENT_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.PUT, "/api/*/clients/*/collaterals/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENT_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.DELETE, "/api/*/clients/*/collaterals/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "DELETE_CLIENT_COLLATERAL_PRODUCT"),
+            // image: staff
+            rule(HttpMethod.GET, "/api/*/staff/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT"),
+            rule(HttpMethod.POST, "/api/*/staff/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFFIMAGE"),
+            rule(HttpMethod.PUT, "/api/*/staff/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFFIMAGE"),
+            rule(HttpMethod.DELETE, "/api/*/staff/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_STAFFIMAGE"),
+            // image: other entity types (only clients and staff have images)
+            rule(HttpMethod.GET, "/api/*/*/*/images", ALL_FUNCTIONS, ALL_FUNCTIONS_READ),
+            rule(HttpMethod.POST, "/api/*/*/*/images", ALL_FUNCTIONS), rule(HttpMethod.PUT, "/api/*/*/*/images", ALL_FUNCTIONS),
+            rule(HttpMethod.DELETE, "/api/*/*/*/images", ALL_FUNCTIONS),
+            // collateral: products
+            rule(HttpMethod.GET, "/api/*/collateral-management", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.GET, "/api/*/collateral-management/template", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.GET, "/api/*/collateral-management/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.POST, "/api/*/collateral-management", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.PUT, "/api/*/collateral-management/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_COLLATERAL_PRODUCT"),
+            rule(HttpMethod.DELETE, "/api/*/collateral-management/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_COLLATERAL_PRODUCT"),
+            // bulk import
+            rule(HttpMethod.GET, "/api/*/import", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT"),
+            rule(HttpMethod.GET, "/api/*/import/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT"),
+            // payment type
+            rule(HttpMethod.GET, "/api/*/paymenttypes/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PAYMENTTYPE"),
+            rule(HttpMethod.POST, "/api/*/paymenttypes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PAYMENTTYPE"),
+            rule(HttpMethod.PUT, "/api/*/paymenttypes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PAYMENTTYPE"),
+            rule(HttpMethod.DELETE, "/api/*/paymenttypes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE"),
+            // product mix
+            rule(HttpMethod.GET, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PRODUCTMIX"),
+            rule(HttpMethod.POST, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PRODUCTMIX"),
+            rule(HttpMethod.PUT, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PRODUCTMIX"),
+            rule(HttpMethod.DELETE, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PRODUCTMIX"),
+
+            // working days
+            rule(HttpMethod.GET, "/api/*/workingdays", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS"),
+            rule(HttpMethod.GET, "/api/*/workingdays/template", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS"),
+            rule(HttpMethod.PUT, "/api/*/workingdays", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_WORKING_DAYS"),
+            // interest rate chart slabs (before charts for specificity)
+            rule(HttpMethod.GET, "/api/*/interestratecharts/*/chartslabs", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARTSLAB"),
+            rule(HttpMethod.GET, "/api/*/interestratecharts/*/chartslabs/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARTSLAB"),
+            rule(HttpMethod.POST, "/api/*/interestratecharts/*/chartslabs", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CHARTSLAB"),
+            rule(HttpMethod.PUT, "/api/*/interestratecharts/*/chartslabs/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CHARTSLAB"),
+            rule(HttpMethod.DELETE, "/api/*/interestratecharts/*/chartslabs/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CHARTSLAB"),
+            // interest rate chart
+            rule(HttpMethod.GET, "/api/*/interestratecharts/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_INTERESTRATECHART"),
+            rule(HttpMethod.POST, "/api/*/interestratecharts", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_INTERESTRATECHART"),
+            rule(HttpMethod.PUT, "/api/*/interestratecharts/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_INTERESTRATECHART"),
+            rule(HttpMethod.DELETE, "/api/*/interestratecharts/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_INTERESTRATECHART"),
+            // staff
+            rule(HttpMethod.GET, "/api/*/staff/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STAFF"),
+            rule(HttpMethod.POST, "/api/*/staff/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFF"),
+            rule(HttpMethod.PUT, "/api/*/staff/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFF"),
+            // meeting
+            rule(HttpMethod.GET, "/api/*/*/*/meetings/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MEETING"),
+            rule(HttpMethod.POST, "/api/*/*/*/meetings", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MEETING"),
+            rule(HttpMethod.POST, "/api/*/*/*/meetings/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "SAVEORUPDATEATTENDANCE_MEETING"),
+            rule(HttpMethod.PUT, "/api/*/*/*/meetings/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MEETING"),
+            rule(HttpMethod.DELETE, "/api/*/*/*/meetings/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MEETING"),
+            // hook
+            rule(HttpMethod.GET, "/api/*/hooks/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_HOOK"),
+            rule(HttpMethod.POST, "/api/*/hooks/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_HOOK"),
+            rule(HttpMethod.PUT, "/api/*/hooks/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK"),
+            rule(HttpMethod.DELETE, "/api/*/hooks/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK"),
+            // template
+            rule(HttpMethod.GET, "/api/*/templates/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE"),
+            rule(HttpMethod.POST, "/api/*/templates/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_TEMPLATE"),
+            rule(HttpMethod.PUT, "/api/*/templates/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_TEMPLATE"),
+            rule(HttpMethod.DELETE, "/api/*/templates/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_TEMPLATE"),
+
+            rule(HttpMethod.DELETE, "/api/*/loan-collateral-management/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "DELETE_LOAN_COLLATERAL_PRODUCT"),
+
+            rule(HttpMethod.GET, "/api/*/standinginstructionrunhistory", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION"),
+            // floatingrate
+            rule(HttpMethod.GET, "/api/*/floatingrates", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FLOATINGRATE"),
+            rule(HttpMethod.GET, "/api/*/floatingrates/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FLOATINGRATE"),
+            rule(HttpMethod.POST, "/api/*/floatingrates", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FLOATINGRATE"),
+            rule(HttpMethod.PUT, "/api/*/floatingrates/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE"),
+            // share accounts and share products
+            rule(HttpMethod.GET, "/api/*/accounts/*/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREACCOUNT"),
+            rule(HttpMethod.GET, "/api/*/products/*/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREPRODUCT"),
+            // ad hoc query
+            rule(HttpMethod.GET, "/api/*/adhocquery/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_ADHOC"),
+            // bulk import: imports and their output documents
+            rule(HttpMethod.GET, "/api/*/imports/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT"),
+            // client search
+            rule(HttpMethod.POST, "/api/*/clients/search", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT"),
+            // codes
+            rule(HttpMethod.GET, "/api/*/codes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CODE"),
+            rule(HttpMethod.GET, "/api/*/codes/name/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CODE"),
+            // business step configuration
+            rule(HttpMethod.GET, "/api/*/jobs/names", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER"),
+            rule(HttpMethod.GET, "/api/*/jobs/*/steps", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER"),
+            rule(HttpMethod.GET, "/api/*/jobs/*/available-steps", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER"),
+            // COB catch-up and account locks
+            rule(HttpMethod.POST, "/api/*/loans/catch-up", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "EXECUTEJOB_SCHEDULER"),
+            rule(HttpMethod.POST, "/api/*/working-capital-loans/catch-up", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "EXECUTEJOB_SCHEDULER"),
+            rule(HttpMethod.GET, "/api/*/loans/locked", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOAN"),
+            // credit bureau
+            rule(HttpMethod.POST, "/api/*/creditBureauIntegration/addCreditReport", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE,
+                    "SAVE_CREDITREPORT"),
+            rule(HttpMethod.GET, "/api/*/creditBureauIntegration/creditReport/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "GET_CREDITREPORT"),
+            // datatables
+            rule(HttpMethod.POST, "/api/*/datatables/deregister/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DEREGISTER_DATATABLE"),
+            // email and sms messages
+            rule(HttpMethod.GET, "/api/*/email/{id:[0-9]+}", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_EMAIL"),
+            rule(HttpMethod.GET, "/api/*/sms/{id:[0-9]+}", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SMS"),
+            // entity datatable checks
+            rule(HttpMethod.GET, "/api/*/entityDatatableChecks/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_ENTITY_DATATABLE_CHECK"),
+            // external asset owners
+            rule(HttpMethod.GET, "/api/*/external-asset-owners/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_EXTERNAL_ASSET_OWNER"),
+            rule(HttpMethod.POST, "/api/*/external-asset-owners/search", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_EXTERNAL_ASSET_OWNER"),
+            // interoperation
+            rule(HttpMethod.GET, "/api/*/interoperation/parties/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_INTERID"),
+            rule(HttpMethod.GET, "/api/*/interoperation/accounts/*/identifiers", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_INTERID"),
+            rule(HttpMethod.GET, "/api/*/interoperation/accounts/*/kyc", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT"),
+            rule(HttpMethod.GET, "/api/*/interoperation/accounts/*/transactions", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SAVINGSACCOUNT"),
+            rule(HttpMethod.GET, "/api/*/interoperation/accounts/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SAVINGSACCOUNT"),
+            // journal entries
+            rule(HttpMethod.GET, "/api/*/journalentries/provisioning", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_JOURNALENTRY"),
+            // loan collateral and post-dated checks
+            rule(HttpMethod.GET, "/api/*/loan-collateral-management/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOAN"),
+            rule(HttpMethod.GET, "/api/*/loans/*/postdatedchecks/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOAN"),
+            // provisioning
+            rule(HttpMethod.GET, "/api/*/provisioningcategory/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PROVISIONCATEGORY"),
+            rule(HttpMethod.GET, "/api/*/provisioningcriteria/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PROVISIONCRITERIA"),
+            rule(HttpMethod.GET, "/api/*/provisioningentries/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PROVISIONENTRIES"),
+            // ad hoc search
+            rule(HttpMethod.POST, "/api/*/search/advance", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOAN"),
+            rule(HttpMethod.GET, "/api/*/search/template", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOANPRODUCT"),
+            // surveys: scorecards and lookup tables (before surveys for specificity)
+            rule(HttpMethod.GET, "/api/*/surveys/scorecards/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCORECARD"),
+            rule(HttpMethod.POST, "/api/*/surveys/scorecards/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_SCORECARD"),
+            rule(HttpMethod.GET, "/api/*/surveys/*/lookuptables/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOOKUPTABLE"),
+            rule(HttpMethod.POST, "/api/*/surveys/*/lookuptables", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_LOOKUPTABLE"),
+            // surveys
+            rule(HttpMethod.GET, "/api/*/surveys/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SURVEY"),
+            rule(HttpMethod.POST, "/api/*/surveys", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_SURVEY"),
+            rule(HttpMethod.PUT, "/api/*/surveys/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SURVEY"),
+            rule(HttpMethod.POST, "/api/*/surveys/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SURVEY"),
+            // teller
+            rule(HttpMethod.GET, "/api/*/tellers/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TELLER"),
+            // working capital loan
+            rule(HttpMethod.GET, "/api/*/working-capital-loans/*/amortization-schedule", ALL_FUNCTIONS, ALL_FUNCTIONS_READ,
+                    "READ_WORKINGCAPITALLOAN"));
+
     private ApiAuthorizationRules() {}
 
     public static void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
-        auth
-                // businessdate
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/businessdate/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_BUSINESS_DATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/businessdate"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_BUSINESS_DATE")
-                // external
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/externalevents/configuration"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_EXTERNAL_EVENT_CONFIGURATION")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/externalevents/configuration"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_EXTERNAL_EVENT_CONFIGURATION")
-                // cache
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/caches"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CACHE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/caches"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CACHE")
-                // currency
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/currencies"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CURRENCY")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/currencies"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CURRENCY")
-                // notes: read
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENTNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/loans/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOANNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/loanTransactions/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_LOANTRANSACTIONNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/savings/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SAVINGNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/groups/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GROUPNOTE")
-                // notes: create
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/notes"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/loans/*/notes"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_LOANNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/loanTransactions/*/notes"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_LOANTRANSACTIONNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/savings/*/notes"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_SAVINGNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/notes"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUPNOTE")
-                // notes: update
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/clients/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/loans/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_LOANNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/loanTransactions/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_LOANTRANSACTIONNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/savings/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SAVINGNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/groups/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUPNOTE")
-                // notes: delete
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/loans/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_LOANNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/loanTransactions/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_LOANTRANSACTIONNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/savings/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_SAVINGNOTE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/groups/*/notes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUPNOTE")
-                // document: clients
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/clients/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // document: client_identifiers
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/client_identifiers/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/client_identifiers/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/client_identifiers/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/client_identifiers/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // document: staff
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/staff/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/staff/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/staff/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/staff/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // document: loans
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/loans/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/loans/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/loans/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/loans/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // document: savings
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/savings/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/savings/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/savings/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/savings/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // document: groups
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/groups/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/groups/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/groups/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // document: import
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/import/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/import/*/documents"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/import/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/import/*/documents/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_DOCUMENT")
-                // image: clients
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTIMAGE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/clients/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTIMAGE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTIMAGE")
-                // collateral: clients
-                // NOTE: the "_CLIENT_COLLATERAL_PRODUCT" suffix is the legacy permission naming kept for
-                // backwards compatibility (entity_name = CLIENT_COLLATERAL_PRODUCT in the permission table)
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/collaterals"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/collaterals/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/collaterals"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENT_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/clients/*/collaterals/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENT_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/collaterals/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENT_COLLATERAL_PRODUCT")
-                // image: staff
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/staff/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_DOCUMENT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/staff/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFFIMAGE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/staff/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFFIMAGE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/staff/*/images"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_STAFFIMAGE")
-                // collateral: products
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/collateral-management"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/collateral-management/template"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/collateral-management/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/collateral-management"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/collateral-management/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_COLLATERAL_PRODUCT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/collateral-management/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_COLLATERAL_PRODUCT")
-                // bulk import
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/import"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/import/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT")
-                // payment type
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/paymenttypes/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PAYMENTTYPE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/paymenttypes"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PAYMENTTYPE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/paymenttypes/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PAYMENTTYPE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/paymenttypes/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE")
-                // product mix
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/loanproducts/*/productmix"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PRODUCTMIX")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/loanproducts/*/productmix"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PRODUCTMIX")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/loanproducts/*/productmix"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PRODUCTMIX")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/loanproducts/*/productmix"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PRODUCTMIX")
+        for (Rule rule : RULES) {
+            auth.requestMatchers(rule.matcher()).hasAnyAuthority(rule.authorities().toArray(String[]::new));
+        }
+    }
 
-                // working days
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/workingdays"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/workingdays/template"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/workingdays"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_WORKING_DAYS")
-                // interest rate chart slabs (before charts for specificity)
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/interestratecharts/*/chartslabs"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARTSLAB")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/interestratecharts/*/chartslabs/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARTSLAB")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/interestratecharts/*/chartslabs"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CHARTSLAB")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/interestratecharts/*/chartslabs/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CHARTSLAB")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/interestratecharts/*/chartslabs/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CHARTSLAB")
-                // interest rate chart
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/interestratecharts/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_INTERESTRATECHART")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/interestratecharts"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_INTERESTRATECHART")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/interestratecharts/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_INTERESTRATECHART")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/interestratecharts/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_INTERESTRATECHART")
-                // staff
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/staff/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STAFF")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/staff/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFF")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/staff/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFF")
-                // meeting
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/*/*/meetings/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MEETING")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/*/*/meetings"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MEETING")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/*/*/meetings/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "SAVEORUPDATEATTENDANCE_MEETING")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/*/*/meetings/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MEETING")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/*/*/meetings/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MEETING")
-                // hook
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/hooks/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_HOOK")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/hooks/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_HOOK")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/hooks/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/hooks/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK")
-                // template
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/templates/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/templates/**"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_TEMPLATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/templates/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_TEMPLATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/templates/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_TEMPLATE")
+    private static Rule rule(HttpMethod method, String pattern, String... authorities) {
+        return new Rule(ApiRequestMatcher.of(method, pattern), List.of(authorities));
+    }
 
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/loan-collateral-management/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_LOAN_COLLATERAL_PRODUCT")
-
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructionrunhistory"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
-                // floatingrate
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/floatingrates"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FLOATINGRATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/floatingrates/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FLOATINGRATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/floatingrates"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FLOATINGRATE")
-                .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/floatingrates/*"))
-                .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE");
+    record Rule(ApiRequestMatcher matcher, List<String> authorities) {
     }
 }
