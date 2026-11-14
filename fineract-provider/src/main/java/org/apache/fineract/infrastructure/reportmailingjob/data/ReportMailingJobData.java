@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonZonedDateTimeEpochFormat;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 
 /**
@@ -32,6 +34,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonZonedDateTimeEpochFormat
 public final class ReportMailingJobData {
 
     private Long id;
@@ -56,6 +59,15 @@ public final class ReportMailingJobData {
     private List<EnumOptionData> emailAttachmentFileFormatOptions;
     private List<EnumOptionData> stretchyReportParamDateOptions;
     private Long runAsUserId;
+
+    /**
+     * Explicit accessor so that the JSON property stays {@code isActive}; the generated {@code isActive()} getter would
+     * otherwise be serialized as {@code active}.
+     */
+    @JsonProperty("isActive")
+    public boolean isActive() {
+        return this.isActive;
+    }
 
     /**
      * @return an instance of the ReportMailingJobData class

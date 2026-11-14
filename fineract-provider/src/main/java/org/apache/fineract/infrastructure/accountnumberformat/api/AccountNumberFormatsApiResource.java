@@ -37,10 +37,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -50,28 +47,26 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccou
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatReadPlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.annotation.PartialResponseParameters;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
 @Path(AccountNumberFormatConstants.resourceRelativeURL)
 @Component
 @Tag(name = "Account number format", description = "Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts.")
+@PartialResponseParameters({ AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
+        AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
+        AccountNumberFormatConstants.prefixTypeOptionsParamName })
 @RequiredArgsConstructor
 public class AccountNumberFormatsApiResource {
 
     private final PlatformSecurityContext context;
     private final AccountNumberFormatReadPlatformService accountNumberFormatReadPlatformService;
-    private final ToApiJsonSerializer<AccountNumberFormatData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private static final Set<String> ACCOUNT_NUMBER_FORMAT_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(AccountNumberFormatConstants.idParamName, AccountNumberFormatConstants.accountTypeParamName,
-                    AccountNumberFormatConstants.prefixTypeParamName, AccountNumberFormatConstants.accountTypeOptionsParamName,
-                    AccountNumberFormatConstants.prefixTypeOptionsParamName));
 
     @GET
     @Path("template")
@@ -80,15 +75,12 @@ public class AccountNumberFormatsApiResource {
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "\n" + "Example Request:\n" + "\n" + "accountnumberformats/template")
     @AlternativeOperationId("retrieveTemplate_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsResponseTemplate.class)))
-    public String retrieveTemplate(@Context final UriInfo uriInfo) {
+    public AccountNumberFormatData retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
 
         EntityAccountType accountType = null;
-        AccountNumberFormatData accountNumberFormatData = this.accountNumberFormatReadPlatformService.retrieveTemplate(accountType);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, accountNumberFormatData, ACCOUNT_NUMBER_FORMAT_RESPONSE_DATA_PARAMETERS);
+        return this.accountNumberFormatReadPlatformService.retrieveTemplate(accountType);
     }
 
     @GET
@@ -97,15 +89,11 @@ public class AccountNumberFormatsApiResource {
             + "\n" + "accountnumberformats\n" + "\n" + "\n" + "accountnumberformats?fields=accountType,prefixType")
     @AlternativeOperationId("retrieveAll_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class))))
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+    public List<AccountNumberFormatData> retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
 
-        final List<AccountNumberFormatData> accountNumberFormatData = this.accountNumberFormatReadPlatformService
-                .getAllAccountNumberFormats();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, accountNumberFormatData, ACCOUNT_NUMBER_FORMAT_RESPONSE_DATA_PARAMETERS);
+        return this.accountNumberFormatReadPlatformService.getAllAccountNumberFormats();
     }
 
     @GET
@@ -116,7 +104,7 @@ public class AccountNumberFormatsApiResource {
             + "accountnumberformats/1?fields=accountType,prefixType")
     @AlternativeOperationId("retrieveOne")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class)))
-    public String retrieveOne(@Context final UriInfo uriInfo,
+    public AccountNumberFormatData retrieveOne(@Context final UriInfo uriInfo,
             @PathParam("accountNumberFormatId") @Parameter(description = "accountNumberFormatId") final Long accountNumberFormatId) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
@@ -131,7 +119,7 @@ public class AccountNumberFormatsApiResource {
             accountNumberFormatData.templateOnTop(templateData.getAccountTypeOptions(), templateData.getPrefixTypeOptions());
         }
 
-        return this.toApiJsonSerializer.serialize(settings, accountNumberFormatData, ACCOUNT_NUMBER_FORMAT_RESPONSE_DATA_PARAMETERS);
+        return accountNumberFormatData;
     }
 
     @POST
@@ -142,16 +130,14 @@ public class AccountNumberFormatsApiResource {
     @AlternativeOperationId("create")
     @RequestBody(content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PostAccountNumberFormatsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PostAccountNumberFormatsResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createAccountNumberFormat() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -162,7 +148,7 @@ public class AccountNumberFormatsApiResource {
     @AlternativeOperationId("update_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsResponse.class)))
-    public String update(
+    public CommandProcessingResult update(
             @PathParam("accountNumberFormatId") @Parameter(description = "accountNumberFormatId") final Long accountNumberFormatId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -171,9 +157,7 @@ public class AccountNumberFormatsApiResource {
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -182,16 +166,14 @@ public class AccountNumberFormatsApiResource {
     @Operation(summary = "Delete an Account number format", operationId = "deleteAccountNumberFormat", description = "Note: Account numbers created while this format was active would remain unchanged.")
     @AlternativeOperationId("delete")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.DeleteAccountNumberFormatsResponse.class)))
-    public String delete(
+    public CommandProcessingResult delete(
             @PathParam("accountNumberFormatId") @Parameter(description = "accountNumberFormatId") final Long accountNumberFormatId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteAccountNumberFormat(accountNumberFormatId) //
                 .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }
