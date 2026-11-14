@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.cob.domain;
 
+import com.querydsl.core.types.Ops;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,6 +36,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 public abstract class AbstractLockingService implements LockingService {
@@ -37,12 +44,19 @@ public abstract class AbstractLockingService implements LockingService {
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractProperties fineractProperties;
+    private final SQLQueryFactory queryFactory;
+    private final RelationalPath<?> lockTable;
+    private final NumberPath<Long> loanId;
 
-    protected AbstractLockingService(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
-            FineractProperties fineractProperties) {
+    protected AbstractLockingService(final JdbcTemplate jdbcTemplate, final DatabaseSpecificSQLGenerator sqlGenerator,
+            final FineractProperties fineractProperties, final SQLQueryFactory queryFactory, final RelationalPath<?> lockTable,
+            final NumberPath<Long> loanId) {
         this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
         this.fineractProperties = fineractProperties;
+        this.queryFactory = queryFactory;
+        this.lockTable = lockTable;
+        this.loanId = loanId;
     }
 
     protected abstract String getTableName();
@@ -61,14 +75,16 @@ public abstract class AbstractLockingService implements LockingService {
     }
 
     @Override
-    public List<Long> findLockIdsByLoanIdIn(List<Long> loanIds) {
+    @Transactional(readOnly = true)
+    public List<Long> findLockIdsByLoanIdIn(final List<Long> loanIds) {
         if (loanIds.isEmpty()) {
             return Collections.emptyList();
         }
-        // Uses DatabaseSpecificSQLGenerator.in() to emit ANY(?) on PostgreSQL instead of IN($1,...$N),
-        // so all batch sizes share one query plan instead of one per distinct size.
-        final String sql = "SELECT loan_id FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds);
-        return jdbcTemplate.queryForList(sql, Long.class, sqlGenerator.inParametersFor(loanIds));
+        final BooleanExpression predicate = switch (sqlGenerator.getDialect()) {
+            case POSTGRESQL -> Expressions.booleanTemplate("{0} = ANY ({1})", loanId, Expressions.constant(loanIds.toArray(Long[]::new)));
+            case MYSQL -> Expressions.booleanOperation(Ops.IN, loanId, Expressions.constant(loanIds));
+        };
+        return queryFactory.select(loanId).from(lockTable).where(predicate).fetch();
     }
 
     @Override

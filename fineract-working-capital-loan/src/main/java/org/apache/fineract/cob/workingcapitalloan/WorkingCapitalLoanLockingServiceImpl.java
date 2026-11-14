@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
+import static org.apache.fineract.query.QMWcLoanAccountLocks.mWcLoanAccountLocks;
+
+import com.querydsl.sql.SQLQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.AbstractLockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -37,9 +40,9 @@ public class WorkingCapitalLoanLockingServiceImpl extends AbstractLockingService
                 UPDATE m_wc_loan_account_locks SET version= version + 1, lock_owner = ?, lock_placed_on = ? WHERE loan_id = ?
             """;
 
-    public WorkingCapitalLoanLockingServiceImpl(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
-            FineractProperties fineractProperties) {
-        super(jdbcTemplate, sqlGenerator, fineractProperties);
+    public WorkingCapitalLoanLockingServiceImpl(final JdbcTemplate jdbcTemplate, final DatabaseSpecificSQLGenerator sqlGenerator,
+            final FineractProperties fineractProperties, final SQLQueryFactory queryFactory) {
+        super(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory, mWcLoanAccountLocks, mWcLoanAccountLocks.loanId);
     }
 
     @Override

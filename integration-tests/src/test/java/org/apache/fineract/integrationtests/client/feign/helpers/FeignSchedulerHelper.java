@@ -20,10 +20,12 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Consumer;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.SchedulerJobApi.RetrieveHistoryQueryParams;
 import org.apache.fineract.client.feign.util.FeignCalls;
@@ -63,24 +65,30 @@ public class FeignSchedulerHelper {
         }
     }
 
-    public void executeAndAwaitJob(String jobDisplayName) {
+    public void executeAndAwaitJob(final String jobDisplayName) {
+        executeAndAwaitJob(jobDisplayName, job -> FeignCalls
+                .executeVoid(() -> fineractClient.schedulerJob().executeJob(job.getJobId(), "executeJob", new ExecuteJobRequest())));
+    }
+
+    public void executeAndAwaitJob(final String jobDisplayName, final Consumer<GetJobsResponse> triggerJob) {
         stopScheduler();
 
-        List<GetJobsResponse> allJobs = ok(() -> fineractClient.schedulerJob().retrieveAllSchedulerJobs());
-        GetJobsResponse targetJob = allJobs.stream().filter(j -> jobDisplayName.equals(j.getDisplayName())).findFirst()
+        final List<GetJobsResponse> allJobs = ok(() -> fineractClient.schedulerJob().retrieveAllSchedulerJobs());
+        final GetJobsResponse targetJob = allJobs.stream().filter(j -> jobDisplayName.equals(j.getDisplayName())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Job not found: " + jobDisplayName));
-        Long jobId = targetJob.getJobId();
+        final Long jobId = targetJob.getJobId();
+        assertNotNull(jobId);
 
-        Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
-        FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+        final Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
+        triggerJob.accept(targetJob);
 
-        JobDetailHistoryDataSwagger finalRunHistory = Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1))
-                .pollDelay(Duration.ofSeconds(1))
+        final JobDetailHistoryDataSwagger finalRunHistory = Awaitility.await().atMost(Duration.ofMinutes(2))
+                .pollInterval(Duration.ofSeconds(1)).pollDelay(Duration.ofSeconds(1))
                 .until(() -> getLatestJobRunHistory(jobId), runHistory -> isNewCompletedRunHistory(runHistory, previousRunHistoryId));
 
         assertEquals("application", finalRunHistory.getTriggerType(),
                 "Job was not triggered by the test for jobId=" + jobId + ": " + finalRunHistory);
-        String status = finalRunHistory.getStatus();
+        final String status = finalRunHistory.getStatus();
         if (!"success".equals(status)) {
             fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
         }
