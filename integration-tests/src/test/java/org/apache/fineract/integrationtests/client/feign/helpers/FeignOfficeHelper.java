@@ -23,7 +23,9 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.OfficeData;
 import org.apache.fineract.client.models.PostOfficesRequest;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdRequest;
@@ -65,7 +67,7 @@ public class FeignOfficeHelper {
         return ok(() -> fineractClient.offices().retrieveOneOffice(officeId));
     }
 
-    public GetOfficesResponse retrieveOfficeByExternalId(String externalId) {
+    public OfficeData retrieveOfficeByExternalId(String externalId) {
         return ok(() -> fineractClient.offices().retrieveOneOfficeByExternalId(externalId));
     }
 
@@ -82,7 +84,7 @@ public class FeignOfficeHelper {
         return ok(() -> fineractClient.offices().updateOffice(officeId, request));
     }
 
-    public PutOfficesOfficeIdResponse updateOfficeByExternalId(String externalId, String name, String openingDate) {
+    public CommandProcessingResult updateOfficeByExternalId(String externalId, String name, String openingDate) {
         PutOfficesOfficeIdRequest request = new PutOfficesOfficeIdRequest()//
                 .name(name)//
                 .openingDate(openingDate)//

@@ -20,9 +20,10 @@ package org.apache.fineract.integrationtests;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.OfficeData;
 import org.apache.fineract.client.models.PostOfficesResponse;
-import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
@@ -64,7 +65,7 @@ public class OfficeIntegrationTest extends FeignIntegrationTest {
         String name = Utils.uniqueRandomStringGenerator("New_Office_", 4);
         String date = "02 July 2007";
 
-        PutOfficesOfficeIdResponse updateResult = officeHelper.updateOfficeByExternalId(externalId, name, date);
+        CommandProcessingResult updateResult = officeHelper.updateOfficeByExternalId(externalId, name, date);
         Assertions.assertEquals(officeId, updateResult.getOfficeId());
 
         GetOfficesResponse updatedOffice = officeHelper.retrieveOffice(officeId);
@@ -82,7 +83,7 @@ public class OfficeIntegrationTest extends FeignIntegrationTest {
         String date = "02 July 2007";
 
         officeHelper.updateOfficeByExternalId(externalId, name, date);
-        GetOfficesResponse updatedOffice = officeHelper.retrieveOfficeByExternalId(externalId);
+        OfficeData updatedOffice = officeHelper.retrieveOfficeByExternalId(externalId);
 
         Assertions.assertEquals(name, updatedOffice.getName());
         Assertions.assertTrue(DateUtils.isEqual(updatedOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));

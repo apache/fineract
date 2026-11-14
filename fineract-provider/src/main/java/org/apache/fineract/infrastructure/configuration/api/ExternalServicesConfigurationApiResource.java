@@ -43,11 +43,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/externalservice")
@@ -58,10 +54,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ExternalServicesConfigurationApiResource {
 
-    private final PlatformSecurityContext context;
     private final ExternalServicesPropertiesReadPlatformService externalServicePropertiesReadPlatformService;
-    private final ToApiJsonSerializer<ExternalServicesPropertiesData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -71,14 +64,12 @@ public class ExternalServicesConfigurationApiResource {
             + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
     @AlternativeOperationId("retrieveOne_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ExternalServicesPropertiesData.class))))
-    public String retrieveOne(@PathParam("servicename") @Parameter(description = "servicename") final String serviceName,
-            @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(ExternalServiceConfigurationApiConstant.EXTERNAL_SERVICE_RESOURCE_NAME);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    public Collection<ExternalServicesPropertiesData> retrieveOne(
+            @PathParam("servicename") @Parameter(description = "servicename") final String serviceName, @Context final UriInfo uriInfo) {
+
         final Collection<ExternalServicesPropertiesData> externalServiceNVPs = this.externalServicePropertiesReadPlatformService
                 .retrieveOne(serviceName);
-        return this.toApiJsonSerializer.serialize(settings, externalServiceNVPs,
-                ExternalServiceConfigurationApiConstant.EXTERNAL_SERVICE_CONFIGURATION_DATA_PARAMETERS);
+        return externalServiceNVPs;
     }
 
     @PUT
@@ -90,7 +81,7 @@ public class ExternalServicesConfigurationApiResource {
     @AlternativeOperationId("updateExternalServiceProperties")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK")
-    public String updateExternalServiceProperties(
+    public CommandProcessingResult updateExternalServiceProperties(
             @PathParam("servicename") @Parameter(description = "servicename") final String serviceName,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         // ExternalServicesData external =
@@ -98,7 +89,7 @@ public class ExternalServicesConfigurationApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateExternalServiceProperties(serviceName)
                 .withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
 
     }
 }

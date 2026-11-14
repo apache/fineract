@@ -51,10 +51,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeData;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
@@ -78,8 +75,6 @@ public class CodeValuesApiResource {
     private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService readPlatformService;
     private final CodeReadPlatformService codeReadPlatformService;
-    private final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -88,15 +83,12 @@ public class CodeValuesApiResource {
     @Operation(summary = "List Code Values", description = "Returns the list of Code Values for a given Code\n" + "\n"
             + "Example Requests:\n" + "\n" + "codes/1/codevalues", parameters = @Parameter(name = "codeId", description = "co"))
     @ApiResponse(responseCode = "200", description = "A List of code values for a given code", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class))))
-    public String retrieveAllCodeValues(@Context final UriInfo uriInfo,
+    public Collection<CodeValueData> retrieveAllCodeValues(@Context final UriInfo uriInfo,
             @PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CodeValueData> codeValues = this.readPlatformService.retrieveAllCodeValues(codeId);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codeValues, RESPONSE_DATA_PARAMETERS);
+        return codeValues;
     }
 
     @GET
@@ -105,16 +97,13 @@ public class CodeValuesApiResource {
     @Operation(summary = "Retrieve a Code description", description = "Returns the details of a Code Value\n" + "\n" + "Example Requests:\n"
             + "\n" + "codes/1/codevalues/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class)))
-    public String retrieveCodeValue(@Context final UriInfo uriInfo,
+    public CodeValueData retrieveCodeValue(@Context final UriInfo uriInfo,
             @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId,
             @PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
         final CodeValueData codeValue = this.readPlatformService.retrieveCodeValue(codeValueId);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codeValue, RESPONSE_DATA_PARAMETERS);
+        return codeValue;
     }
 
     @POST
@@ -124,14 +113,14 @@ public class CodeValuesApiResource {
     @Operation(summary = "Create a Code description", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class)))
-    public String createCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
+    public CommandProcessingResult createCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createCodeValue(codeId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
 
     }
 
@@ -142,7 +131,7 @@ public class CodeValuesApiResource {
     @Operation(summary = "Update a Code description", description = "Updates the details of a code description.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PutCodeValuesDataRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PutCodeValueDataResponse.class)))
-    public String updateCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
+    public CommandProcessingResult updateCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -151,7 +140,7 @@ public class CodeValuesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @DELETE
@@ -159,14 +148,14 @@ public class CodeValuesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Code description", description = "Deletes a code description")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.DeleteCodeValueDataResponse.class)))
-    public String deleteCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
+    public CommandProcessingResult deleteCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCodeValue(codeId, codeValueId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @GET

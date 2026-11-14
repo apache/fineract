@@ -50,8 +50,6 @@ import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
@@ -67,11 +65,9 @@ public class CodesApiResource {
      * The set of parameters that are supported in response for {@link CodeData}
      */
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "systemDefined"));
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CODE";
 
     private final PlatformSecurityContext context;
     private final CodeReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -81,14 +77,9 @@ public class CodesApiResource {
             + "Example Requests:\n" + "\n" + "codes")
     @AlternativeOperationId("retrieveCodes")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class))))
-    public String retrieveCodes(@Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
+    public Collection<CodeData> retrieveCodes(@Context final UriInfo uriInfo) {
         final Collection<CodeData> codes = this.readPlatformService.retrieveAllCodes();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codes, RESPONSE_DATA_PARAMETERS);
+        return codes;
     }
 
     @POST
@@ -97,13 +88,13 @@ public class CodesApiResource {
     @Operation(summary = "Create a Code", operationId = "createCode", description = "Creates a code. Codes created through api are always 'user defined' and so system defined is marked as false.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PostCodesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PostCodesResponse.class)))
-    public String createCode(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult createCode(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createCode().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @GET
@@ -113,12 +104,12 @@ public class CodesApiResource {
             + "Example Requests:\n" + "\n" + "codes/1")
     @AlternativeOperationId("retrieveCode")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))
-    public String retrieveCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId, @Context final UriInfo uriInfo) {
+    public CodeData retrieveCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
+            @Context final UriInfo uriInfo) {
 
         final CodeData code = this.readPlatformService.retrieveCode(codeId);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);
+        return code;
     }
 
     @GET
@@ -128,13 +119,12 @@ public class CodesApiResource {
             + "Example Requests:\n" + "\n" + "codes/1")
     @AlternativeOperationId("retrieveCodeByName")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))
-    public String retrieveCodeByName(@PathParam("codeName") @Parameter(description = "codeName") final String codeName,
+    public CodeData retrieveCodeByName(@PathParam("codeName") @Parameter(description = "codeName") final String codeName,
             @Context final UriInfo uriInfo) {
 
         final CodeData code = this.readPlatformService.retrieveCode(codeName);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);
+        return code;
     }
 
     @PUT
@@ -144,14 +134,14 @@ public class CodesApiResource {
     @Operation(summary = "Update a Code", operationId = "updateCode", description = "Updates the details of a code if it is not system defined.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PutCodesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.PutCodesResponse.class)))
-    public String updateCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
+    public CommandProcessingResult updateCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCode(codeId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @DELETE
@@ -159,12 +149,12 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Code", operationId = "deleteCode", description = "Deletes a code if it is not system defined.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.DeleteCodesResponse.class)))
-    public String deleteCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
+    public CommandProcessingResult deleteCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCode(codeId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 }
