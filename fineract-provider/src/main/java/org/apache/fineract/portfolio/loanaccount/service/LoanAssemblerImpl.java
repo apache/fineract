@@ -214,7 +214,8 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
         final AccountType loanAccountType = AccountType.fromName(loanTypeStr);
         if (loanAccountType.isIndividualAccount()) {
-            collateral = this.collateralAssembler.fromParsedJson(element);
+            // When assembling a real loan application we need to adjust the client's collateral quantities
+            collateral = this.collateralAssembler.fromParsedJson(element, true);
         }
 
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element, disbursementDetails);
@@ -521,7 +522,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
             final AccountType loanType = AccountType.fromName(loanTypeStr);
 
             if (!StringUtils.isBlank(loanTypeStr) && loanType.isIndividualAccount()) {
-                possiblyModifedLoanCollateralItems = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
+                // When updating an existing loan, adjust client collateral quantities based on the
+                // difference between the requested collateral amount and the existing loan collateral
+                possiblyModifedLoanCollateralItems = this.loanCollateralAssembler.fromParsedJson(command.parsedJson(), true);
             }
         }
         this.loanScheduleAssembler.updateLoanApplicationAttributes(command, loan, loanProduct, changes);
@@ -730,8 +733,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
             changes.put(Loan.RECALCULATE_LOAN_SCHEDULE, true);
         }
 
+        // Update collateral only when it actually changed compared to existing items
         if (command.parameterExists(LoanApiConstants.collateralParameterName) && possiblyModifedLoanCollateralItems != null
-                && possiblyModifedLoanCollateralItems.equals(loan.getLoanCollateralManagements())) {
+                && !possiblyModifedLoanCollateralItems.equals(loan.getLoanCollateralManagements())) {
             changes.put(LoanApiConstants.collateralParameterName, loanCollateralManagementMapper.map(possiblyModifedLoanCollateralItems));
         }
 
@@ -859,7 +863,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
             if (!StringUtils.isBlank(loanTypeStr) && loanType.isIndividualAccount()) {
                 final String collateralParamName = "collateral";
                 if (changes.containsKey(collateralParamName)) {
-                    loan.updateLoanCollateral(possiblyModifedLoanCollateralItems);
+                    loan.mergeLoanCollateral(possiblyModifedLoanCollateralItems);
                 }
             }
         }
