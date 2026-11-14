@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.core.config.ApiAuthorizationRules;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.filters.CallerIpTrackingFilter;
@@ -166,6 +167,7 @@ public class AuthorizationServerConfig {
         http
                 // TODO: Make it configurable
                 .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> {
+                    ApiAuthorizationRules.configure(auth);
                     auth.anyRequest().authenticated();
                     if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
                         auth.anyRequest().hasAuthority("TWOFACTOR_AUTHENTICATED");

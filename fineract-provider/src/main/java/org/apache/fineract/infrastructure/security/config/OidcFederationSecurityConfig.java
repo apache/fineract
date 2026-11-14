@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.security.config;
 
 import jakarta.servlet.Filter;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.core.config.ApiAuthorizationRules;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.filters.CallerIpTrackingFilter;
@@ -131,10 +132,11 @@ public class OidcFederationSecurityConfig {
     @Bean
     @Order(100)
     public SecurityFilterChain oidcFederationFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/**")
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll().anyRequest().authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
+        http.securityMatcher("/api/**").authorizeHttpRequests(auth -> {
+            auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll().requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll();
+            ApiAuthorizationRules.configure(auth);
+            auth.anyRequest().authenticated();
+        }).csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Bearer JWT validation — multi-issuer dynamic resolver (DB + YAML fallback)
                 .oauth2ResourceServer(resourceServer -> resourceServer.authenticationManagerResolver(dynamicIssuerResolver))
