@@ -30,7 +30,6 @@ public interface TaxApiConstants {
     String startDateParamName = "startDate";
     String endDateParamName = "endDate";
 
-    String chargeIncludesTaxParamName = "chargeIncludesTax";
     String taxComponentsParamName = "taxComponents";
     String idParamName = "id";
     String taxComponentIdParamName = "taxComponentId";
