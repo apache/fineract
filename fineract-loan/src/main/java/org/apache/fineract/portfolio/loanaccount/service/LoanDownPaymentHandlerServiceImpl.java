@@ -142,6 +142,10 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
+            // as on the reprocess path: the waived interest that was never accrued is not a receivable to reverse
+            if (loanTransaction.isInterestWaiver()) {
+                loanTransaction.adjustInterestComponent();
+            }
             if (!loan.isProgressiveSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {
                     reprocessOnPostConditions = true;
