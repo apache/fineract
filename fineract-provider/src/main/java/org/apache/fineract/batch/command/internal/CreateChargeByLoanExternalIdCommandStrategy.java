@@ -29,6 +29,8 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -50,6 +52,7 @@ public class CreateChargeByLoanExternalIdCommandStrategy implements CommandStrat
      * Loan charges api resource {@link LoanChargesApiResource}.
      */
     private final LoanChargesApiResource loanChargesApiResource;
+    private final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
 
     @Override
     public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") final UriInfo uriInfo) {
@@ -77,7 +80,7 @@ public class CreateChargeByLoanExternalIdCommandStrategy implements CommandStrat
 
         // Calls 'executeLoanCharge' function from 'LoanChargesApiResource'
         // to create a new charge for based on loan external id
-        responseBody = loanChargesApiResource.executeLoanCharge(loanExternalId, command, request.getBody());
+        responseBody = toApiJsonSerializer.serialize(loanChargesApiResource.executeLoanCharge(loanExternalId, command, request.getBody()));
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charge has been successfully
