@@ -1592,7 +1592,6 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
 
     @Test
     public void testInterestPaymentWaiverBatchExternalIdOnChargedOffLoan() {
-        Long[] loanIdContainer = new Long[1];
         String[] loanExternalIdContainer = new String[1];
 
         runAt("01 January 2025", () -> {
@@ -1616,11 +1615,9 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             Long chargeOffTransactionId = chargeOffLoan(createdLoanId, "15 June 2022");
             assertNotNull(chargeOffTransactionId);
 
-            loanIdContainer[0] = createdLoanId;
             loanExternalIdContainer[0] = loanExternalId;
         });
 
-        Long loanId = loanIdContainer[0];
         String loanExternalId = loanExternalIdContainer[0];
 
         runAt("01 January 2025", () -> {

@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -80,7 +79,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -129,7 +128,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -181,7 +180,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -230,7 +229,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -285,7 +284,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -344,7 +343,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -422,7 +421,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -514,7 +513,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -575,7 +574,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -677,7 +676,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -740,7 +739,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -852,7 +851,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
@@ -907,7 +906,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             // Delinquency Bucket
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             // down-payment configuration
             Boolean enableDownPayment = true;
@@ -951,7 +950,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             // Delinquency Bucket
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             // down-payment configuration
             Boolean enableDownPayment = true;
@@ -997,9 +996,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse_1.getEnableAutoRepaymentForDownPayment());
 
             // make repayment for loan
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("5 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId.longValue());
 
@@ -1028,7 +1026,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             // Delinquency Bucket
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             // down-payment configuration
             Boolean enableDownPayment = true;
@@ -1143,7 +1141,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             // Delinquency Bucket
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             // down-payment configuration
             Boolean enableDownPayment = true;
@@ -1479,9 +1477,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             );
 
             String repaymentExternalId = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse initialRepayment = makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("03 March 2023").locale("en")
-                            .transactionAmount(800.0).externalId(repaymentExternalId));
+            makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("03 March 2023")
+                    .locale("en").transactionAmount(800.0).externalId(repaymentExternalId));
 
             loanDetails = getLoanDetails(loanId);
             // Verify Repayment Schedule
@@ -1620,7 +1617,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = delinquencyHelper.getBucket(delinquencyBucketId);
+            delinquencyHelper.getBucket(delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);

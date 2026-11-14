@@ -286,7 +286,6 @@ public class SavingsInterestPostingTest extends FeignSavingsTestBase {
     @Test
     public void testNoDuplicateInterestPostingWhenMixingManualAndJobRunsAcrossBusinessDates() {
         final String accountOpeningDate = "01 January 2025";
-        final String firstManualPostingDate = "02 February 2025";
         final String manualAsOnPostingDate = "15 March 2025";
         final String depositAmount = "10000";
 

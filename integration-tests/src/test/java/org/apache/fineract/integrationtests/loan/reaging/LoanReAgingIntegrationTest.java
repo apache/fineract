@@ -38,7 +38,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.LoanScheduleData;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -122,7 +121,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             Long chargeId = chargeResult.getResourceId();
 
             // add charge after maturity
-            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "11 April 2023", chargeAmount);
+            addLoanCharge(loanId, chargeId, "11 April 2023", chargeAmount);
 
             // verify schedule
             verifyRepaymentSchedule(loanId, //

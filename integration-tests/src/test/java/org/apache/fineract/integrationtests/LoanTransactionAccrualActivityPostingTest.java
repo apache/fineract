@@ -1097,7 +1097,6 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
         final String disbursementDay2 = "02 February 2023";
         final String repaymentDate1 = "15 January 2023";
         final String repaymentPeriod1DueDate = "01 February 2023";
-        final String repaymentPeriod2DueDate = "01 March 2023";
         final String repaymentPeriod1CloseDate = "02 February 2023";
         final String repaymentPeriod2CloseDate = "02 March 2023";
         final String creationBusinessDay = "15 January 2023";
@@ -1611,9 +1610,9 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .locale("en_GB").dateFormat("dd MMMM yyyy").expectedDisbursementDate(applicationDisbursementDate)
                 .submittedOnDate(applicationDisbursementDate).interestCalculationPeriodType(0).repaymentFrequencyType(0).repaymentEvery(30)
-                .principal(BigDecimal.valueOf(1000)).loanTermFrequency(120).loanTermFrequencyType(0)
-                .transactionProcessingStrategyCode(DEFAULT_STRATEGY).interestType(0).loanType("individual").numberOfRepayments(4)
-                .amortizationType(1).interestRatePerPeriod(BigDecimal.valueOf(2)).clientId(clientId).productId(loanProductID);
+                .principal(principal).loanTermFrequency(120).loanTermFrequencyType(0).transactionProcessingStrategyCode(DEFAULT_STRATEGY)
+                .interestType(0).loanType("individual").numberOfRepayments(4).amortizationType(1)
+                .interestRatePerPeriod(BigDecimal.valueOf(2)).clientId(clientId).productId(loanProductID);
         Long loanId = loanHelper.applyForLoan(loanRequest).getLoanId();
         LOG.info("Test Loan http://localhost:4200/#/clients/{}/loans-accounts/{}/transactions", clientId, loanId);
         return loanId;

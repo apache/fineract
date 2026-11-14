@@ -101,16 +101,14 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         String tst_tst_tst = "TST_TST_TST".toLowerCase();
         Long createdCodeId = retrieveCodeId(tst_tst_tst);
         Integer createdCodeValueId;
-        Integer createdCodeValueIdSecond;
         if (createdCodeId == null) {
             createdCodeId = codeHelper.createCode(tst_tst_tst);
 
             createdCodeValueId = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 1).intValue();
-            createdCodeValueIdSecond = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2).intValue();
+            codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2);
         } else {
             List<GetCodeValuesDataResponse> codeValuesForCode = codeHelper.retrieveAllCodeValues(createdCodeId);
             createdCodeValueId = codeValuesForCode.get(0).getId().intValue();
-            createdCodeValueIdSecond = codeValuesForCode.get(1).getId().intValue();
         }
 
         // creating datatable for client entity
@@ -201,7 +199,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         datatableEntryMap.put(itsAJson, '{' + json);
 
         String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-        errorResponse = createDatatableEntryExpectingError(datatableName, clientID, datatabelEntryRequestJsonString);
+        createDatatableEntryExpectingError(datatableName, clientID, datatabelEntryRequestJsonString);
 
         // add valid json
         datatableEntryMap.put(itsAJson, json);
@@ -672,16 +670,14 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         String tst_tst_tst = "tst_tst_tst";
         Long createdCodeId = retrieveCodeId(tst_tst_tst);
         Integer createdCodeValueId;
-        Integer createdCodeValueIdSecond;
         if (createdCodeId == null) {
             createdCodeId = codeHelper.createCode(tst_tst_tst);
 
             createdCodeValueId = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 1).intValue();
-            createdCodeValueIdSecond = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2).intValue();
+            codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2);
         } else {
             List<GetCodeValuesDataResponse> codeValuesForCode = codeHelper.retrieveAllCodeValues(createdCodeId);
             createdCodeValueId = codeValuesForCode.get(0).getId().intValue();
-            createdCodeValueIdSecond = codeValuesForCode.get(1).getId().intValue();
         }
 
         // creating datatable for client entity
@@ -803,8 +799,6 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
 
         // Update datatable entry
 
-        Boolean previousBoolean = (Boolean) datatableEntryMap.get("itsABoolean");
-
         datatableEntryMap.put("itsABoolean", null);
         datatableEntryMap.put("itsADate", null);
         datatableEntryMap.put("itsADatetime", null);
@@ -920,7 +914,6 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         LOG.info("Creating datatable entry: {}", datatableEntryRequestJsonString);
 
-        final boolean genericResultSet = true;
         Long datatableEntryResponse = createDatatableEntry(datatableName, clientId, datatableEntryRequestJsonString);
         assertNotNull(datatableEntryResponse, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
         assertEquals(clientId.longValue(), datatableEntryResponse);

@@ -98,9 +98,8 @@ public class LoanTransactionReverseReplayRelationTest extends FeignLoanTestBase 
                         .transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
 
         // make backdated repayment for reverse replay
-        final PostLoansLoanIdTransactionsResponse backDatedRepaymentTransaction = makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .transactionAmount(5.0));
+        makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                .transactionDate("10 September 2022").locale("en").transactionAmount(5.0));
 
         // get transaction relationship for new transaction using externalId of reversed loan transaction
         Long reversedAndReplayedTransactionId = repaymentTransaction.getResourceId();

@@ -48,7 +48,6 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
     private Long loanId;
     private Long loanRescheduleRequestId;
     private final double loanPrincipalAmount = 100000.00;
-    private final int numberOfRepayments = 12;
     private final double interestRatePerPeriod = 18;
 
     @AfterEach
