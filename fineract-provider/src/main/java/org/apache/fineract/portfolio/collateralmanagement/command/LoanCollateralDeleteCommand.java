@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDel
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class LoanCollateralDeleteCommand extends Command<LoanCollateralDeleteRequest> {}
+public class LoanCollateralDeleteCommand extends Command<LoanCollateralDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "LOAN_COLLATERAL_PRODUCT";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

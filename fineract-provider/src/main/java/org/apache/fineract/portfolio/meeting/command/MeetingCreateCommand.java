@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.meeting.data.MeetingCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MeetingCreateCommand extends Command<MeetingCreateRequest> {}
+public class MeetingCreateCommand extends Command<MeetingCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "MEETING";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

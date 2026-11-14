@@ -25,4 +25,15 @@ import org.apache.fineract.template.data.TemplateCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TemplateCreateCommand extends Command<TemplateCreateRequest> {}
+public class TemplateCreateCommand extends Command<TemplateCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "TEMPLATE";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}
