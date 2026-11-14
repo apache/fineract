@@ -87,6 +87,8 @@ dependencies {
             'org.apache.avro:avro',
             'jakarta.ws.rs:jakarta.ws.rs-api',
             'org.glassfish.jersey.media:jersey-media-multipart',
+            // Tags http.server.requests with the JAX-RS uri template instead of UNKNOWN
+            'org.glassfish.jersey.ext:jersey-micrometer',
 
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
