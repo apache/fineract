@@ -35,7 +35,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -150,7 +149,7 @@ public class FixedDepositTest extends FeignDepositTestBase {
         fixedDepositAccountInterestCalculationServiceImpl = new FixedDepositAccountInterestCalculationServiceImpl(
                 new DepositAccountDataValidator(new FromJsonHelper(), null), new FromJsonHelper());
         try {
-            HashMap h = fixedDepositAccountInterestCalculationServiceImpl
+            fixedDepositAccountInterestCalculationServiceImpl
                     .calculateInterest(new JsonQuery(apiRequestBodyAsJson, element, new FromJsonHelper()));
             fail("The function must throw an exception when called with invalid Compounding period");
         } catch (PlatformApiDataValidationException e) {
@@ -176,7 +175,7 @@ public class FixedDepositTest extends FeignDepositTestBase {
         fixedDepositAccountInterestCalculationServiceImpl = new FixedDepositAccountInterestCalculationServiceImpl(
                 new DepositAccountDataValidator(new FromJsonHelper(), null), new FromJsonHelper());
         try {
-            HashMap h = fixedDepositAccountInterestCalculationServiceImpl
+            fixedDepositAccountInterestCalculationServiceImpl
                     .calculateInterest(new JsonQuery(apiRequestBodyAsJson, element, new FromJsonHelper()));
             fail("The function must throw an exception when called with invalid Compounding period");
         } catch (PlatformApiDataValidationException e) {

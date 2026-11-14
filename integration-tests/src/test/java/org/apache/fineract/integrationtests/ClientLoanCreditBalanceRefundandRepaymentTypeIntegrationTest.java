@@ -489,7 +489,6 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             GetLoansLoanIdSummary loanSummary = getLoanDetails(disbursedLoanID).getSummary();
 
             final Float principalOutstanding = Utils.getDoubleValue(loanSummary.getPrincipalOutstanding()).floatValue();
-            final Float interestOutstanding = Utils.getDoubleValue(loanSummary.getInterestOutstanding()).floatValue();
             final Float totalOutstanding = Utils.getDoubleValue(loanSummary.getTotalOutstanding()).floatValue();
             final Float overpaidAmount = 159.00f;
             final Float goodwillAmount = totalOutstanding + overpaidAmount;

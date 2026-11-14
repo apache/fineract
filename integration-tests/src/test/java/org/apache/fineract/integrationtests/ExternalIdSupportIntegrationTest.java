@@ -35,7 +35,6 @@ import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdRespons
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
-import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
@@ -499,8 +498,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             Integer penalty4LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0, null);
 
             String penalty5LoanChargeExternalId = UUID.randomUUID().toString();
-            Integer penalty5LoanChargeId = addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0,
-                    penalty5LoanChargeExternalId);
+            addSpecifiedDueDateCharge(loanWithInterestId, penalty2, formattedDate, 1000.0, penalty5LoanChargeExternalId);
 
             // Check whether an external id was generated
             final PostLoansLoanIdTransactionsResponse waiveInterestResult = makeWaiveInterest(loanExternalIdStr,
@@ -528,9 +526,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
                             .transactionAmount(500.0).externalId(inAdvanceRepaymentTxnExternalIdStr));
 
             String inAdvanceRepayment2TxnExternalIdStr = UUID.randomUUID().toString();
-            final PostLoansLoanIdTransactionsResponse inAdvanceRepayment2Result = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(formattedDate).locale("en")
-                            .transactionAmount(50.0).externalId(inAdvanceRepayment2TxnExternalIdStr));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate(formattedDate).locale("en").transactionAmount(50.0).externalId(inAdvanceRepayment2TxnExternalIdStr));
 
             // Check whether an external id was generated
             final PostLoansLoanIdTransactionsResponse makeRefundByCashResult = makeRefundByCash(loanExternalIdStr,
@@ -688,7 +685,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final PostLoansResponse loan2 = applyForLoanApplication(clientId, loanProductID, null);
             Integer loan2Id = loan2.getResourceId().intValue();
             approveLoan("02 September 2022", loan2Id);
-            final PostLoansLoanIdResponse disbursedLoan2Result = disburseLoan("03 September 2022", loan2Id, "1000", null);
+            disburseLoan("03 September 2022", loan2Id, "1000", null);
 
             Long penalty = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(10.0).penalty(true)).getResourceId();
 
@@ -813,7 +810,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             PostDelinquencyRangeResponse delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest()
                     .minimumAgeDays(1).maximumAgeDays(3).locale("en").classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
-            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
             delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)

@@ -36,7 +36,6 @@ import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -106,9 +105,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             // set loan as chargeoff
             String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
@@ -132,9 +130,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             updateBusinessDate("12 September 2022");
             // make Repayment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -147,9 +144,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // Merchant Refund
-            final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_1 = makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("8 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -162,8 +158,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // Payout Refund
-            final PostLoansLoanIdTransactionsResponse payoutRefund_1 = makePayoutRefund(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en").transactionAmount(100.0));
+            makePayoutRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022")
+                    .locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -176,8 +172,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // Goodwill Credit
-            final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en").transactionAmount(100.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("10 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -190,9 +186,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, incomeAccount, JournalEntry.TransactionType.CREDIT.name()));
 
             // make overpaid repayment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("11 September 2022").locale("en")
-                            .transactionAmount(720.0));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("11 September 2022").locale("en").transactionAmount(720.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getOverpaid());
@@ -207,13 +202,11 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(720, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // CBR for making loan active again
-            final PostLoansLoanIdTransactionsResponse cbr_transaction = makeCreditBalanceRefund(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("12 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeCreditBalanceRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("12 September 2022").locale("en").transactionAmount(100.0));
 
             // Charge Adjustment making loan overpaid
-            final PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResult = chargeAdjustment(loanId, (long) feeLoanChargeId,
-                    new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).locale("en"));
+            chargeAdjustment(loanId, (long) feeLoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).locale("en"));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getOverpaid());
@@ -259,9 +252,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             // set loan as fraud
             changeLoanFraudState(loanId, true);
@@ -296,9 +288,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             updateBusinessDate("12 September 2022");
 
             // make Repayment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -312,9 +303,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // Merchant Refund
-            final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_1 = makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("8 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -328,8 +318,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // Payout Refund
-            final PostLoansLoanIdTransactionsResponse payoutRefund_1 = makePayoutRefund(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en").transactionAmount(100.0));
+            makePayoutRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022")
+                    .locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -343,8 +333,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // Goodwill Credit
-            final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en").transactionAmount(100.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("10 September 2022").locale("en").transactionAmount(100.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -358,9 +348,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(100, incomeAccount, JournalEntry.TransactionType.CREDIT.name()));
 
             // make overpaid repayment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("11 September 2022").locale("en")
-                            .transactionAmount(720.0));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("11 September 2022").locale("en").transactionAmount(720.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getOverpaid());
@@ -376,13 +365,11 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     journalEntry(720, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // CBR for making loan active again
-            final PostLoansLoanIdTransactionsResponse cbr_transaction = makeCreditBalanceRefund(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("12 September 2022").locale("en")
-                            .transactionAmount(100.0));
+            makeCreditBalanceRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("12 September 2022").locale("en").transactionAmount(100.0));
 
             // Charge Adjustment making loan overpaid
-            final PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResult = chargeAdjustment(loanId, (long) feeLoanChargeId,
-                    new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).locale("en"));
+            chargeAdjustment(loanId, (long) feeLoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(10.0).locale("en"));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getOverpaid());
@@ -419,25 +406,23 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
-            Long feeLoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 110.0d, true).getResourceId();
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
 
             // Goodwill Credit
-            final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en").transactionAmount(800.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("06 September 2022").locale("en").transactionAmount(800.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -476,18 +461,16 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
-            Long feeLoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             // set loan as chargeoff
             String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
@@ -512,8 +495,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             updateBusinessDate("12 September 2022");
 
             // Goodwill Credit
-            final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("08 September 2022").locale("en").transactionAmount(800.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("08 September 2022").locale("en").transactionAmount(800.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -552,25 +535,23 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
-            Long feeLoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
 
             // Goodwill Credit
-            final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en").transactionAmount(800.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("06 September 2022").locale("en").transactionAmount(800.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -612,18 +593,16 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
-            Long feeLoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -653,8 +632,8 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             updateBusinessDate("12 September 2022");
 
             // Goodwill Credit
-            final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en").transactionAmount(800.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("10 September 2022").locale("en").transactionAmount(800.0));
 
             loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -679,7 +658,6 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
                     new PutGlobalConfigurationsRequest().enabled(true));
             updateBusinessDate(LocalDate.of(2020, 9, 5).toString());
             // Loan ExternalId
-            String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Long loanProductId = this.createLoanProductWithInterestRecalculation();
             final Long clientId = createClient();
@@ -691,18 +669,16 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
-            Long feeLoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
 
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Long penalty1LoanChargeId = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             updateBusinessDate(LocalDate.of(2020, 9, 6).toString());
             executeInlineCOB(loanId);
