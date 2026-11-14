@@ -82,7 +82,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -101,7 +100,6 @@ class LoanChargeWritePlatformServiceImplTest {
     private static final LocalDate BUSINESS_DATE_BEFORE = LocalDate.of(2024, 2, 14);
     private static final String CURRENCY_CODE = "USD";
 
-    @InjectMocks
     private LoanChargeWritePlatformServiceImpl loanChargeWritePlatformService;
 
     @Mock
@@ -202,6 +200,29 @@ class LoanChargeWritePlatformServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        // build the real services around the mocks, as @InjectMocks did for the single class before the split
+        final LoanChargeWriteHelper loanChargeWriteHelper = new LoanChargeWriteHelper(loanChargeRepository, loanUtilService, null,
+                configurationDomainService, loanAccrualsProcessingService, loanChargeValidator, loanScheduleService,
+                reprocessLoanTransactionsService, loanAccountService, loanChargeService);
+        loanChargeWritePlatformService = new LoanChargeWritePlatformServiceImpl(
+                new LoanChargeAddUpdateWritePlatformService(loanChargeApiJsonValidator, loanAssembler, chargeRepository,
+                        businessEventNotifierService, loanTransactionRepository, null, loanAccountDomainService, null, loanUtilService,
+                        loanLifecycleStateMachine, externalIdFactory, loanChargeAssembler, loanAccrualsProcessingService,
+                        loanChargeValidator, loanScheduleService, reprocessLoanTransactionsService, loanChargeService,
+                        loanChargeWriteHelper),
+                new LoanChargeWaiverWritePlatformService(loanChargeApiJsonValidator, loanAssembler, businessEventNotifierService,
+                        loanTransactionRepository, null, loanAccountDomainService, loanUtilService, loanChargeReadPlatformService,
+                        loanLifecycleStateMachine, externalIdFactory, loanAccrualsProcessingService, loanChargeValidator,
+                        loanScheduleService, reprocessLoanTransactionsService, journalEntryPoster, loanChargeWriteHelper),
+                new LoanChargePaymentWritePlatformService(loanChargeApiJsonValidator, loanAssembler, businessEventNotifierService, null,
+                        loanAccountDomainService, null, loanUtilService, loanLifecycleStateMachine, null, fromApiJsonHelper,
+                        externalIdFactory, null, null, null, null, loanChargeValidator, loanScheduleService,
+                        reprocessLoanTransactionsService, loanAccountService, journalEntryPoster, loanChargeWriteHelper),
+                new LoanOverdueChargeWritePlatformService(loanAssembler, chargeRepository, businessEventNotifierService, null,
+                        loanAccountDomainService, loanChargeRepository, null, loanUtilService, loanChargeReadPlatformService,
+                        fromApiJsonHelper, configurationDomainService, loanChargeAssembler, loanAccrualsProcessingService,
+                        loanScheduleService, reprocessLoanTransactionsService, loanAccountService, null, loanChargeWriteHelper));
+
         when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
         when(chargeRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(chargeDefinition);
         when(chargeDefinition.getChargeTimeType()).thenReturn(SPECIFIED_DUE_DATE);
