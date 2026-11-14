@@ -26,7 +26,7 @@ dependencies {
     compileOnly('io.github.openfeign.querydsl:querydsl-sql-codegen:7.7')
     compileOnly('io.github.openfeign.querydsl:querydsl-sql:7.7')
     compileOnly('org.liquibase:liquibase-core:4.33.0')
-    compileOnly('org.testcontainers:postgresql:1.20.4')
+    compileOnly('org.testcontainers:postgresql:1.21.4')
 }
 
 gradlePlugin {
@@ -54,7 +54,7 @@ testing {
                 implementation(project())
                 implementation(gradleTestKit())
                 implementation('org.assertj:assertj-core:3.27.7')
-                implementation('org.testcontainers:testcontainers:1.20.4')
+                implementation('org.testcontainers:testcontainers:1.21.4')
             }
             targets {
                 all {
