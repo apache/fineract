@@ -19,11 +19,12 @@
 package org.apache.fineract.command.hook;
 
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_HOOK_ORDER_TIMESTAMP;
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_PROPERTY_HOOKS_TIMESTAMP_ENABLED;
 
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -33,11 +34,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Order(COMMAND_HOOK_ORDER_TIMESTAMP)
-@ConditionalOnProperty(value = "fineract.command.hooks.timestamp-pre", havingValue = "true")
-final class TimestampCommandHook implements CommandHookBefore<Object> {
+@ConditionalOnProperty(value = COMMAND_PROPERTY_HOOKS_TIMESTAMP_ENABLED, havingValue = "true")
+final class TimestampCommandHook implements CommandHookBefore<Object, Object> {
 
     @Override
-    public void onBefore(Command<Object> command) {
+    public void onBefore(CommandContext<Object, Object> ctx) {
+        var command = ctx.getCommand();
+
         if (command.getCreatedAt() == null) {
             command.setCreatedAt(Instant.now());
         }

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.command.disruptor;
 
+import static org.apache.fineract.command.disruptor.DisruptorCommandConstants.COMMAND_DISRUPTOR_PROPERTIES_PREFIX;
+
 import com.lmax.disruptor.dsl.ProducerType;
 import java.io.Serial;
 import java.io.Serializable;
@@ -33,7 +35,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-@ConfigurationProperties(prefix = "fineract.command.disruptor")
+@ConfigurationProperties(prefix = COMMAND_DISRUPTOR_PROPERTIES_PREFIX)
 public final class DisruptorCommandProperties implements Serializable {
 
     @Serial

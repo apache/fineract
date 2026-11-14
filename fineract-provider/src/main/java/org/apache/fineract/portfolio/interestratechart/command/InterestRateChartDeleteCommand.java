@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDel
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class InterestRateChartDeleteCommand extends Command<InterestRateChartDeleteRequest> {}
+public class InterestRateChartDeleteCommand extends Command<InterestRateChartDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "INTERESTRATECHART";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

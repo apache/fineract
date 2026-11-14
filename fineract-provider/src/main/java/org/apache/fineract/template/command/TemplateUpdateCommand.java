@@ -25,4 +25,15 @@ import org.apache.fineract.template.data.TemplateUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TemplateUpdateCommand extends Command<TemplateUpdateRequest> {}
+public class TemplateUpdateCommand extends Command<TemplateUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "TEMPLATE";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}
