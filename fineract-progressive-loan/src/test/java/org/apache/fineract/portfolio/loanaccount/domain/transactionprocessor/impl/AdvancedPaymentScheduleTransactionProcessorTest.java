@@ -28,7 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
@@ -64,6 +66,8 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -74,6 +78,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -96,6 +103,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
+import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -1541,5 +1549,64 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // then
         Assertions.assertDoesNotThrow(() -> underTest.processLatestTransaction(chargeOffTransaction, ctx));
+    }
+
+    @Test
+    public void dueDateChangeUpdatesTargetAndShiftsFollowingInstallmentDates() {
+        // given
+        LoanTransaction loanTransaction = mock(LoanTransaction.class);
+        Loan loan = mock(Loan.class);
+        ProgressiveLoanInterestScheduleModel scheduleModel = mock(ProgressiveLoanInterestScheduleModel.class);
+        LoanProductRelatedDetail productRelatedDetail = mock(LoanProductRelatedDetail.class);
+        LoanTermVariations loanTermVariations = mock(LoanTermVariations.class);
+        LoanPaymentAllocationRule loanPaymentAllocationRule = mock(LoanPaymentAllocationRule.class);
+
+        List<LoanTransaction> loanTransactionList = List.of(loanTransaction);
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
+
+        LocalDate fromDate = LocalDate.of(2000, 3, 1);
+        LocalDate originalDueDate = LocalDate.of(2000, 4, 1);
+        LocalDate secondDueDate = LocalDate.of(2000, 5, 1);
+
+        LocalDate disbursementDate = LocalDate.of(2000, 1, 1);
+
+        installments.add(new LoanRepaymentScheduleInstallment(loan, 1, fromDate, originalDueDate, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO));
+        installments.add(new LoanRepaymentScheduleInstallment(loan, 2, originalDueDate, secondDueDate, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO));
+
+        LocalDate targetDueDate = originalDueDate;
+        LocalDate newDueDate = LocalDate.of(2000, 9, 1);
+
+        LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(null, LoanTermVariationType.DUE_DATE.getValue(),
+                targetDueDate, null, newDueDate, false);
+
+        when(loan.getActiveLoanTermVariations()).thenReturn(List.of(loanTermVariations));
+        when(loanTransaction.getLoan()).thenReturn(loan);
+        when(emiCalculator.generateInstallmentInterestScheduleModel(anyList(), any(ILoanConfigurationDetails.class),
+                nullable(Integer.class), any(MathContext.class))).thenReturn(scheduleModel);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(productRelatedDetail);
+        when(productRelatedDetail.getInstallmentAmountInMultiplesOf()).thenReturn(1);
+        when(loan.getCurrency()).thenReturn(MONETARY_CURRENCY);
+        when(loanTermVariations.toData()).thenReturn(loanTermVariationsData);
+        when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
+        when(loanTransaction.getTypeOf()).thenReturn(REPAYMENT);
+        when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));
+        when(loanPaymentAllocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
+        when(productRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
+        when(loanTransaction.getTransactionDate()).thenReturn(LocalDate.of(2000, 1, 5));
+        when(productRelatedDetail.getRepayEvery()).thenReturn(1);
+        when(productRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+
+        // when
+        underTest.reprocessProgressiveLoanTransactions(disbursementDate, newDueDate, loanTransactionList, MONETARY_CURRENCY, installments,
+                Set.of());
+
+        // then
+        assertEquals(LocalDate.of(2000, 9, 1), installments.get(0).getDueDate());
+        assertEquals(LocalDate.of(2000, 10, 1), installments.get(1).getDueDate());
+        assertEquals(fromDate, installments.get(0).getFromDate());
+        assertEquals(newDueDate, installments.get(1).getFromDate());
+        assertEquals(2, installments.size());
     }
 }
