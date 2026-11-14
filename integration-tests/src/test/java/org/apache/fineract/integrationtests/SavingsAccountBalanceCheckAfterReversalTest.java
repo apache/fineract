@@ -58,6 +58,26 @@ public class SavingsAccountBalanceCheckAfterReversalTest extends FeignSavingsTes
     }
 
     @Test
+    public void testPayChargeAfterAReversedDeposit() {
+        final String reversedDepositDate = "20 April 2022";
+        final String chargeDate = "25 April 2022";
+        final Long clientId = createClient(START_DATE);
+        final Long savingsId = createSavingsAccountDailyPosting(clientId);
+        deposit(savingsId, "10000", START_DATE);
+        final Long depositId = deposit(savingsId, "400", reversedDepositDate).getResourceId();
+        savingsTransactionHelper.reverseTransaction(savingsId, depositId);
+        final Long chargeId = savingsChargeHelper.createCharge(SavingsRequestBuilders.savingsSpecifiedDueDateCharge()).getResourceId();
+        final Long savingsChargeId = savingsChargeHelper.addChargeToSavings(savingsId, SavingsRequestBuilders
+                .savingsAccountCharge(chargeId, 100f).dueDate(chargeDate).dateFormat(SavingsTestData.DATETIME_PATTERN)).getResourceId();
+
+        // the reversal of the deposit is the latest transaction before the charge date, and it has no running balance
+        savingsChargeHelper.payCharge(savingsId, savingsChargeId, "100", chargeDate);
+
+        SavingsTestValidators.verifyAmount(new BigDecimal("9900"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                "Balance after paying the charge");
+    }
+
+    @Test
     public void testSavingsBalanceWithOverDraftAfterWithdrawal() {
         Long clientId = createClient(START_DATE);
         assertNotNull(clientId);
