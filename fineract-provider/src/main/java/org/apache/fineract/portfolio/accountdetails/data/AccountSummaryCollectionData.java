@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.util.Collection;
+import lombok.Getter;
 
 /**
  * Immutable data object representing a summary of various accounts.
  */
+@Getter
 @SuppressWarnings("unused")
 public class AccountSummaryCollectionData {
 

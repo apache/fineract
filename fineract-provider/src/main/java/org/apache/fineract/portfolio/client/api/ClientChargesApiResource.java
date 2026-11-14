@@ -47,11 +47,8 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -77,8 +74,6 @@ public class ClientChargesApiResource {
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final ClientChargeReadPlatformService clientChargeReadPlatformService;
     private final ClientTransactionReadPlatformService clientTransactionReadPlatformService;
-    private final DefaultToApiJsonSerializer<ClientChargeData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
 
@@ -87,13 +82,12 @@ public class ClientChargesApiResource {
     @Operation(summary = "List Client Charges", operationId = "retrieveAllClientCharges", description = "The list capability of client charges supports pagination."
             + "Example Requests:\n" + "clients/1/charges\n" + "\nclients/1/charges?offset=0&limit=5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.class)))
-    public String retrieveAllClientCharges(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public Page<ClientChargeData> retrieveAllClientCharges(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @Parameter(description = "chargeStatus") final String chargeStatus,
             @QueryParam("pendingPayment") @Parameter(description = "pendingPayment") final Boolean pendingPayment,
             @Context final UriInfo uriInfo, @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (!(is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL)
                 || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)
                 || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE))) {
@@ -104,9 +98,7 @@ public class ClientChargesApiResource {
         }
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
 
-        final Page<ClientChargeData> clientCharges = this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus,
-                pendingPayment, searchParameters);
-        return this.toApiJsonSerializer.serialize(settings, clientCharges, ClientApiConstants.CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS);
+        return this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus, pendingPayment, searchParameters);
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -118,18 +110,14 @@ public class ClientChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client charge template", operationId = "retrieveTemplateClientCharge")
     @AlternativeOperationId("retrieveTemplate_4")
-    public String retrieveTemplate(@Context final UriInfo uriInfo,
+    public ClientChargeData retrieveTemplate(@Context final UriInfo uriInfo,
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
         final Long clientOfficeId = this.clientReadPlatformService.retrieveOne(clientId).getOfficeId();
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveAllChargesApplicableToClients(clientOfficeId);
-        final ClientChargeData clientChargeData = ClientChargeData.template(chargeOptions);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientChargeData, ClientApiConstants.CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS);
-
+        return ClientChargeData.template(chargeOptions);
     }
 
     @GET
@@ -139,7 +127,7 @@ public class ClientChargesApiResource {
             + "clients/1/charges/1\n" + "\n" + "\n" + "clients/1/charges/1?fields=name,id")
     @AlternativeOperationId("retrieveClientCharge")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.GetClientsChargesPageItems.class)))
-    public String retrieveClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientChargeData retrieveClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("chargeId") @Parameter(description = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
@@ -159,8 +147,7 @@ public class ClientChargesApiResource {
                 }
             }
         }
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientCharge, ClientApiConstants.CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS);
+        return clientCharge;
     }
 
     @POST
@@ -171,15 +158,13 @@ public class ClientChargesApiResource {
     @AlternativeOperationId("applyClientCharge")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesResponse.class)))
-    public String applyClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public CommandProcessingResult applyClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientCharge(clientId).withJson(apiRequestBodyAsJson)
                 .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @POST
@@ -193,32 +178,27 @@ public class ClientChargesApiResource {
             + "Showing request/response for 'Pay a Client Charge'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdResponse.class)))
-    public String payOrWaiveClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public CommandProcessingResult payOrWaiveClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("chargeId") @Parameter(description = "chargeId") final Long chargeId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
-        String json = "";
         if (is(commandParam, ClientApiConstants.CLIENT_CHARGE_COMMAND_WAIVE_CHARGE)) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().waiveClientCharge(clientId, chargeId)
                     .withJson(apiRequestBodyAsJson).build();
 
-            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-            json = this.toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, ClientApiConstants.CLIENT_CHARGE_COMMAND_PAY_CHARGE)) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().payClientCharge(clientId, chargeId)
                     .withJson(apiRequestBodyAsJson).build();
 
-            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-            json = this.toApiJsonSerializer.serialize(result);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, ClientApiConstants.CLIENT_CHARGE_COMMAND_WAIVE_CHARGE,
                     ClientApiConstants.CLIENT_CHARGE_COMMAND_PAY_CHARGE);
         }
-
-        return json;
     }
 
     @DELETE
@@ -226,14 +206,12 @@ public class ClientChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Client Charge", operationId = "deleteClientCharge", description = "Deletes a Client Charge on which no transactions have taken place (either payments or waivers). ")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientChargesApiResourceSwagger.DeleteClientsClientIdChargesChargeIdResponse.class)))
-    public String deleteClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public CommandProcessingResult deleteClientCharge(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("chargeId") @Parameter(description = "chargeId") final Long chargeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientCharge(clientId, chargeId).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }
