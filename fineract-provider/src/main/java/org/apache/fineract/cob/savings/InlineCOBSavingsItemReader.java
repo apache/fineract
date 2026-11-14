@@ -19,18 +19,20 @@
 package org.apache.fineract.cob.savings;
 
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import org.apache.fineract.cob.AbstractAccountItemReader;
+import org.apache.fineract.cob.COBConstant;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 
-public interface SavingsLockingService {
+public class InlineCOBSavingsItemReader extends AbstractAccountItemReader {
 
-    void upgradeLock(List<Long> accountsToLock, SavingsLockOwner lockOwner);
-
-    void deleteBySavingsIdInAndLockOwner(List<Long> savingsIds, SavingsLockOwner lockOwner);
-
-    List<SavingsAccountLock> findAllBySavingsIdIn(List<Long> savingsIds);
-
-    SavingsAccountLock findBySavingsIdAndLockOwner(Long savingsId, SavingsLockOwner lockOwner);
-
-    List<SavingsAccountLock> findAllBySavingsIdInAndLockOwner(List<Long> savingsIds, SavingsLockOwner lockOwner);
-
-    void applyLock(List<Long> savingsIds, SavingsLockOwner lockOwner);
+    @Override
+    @SuppressWarnings({ "unchecked" })
+    public void beforeStep(@NonNull StepExecution stepExecution) {
+        ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
+        List<Long> savingsIds = (List<Long>) executionContext.get(COBConstant.COB_PARAMETER);
+        setRemainingData(new LinkedBlockingQueue<>(savingsIds));
+    }
 }

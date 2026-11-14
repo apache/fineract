@@ -20,11 +20,12 @@ package org.apache.fineract.cob.loan;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.apache.fineract.cob.AbstractAccountItemReader;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
 
-public class InlineCOBLoanItemReader extends AbstractLoanItemReader {
+public class InlineCOBLoanItemReader extends AbstractAccountItemReader {
 
     @Override
     @SuppressWarnings({ "unchecked" })

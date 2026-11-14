@@ -27,6 +27,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 public interface SavingsAccountWritePlatformService {
@@ -38,6 +39,12 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
 
     CommandProcessingResult applyAnnualFee(Long savingsAccountChargeId, Long accountId);
+
+    /**
+     * Same as {@link #applyAnnualFee(Long, Long)}, on an account the caller already holds; see
+     * {@link #applyChargeDue(SavingsAccount, SavingsAccountCharge)} for the transaction and skip rules.
+     */
+    void applyAnnualFee(SavingsAccount account, SavingsAccountCharge charge);
 
     CommandProcessingResult calculateInterest(Long savingsId);
 
@@ -75,6 +82,14 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult unassignFieldOfficer(Long savingsAccountId, JsonCommand command);
 
     LocalDate applyChargeDue(Long savingsAccountChargeId, Long accountId);
+
+    /**
+     * Pays the due instalments of a charge on an account the caller already holds and manages in its own transaction,
+     * as the savings COB does. Unlike {@link #applyChargeDue(Long, Long)} it opens no transaction of its own, so the
+     * caller's copy of the account stays current. A charge the balance cannot cover is logged and skipped, as the
+     * legacy job did; any other failure propagates and fails the account's COB.
+     */
+    void applyChargeDue(SavingsAccount account, SavingsAccountCharge charge);
 
     void processPostActiveActions(SavingsAccount account, DateTimeFormatter fmt, Set<Long> existingTransactionIds,
             Set<Long> existingReversedTransactionIds);

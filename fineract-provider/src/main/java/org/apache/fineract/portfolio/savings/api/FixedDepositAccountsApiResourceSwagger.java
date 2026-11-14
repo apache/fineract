@@ -365,6 +365,8 @@ final class FixedDepositAccountsApiResourceSwagger {
         public Boolean transferInterestToSavings;
         @Schema(example = "100")
         public Integer maturityInstructionId;
+        @Schema(example = "1", description = "Savings account credited at maturity; required when maturityInstructionId is 200 (transfer to savings)")
+        public Long transferToSavingsId;
         public List<PostFixedDepositAccountsCharges> charges;
         @Schema(example = "false", description = "Determines whether product level interest rate chart is overridden by custom nominal annual interest rate")
         public Boolean isRateChartOverridden;

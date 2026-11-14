@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.AccessLevel;
@@ -36,7 +36,7 @@ import org.springframework.batch.infrastructure.item.ItemReader;
  * failure: the rest of the chunk would then be written and silently rolled back with it. A failure to load an account
  * in the writer instead enters scan mode, where only that account is skipped.
  */
-public abstract class AbstractLoanItemReader implements ItemReader<Long>, StepExecutionListener {
+public abstract class AbstractAccountItemReader implements ItemReader<Long>, StepExecutionListener {
 
     @Setter(AccessLevel.PROTECTED)
     private LinkedBlockingQueue<Long> remainingData;

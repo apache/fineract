@@ -16,9 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.savings;
+package org.apache.fineract.cob.service;
 
-public enum SavingsLockOwner {
-    SAVINGS_COB_CHUNK_PROCESSING, //
-    SAVINGS_INLINE_COB_PROCESSING; //
+import org.apache.fineract.cob.COBBusinessStep;
+import org.apache.fineract.cob.savings.SavingsCOBBusinessStep;
+import org.apache.fineract.cob.savings.SavingsCOBConstant;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SavingsBusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
+
+    @Override
+    public BusinessStepCategory getCategory() {
+        return BusinessStepCategory.SAVINGS;
+    }
+
+    @Override
+    public String getCobJobName() {
+        return SavingsCOBConstant.SAVINGS_COB_JOB_NAME;
+    }
+
+    @Override
+    public Class<? extends COBBusinessStep<?>> getBusinessStepClass() {
+        return SavingsCOBBusinessStep.class;
+    }
 }
