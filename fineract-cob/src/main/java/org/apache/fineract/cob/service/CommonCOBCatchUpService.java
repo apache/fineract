@@ -30,13 +30,13 @@ import org.apache.fineract.cob.domain.AccountLock;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
+import org.apache.fineract.infrastructure.jobs.service.RunningJobBusinessDateService;
 
 @RequiredArgsConstructor
 public abstract class CommonCOBCatchUpService<T extends AccountLock> implements COBCatchUpService {
 
     private final AsyncCOBExecutorService asyncLoanCOBExecutorService;
-    private final JobExecutionRepository jobExecutionRepository;
+    private final RunningJobBusinessDateService runningJobBusinessDateService;
     private final RetrieveIdService retrieveIdService;
     private final AccountLockService<T> accountLockService;
 
@@ -66,7 +66,7 @@ public abstract class CommonCOBCatchUpService<T extends AccountLock> implements 
 
     @Override
     public IsCatchUpRunningDTO isCatchUpRunning() {
-        LocalDate runningCatchUpBusinessDate = jobExecutionRepository.getBusinessDateOfRunningJobByExecutionParameter(getJobName(),
+        LocalDate runningCatchUpBusinessDate = runningJobBusinessDateService.getBusinessDateOfRunningJobByExecutionParameter(getJobName(),
                 COBConstant.COB_CUSTOM_JOB_PARAMETER_KEY, COBConstant.IS_CATCH_UP_PARAMETER_NAME, "true",
                 COBConstant.BUSINESS_DATE_PARAMETER_NAME);
         return new IsCatchUpRunningDTO(runningCatchUpBusinessDate != null, runningCatchUpBusinessDate);

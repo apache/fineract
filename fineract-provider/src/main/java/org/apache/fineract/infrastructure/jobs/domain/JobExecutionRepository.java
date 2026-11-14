@@ -33,13 +33,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.jobs.service.RunningJobBusinessDateService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JobExecutionRepository {
+public class JobExecutionRepository implements RunningJobBusinessDateService {
 
     private static final List<String> ACTIVE_STEP_STATUSES = List.of(STARTING.name(), STARTED.name(), STOPPING.name());
 
@@ -187,6 +188,7 @@ public class JobExecutionRepository {
                 """, Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId));
     }
 
+    @Override
     public LocalDate getBusinessDateOfRunningJobByExecutionParameter(String jobName, String jobCustomParamKeyName, String parameterKeyName,
             String parameterValue, String dateParameterName) {
         try {

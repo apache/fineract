@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class ProgressiveLoanModelProcessingService {
+public class ProgressiveLoanModelProcessingService implements ProgressiveLoanModelService {
 
     private static final List<LoanStatus> allowedLoanStatuses = List.of(LoanStatus.ACTIVE, LoanStatus.CLOSED_OBLIGATIONS_MET,
             LoanStatus.CLOSED_WRITTEN_OFF, LoanStatus.OVERPAID);
@@ -46,6 +46,12 @@ public class ProgressiveLoanModelProcessingService {
     @Transactional(readOnly = true)
     public boolean hasValidModel(Long loanId, String modelVersion) {
         return progressiveLoanModelRepository.hasValidModel(loanId, modelVersion);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasValidModel(Long loanId) {
+        return hasValidModel(loanId, ProgressiveLoanInterestScheduleModel.getModelVersion());
     }
 
     @Transactional(readOnly = true)
@@ -72,6 +78,7 @@ public class ProgressiveLoanModelProcessingService {
      * one instance its persistence context manages. Callers that only have an id and no transaction of their own want
      * {@link #recalculateModelAndSave(Long)} instead.
      */
+    @Override
     @Transactional
     public void recalculateModelAndSave(@NonNull Loan loan) {
         recalculate(loan);

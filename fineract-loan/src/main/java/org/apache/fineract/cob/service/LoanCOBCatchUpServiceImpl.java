@@ -16,30 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.cob.service;
 
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
-import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
-import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanRetrieveIdService;
-import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.infrastructure.jobs.service.RunningJobBusinessDateService;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
 @Service
 @Conditional(LoanCOBEnabledCondition.class)
-public class WorkingCapitalLoanCOBCatchUpServiceImpl extends CommonCOBCatchUpService<WorkingCapitalLoanAccountLock>
-        implements WorkingCapitalLoanCOBCatchUpService {
+public class LoanCOBCatchUpServiceImpl extends CommonCOBCatchUpService<LoanAccountLock> implements LoanCOBCatchUpService {
 
-    public WorkingCapitalLoanCOBCatchUpServiceImpl(AsyncWorkingCapitalLoanCOBExecutorService asyncLoanCOBExecutorService,
-            JobExecutionRepository jobExecutionRepository, WorkingCapitalLoanRetrieveIdService retrieveIdService,
-            AccountLockService<WorkingCapitalLoanAccountLock> accountLockService) {
-        super(asyncLoanCOBExecutorService, jobExecutionRepository, retrieveIdService, accountLockService);
+    public LoanCOBCatchUpServiceImpl(AsyncLoanCOBExecutorService asyncLoanCOBExecutorService,
+            RunningJobBusinessDateService runningJobBusinessDateService, RetrieveLoanIdService retrieveIdService,
+            LoanAccountLockService accountLockService) {
+        super(asyncLoanCOBExecutorService, runningJobBusinessDateService, retrieveIdService, accountLockService);
     }
 
     @Override
     public String getJobName() {
-        return JobName.WORKING_CAPITAL_LOAN_COB_JOB.name();
+        return LoanCOBConstant.JOB_NAME;
     }
 }
