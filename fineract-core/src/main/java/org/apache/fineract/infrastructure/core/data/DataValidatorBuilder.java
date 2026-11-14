@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Getter;
@@ -321,7 +322,7 @@ public class DataValidatorBuilder {
 
         List<String> valuesListLowercase = valuesList.stream().map(String::toLowerCase).toList();
 
-        if (this.value == null || !valuesListLowercase.contains(this.value.toString().toLowerCase())) {
+        if (this.value == null || !valuesListLowercase.contains(this.value.toString().toLowerCase(Locale.ROOT))) {
             final String valuesListStr = String.join(", ", valuesList);
             String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".is.not.one.of.expected.enumerations";
             String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be one of [ " + valuesListStr + " ] " + ".";

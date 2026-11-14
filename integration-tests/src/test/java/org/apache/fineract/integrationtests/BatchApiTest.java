@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -1337,9 +1338,9 @@ public class BatchApiTest extends FeignLoanTestBase {
     @Test
     public void shouldFindOneToOneDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
         final Long loanId = setupLoanAccount();
-        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
-        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
-        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase(Locale.ROOT);
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase(Locale.ROOT);
         createTwoStringColumnDatatable(datatableName, columnName1, columnName2, false, SHORT_COLUMN_LENGTH);
         try {
             final String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
@@ -1371,9 +1372,9 @@ public class BatchApiTest extends FeignLoanTestBase {
      */
     @Test
     public void shouldNotFindAnyDatatableEntryByQueryAPIAndFailsToUpdateItsColumn() {
-        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
-        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
-        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase(Locale.ROOT);
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase(Locale.ROOT);
         createTwoStringColumnDatatable(datatableName, columnName1, columnName2, false, LONG_COLUMN_LENGTH);
         try {
             final List<BatchRequest> batchRequests = List.of(
@@ -1400,9 +1401,9 @@ public class BatchApiTest extends FeignLoanTestBase {
     @Test
     public void shouldFindOneToManyDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
         final Long loanId = setupLoanAccount();
-        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
-        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
-        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
+        final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase(Locale.ROOT);
+        final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase(Locale.ROOT);
         createTwoStringColumnDatatable(datatableName, columnName1, columnName2, true, SHORT_COLUMN_LENGTH);
         try {
             final String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);

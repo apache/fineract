@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -1244,9 +1245,10 @@ public class WorkingCapitalLoanApplicationDataValidator {
                 throw new PlatformDataIntegrityException("error.msg.wc.loan.duplicate.accountNo",
                         "Working Capital Loan with accountNo `" + accountNo + "` already exists", "accountNo", accountNo);
             }
-            if ((message != null && (message.contains("wc_loan_externalid_UNIQUE") || message.toLowerCase().contains("external_id_unique")))
+            if ((message != null
+                    && (message.contains("wc_loan_externalid_UNIQUE") || message.toLowerCase(Locale.ROOT).contains("external_id_unique")))
                     || (causeMessage != null && (causeMessage.contains("wc_loan_externalid_UNIQUE")
-                            || causeMessage.toLowerCase().contains("external_id_unique")))) {
+                            || causeMessage.toLowerCase(Locale.ROOT).contains("external_id_unique")))) {
                 final String externalId = command.stringValueOfParameterNamed("externalId");
                 throw new PlatformDataIntegrityException("error.msg.wc.loan.duplicate.externalId",
                         "Working Capital Loan with externalId `" + externalId + "` already exists", "externalId", externalId);

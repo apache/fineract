@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -486,7 +487,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         } else if (realCause.getMessage().contains("loan_externalid_UNIQUE") || realCause.getMessage().contains("m_loan_external_id_key")
                 || (realCause.getCause() != null && (realCause.getCause().getMessage().contains("loan_externalid_UNIQUE")
                         || realCause.getCause().getMessage().contains("m_loan_external_id_key")))
-                || realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                || realCause.getMessage().toLowerCase(Locale.ROOT).contains("external_id_unique")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.externalId",
                     "Loan with externalId `" + externalId + "` already exists", "externalId", externalId);

@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
@@ -123,7 +124,7 @@ public class SavingsAccountTransactionDatatableIntegrationTest extends FeignSavi
     }
 
     private String uniqueDatatableName() {
-        return Utils.uniqueRandomStringGenerator(DATATABLE_NAME_PREFIX, 5).toLowerCase();
+        return Utils.uniqueRandomStringGenerator(DATATABLE_NAME_PREFIX, 5).toLowerCase(Locale.ROOT);
     }
 
     private PostColumnHeaderData numberColumn() {

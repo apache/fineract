@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -292,8 +293,8 @@ public class GlobalConfigurationTest {
     @Test
     public void testPpiDatatableRegistrationIsVisibleAsAConfigurationWithTheSingleNodeCache() {
         final String appTable = "m_client";
-        final String datatableName = ok(() -> fineractClient.dataTables()
-                .createDatatable(new PostDataTablesRequest().datatableName(Utils.uniqueRandomStringGenerator("dt_ppi_", 5).toLowerCase())
+        final String datatableName = ok(() -> fineractClient.dataTables().createDatatable(
+                new PostDataTablesRequest().datatableName(Utils.uniqueRandomStringGenerator("dt_ppi_", 5).toLowerCase(Locale.ROOT))
                         .apptableName(appTable).entitySubType("PERSON").multiRow(false)
                         .addColumnsItem(new PostColumnHeaderData().name("score").type("Number").mandatory(false))))
                 .getResourceIdentifier();

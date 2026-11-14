@@ -123,7 +123,7 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("postdatedChecks");
-            if (realCause.getMessage().toLowerCase().contains("transaction has been rolled back")) {
+            if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("transaction has been rolled back")) {
                 baseDataValidator.reset().parameter(CHECK_NO).failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) {

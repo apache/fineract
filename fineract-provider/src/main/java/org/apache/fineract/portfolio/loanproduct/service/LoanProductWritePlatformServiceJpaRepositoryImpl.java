@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -468,7 +469,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     }
 
     private static boolean containsDuplicateShortnameErrorForMySQL(Throwable realCause) {
-        return (realCause.getMessage().contains("short_name") && realCause.getMessage().toLowerCase().contains("duplicate"));
+        return (realCause.getMessage().contains("short_name") && realCause.getMessage().toLowerCase(Locale.ROOT).contains("duplicate"));
     }
 
     private void validateInputDates(final JsonCommand command) {

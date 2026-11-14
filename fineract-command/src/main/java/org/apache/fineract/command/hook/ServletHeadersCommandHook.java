@@ -21,6 +21,7 @@ package org.apache.fineract.command.hook;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_HOOK_ORDER_HEADERS;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_HTTP_HEADER_IP;
 
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -56,10 +57,10 @@ final class ServletHeadersCommandHook implements CommandHookBefore<Object> {
         var attributes = RequestContextHolder.getRequestAttributes();
 
         if (attributes instanceof ServletRequestAttributes servletAttributes) {
-            var value = servletAttributes.getRequest().getHeader(name.toLowerCase());
+            var value = servletAttributes.getRequest().getHeader(name.toLowerCase(Locale.ROOT));
 
             if (searchParameter && StringUtils.isEmpty(value)) {
-                value = servletAttributes.getRequest().getParameter(name.toLowerCase());
+                value = servletAttributes.getRequest().getParameter(name.toLowerCase(Locale.ROOT));
             }
 
             return value;
