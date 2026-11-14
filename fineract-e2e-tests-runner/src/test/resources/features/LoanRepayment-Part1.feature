@@ -395,13 +395,74 @@ Feature: LoanRepayment - Part1
       | 12 | 31   | 01 November 2023  |           | 1765.18         | 284.11        | 20.89    | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
       | 13 | 30   | 01 December 2023  |           | 1477.59         | 287.59        | 17.41    | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
       | 14 | 31   | 01 January 2024   |           | 1187.65         | 289.94        | 15.06    | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
-      | 15 | 31   | 01 February 2024  |           | 894.75          | 292.9         | 12.1     | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
-      | 16 | 29   | 01 March 2024     |           | 598.28          | 296.47        | 8.53     | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
-      | 17 | 31   | 01 April 2024     |           | 299.38          | 298.9         | 6.1      | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
-      | 18 | 30   | 01 May 2024       |           | 0.0             | 299.38        | 2.95     | 0.0  | 0.0       | 302.33 | 0.0  | 0.0        | 0.0  | 302.33      |
+      | 15 | 31   | 01 February 2024  |           | 894.72          | 292.93        | 12.07    | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
+      | 16 | 29   | 01 March 2024     |           | 598.23          | 296.49        | 8.51     | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
+      | 17 | 31   | 01 April 2024     |           | 299.31          | 298.92        | 6.08     | 0.0  | 0.0       | 305.0  | 0.0  | 0.0        | 0.0  | 305.0       |
+      | 18 | 30   | 01 May 2024       |           | 0.0             | 299.31        | 2.94     | 0.0  | 0.0       | 302.25 | 0.0  | 0.0        | 0.0  | 302.25      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 5000          | 487.33   | 0    | 0         | 5487.33 | 0    | 0          | 0    | 5487.33     |
+      | 5000          | 487.25   | 0    | 0         | 5487.25 | 0    | 0          | 0    | 5487.25     |
+
+  # Hand check: 10000 * 12% * 31/366 = 101.64 (31/365 would be 101.92). The whole loan is inside 2024.
+  Scenario: RS03a - Cumulative Daily Actual, leap year 2024: first period (31 days) is charged at 1/366
+    When Admin sets the business date to "1 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 1 January 2024    | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024   |           | 10000.0         |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
+      | 1  | 31   | 01 February 2024  |           | 8376.64         | 1623.36       | 101.64   | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 2  | 29   | 01 March 2024     |           | 6731.29         | 1645.35       | 79.65    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 3  | 31   | 01 April 2024     |           | 5074.71         | 1656.58       | 68.42    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 4  | 30   | 01 May 2024       |           | 3399.63         | 1675.08       | 49.92    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 5  | 31   | 01 June 2024      |           | 1709.18         | 1690.45       | 34.55    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 6  | 30   | 01 July 2024      |           | 0.0             | 1709.18       | 16.81    | 0.0  | 0.0       | 1725.99 | 0.0  | 0.0        | 0.0  | 1725.99     |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000         | 350.99   | 0    | 0         | 10350.99 | 0    | 0          | 0    | 10350.99    |
+
+  # Hand check: period 1 = 10000 * 12% * (16/365 + 15/366) = 101.78 (old 31/365 = 101.92).
+  Scenario: RS03b - Cumulative Daily Actual, period across Dec 31 into a leap year: 16 days at 1/365 and 15 days at 1/366
+    When Admin sets the business date to "15 December 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 15 December 2023  | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 15 December 2023  |           | 10000.0         |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
+      | 1  | 31   | 15 January 2024   |           | 8376.78         | 1623.22       | 101.78   | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 2  | 31   | 15 February 2024  |           | 6736.92         | 1639.86       | 85.14    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 3  | 29   | 15 March 2024     |           | 5075.98         | 1660.94       | 64.06    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 4  | 31   | 15 April 2024     |           | 3402.57         | 1673.41       | 51.59    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 5  | 30   | 15 May 2024       |           | 1711.04         | 1691.53       | 33.47    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 6  | 31   | 15 June 2024      |           | 0.0             | 1711.04       | 17.39    | 0.0  | 0.0       | 1728.43 | 0.0  | 0.0        | 0.0  | 1728.43     |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000         | 353.43   | 0    | 0         | 10353.43 | 0    | 0          | 0    | 10353.43    |
+
+  # Hand check: 10000 * 12% * 31/365 = 101.92. No 366 day year, so the result equals the former behaviour.
+  Scenario: RS03c - Cumulative Daily Actual, non-leap year 2025 control: 31 days at 1/365 as before
+    When Admin sets the business date to "1 January 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 1 January 2025    | 10000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025   |           | 10000.0         |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
+      | 1  | 31   | 01 February 2025  |           | 8376.92         | 1623.08       | 101.92   | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 2  | 28   | 01 March 2025     |           | 6729.03         | 1647.89       | 77.11    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 3  | 31   | 01 April 2025     |           | 5072.61         | 1656.42       | 68.58    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 4  | 30   | 01 May 2025       |           | 3397.64         | 1674.97       | 50.03    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 5  | 31   | 01 June 2025      |           | 1707.27         | 1690.37       | 34.63    | 0.0  | 0.0       | 1725.0  | 0.0  | 0.0        | 0.0  | 1725.0      |
+      | 6  | 30   | 01 July 2025      |           | 0.0             | 1707.27       | 16.84    | 0.0  | 0.0       | 1724.11 | 0.0  | 0.0        | 0.0  | 1724.11     |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000         | 349.11   | 0    | 0         | 10349.11 | 0    | 0          | 0    | 10349.11    |
+
 
   @TestRailId:C2494
   Scenario: RS04 - Repayment Schedule with interest type: Declining Balance, interest period: Same as payment period, amortization type: Equal principal payments

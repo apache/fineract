@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -1535,6 +1536,10 @@ public final class LoanApplicationTerms {
                     // TODO: Implement getPeriodEndDate for WHOLE_TERM
                     break;
                 }
+                // ACTUAL days in year: 366 in a leap year. The EMI (isForPMT) stays on its nominal 365 day year.
+                if (!isForPMT && daysInYearType.isActual() && isChargedForActualDays(daysInMonthType)) {
+                    periodicInterestRate = leapYearAwareDailyInterestRate(mc, periodStartDate, periodEndDate);
+                }
             break;
             case SAME_AS_REPAYMENT_PERIOD:
                 periodicInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
@@ -1545,30 +1550,64 @@ public final class LoanApplicationTerms {
         return periodicInterestRate;
     }
 
+    /**
+     * False where the DAILY rate is charged for a nominal number of days (30 day months) or not at all (whole term).
+     */
+    private boolean isChargedForActualDays(final DaysInMonthType daysInMonthType) {
+        return switch (this.repaymentPeriodFrequencyType) {
+            case DAYS, WEEKS, SEMI_MONTHLY, YEARS -> true;
+            case MONTHS -> !daysInMonthType.isDaysInMonth_30();
+            default -> false;
+        };
+    }
+
+    /**
+     * Charges the days of every calendar year at 1/365 or 1/366 of the annual rate, the way the progressive engine does
+     * (ProgressiveEMICalculator#calculatePeriodFractions). A day belongs to the year it ends in, so the split is on Dec
+     * 31 only: interestRecognitionOnDisbursementDate (split on Jan 1) is not supported for cumulative loans. The days
+     * are summed per year length and multiplied once, so a period without a 366 day year gives exactly the former
+     * result. A period that does not end after it starts keeps the former formula.
+     */
+    private BigDecimal leapYearAwareDailyInterestRate(final MathContext mc, final LocalDate periodStartDate,
+            final LocalDate periodEndDate) {
+        if (!periodEndDate.isAfter(periodStartDate)) {
+            return oneDayOfYearInterestRate(365, mc)
+                    .multiply(BigDecimal.valueOf(DateUtils.getDifferenceInDays(periodStartDate, periodEndDate)), mc);
+        }
+        long daysIn365DayYears = 0;
+        long daysIn366DayYears = 0;
+        LocalDate partStartDate = periodStartDate;
+        for (int year = periodStartDate.getYear(); year <= periodEndDate.getYear(); year++) {
+            final LocalDate partEndDate = year == periodEndDate.getYear() ? periodEndDate : LocalDate.of(year, 12, 31);
+            final long days = DateUtils.getDifferenceInDays(partStartDate, partEndDate);
+            if (Year.isLeap(year)) {
+                daysIn366DayYears += days;
+            } else {
+                daysIn365DayYears += days;
+            }
+            partStartDate = partEndDate;
+        }
+        if (daysIn366DayYears == 0) {
+            return oneDayOfYearInterestRate(365, mc).multiply(BigDecimal.valueOf(daysIn365DayYears), mc);
+        }
+        final BigDecimal rateFor366DayYears = oneDayOfYearInterestRate(366, mc).multiply(BigDecimal.valueOf(daysIn366DayYears), mc);
+        if (daysIn365DayYears == 0) {
+            return rateFor366DayYears;
+        }
+        return oneDayOfYearInterestRate(365, mc).multiply(BigDecimal.valueOf(daysIn365DayYears), mc).add(rateFor366DayYears, mc);
+    }
+
+    private BigDecimal oneDayOfYearInterestRate(final int daysInYear, final MathContext mc) {
+        return this.annualNominalInterestRate.divide(BigDecimal.valueOf(daysInYear), mc)
+                .divide(BigDecimal.valueOf(Double.parseDouble("100.0")), mc);
+    }
+
     private BigDecimal calculateLoanTermFrequency(final LocalDate periodStartDate, final LocalDate periodEndDate) {
         BigDecimal loanTermFrequencyBigDecimal = BigDecimal.valueOf(this.repaymentEvery);
         if (this.interestCalculationPeriodMethod.isDaily() || this.allowPartialPeriodInterestCalculation) {
             loanTermFrequencyBigDecimal = calculatePeriodsBetweenDates(periodStartDate, periodEndDate);
         }
         return loanTermFrequencyBigDecimal;
-    }
-
-    public BigDecimal interestRateFor(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc,
-            final Money outstandingBalance, final LocalDate fromDate, final LocalDate toDate) {
-
-        long loanTermPeriodsInOneYear = calculator.calculate(PeriodFrequencyType.DAYS).longValue();
-        int repaymentEvery = DateUtils.getExactDifferenceInDays(fromDate, toDate);
-        if (isFallingInRepaymentPeriod(fromDate, toDate)) {
-            loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
-            repaymentEvery = getPeriodsBetween(fromDate, toDate);
-        }
-
-        final BigDecimal divisor = BigDecimal.valueOf(Double.parseDouble("100.0"));
-        final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
-        final BigDecimal oneDayOfYearInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc)
-                .divide(divisor, mc);
-        BigDecimal interestRate = oneDayOfYearInterestRate.multiply(BigDecimal.valueOf(repaymentEvery), mc);
-        return outstandingBalance.getAmount().multiply(interestRate, mc);
     }
 
     private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
@@ -1883,56 +1922,6 @@ public final class LoanApplicationTerms {
 
     public boolean isInterestBearingAndInterestRecalculationEnabled() {
         return isInterestBearing() && isInterestRecalculationEnabled();
-    }
-
-    private boolean isFallingInRepaymentPeriod(LocalDate fromDate, LocalDate toDate) {
-        boolean isSameAsRepaymentPeriod = false;
-        if (this.interestCalculationPeriodMethod.getValue().equals(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue())) {
-            switch (this.repaymentPeriodFrequencyType) {
-                case WEEKS:
-                    int days = DateUtils.getExactDifferenceInDays(fromDate, toDate);
-                    isSameAsRepaymentPeriod = (days % 7) == 0;
-                break;
-                case MONTHS:
-                    boolean isFromDateOnEndDate = fromDate.getDayOfMonth() > fromDate.plusDays(1).getDayOfMonth();
-                    boolean isToDateOnEndDate = toDate.getDayOfMonth() > toDate.plusDays(1).getDayOfMonth();
-
-                    if (isFromDateOnEndDate && isToDateOnEndDate) {
-                        isSameAsRepaymentPeriod = true;
-                    } else {
-
-                        int months = getPeriodsBetween(fromDate, toDate);
-                        fromDate = fromDate.plusMonths(months);
-                        isSameAsRepaymentPeriod = DateUtils.isEqual(fromDate, toDate);
-                    }
-
-                break;
-                default:
-                break;
-            }
-        }
-        return isSameAsRepaymentPeriod;
-    }
-
-    private Integer getPeriodsBetween(LocalDate fromDate, LocalDate toDate) {
-        Integer numberOfPeriods = 0;
-        switch (this.repaymentPeriodFrequencyType) {
-            case DAYS:
-                numberOfPeriods = DateUtils.getExactDifferenceInDays(fromDate, toDate);
-            break;
-            case WEEKS:
-                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.WEEKS);
-            break;
-            case MONTHS:
-                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.MONTHS);
-            break;
-            case YEARS:
-                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.YEARS);
-            break;
-            default:
-            break;
-        }
-        return numberOfPeriods;
     }
 
     public void updateNumberOfRepayments(final Integer numberOfRepayments) {
