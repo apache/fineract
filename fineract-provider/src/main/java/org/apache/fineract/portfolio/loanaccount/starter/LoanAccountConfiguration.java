@@ -116,6 +116,8 @@ import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoWritePla
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.ILoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundServiceDelegate;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccountDataReadService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccountDataReadServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccountServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualActivityProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualEventService;
@@ -162,6 +164,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleGeneratorSe
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanStatusChangePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanStatusChangePlatformServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTemplateReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTemplateReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionRelationReadService;
@@ -340,32 +344,52 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanReadPlatformService.class)
     public LoanReadPlatformServiceImpl loanReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            LoanRepositoryWrapper loanRepositoryWrapper, ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            LoanProductReadPlatformService loanProductReadPlatformService, ClientReadPlatformService clientReadPlatformService,
-            GroupReadPlatformService groupReadPlatformService, LoanDropdownReadPlatformService loanDropdownReadPlatformService,
-            FundReadPlatformService fundReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
-            CodeValueReadPlatformService codeValueReadPlatformService, CalendarReadPlatformService calendarReadPlatformService,
-            StaffReadService staffReadPlatformService, PaginationHelper paginationHelper,
-            PaymentTypeReadService paymentTypeReadPlatformService, FloatingRatesReadService floatingRatesReadPlatformService,
-            LoanUtilService loanUtilService, ConfigurationDomainService configurationDomainService,
-            AccountDetailsReadPlatformService accountDetailsReadPlatformService, ColumnValidator columnValidator,
+            LoanRepositoryWrapper loanRepositoryWrapper, LoanProductReadPlatformService loanProductReadPlatformService,
+            ClientReadPlatformService clientReadPlatformService, GroupReadPlatformService groupReadPlatformService,
+            CalendarReadPlatformService calendarReadPlatformService, StaffReadService staffReadPlatformService,
+            PaginationHelper paginationHelper, FloatingRatesReadService floatingRatesReadPlatformService,
+            ConfigurationDomainService configurationDomainService, ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, DelinquencyReadPlatformService delinquencyReadPlatformService,
             LoanTransactionRepository loanTransactionRepository, LoanChargePaidByReadService loanChargePaidByReadService,
-            LoanTransactionRelationReadService loanTransactionRelationReadService, LoanForeclosureValidator loanForeclosureValidator,
-            LoanTransactionMapper loanTransactionMapper, LoanTransactionProcessingService loanTransactionProcessingService,
+            LoanTransactionRelationReadService loanTransactionRelationReadService, LoanTransactionMapper loanTransactionMapper,
+            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
+            LoanRepaymentScheduleService loanRepaymentScheduleService, LoanAccountDataReadService loanAccountDataReadService,
+            LoanTemplateReadPlatformService loanTemplateReadPlatformService) {
+        return new LoanReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, loanProductReadPlatformService,
+                clientReadPlatformService, groupReadPlatformService, calendarReadPlatformService, staffReadPlatformService,
+                paginationHelper, floatingRatesReadPlatformService, configurationDomainService, columnValidator, sqlGenerator,
+                delinquencyReadPlatformService, loanTransactionRepository, loanChargePaidByReadService, loanTransactionRelationReadService,
+                loanTransactionMapper, loanCapitalizedIncomeBalanceRepository, loanRepaymentScheduleService, loanAccountDataReadService,
+                loanTemplateReadPlatformService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoanAccountDataReadService.class)
+    public LoanAccountDataReadService loanAccountDataReadService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
+            DatabaseSpecificSQLGenerator sqlGenerator, DelinquencyReadPlatformService delinquencyReadPlatformService) {
+        return new LoanAccountDataReadServiceImpl(jdbcTemplate, context, sqlGenerator, delinquencyReadPlatformService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoanTemplateReadPlatformService.class)
+    public LoanTemplateReadPlatformService loanTemplateReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
+            LoanRepositoryWrapper loanRepositoryWrapper, ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+            LoanProductReadPlatformService loanProductReadPlatformService, LoanDropdownReadPlatformService loanDropdownReadPlatformService,
+            FundReadPlatformService fundReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
+            CodeValueReadPlatformService codeValueReadPlatformService, PaymentTypeReadService paymentTypeReadPlatformService,
+            LoanUtilService loanUtilService, AccountDetailsReadPlatformService accountDetailsReadPlatformService,
+            DatabaseSpecificSQLGenerator sqlGenerator, DelinquencyReadPlatformService delinquencyReadPlatformService,
+            LoanForeclosureValidator loanForeclosureValidator, LoanTransactionProcessingService loadTransactionProcessingService,
             LoanBalanceService loanBalanceService, LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
             LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository,
             @Lazy InterestRefundServiceDelegate interestRefundServiceDelegate, LoanMaximumAmountCalculator loanMaximumAmountCalculator,
-            LoanRepaymentScheduleService loanRepaymentScheduleService) {
-        return new LoanReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, applicationCurrencyRepository,
-                loanProductReadPlatformService, clientReadPlatformService, groupReadPlatformService, loanDropdownReadPlatformService,
-                fundReadPlatformService, chargeReadPlatformService, codeValueReadPlatformService, calendarReadPlatformService,
-                staffReadPlatformService, paginationHelper, paymentTypeReadPlatformService, floatingRatesReadPlatformService,
-                loanUtilService, configurationDomainService, accountDetailsReadPlatformService, columnValidator, sqlGenerator,
-                delinquencyReadPlatformService, loanTransactionRepository, loanChargePaidByReadService, loanTransactionRelationReadService,
-                loanForeclosureValidator, loanTransactionMapper, loanTransactionProcessingService, loanBalanceService,
-                loanCapitalizedIncomeBalanceRepository, loanBuyDownFeeBalanceRepository, interestRefundServiceDelegate,
-                loanMaximumAmountCalculator, loanRepaymentScheduleService);
+            LoanAccountDataReadService loanAccountDataReadService) {
+        return new LoanTemplateReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, applicationCurrencyRepository,
+                loanProductReadPlatformService, loanDropdownReadPlatformService, fundReadPlatformService, chargeReadPlatformService,
+                codeValueReadPlatformService, paymentTypeReadPlatformService, loanUtilService, accountDetailsReadPlatformService,
+                sqlGenerator, delinquencyReadPlatformService, loanForeclosureValidator, loadTransactionProcessingService,
+                loanBalanceService, loanCapitalizedIncomeBalanceRepository, loanBuyDownFeeBalanceRepository, interestRefundServiceDelegate,
+                loanMaximumAmountCalculator, loanAccountDataReadService);
     }
 
     @Bean
