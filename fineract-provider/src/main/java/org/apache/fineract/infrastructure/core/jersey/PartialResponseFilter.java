@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.jersey;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -68,6 +69,9 @@ public class PartialResponseFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(final ContainerRequestContext requestContext, final ContainerResponseContext responseContext) {
+        if (!isPartialResponseCandidate(requestContext, responseContext)) {
+            return;
+        }
         final String fields = requestContext.getUriInfo().getQueryParameters().getFirst(FIELDS_PARAMETER);
         if (StringUtils.isBlank(fields) || !isPrunableEntity(responseContext)) {
             return;
@@ -103,6 +107,16 @@ public class PartialResponseFilter implements ContainerResponseFilter {
         final JsonNode tree = objectMapper.valueToTree(responseContext.getEntity());
         prune(tree, shouldSkip);
         responseContext.setEntity(tree, responseContext.getEntityAnnotations(), responseContext.getMediaType());
+    }
+
+    /**
+     * A partial response only ever applied to the reads, which were the only ones serialized with the settings. A write
+     * that already happened must not be turned into an error, and an error response must not be pruned.
+     */
+    private boolean isPartialResponseCandidate(final ContainerRequestContext requestContext,
+            final ContainerResponseContext responseContext) {
+        return HttpMethod.GET.equals(requestContext.getMethod())
+                && responseContext.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL;
     }
 
     private boolean isPrunableEntity(final ContainerResponseContext responseContext) {
