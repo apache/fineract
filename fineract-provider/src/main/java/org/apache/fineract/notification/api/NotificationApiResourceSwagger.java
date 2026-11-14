@@ -19,6 +19,7 @@
 package org.apache.fineract.notification.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 final class NotificationApiResourceSwagger {
@@ -54,6 +55,8 @@ final class NotificationApiResourceSwagger {
             public String tenantIdentifier;
             @Schema(example = "a")
             public String createdAt;
+            @Schema(example = "2026-01-15T15:36:19.900905+05:30", description = "Creation time in the tenant time zone, with offset")
+            public OffsetDateTime createdAtTenant;
             @Schema(example = "1")
             public Long officeId;
             @Schema(example = "[]")
