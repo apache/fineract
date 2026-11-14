@@ -404,6 +404,11 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/floatingrates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE")
 
+                    // execute scheduler job (by id)
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, "EXECUTEJOB_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, "EXECUTEJOB_SCHEDULER")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));
