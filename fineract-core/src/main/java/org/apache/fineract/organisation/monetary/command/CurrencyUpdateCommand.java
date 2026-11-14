@@ -25,4 +25,15 @@ import org.apache.fineract.organisation.monetary.data.CurrencyUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CurrencyUpdateCommand extends Command<CurrencyUpdateRequest> {}
+public class CurrencyUpdateCommand extends Command<CurrencyUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CURRENCY";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

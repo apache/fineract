@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.meeting.data.MeetingDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MeetingDeleteCommand extends Command<MeetingDeleteRequest> {}
+public class MeetingDeleteCommand extends Command<MeetingDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "MEETING";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

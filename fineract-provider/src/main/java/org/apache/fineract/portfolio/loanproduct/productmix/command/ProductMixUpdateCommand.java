@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixUpdat
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProductMixUpdateCommand extends Command<ProductMixUpdateRequest> {}
+public class ProductMixUpdateCommand extends Command<ProductMixUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "PRODUCTMIX";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}
