@@ -620,6 +620,13 @@ public class FineractProperties {
                 private String jwksUri;
                 // Optional: per-issuer override for the username claim.
                 private String usernameClaim;
+                // Optional: claim holding the names of the user's Fineract roles: a list, or a comma-separated
+                // string; a dotted name reaches into nested claims (realm_access.roles). When set, a token of this
+                // issuer that carries the claim decides the user's roles whenever it is resolved to a user: at every
+                // browser login, and on every request with a Bearer token. Absent: roles are managed in Fineract.
+                private String rolesClaim;
+                // Optional: the only roles a token of this issuer may grant or remove. Empty: every role.
+                private List<String> managedRoles = new ArrayList<>();
             }
         }
 

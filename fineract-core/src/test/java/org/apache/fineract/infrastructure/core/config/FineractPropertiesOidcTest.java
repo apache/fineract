@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractSecurityProperties.FineractSecurityOidcFederationProperties;
+import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractSecurityProperties.FineractSecurityOidcFederationProperties.OidcIssuerProperties;
 import org.junit.jupiter.api.Test;
 
 class FineractPropertiesOidcTest {
@@ -53,6 +54,14 @@ class FineractPropertiesOidcTest {
     @Test
     void defaultDefaultRolesIsEmpty() {
         assertThat(new FineractSecurityOidcFederationProperties().getDefaultRoles()).isEmpty();
+    }
+
+    @Test
+    void issuerTakesNoRolesFromTokensByDefault() {
+        OidcIssuerProperties issuer = new OidcIssuerProperties();
+
+        assertThat(issuer.getRolesClaim()).isNull();
+        assertThat(issuer.getManagedRoles()).isEmpty();
     }
 
     @Test

@@ -135,6 +135,10 @@ fineract:
           tenantId: default                                          # <2>
           jwksUri: ""                                                # <3>
           usernameClaim: preferred_username                          # <4>
+          rolesClaim: realm_access.roles                             # <5>
+          managedRoles:                                              # <6>
+            - Teller
+            - Branch Manager
         - issuerUri: https://accounts.google.com
           tenantId: google-tenant
           usernameClaim: email
@@ -143,6 +147,8 @@ fineract:
 <2> Fineract tenant identifier this issuer maps to. Used for tenant resolution when no JWT claim or header is present.
 <3> Optional. If blank or absent, the JWK Set URI is derived automatically from `issuerUri` via OIDC discovery (fetches `{issuerUri}/.well-known/openid-configuration`).
 <4> Optional per-issuer override for the username claim. Falls back to the global `username-claim` property if absent.
+<5> Optional. A claim that names the user's Fineract roles. When set, tokens of this issuer decide the user's roles; when absent, roles are assigned in Fineract only. See <<_roles_from_the_token>>.
+<6> Optional, with `rolesClaim`. The only roles a token of this issuer may grant or remove. When absent, the issuer can grant every role of the tenant.
 
 [NOTE]
 ====
@@ -599,6 +605,40 @@ On every authenticated request, `FineractOidcJwtAuthenticationConverter` maps th
 4. If not found and `auto-create-user=false`: reject with HTTP 401.
 
 The resolved `AppUser` is set as the principal in a `FineractJwtAuthenticationToken`, ensuring full compatibility with all existing Fineract services without any code changes.
+
+=== Roles from the Token
+
+By default the token only identifies the user: roles are assigned in Fineract, and `default-roles` applies once, when a user is auto-created.
+
+An issuer can be allowed to decide the roles of its users, by giving its entry in `issuers[]` a `rolesClaim`. There is no global setting, so each issuer is trusted with roles separately. Issuers configured through the per-tenant API cannot be given a roles claim: their tokens never change roles.
+
+[source,yaml]
+----
+fineract:
+  security:
+    oidc-federation:
+      issuers:
+        - issuerUri: https://keycloak.example.com/realms/fineract
+          tenantId: default
+          rolesClaim: roles
+          managedRoles:
+            - Teller
+            - Branch Manager
+----
+
+Whenever a token of such an issuer is resolved to a user, the user's roles are brought in line with the claim: the roles it names are granted, and the roles it does not name are removed. That is at every login in the browser flow, and on every request that carries a Bearer token. It applies to auto-created users and to users that already exist, including users created in Fineract.
+
+* The claim is a JSON array of role names, or a string of comma-separated names. A dotted claim name reaches into nested claims when the token has no claim of that literal name, for example `realm_access.roles`.
+* *A token without the claim changes nothing.* Only a token that carries the claim decides the roles; a claim that is present and empty removes them. The Bearer flow reads the access token; the browser login flow reads the ID token and the userinfo response. Check that the IdP puts the claim into the tokens of the flows in use.
+* *`managedRoles` limits what the issuer decides.* With the list, a token can grant and remove only the roles on it; every other role of the user is left as it is, and a name outside the list is ignored. Without the list the issuer manages every role of the tenant, the super user role included: set it unless the IdP is trusted with all of them.
+* Names are matched to Fineract roles by name, ignoring case. A name that is not a Fineract role, or names a disabled role, is skipped; create the roles in Fineract first and give them their permissions there.
+* The roles listed in `default-roles` are never removed.
+* A token that names the roles the user already holds costs no extra query. Names the user does not hold are looked up with one query per request.
+
+[WARNING]
+====
+A change of roles made this way is not a command: it does not appear in the audit trail and is not subject to maker-checker. Its only record is a log line at `INFO` level with the user, the issuer and the roles before and after. Keep that log if role assignments have to be traceable.
+====
 
 == Running Alongside Basic Auth
 
