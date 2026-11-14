@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.bulkimport.populator.OfficeSheetPopula
 import org.apache.fineract.infrastructure.bulkimport.populator.PersonnelSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.SavingsProductSheetPopulator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Name;
@@ -70,6 +71,22 @@ class SavingsWorkbookPopulatorTest {
             long compoundingNames = workbook.getAllNames().stream().map(Name::getNameName)
                     .filter(name -> name.startsWith("Interest_Compouding_")).count();
             assertEquals(1, compoundingNames, "colliding product names must yield a single defined-name set");
+        }
+    }
+
+    @Test
+    void officesCollidingOnNameEmitOneDefinedNameSetPerScope() throws Exception {
+        List<OfficeData> offices = List.of(OfficeData.testInstance(241L, "Test"), OfficeData.testInstance(276L, "test"));
+
+        try (Workbook workbook = new HSSFWorkbook()) {
+            SavingsWorkbookPopulator populator = new SavingsWorkbookPopulator(new OfficeSheetPopulator(offices),
+                    new ClientSheetPopulator(List.of(), offices), new GroupSheetPopulator(List.of(), offices),
+                    new PersonnelSheetPopulator(List.of(), offices), new SavingsProductSheetPopulator(List.of()));
+
+            assertDoesNotThrow(() -> populator.populate(workbook, DATE_FORMAT));
+
+            long groupNames = workbook.getAllNames().stream().map(Name::getNameName).filter(name -> name.startsWith("Group_")).count();
+            assertEquals(1, groupNames, "colliding office names must yield a single Group_ defined name");
         }
     }
 }
