@@ -26,6 +26,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.infrastructure.cache.service.ThreadLocalCacheStore;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,7 +36,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @DisplayName("SpringConfig Thread Pool Tests")
 class SpringConfigTest {
@@ -297,6 +303,134 @@ class SpringConfigTest {
             assertThat(latch.await(30, TimeUnit.SECONDS)).as("All tasks completed despite saturation").isTrue();
 
             assertThat(mainThreadExecutions.get()).as("Main thread executed rejected tasks (natural backpressure)").isGreaterThan(0);
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    @Test
+    @DisplayName("A listener run on the caller thread by CallerRunsPolicy does not wipe the caller's context")
+    void callerRunListenerKeepsCallerContext() throws Exception {
+        ThreadPoolTaskExecutor executor = new SpringConfig().fineractEventExecutor(new ThreadPoolTaskExecutorBuilder(), 1, 1, 0);
+        executor.initialize();
+        CountDownLatch busy = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        AtomicReference<String> seenByListener = new AtomicReference<>();
+        try {
+            executor.execute(() -> {
+                busy.countDown();
+                try {
+                    release.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            assertThat(busy.await(5, TimeUnit.SECONDS)).isTrue();
+
+            ThreadLocalContextUtil.setDataSourceContext("tenant-ds");
+            ThreadLocalContextUtil.setAuthToken("import-token");
+            executor.execute(() -> {
+                seenByListener.set(Thread.currentThread().getName());
+                ThreadLocalContextUtil.reset();
+            });
+
+            assertThat(seenByListener.get()).as("rejected task ran on the caller").isEqualTo(Thread.currentThread().getName());
+            assertThat(ThreadLocalContextUtil.getDataSourceContext()).isEqualTo("tenant-ds");
+            assertThat(ThreadLocalContextUtil.getAuthToken()).isEqualTo("import-token");
+        } finally {
+            release.countDown();
+            ThreadLocalContextUtil.reset();
+            executor.shutdown();
+        }
+    }
+
+    @Test
+    @DisplayName("A listener run on the caller thread does not see the caller's HTTP request attributes")
+    void callerRunListenerDoesNotSeeCallerRequest() throws Exception {
+        ThreadPoolTaskExecutor executor = new SpringConfig().fineractEventExecutor(new ThreadPoolTaskExecutorBuilder(), 1, 1, 0);
+        executor.initialize();
+        CountDownLatch busy = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        AtomicReference<Object> seenByListener = new AtomicReference<>("unset");
+        ServletRequestAttributes callerRequest = new ServletRequestAttributes(new MockHttpServletRequest());
+        try {
+            executor.execute(() -> {
+                busy.countDown();
+                try {
+                    release.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            assertThat(busy.await(5, TimeUnit.SECONDS)).isTrue();
+
+            RequestContextHolder.setRequestAttributes(callerRequest);
+            executor.execute(() -> seenByListener.set(RequestContextHolder.getRequestAttributes()));
+
+            assertThat(seenByListener.get()).isNull();
+            assertThat(RequestContextHolder.getRequestAttributes()).isSameAs(callerRequest);
+        } finally {
+            release.countDown();
+            RequestContextHolder.resetRequestAttributes();
+            executor.shutdown();
+        }
+    }
+
+    @Test
+    @DisplayName("A listener run on the caller thread neither sees nor wipes the caller's transaction cache")
+    void callerRunListenerKeepsCallerTransactionCache() throws Exception {
+        ThreadPoolTaskExecutor executor = new SpringConfig().fineractEventExecutor(new ThreadPoolTaskExecutorBuilder(), 1, 1, 0);
+        executor.initialize();
+        CountDownLatch busy = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        AtomicReference<Object> seenByListener = new AtomicReference<>("unset");
+        try {
+            executor.execute(() -> {
+                busy.countDown();
+                try {
+                    release.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            assertThat(busy.await(5, TimeUnit.SECONDS)).isTrue();
+
+            ThreadLocalCacheStore.getCache("configs").put("key", "caller-value");
+            executor.execute(() -> {
+                seenByListener.set(ThreadLocalCacheStore.getCache("configs").get("key"));
+                ThreadLocalContextUtil.reset();
+            });
+
+            assertThat(seenByListener.get()).as("listener starts with an empty cache").isNull();
+            assertThat(ThreadLocalCacheStore.getCache("configs").get("key", String.class)).as("caller keeps its cache")
+                    .isEqualTo("caller-value");
+        } finally {
+            release.countDown();
+            ThreadLocalCacheStore.remove();
+            executor.shutdown();
+        }
+    }
+
+    @Test
+    @DisplayName("A worker thread is left without context after a listener runs")
+    void workerThreadContextIsClearedAfterTask() throws Exception {
+        ThreadPoolTaskExecutor executor = new SpringConfig().fineractEventExecutor(new ThreadPoolTaskExecutorBuilder(), 1, 1, 10);
+        executor.initialize();
+        AtomicReference<String> leftOver = new AtomicReference<>("unset");
+        try {
+            CountDownLatch first = new CountDownLatch(1);
+            executor.execute(() -> {
+                ThreadLocalContextUtil.setDataSourceContext("leaked");
+                first.countDown();
+            });
+            assertThat(first.await(5, TimeUnit.SECONDS)).isTrue();
+            CountDownLatch second = new CountDownLatch(1);
+            executor.execute(() -> {
+                leftOver.set(ThreadLocalContextUtil.getDataSourceContext());
+                second.countDown();
+            });
+            assertThat(second.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(leftOver.get()).isNull();
         } finally {
             executor.shutdown();
         }

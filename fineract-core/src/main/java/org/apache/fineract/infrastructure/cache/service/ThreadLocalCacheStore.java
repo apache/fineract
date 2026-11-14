@@ -54,4 +54,22 @@ public final class ThreadLocalCacheStore {
     public static void remove() {
         CACHES.remove();
     }
+
+    /**
+     * Takes the current thread's caches off the thread and returns them, so they can be put back with {@link #attach}.
+     */
+    public static Map<String, Cache> detach() {
+        final Map<String, Cache> caches = CACHES.get();
+        CACHES.remove();
+        return caches;
+    }
+
+    /** Puts caches returned by {@link #detach} back on the current thread, replacing whatever it holds. */
+    public static void attach(final Map<String, Cache> caches) {
+        if (caches == null || caches.isEmpty()) {
+            CACHES.remove();
+        } else {
+            CACHES.set(caches);
+        }
+    }
 }
