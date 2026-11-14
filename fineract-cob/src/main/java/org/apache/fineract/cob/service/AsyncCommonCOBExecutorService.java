@@ -34,10 +34,8 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
-import org.apache.fineract.infrastructure.jobs.service.JobStarter;
+import org.apache.fineract.infrastructure.jobs.service.ScheduledJobStartService;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerServiceConstants;
 import org.quartz.JobExecutionException;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -54,8 +52,7 @@ import org.springframework.scheduling.annotation.Async;
 public abstract class AsyncCommonCOBExecutorService implements AsyncCOBExecutorService {
 
     private final JobRegistry jobRegistry;
-    private final ScheduledJobDetailRepository scheduledJobDetailRepository;
-    private final JobStarter jobStarter;
+    private final ScheduledJobStartService scheduledJobStartService;
     private final RetrieveIdService retrieveIdService;
 
     @Override
@@ -96,7 +93,6 @@ public abstract class AsyncCommonCOBExecutorService implements AsyncCOBExecutorS
         if (job == null) {
             throw new NoSuchJobException("No job configuration with the name [" + getJobName() + "] was registered");
         }
-        ScheduledJobDetail scheduledJobDetail = scheduledJobDetailRepository.findByJobName(getJobHumanReadableName());
         LocalDate executingBusinessDate = oldestCOBProcessedDate.plusDays(1);
         String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 
@@ -107,7 +103,7 @@ public abstract class AsyncCommonCOBExecutorService implements AsyncCOBExecutorS
             JobParameterDTO tenantParameterDTO = new JobParameterDTO(SchedulerServiceConstants.TENANT_IDENTIFIER, tenantIdentifier);
             Set<JobParameterDTO> jobParameters = new HashSet<>();
             Collections.addAll(jobParameters, jobParameterDTO, jobParameterCatchUpDTO, tenantParameterDTO);
-            jobStarter.run(job, scheduledJobDetail, jobParameters, tenantIdentifier);
+            scheduledJobStartService.run(job, getJobHumanReadableName(), jobParameters, tenantIdentifier);
             executingBusinessDate = executingBusinessDate.plusDays(1);
         }
     }
