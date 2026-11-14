@@ -22,10 +22,12 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
+@Getter
 public class InteropIdentifiersResponseData extends CommandProcessingResult {
 
     @NotNull

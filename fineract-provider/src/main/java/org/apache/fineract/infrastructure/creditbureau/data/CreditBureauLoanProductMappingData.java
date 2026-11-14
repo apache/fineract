@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.creditbureau.data;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @NoArgsConstructor
@@ -39,6 +40,7 @@ public final class CreditBureauLoanProductMappingData {
 
     private long loanProductId;
 
+    @JsonProperty("isCreditCheckMandatory")
     private boolean isCreditCheckMandatory;
 
     private boolean skipCrediCheckInFailure;

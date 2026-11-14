@@ -39,6 +39,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -3405,7 +3406,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             Float earlyPayment = Float.parseFloat("3000");
             String accountNo = getLoanDetails(loanID).getAccountNo();
 
-            String loanRepayment = makeRepaymentByAccountNo(accountNo, loanFirstRepaymentDate, earlyPayment);
+            CommandProcessingResult loanRepayment = makeRepaymentByAccountNo(accountNo, loanFirstRepaymentDate, earlyPayment);
             assertNotNull(loanRepayment);
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(
@@ -7858,7 +7859,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
      * Repays a loan through the interoperation API, which addresses the loan by account number. That endpoint forwards
      * its body straight to the standard loan repayment command, so it takes {@code PostLoansLoanIdTransactionsRequest}.
      */
-    private String makeRepaymentByAccountNo(String accountNo, String transactionDate, Float transactionAmount) {
+    private CommandProcessingResult makeRepaymentByAccountNo(String accountNo, String transactionDate, Float transactionAmount) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest()//
                 .transactionDate(transactionDate)//
                 .transactionAmount(transactionAmount.doubleValue())//
