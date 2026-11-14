@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import feign.FeignException;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CurrencyUpdateRequest;
 import org.apache.fineract.client.models.HookCreateRequest;
 import org.apache.fineract.client.models.MeetingCreateRequest;
@@ -143,7 +143,9 @@ public class EndpointPermissionTest extends FeignIntegrationTest {
     }
 
     private void assertForbidden(final Function<FineractFeignClient, ?> call) {
-        final CallFailedRuntimeException exception = fail(() -> call.apply(userClient));
-        assertEquals(403, exception.getStatus());
+        // the security filter chain rejects the request before it reaches the resource, so the body is not a Fineract
+        // error
+        final FeignException.Forbidden exception = assertThrows(FeignException.Forbidden.class, () -> call.apply(userClient));
+        assertEquals(403, exception.status());
     }
 }

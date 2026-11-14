@@ -50,6 +50,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.AuthenticatedAuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -132,7 +133,7 @@ public class OidcFederationSecurityConfig {
             DynamicJwtIssuerAuthenticationManagerResolver dynamicIssuerResolver) throws Exception {
         http.securityMatcher("/api/**").authorizeHttpRequests(auth -> {
             auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll().requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll();
-            ApiAuthorizationRules.configure(auth);
+            ApiAuthorizationRules.configure(auth, AuthenticatedAuthorizationManager.authenticated());
             auth.anyRequest().authenticated();
         }).csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
