@@ -279,6 +279,14 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             whereClose = " and ";
         }
 
+        if (searchParameters.hasHierarchy()) {
+            sqlBuilder.append(whereClose).append(" office.hierarchy like ?");
+            objectArray[arrayPos] = searchParameters.getHierarchy() + "%";
+            arrayPos = arrayPos + 1;
+
+            whereClose = " and ";
+        }
+
         if (searchParameters.hasCurrencyCode()) {
             sqlBuilder.append(whereClose).append(" journalEntry.currency_code = ?");
             objectArray[arrayPos] = searchParameters.getCurrencyCode();
@@ -393,13 +401,23 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     @Override
     public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId,
             JournalEntryAssociationParametersData associationParametersData) {
+        return retrieveGLJournalEntryById(glJournalEntryId, associationParametersData, null);
+    }
+
+    @Override
+    public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId,
+            JournalEntryAssociationParametersData associationParametersData, final String officeHierarchy) {
         try {
 
             final GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
+            if (StringUtils.isBlank(officeHierarchy)) {
+                // Programmatic query, disable sonar issue
+                final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
+                return this.jdbcTemplate.queryForObject(sql, rm, glJournalEntryId); // NOSONAR
+            }
             // Programmatic query, disable sonar issue
-            final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
-
-            return this.jdbcTemplate.queryForObject(sql, rm, glJournalEntryId); // NOSONAR
+            final String sql = "select " + rm.schema() + " where journalEntry.id = ? and office.hierarchy like ?";
+            return this.jdbcTemplate.queryForObject(sql, rm, glJournalEntryId, officeHierarchy + "%"); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(glJournalEntryId, e);
         }

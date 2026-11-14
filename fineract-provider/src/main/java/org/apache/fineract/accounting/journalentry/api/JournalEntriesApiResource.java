@@ -68,6 +68,7 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.PortfolioProductType;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
@@ -130,7 +131,8 @@ public class JournalEntriesApiResource {
             @QueryParam("runningBalance") @Parameter(description = "runningBalance") final boolean runningBalance,
             @QueryParam("transactionDetails") @Parameter(description = "transactionDetails") final boolean transactionDetails) {
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+        final AppUser currentUser = this.context.authenticatedUser();
+        currentUser.validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 
@@ -155,7 +157,7 @@ public class JournalEntriesApiResource {
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).offset(offset).orderBy(orderBy)
-                .sortOrder(sortOrder).loanId(loanId).savingsId(savingsId).build();
+                .sortOrder(sortOrder).loanId(loanId).savingsId(savingsId).hierarchy(currentUser.getOffice().getHierarchy()).build();
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
 
@@ -179,11 +181,12 @@ public class JournalEntriesApiResource {
             @QueryParam("runningBalance") @Parameter(description = "runningBalance") final boolean runningBalance,
             @QueryParam("transactionDetails") @Parameter(description = "transactionDetails") final boolean transactionDetails) {
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+        final AppUser currentUser = this.context.authenticatedUser();
+        currentUser.validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
         final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId,
-                associationParametersData);
+                associationParametersData, currentUser.getOffice().getHierarchy());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntryData, RESPONSE_DATA_PARAMETERS);
