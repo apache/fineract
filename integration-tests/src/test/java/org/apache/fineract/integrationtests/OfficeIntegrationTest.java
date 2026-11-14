@@ -18,9 +18,14 @@
  */
 package org.apache.fineract.integrationtests;
 
+import feign.Headers;
+import feign.RequestLine;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.GetOfficesTemplateResponse;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -34,10 +39,12 @@ import org.junit.jupiter.api.Test;
 public class OfficeIntegrationTest extends FeignIntegrationTest {
 
     private FeignOfficeHelper officeHelper;
+    private RawOfficeApi rawOfficeApi;
 
     @BeforeAll
     public void setup() {
         officeHelper = new FeignOfficeHelper(fineractClient());
+        rawOfficeApi = fineractClient().create(RawOfficeApi.class);
     }
 
     @Test
@@ -86,5 +93,45 @@ public class OfficeIntegrationTest extends FeignIntegrationTest {
 
         Assertions.assertEquals(name, updatedOffice.getName());
         Assertions.assertTrue(DateUtils.isEqual(updatedOffice.getOpeningDate(), LocalDate.of(2007, 7, 2)));
+    }
+
+    @Test
+    public void testRetrieveOfficeTemplate() {
+        GetOfficesTemplateResponse template = ok(() -> fineractClient().offices().retrieveTemplateOffice());
+
+        Assertions.assertNotNull(template);
+        Assertions.assertNotNull(template.getOpeningDate());
+        Assertions.assertNotNull(template.getAllowedParents());
+        Assertions.assertFalse(template.getAllowedParents().isEmpty());
+    }
+
+    @Test
+    public void testOfficeTemplateReturnsOpeningDateAsArray() {
+        Map<String, Object> template = ok(rawOfficeApi::retrieveOfficeTemplate);
+
+        Assertions.assertInstanceOf(List.class, template.get("openingDate"), "openingDate must be serialized as [year, month, day]");
+    }
+
+    @Test
+    public void testAccountTransferTemplateKeepsOpeningDateAsIsoString() {
+        Map<String, Object> template = ok(rawOfficeApi::accountTransferTemplate);
+        Object fromOfficeValue = template.get("fromOffice");
+        Assertions.assertInstanceOf(Map.class, fromOfficeValue);
+        Map<?, ?> fromOffice = (Map<?, ?>) fromOfficeValue;
+        Object openingDate = fromOffice.get("openingDate");
+
+        Assertions.assertInstanceOf(String.class, openingDate, "fromOffice.openingDate must remain an ISO date string");
+
+        Assertions.assertDoesNotThrow(() -> LocalDate.parse((String) openingDate));
+    }
+
+    @Headers("Accept: application/json")
+    interface RawOfficeApi {
+
+        @RequestLine("GET /v1/offices/template")
+        Map<String, Object> retrieveOfficeTemplate();
+
+        @RequestLine("GET /v1/accounttransfers/template?fromOfficeId=1&fromAccountType=2")
+        Map<String, Object> accountTransferTemplate();
     }
 }

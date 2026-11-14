@@ -21,34 +21,27 @@ package org.apache.fineract.organisation.office.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object for office transactions.
  */
+@Getter
+@JsonLocalDateArrayFormat
 public final class OfficeTransactionData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final LocalDate transactionDate;
-    @SuppressWarnings("unused")
     private final Long fromOfficeId;
-    @SuppressWarnings("unused")
     private final String fromOfficeName;
-    @SuppressWarnings("unused")
     private final Long toOfficeId;
-    @SuppressWarnings("unused")
     private final String toOfficeName;
-    @SuppressWarnings("unused")
     private final CurrencyData currency;
-    @SuppressWarnings("unused")
     private final BigDecimal transactionAmount;
-    @SuppressWarnings("unused")
     private final String description;
-    @SuppressWarnings("unused")
     private final Collection<CurrencyData> currencyOptions;
-    @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedOffices;
 
     public static OfficeTransactionData instance(final Long id, final LocalDate transactionDate, final Long fromOfficeId,
