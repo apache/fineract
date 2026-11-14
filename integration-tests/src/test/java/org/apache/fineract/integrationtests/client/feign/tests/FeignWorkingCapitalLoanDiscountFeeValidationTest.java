@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for what {@code POST working-capital-loans/{id}/transactions?command=discountFee} accepts as its
- * {@code relatedResourceId}, and for the loan carrying at most one discount fee.
+ * {@code relatedResourceId}, the approved discount cap and the loan carrying at most one discount fee.
  *
  * <p>
  * A discount fee is not a free-standing transaction: it is the fee withheld from one disbursement, it is what the
@@ -205,20 +205,64 @@ public class FeignWorkingCapitalLoanDiscountFeeValidationTest extends FeignInteg
         });
     }
 
+    @Test
+    @DisplayName("a fee above the approved discount is rejected without changes, then the approved amount is accepted")
+    void discountFee_cannotExceedApprovedDiscount() {
+        businessDateHelper.runAt(DISBURSE_DATE_ISO, () -> {
+            final BigDecimal proposedDiscount = new BigDecimal("100");
+            final BigDecimal approvedDiscount = new BigDecimal("53");
+            final Long clientId = clientHelper.createClient(DISBURSE_DATE);
+            final Long loanId = wcLoanHelper.submitApplication(WorkingCapitalLoanRequestBuilders.submitApplicationWithDiscount(clientId,
+                    createProduct(), NET_DISBURSEMENT, PERIOD_PAYMENT_RATE, DISBURSE_DATE, DISBURSE_DATE, proposedDiscount));
+            createdLoanIds.add(loanId);
+            wcLoanHelper.approve(loanId, WorkingCapitalLoanRequestBuilders.approveWithDiscount(DISBURSE_DATE, NET_DISBURSEMENT,
+                    DISBURSE_DATE, approvedDiscount));
+            final Long disbursementId = wcLoanHelper.disburse(loanId,
+                    WorkingCapitalLoanRequestBuilders.disburse(DISBURSE_DATE, NET_DISBURSEMENT));
+            assertNoDiscountFeeBooked(loanId);
+            final GetWorkingCapitalLoansLoanIdResponse before = wcLoanHelper.getLoanDetails(loanId);
+            assertEqualBigDecimal(proposedDiscount, before.getProposedDiscountFee(), "loan.proposedDiscountFee");
+            assertEqualBigDecimal(approvedDiscount, before.getApprovedDiscountFee(), "loan.approvedDiscountFee");
+
+            final CallFailedRuntimeException failure = wcLoanHelper.makeDiscountFeeExpectingFailure(loanId,
+                    WorkingCapitalLoanRequestBuilders.discountFee(new BigDecimal("54"), disbursementId));
+
+            assertEquals(400, failure.getStatus(), "a fee above the approved discount must be rejected");
+            assertEquals(List.of("validation.msg.WORKINGCAPITALLOAN.discountAmount.amount.cannot.exceed.approved.discount"),
+                    errorCodesOf(failure));
+            assertNoDiscountFeeBooked(loanId);
+            final GetWorkingCapitalLoansLoanIdResponse after = wcLoanHelper.getLoanDetails(loanId);
+            assertEquals(before.getBalance(), after.getBalance(), "a rejected fee must leave the balance unchanged");
+            assertEqualBigDecimal(approvedDiscount, after.getApprovedDiscountFee(), "the approved discount must stay unchanged");
+
+            final Long discountFeeId = wcLoanHelper.makeDiscountFee(loanId,
+                    WorkingCapitalLoanRequestBuilders.discountFee(approvedDiscount, disbursementId));
+
+            assertNotNull(discountFeeId, "a fee equal to the approved discount must be accepted");
+            assertDiscountFeeBooked(loanId, approvedDiscount);
+            assertEqualBigDecimal(approvedDiscount, activeDiscountFees(loanId).getFirst().getTransactionAmount(),
+                    "the booked transaction must equal the approved discount");
+        });
+    }
+
     // -----------------------------------------------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------------------------------------------
 
     /** Asserts the loan carries exactly one active discount fee and every derived total agrees with it. */
     private void assertDiscountFeeBooked(final Long loanId) {
+        assertDiscountFeeBooked(loanId, DISCOUNT);
+    }
+
+    private void assertDiscountFeeBooked(final Long loanId, final BigDecimal discount) {
         final GetWorkingCapitalLoansLoanIdResponse details = wcLoanHelper.getLoanDetails(loanId);
-        assertEqualBigDecimal(DISCOUNT, details.getDiscountFee(), "loan.discountFee");
+        assertEqualBigDecimal(discount, details.getDiscountFee(), "loan.discountFee");
         final GetBalance balance = details.getBalance();
         assertNotNull(balance, "loan.balance must be present");
-        assertEqualBigDecimal(DISCOUNT, balance.getTotalDiscountFee(), "balance.totalDiscountFee must equal the one booked fee");
-        assertEqualBigDecimal(NET_DISBURSEMENT.add(DISCOUNT), balance.getPrincipal(),
+        assertEqualBigDecimal(discount, balance.getTotalDiscountFee(), "balance.totalDiscountFee must equal the one booked fee");
+        assertEqualBigDecimal(NET_DISBURSEMENT.add(discount), balance.getPrincipal(),
                 "balance.principal is the total repayable, i.e. disbursed plus the one discount");
-        assertEqualBigDecimal(DISCOUNT, wcLoanHelper.getAmortizationSchedule(loanId).getDiscountFeeAmount(),
+        assertEqualBigDecimal(discount, wcLoanHelper.getAmortizationSchedule(loanId).getDiscountFeeAmount(),
                 "the schedule must be built on the same single discount");
         assertEquals(1, activeDiscountFees(loanId).size(), "the loan must carry exactly one active discount fee transaction");
     }
