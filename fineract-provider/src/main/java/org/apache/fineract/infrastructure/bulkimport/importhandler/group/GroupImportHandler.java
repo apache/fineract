@@ -75,26 +75,37 @@ public class GroupImportHandler implements ImportHandler {
         List<GroupGeneralData> groups = new ArrayList<>();
         List<CalendarData> meetings = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, groups, meetings, statuses, locale, dateFormat);
-        return importEntity(workbook, groups, meetings, statuses, dateFormat);
+        int errorCount = readExcelFile(workbook, groups, meetings, statuses, locale, dateFormat);
+        return importEntity(workbook, groups, meetings, statuses, dateFormat, errorCount);
     }
 
-    private void readExcelFile(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
+    private int readExcelFile(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
             final List<String> statuses, final String locale, final String dateFormat) {
+        int errorCount = 0;
         Sheet groupsSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(groupsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = groupsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, GroupConstants.STATUS_COL)) {
-                groups.add(readGroup(workbook, row, statuses, locale, dateFormat));
-                meetings.add(readMeeting(row, locale, dateFormat));
+                try {
+                    GroupGeneralData group = readGroup(workbook, row, statuses, locale, dateFormat);
+                    CalendarData meeting = readMeeting(row, locale, dateFormat);
+                    groups.add(group);
+                    meetings.add(meeting);
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount++;
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(groupsSheet, rowIndex, errorMessage, GroupConstants.STATUS_COL);
+                }
             }
         }
+        return errorCount;
     }
 
     private CalendarData readMeeting(Row row, String locale, String dateFormat) {
-        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(GroupConstants.MEETING_START_DATE_COL, row);
+        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(GroupConstants.MEETING_START_DATE_COL, row, dateFormat, locale);
         Boolean isRepeating = ImportHandlerUtils.readAsBoolean(GroupConstants.IS_REPEATING_COL, row);
         String frequency = ImportHandlerUtils.readAsString(GroupConstants.FREQUENCY_COL, row);
         EnumOptionData frequencyEnum = new EnumOptionData(null, null, ImportHandlerUtils.getFrequencyId(frequency));
@@ -128,10 +139,10 @@ public class GroupImportHandler implements ImportHandler {
         }
         String externalId = ImportHandlerUtils.readAsString(GroupConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(GroupConstants.ACTIVE_COL, row);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(GroupConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(GroupConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         LocalDate activationDate = null;
         if (active) {
-            activationDate = ImportHandlerUtils.readAsDate(GroupConstants.ACTIVATION_DATE_COL, row);
+            activationDate = ImportHandlerUtils.readAsDate(GroupConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         } else {
             activationDate = submittedOnDate;
         }
@@ -167,10 +178,9 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
-            final List<String> statuses, final String dateFormat) {
+            final List<String> statuses, final String dateFormat, int errorCount) {
         Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         int progressLevel = 0;
         String groupId = "";
         String errorMessage = "";

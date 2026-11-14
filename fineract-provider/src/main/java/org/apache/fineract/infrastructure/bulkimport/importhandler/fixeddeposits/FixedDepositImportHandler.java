@@ -74,30 +74,43 @@ public class FixedDepositImportHandler implements ImportHandler {
         List<ClosingOfSavingsAccounts> closedOnDates = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
 
-        readExcelFile(workbook, savings, approvalDates, activationDates, closedOnDates, statuses, locale, dateFormat);
-        return importEntity(workbook, savings, approvalDates, activationDates, closedOnDates, statuses, dateFormat);
+        int errorCount = readExcelFile(workbook, savings, approvalDates, activationDates, closedOnDates, statuses, locale, dateFormat);
+        return importEntity(workbook, savings, approvalDates, activationDates, closedOnDates, statuses, dateFormat, errorCount);
     }
 
-    private void readExcelFile(final Workbook workbook, final List<FixedDepositAccountData> savings,
+    private int readExcelFile(final Workbook workbook, final List<FixedDepositAccountData> savings,
             final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
             final List<ClosingOfSavingsAccounts> closedOnDate, final List<String> statuses, final String locale, final String dateFormat) {
+        int errorCount = 0;
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, FixedDepositConstants.STATUS_COL)) {
-                savings.add(readSavings(workbook, statuses, row, locale, dateFormat));
-                approvalDates.add(readSavingsApproval(row, locale, dateFormat));
-                activationDates.add(readSavingsActivation(row, locale, dateFormat));
-                closedOnDate.add(readSavingsClosed(row, locale, dateFormat));
+                try {
+                    FixedDepositAccountData savingsAccount = readSavings(workbook, statuses, row, locale, dateFormat);
+                    SavingsApproval approvalDate = readSavingsApproval(row, locale, dateFormat);
+                    SavingsActivation activationDate = readSavingsActivation(row, locale, dateFormat);
+                    ClosingOfSavingsAccounts closingDate = readSavingsClosed(row, locale, dateFormat);
+                    savings.add(savingsAccount);
+                    approvalDates.add(approvalDate);
+                    activationDates.add(activationDate);
+                    closedOnDate.add(closingDate);
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount++;
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(savingsSheet, rowIndex, errorMessage, FixedDepositConstants.STATUS_COL);
+                }
             }
         }
 
+        return errorCount;
     }
 
     private ClosingOfSavingsAccounts readSavingsClosed(Row row, String locale, String dateFormat) {
-        LocalDate closedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.CLOSED_ON_DATE, row);
+        LocalDate closedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.CLOSED_ON_DATE, row, dateFormat, locale);
         Long onAccountClosureId = ImportHandlerUtils.readAsLong(FixedDepositConstants.ON_ACCOUNT_CLOSURE_ID, row);
         Long toSavingsAccountId = ImportHandlerUtils.readAsLong(FixedDepositConstants.TO_SAVINGS_ACCOUNT_ID, row);
         if (closedOnDate != null) {
@@ -109,7 +122,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private SavingsActivation readSavingsActivation(Row row, String locale, String dateFormat) {
-        LocalDate activationDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.ACTIVATION_DATE_COL, row);
+        LocalDate activationDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         if (activationDate != null) {
             return SavingsActivation.importInstance(activationDate, row.getRowNum(), locale, dateFormat);
         } else {
@@ -118,7 +131,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private SavingsApproval readSavingsApproval(Row row, String locale, String dateFormat) {
-        LocalDate approvalDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.APPROVED_DATE_COL, row);
+        LocalDate approvalDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.APPROVED_DATE_COL, row, dateFormat, locale);
         if (approvalDate != null) {
             return SavingsApproval.importInstance(approvalDate, row.getRowNum(), locale, dateFormat);
         } else {
@@ -134,7 +147,7 @@ public class FixedDepositImportHandler implements ImportHandler {
         String fieldOfficerName = ImportHandlerUtils.readAsString(FixedDepositConstants.FIELD_OFFICER_NAME_COL, row);
         Long fieldOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME),
                 fieldOfficerName);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         String interestCompoundingPeriodType = ImportHandlerUtils.readAsString(FixedDepositConstants.INTEREST_COMPOUNDING_PERIOD_COL, row);
         Long interestCompoundingPeriodTypeId = null;
         EnumOptionData interestCompoundingPeriodTypeEnum = null;
@@ -243,21 +256,21 @@ public class FixedDepositImportHandler implements ImportHandler {
             if (ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row)),
-                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row)));
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale)));
             }
         } else {
             charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row), null,
-                    ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row)));
+                    ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale)));
         }
 
         if (charge2 != null) {
             if (ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_2, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_2, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_2, row)),
-                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row)));
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale)));
             } else {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_2, row), null,
-                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row)));
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale)));
             }
         }
         String status = ImportHandlerUtils.readAsString(FixedDepositConstants.STATUS_COL, row);
@@ -271,10 +284,9 @@ public class FixedDepositImportHandler implements ImportHandler {
 
     private Count importEntity(final Workbook workbook, final List<FixedDepositAccountData> savings,
             final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
-            final List<ClosingOfSavingsAccounts> closedOnDates, final List<String> statuses, String dateFormat) {
+            final List<ClosingOfSavingsAccounts> closedOnDates, final List<String> statuses, String dateFormat, int errorCount) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage = "";
         int progressLevel = 0;
         Long savingsId = null;
