@@ -2506,7 +2506,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             verifyLoanIsActive(disburseLoanWithNetDisbursalAmount("20 September 2011", loanID));
 
-            getLoanDetails(loanID).getTransactions();
+            getLoanDetails(loanID);
             final LoanTestData.Journal[] assetAccountInitialEntry = {
                     journalEntry(Float.parseFloat("120.00"), assetAccount, JournalEntry.TransactionType.DEBIT.name()),
                     journalEntry(Float.parseFloat("12000.00"), assetAccount, JournalEntry.TransactionType.CREDIT.name()),

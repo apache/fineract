@@ -177,7 +177,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             Long firstChargeId = addLoanCharge(loanId, fee, "20 January 2023", 50.0).getResourceId();
             Long secondRepaymentId = addRepaymentForLoan(loanId, 100.00, "17 January 2023");
 
-            addLoanCharge(loanId, penalty, "23 January 2023", 10.0).getResourceId();
+            addLoanCharge(loanId, penalty, "23 January 2023", 10.0);
 
             Long thirdRepaymentId = addRepaymentForLoan(loanId, 100.00, "20 January 2023");
 

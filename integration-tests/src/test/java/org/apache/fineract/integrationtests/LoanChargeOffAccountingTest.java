@@ -106,8 +106,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             // set loan as chargeoff
             String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
@@ -254,8 +253,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             // set loan as fraud
             changeLoanFraudState(loanId, true);
@@ -409,8 +407,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 110.0d, true).getResourceId();
@@ -418,8 +415,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -466,8 +462,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
@@ -475,8 +470,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             // set loan as chargeoff
             String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
@@ -542,8 +536,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
@@ -551,8 +544,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -602,8 +594,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
@@ -611,8 +602,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getActive());
@@ -680,8 +670,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(feeCharge).amount(10.0d).dueDate(feeCharge1AddedDate));
 
             // apply penalty
             Long penalty = chargesHelper.createLoanSpecifiedDueDateCharge(ChargeCalculationType.FLAT, 10.0d, true).getResourceId();
@@ -689,8 +678,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate))
-                    .getResourceId();
+                    .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(penalty).amount(10.0d).dueDate(penaltyCharge1AddedDate));
 
             updateBusinessDate(LocalDate.of(2020, 9, 6).toString());
             executeInlineCOB(loanId);

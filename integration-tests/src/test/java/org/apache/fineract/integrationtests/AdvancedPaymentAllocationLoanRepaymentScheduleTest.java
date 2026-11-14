@@ -4207,9 +4207,6 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .installmentAmountInMultiplesOf(null).numberOfRepayments(3).repaymentEvery(15).enableDownPayment(false);
             PostLoanProductsResponse loanProductResponse = loanHelper.createLoanProduct(product);
-            applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(), "23 March 2024", 1000.0, 3)
-                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(15)
-                    .enableDownPayment(true);
 
             Long clientId = client.getClientId();
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
