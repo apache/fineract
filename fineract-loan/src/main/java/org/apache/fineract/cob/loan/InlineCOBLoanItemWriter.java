@@ -22,25 +22,24 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelService;
 import org.springframework.batch.core.step.StepExecution;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+public class InlineCOBLoanItemWriter extends AbstractLoanItemWriter {
 
-    public LoanItemWriter(COBBusinessStepService cobBusinessStepService,
-            ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService, LockingService loanLockingService,
-            LoanRepository loanRepository) {
-        super(cobBusinessStepService, progressiveLoanModelProcessingService, loanLockingService, loanRepository);
+    public InlineCOBLoanItemWriter(COBBusinessStepService cobBusinessStepService, ProgressiveLoanModelService progressiveLoanModelService,
+            LockingService loanLockingService, LoanRepository loanRepository) {
+        super(cobBusinessStepService, progressiveLoanModelService, loanLockingService, loanRepository);
     }
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        setExecutionContext(stepExecution.getExecutionContext());
+        setExecutionContext(stepExecution.getJobExecution().getExecutionContext());
         setBusinessDate(stepExecution);
     }
 
     @Override
     protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+        return LockOwner.LOAN_INLINE_COB_PROCESSING;
     }
 }

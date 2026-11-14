@@ -28,7 +28,7 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -57,7 +57,7 @@ class CobStepListenerRegistrationTest {
         LoanRepository loanRepository = mock(LoanRepository.class);
         BeforeStepLockingItemReaderHelper lockingHelper = mock(BeforeStepLockingItemReaderHelper.class);
         COBBusinessStepService businessStepService = mock(COBBusinessStepService.class);
-        ProgressiveLoanModelProcessingService modelProcessingService = mock(ProgressiveLoanModelProcessingService.class);
+        ProgressiveLoanModelService modelProcessingService = mock(ProgressiveLoanModelService.class);
         LockingService lockingService = mock(LockingService.class);
 
         return Stream.of(//
