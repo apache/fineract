@@ -36,27 +36,13 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
 
         Integer paymentPeriodsInOneYear = 0;
         switch (repaymentFrequencyType) {
-            case DAYS:
-                paymentPeriodsInOneYear = 365;
-            break;
-            case WEEKS:
-                paymentPeriodsInOneYear = 52;
-            break;
-            case MONTHS:
-                paymentPeriodsInOneYear = 12;
-            break;
-            case YEARS:
-                paymentPeriodsInOneYear = 1;
-            break;
-            case SEMI_MONTHLY:
-                paymentPeriodsInOneYear = 24;
-            break;
-            case INVALID:
-                paymentPeriodsInOneYear = 0;
-            break;
-            case WHOLE_TERM:
-                log.error("TODO Implement repaymentFrequencyType for WHOLE_TERM");
-            break;
+            case DAYS -> paymentPeriodsInOneYear = 365;
+            case WEEKS -> paymentPeriodsInOneYear = 52;
+            case MONTHS -> paymentPeriodsInOneYear = 12;
+            case YEARS -> paymentPeriodsInOneYear = 1;
+            case SEMI_MONTHLY -> paymentPeriodsInOneYear = 24;
+            case INVALID -> paymentPeriodsInOneYear = 0;
+            case WHOLE_TERM -> log.error("TODO Implement repaymentFrequencyType for WHOLE_TERM");
         }
         return paymentPeriodsInOneYear;
     }

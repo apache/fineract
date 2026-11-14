@@ -35,15 +35,9 @@ public enum LoanSubStatus {
 
         LoanSubStatus enumeration = LoanSubStatus.INVALID;
         switch (statusValue) {
-            case 100:
-                enumeration = LoanSubStatus.FORECLOSED;
-            break;
-            case 900:
-                enumeration = LoanSubStatus.CONTRACT_TERMINATION;
-            break;
-            case 901:
-                enumeration = LoanSubStatus.LOAN_WITHDRAWAL;
-            break;
+            case 100 -> enumeration = LoanSubStatus.FORECLOSED;
+            case 900 -> enumeration = LoanSubStatus.CONTRACT_TERMINATION;
+            case 901 -> enumeration = LoanSubStatus.LOAN_WITHDRAWAL;
         }
         return enumeration;
     }
@@ -83,24 +77,16 @@ public enum LoanSubStatus {
 
     public static EnumOptionData loanSubStatusEnum(final LoanSubStatus type) {
         final String codePrefix = "loanSubStatus.";
-        EnumOptionData optionData = null;
-        switch (type) {
-            case FORECLOSED:
-                optionData = new EnumOptionData(LoanSubStatus.FORECLOSED.getValue().longValue(),
-                        codePrefix + LoanSubStatus.FORECLOSED.getCode(), "Foreclosed");
-            break;
-            case CONTRACT_TERMINATION:
-                optionData = new EnumOptionData(LoanSubStatus.CONTRACT_TERMINATION.getValue().longValue(),
-                        codePrefix + LoanSubStatus.CONTRACT_TERMINATION.getCode(), "Contract Termination");
-            break;
-            case LOAN_WITHDRAWAL:
-                optionData = new EnumOptionData(LoanSubStatus.LOAN_WITHDRAWAL.getValue().longValue(),
-                        codePrefix + LoanSubStatus.LOAN_WITHDRAWAL.getCode(), "Loan Withdrawal");
-            break;
-            default:
-                optionData = new EnumOptionData(LoanSubStatus.INVALID.getValue().longValue(), LoanSubStatus.INVALID.getCode(), "Invalid");
-            break;
-        }
+
+        EnumOptionData optionData = switch (type) {
+            case FORECLOSED -> new EnumOptionData(LoanSubStatus.FORECLOSED.getValue().longValue(),
+                    codePrefix + LoanSubStatus.FORECLOSED.getCode(), "Foreclosed");
+            case CONTRACT_TERMINATION -> new EnumOptionData(LoanSubStatus.CONTRACT_TERMINATION.getValue().longValue(),
+                    codePrefix + LoanSubStatus.CONTRACT_TERMINATION.getCode(), "Contract Termination");
+            case LOAN_WITHDRAWAL -> new EnumOptionData(LoanSubStatus.LOAN_WITHDRAWAL.getValue().longValue(),
+                    codePrefix + LoanSubStatus.LOAN_WITHDRAWAL.getCode(), "Loan Withdrawal");
+            default -> new EnumOptionData(LoanSubStatus.INVALID.getValue().longValue(), LoanSubStatus.INVALID.getCode(), "Invalid");
+        };
         return optionData;
     }
 }

@@ -573,16 +573,14 @@ public final class LoanEnumerations {
     public static EnumOptionData preCloseInterestCalculationStrategy(final LoanPreCloseInterestCalculationStrategy type) {
         EnumOptionData optionData = null;
         switch (type) {
-            case TILL_PRE_CLOSURE_DATE:
+            case TILL_PRE_CLOSURE_DATE ->
                 optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue().longValue(),
                         LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getCode(), "Till Pre-Close Date");
-            break;
-            case TILL_REST_FREQUENCY_DATE:
+            case TILL_REST_FREQUENCY_DATE ->
                 optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue().longValue(),
                         LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getCode(), "Till Rest Frequency Date");
-            break;
-            case NONE:
-            break;
+            case NONE -> {
+            }
         }
         return optionData;
     }

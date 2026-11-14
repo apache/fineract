@@ -45,23 +45,15 @@ public final class LoanRescheduleRequestEnumerations {
                 "Submitted and pending approval");
 
         switch (status) {
-            case SUBMITTED_AND_PENDING_APPROVAL:
+            case SUBMITTED_AND_PENDING_APPROVAL ->
                 enumData = new LoanRescheduleRequestStatusEnumData(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
                         LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
-            break;
-
-            case APPROVED:
-                enumData = new LoanRescheduleRequestStatusEnumData(LoanStatus.APPROVED.getValue().longValue(),
-                        LoanStatus.APPROVED.getCode(), "Approved");
-            break;
-
-            case REJECTED:
-                enumData = new LoanRescheduleRequestStatusEnumData(LoanStatus.REJECTED.getValue().longValue(),
-                        LoanStatus.REJECTED.getCode(), "Rejected");
-            break;
-
-            default:
-            break;
+            case APPROVED -> enumData = new LoanRescheduleRequestStatusEnumData(LoanStatus.APPROVED.getValue().longValue(),
+                    LoanStatus.APPROVED.getCode(), "Approved");
+            case REJECTED -> enumData = new LoanRescheduleRequestStatusEnumData(LoanStatus.REJECTED.getValue().longValue(),
+                    LoanStatus.REJECTED.getCode(), "Rejected");
+            default -> {
+            }
         }
 
         return enumData;
