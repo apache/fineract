@@ -272,34 +272,6 @@ final class GroupsApiResourceSwagger {
         public Long resourceId;
     }
 
-    @Schema(description = "PostGroupsGroupIdCommandUnassignStaffRequest")
-    public static final class PostGroupsGroupIdCommandUnassignStaffRequest {
-
-        private PostGroupsGroupIdCommandUnassignStaffRequest() {}
-
-        @Schema(example = "1")
-        public Long staffId;
-    }
-
-    @Schema(description = "PostGroupsGroupIdCommandUnassignStaffResponse")
-    public static final class PostGroupsGroupIdCommandUnassignStaffResponse {
-
-        private PostGroupsGroupIdCommandUnassignStaffResponse() {}
-
-        static final class PostGroupsGroupIdCommandUnassignStaffChanges {
-
-            private PostGroupsGroupIdCommandUnassignStaffChanges() {}
-        }
-
-        @Schema(example = "1")
-        public Long officeId;
-        @Schema(example = "1")
-        public Long groupId;
-        @Schema(example = "1")
-        public Long resourceId;
-        public PostGroupsGroupIdCommandUnassignStaffChanges changes;
-    }
-
     @Schema(description = "PutGroupsGroupIdRequest")
     public static final class PutGroupsGroupIdRequest {
 
