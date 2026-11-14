@@ -100,9 +100,6 @@ public class OidcFederationSecurityConfig {
     private TenantOidcConfigService tenantOidcConfigService;
 
     @Autowired
-    private DynamicJwtIssuerAuthenticationManagerResolver dynamicIssuerResolver;
-
-    @Autowired
     private BusinessDateReadPlatformService businessDateReadPlatformService;
 
     @Autowired
@@ -130,7 +127,8 @@ public class OidcFederationSecurityConfig {
 
     @Bean
     @Order(100)
-    public SecurityFilterChain oidcFederationFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain oidcFederationFilterChain(HttpSecurity http,
+            DynamicJwtIssuerAuthenticationManagerResolver dynamicIssuerResolver) throws Exception {
         http.securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/*/echo").permitAll().anyRequest().authenticated())
