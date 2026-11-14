@@ -594,8 +594,6 @@ final class ProductsApiResourceSwagger {
         public Integer totalShares;
         @Schema(example = "2000")
         public Integer sharesIssued;
-        @Schema(example = "USD")
-        public String currencyCode;
         public Set<PostProductsTypeRequest.PostProductsChargesSelected> chargesSelected;
         public Set<PostProductsTypeRequest.PostProductsPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
     }
