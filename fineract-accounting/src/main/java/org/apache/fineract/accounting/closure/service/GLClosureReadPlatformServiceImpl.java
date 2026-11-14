@@ -18,25 +18,33 @@
  */
 package org.apache.fineract.accounting.closure.service;
 
+import static org.apache.fineract.query.QAccGlClosure.accGlClosure;
+import static org.apache.fineract.query.QMOffice.mOffice;
+
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
+import org.apache.fineract.accounting.closure.domain.GLClosureProjection;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.apache.fineract.query.QMAppuser;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
 
     private static final class GLClosureMapper implements RowMapper<GLClosureData> {
 
@@ -91,18 +99,14 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GLClosureData retrieveGLClosureById(final long glClosureId) {
-        try {
-
-            final GLClosureMapper rm = new GLClosureMapper();
-            final String sql = "select " + rm.schema() + " and glClosure.id = ?";
-
-            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId }); // NOSONAR
-
-            return glAccountData;
-        } catch (final EmptyResultDataAccessException e) {
-            throw new GLClosureNotFoundException(glClosureId, e);
-        }
+        final QMAppuser creatingUser = new QMAppuser("creatingUser");
+        final QMAppuser updatingUser = new QMAppuser("updatingUser");
+        final GLClosureData closure = queryFactory.select(new GLClosureProjection(creatingUser, updatingUser)).from(accGlClosure)
+                .join(mOffice).on(accGlClosure.officeId.eq(mOffice.id)).join(creatingUser).on(accGlClosure.createdbyId.eq(creatingUser.id))
+                .join(updatingUser).on(accGlClosure.lastmodifiedbyId.eq(updatingUser.id)).where(accGlClosure.id.eq(glClosureId)).fetchOne();
+        return Optional.ofNullable(closure).orElseThrow(() -> new GLClosureNotFoundException(glClosureId));
     }
 
 }
