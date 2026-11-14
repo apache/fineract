@@ -24,9 +24,8 @@ import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant;
 import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanRetrieveIdService;
 import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.infrastructure.jobs.service.JobStarter;
+import org.apache.fineract.infrastructure.jobs.service.ScheduledJobStartService;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.scheduling.annotation.Async;
@@ -38,9 +37,9 @@ import org.springframework.stereotype.Service;
 public class AsyncWorkingCapitalLoanCOBExecutorServiceImpl extends AsyncCommonCOBExecutorService
         implements AsyncWorkingCapitalLoanCOBExecutorService {
 
-    public AsyncWorkingCapitalLoanCOBExecutorServiceImpl(JobRegistry jobRegistry, ScheduledJobDetailRepository scheduledJobDetailRepository,
-            JobStarter jobStarter, WorkingCapitalLoanRetrieveIdService retrieveIdService) {
-        super(jobRegistry, scheduledJobDetailRepository, jobStarter, retrieveIdService);
+    public AsyncWorkingCapitalLoanCOBExecutorServiceImpl(JobRegistry jobRegistry, ScheduledJobStartService scheduledJobStartService,
+            WorkingCapitalLoanRetrieveIdService retrieveIdService) {
+        super(jobRegistry, scheduledJobStartService, retrieveIdService);
     }
 
     @Override
