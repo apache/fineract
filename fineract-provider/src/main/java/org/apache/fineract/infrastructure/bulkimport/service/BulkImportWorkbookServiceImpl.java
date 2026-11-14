@@ -224,7 +224,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 i.failure_count as failureCount, i.createdby_id as createdBy
                 from m_import_document i inner join m_document d on i.document_id=d.id where i.entity_type= ?\s""";
 
-        public String schema() {
+        private String schema() {
             return IMPORT_SCHEMA;
         }
 

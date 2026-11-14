@@ -130,7 +130,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         private final String schemaSql;
 
-        protected DepositProductMapper() {
+        private DepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
             sqlBuilder.append(
@@ -152,11 +152,11 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        String schema() {
             return this.schemaSql;
         }
 
-        public DepositProductData mapRow(final ResultSet rs) throws SQLException {
+        private DepositProductData mapRow(final ResultSet rs) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
@@ -358,7 +358,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
     private static final class DepositProductLookupMapper implements RowMapper<DepositProductData> {
 
-        public String schema() {
+        private String schema() {
             return " sp.id as id, sp.name as name from m_savings_product sp ";
         }
 

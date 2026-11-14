@@ -90,14 +90,14 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
             return PermissionData.instance(grouping, code, entityName, actionName, selected);
         }
 
-        public String permissionSchema() {
+        private String permissionSchema() {
             /* get all non-CHECKER permissions */
             return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, true as selected"
                     + " from m_permission p " + " where code not like '%\\_CHECKER'"
                     + " order by p.grouping, coalesce(entity_name, ''), p.code";
         }
 
-        public String makerCheckerablePermissionSchema() {
+        private String makerCheckerablePermissionSchema() {
             /*
              * get all 'Maker-Checkerable' permissions - Maintenance permissions (i.e. exclude the 'special' grouping,
              * the READ permissions and the CHECKER permissions
@@ -109,7 +109,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
                     + " order by p.grouping, coalesce(entity_name, ''), p.code";
         }
 
-        public String rolePermissionSchema() {
+        private String rolePermissionSchema() {
             return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, rp.role_id IS NOT NULL as selected "
                     + " from m_permission p " + " left join m_role_permission rp on rp.permission_id = p.id and rp.role_id = ? "
                     + " order by p.grouping, COALESCE(entity_name, ''), p.code";

@@ -47,7 +47,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
     private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
 
-        public String schema() {
+        private String schema() {
             return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.code_description as description, cv.order_position as position,"
                     + " cv.is_active isActive, cv.is_mandatory as mandatory from m_code_value as cv join m_code c on cv.code_id = c.id ";
         }

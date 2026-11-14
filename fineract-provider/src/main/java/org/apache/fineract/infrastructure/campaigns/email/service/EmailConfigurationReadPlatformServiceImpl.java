@@ -54,7 +54,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
 
         EmailConfigurationRowMapper() {}
 
-        public String schema() {
+        private String schema() {
             return EMAIL_CONFIGURATION_SCHEMA;
         }
 
