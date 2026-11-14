@@ -683,13 +683,6 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(postRemovalJournalEntries, "Journal entries should exist after charge removal and COB");
             assertNotNull(postRemovalJournalEntries.getPageItems(), "Journal entry items should exist");
 
-            // Validate that accrual adjustment entries were created
-            postRemovalJournalEntries.getPageItems().stream().filter(entry -> {
-                // Look for reversal entries that might indicate accrual adjustments
-                String transactionDetails = entry.getTransactionDetails() != null ? entry.getTransactionDetails().toString() : "";
-                return transactionDetails.contains("waive") || transactionDetails.contains("adjust");
-            }).toList();
-
             // Validate that charge removal processing uses correct GL accounts
             Map<Long, List<JournalEntryTransactionItem>> entriesByGLAccount = postRemovalJournalEntries.getPageItems().stream()
                     .collect(Collectors.groupingBy(entry -> entry.getGlAccountId()));
@@ -765,13 +758,6 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
                     .collect(Collectors.groupingBy(entry -> entry.getGlAccountId()));
 
             assertTrue(debitEntriesByGLAccount.size() > 0, "Should have debit entries for multiple GL accounts");
-
-            // Test that charge ID resolution works correctly for multiple debit accounts
-            journalEntries.getPageItems().stream().filter(entry -> {
-                BigDecimal amount = BigDecimal.valueOf(entry.getAmount());
-                return amount.compareTo(BigDecimal.valueOf(500)) == 0 || amount.compareTo(BigDecimal.valueOf(300)) == 0
-                        || amount.compareTo(BigDecimal.valueOf(150)) == 0;
-            }).toList();
 
             // Note: Charge amounts might be aggregated or combined with other transactions
             // The key test is that GL account resolution works correctly

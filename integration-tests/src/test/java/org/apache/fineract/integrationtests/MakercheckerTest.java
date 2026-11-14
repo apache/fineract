@@ -151,7 +151,7 @@ public class MakercheckerTest extends FeignIntegrationTest {
 
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
-            FeignUserHelper.createUser(roleId, staffId, checker, PASSWORD).getResourceId();
+            FeignUserHelper.createUser(roleId, staffId, checker, PASSWORD);
             FineractFeignClient checkerClient = FineractFeignClientHelper.createNewFineractFeignClient(checker, PASSWORD);
 
             // check by another checker user should succeed
