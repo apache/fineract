@@ -64,7 +64,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             }
         }
 
-        public String schema() {
+        private String schema() {
             StringBuilder sb = new StringBuilder();
             sb.append(
                     " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, ")

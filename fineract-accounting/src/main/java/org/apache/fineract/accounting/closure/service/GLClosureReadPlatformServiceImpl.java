@@ -40,7 +40,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
 
     private static final class GLClosureMapper implements RowMapper<GLClosureData> {
 
-        public String schema() {
+        private String schema() {
             return " glClosure.id as id, glClosure.office_id as officeId,office.name as officeName ,glClosure.closing_date as closingDate,"
                     + " glClosure.is_deleted as isDeleted, creatingUser.id as creatingUserId,creatingUser.username as creatingUserName,"
                     + " updatingUser.id as updatingUserId,updatingUser.username as updatingUserName, glClosure.created_date as createdDate,"
