@@ -19,7 +19,7 @@
 package org.apache.fineract.command.core;
 
 @FunctionalInterface
-public interface CommandHookError<REQ> {
+public interface CommandHookError<REQ, RES> {
 
-    void onError(Command<REQ> command, Throwable error);
+    void onError(CommandContext<REQ, RES> ctx);
 }
