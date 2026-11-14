@@ -84,7 +84,7 @@ public class PartDayCashierTest extends FeignIntegrationTest {
     public void partDayCashierIsCreated() {
         create(partDay(9, 13));
         assertEquals(1, cashiers().size());
-        assertEquals(Boolean.FALSE, cashiers().get(0).getIsFullDay());
+        assertEquals(Boolean.valueOf(false), cashiers().get(0).getIsFullDay());
     }
 
     @Test

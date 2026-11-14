@@ -97,7 +97,7 @@ class WorkingCapitalLoanNearBreachBaselineTest {
 
         baseline.carryOverToRegenerated(regenerated);
 
-        assertEquals(Boolean.TRUE, regenerated.getNearBreach());
+        assertEquals(Boolean.valueOf(true), regenerated.getNearBreach());
         assertFalse(baseline.hasChanged(List.of(regenerated), BUSINESS_DATE));
     }
 

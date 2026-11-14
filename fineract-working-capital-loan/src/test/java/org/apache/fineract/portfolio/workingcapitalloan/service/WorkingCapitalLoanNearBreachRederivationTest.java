@@ -183,7 +183,7 @@ class WorkingCapitalLoanNearBreachRederivationTest {
 
         underTest.rederiveSince(loan, List.of(regenerated), baseline, true);
 
-        assertEquals(Boolean.TRUE, regenerated.getNearBreach());
+        assertEquals(Boolean.valueOf(true), regenerated.getNearBreach());
         verify(evaluationService, never()).rederiveNearBreach(anyList(), any(), any());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
@@ -225,7 +225,7 @@ class WorkingCapitalLoanNearBreachRederivationTest {
 
         underTest.rederiveSince(loan, List.of(open), baseline, false);
 
-        assertEquals(Boolean.TRUE, open.getNearBreach());
+        assertEquals(Boolean.valueOf(true), open.getNearBreach());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
 

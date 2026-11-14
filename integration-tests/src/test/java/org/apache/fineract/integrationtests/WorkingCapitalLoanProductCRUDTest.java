@@ -617,10 +617,10 @@ public class WorkingCapitalLoanProductCRUDTest {
 
         // Verify Configurable Attributes (allowAttributeOverrides)
         if (retrieved.getAllowAttributeOverrides() != null) {
-            assertEquals(Boolean.FALSE, retrieved.getAllowAttributeOverrides().getDelinquencyBucketClassification());
-            assertEquals(Boolean.TRUE, retrieved.getAllowAttributeOverrides().getDiscountDefault());
-            assertEquals(Boolean.FALSE, retrieved.getAllowAttributeOverrides().getPeriodPaymentFrequency());
-            assertEquals(Boolean.TRUE, retrieved.getAllowAttributeOverrides().getPeriodPaymentFrequencyType());
+            assertEquals(Boolean.valueOf(false), retrieved.getAllowAttributeOverrides().getDelinquencyBucketClassification());
+            assertEquals(Boolean.valueOf(true), retrieved.getAllowAttributeOverrides().getDiscountDefault());
+            assertEquals(Boolean.valueOf(false), retrieved.getAllowAttributeOverrides().getPeriodPaymentFrequency());
+            assertEquals(Boolean.valueOf(true), retrieved.getAllowAttributeOverrides().getPeriodPaymentFrequencyType());
         }
 
         wclProductHelper.deleteWorkingCapitalLoanProductById(productId);

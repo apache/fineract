@@ -235,8 +235,8 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
         Assertions.assertTrue(optionalExternalEventDTO.isPresent());
 
         final ExternalEventResponse externalEventDTO = optionalExternalEventDTO.get();
-        Assertions.assertEquals(externalEventDTO.getPayLoad().get("enableDownPayment"), Boolean.TRUE);
-        Assertions.assertEquals(externalEventDTO.getPayLoad().get("enableAutoRepaymentForDownPayment"), Boolean.TRUE);
+        Assertions.assertEquals(externalEventDTO.getPayLoad().get("enableDownPayment"), Boolean.valueOf(true));
+        Assertions.assertEquals(externalEventDTO.getPayLoad().get("enableAutoRepaymentForDownPayment"), Boolean.valueOf(true));
         Assertions.assertEquals(externalEventDTO.getPayLoad().get("disbursedAmountPercentageForDownPayment"),
                 DOWN_PAYMENT_PERCENTAGE.doubleValue());
     }

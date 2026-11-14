@@ -193,12 +193,12 @@ public class GlobalConfigurationTest {
         GlobalConfigurationPropertyData restricted = globalConfigurationHelper
                 .retrieveConfigurationByName(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE);
         assertEquals(List.of("due-date", "submitted-date"), restricted.getAllowedValues());
-        assertEquals(Boolean.FALSE, restricted.getMultipleValuesAllowed());
+        assertEquals(Boolean.valueOf(false), restricted.getMultipleValuesAllowed());
 
         GlobalConfigurationPropertyData multiple = globalConfigurationHelper
                 .retrieveConfigurationByName(GlobalConfigurationConstants.ACCOUNT_MAPPING_FOR_CHARGE);
         assertEquals(List.of("Income", "Liability", "Expense"), multiple.getAllowedValues());
-        assertEquals(Boolean.TRUE, multiple.getMultipleValuesAllowed());
+        assertEquals(Boolean.valueOf(true), multiple.getMultipleValuesAllowed());
 
         GlobalConfigurationPropertyData unrestricted = globalConfigurationHelper
                 .retrieveConfigurationByName(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD);

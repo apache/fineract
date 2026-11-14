@@ -508,9 +508,9 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
                 .findUnReversedSystemJournalEntriesByTransactionId(SAVINGS_TRANSACTION_IDENTIFIER + transactionId);
         for (final JournalEntry journalEntry : journalEntries) {
             persistJournalEntry(JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), Boolean.FALSE,
-                    transactionDate, journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT,
-                    journalEntry.getAmount(), journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(),
+                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), false, transactionDate,
+                    journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT, journalEntry.getAmount(),
+                    journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(),
                     journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
                     journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId()));
         }

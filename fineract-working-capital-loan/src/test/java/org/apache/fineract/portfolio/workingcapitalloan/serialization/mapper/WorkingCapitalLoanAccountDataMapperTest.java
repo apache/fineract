@@ -112,8 +112,8 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("43.7562"), result.getAnnualEir());
         assertEquals(new BigDecimal("47.22"), result.getPaymentAmount());
         assertStringEnum(source.getPaymentAmountCalculationStrategy(), result.getPaymentAmountCalculationStrategy());
-        assertEquals(Boolean.TRUE, result.getChargedOff());
-        assertEquals(Boolean.TRUE, result.getEnableInstallmentLevelDelinquency());
+        assertEquals(Boolean.valueOf(true), result.getChargedOff());
+        assertEquals(Boolean.valueOf(true), result.getEnableInstallmentLevelDelinquency());
 
         // actualNoTerm duplicates numberOfRepayments
         assertEquals(90, result.getActualNoTerm());
@@ -155,14 +155,14 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(300, status.getId());
         assertEquals("loanStatusType.active", status.getCode());
         assertEquals("Active", status.getValue());
-        assertEquals(Boolean.FALSE, status.getPendingApproval());
-        assertEquals(Boolean.FALSE, status.getWaitingForDisbursal());
-        assertEquals(Boolean.TRUE, status.getActive());
-        assertEquals(Boolean.FALSE, status.getClosedObligationsMet());
-        assertEquals(Boolean.FALSE, status.getClosedWrittenOff());
-        assertEquals(Boolean.FALSE, status.getClosedRescheduled());
-        assertEquals(Boolean.FALSE, status.getClosed());
-        assertEquals(Boolean.FALSE, status.getOverpaid());
+        assertEquals(Boolean.valueOf(false), status.getPendingApproval());
+        assertEquals(Boolean.valueOf(false), status.getWaitingForDisbursal());
+        assertEquals(Boolean.valueOf(true), status.getActive());
+        assertEquals(Boolean.valueOf(false), status.getClosedObligationsMet());
+        assertEquals(Boolean.valueOf(false), status.getClosedWrittenOff());
+        assertEquals(Boolean.valueOf(false), status.getClosedRescheduled());
+        assertEquals(Boolean.valueOf(false), status.getClosed());
+        assertEquals(Boolean.valueOf(false), status.getOverpaid());
     }
 
     @Test
@@ -221,8 +221,8 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals("Broker", originator.getOriginatorType().getName());
         assertEquals(1, originator.getOriginatorType().getPosition());
         assertEquals("originator type", originator.getOriginatorType().getDescription());
-        assertEquals(Boolean.TRUE, originator.getOriginatorType().getActive());
-        assertEquals(Boolean.FALSE, originator.getOriginatorType().getMandatory());
+        assertEquals(Boolean.valueOf(true), originator.getOriginatorType().getActive());
+        assertEquals(Boolean.valueOf(false), originator.getOriginatorType().getMandatory());
 
         assertNotNull(originator.getChannelType());
         assertEquals(72L, originator.getChannelType().getId());
@@ -366,7 +366,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
 
         assertNotNull(result.getDelinquencyPausePeriods());
         assertEquals(1, result.getDelinquencyPausePeriods().size());
-        assertEquals(Boolean.TRUE, result.getDelinquencyPausePeriods().getFirst().getActive());
+        assertEquals(Boolean.valueOf(true), result.getDelinquencyPausePeriods().getFirst().getActive());
         assertEquals("2024-01-10", result.getDelinquencyPausePeriods().getFirst().getPausePeriodStart());
         assertEquals("2024-01-20", result.getDelinquencyPausePeriods().getFirst().getPausePeriodEnd());
 
@@ -392,7 +392,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("150.00"), result.getExpectedAmount());
         assertEquals(new BigDecimal("50.00"), result.getPaidAmount());
         assertEquals(new BigDecimal("100.00"), result.getOutstandingAmount());
-        assertEquals(Boolean.FALSE, result.getMinPaymentCriteriaMet());
+        assertEquals(Boolean.valueOf(false), result.getMinPaymentCriteriaMet());
         assertEquals(12, result.getDelinquentDays());
         assertEquals(new BigDecimal("100.00"), result.getDelinquentAmount());
     }
@@ -421,9 +421,9 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("120.00"), result.getMinPaymentAmount());
         assertEquals(new BigDecimal("70.00"), result.getOutstandingAmount());
         assertEquals(new BigDecimal("50.00"), result.getPaidAmount());
-        assertEquals(Boolean.TRUE, result.getNearBreach());
-        assertEquals(Boolean.FALSE, result.getBreach());
-        assertEquals(Boolean.FALSE, result.getReset());
+        assertEquals(Boolean.valueOf(true), result.getNearBreach());
+        assertEquals(Boolean.valueOf(false), result.getBreach());
+        assertEquals(Boolean.valueOf(false), result.getReset());
     }
 
     @Test
@@ -453,8 +453,8 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(new BigDecimal("4.00"), result.getAmountWaived());
         assertEquals(new BigDecimal("3.00"), result.getAmountWrittenOff());
         assertEquals(new BigDecimal("8.00"), result.getAmountOutstanding());
-        assertEquals(Boolean.FALSE, result.getPenalty());
-        assertEquals(Boolean.FALSE, result.getPaid());
+        assertEquals(Boolean.valueOf(false), result.getPenalty());
+        assertEquals(Boolean.valueOf(false), result.getPaid());
         assertEquals(99L, result.getLoanId());
         assertEquals("charge-ext", result.getExternalId());
         assertEquals("loan-ext", result.getExternalLoanId());
@@ -488,7 +488,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals("2024-01-25", result.getEffectiveDate());
         assertEquals(new BigDecimal("18.0"), result.getPreviousRate());
         assertEquals(new BigDecimal("17.0"), result.getNewRate());
-        assertEquals(Boolean.TRUE, result.getReversed());
+        assertEquals(Boolean.valueOf(true), result.getReversed());
         assertEquals("2024-01-26", result.getReversedOnDate());
         assertEquals(new BigDecimal("47.22"), result.getDailyPaymentAmount());
         assertEquals(212, result.getSegmentTerm());

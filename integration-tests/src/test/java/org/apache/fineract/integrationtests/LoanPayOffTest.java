@@ -56,7 +56,7 @@ public class LoanPayOffTest extends FeignLoanTestBase {
 
             final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertNotNull(loanDetails.getStatus());
-            Assertions.assertEquals(Boolean.TRUE, loanDetails.getStatus().getClosedObligationsMet());
+            Assertions.assertEquals(Boolean.valueOf(true), loanDetails.getStatus().getClosedObligationsMet());
         });
     }
 }

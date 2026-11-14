@@ -230,7 +230,7 @@ public class WorkingCapitalLoanNearBreachConfigTest {
             final List<WorkingCapitalLoanBreachScheduleData> schedule = nearBreachActionsHelper.getBreachSchedule(loanId);
             assertFalse(schedule.isEmpty());
             final WorkingCapitalLoanBreachScheduleData period = schedule.getFirst();
-            assertEquals(Boolean.TRUE, period.getNearBreach(),
+            assertEquals(Boolean.valueOf(true), period.getNearBreach(),
                     "Near breach should be flagged on the 14-day evaluation point with no payment");
         });
     }

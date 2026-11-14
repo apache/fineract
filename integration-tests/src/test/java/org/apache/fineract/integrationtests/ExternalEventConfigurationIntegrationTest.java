@@ -53,7 +53,7 @@ public class ExternalEventConfigurationIntegrationTest extends FeignIntegrationT
         for (final ExternalEventConfigurationItemResponse configuration : externalEventConfigurations) {
             Assertions.assertTrue(DEFAULT_DISABLED_EVENT_TYPES.contains(configuration.getType()),
                     "Unexpected external event type: " + configuration.getType());
-            Assertions.assertEquals(Boolean.FALSE, configuration.getEnabled(),
+            Assertions.assertEquals(Boolean.valueOf(false), configuration.getEnabled(),
                     "External event " + configuration.getType() + " is expected to be disabled by default");
         }
     }
@@ -68,12 +68,14 @@ public class ExternalEventConfigurationIntegrationTest extends FeignIntegrationT
         final Map<?, ?> changedFlags = (Map<?, ?>) changes.get(EXTERNAL_EVENT_CONFIGURATIONS_KEY);
         Assertions.assertNotNull(changedFlags, "changes payload did not contain " + EXTERNAL_EVENT_CONFIGURATIONS_KEY);
         Assertions.assertEquals(2, changedFlags.size());
-        Assertions.assertEquals(Boolean.TRUE, changedFlags.get(CENTERS_CREATE_EVENT));
-        Assertions.assertEquals(Boolean.TRUE, changedFlags.get(CLIENT_ACTIVATE_EVENT));
+        Assertions.assertEquals(Boolean.valueOf(true), changedFlags.get(CENTERS_CREATE_EVENT));
+        Assertions.assertEquals(Boolean.valueOf(true), changedFlags.get(CLIENT_ACTIVATE_EVENT));
 
         final Map<String, Boolean> enabledByEventType = externalEventConfigurationHelper.retrieveEnabledByEventType();
-        Assertions.assertEquals(Boolean.TRUE, enabledByEventType.get(CENTERS_CREATE_EVENT), CENTERS_CREATE_EVENT + " was not enabled");
-        Assertions.assertEquals(Boolean.TRUE, enabledByEventType.get(CLIENT_ACTIVATE_EVENT), CLIENT_ACTIVATE_EVENT + " was not enabled");
+        Assertions.assertEquals(Boolean.valueOf(true), enabledByEventType.get(CENTERS_CREATE_EVENT),
+                CENTERS_CREATE_EVENT + " was not enabled");
+        Assertions.assertEquals(Boolean.valueOf(true), enabledByEventType.get(CLIENT_ACTIVATE_EVENT),
+                CLIENT_ACTIVATE_EVENT + " was not enabled");
     }
 
     @AfterEach

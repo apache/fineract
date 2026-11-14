@@ -48,14 +48,14 @@ public class InterestRecognitionFromDistbusementDateTest extends FeignLoanTestBa
                     .numberOfRepayments(6);
             Long loanProductId = createLoanProduct(product);
             GetLoanProductsProductIdResponse loanProductData = retrieveLoanProduct(loanProductId);
-            assertEquals(Boolean.FALSE, loanProductData.getInterestRecognitionOnDisbursementDate());
+            assertEquals(Boolean.valueOf(false), loanProductData.getInterestRecognitionOnDisbursementDate());
 
             // Create a Loan Product Adv. Pment. Alloc. (PROGRESSIVE) using interestChargedFromDisbursementDate in true
             product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation().numberOfRepayments(6)
                     .interestRecognitionOnDisbursementDate(true);
             loanProductId = createLoanProduct(product);
             loanProductData = retrieveLoanProduct(loanProductId);
-            assertEquals(Boolean.TRUE, loanProductData.getInterestRecognitionOnDisbursementDate());
+            assertEquals(Boolean.valueOf(true), loanProductData.getInterestRecognitionOnDisbursementDate());
 
             // Try to create a Loan Product (CUMULATIVE) using interestChargedFromDisbursementDate in true
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> createLoanProduct(

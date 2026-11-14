@@ -345,7 +345,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
         }
         for (final JournalEntry journalEntry : journalEntries) {
             final JournalEntry reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), transactionId, Boolean.FALSE, transactionDate,
+                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), transactionId, false, transactionDate,
                     journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT, journalEntry.getAmount(),
                     journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(),
                     journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
@@ -485,18 +485,18 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
                         + journalEntry.getTransactionId();
                 if (journalEntry.isDebitEntry()) {
                     reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                            journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, Boolean.FALSE,
-                            transactionDate, JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment,
-                            journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
-                            journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
-                            journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId());
+                            journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, false, transactionDate,
+                            JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment, journalEntry.getEntityType(),
+                            journalEntry.getEntityId(), journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(),
+                            journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(),
+                            journalEntry.getShareTransactionId());
                 } else {
                     reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                            journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, Boolean.FALSE,
-                            transactionDate, JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment,
-                            journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
-                            journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
-                            journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId());
+                            journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, false, transactionDate,
+                            JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment, journalEntry.getEntityType(),
+                            journalEntry.getEntityId(), journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(),
+                            journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(),
+                            journalEntry.getShareTransactionId());
                 }
                 // save the reversal entry
                 helper.persistJournalEntry(reversalJournalEntry);

@@ -329,7 +329,7 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
                 () -> assertEquals(List.of(false, true, false), flags()),
                 () -> assertEquals(0, BigDecimal.valueOf(40).compareTo(actionDatePeriod.getPaidAmount())),
                 () -> assertEquals(0, BigDecimal.valueOf(60).compareTo(actionDatePeriod.getOutstandingAmount())),
-                () -> assertEquals(Boolean.TRUE, actionDatePeriod.getBreach()));
+                () -> assertEquals(Boolean.valueOf(true), actionDatePeriod.getBreach()));
     }
 
     @Test

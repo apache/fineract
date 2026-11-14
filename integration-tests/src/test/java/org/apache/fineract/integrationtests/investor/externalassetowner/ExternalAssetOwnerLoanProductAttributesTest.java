@@ -88,7 +88,7 @@ public class ExternalAssetOwnerLoanProductAttributesTest extends FeignLoanTestBa
 
         final ExternalTransferLoanProductAttributesTemplateData excludedTransactionTypes = template.stream()
                 .filter(attribute -> EXCLUDED_TRANSACTION_TYPES.equals(attribute.getAttributeKey())).findFirst().orElseThrow();
-        assertEquals(Boolean.TRUE, excludedTransactionTypes.getMultiValue());
+        assertEquals(Boolean.valueOf(true), excludedTransactionTypes.getMultiValue());
         assertNotNull(excludedTransactionTypes.getAttributeValues());
 
         assertTrue(excludedTransactionTypes.getAttributeValues().contains("BUY_DOWN_FEE"));
@@ -97,7 +97,7 @@ public class ExternalAssetOwnerLoanProductAttributesTest extends FeignLoanTestBa
 
         final ExternalTransferLoanProductAttributesTemplateData settlementModel = template.stream()
                 .filter(attribute -> SETTLEMENT_MODEL.equals(attribute.getAttributeKey())).findFirst().orElseThrow();
-        assertEquals(Boolean.FALSE, settlementModel.getMultiValue());
+        assertEquals(Boolean.valueOf(false), settlementModel.getMultiValue());
         assertEquals(List.of("DEFAULT_SETTLEMENT", "DELAYED_SETTLEMENT"), settlementModel.getAttributeValues());
     }
 

@@ -833,7 +833,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
         assertNotNull(original.getType());
         assertNotNull(adjusted.getType());
-        assertEquals(Boolean.TRUE, original.getManuallyReversed());
+        assertEquals(Boolean.valueOf(true), original.getManuallyReversed());
         assertEquals(original.getType().getValue(), adjusted.getType().getValue());
         assertEquals(expectedAmount, Utils.getDoubleValue(adjusted.getAmount()));
     }

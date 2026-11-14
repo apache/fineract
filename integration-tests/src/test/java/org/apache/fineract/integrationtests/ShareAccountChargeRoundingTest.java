@@ -632,7 +632,7 @@ public class ShareAccountChargeRoundingTest extends FeignSavingsTestBase {
         assertNotNull(accountData.getStatus());
         assertEquals((long) ShareAccountStatusType.ACTIVE.getValue(), accountData.getStatus().getId());
         assertEquals(ShareAccountStatusType.ACTIVE.getCode(), accountData.getStatus().getCode());
-        assertEquals(Boolean.TRUE, accountData.getStatus().getActive());
+        assertEquals(Boolean.valueOf(true), accountData.getStatus().getActive());
     }
 
     private GetAccountsPurchasedShares getChargePaymentTransaction(GetAccountsTypeAccountIdResponse accountData) {

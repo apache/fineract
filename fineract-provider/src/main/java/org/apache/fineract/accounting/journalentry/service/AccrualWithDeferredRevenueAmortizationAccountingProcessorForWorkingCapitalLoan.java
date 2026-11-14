@@ -427,7 +427,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     private JournalEntry createMirrorEntry(final JournalEntry journalEntry, final String transactionId, final LocalDate transactionDate) {
         final JournalEntryType reversalType = journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT;
         return JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(), journalEntry.getGlAccount(),
-                journalEntry.getCurrencyCode(), transactionId, Boolean.FALSE, transactionDate, reversalType, journalEntry.getAmount(),
+                journalEntry.getCurrencyCode(), transactionId, false, transactionDate, reversalType, journalEntry.getAmount(),
                 journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
                 journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(),
                 journalEntry.getShareTransactionId());
