@@ -2628,6 +2628,23 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(totalOverpaidExpected);
     }
 
+    @Then("Loan has {double} total overpaid amount")
+    public void loanTotalOverpaid(double totalOverpaidExpected) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetailsResponse = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        // Loan API omits `totalOverpaid` when the loan has no overpayment
+        final double totalOverpaidActual = Optional.ofNullable(loanDetailsResponse.getTotalOverpaid()).map(BigDecimal::doubleValue)
+                .orElse(0.0);
+        assertThat(totalOverpaidActual)
+                .as(ErrorMessageHelper.wrongAmountInTransactionsOverpayment(totalOverpaidActual, totalOverpaidExpected))
+                .isEqualTo(totalOverpaidExpected);
+    }
+
     @Then("Loan has {double} total overdue amount")
     public void loanOverdue(double totalOverdueExpected) {
         PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

@@ -1272,8 +1272,8 @@ Feature: LoanChargesDownPaymentFeeRefund
     When Loan Pay-off is made on "20 January 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-# TODO check and unSkip when FINERACT-3204 is fixed: contract termination loses the transactions allocated only to the current installment
-  @Skip @TestRailId:C119716 @FeeRefundLoanStates
+  @TestRailId:C119716
+  @FeeRefundLoanStates
   Scenario: Verify Fee Refund made before the contract termination is kept after undo of the contract termination - UC38
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1285,26 +1285,62 @@ Feature: LoanChargesDownPaymentFeeRefund
     When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
     When Admin sets the business date to "05 January 2026"
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "05 January 2026" with 400 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2026  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 0    | 01 January 2026  | 01 January 2026 | 750.0           | 250.0         | 0.0      | 25.0 | 0.0       | 275.0 | 275.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 15   | 16 January 2026  |                 | 500.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 143.33 | 143.33     | 0.0  | 106.67      |
+      | 3  | 15   | 31 January 2026  |                 | 250.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 133.33 | 133.33     | 0.0  | 116.67      |
+      | 4  | 15   | 15 February 2026 |                 | 0.0             | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 133.34 | 133.34     | 0.0  | 116.66      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 25.0 | 0.0       | 1025.0 | 685.0 | 410.0      | 0.0  | 340.0       |
     When Admin sets the business date to "10 January 2026"
     And Admin successfully terminates loan contract
     # contract termination takes the Fee Refund into account: 750 - 10 - 400 = 340.0
     Then Loan has sub status "Contract Termination"
     Then Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | 01 January 2026  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 01 January 2026  | Down Payment           | 275.0  | 250.0     | 0.0      | 25.0 | 0.0       | 750.0        |
-      | 05 January 2026  | Fee Refund             | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 740.0        |
-      | 05 January 2026  | Merchant Issued Refund | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 340.0        |
-      | 10 January 2026  | Contract Termination   | 340.0  | 340.0     | 0.0      | 0.0  | 0.0       | 0.0          |
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2026  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 January 2026  | Down Payment           | 275.0  | 250.0     | 0.0      | 25.0 | 0.0       | 750.0        | false    | false    |
+      | 05 January 2026  | Merchant Issued Refund | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 350.0        | false    | false    |
+      | 05 January 2026  | Fee Refund             | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 340.0        | false    | false    |
+      | 10 January 2026  | Contract Termination   | 340.0  | 340.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date            | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2026 |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 0    | 01 January 2026 | 01 January 2026 | 750.0           | 250.0         | 0.0      | 25.0 | 0.0       | 275.0 | 275.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 9    | 10 January 2026 |                 | 0.0             | 750.0         | 0.0      | 0.0  | 0.0       | 750.0 | 410.0 | 410.0      | 0.0  | 340.0       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 25.0 | 0.0       | 1025.0 | 685.0 | 410.0      | 0.0  | 340.0       |
     Then Loan has 340.0 outstanding amount
-    Then Loan has 0.0 overpaid amount
+    Then Loan has 0.0 total overpaid amount
     Then Loan has 10.0 total fee refund amount
     When Admin sets the business date to "20 January 2026"
     When Admin successfully undoes loan contract termination
     Then Loan has 10.0 total fee refund amount
     Then Loan has 340.0 outstanding amount
-    Then Loan has 0.0 overpaid amount
+    Then Loan has 0.0 total overpaid amount
     Then Loan status will be "ACTIVE"
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2026  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 0    | 01 January 2026  | 01 January 2026 | 750.0           | 250.0         | 0.0      | 25.0 | 0.0       | 275.0 | 275.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 15   | 16 January 2026  |                 | 500.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 143.33 | 143.33     | 0.0  | 106.67      |
+      | 3  | 15   | 31 January 2026  |                 | 250.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 133.33 | 133.33     | 0.0  | 116.67      |
+      | 4  | 15   | 15 February 2026 |                 | 0.0             | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 133.34 | 133.34     | 0.0  | 116.66      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 25.0 | 0.0       | 1025.0 | 685.0 | 410.0      | 0.0  | 340.0       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2026  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 January 2026  | Down Payment           | 275.0  | 250.0     | 0.0      | 25.0 | 0.0       | 750.0        | false    | false    |
+      | 05 January 2026  | Merchant Issued Refund | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 350.0        | false    | false    |
+      | 05 January 2026  | Fee Refund             | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 340.0        | false    | false    |
+      | 10 January 2026  | Contract Termination   | 340.0  | 340.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
+
 
   @TestRailId:C119717
   @FeeRefundLoanStates
