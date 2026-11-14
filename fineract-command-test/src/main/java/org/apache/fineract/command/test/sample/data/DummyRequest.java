@@ -21,13 +21,16 @@ package org.apache.fineract.command.test.sample.data;
 import jakarta.validation.constraints.NotEmpty;
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,4 +42,24 @@ public class DummyRequest implements Serializable {
 
     @NotEmpty(message = "{org.apache.fineract.dummy.content.not-empty}")
     private String content;
+
+    /**
+     * Present so that tests exercise the field types real requests carry. Each of these serialises differently, and
+     * several of them change shape if a stored request or response is parsed and re-rendered rather than kept as it was
+     * written.
+     */
+    private Long referenceId;
+
+    private Integer count;
+
+    private Boolean flag;
+
+    private BigDecimal amount;
+
+    /** Beyond what a double can represent, so a comparison that rounds through one would miss a real difference. */
+    private BigDecimal preciseAmount;
+
+    private LocalDate businessDate;
+
+    private OffsetDateTime timestamp;
 }
