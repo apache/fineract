@@ -43,6 +43,9 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
     @Query("select sa from SavingsAccount sa where sa.id = :savingsId")
     SavingsAccount findOneLocked(@Param("savingsId") Long id);
 
+    @Query("select sa.currency.digitsAfterDecimal from SavingsAccount sa where sa.id = :savingsId")
+    Integer findCurrencyDigitsById(@Param("savingsId") Long savingsId);
+
     // the rows are locked in ascending id order, see SavingsAccountRepositoryWrapper#lockInIdOrder
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select sa from SavingsAccount sa where sa.id in :ids order by sa.id")

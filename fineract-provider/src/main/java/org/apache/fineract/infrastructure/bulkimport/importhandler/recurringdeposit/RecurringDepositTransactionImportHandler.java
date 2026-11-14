@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -54,10 +55,13 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTransactionImportHandler.class);
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
 
     @Autowired
-    public RecurringDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public RecurringDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
     }
 
     @Override
@@ -95,6 +99,10 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
         BigDecimal amount = null;
         if (ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row) != null) {
             amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row));
+        }
+        if (savingsAccountId != null) {
+            ImportHandlerUtils.requireAmountWithinCurrencyDigits(amount,
+                    savingsAccountRepositoryWrapper.findCurrencyDigitsById(savingsAccountId));
         }
 
         LocalDate transactionDate = ImportHandlerUtils.readAsDate(TransactionConstants.TRANSACTION_DATE_COL, row);
