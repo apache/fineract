@@ -55,7 +55,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
     private static final class GSIMFieldsMapper implements RowMapper<GroupSavingsIndividualMonitoringAccountData> {
 
-        public String schema() {
+        private String schema() {
             return "gsim.id as gsimId,sv.group_id as groupId,sv.client_id as clientId,gsim.account_number as accountNumber, sv.id as childAccountId,sv.account_no as childAccountNumber,sv.account_balance_derived as childBalance,gsim.parent_deposit as parentBalance,gsim.child_accounts_count as childAccountsCount,"
                     + "gsim.savings_status_id as savingsStatus from gsim_accounts gsim,m_savings_account sv where gsim.id=sv.gsim_id";
         }
@@ -84,7 +84,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
     private static final class GSIMMapper implements RowMapper<GroupSavingsIndividualMonitoringAccountData> {
 
-        public String schema() {
+        private String schema() {
             return "gsim.id as gsimId,gsim.group_id as groupId,gsim.account_number as accountNumber,gsim.parent_deposit as parentDeposit,gsim.child_accounts_count as childAccountsCount,"
                     + "gsim.savings_status_id as savingsStatus from gsim_accounts gsim";
         }
@@ -301,7 +301,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
             this.schemaSql = accountsSummary.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

@@ -395,11 +395,11 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
     private record LoanStatusTransition(LoanStatus targetStatus, LoanEvent event, boolean transitionNeeded) {
 
-        public static LoanStatusTransition to(final LoanStatus targetStatus, final LoanEvent event) {
+        private static LoanStatusTransition to(final LoanStatus targetStatus, final LoanEvent event) {
             return new LoanStatusTransition(targetStatus, event, true);
         }
 
-        public static LoanStatusTransition noTransition(final LoanStatus currentStatus) {
+        private static LoanStatusTransition noTransition(final LoanStatus currentStatus) {
             return new LoanStatusTransition(currentStatus, null, false);
         }
 
