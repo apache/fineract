@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartValidator;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,7 +89,7 @@ public class InterestRateChartValidationTest {
 
         DataValidatorBuilder validator = new DataValidatorBuilder(dataValidationErrors).resource("savings.interestRateChart")
                 .parameter("slabs");
-        chart.validateChartSlabs(validator);
+        InterestRateChartValidator.validateChartSlabs(chart, validator);
 
         assertTrue(dataValidationErrors.isEmpty(),
                 "Expected no validation error for a single well-formed period slab with explicit toPeriod");
