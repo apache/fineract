@@ -115,4 +115,24 @@ public class ExternalServicesConfigurationTest extends FeignIntegrationTest {
     private boolean hasMoreThanThreeStars(String input) {
         return input != null && input.matches("(.*\\*.*){4,}");
     }
+
+    @Test
+    public void testExternalServiceSecretsAreMasked() {
+        assertSecretIsMasked("SMTP", "password");
+        assertSecretIsMasked("NOTIFICATION", "server_key");
+    }
+
+    private void assertSecretIsMasked(String serviceName, String propertyName) {
+        List<ExternalServicesPropertiesData> properties = externalServicesHelper.retrieveProperties(serviceName);
+
+        Assertions.assertNotNull(properties);
+
+        ExternalServicesPropertiesData secretProperty = properties.stream().filter(property -> propertyName.equals(property.getName()))
+                .findFirst().orElseThrow(() -> new AssertionError(propertyName + " property was not returned for " + serviceName));
+
+        Assertions.assertNotNull(secretProperty.getValue(), propertyName + " should not be null");
+
+        assertTrue(hasMoreThanThreeStars(secretProperty.getValue()), propertyName + " should be masked for " + serviceName);
+    }
+
 }

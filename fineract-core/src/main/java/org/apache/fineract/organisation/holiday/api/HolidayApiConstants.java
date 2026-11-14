@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.organisation.holiday.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public final class HolidayApiConstants {
 
     private HolidayApiConstants() {
@@ -47,6 +43,4 @@ public final class HolidayApiConstants {
     public static final String status = "status";
     public static final String reschedulingType = "reschedulingType";
 
-    static final Set<String> HOLIDAY_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName, fromDateParamName,
-            descriptionParamName, toDateParamName, repaymentsRescheduledToParamName, localeParamName, dateFormatParamName, status));
 }
