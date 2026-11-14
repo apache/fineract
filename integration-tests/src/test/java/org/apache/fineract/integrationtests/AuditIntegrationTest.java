@@ -31,9 +31,9 @@ import org.apache.fineract.client.models.AuditSearchData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.AuditHelper;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Test;
 public class AuditIntegrationTest extends FeignIntegrationTest {
 
     private FeignClientHelper clientHelper;
+    private FeignGroupHelper groupHelper;
     private Long closureReasonId;
     private static final SecureRandom rand = new SecureRandom();
     private static final String CLOSURE_DATE = Utils.dateFormatter.format(Utils.getLocalDateOfTenant().minusDays(4));
@@ -54,6 +55,7 @@ public class AuditIntegrationTest extends FeignIntegrationTest {
     @BeforeAll
     public void setup() {
         this.clientHelper = new FeignClientHelper(fineractClient());
+        this.groupHelper = new FeignGroupHelper(fineractClient());
         this.closureReasonId = new FeignCodeHelper(fineractClient()).retrieveOrCreateCodeValueId("ClientClosureReason");
     }
 
@@ -118,11 +120,10 @@ public class AuditIntegrationTest extends FeignIntegrationTest {
             AuditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, clientId, "REACTIVATE", "CLIENT");
         }
 
-        // When Office is created
-        OfficeHelper officeHelper = new OfficeHelper();
-        int officeId = officeHelper.createOffice(java.time.LocalDate.of(2020, 6, 22)).getResourceId().intValue();
-        auditsRecieved = AuditHelper.getAuditDetails(officeId, "CREATE", "OFFICE");
-        AuditHelper.verifyOneAuditOnly(auditsRecieved, officeId, "CREATE", "OFFICE");
+        // When Group is created
+        final Integer groupId = this.groupHelper.createActiveGroup().getResourceId().intValue();
+        auditsRecieved = AuditHelper.getAuditDetails(groupId, "CREATE", "GROUP");
+        AuditHelper.verifyOneAuditOnly(auditsRecieved, groupId, "CREATE", "GROUP");
     }
 
     @Test

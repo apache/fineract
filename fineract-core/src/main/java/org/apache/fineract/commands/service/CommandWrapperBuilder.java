@@ -211,7 +211,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_AVAILABLE_DISBURSEMENT_AMOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_COLLATERAL_PRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_ORIGINATOR;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_OFFICE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_OFFICETRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ORGANISATIONCREDITBUREAU;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PERIODICACCRUALACCOUNTING;
@@ -516,22 +515,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_USER;
         this.entityId = userId;
         this.href = "/users/" + userId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createOffice() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_OFFICE;
-        this.entityId = null;
-        this.href = "/offices/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateOffice(final Long officeId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_OFFICE;
-        this.entityId = officeId;
-        this.href = "/offices/" + officeId;
         return this;
     }
 
