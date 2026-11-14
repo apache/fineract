@@ -18,13 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeCalculationTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dateFormatParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeIntervalParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,11 +33,8 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -134,13 +126,9 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     @Column(name = "inactivated_on_date")
     private LocalDate inactivationDate;
 
-    public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition,
-            final JsonCommand command) {
+    public static SavingsAccountCharge createNew(final SavingsAccount savingsAccount, final Charge chargeDefinition, BigDecimal amount,
+            final LocalDate dueDate, MonthDay feeOnMonthDay, Integer feeInterval) {
 
-        BigDecimal amount = command.bigDecimalValueOfParameterNamed(amountParamName);
-        final LocalDate dueDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
-        MonthDay feeOnMonthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
-        Integer feeInterval = command.integerValueOfParameterNamed(feeIntervalParamName);
         final ChargeTimeType chargeTime = null;
         final ChargeCalculationType chargeCalculation = null;
         final boolean status = true;
@@ -485,62 +473,36 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         }
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        if (command.isChangeInLocalDateParameterNamed(dueAsOfDateParamName, getDueDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(dueAsOfDateParamName);
-            actualChanges.put(dueAsOfDateParamName, valueAsInput);
-            actualChanges.put(dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(localeParamName, localeAsInput);
-
-            this.dueDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
-            if (this.isWeeklyFee()) {
-                this.feeOnDay = this.dueDate.get(ChronoField.DAY_OF_WEEK);
-            }
+    public void updateDueDate(final LocalDate dueDate) {
+        this.dueDate = dueDate;
+        if (this.isWeeklyFee()) {
+            this.feeOnDay = this.dueDate.get(ChronoField.DAY_OF_WEEK);
         }
+    }
 
-        if (command.hasParameter(feeOnMonthDayParamName)) {
-            final MonthDay monthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
-            final String actualValueEntered = command.stringValueOfParameterNamed(feeOnMonthDayParamName);
-            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (!this.feeOnDay.equals(dayOfMonthValue)) {
-                actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
-                actualChanges.put(localeParamName, localeAsInput);
-                this.feeOnDay = dayOfMonthValue;
-            }
-
-            final Integer monthOfYear = monthDay.getMonthValue();
-            if (!this.feeOnMonth.equals(monthOfYear)) {
-                actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
-                actualChanges.put(localeParamName, localeAsInput);
-                this.feeOnMonth = monthOfYear;
-            }
+    public boolean updateFeeOnMonthDay(final MonthDay monthDay) {
+        final Integer dayOfMonth = monthDay.getDayOfMonth();
+        final Integer monthOfYear = monthDay.getMonthValue();
+        final boolean changed = !Objects.equals(this.feeOnDay, dayOfMonth) || !Objects.equals(this.feeOnMonth, monthOfYear);
+        if (changed) {
+            this.feeOnDay = dayOfMonth;
+            this.feeOnMonth = monthOfYear;
         }
+        return changed;
+    }
 
-        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
-            final ChargeCalculationType calculationType = ChargeCalculationType.fromInt(this.chargeCalculation);
-            assertSupportedSavingsChargeCalculationType(calculationType);
+    public void updateAmount(final BigDecimal amount) {
+        final ChargeCalculationType calculationType = ChargeCalculationType.fromInt(this.chargeCalculation);
+        assertSupportedSavingsChargeCalculationType(calculationType);
 
-            actualChanges.put(amountParamName, newValue);
-            actualChanges.put(localeParamName, localeAsInput);
-
-            if (calculationType.isFlat()) {
-                this.amount = newValue;
-            } else {
-                this.percentage = newValue;
-                this.amountPercentageAppliedTo = BigDecimal.ZERO;
-                this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
-            }
-            this.amountOutstanding = calculateOutstanding();
+        if (calculationType.isFlat()) {
+            this.amount = amount;
+        } else {
+            this.percentage = amount;
+            this.amountPercentageAppliedTo = BigDecimal.ZERO;
+            this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
         }
-
-        return actualChanges;
+        this.amountOutstanding = calculateOutstanding();
     }
 
     private void assertSupportedSavingsChargeCalculationType(final ChargeCalculationType calculationType) {

@@ -22,8 +22,12 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dateFormatParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeIntervalParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionAmountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionTimeParamName;
@@ -35,6 +39,7 @@ import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.MonthDay;
 import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -1264,7 +1269,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     .failWithCodeNoParameterAddedToErrorCode(
                             "charge.due.date.is.invalid.for." + ChargeTimeType.fromInt(chargeTimeType).getCode());
         }
-        final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
+        final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNew(savingsAccount, chargeDefinition,
+                command.bigDecimalValueOfParameterNamed(amountParamName), dueAsOfDateParam,
+                command.extractMonthDayNamed(feeOnMonthDayParamName), command.integerValueOfParameterNamed(feeIntervalParamName));
 
         validateChargeAmountNotZero(savingsAccountCharge, dataValidationErrors);
 
@@ -1322,7 +1329,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsChargeId,
                 savingsAccountId);
 
-        final Map<String, Object> changes = savingsAccountCharge.update(command);
+        final Map<String, Object> changes = updateSavingsAccountCharge(savingsAccountCharge, command);
 
         if (savingsAccountCharge.getDueDate() != null) {
             final Locale locale = command.extractLocale();
@@ -1358,6 +1365,35 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsAccountCharge.savingsAccount().getId()) //
                 .with(changes) //
                 .build();
+    }
+
+    private Map<String, Object> updateSavingsAccountCharge(final SavingsAccountCharge savingsAccountCharge, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+        final String localeAsInput = command.locale();
+
+        if (command.isChangeInLocalDateParameterNamed(dueAsOfDateParamName, savingsAccountCharge.getDueDate())) {
+            actualChanges.put(dueAsOfDateParamName, command.stringValueOfParameterNamed(dueAsOfDateParamName));
+            actualChanges.put(dateFormatParamName, command.dateFormat());
+            actualChanges.put(localeParamName, localeAsInput);
+            savingsAccountCharge.updateDueDate(command.localDateValueOfParameterNamed(dueAsOfDateParamName));
+        }
+
+        if (command.hasParameter(feeOnMonthDayParamName)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
+            if (savingsAccountCharge.updateFeeOnMonthDay(monthDay)) {
+                actualChanges.put(feeOnMonthDayParamName, command.stringValueOfParameterNamed(feeOnMonthDayParamName));
+                actualChanges.put(localeParamName, localeAsInput);
+            }
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(amountParamName, savingsAccountCharge.amount())) {
+            final BigDecimal amount = command.bigDecimalValueOfParameterNamed(amountParamName);
+            actualChanges.put(amountParamName, amount);
+            actualChanges.put(localeParamName, localeAsInput);
+            savingsAccountCharge.updateAmount(amount);
+        }
+
+        return actualChanges;
     }
 
     @Transactional
