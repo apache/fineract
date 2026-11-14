@@ -57,7 +57,7 @@ public interface JournalEntryMapper {
     @Mapping(target = "routingCode", source = "paymentDetail.routingCode")
     @Mapping(target = "receiptNumber", source = "paymentDetail.receiptNumber")
     @Mapping(target = "bankNumber", source = "paymentDetail.bankNumber")
-    @Mapping(target = "createdDate", ignore = true)
+    @Mapping(target = "createdDate", expression = "java(journalEntry.getCreatedDate().orElse(null))")
     @Mapping(target = "createdByUserId", ignore = true)
     @Mapping(target = "createdByUserName", ignore = true)
     @Mapping(target = "comments", ignore = true)

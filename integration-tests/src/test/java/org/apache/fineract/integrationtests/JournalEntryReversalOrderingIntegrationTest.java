@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -76,11 +77,11 @@ public class JournalEntryReversalOrderingIntegrationTest extends FeignLoanTestBa
     private void verifyJournalEntriesOrdering(List<JournalEntryTransactionItem> entries) {
         Long previousId = null;
         LocalDate previousTransactionDate = null;
-        LocalDate previousCreatedDate = null;
+        OffsetDateTime previousCreatedDate = null;
 
         for (JournalEntryTransactionItem entry : entries) {
             LocalDate transactionDate = entry.getTransactionDate();
-            LocalDate createdDate = entry.getCreatedDate();
+            OffsetDateTime createdDate = entry.getCreatedDate();
             Long id = entry.getId();
 
             if (previousTransactionDate != null && transactionDate.isEqual(previousTransactionDate)
