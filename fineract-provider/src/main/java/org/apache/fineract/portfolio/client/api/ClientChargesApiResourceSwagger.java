@@ -162,6 +162,8 @@ final class ClientChargesApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "01 September 2015")
         public String transactionDate;
+        @Schema(description = "Optional savings account funding the payment. Must use the charge currency and office. Transfer withdrawal fee policy applies. Cash payment details cannot be combined with savings funding.", example = "1")
+        public Long savingsAccountId;
         @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
         public String externalId;
     }
@@ -179,6 +181,8 @@ final class ClientChargesApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "221")
         public Long transactionId;
+        @Schema(description = "Savings account funding the payment, when supplied", example = "1")
+        public Long savingsId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String subResourceExternalId;
     }

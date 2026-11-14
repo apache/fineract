@@ -31,11 +31,14 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -55,6 +58,7 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,9 +90,29 @@ class AccountingProcessorHelperImplTest {
     private ChargeRepositoryWrapper chargeRepositoryWrapper;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private ClientTransactionRepository clientTransactionRepository;
 
     @InjectMocks
     private AccountingProcessorHelperImpl helper;
+
+    @Test
+    void fundingLookupBatchesLargeAccountingPostings() {
+        final var transactions = LongStream.rangeClosed(1, 1001).mapToObj(this::transaction).toList();
+        when(clientTransactionRepository.findFundingSavingsTransactionIds(any())).thenAnswer(invocation -> {
+            final Collection<Long> ids = invocation.getArgument(0);
+            assertThat(ids).hasSizeLessThanOrEqualTo(1000);
+            return ids.stream().filter(id -> id == 1L || id == 1001L).collect(Collectors.toSet());
+        });
+
+        final var result = helper.populateSavingsDtoFromMap(accountingBridgeData(transactions, Set.of()), true, false)
+                .getNewSavingsTransactions();
+
+        assertTrue(result.getFirst().isAccountTransfer());
+        assertFalse(result.get(1).isAccountTransfer());
+        assertTrue(result.getLast().isAccountTransfer());
+        verify(clientTransactionRepository, times(2)).findFundingSavingsTransactionIds(any());
+    }
 
     @BeforeEach
     void setUp() {
