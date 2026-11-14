@@ -121,7 +121,7 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                 }
             }
 
-            /** Handle Deposits **/
+            // Handle Deposits
             else if (savingsTransactionDTO.getTransactionType().isDeposit()) {
                 if (savingsTransactionDTO.isAccountTransfer()) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
@@ -134,14 +134,14 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                 }
             }
 
-            /** Handle Dividend pay outs **/
+            // Handle Dividend pay outs
             else if (savingsTransactionDTO.getTransactionType().isDividendPayout()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         FinancialActivity.PAYABLE_DIVIDENDS.getValue(), AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
 
-            /** Handle withdrawals **/
+            // Handle withdrawals
             else if (savingsTransactionDTO.getTransactionType().isWithdrawal()) {
                 if (savingsTransactionDTO.isAccountTransfer()) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
@@ -159,9 +159,7 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                         AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(), AccrualAccountsForSavings.ESCHEAT_LIABILITY.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
-            /**
-             * Handle Interest Applications, from the rules the Post Interest job books them with
-             **/
+            // Handle Interest Applications, from the rules the Post Interest job books them with
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
                 for (final Leg leg : SavingsInterestPostingLegs.legsFor(false, amount, overdraftAmount)) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode, leg.accountTypeToDebit(),
@@ -197,7 +195,7 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                         paymentTypeId, savingsId, transactionId, transactionDate, amount, false, savingsTransactionDTO.getTaxPayments());
             }
 
-            /** Handle Fees Deductions **/
+            // Handle Fees Deductions
             else if (savingsTransactionDTO.getTransactionType().isFeeDeduction() && savingsTransactionDTO.isOverdraftTransaction()) {
                 final List<TaxPaymentDTO> overdraftTaxPayments = TaxPaymentDTO.share(savingsTransactionDTO.getTaxPayments(),
                         overdraftAmount, amount);
@@ -244,14 +242,14 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                 }
             }
 
-            /** Handle Transfers proposal **/
+            // Handle Transfers proposal
             else if (savingsTransactionDTO.getTransactionType().isInitiateTransfer()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(), AccrualAccountsForSavings.TRANSFERS_SUSPENSE.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
 
-            /** Handle Transfer Withdrawal or Acceptance **/
+            // Handle Transfer Withdrawal or Acceptance
             else if (savingsTransactionDTO.getTransactionType().isWithdrawTransfer()
                     || savingsTransactionDTO.getTransactionType().isApproveTransfer()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
@@ -259,7 +257,7 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
 
-            /** overdraft **/
+            // overdraft
             else if (savingsTransactionDTO.getTransactionType().isOverdraftInterest()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         AccrualAccountsForSavings.SAVINGS_REFERENCE.getValue(), AccrualAccountsForSavings.INCOME_FROM_INTEREST.getValue(),

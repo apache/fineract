@@ -116,7 +116,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
-            /** Handle Deposits **/
+            // Handle Deposits
             else if (savingsTransactionDTO.getTransactionType().isDeposit()) {
                 if (savingsTransactionDTO.isAccountTransfer()) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
@@ -129,13 +129,13 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
-            /** Handle Dividend pay outs **/
+            // Handle Dividend pay outs
             else if (savingsTransactionDTO.getTransactionType().isDividendPayout()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         FinancialActivity.PAYABLE_DIVIDENDS.getValue(), CashAccountsForSavings.SAVINGS_CONTROL.getValue(), savingsProductId,
                         paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
-            /** Handle withdrawals **/
+            // Handle withdrawals
             else if (savingsTransactionDTO.getTransactionType().isWithdrawal()) {
                 if (savingsTransactionDTO.isAccountTransfer()) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
@@ -153,9 +153,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                         CashAccountsForSavings.SAVINGS_CONTROL.getValue(), CashAccountsForSavings.ESCHEAT_LIABILITY.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
-            /**
-             * Handle Interest Applications, from the rules the Post Interest job books them with
-             **/
+            // Handle Interest Applications, from the rules the Post Interest job books them with
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
                 for (final Leg leg : SavingsInterestPostingLegs.legsFor(true, amount, overdraftAmount)) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode, leg.accountTypeToDebit(),
@@ -170,7 +168,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                         savingsId, transactionId, transactionDate, amount, false, savingsTransactionDTO.getTaxPayments());
             }
 
-            /** Handle Fees Deductions **/
+            // Handle Fees Deductions
             else if (savingsTransactionDTO.getTransactionType().isFeeDeduction() && savingsTransactionDTO.isOverdraftTransaction()) {
                 final List<TaxPaymentDTO> overdraftTaxPayments = TaxPaymentDTO.share(savingsTransactionDTO.getTaxPayments(),
                         overdraftAmount, amount);
@@ -216,14 +214,14 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
-            /** Handle Transfers proposal **/
+            // Handle Transfers proposal
             else if (savingsTransactionDTO.getTransactionType().isInitiateTransfer()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         CashAccountsForSavings.SAVINGS_CONTROL.getValue(), CashAccountsForSavings.TRANSFERS_SUSPENSE.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
 
-            /** Handle Transfer Withdrawal or Acceptance **/
+            // Handle Transfer Withdrawal or Acceptance
             else if (savingsTransactionDTO.getTransactionType().isWithdrawTransfer()
                     || savingsTransactionDTO.getTransactionType().isApproveTransfer()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
@@ -231,7 +229,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, false);
             }
 
-            /** overdraft **/
+            // overdraft
             else if (savingsTransactionDTO.getTransactionType().isOverdraftInterest()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         CashAccountsForSavings.SAVINGS_REFERENCE.getValue(), CashAccountsForSavings.INCOME_FROM_INTEREST.getValue(),

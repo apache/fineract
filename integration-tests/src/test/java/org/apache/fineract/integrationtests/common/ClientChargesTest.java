@@ -66,18 +66,15 @@ public class ClientChargesTest extends FeignIntegrationTest {
         final Long clientId = clientHelper.createClient("01 October 2011");
         Assertions.assertNotNull(clientId);
 
-        /**
+        /*
          * create a charge for loan and try to associate to client created in the above lines.it will be an invalid
          * scenario the reason is client is not allowed to have only client charge.
-         *
          */
         final Long loanChargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(CHARGE_AMOUNT).getResourceId();
         Assertions.assertNotNull(loanChargeId);
         Assertions.assertEquals(FORBIDDEN, chargesHelper.addClientChargeExpectingError(clientId, clientCharge(loanChargeId)).getStatus());
 
-        /**
-         * associates a clientCharge to a client and pay client charge for 10 USD--success scenario
-         **/
+        // associates a clientCharge to a client and pay client charge for 10 USD--success scenario
         final Long clientChargeId = chargesHelper.addClientCharge(clientId, clientCharge(chargeId)).getResourceId();
         Assertions.assertNotNull(clientChargeId);
         final Long clientChargePaidTransactionId = chargesHelper
@@ -85,16 +82,12 @@ public class ClientChargesTest extends FeignIntegrationTest {
         Assertions.assertNotNull(clientChargePaidTransactionId);
         isValidOutstandingAmount(clientId, clientChargeId, BigDecimal.valueOf(190));
 
-        /**
-         * Revert the paid client charge transaction by passing the clientChargePaidTransactionId and ensure the same is
-         * reverted.
-         */
+        // Revert the paid client charge transaction by passing the clientChargePaidTransactionId and ensure the same is
+        // reverted.
         final Long undoTrxnId = clientHelper.undoClientTransaction(clientId, clientChargePaidTransactionId).getResourceId();
         Assertions.assertNotNull(undoTrxnId);
         isReversedTransaction(clientId, undoTrxnId);
-        /**
-         * Now pay client charge for 20 USD and ensure the outstanding amount is updated properly
-         */
+        // Now pay client charge for 20 USD and ensure the outstanding amount is updated properly
         final String futureDate = Utils.getLocalDateOfTenant().plusDays(2).format(Utils.dateFormatter);
         assertPaymentRejected(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge(futureDate, 20));
 
@@ -103,25 +96,20 @@ public class ClientChargesTest extends FeignIntegrationTest {
                 .waiveClientCharge(clientId, clientChargeId, ChargeRequestBuilders.waiveClientCharge(100)).getTransactionId();
         Assertions.assertNotNull(waiveOffClientChargeTransactionId);
 
-        /**
+        /*
          * Revert the waived off client charge transaction by passing the waiveOffClientChargeTransactionId and ensured
          * the transaction is reversed.
          */
         final Long undoWaiveTrxnId = clientHelper.undoClientTransaction(clientId, waiveOffClientChargeTransactionId).getResourceId();
         Assertions.assertNotNull(undoWaiveTrxnId);
         isReversedTransaction(clientId, undoWaiveTrxnId);
-        /**
-         * pay client charge before client activation date and ensured its a failure test case
-         */
+
+        // pay client charge before client activation date and ensured its a failure test case
 
         assertPaymentRejected(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("30 September 2011", 20));
-        /**
-         * pay client charge more than outstanding amount amount and ensured its a failure test case
-         */
+        // pay client charge more than outstanding amount amount and ensured its a failure test case
         assertPaymentRejected(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 300));
-        /**
-         * pay client charge for 10 USD and ensure outstanding amount is updated properly
-         */
+        // pay client charge for 10 USD and ensure outstanding amount is updated properly
         final Long chargePaidResponseId = chargesHelper
                 .payClientCharge(clientId, clientChargeId, ChargeRequestBuilders.payClientCharge("25 AUGUST 2015", 100)).getTransactionId();
         Assertions.assertNotNull(chargePaidResponseId);

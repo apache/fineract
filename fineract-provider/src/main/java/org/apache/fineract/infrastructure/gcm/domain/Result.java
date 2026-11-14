@@ -28,9 +28,9 @@ import lombok.experimental.Accessors;
  * Result of a GCM message request that returned HTTP status code 200.
  *
  * <p>
- * If the message is successfully created, the {@link #getMessageId()} returns the message id and
- * {@link #getErrorCode()} returns {@literal null}; otherwise, {@link #getMessageId()} returns {@literal null} and
- * {@link #getErrorCode()} returns the code of the error.
+ * If the message is successfully created, the {@link #messageId} returns the message id and {@link #errorCode} returns
+ * {@literal null}; otherwise, {@link #messageId} returns {@literal null} and {@link #errorCode} returns the code of the
+ * error.
  *
  * <p>
  * There are cases when a request is accept and the message successfully created, but GCM has a canonical registration
@@ -41,10 +41,10 @@ import lombok.experimental.Accessors;
  * In a nutshell, the workflow to handle a result is:
  *
  * <pre>
- *   - Call {@link #getMessageId()}:
- *     - {@literal null} means error, call {@link #getErrorCode()}
+ *   - Call {@link #messageId}:
+ *     - {@literal null} means error, call {@link #errorCode}
  *     - non-{@literal null} means the message was created:
- *       - Call {@link #getCanonicalRegistrationId()}
+ *       - Call {@link #canonicalRegistrationId}
  *         - if it returns {@literal null}, do nothing.
  *         - otherwise, update the server datastore with the new id.
  * </pre>
