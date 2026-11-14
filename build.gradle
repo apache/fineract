@@ -722,13 +722,14 @@ configure(project.fineractJavaProjects) {
                     "ModifiedButNotUsed",
                     "InconsistentCapitalization",
                     "MissingOverride",
+                    "UnnecessaryDefaultInEnumSwitch",
+                    "TypeParameterUnusedInFormals",
                     // TODO enable these remaining checks (one by one)
                     // "InvalidBlockTag",
                     // "InconsistentOverloads",
                     // "MethodCanBeStatic",
                     // "Var",
                     // "ConstantField",
-                    // "UnnecessaryDefaultInEnumSwitch",
                     // "FieldCanBeFinal"
                     )
         }
