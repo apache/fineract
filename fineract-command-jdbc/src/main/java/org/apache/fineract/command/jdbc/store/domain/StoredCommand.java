@@ -18,11 +18,33 @@
  */
 package org.apache.fineract.command.jdbc.store.domain;
 
-import java.util.Optional;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.data.repository.query.QueryByExampleExecutor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 
-public interface CommandRepository extends ListCrudRepository<CommandEntity, Long>, QueryByExampleExecutor<CommandEntity> {
+/**
+ * A command read back out of the command table.
+ *
+ * <p>
+ * Every command declares its entity and action in code, which is what makes them impossible to forget. A command
+ * reconstructed from a stored row has no code to ask - the class that declared them is not involved - so it carries the
+ * names that were recorded with it instead.
+ */
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class StoredCommand<T> extends Command<T> {
 
-    Optional<CommandEntity> findOneByIdempotencyKey(String idempotencyKey);
+    private String entityName;
+
+    private String actionName;
+
+    @Override
+    public String entityName() {
+        return entityName;
+    }
+
+    @Override
+    public String actionName() {
+        return actionName;
+    }
 }

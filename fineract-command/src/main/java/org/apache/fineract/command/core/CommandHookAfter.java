@@ -21,5 +21,5 @@ package org.apache.fineract.command.core;
 @FunctionalInterface
 public interface CommandHookAfter<REQ, RES> {
 
-    void onAfter(Command<REQ> command, RES response);
+    void onAfter(CommandContext<REQ, RES> ctx);
 }

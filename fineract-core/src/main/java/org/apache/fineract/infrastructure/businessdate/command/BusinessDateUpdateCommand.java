@@ -25,4 +25,15 @@ import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpda
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BusinessDateUpdateCommand extends Command<BusinessDateUpdateRequest> {}
+public class BusinessDateUpdateCommand extends Command<BusinessDateUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "BUSINESS_DATE";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

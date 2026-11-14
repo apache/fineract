@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.meeting.data.MeetingAttendanceUpdateRequest
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MeetingAttendanceUpdateCommand extends Command<MeetingAttendanceUpdateRequest> {}
+public class MeetingAttendanceUpdateCommand extends Command<MeetingAttendanceUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "MEETING";
+    }
+
+    @Override
+    public String actionName() {
+        return "SAVEORUPDATEATTENDANCE";
+    }
+}

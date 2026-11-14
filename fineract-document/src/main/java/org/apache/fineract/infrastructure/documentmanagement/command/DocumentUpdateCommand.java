@@ -29,12 +29,12 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdate
 public class DocumentUpdateCommand extends Command<DocumentUpdateRequest> implements HookableCommand {
 
     @Override
-    public String hookEntityName() {
+    public String entityName() {
         return "DOCUMENT";
     }
 
     @Override
-    public String hookActionName() {
+    public String actionName() {
         return "UPDATE";
     }
 }
