@@ -47,11 +47,11 @@ import org.springframework.stereotype.Service;
 @ConditionalOnMissingBean(value = ProvisioningEntriesReadPlatformService.class, ignored = ProvisioningEntriesReadPlatformServiceImpl.class)
 public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningEntriesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    protected final JdbcTemplate jdbcTemplate;
 
-    private final PaginationHelper loanProductProvisioningEntryDataPaginationHelper;
-    private final PaginationHelper provisioningEntryDataPaginationHelper;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    protected final PaginationHelper loanProductProvisioningEntryDataPaginationHelper;
+    protected final PaginationHelper provisioningEntryDataPaginationHelper;
+    protected final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Override
     public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(LocalDate date) {

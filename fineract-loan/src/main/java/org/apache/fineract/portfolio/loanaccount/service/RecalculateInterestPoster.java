@@ -34,10 +34,10 @@ import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 public class RecalculateInterestPoster implements Callable<Void> {
 
     @Setter
-    private Collection<Long> loanIds;
+    protected Collection<Long> loanIds;
     @Setter
-    private FineractContext fineractContext;
-    private final LoanWritePlatformService loanWritePlatformService;
+    protected FineractContext fineractContext;
+    protected final LoanWritePlatformService loanWritePlatformService;
 
     @Override
     public Void call() throws JobExecutionException {
