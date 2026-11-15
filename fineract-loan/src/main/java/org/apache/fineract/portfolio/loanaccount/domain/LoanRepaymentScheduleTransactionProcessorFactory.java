@@ -29,12 +29,12 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 public class LoanRepaymentScheduleTransactionProcessorFactory {
 
-    private final LoanRepaymentScheduleTransactionProcessor defaultLoanRepaymentScheduleTransactionProcessor;
+    protected final LoanRepaymentScheduleTransactionProcessor defaultLoanRepaymentScheduleTransactionProcessor;
 
-    private final List<LoanRepaymentScheduleTransactionProcessor> processors;
+    protected final List<LoanRepaymentScheduleTransactionProcessor> processors;
 
     @Value("${fineract.loan.transactionprocessor.error-not-found-fail}")
-    private Boolean errorNotFoundFail;
+    protected Boolean errorNotFoundFail;
 
     public LoanRepaymentScheduleTransactionProcessor determineProcessor(final String transactionProcessingStrategy) {
 
