@@ -209,20 +209,12 @@ public class WorkingCapitalNearBreachConfigStepDef extends AbstractStepDef {
         final Integer intValue = fieldValue != null && "nearBreachFrequency".equals(fieldName) ? Integer.valueOf(fieldValue) : null;
         final BigDecimal decimalValue = fieldValue != null && "nearBreachThreshold".equals(fieldName) ? new BigDecimal(fieldValue) : null;
         switch (fieldName) {
-            case "nearBreachName":
-                request.setNearBreachName(fieldValue);
-            break;
-            case "nearBreachFrequency":
-                request.setNearBreachFrequency(intValue);
-            break;
-            case "nearBreachFrequencyType":
-                request.setNearBreachFrequencyType(fieldValue);
-            break;
-            case "nearBreachThreshold":
-                request.setNearBreachThreshold(decimalValue);
-            break;
-            default:
-            break;
+            case "nearBreachName" -> request.setNearBreachName(fieldValue);
+            case "nearBreachFrequency" -> request.setNearBreachFrequency(intValue);
+            case "nearBreachFrequencyType" -> request.setNearBreachFrequencyType(fieldValue);
+            case "nearBreachThreshold" -> request.setNearBreachThreshold(decimalValue);
+            default -> {
+            }
         }
         return request;
     }

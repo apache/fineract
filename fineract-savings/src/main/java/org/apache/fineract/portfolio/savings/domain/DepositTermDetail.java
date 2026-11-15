@@ -204,47 +204,24 @@ public class DepositTermDetail {
 
     public Integer depositPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate,
             final SavingsPeriodFrequencyType periodFrequencyType) {
-        Integer actualDepositPeriod = 0;
-
-        switch (periodFrequencyType) {
-            case DAYS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
-            break;
-            case WEEKS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(periodStartDate, periodEndDate));
-            break;
-            case MONTHS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
-            break;
-            case YEARS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
-            break;
-            case INVALID:
-                actualDepositPeriod = 0;// default value
-            break;
-        }
+        Integer actualDepositPeriod = switch (periodFrequencyType) {
+            case DAYS -> Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
+            case WEEKS -> Math.toIntExact(ChronoUnit.WEEKS.between(periodStartDate, periodEndDate));
+            case MONTHS -> Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
+            case YEARS -> Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
+            case INVALID -> 0; // default value
+        };
         return actualDepositPeriod;
     }
 
     private Integer convertToSafeDays(final Integer period, final SavingsPeriodFrequencyType periodFrequencyType) {
-        Integer toDays = 0;
-        switch (periodFrequencyType) {
-            case DAYS:
-                toDays = period;
-            break;
-            case WEEKS:
-                toDays = period * 7;
-            break;
-            case MONTHS:
-                toDays = period * 30;// converting to stard 30 days
-            break;
-            case YEARS:
-                toDays = period * 365;
-            break;
-            case INVALID:
-                toDays = 0;// default value
-            break;
-        }
+        Integer toDays = switch (periodFrequencyType) {
+            case DAYS -> period;
+            case WEEKS -> period * 7;
+            case MONTHS -> period * 30; // converting to stard 30 days
+            case YEARS -> period * 365;
+            case INVALID -> 0; // default value
+        };
         return toDays;
     }
 

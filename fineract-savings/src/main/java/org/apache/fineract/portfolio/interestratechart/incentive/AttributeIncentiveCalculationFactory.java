@@ -27,11 +27,9 @@ public final class AttributeIncentiveCalculationFactory {
     public static AttributeIncentiveCalculation findAttributeIncentiveCalculation(InterestIncentiveEntityType entityType) {
         AttributeIncentiveCalculation attributeIncentiveCalculation = null;
         switch (entityType) {
-            case CUSTOMER:
-                attributeIncentiveCalculation = new ClientAttributeIncentiveCalculation();
-            break;
-            default:
-            break;
+            case CUSTOMER -> attributeIncentiveCalculation = new ClientAttributeIncentiveCalculation();
+            default -> {
+            }
         }
         return attributeIncentiveCalculation;
     }
