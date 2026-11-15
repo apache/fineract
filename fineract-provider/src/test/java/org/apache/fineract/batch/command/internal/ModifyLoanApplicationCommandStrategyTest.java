@@ -50,7 +50,7 @@ public class ModifyLoanApplicationCommandStrategyTest {
     @MethodSource("commandParamDataProvider")
     public void testExecuteSuccessScenario(final String command, final String responseBody) {
         final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, command);
 
         given(testContext.loansApiResource.modifyLoanApplication(eq(loanId), eq(command), eq(request.getBody()))).willReturn(responseBody);
@@ -94,10 +94,10 @@ public class ModifyLoanApplicationCommandStrategyTest {
             relativeUrl = relativeUrl + "?command=" + queryParameter;
         }
 
-        batchRequest.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        batchRequest.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         batchRequest.setRelativeUrl(relativeUrl);
         batchRequest.setMethod(HttpMethod.PUT);
-        batchRequest.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        batchRequest.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         batchRequest.setBody("{\"fraud\": \"true\"}");
         return batchRequest;
     }

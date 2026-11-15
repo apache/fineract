@@ -27,6 +27,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ObjectMapperFactoryTest {
@@ -70,7 +72,12 @@ class ObjectMapperFactoryTest {
         TestObject obj = new TestObject(null);
 
         String json = mapper.writeValueAsString(obj);
-        assertNotNull(json);
+        assertEquals("{}", json);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("k1", null);
+        map.put("k2", 1);
+        assertEquals("{\"k2\":1}", mapper.writeValueAsString(map));
     }
 
     @Test

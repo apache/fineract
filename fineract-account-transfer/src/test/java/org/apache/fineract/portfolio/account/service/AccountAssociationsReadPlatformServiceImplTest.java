@@ -27,13 +27,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+@ExtendWith(MockitoExtension.class)
 public class AccountAssociationsReadPlatformServiceImplTest {
 
     @Mock
@@ -41,11 +42,6 @@ public class AccountAssociationsReadPlatformServiceImplTest {
 
     @InjectMocks
     private AccountAssociationsReadPlatformServiceImpl service;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testRetriveLoanAssociations_HandlesShortFromDatabase() {

@@ -76,10 +76,10 @@ public class CreateWorkingCapitalLoanNearBreachActionByLoanExternalIdCommandStra
      */
     private BatchRequest getBatchRequest(final String loanExternalId) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("v1/working-capital-loans/external-id/" + loanExternalId + "/near-breach-actions");
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"action\":\"reschedule\",\"rescheduledDate\":\"12 March 2026\",\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\"}");
         return br;
     }

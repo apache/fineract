@@ -372,7 +372,7 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         // creating new loan application with error
         PostLoansRequest loanRequest = loanApplication(clientID, loanProductID, 5);
         CallFailedRuntimeException loanError = fail(
-                () -> fineractClient().loans().calculateLoanScheduleOrSubmitLoanApplication(loanRequest, (String) null));
+                () -> fineractClient().loans().calculateOrSubmitLoanApplication(loanRequest, (String) null));
         assertEquals(403, loanError.getStatus());
         assertEquals("error.msg.entry.required.in.datatable.[" + registeredTableName + "]",
                 FeignErrors.firstError(loanError).userMessageGlobalisationCode());

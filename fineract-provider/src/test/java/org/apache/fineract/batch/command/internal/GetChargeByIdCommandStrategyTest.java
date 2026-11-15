@@ -63,8 +63,8 @@ public class GetChargeByIdCommandStrategyTest {
     public void testExecuteSuccessScenario(final String queryParameter, final int numberOfQueryParams) {
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long chargeId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long chargeId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, chargeId, queryParameter);
         final String responseBody = "someResponseBody";
 
@@ -101,10 +101,10 @@ public class GetChargeByIdCommandStrategyTest {
             relativeUrl = relativeUrl + "?" + queryParameter;
         }
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
 
         return br;

@@ -48,8 +48,8 @@ public class PaySavingsAccountChargeCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long savingsAccountId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long savingsAccountChargeId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long savingsAccountId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long savingsAccountChargeId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String command = "paycharge";
         final BatchRequest request = getBatchRequest(savingsAccountId, savingsAccountChargeId, command);
         final String responseBody = "{\"savingsId\":51,\"resourceId\":47,\"changes\":{}}";
@@ -77,8 +77,8 @@ public class PaySavingsAccountChargeCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long savingsAccountId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long savingsAccountChargeId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long savingsAccountId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long savingsAccountChargeId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String command = "waive";
         final BatchRequest request = getBatchRequest(savingsAccountId, savingsAccountChargeId, command);
         final String responseBody = "{\"savingsId\":51,\"resourceId\":47,\"changes\":{}}";
@@ -103,12 +103,12 @@ public class PaySavingsAccountChargeCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long savingsAccountId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long savingsAccountChargeId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long savingsAccountId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long savingsAccountChargeId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
 
         // URL without ?command=... — should return 501
         final BatchRequest request = new BatchRequest();
-        request.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        request.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         request.setRelativeUrl(String.format("savingsaccounts/%s/charges/%s", savingsAccountId, savingsAccountChargeId));
         request.setMethod(HttpMethod.POST);
         request.setBody("{\"transactionDate\":\"2026-03-16\",\"amount\":100}");
@@ -127,10 +127,10 @@ public class PaySavingsAccountChargeCommandStrategyTest {
      */
     private BatchRequest getBatchRequest(final Long savingsAccountId, final Long savingsAccountChargeId, final String command) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(String.format("savingsaccounts/%s/charges/%s?command=%s", savingsAccountId, savingsAccountChargeId, command));
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"transactionDate\":\"2026-03-16\",\"amount\":100,\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\"}");
         return br;
     }

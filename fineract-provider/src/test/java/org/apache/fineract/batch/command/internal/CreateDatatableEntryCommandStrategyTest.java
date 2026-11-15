@@ -46,8 +46,8 @@ public class CreateDatatableEntryCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final String datatableName = RandomStringUtils.randomAlphabetic(10);
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final String datatableName = RandomStringUtils.secure().nextAlphabetic(10);
         final BatchRequest request = getBatchRequest(datatableName, loanId);
         final String responseBody = "{\"resourceId\":193}";
 
@@ -78,7 +78,7 @@ public class CreateDatatableEntryCommandStrategyTest {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("datatables/%s/%s", datatableName, loanId);
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.POST);
         br.setBody("{\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\",\"enabled\":true,\"amount\":500.10}");

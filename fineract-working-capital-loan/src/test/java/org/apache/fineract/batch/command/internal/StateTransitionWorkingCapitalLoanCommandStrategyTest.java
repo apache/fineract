@@ -49,7 +49,7 @@ public class StateTransitionWorkingCapitalLoanCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String command = "approve";
         final BatchRequest request = getBatchRequest(loanId, command);
         final CommandProcessingResult processingResult = CommandProcessingResult.resourceResult(loanId, null);
@@ -83,10 +83,10 @@ public class StateTransitionWorkingCapitalLoanCommandStrategyTest {
      */
     private BatchRequest getBatchRequest(final Long loanId, final String command) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("v1/working-capital-loans/" + loanId + "?command=" + command);
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"approvedOnDate\":\"01 January 2026\",\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\"}");
         return br;
     }

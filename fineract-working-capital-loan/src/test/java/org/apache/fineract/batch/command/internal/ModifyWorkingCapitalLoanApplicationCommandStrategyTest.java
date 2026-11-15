@@ -49,7 +49,7 @@ public class ModifyWorkingCapitalLoanApplicationCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, null);
         final CommandProcessingResult processingResult = CommandProcessingResult.resourceResult(loanId, null);
         final String serializedResponse = "{\"resourceId\":" + loanId + "}";
@@ -79,7 +79,7 @@ public class ModifyWorkingCapitalLoanApplicationCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String command = "markAsFraud";
         final BatchRequest request = getBatchRequest(loanId, command);
         final CommandProcessingResult processingResult = CommandProcessingResult.resourceResult(loanId, null);
@@ -114,10 +114,10 @@ public class ModifyWorkingCapitalLoanApplicationCommandStrategyTest {
         if (command != null) {
             relativeUrl = relativeUrl + "?command=" + command;
         }
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.PUT);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"principal\":2000,\"locale\":\"en\"}");
         return br;
     }

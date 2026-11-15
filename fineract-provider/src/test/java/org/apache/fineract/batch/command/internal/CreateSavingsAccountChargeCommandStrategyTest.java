@@ -45,7 +45,7 @@ public class CreateSavingsAccountChargeCommandStrategyTest {
     @Test
     public void testExecuteSuccessScenario() {
         final TestContext testContext = new TestContext();
-        final Long savingsAccountId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long savingsAccountId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest batchRequest = getBatchRequest(savingsAccountId);
         final String responseBody = "myResponseBody";
 
@@ -74,10 +74,10 @@ public class CreateSavingsAccountChargeCommandStrategyTest {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = "savingsaccounts/" + savingsAccountId + "/charges";
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"chargeId\":\"1\",\"amount\":\"100\"}");
 
         return br;

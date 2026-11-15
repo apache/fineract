@@ -134,10 +134,10 @@ public class GetLoanByExternalIdCommandStrategyTest {
             relativeUrl = relativeUrl + "?" + String.join("&", queryParams);
         }
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
 
         return br;

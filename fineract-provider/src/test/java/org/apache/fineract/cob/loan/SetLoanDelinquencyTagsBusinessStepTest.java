@@ -197,9 +197,9 @@ public class SetLoanDelinquencyTagsBusinessStepTest {
      */
     private Loan createLoan() throws Exception {
         Map<String, Object> loanDataMap = new HashMap<>();
-        loanDataMap.put("id", RandomUtils.nextLong(1, 1000));
+        loanDataMap.put("id", RandomUtils.secure().randomLong(1, 1000));
         loanDataMap.put("externalId", ExternalId.generate());
-        loanDataMap.put("accountNumber", RandomStringUtils.randomNumeric(10));
+        loanDataMap.put("accountNumber", RandomStringUtils.secure().nextNumeric(10));
         return setupLoanData(loanDataMap);
     }
 

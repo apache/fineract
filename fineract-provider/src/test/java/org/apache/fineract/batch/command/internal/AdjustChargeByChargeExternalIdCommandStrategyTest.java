@@ -113,13 +113,13 @@ public class AdjustChargeByChargeExternalIdCommandStrategyTest {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("loans/external-id/%s/charges/external-id/%s", loanExternalId, chargeExternalId);
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         if (StringUtils.isNotBlank(chargeCommand)) {
             br.setRelativeUrl(br.getRelativeUrl() + String.format("?command=%s", chargeCommand));
         }
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"amount\":7.00,\"locale\":\"en\"}");
 
         return br;
