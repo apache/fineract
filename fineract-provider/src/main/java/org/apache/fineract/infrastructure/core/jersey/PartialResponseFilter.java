@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.infrastructure.core.jersey;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -33,9 +36,11 @@ import jakarta.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -105,7 +110,7 @@ public class PartialResponseFilter implements ContainerResponseFilter {
         }
 
         final JsonNode tree = objectMapper.valueToTree(responseContext.getEntity());
-        prune(tree, shouldSkip);
+        prune(tree, entityType(responseContext), shouldSkip);
         responseContext.setEntity(tree, responseContext.getEntityAnnotations(), responseContext.getMediaType());
     }
 
@@ -155,7 +160,31 @@ public class PartialResponseFilter implements ContainerResponseFilter {
         return parameters;
     }
 
-    private void prune(final JsonNode node, final Predicate<String> shouldSkip) {
+    private JavaType entityType(final ContainerResponseContext responseContext) {
+        return responseContext.getEntityType() == null ? null : objectMapper.constructType(responseContext.getEntityType());
+    }
+
+    /**
+     * Removes the skipped names from the serialized tree, at any depth, which is what the GSON exclusion strategy did.
+     *
+     * <p>
+     * The declared type is walked alongside the tree so that a serialized {@link java.util.Map} is left alone: its
+     * entries are data, not properties, and the GSON strategy only ever saw reflective fields. A property whose type
+     * cannot be resolved falls back to matching on name.
+     */
+    private void prune(final JsonNode node, final JavaType type, final Predicate<String> shouldSkip) {
+        if (type != null && type.isMapLikeType()) {
+            for (final JsonNode child : node) {
+                prune(child, type.getContentType(), shouldSkip);
+            }
+            return;
+        }
+        if (type != null && type.isContainerType()) {
+            for (final JsonNode child : node) {
+                prune(child, type.getContentType(), shouldSkip);
+            }
+            return;
+        }
         if (node instanceof ObjectNode objectNode) {
             final Iterator<String> names = objectNode.fieldNames();
             final List<String> toRemove = new ArrayList<>();
@@ -166,9 +195,32 @@ public class PartialResponseFilter implements ContainerResponseFilter {
                 }
             }
             objectNode.remove(toRemove);
+
+            final Map<String, JavaType> propertyTypes = propertyTypes(type);
+            final Iterator<String> remaining = objectNode.fieldNames();
+            final List<String> fields = new ArrayList<>();
+            while (remaining.hasNext()) {
+                fields.add(remaining.next());
+            }
+            for (final String field : fields) {
+                prune(objectNode.get(field), propertyTypes.get(field), shouldSkip);
+            }
+            return;
         }
         for (final JsonNode child : node) {
-            prune(child, shouldSkip);
+            prune(child, null, shouldSkip);
         }
+    }
+
+    private Map<String, JavaType> propertyTypes(final JavaType type) {
+        final Map<String, JavaType> types = new HashMap<>();
+        if (type == null || type.isJavaLangObject()) {
+            return types;
+        }
+        final BeanDescription description = objectMapper.getSerializationConfig().introspect(type);
+        for (final BeanPropertyDefinition property : description.findProperties()) {
+            types.put(property.getName(), property.getPrimaryType());
+        }
+        return types;
     }
 }
