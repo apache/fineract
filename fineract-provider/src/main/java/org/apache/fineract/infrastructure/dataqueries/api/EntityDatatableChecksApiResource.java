@@ -42,12 +42,10 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +56,6 @@ import org.springframework.stereotype.Component;
 public class EntityDatatableChecksApiResource {
 
     private final EntityDatatableChecksReadService readEntityDatatableChecksService;
-    private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -69,16 +66,14 @@ public class EntityDatatableChecksApiResource {
             + "Example Request:\n" + "\n" + "entityDatatableChecks?offset=0&limit=15")
     @AlternativeOperationId("retrieveAll_6")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.PageGetEntityDatatableChecksResponse.class)))
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("status") @Parameter(description = "status") final Integer status,
+    public Page<EntityDataTableChecksData> retrieveAll(@Context final UriInfo uriInfo,
+            @QueryParam("status") @Parameter(description = "status") final Integer status,
             @QueryParam("entity") @Parameter(description = "entity") final String entity,
             @QueryParam("productId") @Parameter(description = "productId") final Long productId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
-        final Page<EntityDataTableChecksData> result = this.readEntityDatatableChecksService.retrieveAll(searchParameters, status, entity,
-                productId);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.readEntityDatatableChecksService.retrieveAll(searchParameters, status, entity, productId);
     }
 
     @GET
@@ -88,11 +83,8 @@ public class EntityDatatableChecksApiResource {
             + "\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "entityDatatableChecks/template")
     @AlternativeOperationId("getTemplate")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.GetEntityDatatableChecksTemplateResponse.class)))
-    public String getTemplate(@Context final UriInfo uriInfo) {
-
-        final EntityDataTableChecksTemplateData result = this.readEntityDatatableChecksService.retrieveTemplate();
-
-        return this.toApiJsonSerializer.serialize(result);
+    public EntityDataTableChecksTemplateData getTemplate(@Context final UriInfo uriInfo) {
+        return this.readEntityDatatableChecksService.retrieveTemplate();
     }
 
     @POST
@@ -102,11 +94,9 @@ public class EntityDatatableChecksApiResource {
             + "entity, status, datatableName\n" + "\n" + "Non-Mandatory Fields : \n" + "productId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.PostEntityDatatableChecksTemplateRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.PostEntityDatatableChecksTemplateResponse.class)))
-    public String createEntityDatatableCheck(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
+    public CommandProcessingResult createEntityDatatableCheck(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createEntityDatatableChecks(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -116,15 +106,12 @@ public class EntityDatatableChecksApiResource {
     @Operation(summary = "Delete Entity-Datatable Checks", operationId = "deleteEntityDatatableCheck", description = "Deletes an existing Entity-Datatable Check")
     @AlternativeOperationId("deleteDatatable_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EntityDatatableChecksApiResourceSwagger.DeleteEntityDatatableChecksTemplateResponse.class)))
-    public String deleteDatatable(
+    public CommandProcessingResult deleteDatatable(
             @PathParam("entityDatatableCheckId") @Parameter(description = "entityDatatableCheckId") final long entityDatatableCheckId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder()
                 .deleteEntityDatatableChecks(entityDatatableCheckId, apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }
