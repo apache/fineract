@@ -71,6 +71,17 @@ class PartialResponseFilterTest {
     private record Item(Long id, Nested accountType, Nested prefixType, String prefixCharacter) {
     }
 
+    private record WithOptions(Long id, Map<String, Nested> options) {
+    }
+
+    @PartialResponseParameters({ "id", "options" })
+    private static final class MapResource {}
+
+    @PartialResponseParameters({ "version", "status" })
+    private static void methodWithItsOwnParameters() {
+        // only the annotation is used, the method is never called
+    }
+
     @BeforeEach
     void setUp() {
         underTest = new PartialResponseFilter(objectMapper, new UnsupportedParameterExceptionMapper());
@@ -210,6 +221,39 @@ class PartialResponseFilterTest {
         underTest.filter(requestContext, responseContext);
 
         verify(responseContext, never()).setEntity(any(), any(), any());
+    }
+
+    @Test
+    void theKeysOfASerializedMapAreNotPruned() {
+        final ResourceInfo resourceInfo = mock(ResourceInfo.class);
+        when(resourceInfo.getResourceClass()).thenAnswer(invocation -> MapResource.class);
+        underTest.setResourceInfo(resourceInfo);
+        queryParameters.putSingle("fields", "options");
+        when(responseContext.getEntity()).thenReturn(new WithOptions(1L, Map.of("id", new Nested(2L, "code", "value"))));
+        when(responseContext.getEntityType()).thenReturn(WithOptions.class);
+
+        underTest.filter(requestContext, responseContext);
+
+        final JsonNode pruned = capturePrunedEntity();
+        assertFalse(pruned.has("id"), "the property is pruned");
+        assertTrue(pruned.get("options").has("id"), "a map key that happens to match is data, not a property");
+        assertFalse(pruned.get("options").get("id").has("id"), "the value is still a bean and is pruned");
+    }
+
+    @Test
+    void aMethodLevelAnnotationOverridesTheClassOne() throws Exception {
+        withSupportedParameters(SUPPORTED);
+        when(responseContext.getEntityAnnotations())
+                .thenReturn(PartialResponseFilterTest.class.getDeclaredMethod("methodWithItsOwnParameters").getAnnotations());
+        queryParameters.putSingle("fields", "status");
+        when(responseContext.getEntity()).thenReturn(Map.of("version", 2, "status", "success", "id", 7));
+
+        underTest.filter(requestContext, responseContext);
+
+        final JsonNode pruned = capturePrunedEntity();
+        assertFalse(pruned.has("version"), "version is supported by the method annotation but was not requested");
+        assertTrue(pruned.has("status"));
+        assertTrue(pruned.has("id"), "id is not in the method's set, so it is never a candidate");
     }
 
     @Test
