@@ -18,15 +18,23 @@
  */
 package org.apache.fineract.accounting.glaccount.service;
 
+import static org.apache.fineract.query.QAccGlAccount.accGlAccount;
+import static org.apache.fineract.query.QMCodeValue.mCodeValue;
+
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.sql.SQLExpressions;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountProjection;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidClassificationException;
@@ -35,6 +43,7 @@ import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationP
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.query.QAccGlJournalEntry;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -48,9 +57,14 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     private static final String NAME_DECORATED_BASE_ON_HIERARCHY = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
 
-    private final JdbcTemplate jdbcTemplate;
+    private static final QAccGlJournalEntry BALANCE_ENTRY = new QAccGlJournalEntry("balanceEntry");
+    private static final QAccGlJournalEntry CANDIDATE_ENTRY = new QAccGlJournalEntry("candidateEntry");
+    private static final QAccGlJournalEntry CALCULATED_ENTRY = new QAccGlJournalEntry("calculatedEntry");
+    private static final NumberExpression<Long> ORGANIZATION_RUNNING_BALANCE = Expressions.numberTemplate(Long.class, "{0}",
+            BALANCE_ENTRY.organizationRunningBalance);
 
-    private static final String SQL_AND = " and ";
+    private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
 
     private static final class GLAccountMapper implements RowMapper<GLAccountData> {
 
@@ -112,7 +126,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     @Override
     public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,
             final Boolean manualTransactionsAllowed, final Boolean disabled,
-            JournalEntryAssociationParametersData associationParametersData) {
+            final JournalEntryAssociationParametersData associationParametersData) {
         if (accountClassification != null && !checkValidGLAccountType(accountClassification)) {
             throw new GLAccountInvalidClassificationException(accountClassification);
         }
@@ -121,75 +135,40 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             throw new GLAccountInvalidClassificationException(accountClassification);
         }
 
-        final GLAccountMapper rm = new GLAccountMapper(associationParametersData);
-        String sql = "select " + rm.schema();
-        // append SQL statement for fetching account totals
-        if (associationParametersData != null && associationParametersData.isRunningBalanceRequired()) {
-            sql = sql + " and gl_j.id in (select t1.id from (select t2.account_id, max(t2.id) as id from "
-                    + "(select id, max(entry_date) as entry_date, account_id from acc_gl_journal_entry where is_running_balance_calculated = true "
-                    + "group by account_id desc, id) t3 inner join acc_gl_journal_entry t2 on t2.account_id = t3.account_id and t2.entry_date = t3.entry_date "
-                    + "group by t2.account_id desc) t1)";
+        final boolean runningBalanceRequired = associationParametersData != null && associationParametersData.isRunningBalanceRequired();
+        final SQLQuery<GLAccountData> query = baseQuery(runningBalanceRequired);
+        if (accountClassification != null) {
+            query.where(accGlAccount.classificationEnum.eq(accountClassification));
         }
-        final Object[] parameterArray = new Object[3];
-        int arrayPos = 0;
-        boolean filtersPresent = false;
-        if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null) || (manualTransactionsAllowed != null)
-                || (disabled != null)) {
-            filtersPresent = true;
-            sql += " where";
+        if (StringUtils.isNotBlank(searchParam)) {
+            final String pattern = "%" + searchParam + "%";
+            query.where(accGlAccount.name.like(pattern).or(accGlAccount.glCode.like(pattern)));
         }
-
-        if (filtersPresent) {
-            boolean firstWhereConditionAdded = false;
-            if (accountClassification != null) {
-                sql += " classification_enum = ?";
-                parameterArray[arrayPos] = accountClassification.shortValue();
-                arrayPos = arrayPos + 1;
-                firstWhereConditionAdded = true;
-            }
-            if (StringUtils.isNotBlank(searchParam)) {
-                if (firstWhereConditionAdded) {
-                    sql += SQL_AND;
-                }
-                sql += " ( name like %?% or gl_code like %?% )";
-                parameterArray[arrayPos] = searchParam;
-                arrayPos = arrayPos + 1;
-                parameterArray[arrayPos] = searchParam;
-                arrayPos = arrayPos + 1;
-                firstWhereConditionAdded = true;
-            }
-            if (usage != null) {
-                if (firstWhereConditionAdded) {
-                    sql += SQL_AND;
-                }
-                if (GLAccountUsage.HEADER.getValue().equals(usage)) {
-                    sql += " account_usage = 2 ";
-                } else if (GLAccountUsage.DETAIL.getValue().equals(usage)) {
-                    sql += " account_usage = 1 ";
-                }
-                firstWhereConditionAdded = true;
-            }
-            if (manualTransactionsAllowed != null) {
-                if (firstWhereConditionAdded) {
-                    sql += SQL_AND;
-                }
-
-                sql += " manual_journal_entries_allowed = " + manualTransactionsAllowed;
-                firstWhereConditionAdded = true;
-            }
-            if (disabled != null) {
-                if (firstWhereConditionAdded) {
-                    sql += SQL_AND;
-                }
-
-                sql += " disabled = " + disabled;
-            }
+        if (usage != null) {
+            query.where(accGlAccount.accountUsage.eq(usage));
         }
+        if (manualTransactionsAllowed != null) {
+            query.where(accGlAccount.manualJournalEntriesAllowed.eq(manualTransactionsAllowed));
+        }
+        if (disabled != null) {
+            query.where(accGlAccount.disabled.eq(disabled));
+        }
+        return query.orderBy(accGlAccount.glCode.asc()).fetch();
+    }
 
-        sql += " ORDER BY gl_code ASC";
-
-        final Object[] finalObjectArray = Arrays.copyOf(parameterArray, arrayPos);
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
+    private SQLQuery<GLAccountData> baseQuery(final boolean runningBalanceRequired) {
+        final SQLQuery<GLAccountData> query = queryFactory
+                .select(new GLAccountProjection(runningBalanceRequired ? ORGANIZATION_RUNNING_BALANCE : null)).from(accGlAccount)
+                .leftJoin(mCodeValue).on(accGlAccount.tagId.eq(mCodeValue.id));
+        if (runningBalanceRequired) {
+            final SQLQuery<Long> latestEligibleEntryId = SQLExpressions.select(CANDIDATE_ENTRY.id.max()).from(CANDIDATE_ENTRY).where(
+                    CANDIDATE_ENTRY.accountId.eq(accGlAccount.id),
+                    SQLExpressions.selectOne().from(CALCULATED_ENTRY).where(CALCULATED_ENTRY.accountId.eq(CANDIDATE_ENTRY.accountId),
+                            CALCULATED_ENTRY.entryDate.eq(CANDIDATE_ENTRY.entryDate), CALCULATED_ENTRY.isRunningBalanceCalculated.isTrue())
+                            .exists());
+            query.leftJoin(BALANCE_ENTRY).on(BALANCE_ENTRY.accountId.eq(accGlAccount.id), BALANCE_ENTRY.id.eq(latestEligibleEntryId));
+        }
+        return query;
     }
 
     @Override

@@ -21,7 +21,10 @@ package org.apache.fineract.portfolio.savings.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
 /**
  * Created by Chirag Gupta on 12/27/17.
@@ -586,6 +589,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         public GetRecurringDepositProductsResponse.GetRecurringDepositProductsInterestCalculationType interestCalculationType;
         public GetRecurringDepositProductsResponse.GetRecurringDepositProductsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
         public GetRecurringDepositProductsProductIdAccountingMappings accountingMappings;
+        public Map<String, List<GLAccountData>> accountingMappingOptions;
         public Set<GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public Set<GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings> penaltyToIncomeAccountMappings;
         @Schema(example = "1")

@@ -488,13 +488,15 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public List<EnumOptionData> advancedPaymentAllocationTransactionTypes;
         public List<GetWorkingCapitalLoanProductsResponse.GetDelinquencyBucket> delinquencyBucketOptions;
         public List<StringEnumOptionData> accountingRuleOptions;
-        public Map<String, Object> accountingMappingOptions;
+        public Map<String, List<GLAccountData>> accountingMappingOptions;
         public List<CodeValueData> chargeOffReasonOptions;
         public List<CodeValueData> writeOffReasonOptions;
     }
 
     @Schema(description = "GetWorkingCapitalLoanProductsProductIdResponse")
     public static final class GetWorkingCapitalLoanProductsProductIdResponse {
+
+        public Map<String, List<GLAccountData>> accountingMappingOptions;
 
         private GetWorkingCapitalLoanProductsProductIdResponse() {}
 
