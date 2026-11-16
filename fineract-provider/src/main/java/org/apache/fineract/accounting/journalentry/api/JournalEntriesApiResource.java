@@ -194,7 +194,9 @@ public class JournalEntriesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create \"Balanced\" Journal Entries", tags = {
             "Journal Entries" }, description = "Note: A Balanced (simple) Journal entry would have atleast one \"Debit\" and one \"Credit\" entry whose amounts are equal \n"
-                    + "Compound Journal entries may have \"n\" debits and \"m\" credits where both \"m\" and \"n\" are greater than 0 and the net sum or all debits and credits are equal \n\n"
+                    + "Compound Journal entries may have \"n\" debits and \"m\" credits where both \"m\" and \"n\" are greater than 0 and the net sum or all debits and credits are equal \n"
+                    + "A GL account may not appear on both the debit and the credit side of the same entry, even when the lines on that account do not cancel out; "
+                    + "this also applies to entries created from an accounting rule whose debit and credit sides share an account. \n\n"
                     + "\n" + "Mandatory Fields\n" + "officeId, transactionDate\n\n" + "\ncredits- glAccountId, amount, comments\n\n "
                     + "\ndebits-  glAccountId, amount, comments\n\n " + "\n" + "Optional Fields\n"
                     + "paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber")

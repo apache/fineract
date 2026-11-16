@@ -132,6 +132,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
             final String currencyCode = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.CURRENCY_CODE.getValue());
 
             validateBusinessRulesForJournalEntries(journalEntryCommand);
+            checkDebitAndCreditAccountsDiffer(journalEntryCommand.getCredits(), journalEntryCommand.getDebits());
 
             /** Capture payment details **/
             final Map<String, Object> changes = new LinkedHashMap<>();
@@ -299,6 +300,17 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
         }
         if (creditsSum.compareTo(debitsSum) != 0) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.DEBIT_CREDIT_SUM_MISMATCH, null, null, null);
+        }
+    }
+
+    private void checkDebitAndCreditAccountsDiffer(final SingleDebitOrCreditEntryCommand[] credits,
+            final SingleDebitOrCreditEntryCommand[] debits) {
+        for (final SingleDebitOrCreditEntryCommand credit : credits) {
+            for (final SingleDebitOrCreditEntryCommand debit : debits) {
+                if (Objects.equals(credit.getGlAccountId(), debit.getGlAccountId())) {
+                    throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.DEBIT_CREDIT_SAME_ACCOUNT, null, null, null);
+                }
+            }
         }
     }
 

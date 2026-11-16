@@ -18,23 +18,51 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
+import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
+import org.apache.fineract.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException;
 import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
 import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -86,6 +114,19 @@ class JournalEntryWritePlatformServiceImplTest {
     @InjectMocks
     private JournalEntryWritePlatformServiceImpl service;
 
+    private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 11, 6);
+
+    @BeforeEach
+    void setUp() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
+    }
+
+    @AfterEach
+    void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
+
     // Regression test for: revertJournalEntry(List<JournalEntry>, String) called journalEntries.get(0)
     // unconditionally, with no empty-list guard. defineOpeningBalance() calls this overload directly
     // (not through the guarded JsonCommand entry point) for each transactionId returned by
@@ -96,5 +137,62 @@ class JournalEntryWritePlatformServiceImplTest {
     @Test
     void revertJournalEntryWithEmptyListDoesNotThrow() {
         assertDoesNotThrow(() -> service.revertJournalEntry(Collections.emptyList(), "defining opening balance"));
+    }
+
+    @Test
+    void createJournalEntryRejectsSameAccountOnDebitAndCredit() {
+        final JsonCommand command = commandFor(new SingleDebitOrCreditEntryCommand[] { line(10L, "5") },
+                new SingleDebitOrCreditEntryCommand[] { line(10L, "5") });
+
+        final JournalEntryInvalidException exception = assertThrows(JournalEntryInvalidException.class,
+                () -> service.createJournalEntry(command));
+
+        assertThat(exception.getGlobalisationMessageCode()).isEqualTo("error.msg.glJournalEntry.invalid.debit.credit.same.account");
+        assertThat(exception.getDefaultUserMessage()).isEqualTo("Debit and credit account cannot be the same");
+        verifyNoInteractions(paymentDetailWritePlatformService);
+        verify(helper, never()).persistJournalEntry(any());
+    }
+
+    @Test
+    void createJournalEntryRejectsAccountRepeatedAcrossSidesInMultiLineEntry() {
+        final JsonCommand command = commandFor(new SingleDebitOrCreditEntryCommand[] { line(10L, "3"), line(11L, "2") },
+                new SingleDebitOrCreditEntryCommand[] { line(12L, "4"), line(11L, "1") });
+
+        final JournalEntryInvalidException exception = assertThrows(JournalEntryInvalidException.class,
+                () -> service.createJournalEntry(command));
+
+        assertThat(exception.getGlobalisationMessageCode()).isEqualTo("error.msg.glJournalEntry.invalid.debit.credit.same.account");
+        verify(helper, never()).persistJournalEntry(any());
+    }
+
+    @Test
+    void createJournalEntryPostsDistinctDebitAndCreditAccounts() {
+        final JsonCommand command = commandFor(new SingleDebitOrCreditEntryCommand[] { line(10L, "5") },
+                new SingleDebitOrCreditEntryCommand[] { line(20L, "5") });
+        when(command.longValueOfParameterNamed("officeId")).thenReturn(1L);
+        when(command.longValueOfParameterNamed("accountingRule")).thenReturn(null);
+        when(officeRepositoryWrapper.findOneWithNotFoundDetection(1L)).thenReturn(mock(Office.class));
+        final AppUser user = mock(AppUser.class);
+        when(user.getId()).thenReturn(1L);
+        when(context.authenticatedUser()).thenReturn(user);
+        final GLAccount glAccount = mock(GLAccount.class);
+        when(glAccount.isManualEntriesAllowed()).thenReturn(true);
+        when(glAccountRepository.findById(any())).thenReturn(Optional.of(glAccount));
+
+        assertDoesNotThrow(() -> service.createJournalEntry(command));
+
+        verify(helper, times(2)).persistJournalEntry(any(JournalEntry.class));
+    }
+
+    private JsonCommand commandFor(final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits) {
+        final JournalEntryCommand journalEntryCommand = new JournalEntryCommand(1L, "USD", BUSINESS_DATE.minusDays(1), "comment", null,
+                null, null, null, null, null, null, null, null, credits, debits, "en", "dd MMMM yyyy", null);
+        final JsonCommand command = mock(JsonCommand.class);
+        when(fromApiJsonDeserializer.commandFromApiJson(any())).thenReturn(journalEntryCommand);
+        return command;
+    }
+
+    private SingleDebitOrCreditEntryCommand line(final Long glAccountId, final String amount) {
+        return new SingleDebitOrCreditEntryCommand(glAccountId, new BigDecimal(amount), null, Set.of());
     }
 }
