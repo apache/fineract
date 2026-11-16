@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.accounting.provisioning.service;
 
+import static org.apache.fineract.query.QMProvisioningHistory.mProvisioningHistory;
+
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -26,6 +32,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
@@ -35,11 +42,13 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.query.QMAppuser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -50,8 +59,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     private final JdbcTemplate jdbcTemplate;
 
     private final PaginationHelper loanProductProvisioningEntryDataPaginationHelper;
-    private final PaginationHelper provisioningEntryDataPaginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final SQLQueryFactory queryFactory;
 
     @Override
     public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(LocalDate date) {
@@ -227,22 +236,35 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProvisioningEntryData> retrieveAllProvisioningEntries(Integer offset, Integer limit) {
-        ProvisioningEntryDataMapper mapper = new ProvisioningEntryDataMapper();
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(mapper.getSchema());
-        sqlBuilder.append(" order by entry.created_date");
+        final QMAppuser created = new QMAppuser("created");
+        final QMAppuser modified = new QMAppuser("modified");
+
+        final SQLQuery<Tuple> query = queryFactory
+                .select(mProvisioningHistory.id, mProvisioningHistory.journalEntryCreated, mProvisioningHistory.createdbyId,
+                        mProvisioningHistory.createdDate, created.username, mProvisioningHistory.lastmodifiedbyId, modified.username)
+                .from(mProvisioningHistory).leftJoin(created).on(created.id.eq(mProvisioningHistory.createdbyId)).leftJoin(modified)
+                .on(modified.id.eq(mProvisioningHistory.lastmodifiedbyId)).orderBy(mProvisioningHistory.createdDate.asc());
         if (limit != null) {
-            sqlBuilder.append(" limit ").append(limit);
+            query.limit(limit);
         }
         if (offset != null) {
-            sqlBuilder.append(" offset ").append(offset);
+            query.offset(offset);
         }
 
-        Object[] whereClauseItemsitems = new Object[] {};
-        return this.provisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), whereClauseItemsitems,
-                mapper);
+        final List<ProvisioningEntryData> items = query.fetch().stream().map(row -> {
+            final java.sql.Date createdDate = row.get(mProvisioningHistory.createdDate);
+            return new ProvisioningEntryData().setId(row.get(mProvisioningHistory.id))
+                    .setJournalEntry(Boolean.TRUE.equals(row.get(mProvisioningHistory.journalEntryCreated)))
+                    .setCreatedById(Objects.requireNonNullElse(row.get(mProvisioningHistory.createdbyId), 0L))
+                    .setCreatedUser(row.get(created.username)).setCreatedDate(createdDate != null ? createdDate.toLocalDate() : null)
+                    .setModifiedById(Objects.requireNonNullElse(row.get(mProvisioningHistory.lastmodifiedbyId), 0L))
+                    .setModifiedUser(row.get(modified.username));
+        }).toList();
+
+        final Long total = queryFactory.select(Wildcard.count).from(mProvisioningHistory).fetchOne();
+        return new Page<>(items, total == null ? 0 : total.intValue());
     }
 
     @Override
