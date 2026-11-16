@@ -103,7 +103,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                     .setCriteriaId(criteriaId);
         }
 
-        public String schema() {
+        private String schema() {
             return sqlQuery.toString();
         }
     }
@@ -141,7 +141,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                     .setReservedAmount(totalReservedAmount);
         }
 
-        public String getSchema() {
+        private String getSchema() {
             return PROVISIONING_ENTRY_SCHEMA;
         }
 
@@ -188,7 +188,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         }
 
-        public String getSchema() {
+        private String getSchema() {
             return LOAN_PRODUCT_PROVISIONING_ENTRY_SCHEMA;
         }
     }
@@ -220,7 +220,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                     .setReservedAmount(totalReservedAmount);
         }
 
-        public String getSchema() {
+        private String getSchema() {
             return PROVISIONING_ENTRY_SUM_RESERVED_SCHEMA;
         }
 
@@ -310,7 +310,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                     .setReservedAmount(totalReservedAmount);
         }
 
-        public String schema() {
+        private String schema() {
             return PROVISIONING_ENTRY_ID_DATE_SCHEMA;
         }
     }
