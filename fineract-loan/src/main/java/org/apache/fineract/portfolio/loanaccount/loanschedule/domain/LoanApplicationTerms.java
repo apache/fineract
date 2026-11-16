@@ -1003,7 +1003,7 @@ public final class LoanApplicationTerms {
         Money totalInterestCharged = this.principal.zero();
 
         switch (this.interestMethod) {
-            case FLAT:
+            case FLAT -> {
                 final Money totalInterestChargedForLoanTerm = calculateTotalFlatInterestDueWithoutGrace(calculator, mc);
 
                 final Money totalInterestPerInstallment = calculateTotalInterestPerInstallmentWithoutGrace(calculator, mc);
@@ -1011,10 +1011,9 @@ public final class LoanApplicationTerms {
                 final Money totalGraceOnInterestCharged = totalInterestPerInstallment.multiplyRetainScale(getInterestChargingGrace(), mc);
 
                 totalInterestCharged = totalInterestChargedForLoanTerm.minus(totalGraceOnInterestCharged);
-            break;
-            case DECLINING_BALANCE:
-            case INVALID:
-            break;
+            }
+            case DECLINING_BALANCE, INVALID -> {
+            }
         }
 
         return totalInterestCharged;
@@ -1026,10 +1025,9 @@ public final class LoanApplicationTerms {
         Money principalForInstallment = this.principal.zero();
 
         switch (this.interestMethod) {
-            case FLAT:
+            case FLAT ->
                 principalForInstallment = calculateTotalPrincipalPerPeriodWithoutGrace(mc, periodNumber, interestForThisInstallment);
-            break;
-            case DECLINING_BALANCE:
+            case DECLINING_BALANCE -> {
                 switch (this.amortizationMethod) {
                     case EQUAL_INSTALLMENTS:
                         Money totalPmtForThisInstallment = pmtForInstallment(calculator, outstandingBalance, periodNumber, mc);
@@ -1042,9 +1040,9 @@ public final class LoanApplicationTerms {
                     case INVALID:
                     break;
                 }
-            break;
-            case INVALID:
-            break;
+            }
+            case INVALID -> {
+            }
         }
 
         return principalForInstallment;
@@ -1069,26 +1067,16 @@ public final class LoanApplicationTerms {
     private LocalDate getPeriodEndDate(final LocalDate startDate) {
         LocalDate dueRepaymentPeriodDate = startDate;
         switch (this.repaymentPeriodFrequencyType) {
-            case DAYS:
-                dueRepaymentPeriodDate = startDate.plusDays(this.repaymentEvery);
-            break;
-            case WEEKS:
-                dueRepaymentPeriodDate = startDate.plusWeeks(this.repaymentEvery);
-            break;
-            case MONTHS:
-                dueRepaymentPeriodDate = startDate.plusMonths(this.repaymentEvery);
-            break;
-            case YEARS:
-                dueRepaymentPeriodDate = startDate.plusYears(this.repaymentEvery);
-            break;
-            case SEMI_MONTHLY:
-                dueRepaymentPeriodDate = SemiMonthlyScheduleDates.next(startDate, semiMonthlyDueDays());
-            break;
-            case INVALID:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getPeriodEndDate for WHOLE_TERM
-            break;
+            case DAYS -> dueRepaymentPeriodDate = startDate.plusDays(this.repaymentEvery);
+            case WEEKS -> dueRepaymentPeriodDate = startDate.plusWeeks(this.repaymentEvery);
+            case MONTHS -> dueRepaymentPeriodDate = startDate.plusMonths(this.repaymentEvery);
+            case YEARS -> dueRepaymentPeriodDate = startDate.plusYears(this.repaymentEvery);
+            case SEMI_MONTHLY -> dueRepaymentPeriodDate = SemiMonthlyScheduleDates.next(startDate, semiMonthlyDueDays());
+            case INVALID -> {
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getPeriodEndDate for WHOLE_TERM
+            }
         }
         return dueRepaymentPeriodDate;
     }
@@ -1106,7 +1094,7 @@ public final class LoanApplicationTerms {
             interestMethod = InterestMethod.FLAT;
         }
         switch (interestMethod) {
-            case FLAT:
+            case FLAT -> {
                 if (this.isEqualAmortization() && this.totalInterestDue != null && this.interestMethod.isDecliningBalance()) {
                     interestForInstallment = flatInterestPerInstallment(mc, this.totalInterestDue);
                 } else {
@@ -1131,9 +1119,8 @@ public final class LoanApplicationTerms {
                         break;
                     }
                 }
-            break;
-            case DECLINING_BALANCE:
-
+            }
+            case DECLINING_BALANCE -> {
                 final Money interestForThisInstallmentBeforeGrace = calculateDecliningInterestDueForInstallmentBeforeApplyingGrace(
                         calculator, mc, outstandingBalance, periodStartDate, periodEndDate);
 
@@ -1150,9 +1137,9 @@ public final class LoanApplicationTerms {
                 } else {
                     interestBroughtForwardDueToGrace = interestBroughtForwardDueToGrace.plus(interestForThisInstallmentBeforeGrace);
                 }
-            break;
-            case INVALID:
-            break;
+            }
+            case INVALID -> {
+            }
         }
 
         return new PrincipalInterest(null, interestForInstallment, interestBroughtForwardDueToGrace);
@@ -1174,16 +1161,15 @@ public final class LoanApplicationTerms {
         Money totalInterestDue = this.principal.zero();
 
         switch (this.interestMethod) {
-            case FLAT:
+            case FLAT -> {
                 final BigDecimal interestRateForLoanTerm = calculateFlatInterestRateForLoanTerm(calculator, mc);
                 totalInterestDue = this.disbursedPrincipal.minus(totalPrincipalAccountedForInterestCalcualtion)
                         .multiplyRetainScale(interestRateForLoanTerm, mc);
-
-            break;
-            case DECLINING_BALANCE:
-            break;
-            case INVALID:
-            break;
+            }
+            case DECLINING_BALANCE -> {
+            }
+            case INVALID -> {
+            }
         }
 
         return totalInterestDue;
@@ -1206,9 +1192,8 @@ public final class LoanApplicationTerms {
 
         BigDecimal periodsInLoanTerm = BigDecimal.valueOf(this.loanTermFrequency);
         switch (this.interestCalculationPeriodMethod) {
-            case DAILY:
+            case DAILY -> {
                 // number of days from 'ideal disbursement' to final date
-
                 LocalDate loanStartDate = getExpectedDisbursementDate();
                 if (DateUtils.isBefore(loanStartDate, getInterestChargedFromLocalDate())) {
                     loanStartDate = getInterestChargedFromLocalDate();
@@ -1216,10 +1201,10 @@ public final class LoanApplicationTerms {
 
                 final int periodsInLoanTermInteger = DateUtils.getExactDifferenceInDays(loanStartDate, this.loanEndDate);
                 periodsInLoanTerm = BigDecimal.valueOf(periodsInLoanTermInteger);
-            break;
-            case INVALID:
-            break;
-            case SAME_AS_REPAYMENT_PERIOD:
+            }
+            case INVALID -> {
+            }
+            case SAME_AS_REPAYMENT_PERIOD -> {
                 if (this.allowPartialPeriodInterestCalculation) {
                     LocalDate startDate = getExpectedDisbursementDate();
                     if (getInterestChargedFromDate() != null) {
@@ -1227,7 +1212,7 @@ public final class LoanApplicationTerms {
                     }
                     periodsInLoanTerm = calculatePeriodsBetweenDates(startDate, this.loanEndDate);
                 }
-            break;
+            }
         }
 
         return periodsInLoanTerm;
@@ -1241,21 +1226,19 @@ public final class LoanApplicationTerms {
     public BigDecimal calculatePeriodsBetweenDates(final LocalDate startDate, final LocalDate endDate) {
         BigDecimal numberOfPeriods = BigDecimal.ZERO;
         switch (this.repaymentPeriodFrequencyType) {
-            case DAYS:
+            case DAYS -> {
                 int numOfDays = DateUtils.getExactDifferenceInDays(startDate, endDate);
                 numberOfPeriods = BigDecimal.valueOf((double) numOfDays);
-            break;
-            case WEEKS:
+            }
+            case WEEKS -> {
                 int numberOfWeeks = DateUtils.getExactDifference(startDate, endDate, ChronoUnit.WEEKS);
                 int daysLeftAfterWeeks = DateUtils.getExactDifferenceInDays(startDate.plusWeeks(numberOfWeeks), endDate);
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfWeeks))
                         .add(BigDecimal.valueOf((double) daysLeftAfterWeeks / 7));
-            break;
-            case SEMI_MONTHLY:
-                numberOfPeriods = SemiMonthlyScheduleDates.periodsBetween(startDate, endDate, semiMonthlyDueDays(),
-                        MoneyHelper.getMathContext());
-            break;
-            case MONTHS:
+            }
+            case SEMI_MONTHLY -> numberOfPeriods = SemiMonthlyScheduleDates.periodsBetween(startDate, endDate, semiMonthlyDueDays(),
+                    MoneyHelper.getMathContext());
+            case MONTHS -> {
                 // a 1st after a month too short for the anchor day is that month's date when rolling forward, so it
                 // counts
                 // whole months from the end of that month - whether a due date was rolled there or the period starts
@@ -1302,8 +1285,8 @@ public final class LoanApplicationTerms {
                         endDateAfterConsideringMonths);
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfMonths))
                         .add(BigDecimal.valueOf((double) daysLeftAfterMonths / daysInPeriodAfterMonths));
-            break;
-            case YEARS:
+            }
+            case YEARS -> {
                 int numberOfYears = DateUtils.getExactDifference(startDate, endDate, ChronoUnit.YEARS);
                 LocalDate startDateAfterConsideringYears = startDate.plusYears(numberOfYears);
                 LocalDate endDateAfterConsideringYears = startDate.plusYears(numberOfYears + 1);
@@ -1312,9 +1295,9 @@ public final class LoanApplicationTerms {
                         endDateAfterConsideringYears);
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfYears))
                         .add(BigDecimal.valueOf((double) daysLeftAfterYears / daysInPeriodAfterYears));
-            break;
-            default:
-            break;
+            }
+            default -> {
+            }
         }
         return numberOfPeriods;
     }
@@ -1482,9 +1465,9 @@ public final class LoanApplicationTerms {
             loanTermFrequencyBigDecimal = calculateLoanTermFrequency(periodStartDate, periodEndDate);
         }
         switch (this.interestCalculationPeriodMethod) {
-            case INVALID:
-            break;
-            case DAILY:
+            case INVALID -> {
+            }
+            case DAILY -> {
                 // For daily work out number of days in the period
                 BigDecimal numberOfDaysInPeriod = BigDecimal.valueOf(DateUtils.getDifferenceInDays(periodStartDate, periodEndDate));
 
@@ -1535,11 +1518,9 @@ public final class LoanApplicationTerms {
                     // TODO: Implement getPeriodEndDate for WHOLE_TERM
                     break;
                 }
-            break;
-            case SAME_AS_REPAYMENT_PERIOD:
-                periodicInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
-                        .multiply(loanTermFrequencyBigDecimal);
-            break;
+            }
+            case SAME_AS_REPAYMENT_PERIOD -> periodicInterestRate = this.annualNominalInterestRate
+                    .divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc).multiply(loanTermFrequencyBigDecimal);
         }
 
         return periodicInterestRate;
@@ -1584,15 +1565,13 @@ public final class LoanApplicationTerms {
             periodsInOneYear = calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
         }
         switch (this.interestCalculationPeriodMethod) {
-            case DAILY:
-                periodsInOneYear = !this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")
-                        ? this.daysInYearType.getValue().longValue()
-                        : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
-            break;
-            case INVALID:
-            break;
-            case SAME_AS_REPAYMENT_PERIOD:
-            break;
+            case DAILY -> periodsInOneYear = !this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")
+                    ? this.daysInYearType.getValue().longValue()
+                    : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+            case INVALID -> {
+            }
+            case SAME_AS_REPAYMENT_PERIOD -> {
+            }
         }
 
         return periodsInOneYear;
@@ -1889,11 +1868,11 @@ public final class LoanApplicationTerms {
         boolean isSameAsRepaymentPeriod = false;
         if (this.interestCalculationPeriodMethod.getValue().equals(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue())) {
             switch (this.repaymentPeriodFrequencyType) {
-                case WEEKS:
+                case WEEKS -> {
                     int days = DateUtils.getExactDifferenceInDays(fromDate, toDate);
                     isSameAsRepaymentPeriod = (days % 7) == 0;
-                break;
-                case MONTHS:
+                }
+                case MONTHS -> {
                     boolean isFromDateOnEndDate = fromDate.getDayOfMonth() > fromDate.plusDays(1).getDayOfMonth();
                     boolean isToDateOnEndDate = toDate.getDayOfMonth() > toDate.plusDays(1).getDayOfMonth();
 
@@ -1905,10 +1884,9 @@ public final class LoanApplicationTerms {
                         fromDate = fromDate.plusMonths(months);
                         isSameAsRepaymentPeriod = DateUtils.isEqual(fromDate, toDate);
                     }
-
-                break;
-                default:
-                break;
+                }
+                default -> {
+                }
             }
         }
         return isSameAsRepaymentPeriod;
@@ -1917,20 +1895,12 @@ public final class LoanApplicationTerms {
     private Integer getPeriodsBetween(LocalDate fromDate, LocalDate toDate) {
         Integer numberOfPeriods = 0;
         switch (this.repaymentPeriodFrequencyType) {
-            case DAYS:
-                numberOfPeriods = DateUtils.getExactDifferenceInDays(fromDate, toDate);
-            break;
-            case WEEKS:
-                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.WEEKS);
-            break;
-            case MONTHS:
-                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.MONTHS);
-            break;
-            case YEARS:
-                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.YEARS);
-            break;
-            default:
-            break;
+            case DAYS -> numberOfPeriods = DateUtils.getExactDifferenceInDays(fromDate, toDate);
+            case WEEKS -> numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.WEEKS);
+            case MONTHS -> numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.MONTHS);
+            case YEARS -> numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.YEARS);
+            default -> {
+            }
         }
         return numberOfPeriods;
     }
@@ -2191,22 +2161,15 @@ public final class LoanApplicationTerms {
             return maxDateForFixedLength;
         }
         switch (repaymentPeriodFrequencyType) {
-            case DAYS:
-                maxDateForFixedLength = startDate.plusDays(fixedLength + variationDays);
-            break;
-            case WEEKS:
-                maxDateForFixedLength = startDate.plusWeeks(fixedLength + variationDays);
-            break;
-            case MONTHS:
+            case DAYS -> maxDateForFixedLength = startDate.plusDays(fixedLength + variationDays);
+            case WEEKS -> maxDateForFixedLength = startDate.plusWeeks(fixedLength + variationDays);
+            case MONTHS ->
                 // a meeting calendar decides the due dates of the loan, so the maturity date must not follow the
                 // strategy
                 maxDateForFixedLength = MonthlyDueDateResolver.plusMonths(startDate, fixedLength + variationDays,
                         this.loanCalendar == null ? this.monthEndDueDateStrategy : null);
-            break;
-            case YEARS:
-                maxDateForFixedLength = startDate.plusYears(fixedLength + variationDays);
-            break;
-            case SEMI_MONTHLY:
+            case YEARS -> maxDateForFixedLength = startDate.plusYears(fixedLength + variationDays);
+            case SEMI_MONTHLY -> {
                 // The periods are of unequal length, so the fixed length is walked one due date at a time instead
                 // of being added as a single offset.
                 LocalDate semiMonthlyDate = startDate;
@@ -2214,12 +2177,12 @@ public final class LoanApplicationTerms {
                     semiMonthlyDate = SemiMonthlyScheduleDates.next(semiMonthlyDate, semiMonthlyDueDays());
                 }
                 maxDateForFixedLength = semiMonthlyDate.plusDays(variationDays);
-            break;
-            case INVALID:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getPeriodEndDate for WHOLE_TERM
-            break;
+            }
+            case INVALID -> {
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getPeriodEndDate for WHOLE_TERM
+            }
         }
         return maxDateForFixedLength;
     }

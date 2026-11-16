@@ -243,25 +243,19 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 .extractLongNamed(LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
 
         switch (accountingRuleType) {
-            case NONE:
-            break;
-            case CASH_BASED:
-                populateChangesForCashBasedAccounting(changes, fundAccountId, loanPortfolioAccountId, incomeFromInterestId, incomeFromFeeId,
-                        incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId, transfersInSuspenseAccountId,
-                        incomeFromRecoveryAccountId);
-            break;
-            case ACCRUAL_PERIODIC:
-                populateChangesForAccrualBasedAccounting(changes, fundAccountId, loanPortfolioAccountId, incomeFromInterestId,
-                        incomeFromFeeId, incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId, transfersInSuspenseAccountId,
-                        incomeFromRecoveryAccountId, incomeFromBuyDownFeesAccountId, receivableInterestAccountId, receivableFeeAccountId,
-                        receivablePenaltyAccountId);
-            break;
-            case ACCRUAL_UPFRONT:
-                populateChangesForAccrualBasedAccounting(changes, fundAccountId, loanPortfolioAccountId, incomeFromInterestId,
-                        incomeFromFeeId, incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId, transfersInSuspenseAccountId,
-                        incomeFromRecoveryAccountId, incomeFromBuyDownFeesAccountId, receivableInterestAccountId, receivableFeeAccountId,
-                        receivablePenaltyAccountId);
-            break;
+            case NONE -> {
+            }
+            case CASH_BASED -> populateChangesForCashBasedAccounting(changes, fundAccountId, loanPortfolioAccountId, incomeFromInterestId,
+                    incomeFromFeeId, incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId, transfersInSuspenseAccountId,
+                    incomeFromRecoveryAccountId);
+            case ACCRUAL_PERIODIC -> populateChangesForAccrualBasedAccounting(changes, fundAccountId, loanPortfolioAccountId,
+                    incomeFromInterestId, incomeFromFeeId, incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId,
+                    transfersInSuspenseAccountId, incomeFromRecoveryAccountId, incomeFromBuyDownFeesAccountId, receivableInterestAccountId,
+                    receivableFeeAccountId, receivablePenaltyAccountId);
+            case ACCRUAL_UPFRONT -> populateChangesForAccrualBasedAccounting(changes, fundAccountId, loanPortfolioAccountId,
+                    incomeFromInterestId, incomeFromFeeId, incomeFromPenaltyId, writeOffAccountId, overPaymentAccountId,
+                    transfersInSuspenseAccountId, incomeFromRecoveryAccountId, incomeFromBuyDownFeesAccountId, receivableInterestAccountId,
+                    receivableFeeAccountId, receivablePenaltyAccountId);
         }
 
         return changes;
@@ -310,9 +304,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
             final JsonElement element, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
             final boolean enableBuyDownFee, final boolean merchantBuyDownFee) {
         switch (accountingRuleType) {
-            case NONE:
-            break;
-            case CASH_BASED:
+            case NONE -> {
+            }
+            case CASH_BASED -> {
                 // asset or liabilities
                 mergeLoanToAssetOrLiabilityAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId,
                         CashAccountsForLoan.FUND_SOURCE.getValue(), CashAccountsForLoan.FUND_SOURCE.toString(), changes);
@@ -366,10 +360,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,
                         CashAccountsForLoan.OVERPAYMENT.getValue(), CashAccountsForLoan.OVERPAYMENT.toString(), changes);
-            break;
-            case ACCRUAL_UPFRONT:
-                // fall through to periodic accrual
-            case ACCRUAL_PERIODIC:
+            }
+            case ACCRUAL_UPFRONT, ACCRUAL_PERIODIC -> {
                 // asset or liabilities
                 mergeLoanToAssetOrLiabilityAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId,
                         CashAccountsForLoan.FUND_SOURCE.getValue(), CashAccountsForLoan.FUND_SOURCE.toString(), changes);
@@ -469,7 +461,7 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                             loanProductId, AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
                             AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.toString(), changes);
                 }
-            break;
+            }
         }
     }
 

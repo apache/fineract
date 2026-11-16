@@ -315,27 +315,19 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     public LocalDate getRepaymentPeriodDate(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate) {
         LocalDate dueRepaymentPeriodDate = startDate;
         switch (frequency) {
-            case DAYS:
-                dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
-            break;
-            case WEEKS:
-                dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
-            break;
-            case MONTHS:
-                dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
-            break;
-            case YEARS:
-                dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
-            break;
-            case SEMI_MONTHLY:
+            case DAYS -> dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
+            case WEEKS -> dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
+            case MONTHS -> dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
+            case YEARS -> dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
+            case SEMI_MONTHLY ->
                 // A semi-monthly due date depends on the configured day of the month, which this method does not
                 // receive. Callers must go through generateNextRepaymentDate, which has the loan terms at hand.
                 throw new UnsupportedOperationException("A semi-monthly repayment date cannot be derived from a period length");
-            case INVALID:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
-            break;
+            case INVALID -> {
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
+            }
         }
         return dueRepaymentPeriodDate;
     }
@@ -358,42 +350,41 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             final LocalDate date) {
         boolean isScheduledDate = false;
         switch (frequency) {
-            case DAYS:
+            case DAYS -> {
                 int diff = DateUtils.getExactDifferenceInDays(startDate, date);
                 isScheduledDate = (diff % repaidEvery) == 0;
-            break;
-            case WEEKS:
+            }
+            case WEEKS -> {
                 int weekDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.WEEKS);
                 isScheduledDate = (weekDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusWeeks(weekDiff);
                     isScheduledDate = DateUtils.isEqual(modifiedDate, date);
                 }
-            break;
-            case MONTHS:
+            }
+            case MONTHS -> {
                 int monthDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.MONTHS);
                 isScheduledDate = (monthDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusMonths(monthDiff);
                     isScheduledDate = DateUtils.isEqual(modifiedDate, date);
                 }
-            break;
-            case YEARS:
+            }
+            case YEARS -> {
                 int yearDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.YEARS);
                 isScheduledDate = (yearDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusYears(yearDiff);
                     isScheduledDate = DateUtils.isEqual(modifiedDate, date);
                 }
-            break;
-            case INVALID:
+            }
+            case INVALID, SEMI_MONTHLY -> {
                 // This is only asked of a standing instruction recurrence, and SEMI_MONTHLY is not offered as one, so
                 // no date falls in such a schedule.
-            case SEMI_MONTHLY:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
-            break;
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
+            }
         }
         return isScheduledDate;
     }
@@ -406,13 +397,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate idealDisbursementDate = null;
 
         switch (repaymentPeriodFrequencyType) {
-            case DAYS:
-                idealDisbursementDate = firstRepaymentDate.minusDays(repaidEvery);
-            break;
-            case WEEKS:
-                idealDisbursementDate = firstRepaymentDate.minusWeeks(repaidEvery);
-            break;
-            case MONTHS:
+            case DAYS -> idealDisbursementDate = firstRepaymentDate.minusDays(repaidEvery);
+            case WEEKS -> idealDisbursementDate = firstRepaymentDate.minusWeeks(repaidEvery);
+            case MONTHS -> {
                 if (loanCalendar == null) {
                     idealDisbursementDate = idealDisbursementDateForMonthlyRepayments(repaidEvery, firstRepaymentDate,
                             loanApplicationTerms);
@@ -423,18 +410,15 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                             holidayDetailDTO.getWorkingDays(), loanApplicationTerms.isSkipRepaymentOnFirstDayofMonth(),
                             loanApplicationTerms.getNumberOfdays());
                 }
-            break;
-            case YEARS:
-                idealDisbursementDate = firstRepaymentDate.minusYears(repaidEvery);
-            break;
-            case SEMI_MONTHLY:
+            }
+            case YEARS -> idealDisbursementDate = firstRepaymentDate.minusYears(repaidEvery);
+            case SEMI_MONTHLY ->
                 idealDisbursementDate = SemiMonthlyScheduleDates.previous(firstRepaymentDate, loanApplicationTerms.semiMonthlyDueDays());
-            break;
-            case INVALID:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
-            break;
+            case INVALID -> {
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
+            }
         }
 
         return idealDisbursementDate;

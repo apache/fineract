@@ -18,19 +18,27 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
+import static org.apache.fineract.query.QMCurrency.mCurrency;
+
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.CurrencyDataProjection;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
     private final CurrencyRowMapper currencyRowMapper = new CurrencyRowMapper();
 
     @Override
@@ -49,9 +57,15 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
     @Override
     public CurrencyData retrieveCurrency(final String code) {
-        final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c  where c.code = ? order by c.name";
+        final CurrencyData currency = queryFactory.select(new CurrencyDataProjection()).from(mCurrency).where(mCurrency.code.eq(code))
+                .orderBy(mCurrency.name.asc()).fetchOne();
 
-        return this.jdbcTemplate.queryForObject(sql, this.currencyRowMapper, new Object[] { code }); // NOSONAR
+        if (currency == null) {
+            // keep the contract of the former JdbcTemplate.queryForObject call
+            throw new EmptyResultDataAccessException(1);
+        }
+
+        return currency;
     }
 
     private static final class CurrencyRowMapper implements RowMapper<CurrencyData> {

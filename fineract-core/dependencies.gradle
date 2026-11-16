@@ -25,6 +25,7 @@ dependencies {
 
     implementation(project(path: ':fineract-avro-schemas'))
     implementation(project(path: ':fineract-command'))
+    implementation(project(path: ':fineract-querydsl'))
     implementation(project(path: ':fineract-validation'))
 
 

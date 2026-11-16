@@ -47,26 +47,14 @@ public enum ChargeAppliesTo {
         ChargeAppliesTo chargeAppliesToType = ChargeAppliesTo.INVALID;
 
         if (chargeAppliesTo != null) {
-            switch (chargeAppliesTo) {
-                case 1:
-                    chargeAppliesToType = LOAN;
-                break;
-                case 2:
-                    chargeAppliesToType = SAVINGS;
-                break;
-                case 3:
-                    chargeAppliesToType = CLIENT;
-                break;
-                case 4:
-                    chargeAppliesToType = SHARES;
-                break;
-                case 5:
-                    chargeAppliesToType = WORKING_CAPITAL_LOAN;
-                break;
-                default:
-                    chargeAppliesToType = INVALID;
-                break;
-            }
+            chargeAppliesToType = switch (chargeAppliesTo) {
+                case 1 -> LOAN;
+                case 2 -> SAVINGS;
+                case 3 -> CLIENT;
+                case 4 -> SHARES;
+                case 5 -> WORKING_CAPITAL_LOAN;
+                default -> INVALID;
+            };
         }
 
         return chargeAppliesToType;

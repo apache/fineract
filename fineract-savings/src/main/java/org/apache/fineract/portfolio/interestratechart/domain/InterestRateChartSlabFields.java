@@ -326,23 +326,13 @@ public class InterestRateChartSlabFields {
     public Integer depositPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate) {
         Integer actualDepositPeriod = 0;
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(periodType());
-        switch (periodFrequencyType) {
-            case DAYS:
-                actualDepositPeriod = DateUtils.getExactDifferenceInDays(periodStartDate, periodEndDate);
-            break;
-            case WEEKS:
-                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.WEEKS);
-            break;
-            case MONTHS:
-                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.MONTHS);
-            break;
-            case YEARS:
-                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.YEARS);
-            break;
-            case INVALID:
-                actualDepositPeriod = 0;// default value
-            break;
-        }
+        actualDepositPeriod = switch (periodFrequencyType) {
+            case DAYS -> DateUtils.getExactDifferenceInDays(periodStartDate, periodEndDate);
+            case WEEKS -> DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.WEEKS);
+            case MONTHS -> DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.MONTHS);
+            case YEARS -> DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.YEARS);
+            case INVALID -> 0; // default value
+        };
         return actualDepositPeriod;
     }
 

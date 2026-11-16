@@ -36,18 +36,10 @@ public enum GuarantorFundStatusType {
 
         GuarantorFundStatusType enumeration = GuarantorFundStatusType.INVALID;
         switch (type) {
-            case 100:
-                enumeration = GuarantorFundStatusType.ACTIVE;
-            break;
-            case 200:
-                enumeration = GuarantorFundStatusType.COMPLETED;
-            break;
-            case 300:
-                enumeration = GuarantorFundStatusType.WITHDRAWN;
-            break;
-            case 400:
-                enumeration = GuarantorFundStatusType.DELETED;
-            break;
+            case 100 -> enumeration = GuarantorFundStatusType.ACTIVE;
+            case 200 -> enumeration = GuarantorFundStatusType.COMPLETED;
+            case 300 -> enumeration = GuarantorFundStatusType.WITHDRAWN;
+            case 400 -> enumeration = GuarantorFundStatusType.DELETED;
         }
         return enumeration;
     }

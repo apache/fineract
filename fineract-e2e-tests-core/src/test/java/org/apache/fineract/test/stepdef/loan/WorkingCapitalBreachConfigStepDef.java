@@ -275,23 +275,13 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
         final Integer intValue = fieldValue != null && "breachFrequency".equals(fieldName) ? Integer.valueOf(fieldValue) : null;
         final BigDecimal decimalValue = fieldValue != null && "breachAmount".equals(fieldName) ? new BigDecimal(fieldValue) : null;
         switch (fieldName) {
-            case "name":
-                request.setName(fieldValue);
-            break;
-            case "breachFrequency":
-                request.setBreachFrequency(intValue);
-            break;
-            case "breachFrequencyType":
-                request.setBreachFrequencyType(fieldValue);
-            break;
-            case "breachAmountCalculationType":
-                request.setBreachAmountCalculationType(fieldValue);
-            break;
-            case "breachAmount":
-                request.setBreachAmount(decimalValue);
-            break;
-            default:
-            break;
+            case "name" -> request.setName(fieldValue);
+            case "breachFrequency" -> request.setBreachFrequency(intValue);
+            case "breachFrequencyType" -> request.setBreachFrequencyType(fieldValue);
+            case "breachAmountCalculationType" -> request.setBreachAmountCalculationType(fieldValue);
+            case "breachAmount" -> request.setBreachAmount(decimalValue);
+            default -> {
+            }
         }
         return request;
     }

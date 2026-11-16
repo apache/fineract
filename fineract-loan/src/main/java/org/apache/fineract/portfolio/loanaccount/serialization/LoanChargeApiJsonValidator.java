@@ -265,29 +265,28 @@ public final class LoanChargeApiJsonValidator {
         for (LoanCharge loanCharge : charges) {
             String errorcode = null;
             switch (loanCharge.getChargeCalculation()) {
-                case PERCENT_OF_AMOUNT:
+                case PERCENT_OF_AMOUNT -> {
                     if (loanCharge.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
 
                     }
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                }
+                case PERCENT_OF_AMOUNT_AND_INTEREST -> {
                     if (loanCharge.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
                     } else if (loanCharge.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
-                case PERCENT_OF_INTEREST:
+                }
+                case PERCENT_OF_INTEREST -> {
                     if (loanCharge.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     } else if (loanCharge.isInstalmentFee() && loanCharge.getLoan().isProgressiveSchedule()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
-
-                default:
-                break;
+                }
+                default -> {
+                }
             }
             if (errorcode != null) {
                 baseDataValidator.reset().parameter("charges").failWithCode(errorcode);
@@ -425,30 +424,29 @@ public final class LoanChargeApiJsonValidator {
         if (loanProduct.isInterestRecalculationEnabled()) {
             String errorcode = null;
             switch (chargeCalculationType) {
-                case PERCENT_OF_AMOUNT:
+                case PERCENT_OF_AMOUNT -> {
                     if (chargeTime.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
 
                     }
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                }
+                case PERCENT_OF_AMOUNT_AND_INTEREST -> {
                     if (chargeTime.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
                     } else if (chargeTime.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
-                case PERCENT_OF_INTEREST:
+                }
+                case PERCENT_OF_INTEREST -> {
                     if (chargeTime.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     } else if (chargeTime.isInstalmentFee()
                             && loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
-
-                default:
-                break;
+                }
+                default -> {
+                }
             }
             if (errorcode != null) {
                 baseDataValidator.reset().parameter("charges").failWithCode(errorcode);
