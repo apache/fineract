@@ -207,6 +207,8 @@ public class ClientEntityImportHandler implements ImportHandler {
 
         for (ClientData client : clients) {
             try {
+                ImportHandlerUtils.readAsMandatoryBoolean(ClientEntityConstants.ACTIVE_COL, clientSheet.getRow(client.getRowIndex()),
+                        "Active");
                 String payload = gsonBuilder.create().toJson(client);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createClient() //

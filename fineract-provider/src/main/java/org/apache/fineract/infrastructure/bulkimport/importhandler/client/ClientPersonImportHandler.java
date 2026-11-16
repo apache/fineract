@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateI
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -68,7 +69,8 @@ public class ClientPersonImportHandler implements ImportHandler {
     public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(clientSheet, 0);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(clientSheet, ClientPersonConstants.FIRST_NAME_COL,
+                ClientPersonConstants.IS_ACTIVE_ADDRESS_COL);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = clientSheet.getRow(rowIndex);
@@ -86,7 +88,7 @@ public class ClientPersonImportHandler implements ImportHandler {
         String middleName = ImportHandlerUtils.readAsString(ClientPersonConstants.MIDDLE_NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientPersonConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        if (officeId == 0L) {
+        if (officeId != null && officeId == 0L) {
             officeId = null;
         }
         String staffName = ImportHandlerUtils.readAsString(ClientPersonConstants.STAFF_NAME_COL, row);
@@ -192,6 +194,12 @@ public class ClientPersonImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         for (ClientData client : clients) {
             try {
+                Row row = clientSheet.getRow(client.getRowIndex());
+                ImportHandlerUtils.requireColumns(row, new MandatoryColumn(ClientPersonConstants.FIRST_NAME_COL, "First Name"),
+                        new MandatoryColumn(ClientPersonConstants.LAST_NAME_COL, "Last Name"),
+                        new MandatoryColumn(ClientPersonConstants.OFFICE_NAME_COL, "Office Name"),
+                        new MandatoryColumn(ClientPersonConstants.ACTIVE_COL, "Active"));
+                ImportHandlerUtils.readAsMandatoryBoolean(ClientPersonConstants.ACTIVE_COL, row, "Active");
                 String payload = gsonBuilder.create().toJson(client);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createClient() //

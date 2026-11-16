@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +71,31 @@ public final class ImportHandlerUtils {
             noOfEntries++;
         }
         return noOfEntries;
+    }
+
+    public static Integer getNumberOfRows(Sheet sheet, int firstColumn, int lastColumn) {
+        int noOfEntries = 0;
+        int maxRows = sheet.getLastRowNum();
+        while (noOfEntries < maxRows) {
+            Row row = sheet.getRow(noOfEntries + 1);
+            if (row == null || isBlankRow(row, firstColumn, lastColumn)) {
+                break;
+            }
+            noOfEntries++;
+        }
+        return noOfEntries;
+    }
+
+    private static boolean isBlankRow(Row row, int firstColumn, int lastColumn) {
+        for (int column = firstColumn; column <= lastColumn; column++) {
+            Cell c = row.getCell(column);
+            boolean blank = c == null || c.getCellType() == CellType.BLANK
+                    || (c.getCellType() == CellType.STRING && StringUtils.isBlank(c.getStringCellValue()));
+            if (!blank) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean isNotImported(Row row, int statusColumn) {
@@ -236,6 +262,50 @@ public final class ImportHandlerUtils {
         }
         throw new IllegalArgumentException("Unable to parse date '" + trimmed + "' at row " + (rowNum + 1) + ", column " + (colIndex + 1)
                 + (StringUtils.isNotBlank(dateFormat) ? " (expected format: " + dateFormat + ")" : ""));
+    }
+
+    public static void requireColumns(Row row, MandatoryColumn... columns) {
+        List<String> missing = new ArrayList<>();
+        for (MandatoryColumn column : columns) {
+            if (isBlankCell(row, column.index())) {
+                missing.add(column.label() + " is mandatory");
+            }
+        }
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException(String.join(", ", missing));
+        }
+    }
+
+    public record MandatoryColumn(int index, String label) {
+    }
+
+    public static boolean readAsMandatoryBoolean(int colIndex, Row row, String label) {
+        if (isBlankCell(row, colIndex)) {
+            throw new IllegalArgumentException(label + " is mandatory");
+        }
+        Cell c = row.getCell(colIndex);
+        if (c.getCellType() == CellType.BOOLEAN) {
+            return c.getBooleanCellValue();
+        }
+        String value = null;
+        if (c.getCellType() == CellType.STRING) {
+            value = c.getStringCellValue().trim();
+        } else if (c.getCellType() == CellType.FORMULA) {
+            value = readAsString(colIndex, row);
+        }
+        if ("TRUE".equalsIgnoreCase(value)) {
+            return true;
+        }
+        if ("FALSE".equalsIgnoreCase(value)) {
+            return false;
+        }
+        throw new IllegalArgumentException(label + " must be TRUE or FALSE");
+    }
+
+    private static boolean isBlankCell(Row row, int colIndex) {
+        Cell c = row.getCell(colIndex);
+        return c == null || c.getCellType() == CellType.BLANK
+                || (c.getCellType() == CellType.STRING && StringUtils.isBlank(c.getStringCellValue()));
     }
 
     public static Boolean readAsBoolean(int colIndex, Row row) {
