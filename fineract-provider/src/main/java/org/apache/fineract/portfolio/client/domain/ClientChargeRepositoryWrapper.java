@@ -47,6 +47,12 @@ public class ClientChargeRepositoryWrapper {
         this.repository.save(clientCharge);
     }
 
+    public ClientCharge findOneForUpdate(final Long id) {
+        ClientCharge charge = repository.findByIdForUpdate(id).orElseThrow(() -> new ChargeNotFoundException(id));
+        charge.setCurrency(organisationCurrencyRepository.findOneWithNotFoundDetection(charge.getCharge().getCurrencyCode()));
+        return charge;
+    }
+
     public void saveAndFlush(final ClientCharge clientCharge) {
         this.repository.saveAndFlush(clientCharge);
     }

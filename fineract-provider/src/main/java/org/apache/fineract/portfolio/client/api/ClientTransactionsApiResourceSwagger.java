@@ -85,6 +85,8 @@ final class ClientTransactionsApiResourceSwagger {
             public LocalDate submittedOnDate;
             @Schema(example = "false")
             public Boolean reversed;
+            public Long savingsAccountId;
+            public Long savingsTransactionId;
         }
 
         @Schema(example = "20")
@@ -111,6 +113,8 @@ final class ClientTransactionsApiResourceSwagger {
         public BigDecimal amount;
         @Schema(example = "42")
         public Long clientChargeId;
+        public Long savingsAccountId;
+        public Long savingsTransactionId;
         @Schema(example = "[2015, 8, 17]")
         public LocalDate submittedOnDate;
         @Schema(example = "true")

@@ -73,7 +73,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
              * on at the level of for each charge that has been paid by this transaction)
              **/
             this.helper.createDebitJournalEntryOrReversalForClientChargePayments(office, currencyCode, clientId, transactionId,
-                    transactionDate, totalCreditedAmount, isReversal);
+                    transactionDate, totalCreditedAmount, isReversal, clientTransactionDTO.isSavingsFunded());
         }
 
     }

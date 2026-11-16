@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @RequiredArgsConstructor
@@ -44,6 +45,9 @@ public class ClientTransactionDTO {
     private final boolean reversed;
 
     private final boolean accountingEnabled;
+
+    @Setter
+    private boolean savingsFunded;
 
     /** Breakdowns of fees this Transaction pays **/
     private final List<ClientChargePaymentDTO> chargePayments;

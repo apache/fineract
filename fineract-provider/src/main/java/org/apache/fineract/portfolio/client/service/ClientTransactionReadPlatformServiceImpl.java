@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
@@ -66,6 +67,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount, ");
             sqlBuilder.append("tr.submitted_on_date as submittedOnDate, tr.is_reversed as reversed, ");
             sqlBuilder.append("tr.external_id as externalId, o.name as officeName, o.id as officeId, ");
+            sqlBuilder.append("funding.id as savingsTransactionId, funding.savings_account_id as savingsAccountId, ");
             sqlBuilder.append("c.id as clientId, c.account_no as accountNo, ccpb.client_charge_id as clientChargeId, ");
             sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode,  ");
@@ -76,6 +78,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append("pt.value as paymentTypeName  ");
             sqlBuilder.append("from m_client c  ");
             sqlBuilder.append("join m_client_transaction tr on tr.client_id = c.id ");
+            sqlBuilder.append("left join m_savings_account_transaction funding on funding.id = tr.funding_savings_transaction_id ");
             sqlBuilder.append("join m_currency curr on curr.code = tr.currency_code ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id  ");
             sqlBuilder.append("left join m_payment_type pt  on pd.payment_type_id = pt.id ");
@@ -128,8 +131,11 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
                     currencyNameCode);
 
-            return ClientTransactionData.create(id, officeId, officeName, transactionType, date, currency, paymentDetailData, amount,
-                    externalId, submittedOnDate, reversed, clientChargeId);
+            ClientTransactionData transaction = ClientTransactionData.create(id, officeId, officeName, transactionType, date, currency,
+                    paymentDetailData, amount, externalId, submittedOnDate, reversed, clientChargeId);
+            transaction.setSavingsAccountId(JdbcSupport.getLong(rs, ClientApiConstants.savingsAccountIdParamName));
+            transaction.setSavingsTransactionId(JdbcSupport.getLong(rs, ClientApiConstants.savingsTransactionIdParamName));
+            return transaction;
         }
     }
 

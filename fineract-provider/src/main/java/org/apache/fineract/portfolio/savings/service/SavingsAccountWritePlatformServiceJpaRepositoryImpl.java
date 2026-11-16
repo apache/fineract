@@ -93,6 +93,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
@@ -154,6 +155,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final NoteRepository noteRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
+    private final ClientTransactionRepository clientTransactionRepository;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepository;
     private final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository;
@@ -756,7 +758,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
         if (!allowAccountTransferModification
-                && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) {
+                && (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)
+                        || clientTransactionRepository.existsByFundingSavingsTransactionId(transactionId))) {
             throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed",
                     "Savings account transaction:" + transactionId + " update not allowed as it involves in account transfer",
                     transactionId);
@@ -776,6 +779,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (isBulk) {
             String transactionRefNo = savingsAccountTransaction.getRefNo();
             savingsAccountTransactions = this.savingsAccountTransactionRepository.findByRefNo(transactionRefNo);
+            if (!allowAccountTransferModification) {
+                for (SavingsAccountTransaction transaction : savingsAccountTransactions) {
+                    if (clientTransactionRepository.existsByFundingSavingsTransactionId(transaction.getId())) {
+                        throw new PlatformServiceUnavailableException(
+                                "error.msg.saving.account.transfer.transaction.update.not.allowed", "Savings account transaction:"
+                                        + transaction.getId() + " update not allowed as it involves in account transfer",
+                                transaction.getId());
+                    }
+                }
+            }
             reversal = this.savingsAccountDomainService.handleReversal(account, savingsAccountTransactions, backdatedTxnsAllowedTill);
         } else {
             reversal = this.savingsAccountDomainService.handleReversal(account, Collections.singletonList(savingsAccountTransaction),
@@ -815,7 +828,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 account);
 
         if (!allowAccountTransferModification
-                && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) {
+                && (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)
+                        || clientTransactionRepository.existsByFundingSavingsTransactionId(transactionId))) {
             throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed",
                     "Savings account transaction:" + transactionId + " update not allowed as it involves in account transfer",
                     transactionId);
@@ -888,7 +902,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             throw new TransactionUpdateNotAllowedException(savingsId, transactionId);
         }
 
-        if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) {
+        if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)
+                || clientTransactionRepository.existsByFundingSavingsTransactionId(transactionId)) {
             throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed",
                     "Savings account transaction:" + transactionId + " update not allowed as it involves in account transfer",
                     transactionId);

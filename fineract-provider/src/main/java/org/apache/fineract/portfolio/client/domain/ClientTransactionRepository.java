@@ -18,12 +18,20 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import java.util.Collection;
+import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ClientTransactionRepository extends JpaRepository<ClientTransaction, Long>, JpaSpecificationExecutor<ClientTransaction> {
 
     ClientTransaction findByExternalId(ExternalId externalId);
+
+    boolean existsByFundingSavingsTransactionId(Long transactionId);
+
+    @Query("select transaction.fundingSavingsTransaction.id from ClientTransaction transaction where transaction.fundingSavingsTransaction.id in :transactionIds")
+    Set<Long> findFundingSavingsTransactionIds(Collection<Long> transactionIds);
 
 }

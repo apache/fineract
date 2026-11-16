@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
@@ -108,6 +110,7 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final ClientTransactionRepository clientTransactionRepository;
 
     @Override
     public LoanDTO populateLoanDtoFromDTO(final AccountingBridgeDataDTO accountingBridgeData) {
@@ -235,6 +238,14 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newSavingsTransactions");
 
+        final Set<Long> savingsFundingIds = new HashSet<>();
+        final List<Long> transactionIds = newTransactionsMap.stream().map(transaction -> (Long) transaction.get("id")).toList();
+        final int fundingLookupBatchSize = 1000;
+        for (int offset = 0; offset < transactionIds.size(); offset += fundingLookupBatchSize) {
+            savingsFundingIds.addAll(clientTransactionRepository.findFundingSavingsTransactionIds(
+                    transactionIds.subList(offset, Math.min(offset + fundingLookupBatchSize, transactionIds.size()))));
+        }
+
         for (final Map<String, Object> map : newTransactionsMap) {
             final Long transactionOfficeId = (Long) map.get("officeId");
             final String transactionId = ((Long) map.get("id")).toString();
@@ -278,6 +289,7 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             }
 
             boolean localIsAccountTransfer = isAccountTransfer || accountTransferTransactionIds.contains(Long.parseLong(transactionId));
+            localIsAccountTransfer = localIsAccountTransfer || savingsFundingIds.contains(Long.parseLong(transactionId));
             if (!localIsAccountTransfer) {
                 localIsAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.SAVINGS);
@@ -372,8 +384,10 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             }
         }
 
-        return new ClientTransactionDTO(clientId, transactionOfficeId, paymentTypeId, transactionId, transactionDate, transactionType,
-                currencyCode, amount, reversed, accountingEnabled, clientChargePaymentDTOs);
+        ClientTransactionDTO transaction = new ClientTransactionDTO(clientId, transactionOfficeId, paymentTypeId, transactionId,
+                transactionDate, transactionType, currencyCode, amount, reversed, accountingEnabled, clientChargePaymentDTOs);
+        transaction.setSavingsFunded(Boolean.TRUE.equals(accountingBridgeData.get("savingsFunded")));
+        return transaction;
 
     }
 
@@ -1481,9 +1495,11 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
     @Override
     public void createDebitJournalEntryOrReversalForClientChargePayments(final Office office, final String currencyCode,
             final Long clientId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount,
-            final Boolean isReversal) {
+            final Boolean isReversal, final boolean savingsFunded) {
         final GLAccount account = financialActivityAccountRepository
-                .findByFinancialActivityTypeWithNotFoundDetection(FinancialActivity.ASSET_FUND_SOURCE.getValue()).getGlAccount();
+                .findByFinancialActivityTypeWithNotFoundDetection(
+                        (savingsFunded ? FinancialActivity.LIABILITY_TRANSFER : FinancialActivity.ASSET_FUND_SOURCE).getValue())
+                .getGlAccount();
         if (isReversal) {
             createCreditJournalEntryForClientPayments(office, currencyCode, account, clientId, transactionId, transactionDate, amount);
         } else {

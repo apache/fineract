@@ -304,4 +304,5 @@
     <include file="parts/0282_idempotency_recoverable_error_codes.xml" relativeToChangelogFile="true" />
     <include file="parts/0283_add_fee_refund_to_r_enum_value.xml" relativeToChangelogFile="true" />
     <include file="parts/0284_fee_refund_business_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0285_add_client_charge_savings_funding.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

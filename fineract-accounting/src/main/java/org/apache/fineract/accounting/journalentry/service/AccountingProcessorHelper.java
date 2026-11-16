@@ -220,7 +220,7 @@ public interface AccountingProcessorHelper {
             LocalDate transactionDate, Boolean isReversal, List<ClientChargePaymentDTO> clientChargePaymentDTOs);
 
     void createDebitJournalEntryOrReversalForClientChargePayments(Office office, String currencyCode, Long clientId, Long transactionId,
-            LocalDate transactionDate, BigDecimal amount, Boolean isReversal);
+            LocalDate transactionDate, BigDecimal amount, Boolean isReversal, boolean savingsFunded);
 
     Integer getValueForFeeOrPenaltyIncomeAccount(String chargeRefundChargeType);
 
