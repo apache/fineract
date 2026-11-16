@@ -155,6 +155,17 @@ class LoanApplicationTermsLeapYearInterestTest {
                 "2024-02-01")).isEqualByComparingTo("100.00");
     }
 
+    @ParameterizedTest(name = "{0} to {1} = {2}")
+    @CsvSource({ "2023-01-01, 2023-02-01, 98.63", "2024-01-01, 2024-02-01, 98.63", "2023-12-15, 2024-01-15, 98.63" })
+    void thirtyDayMonthsWithActualDaysInYearStayAtThirtyOver365(String periodStart, String periodEnd, String expectedInterest) {
+        // MONTHS repayment with 30-day months charges a nominal 30 days a month, so it stays 30/365 (10000 * 12% * 30 /
+        // 365)
+        // in a leap year and across a year end. The progressive engine uses 30/366 here, a known limit tracked in
+        // FINERACT-3194.
+        assertThat(interest(DaysInYearType.ACTUAL, DaysInMonthType.DAYS_30, InterestCalculationPeriodMethod.DAILY, TEN_THOUSAND,
+                periodStart, periodEnd)).isEqualByComparingTo(expectedInterest);
+    }
+
     @ParameterizedTest(name = "disbursed {0}: first interest {1}, total interest {2}")
     @CsvSource({ "2024-01-01, 101.64, 660.86", "2023-01-01, 101.92, 659.44" })
     void generatedScheduleOfTwelveMonthlyInstallments(String disbursement, String firstInterest, String totalInterest) {
@@ -186,7 +197,13 @@ class LoanApplicationTermsLeapYearInterestTest {
 
     private BigDecimal interest(DaysInYearType daysInYearType, InterestCalculationPeriodMethod interestCalculationPeriodMethod,
             BigDecimal principal, String periodStart, String periodEnd) {
-        LoanApplicationTerms terms = terms(daysInYearType, interestCalculationPeriodMethod, principal, LocalDate.of(2024, 1, 1));
+        return interest(daysInYearType, DaysInMonthType.ACTUAL, interestCalculationPeriodMethod, principal, periodStart, periodEnd);
+    }
+
+    private BigDecimal interest(DaysInYearType daysInYearType, DaysInMonthType daysInMonthType,
+            InterestCalculationPeriodMethod interestCalculationPeriodMethod, BigDecimal principal, String periodStart, String periodEnd) {
+        LoanApplicationTerms terms = terms(daysInYearType, daysInMonthType, interestCalculationPeriodMethod, principal,
+                LocalDate.of(2024, 1, 1));
         return terms.calculateTotalInterestForPeriod(new DefaultPaymentPeriodsInOneYearCalculator(), ZERO, 1, MC,
                 Money.zero(fromApplicationCurrency(currency)), terms.getPrincipal(), LocalDate.parse(periodStart),
                 LocalDate.parse(periodEnd)).interest().getAmount();
@@ -194,6 +211,11 @@ class LoanApplicationTermsLeapYearInterestTest {
 
     private LoanApplicationTerms terms(DaysInYearType daysInYearType, InterestCalculationPeriodMethod interestCalculationPeriodMethod,
             BigDecimal principal, LocalDate disbursementDate) {
+        return terms(daysInYearType, DaysInMonthType.ACTUAL, interestCalculationPeriodMethod, principal, disbursementDate);
+    }
+
+    private LoanApplicationTerms terms(DaysInYearType daysInYearType, DaysInMonthType daysInMonthType,
+            InterestCalculationPeriodMethod interestCalculationPeriodMethod, BigDecimal principal, LocalDate disbursementDate) {
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(false, emptyList(),
                 new WorkingDays("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU", MOVE_TO_NEXT_WORKING_DAY.getValue(), false, false),
                 false, false);
@@ -202,9 +224,9 @@ class LoanApplicationTermsLeapYearInterestTest {
         return LoanApplicationTerms.assembleFrom(currency.toData(), 12, MONTHS, 12, 1, MONTHS, null, null, null, INVALID,
                 EQUAL_INSTALLMENTS, DECLINING_BALANCE, annualRate, MONTHS, annualRate, interestCalculationPeriodMethod, false,
                 principalAmount, disbursementDate, null, disbursementDate.plusMonths(1), null, null, null, null, null,
-                Money.of(fromApplicationCurrency(currency), ZERO), false, null, emptyList(), null, null, DaysInMonthType.ACTUAL,
-                daysInYearType, false, null, null, null, null, null, ZERO, null, NONE, null, ZERO, emptyList(), true, 0, false,
-                holidayDetailDTO, false, false, false, null, false, false, null, false, DISBURSEMENT_DATE, disbursementDate, CUMULATIVE,
+                Money.of(fromApplicationCurrency(currency), ZERO), false, null, emptyList(), null, null, daysInMonthType, daysInYearType,
+                false, null, null, null, null, null, ZERO, null, NONE, null, ZERO, emptyList(), true, 0, false, holidayDetailDTO, false,
+                false, false, null, false, false, null, false, DISBURSEMENT_DATE, disbursementDate, CUMULATIVE,
                 LoanScheduleProcessingType.HORIZONTAL, null, false, null, null, null, false, null, false, null, null, null, false, null,
                 null, null, false, false, null);
     }
