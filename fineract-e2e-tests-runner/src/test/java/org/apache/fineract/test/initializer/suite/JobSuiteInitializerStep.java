@@ -24,8 +24,8 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsResponse;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.springframework.stereotype.Component;
 
@@ -65,7 +65,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
 
         // Manually execute once immediately to publish any queued events from initialization
         log.debug("Manually executing '{}' job once to publish queued events...", SEND_ASYNCHRONOUS_EVENTS_JOB_NAME);
-        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), Map.of("command", "executeJob")));
+        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new JobExecuteRequest(), Map.of("command", "executeJob")));
 
         // Poll job history to confirm it ran
         log.debug("Polling job history to confirm initial execution...");

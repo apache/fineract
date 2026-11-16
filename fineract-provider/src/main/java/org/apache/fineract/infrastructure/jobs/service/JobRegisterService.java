@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.util.Set;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 
 public interface JobRegisterService {
-
-    void executeJobWithParameters(Long jobId, String jobParametersJson);
 
     void rescheduleJob(Long jobId);
 
@@ -37,5 +37,7 @@ public interface JobRegisterService {
     void scheduleJob(ScheduledJobDetail scheduledJobDetails);
 
     void stopAllSchedulers();
+
+    void executeJobWithParameters(Long jobId, Set<JobParameterDTO> parameters);
 
 }

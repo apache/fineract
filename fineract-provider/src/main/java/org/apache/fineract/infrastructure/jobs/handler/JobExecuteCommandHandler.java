@@ -16,31 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.infrastructure.jobs.handler;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
+import org.apache.fineract.infrastructure.jobs.data.JobExecuteResponse;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@CommandType(entity = "SCHEDULER", action = "EXECUTEJOB")
-public class ExecuteJobCommandHandler implements NewCommandSourceHandler {
+public class JobExecuteCommandHandler implements CommandHandler<JobExecuteRequest, JobExecuteResponse> {
 
     private final JobRegisterService jobRegisterService;
 
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        final Long jobId = command.entityId();
-        jobRegisterService.executeJobWithParameters(jobId, command.json());
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(jobId) //
-                .build();
+    public JobExecuteResponse handle(Command<JobExecuteRequest> command) {
+        JobExecuteRequest req = command.getPayload();
+        List<JobParameterDTO> params = req.getJobParameters();
+        Set<JobParameterDTO> paramSet = (params == null || params.isEmpty()) ? Set.of() : new HashSet<>(params);
+        jobRegisterService.executeJobWithParameters(req.getJobId(), paramSet);
+        return JobExecuteResponse.builder().resourceId(req.getJobId()).build();
     }
 }

@@ -33,11 +33,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.services.SchedulerJobApi.RetrieveHistoryQueryParams;
 import org.apache.fineract.client.models.CommandProcessingResult;
-import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetSchedulerResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
@@ -107,13 +107,13 @@ public final class SchedulerJobHelper {
 
     public static void runSchedulerJob(int jobId) {
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJob((long) jobId, "executeJob",
-                new ExecuteJobRequest()));
+                new JobExecuteRequest()));
     }
 
     public static void runSchedulerJobByShortName(String shortName) {
         LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJobByShortName(shortName, "executeJob",
-                new ExecuteJobRequest()));
+                new JobExecuteRequest()));
     }
 
     public static int getSchedulerJobIdByName(String jobName) {

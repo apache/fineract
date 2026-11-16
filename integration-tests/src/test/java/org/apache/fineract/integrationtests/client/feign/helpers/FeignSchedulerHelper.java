@@ -27,11 +27,11 @@ import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.SchedulerJobApi.RetrieveHistoryQueryParams;
 import org.apache.fineract.client.feign.util.FeignCalls;
-import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetSchedulerResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.awaitility.Awaitility;
 
 public class FeignSchedulerHelper {
@@ -72,7 +72,7 @@ public class FeignSchedulerHelper {
         Long jobId = targetJob.getJobId();
 
         Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
-        FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+        FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, "executeJob", new JobExecuteRequest()));
 
         JobDetailHistoryDataSwagger finalRunHistory = Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1))
                 .pollDelay(Duration.ofSeconds(1))
