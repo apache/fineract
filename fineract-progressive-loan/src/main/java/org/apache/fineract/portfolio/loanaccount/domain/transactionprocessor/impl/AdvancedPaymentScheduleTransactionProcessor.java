@@ -609,8 +609,15 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case CHARGEBACK -> handleChargeback(loanTransaction, ctx);
             case CREDIT_BALANCE_REFUND -> handleCreditBalanceRefund(loanTransaction, ctx);
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
-                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT ->
+                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT -> {
+                if (loanTransaction.isForeclosure() && loanTransaction.isNotReversed()) {
+                    // A foreclosure ends the loan on its date like a contract termination, then pays off what is due.
+                    // Foreclosure is only allowed without interest recalculation.
+                    handleAccelerateMaturityDate(loanTransaction, ctx);
+                    recalculateInstallmentFeeCharges(loanTransaction);
+                }
                 handleRepayment(loanTransaction, ctx);
+            }
             case INTEREST_REFUND -> handleInterestRefund(loanTransaction, ctx);
             case FEE_REFUND -> handleFeeRefund(loanTransaction, ctx);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, ctx);

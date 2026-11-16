@@ -370,8 +370,15 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             case WAIVE_INTEREST -> buildInterestWaiverReplacement(loan, transactionAmount, transactionDate, txnExternalId);
             case CHARGE_ADJUSTMENT -> buildChargeAdjustmentReplacement(loan, transactionToAdjust, transactionAmount, paymentDetail,
                     transactionDate, txnExternalId);
-            default -> LoanTransaction.repaymentType(transactionToAdjust.getTypeOf(), loan.getOffice(), transactionAmount, paymentDetail,
-                    transactionDate, txnExternalId, transactionToAdjust.getChargeRefundChargeType());
+            default -> {
+                final LoanTransaction replacement = LoanTransaction.repaymentType(transactionToAdjust.getTypeOf(), loan.getOffice(),
+                        transactionAmount, paymentDetail, transactionDate, txnExternalId, transactionToAdjust.getChargeRefundChargeType());
+                // An adjusted foreclosure stays one, so that a progressive loan still ends on the foreclosure date
+                if (transactionToAdjust.isForeclosure()) {
+                    replacement.markAsForeclosure();
+                }
+                yield replacement;
+            }
         };
     }
 

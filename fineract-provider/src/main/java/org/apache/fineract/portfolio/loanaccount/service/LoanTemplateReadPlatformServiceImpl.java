@@ -115,6 +115,7 @@ public class LoanTemplateReadPlatformServiceImpl implements LoanTemplateReadPlat
     private final InterestRefundServiceDelegate interestRefundServiceDelegate;
     private final LoanMaximumAmountCalculator loanMaximumAmountCalculator;
     private final LoanAccountDataReadService loanAccountDataReadService;
+    private final LoanForeclosureDetailService loanForeclosureDetailService;
 
     private CurrencyData retriveLoanCurrencyData(final Long loanId) {
         final LoanCurrencyDataMapper loanCurrencyMapper = new LoanCurrencyDataMapper(sqlGenerator);
@@ -594,7 +595,7 @@ public class LoanTemplateReadPlatformServiceImpl implements LoanTemplateReadPlat
 
         final LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
 
-        final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanBalanceService.fetchLoanForeclosureDetail(loan,
+        final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanForeclosureDetailService.fetchForeclosureDetail(loan,
                 transactionDate);
         BigDecimal unrecognizedIncomePortion = null;
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
