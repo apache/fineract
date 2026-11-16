@@ -609,8 +609,15 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case CHARGEBACK -> handleChargeback(loanTransaction, ctx);
             case CREDIT_BALANCE_REFUND -> handleCreditBalanceRefund(loanTransaction, ctx);
             case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
-                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT ->
+                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER, CAPITALIZED_INCOME_ADJUSTMENT -> {
+                if (loanTransaction.isForeclosure() && loanTransaction.isNotReversed()) {
+                    // A foreclosure ends the loan on its date like a contract termination, then pays off what is due.
+                    // Foreclosure is only allowed without interest recalculation.
+                    handleAccelerateMaturityDate(loanTransaction, ctx);
+                    recalculateInstallmentFeeCharges(loanTransaction);
+                }
                 handleRepayment(loanTransaction, ctx);
+            }
             case INTEREST_REFUND -> handleInterestRefund(loanTransaction, ctx);
             case FEE_REFUND -> handleFeeRefund(loanTransaction, ctx);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, ctx);
@@ -1732,6 +1739,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
     }
 
+    // LoanTransactionProcessingService.fetchEarlyTerminationDetail computes the result of this for the contract
+    // termination and
+    // foreclosure templates without running it: keep the two in sync
     private void recalculateInstallmentFeeCharges(final LoanTransaction loanTransaction) {
         final Loan loan = loanTransaction.getLoan();
         final List<LoanCharge> loanInstallmentFeeCharges = loan.getActiveCharges().stream()
@@ -2299,6 +2309,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return Arrays.stream(components).allMatch(Money::isZero);
     }
 
+    // LoanTransactionProcessingService.fetchEarlyTerminationDetail computes the result of this for the contract
+    // termination and
+    // foreclosure templates without running it: keep the two in sync
     private void handleAccelerateMaturityDate(final LoanTransaction loanTransaction, final TransactionCtx transactionCtx) {
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final List<LoanRepaymentScheduleInstallment> installments = transactionCtx.getInstallments();

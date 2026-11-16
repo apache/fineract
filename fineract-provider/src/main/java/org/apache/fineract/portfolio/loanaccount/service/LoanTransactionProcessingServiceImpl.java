@@ -183,7 +183,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
             return fetchPrepaymentDetail(scheduleGeneratorDTO, onDate, loan);
         }
         // Without interest recalculation the termination prorates the interest of the installment it lands in
-        // and drops the interest of the installments after it.
+        // and drops the interest of the installments after it. This mirrors handleAccelerateMaturityDate and
+        // recalculateInstallmentFeeCharges in AdvancedPaymentScheduleTransactionProcessor: keep the two in sync.
         final MonetaryCurrency currency = loan.getCurrency();
         Money principal = Money.zero(currency);
         Money interest = Money.zero(currency);
@@ -206,8 +207,50 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 }
             }
         }
+        // As the processor does after the acceleration (recalculateInstallmentFeeCharges), the percentage-based fees of
+        // the
+        // installment it lands in are recalculated on the principal moved into it and its prorated interest
+        feeCharges = feeCharges.plus(percentageInstallmentFeeChange(loan, onDate, false));
+        penaltyCharges = penaltyCharges.plus(percentageInstallmentFeeChange(loan, onDate, true));
         return new OutstandingAmountsDTO(currency).principal(principal).interest(interest).feeCharges(feeCharges)
                 .penaltyCharges(penaltyCharges);
+    }
+
+    /**
+     * How much the percentage-based installment fees (or penalties) of the installment the termination lands in change.
+     * The processor recalculates them after the acceleration, when the installment holds the principal of the
+     * installments after it and its interest is prorated to the termination date.
+     */
+    private static Money percentageInstallmentFeeChange(final Loan loan, final LocalDate onDate, final boolean penalty) {
+        final MonetaryCurrency currency = loan.getCurrency();
+        Money change = Money.zero(currency);
+        final LoanRepaymentScheduleInstallment currentInstallment = loan.getRelatedRepaymentScheduleInstallment(onDate);
+        if (currentInstallment == null || currentInstallment.isAdditional() || !DateUtils.isBefore(onDate, loan.getMaturityDate())) {
+            return change;
+        }
+        Money principal = currentInstallment.getPrincipal(currency);
+        for (final LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
+            if (!installment.equals(currentInstallment) && DateUtils.isBefore(onDate, installment.getDueDate())) {
+                principal = principal.plus(installment.getPrincipal(currency));
+            }
+        }
+        final Money interest = currentInstallment.getInterestOutstanding(currency).isGreaterThanZero()
+                ? currentInstallment.getInterestChargedProratedTill(onDate, currency)
+                : currentInstallment.getInterestCharged(currency);
+        for (final LoanInstallmentCharge installmentCharge : currentInstallment.getInstallmentCharges()) {
+            final LoanCharge loanCharge = installmentCharge.getLoanCharge();
+            if (loanCharge.isPenaltyCharge() != penalty || !loanCharge.isActive() || !loanCharge.getChargeCalculation().isPercentageBased()
+                    || !DateUtils.isBefore(loanCharge.getSubmittedOnDate(), onDate)) {
+                continue;
+            }
+            final Money recalculated = LoanChargeService.calculateInstallmentChargeAmount(currency, loanCharge.getChargeCalculation(),
+                    loanCharge.getPercentage(), principal, interest);
+            final Money outstanding = installmentCharge.getAmountOutstanding(currency);
+            final Money recalculatedOutstanding = outstanding.plus(recalculated).minus(installmentCharge.getAmount(currency));
+            change = change.plus(recalculatedOutstanding.isGreaterThanZero() ? recalculatedOutstanding : Money.zero(currency))
+                    .minus(outstanding);
+        }
+        return change;
     }
 
     private OutstandingAmountsDTO getTotalOutstandingOnLoan(Loan loan) {

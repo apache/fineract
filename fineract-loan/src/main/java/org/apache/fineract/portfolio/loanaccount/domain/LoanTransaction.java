@@ -133,6 +133,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @Column(name = "charge_refund_charge_type", length = 1, unique = true)
     private String chargeRefundChargeType;
 
+    // A foreclosure is booked as a repayment; the progressive processor needs to tell it apart when it replays the loan
+    @Column(name = "is_foreclosure", nullable = false)
+    private boolean foreclosure;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
 
@@ -332,6 +336,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
             newTransaction.setLoanReAmortizationParameter(loanTransaction.getLoanReAmortizationParameter().getCopy(newTransaction));
         }
         newTransaction.setClassification(loanTransaction.getClassification());
+        newTransaction.foreclosure = loanTransaction.foreclosure;
         return newTransaction;
     }
 
@@ -900,6 +905,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public void manuallyAdjustedOrReversed() {
         this.manuallyAdjustedOrReversed = true;
+    }
+
+    public void markAsForeclosure() {
+        this.foreclosure = true;
+    }
+
+    public boolean isForeclosure() {
+        return this.foreclosure;
     }
 
     public void updateLoanTransactionToRepaymentScheduleMappings(final Collection<LoanTransactionToRepaymentScheduleMapping> mappings) {

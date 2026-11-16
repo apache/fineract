@@ -947,15 +947,23 @@ public class LoanChargeService {
 
     private Money calculateInstallmentChargeAmount(final Loan loan, final ChargeCalculationType calculationType,
             final BigDecimal percentage, final LoanRepaymentScheduleInstallment installment) {
+        return calculateInstallmentChargeAmount(loan.getCurrency(), calculationType, percentage,
+                installment.getPrincipal(loan.getCurrency()), installment.getInterestCharged(loan.getCurrency()));
+    }
+
+    /**
+     * The amount of a percentage-based installment fee on an installment with the given principal and interest.
+     */
+    public static Money calculateInstallmentChargeAmount(final MonetaryCurrency currency, final ChargeCalculationType calculationType,
+            final BigDecimal percentage, final Money principal, final Money interest) {
         Money percentOf = switch (calculationType) {
-            case PERCENT_OF_AMOUNT -> installment.getPrincipal(loan.getCurrency());
-            case PERCENT_OF_AMOUNT_AND_INTEREST ->
-                installment.getPrincipal(loan.getCurrency()).plus(installment.getInterestCharged(loan.getCurrency()));
-            case PERCENT_OF_INTEREST -> installment.getInterestCharged(loan.getCurrency());
-            case PERCENT_OF_DISBURSEMENT_AMOUNT, INVALID, FLAT -> Money.zero(loan.getCurrency());
+            case PERCENT_OF_AMOUNT -> principal;
+            case PERCENT_OF_AMOUNT_AND_INTEREST -> principal.plus(interest);
+            case PERCENT_OF_INTEREST -> interest;
+            case PERCENT_OF_DISBURSEMENT_AMOUNT, INVALID, FLAT -> Money.zero(currency);
 
         };
-        return Money.zero(loan.getCurrency()) //
+        return Money.zero(currency) //
                 .plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
     }
 
