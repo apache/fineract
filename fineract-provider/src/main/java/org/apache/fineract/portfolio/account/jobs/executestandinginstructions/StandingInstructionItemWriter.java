@@ -109,7 +109,7 @@ public class StandingInstructionItemWriter implements ItemWriter<DueStandingInst
         final boolean isExceptionForBalanceCheck = false;
         return new AccountTransferDTO(due.transactionDate(), transactionAmount, data.getFromAccountTypeEnum(), data.getToAccountTypeEnum(),
                 data.getFromAccount().getId(), data.getToAccount().getId(), data.getName() + " Standing instruction trasfer ", null, null,
-                null, null, data.toTransferType(), null, null, data.getTransferTypeEnum().getValue(), null, null, ExternalId.empty(), null,
-                null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
+                null, null, data.toTransferType(), null, null, data.getTransferTypeEnum().getValue(), null, ExternalId.empty(), null, null,
+                fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
     }
 }

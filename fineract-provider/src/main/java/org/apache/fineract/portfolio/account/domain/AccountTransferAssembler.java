@@ -108,11 +108,8 @@ public class AccountTransferAssembler {
             final SavingsAccount fromSavingsAccount, final Loan toLoanAccount, final SavingsAccountTransaction savingsAccountTransaction,
             final LoanTransaction loanTransaction) {
         final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), accountTransferDTO.getTransactionAmount());
-        AccountTransferDetails accountTransferDetails = accountTransferDTO.getAccountTransferDetails();
-        if (accountTransferDetails == null) {
-            accountTransferDetails = this.accountTransferDetailAssembler.assembleSavingsToLoanTransfer(fromSavingsAccount, toLoanAccount,
-                    accountTransferDTO.getTransferType());
-        }
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleSavingsToLoanTransfer(fromSavingsAccount, toLoanAccount, accountTransferDTO.getTransferType());
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToLoanTransfer(accountTransferDetails,
                 savingsAccountTransaction, loanTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
                 accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());
@@ -124,11 +121,8 @@ public class AccountTransferAssembler {
             final SavingsAccount fromSavingsAccount, final SavingsAccount toSavingsAccount, final SavingsAccountTransaction withdrawal,
             final SavingsAccountTransaction deposit) {
         final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), accountTransferDTO.getTransactionAmount());
-        AccountTransferDetails accountTransferDetails = accountTransferDTO.getAccountTransferDetails();
-        if (accountTransferDetails == null) {
-            accountTransferDetails = this.accountTransferDetailAssembler.assembleSavingsToSavingsTransfer(fromSavingsAccount,
-                    toSavingsAccount, accountTransferDTO.getTransferType());
-        }
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleSavingsToSavingsTransfer(fromSavingsAccount, toSavingsAccount, accountTransferDTO.getTransferType());
 
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(accountTransferDetails,
                 withdrawal, deposit, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
@@ -140,11 +134,8 @@ public class AccountTransferAssembler {
     public AccountTransferDetails assembleLoanToSavingsTransfer(final AccountTransferDTO accountTransferDTO, final Loan fromLoanAccount,
             final SavingsAccount toSavingsAccount, final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction) {
         final Money transactionMonetaryAmount = Money.of(fromLoanAccount.getCurrency(), accountTransferDTO.getTransactionAmount());
-        AccountTransferDetails accountTransferDetails = accountTransferDTO.getAccountTransferDetails();
-        if (accountTransferDetails == null) {
-            accountTransferDetails = this.accountTransferDetailAssembler.assembleLoanToSavingsTransfer(fromLoanAccount, toSavingsAccount,
-                    accountTransferDTO.getTransferType());
-        }
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleLoanToSavingsTransfer(fromLoanAccount, toSavingsAccount, accountTransferDTO.getTransferType());
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
                 deposit, loanRefundTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
                 accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());
@@ -155,11 +146,8 @@ public class AccountTransferAssembler {
     public AccountTransferDetails assembleLoanToLoanTransfer(final AccountTransferDTO accountTransferDTO, final Loan fromLoanAccount,
             final Loan toLoanAccount, final LoanTransaction disburseTransaction, final LoanTransaction repaymentTransaction) {
         final Money transactionMonetaryAmount = Money.of(fromLoanAccount.getCurrency(), accountTransferDTO.getTransactionAmount());
-        AccountTransferDetails accountTransferDetails = accountTransferDTO.getAccountTransferDetails();
-        if (accountTransferDetails == null) {
-            accountTransferDetails = this.accountTransferDetailAssembler.assembleLoanToLoanTransfer(fromLoanAccount, toLoanAccount,
-                    accountTransferDTO.getFromTransferType());
-        }
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleLoanToLoanTransfer(fromLoanAccount, toLoanAccount, accountTransferDTO.getFromTransferType());
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanToLoanTransfer(accountTransferDetails,
                 disburseTransaction, repaymentTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
                 accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());

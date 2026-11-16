@@ -174,8 +174,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(account.getActivationDate(),
                             amountForDeposit.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                             portfolioAccountData.getId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null, null,
-                            AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null, account,
-                            fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
+                            AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, account, fromSavingsAccount,
+                            isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 final boolean isInterestTransfer = false;
@@ -279,8 +279,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(account.getActivationDate(),
                             amountForDeposit.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                             portfolioAccountData.getId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null, null,
-                            AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null, account,
-                            fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
+                            AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, account, fromSavingsAccount,
+                            isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);

@@ -22,13 +22,21 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
-import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
+/**
+ * A request to move money between two portfolio accounts.
+ *
+ * <p>
+ * Callers that already hold the accounts pass them in ({@code loan}, {@code fromLoan}, {@code toLoan},
+ * {@code toSavingsAccount}, {@code fromSavingsAccount}), so the transfer works on those instances instead of loading
+ * the accounts again. They are typed as {@link AbstractPersistableCustom} because fineract-core cannot see the
+ * {@code Loan} and {@code SavingsAccount} entities; the account transfer service casts them back.
+ * </p>
+ */
 public class AccountTransferDTO {
 
     private final LocalDate transactionDate;
@@ -46,14 +54,13 @@ public class AccountTransferDTO {
     private final Long chargeId;
     private final Integer loanInstallmentNumber;
     private final Integer transferType;
-    private final AccountTransferDetails accountTransferDetails;
     private final String noteText;
     private final ExternalId txnExternalId;
-    private final Loan loan;
-    private final Loan fromLoan;
-    private final Loan toLoan;
-    private final SavingsAccount toSavingsAccount;
-    private final SavingsAccount fromSavingsAccount;
+    private final AbstractPersistableCustom<Long> loan;
+    private final AbstractPersistableCustom<Long> fromLoan;
+    private final AbstractPersistableCustom<Long> toLoan;
+    private final AbstractPersistableCustom<Long> toSavingsAccount;
+    private final AbstractPersistableCustom<Long> fromSavingsAccount;
     private final Boolean isRegularTransaction;
     private final Boolean isExceptionForBalanceCheck;
 
@@ -61,9 +68,10 @@ public class AccountTransferDTO {
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId,
-            Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails, final String noteText,
-            final ExternalId txnExternalId, final Loan loan, SavingsAccount toSavingsAccount, final SavingsAccount fromSavingsAccount,
-            final Boolean isRegularTransaction, Boolean isExceptionForBalanceCheck) {
+            Integer loanInstallmentNumber, Integer transferType, final String noteText, final ExternalId txnExternalId,
+            final AbstractPersistableCustom<Long> loan, final AbstractPersistableCustom<Long> toSavingsAccount,
+            final AbstractPersistableCustom<Long> fromSavingsAccount, final Boolean isRegularTransaction,
+            Boolean isExceptionForBalanceCheck) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -79,7 +87,6 @@ public class AccountTransferDTO {
         this.chargeId = chargeId;
         this.loanInstallmentNumber = loanInstallmentNumber;
         this.transferType = transferType;
-        this.accountTransferDetails = accountTransferDetails;
         this.noteText = noteText;
         this.txnExternalId = txnExternalId;
         this.loan = loan;
@@ -94,8 +101,8 @@ public class AccountTransferDTO {
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
-            final Integer fromTransferType, final Integer toTransferType, final ExternalId txnExternalId, final Loan fromLoan,
-            final Loan toLoan) {
+            final Integer fromTransferType, final Integer toTransferType, final ExternalId txnExternalId,
+            final AbstractPersistableCustom<Long> fromLoan, final AbstractPersistableCustom<Long> toLoan) {
         this(transactionDate, transactionAmount, fromAccountType, toAccountType, fromAccountId, toAccountId, description, locale, fmt, null,
                 fromTransferType, toTransferType, txnExternalId, fromLoan, toLoan);
     }
@@ -104,7 +111,7 @@ public class AccountTransferDTO {
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final ExternalId txnExternalId,
-            final Loan fromLoan, final Loan toLoan) {
+            final AbstractPersistableCustom<Long> fromLoan, final AbstractPersistableCustom<Long> toLoan) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -120,7 +127,6 @@ public class AccountTransferDTO {
         this.chargeId = null;
         this.loanInstallmentNumber = null;
         this.transferType = null;
-        this.accountTransferDetails = null;
         this.noteText = null;
         this.txnExternalId = txnExternalId;
         this.fromLoan = fromLoan;
@@ -192,10 +198,6 @@ public class AccountTransferDTO {
         return this.transferType;
     }
 
-    public AccountTransferDetails getAccountTransferDetails() {
-        return this.accountTransferDetails;
-    }
-
     public String getNoteText() {
         return this.noteText;
     }
@@ -204,23 +206,23 @@ public class AccountTransferDTO {
         return this.txnExternalId;
     }
 
-    public Loan getLoan() {
+    public AbstractPersistableCustom<Long> getLoan() {
         return this.loan;
     }
 
-    public Loan getFromLoan() {
+    public AbstractPersistableCustom<Long> getFromLoan() {
         return this.fromLoan;
     }
 
-    public Loan getToLoan() {
+    public AbstractPersistableCustom<Long> getToLoan() {
         return this.toLoan;
     }
 
-    public SavingsAccount getToSavingsAccount() {
+    public AbstractPersistableCustom<Long> getToSavingsAccount() {
         return this.toSavingsAccount;
     }
 
-    public SavingsAccount getFromSavingsAccount() {
+    public AbstractPersistableCustom<Long> getFromSavingsAccount() {
         return this.fromSavingsAccount;
     }
 
