@@ -107,6 +107,10 @@ All global properties are under `fineract.security.oidc-federation.*`.
 | _(empty)_
 | Comma-separated Fineract role names assigned to auto-created users (e.g. `Read-Only Role,Branch Manager`).
 
+| `audience`
+| _(empty)_
+| Audience a token must name in its `aud` claim, typically the identifier under which Fineract is registered at the IdP. A token issued for another service is rejected with HTTP 401. When empty, the audience is not checked. Can be overridden per issuer in the `issuers[]` list; issuers configured through the per-tenant API use this value.
+
 | `provider`
 | `generic`
 | Controls the RP-Initiated Logout URL format. Values: `keycloak`, `azure_ad`, `okta`, `auth0`, `google`, `generic`.
@@ -135,6 +139,7 @@ fineract:
           tenantId: default                                          # <2>
           jwksUri: ""                                                # <3>
           usernameClaim: preferred_username                          # <4>
+          audience: fineract                                         # <5>
         - issuerUri: https://accounts.google.com
           tenantId: google-tenant
           usernameClaim: email
@@ -143,6 +148,7 @@ fineract:
 <2> Fineract tenant identifier this issuer maps to. Used for tenant resolution when no JWT claim or header is present.
 <3> Optional. If blank or absent, the JWK Set URI is derived automatically from `issuerUri` via OIDC discovery (fetches `{issuerUri}/.well-known/openid-configuration`).
 <4> Optional per-issuer override for the username claim. Falls back to the global `username-claim` property if absent.
+<5> Optional per-issuer override for the audience. Falls back to the global `audience` property if absent.
 
 [NOTE]
 ====
@@ -646,6 +652,7 @@ FINERACT_SECURITY_OIDC_TENANT_CLAIM=fineract_tenant
 FINERACT_SECURITY_OIDC_USERNAME_CLAIM=preferred_username
 FINERACT_SECURITY_OIDC_AUTO_CREATE_USER=false
 FINERACT_SECURITY_OIDC_DEFAULT_ROLES=Read-Only Role
+FINERACT_SECURITY_OIDC_AUDIENCE=fineract
 FINERACT_SECURITY_OIDC_PROVIDER=keycloak
 FINERACT_SECURITY_OIDC_POST_LOGOUT_URI=https://app.example.com/login?logout
 ----
