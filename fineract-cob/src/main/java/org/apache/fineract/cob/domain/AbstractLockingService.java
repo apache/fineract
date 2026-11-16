@@ -51,6 +51,14 @@ public abstract class AbstractLockingService implements LockingService {
 
     protected abstract String getBatchLoanLockUpgrade();
 
+    /**
+     * Name of the account-id column in the lock table. Defaults to {@code loan_id} for backwards compatibility; account
+     * types whose lock table uses a different column (e.g. savings) override this.
+     */
+    protected String getIdColumnName() {
+        return "loan_id";
+    }
+
     @Override
     public void upgradeLock(List<Long> accountsToLock, LockOwner lockOwner) {
         jdbcTemplate.batchUpdate(getBatchLoanLockUpgrade(), accountsToLock, getInClauseParameterSizeLimit(), (ps, id) -> {
@@ -67,7 +75,8 @@ public abstract class AbstractLockingService implements LockingService {
         }
         // Uses DatabaseSpecificSQLGenerator.in() to emit ANY(?) on PostgreSQL instead of IN($1,...$N),
         // so all batch sizes share one query plan instead of one per distinct size.
-        final String sql = "SELECT loan_id FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds);
+        String idColumn = getIdColumnName();
+        final String sql = "SELECT " + idColumn + " FROM " + getTableName() + " WHERE " + sqlGenerator.in(idColumn, loanIds);
         return jdbcTemplate.queryForList(sql, Long.class, sqlGenerator.inParametersFor(loanIds));
     }
 
@@ -76,7 +85,8 @@ public abstract class AbstractLockingService implements LockingService {
         if (loanIds.isEmpty()) {
             return Collections.emptyList();
         }
-        final String sql = "SELECT loan_id FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds)
+        String idColumn = getIdColumnName();
+        final String sql = "SELECT " + idColumn + " FROM " + getTableName() + " WHERE " + sqlGenerator.in(idColumn, loanIds)
                 + " AND lock_owner = ?";
         return jdbcTemplate.queryForList(sql, Long.class, paramsWithLockOwner(loanIds, lockOwner));
     }
@@ -98,13 +108,14 @@ public abstract class AbstractLockingService implements LockingService {
         if (loanIds.isEmpty()) {
             return;
         }
-        final String sql = "DELETE FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds) + " AND lock_owner = ?";
+        final String sql = "DELETE FROM " + getTableName() + " WHERE " + sqlGenerator.in(getIdColumnName(), loanIds)
+                + " AND lock_owner = ?";
         jdbcTemplate.update(sql, paramsWithLockOwner(loanIds, lockOwner));
     }
 
     @Override
     public void updateLockError(Long loanId, LockOwner lockOwner, String error, String stacktrace) {
-        String sql = "UPDATE " + getTableName() + " SET error = ?, stacktrace = ? WHERE loan_id = ? AND lock_owner = ?";
+        String sql = "UPDATE " + getTableName() + " SET error = ?, stacktrace = ? WHERE " + getIdColumnName() + " = ? AND lock_owner = ?";
         int updated = jdbcTemplate.update(sql, error, stacktrace, loanId, lockOwner.name());
         if (updated == 0) {
             log.warn("No lock found to update error for loan id: {} with owner: {}", loanId, lockOwner);

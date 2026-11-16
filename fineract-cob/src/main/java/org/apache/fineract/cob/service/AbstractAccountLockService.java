@@ -50,25 +50,33 @@ public abstract class AbstractAccountLockService<T extends AccountLock> implemen
     @Override
     @Transactional(readOnly = true)
     public boolean isAnyLoanHardLocked(List<Long> loanIds) {
-        return !loanIds.isEmpty() && loanAccountLockRepository.existsByLoanIdInAndLockOwnerIn(loanIds, COB_LOCK_OWNERS);
+        return !loanIds.isEmpty() && loanAccountLockRepository.existsByLoanIdInAndLockOwnerIn(loanIds, getCobLockOwners());
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isAnyLockOverrulable(List<Long> loanIds) {
-        return !loanIds.isEmpty() && loanAccountLockRepository.existsByLoanIdInAndLockOwnerInAndErrorIsNotNull(loanIds, COB_LOCK_OWNERS);
+        return !loanIds.isEmpty() && loanAccountLockRepository.existsByLoanIdInAndLockOwnerInAndErrorIsNotNull(loanIds, getCobLockOwners());
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateCobAndRemoveLocks() {
         customLoanAccountLockRepository.updateLoanFromAccountLocks();
-        loanAccountLockRepository.removeByLockOwnerInAndErrorIsNotNullAndLockPlacedOnCobBusinessDateIsNotNull(COB_LOCK_OWNERS);
+        loanAccountLockRepository.removeByLockOwnerInAndErrorIsNotNullAndLockPlacedOnCobBusinessDateIsNotNull(getCobLockOwners());
+    }
+
+    /**
+     * Lock owners that mark an account as locked by COB (batch or inline). Defaults to the loan owners, which the loan
+     * and working capital loan lock tables share; account types with their own owners override it.
+     */
+    protected List<LockOwner> getCobLockOwners() {
+        return COB_LOCK_OWNERS;
     }
 
     @Override
     public int removeOrphanedLocksForProcessedAccounts() {
-        return loanAccountLockRepository.deleteOrphanedLocksForProcessedAccounts(COB_LOCK_OWNERS);
+        return loanAccountLockRepository.deleteOrphanedLocksForProcessedAccounts(getCobLockOwners());
     }
 
 }
