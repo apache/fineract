@@ -30,7 +30,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -38,6 +40,9 @@ import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAcc
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationCalculationType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationIncomeType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationPeriodType;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
@@ -168,7 +173,12 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 .incomeOrLiabilityAccountOptions(incomeOrLiabilityAccountOptions).taxGroupOptions(taxGroupOptions)
                 .shareChargeCalculationTypeOptions(shareChargeCalculationTypeOptions).shareChargeTimeTypeOptions(shareChargeTimeTypeOptions)
                 .accountMappingForChargeConfig(accountMappingForChargeConfig).expenseAccountOptions(expenseAccountOptions)
-                .assetAccountOptions(assetAccountOptions).build();
+                .assetAccountOptions(assetAccountOptions)
+                .amortizationPeriodTypeOptions(ApiFacingEnum.getValuesAsStringEnumOptionDataList(ChargeAmortizationPeriodType.class))
+                .amortizationCalculationTypeOptions(
+                        ApiFacingEnum.getValuesAsStringEnumOptionDataList(ChargeAmortizationCalculationType.class))
+                .amortizationIncomeTypeOptions(ApiFacingEnum.getValuesAsStringEnumOptionDataList(ChargeAmortizationIncomeType.class))
+                .build();
     }
 
     @Override
@@ -294,7 +304,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
                     + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap, "
                     + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode, "
-                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName "
+                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName, "
+                    + "c.amortization_period_type as amortizationPeriodType, c.amortization_days as amortizationDays, "
+                    + "c.amortization_calculation_type as amortizationCalculationType, c.amortization_income_type as amortizationIncomeType "
                     + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code "
                     + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id "
                     + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id " + " LEFT JOIN m_payment_type pt on pt.id = c.payment_type_id ";
@@ -388,13 +400,22 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 paymentTypeData = PaymentTypeData.builder().id(paymentTypeId).name(paymentTypeName).build();
             }
 
+            final StringEnumOptionData amortizationPeriodType = ApiFacingEnum.getStringEnumOptionData(ChargeAmortizationPeriodType.class,
+                    rs.getString("amortizationPeriodType"));
+            final Integer amortizationDays = JdbcSupport.getInteger(rs, "amortizationDays");
+            final StringEnumOptionData amortizationCalculationType = ApiFacingEnum
+                    .getStringEnumOptionData(ChargeAmortizationCalculationType.class, rs.getString("amortizationCalculationType"));
+            final StringEnumOptionData amortizationIncomeType = ApiFacingEnum.getStringEnumOptionData(ChargeAmortizationIncomeType.class,
+                    rs.getString("amortizationIncomeType"));
+
             return ChargeData.builder().id(id).name(name).amount(amount).currency(currency).chargeTimeType(chargeTimeType)
                     .chargeAppliesTo(chargeAppliesToType).chargeCalculationType(chargeCalculationType).chargePaymentMode(chargePaymentMode)
                     .feeOnMonthDay(feeOnMonthDay).feeInterval(feeInterval).penalty(penalty).active(active).freeWithdrawal(isFreeWithdrawal)
                     .freeWithdrawalChargeFrequency(freeWithdrawalChargeFrequency).restartFrequency(restartFrequency)
                     .restartFrequencyEnum(restartFrequencyEnum).isPaymentType(isPaymentType).paymentTypeOptions(paymentTypeData)
                     .minCap(minCap).maxCap(maxCap).feeFrequency(feeFrequencyType).incomeOrLiabilityAccount(glAccountData)
-                    .taxGroup(taxGroupData).build();
+                    .taxGroup(taxGroupData).amortizationPeriodType(amortizationPeriodType).amortizationDays(amortizationDays)
+                    .amortizationCalculationType(amortizationCalculationType).amortizationIncomeType(amortizationIncomeType).build();
 
         }
     }

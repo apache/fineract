@@ -38,6 +38,10 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
+import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationCalculationType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationIncomeType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationPeriodType;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
@@ -80,7 +84,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             CURRENCY_OPTIONS, CHARGE_APPLIES_TO, CHARGE_TIME_TYPE, CHARGE_CALCULATION_TYPE, CHARGE_CALCULATION_TYPE_OPTIONS, PENALTY,
             ACTIVE, CHARGE_PAYMENT_MODE, FEE_ON_MONTH_DAY, FEE_INTERVAL, MONTH_DAY_FORMAT, MIN_CAP, MAX_CAP, FEE_FREQUENCY,
             ENABLE_FREE_WITHDRAWAL_CHARGE, FREE_WITHDRAWAL_FREQUENCY, RESTART_COUNT_FREQUENCY, COUNT_FREQUENCY_TYPE, PAYMENT_TYPE_ID,
-            ENABLE_PAYMENT_TYPE, ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+            ENABLE_PAYMENT_TYPE, ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName,
+            ChargesApiConstants.amortizationPeriodTypeParamName, ChargesApiConstants.amortizationDaysParamName,
+            ChargesApiConstants.amortizationCalculationTypeParamName, ChargesApiConstants.amortizationIncomeTypeParamName));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -312,6 +318,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).value(taxGroupId).notNull().longGreaterThanZero();
         }
 
+        validateAmortizationParameters(element, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -476,6 +484,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).value(taxGroupId).notNull().longGreaterThanZero();
         }
 
+        validateAmortizationParameters(element, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -503,6 +513,87 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         } else {
             baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE).value(chargeCalculationType)
                     .isNotOneOfTheseValues(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
+        }
+    }
+
+    /**
+     * Checks that the amortization configuration of a created or updated charge is allowed (FR-01 to FR-07 of charge
+     * amortization). It runs on the charge itself because an update only sends the fields that change.
+     */
+    public void validateAmortizationConfiguration(final Charge charge) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CHARGE);
+
+        final ChargeAmortizationPeriodType periodType = charge.getAmortizationPeriodType();
+        final Integer days = charge.getAmortizationDays();
+        final ChargeAmortizationCalculationType calculationType = charge.getAmortizationCalculationType();
+
+        if (!periodType.isAmortized()) {
+            if (calculationType != null) {
+                baseDataValidator.reset().parameter(ChargesApiConstants.amortizationCalculationTypeParamName).value(calculationType.name())
+                        .failWithCodeAndMessage("supported.only.for.amortized.charge",
+                                "Amortization calculation type can be set only when the amortization period type is not NONE");
+            }
+            if (charge.getAmortizationIncomeType() != null) {
+                baseDataValidator.reset().parameter(ChargesApiConstants.amortizationIncomeTypeParamName)
+                        .value(charge.getAmortizationIncomeType().name()).failWithCodeAndMessage("supported.only.for.amortized.charge",
+                                "Amortization income type can be set only when the amortization period type is not NONE");
+            }
+        } else {
+            if (!charge.isLoanCharge()) {
+                baseDataValidator.reset().parameter(ChargesApiConstants.amortizationPeriodTypeParamName).value(periodType.name())
+                        .failWithCodeAndMessage("supported.only.for.loan.charge", "Only loan charges can be amortized");
+            } else {
+                if (charge.isPenalty()) {
+                    baseDataValidator.reset().parameter(ChargesApiConstants.amortizationPeriodTypeParamName).value(periodType.name())
+                            .failWithCodeAndMessage("not.supported.for.penalty", "Penalties cannot be amortized");
+                }
+                if (!ChargeTimeType.fromInt(charge.getChargeTimeType()).isAllowedChargeAmortizationTime()) {
+                    baseDataValidator.reset().parameter(ChargesApiConstants.amortizationPeriodTypeParamName).value(periodType.name())
+                            .failWithCodeAndMessage("not.supported.for.charge.time.type",
+                                    "Only Disbursement, Tranche Disbursement and Specified due date charges can be amortized");
+                }
+            }
+            if (calculationType == ChargeAmortizationCalculationType.EFFECTIVE_RATE
+                    && periodType != ChargeAmortizationPeriodType.FULL_LOAN_TERM) {
+                baseDataValidator.reset().parameter(ChargesApiConstants.amortizationCalculationTypeParamName).value(calculationType.name())
+                        .failWithCodeAndMessage("effective.rate.supported.only.for.full.loan.term",
+                                "Effective rate amortization is supported only with the FULL_LOAN_TERM amortization period type");
+            }
+        }
+
+        if (periodType == ChargeAmortizationPeriodType.NUMBER_OF_DAYS) {
+            baseDataValidator.reset().parameter(ChargesApiConstants.amortizationDaysParamName).value(days).notNull()
+                    .integerGreaterThanZero();
+        } else if (days != null) {
+            baseDataValidator.reset().parameter(ChargesApiConstants.amortizationDaysParamName).value(days).failWithCodeAndMessage(
+                    "supported.only.for.number.of.days.period.type",
+                    "Amortization days can be set only when the amortization period type is NUMBER_OF_DAYS");
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateAmortizationParameters(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
+        validateEnumParameter(element, baseDataValidator, ChargesApiConstants.amortizationPeriodTypeParamName,
+                ChargeAmortizationPeriodType.class);
+        validateEnumParameter(element, baseDataValidator, ChargesApiConstants.amortizationCalculationTypeParamName,
+                ChargeAmortizationCalculationType.class);
+        validateEnumParameter(element, baseDataValidator, ChargesApiConstants.amortizationIncomeTypeParamName,
+                ChargeAmortizationIncomeType.class);
+        if (this.fromApiJsonHelper.parameterExists(ChargesApiConstants.amortizationDaysParamName, element)) {
+            final Integer amortizationDays = this.fromApiJsonHelper.extractIntegerNamed(ChargesApiConstants.amortizationDaysParamName,
+                    element, Locale.getDefault());
+            baseDataValidator.reset().parameter(ChargesApiConstants.amortizationDaysParamName).value(amortizationDays).ignoreIfNull()
+                    .integerGreaterThanZero();
+        }
+    }
+
+    private void validateEnumParameter(final JsonElement element, final DataValidatorBuilder baseDataValidator, final String parameterName,
+            final Class<? extends Enum<?>> enumType) {
+        if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
+            final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, element);
+            baseDataValidator.reset().parameter(parameterName).value(value).ignoreIfNull().isOneOfEnumValues(enumType);
         }
     }
 
