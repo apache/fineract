@@ -57,6 +57,17 @@ public class JournalEntryCommand {
     private final String externalAssetOwner;
 
     public void validateForCreate() {
+        validate(false);
+    }
+
+    /**
+     * Opening balances keep accepting a zero line: an account can legitimately open with no balance.
+     */
+    public void validateForOpeningBalance() {
+        validate(true);
+    }
+
+    private void validate(final boolean zeroLineAmountAllowed) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -82,11 +93,12 @@ public class JournalEntryCommand {
         // validation for credit array elements
         if (this.credits != null) {
             if (this.credits.length == 0) {
-                validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
+                validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null),
+                        zeroLineAmountAllowed);
             } else {
                 int i = 0;
                 for (final SingleDebitOrCreditEntryCommand credit : this.credits) {
-                    validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit);
+                    validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit, zeroLineAmountAllowed);
                     i++;
                 }
             }
@@ -95,11 +107,12 @@ public class JournalEntryCommand {
         // validation for debit array elements
         if (this.debits != null) {
             if (this.debits.length == 0) {
-                validateSingleDebitOrCredit(baseDataValidator, "debits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
+                validateSingleDebitOrCredit(baseDataValidator, "debits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null),
+                        zeroLineAmountAllowed);
             } else {
                 int i = 0;
                 for (final SingleDebitOrCreditEntryCommand debit : this.debits) {
-                    validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit);
+                    validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit, zeroLineAmountAllowed);
                     i++;
                 }
             }
@@ -116,12 +129,18 @@ public class JournalEntryCommand {
      * @param baseDataValidator
      * @param i
      * @param credit
+     * @param zeroAmountAllowed
      */
     private void validateSingleDebitOrCredit(final DataValidatorBuilder baseDataValidator, final String paramSuffix, final int arrayPos,
-            final SingleDebitOrCreditEntryCommand credit) {
+            final SingleDebitOrCreditEntryCommand credit, final boolean zeroAmountAllowed) {
         baseDataValidator.reset().parameter(paramSuffix + "[" + arrayPos + "].glAccountId").value(credit.getGlAccountId()).notNull()
                 .integerGreaterThanZero();
-        baseDataValidator.reset().parameter(paramSuffix + "[" + arrayPos + "].amount").value(credit.getAmount()).notNull()
-                .zeroOrPositiveAmount();
+        final DataValidatorBuilder amountValidator = baseDataValidator.reset().parameter(paramSuffix + "[" + arrayPos + "].amount")
+                .value(credit.getAmount()).notNull();
+        if (zeroAmountAllowed) {
+            amountValidator.zeroOrPositiveAmount();
+        } else {
+            amountValidator.positiveAmount();
+        }
     }
 }
