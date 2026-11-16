@@ -918,7 +918,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         final String resourceTypeName = depositAccountType().resourceName();
         if (isNotActive()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
-            final ApiParameterError error = ApiParameterError.parameterError(
+            final ApiParameterError error = ApiParameterError.parameterErrorWithValue(
                     "error.msg." + resourceTypeName + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate",
                     transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
@@ -930,8 +930,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
         if (DateUtils.isDateInTheFuture(transactionDTO.getTransactionDate())) {
             final String defaultUserMessage = "Transaction date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg." + resourceTypeName + ".transaction.in.the.future",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
+            final ApiParameterError error = ApiParameterError.parameterErrorWithValue(
+                    "error.msg." + resourceTypeName + ".transaction.in.the.future", defaultUserMessage, "transactionDate",
+                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);

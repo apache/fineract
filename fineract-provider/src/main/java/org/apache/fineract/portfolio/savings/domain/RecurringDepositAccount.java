@@ -847,7 +847,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         if (isAccountMatured()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is matured.";
-            final ApiParameterError error = ApiParameterError.parameterError(
+            final ApiParameterError error = ApiParameterError.parameterErrorWithValue(
                     "error.msg.recurring.deposit.account.transaction.account.is.matured", defaultUserMessage, "transactionDate",
                     transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
@@ -859,7 +859,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         if (!isBeforeMaturityDate(transactionDTO.getTransactionDate())) {
             final String defaultUserMessage = "Transaction is not allowed. Transaction date is on or after account maturity date.";
-            final ApiParameterError error = ApiParameterError.parameterError(
+            final ApiParameterError error = ApiParameterError.parameterErrorWithValue(
                     "error.msg.recurring.deposit.account.transaction.date.is.after.account.maturity.date", defaultUserMessage,
                     "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
@@ -870,8 +870,9 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         if (isBeforeDepositStartDate(transactionDTO.getTransactionDate())) {
-            final String defaultUserMessage = "Transaction is not allowed. Transaction date is on or after account activation and deposit start date.";
-            final ApiParameterError error = ApiParameterError.parameterError(
+            final String defaultUserMessage = "Transaction is not allowed. Transaction date cannot be before the account deposit "
+                    + "start date " + depositStartDate().format(transactionDTO.getFormatter()) + ".";
+            final ApiParameterError error = ApiParameterError.parameterErrorWithValue(
                     "error.msg.recurring.deposit.account.transaction.date.is.before.account.activation.or.deposit.date", defaultUserMessage,
                     "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
