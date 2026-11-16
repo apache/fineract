@@ -34,9 +34,11 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.SavingsAccountTransactionEnumValueSerialiser;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.savings.SavingsTransactionClientCheck;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -57,10 +59,13 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
     public static final String DEPOSIT = "Deposit";
     private static final Logger LOG = LoggerFactory.getLogger(FixedDepositTransactionImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
 
     @Autowired
-    public FixedDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public FixedDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
     }
 
     @Override
@@ -128,6 +133,8 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
 
         for (SavingsAccountTransactionData transaction : savingsTransactions) {
             try {
+                SavingsTransactionClientCheck.requireAccountOfClient(savingsTransactionSheet.getRow(transaction.getRowIndex()),
+                        transaction.getSavingsAccountId(), savingsAccountRepositoryWrapper);
                 JsonObject savingsTransactionJsonob = gsonBuilder.create().toJsonTree(transaction).getAsJsonObject();
                 savingsTransactionJsonob.remove(TRANSACTION_TYPE);
                 savingsTransactionJsonob.remove(REVERSED);

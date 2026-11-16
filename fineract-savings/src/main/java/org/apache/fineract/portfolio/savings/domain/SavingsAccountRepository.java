@@ -164,4 +164,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("select sa.id, sa.externalId, sa.accountNumber from SavingsAccountLock lock left join SavingsAccount sa on lock.loanId = sa.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate")
     List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
+
+    @Query("select sa.client.id from SavingsAccount sa where sa.id = :savingsAccountId")
+    Long findClientIdById(@Param("savingsAccountId") Long savingsAccountId);
 }
