@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -84,8 +85,19 @@ public class OfficeImportHandler implements ImportHandler {
     }
 
     private OfficeData readOffice(Row row, final String locale, final String dateFormat, final Map<Integer, String> rowErrors) {
+        final String missingColumns = ImportHandlerUtils.missingColumnsError(row,
+                new MandatoryColumn(OfficeConstants.OFFICE_NAME_COL, "Office Name"),
+                new MandatoryColumn(OfficeConstants.OPENED_ON_COL, "Opened On Date"));
+        if (missingColumns != null) {
+            rowErrors.putIfAbsent(row.getRowNum(), missingColumns);
+        }
         String officeName = ImportHandlerUtils.readAsString(OfficeConstants.OFFICE_NAME_COL, row);
         Long parentId = readParentOfficeId(row, rowErrors);
+        if (parentId == null) {
+            final String parentOffice = ImportHandlerUtils.readAsString(OfficeConstants.PARENT_OFFICE_NAME_COL, row);
+            rowErrors.putIfAbsent(row.getRowNum(),
+                    parentOffice == null ? "Parent Office is mandatory" : "Parent Office '" + parentOffice + "' not found");
+        }
         LocalDate openedDate = ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL, row);
         String externalId = ImportHandlerUtils.readAsString(OfficeConstants.EXTERNAL_ID_COL, row);
         OfficeData office = OfficeData.importInstance(officeName, parentId, openedDate, ExternalIdFactory.produce(externalId));

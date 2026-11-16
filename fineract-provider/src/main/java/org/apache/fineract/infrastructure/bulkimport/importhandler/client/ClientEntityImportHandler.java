@@ -23,7 +23,9 @@ import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -64,11 +66,13 @@ public class ClientEntityImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
-        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat, locale);
+        Map<Integer, String> rowErrors = new HashMap<>();
+        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        return importEntity(workbook, clients, dateFormat, locale, rowErrors);
     }
 
-    private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, String> rowErrors) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
         Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.CLIENTS_ENTITY).countRows(clientSheet);
@@ -76,13 +80,14 @@ public class ClientEntityImportHandler implements ImportHandler {
             Row row;
             row = clientSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ClientEntityConstants.STATUS_COL)) {
-                clients.add(readClient(workbook, row, locale, dateFormat));
+                clients.add(readClient(workbook, row, locale, dateFormat, rowErrors));
             }
         }
         return clients;
     }
 
-    private ClientData readClient(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
+    private ClientData readClient(final Workbook workbook, final Row row, final String locale, final String dateFormat,
+            final Map<Integer, String> rowErrors) {
         Long legalFormId = 2L;
         String name = ImportHandlerUtils.readAsString(ClientEntityConstants.NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientEntityConstants.OFFICE_NAME_COL, row);
@@ -144,7 +149,7 @@ public class ClientEntityImportHandler implements ImportHandler {
 
         ExternalId externalId = externalIdFactory.create(ImportHandlerUtils.readAsString(ClientEntityConstants.EXTERNAL_ID_COL, row));
 
-        Boolean active = ImportHandlerUtils.readAsBoolean(ClientEntityConstants.ACTIVE_COL, row);
+        Boolean active = ImportHandlerUtils.readAsMandatoryBoolean(ClientEntityConstants.ACTIVE_COL, row, "Active", rowErrors);
 
         LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientEntityConstants.SUBMITTED_ON_COL, row);
 
@@ -197,7 +202,8 @@ public class ClientEntityImportHandler implements ImportHandler {
                 locale, dateFormat);
     }
 
-    private Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, final String locale) {
+    private Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, final String locale,
+            final Map<Integer, String> rowErrors) {
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
 
         int successCount = 0;
@@ -209,6 +215,10 @@ public class ClientEntityImportHandler implements ImportHandler {
 
         for (ClientData client : clients) {
             try {
+                final String rowError = rowErrors.get(client.getRowIndex());
+                if (rowError != null) {
+                    throw new IllegalArgumentException(rowError);
+                }
                 String payload = gsonBuilder.create().toJson(client);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createClient() //

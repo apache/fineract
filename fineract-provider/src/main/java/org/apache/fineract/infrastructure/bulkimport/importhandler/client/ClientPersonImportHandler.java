@@ -23,7 +23,9 @@ import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -36,6 +38,7 @@ import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -63,11 +66,13 @@ public class ClientPersonImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
-        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat, locale);
+        Map<Integer, String> rowErrors = new HashMap<>();
+        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        return importEntity(workbook, clients, dateFormat, locale, rowErrors);
     }
 
-    public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, String> rowErrors) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
         Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.CLIENTS_PERSON).countRows(clientSheet);
@@ -75,20 +80,29 @@ public class ClientPersonImportHandler implements ImportHandler {
             Row row;
             row = clientSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ClientPersonConstants.STATUS_COL)) {
-                clients.add(readClient(workbook, row, locale, dateFormat));
+                clients.add(readClient(workbook, row, locale, dateFormat, rowErrors));
             }
         }
         return clients;
     }
 
-    private ClientData readClient(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
+    private ClientData readClient(final Workbook workbook, final Row row, final String locale, final String dateFormat,
+            final Map<Integer, String> rowErrors) {
+        final String missingColumns = ImportHandlerUtils.missingColumnsError(row,
+                new MandatoryColumn(ClientPersonConstants.FIRST_NAME_COL, "First Name"),
+                new MandatoryColumn(ClientPersonConstants.LAST_NAME_COL, "Last Name"),
+                new MandatoryColumn(ClientPersonConstants.OFFICE_NAME_COL, "Office Name"),
+                new MandatoryColumn(ClientPersonConstants.ACTIVE_COL, "Active"));
+        if (missingColumns != null) {
+            rowErrors.putIfAbsent(row.getRowNum(), missingColumns);
+        }
         Long legalFormId = 1L;
         String firstName = ImportHandlerUtils.readAsString(ClientPersonConstants.FIRST_NAME_COL, row);
         String lastName = ImportHandlerUtils.readAsString(ClientPersonConstants.LAST_NAME_COL, row);
         String middleName = ImportHandlerUtils.readAsString(ClientPersonConstants.MIDDLE_NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientPersonConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        if (officeId == 0L) {
+        if (officeId != null && officeId == 0L) {
             officeId = null;
         }
         String staffName = ImportHandlerUtils.readAsString(ClientPersonConstants.STAFF_NAME_COL, row);
@@ -99,7 +113,7 @@ public class ClientPersonImportHandler implements ImportHandler {
         ExternalId externalId = externalIdFactory.create(ImportHandlerUtils.readAsString(ClientPersonConstants.EXTERNAL_ID_COL, row));
         LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientPersonConstants.SUBMITTED_ON_COL, row);
         LocalDate activationDate = ImportHandlerUtils.readAsDate(ClientPersonConstants.ACTIVATION_DATE_COL, row);
-        Boolean active = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ACTIVE_COL, row);
+        Boolean active = ImportHandlerUtils.readAsMandatoryBoolean(ClientPersonConstants.ACTIVE_COL, row, "Active", rowErrors);
         if (!active) {
             activationDate = submittedOn;
         }
@@ -185,7 +199,8 @@ public class ClientPersonImportHandler implements ImportHandler {
 
     }
 
-    public Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, String locale) {
+    public Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, String locale,
+            final Map<Integer, String> rowErrors) {
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -194,6 +209,10 @@ public class ClientPersonImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         for (ClientData client : clients) {
             try {
+                final String rowError = rowErrors.get(client.getRowIndex());
+                if (rowError != null) {
+                    throw new IllegalArgumentException(rowError);
+                }
                 String payload = gsonBuilder.create().toJson(client);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createClient() //
