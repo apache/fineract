@@ -208,10 +208,8 @@ public class FundsIntegrationTest extends FeignIntegrationTest {
         final Long fundID = createFund(fund);
         Assertions.assertNotNull(fundID);
 
-        PutFundsFundIdRequest changes = fundHelper.updateFund(fundID, new FundRequest()).getChanges();
-
-        Assertions.assertNull(changes.getName());
-        Assertions.assertNull(changes.getExternalId());
+        // a no-op update reports no change set
+        Assertions.assertNull(fundHelper.updateFund(fundID, new FundRequest()).getChanges());
 
         // assert that there was no change in
         // the name and external ID of the fund

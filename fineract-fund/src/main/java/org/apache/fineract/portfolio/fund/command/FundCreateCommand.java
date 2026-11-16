@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.fund.service;
+package org.apache.fineract.portfolio.fund.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.fund.data.FundCreateRequest;
 
-public interface FundWritePlatformService {
-
-    CommandProcessingResult createFund(JsonCommand command);
-
-    CommandProcessingResult updateFund(Long fundId, JsonCommand command);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class FundCreateCommand extends Command<FundCreateRequest> {}
