@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  * Unit tests for {@link DynamicJwtIssuerAuthenticationManagerResolver}.
@@ -258,5 +260,43 @@ class DynamicJwtIssuerAuthenticationManagerResolverTest {
         props.setTenantId(tenantId);
         props.setJwksUri(jwksUri);
         return props;
+    }
+
+    @Test
+    void acceptsAccessTokenTypeOfRfc9068() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("at+jwt", ISSUER_KEYCLOAK))
+                .hasErrors()).isFalse();
+    }
+
+    @Test
+    void acceptsAccessTokenTypeOfRfc9068AsFullMediaType() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK)
+                .validate(jwt("application/at+jwt", ISSUER_KEYCLOAK)).hasErrors()).isFalse();
+    }
+
+    @Test
+    void acceptsJwtTypeAndAbsentType() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("JWT", ISSUER_KEYCLOAK))
+                .hasErrors()).isFalse();
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt(null, ISSUER_KEYCLOAK))
+                .hasErrors()).isFalse();
+    }
+
+    @Test
+    void rejectsOtherTokenTypes() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("dpop+jwt", ISSUER_KEYCLOAK))
+                .hasErrors()).isTrue();
+    }
+
+    @Test
+    void rejectsTokenOfAnotherIssuer() {
+        assertThat(DynamicJwtIssuerAuthenticationManagerResolver.tokenValidator(ISSUER_KEYCLOAK).validate(jwt("at+jwt", ISSUER_GOOGLE))
+                .hasErrors()).isTrue();
+    }
+
+    private static Jwt jwt(String type, String issuer) {
+        Jwt.Builder builder = Jwt.withTokenValue("token").header("alg", "ES256").issuer(issuer).subject("user").issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(300));
+        return (type == null ? builder : builder.header("typ", type)).build();
     }
 }
