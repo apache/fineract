@@ -103,10 +103,9 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
 
         assertEquals(1, page.getPageItems().size());
         assertEquals(1, page.getTotalFilteredRecords());
-        assertEquals(SELECT_SQL + "\nlimit ?\noffset ?", executedSql.get(0));
+        assertEquals(SELECT_SQL + "\nlimit ?", executedSql.get(0));
         assertEquals(COUNT_SQL, executedSql.get(1));
         Mockito.verify(statement).setLong(1, 1L);
-        Mockito.verify(statement).setLong(2, 0L);
     }
 
     @Test
@@ -146,6 +145,29 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
 
         assertTrue(page.getPageItems().isEmpty());
         assertEquals(0, page.getTotalFilteredRecords());
+    }
+
+    @Test
+    void retrieveAllProvisioningEntriesWithZeroLimitReturnsEmptyPageWithTotal() throws SQLException {
+        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build(), 5L,
+                new Object[] { 1L, true, 10L, Date.valueOf("2026-11-10"), "mifos", 11L, "admin" });
+
+        Page<ProvisioningEntryData> page = service.retrieveAllProvisioningEntries(0, 0);
+
+        assertTrue(page.getPageItems().isEmpty());
+        assertEquals(5, page.getTotalFilteredRecords());
+        assertEquals(List.of(COUNT_SQL), executedSql);
+    }
+
+    @Test
+    void retrieveAllProvisioningEntriesIgnoresNegativeOffsetAndLimit() throws SQLException {
+        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build(), 1L,
+                new Object[] { 1L, true, 10L, Date.valueOf("2026-11-10"), "mifos", 11L, "admin" });
+
+        Page<ProvisioningEntryData> page = service.retrieveAllProvisioningEntries(-1, -5);
+
+        assertEquals(1, page.getPageItems().size());
+        assertEquals(SELECT_SQL, executedSql.get(0));
     }
 
     private ProvisioningEntriesReadPlatformService service(SQLTemplates templates, Long total, Object[]... rows) throws SQLException {

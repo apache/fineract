@@ -246,14 +246,16 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                         mProvisioningHistory.createdDate, created.username, mProvisioningHistory.lastmodifiedbyId, modified.username)
                 .from(mProvisioningHistory).leftJoin(created).on(created.id.eq(mProvisioningHistory.createdbyId)).leftJoin(modified)
                 .on(modified.id.eq(mProvisioningHistory.lastmodifiedbyId)).orderBy(mProvisioningHistory.createdDate.asc());
-        if (limit != null) {
+        // QueryDSL rejects limit <= 0 and offset < 0; limit=0 used to return an empty page, so keep that
+        final boolean emptyPage = limit != null && limit == 0;
+        if (limit != null && limit > 0) {
             query.limit(limit);
         }
-        if (offset != null) {
+        if (offset != null && offset > 0) {
             query.offset(offset);
         }
 
-        final List<ProvisioningEntryData> items = query.fetch().stream().map(row -> {
+        final List<ProvisioningEntryData> items = emptyPage ? List.of() : query.fetch().stream().map(row -> {
             final java.sql.Date createdDate = row.get(mProvisioningHistory.createdDate);
             return new ProvisioningEntryData().setId(row.get(mProvisioningHistory.id))
                     .setJournalEntry(Boolean.TRUE.equals(row.get(mProvisioningHistory.journalEntryCreated)))
