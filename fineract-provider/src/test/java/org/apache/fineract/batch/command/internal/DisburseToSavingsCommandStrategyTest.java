@@ -47,7 +47,7 @@ public class DisburseToSavingsCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId);
         final String responseBody = "{\"loanId\":" + loanId + ",\"resourceId\":16,\"changes\":{}}";
 
@@ -73,7 +73,7 @@ public class DisburseToSavingsCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId);
         request.setRelativeUrl("v1/loans/" + loanId + "?command=disburseToSavings");
         final String responseBody = "{\"loanId\":" + loanId + ",\"resourceId\":17,\"changes\":{}}";
@@ -95,10 +95,10 @@ public class DisburseToSavingsCommandStrategyTest {
      */
     private BatchRequest getBatchRequest(final Long loanId) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(String.format("loans/%s?command=disburseToSavings", loanId));
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"actualDisbursementDate\":\"01 March 2026\",\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\"}");
         return br;
     }

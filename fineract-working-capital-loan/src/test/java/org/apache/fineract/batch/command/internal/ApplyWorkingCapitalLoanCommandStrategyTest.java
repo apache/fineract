@@ -73,7 +73,7 @@ public class ApplyWorkingCapitalLoanCommandStrategyTest {
      */
     private BatchRequest getBatchRequest() {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("working-capital-loans");
         br.setMethod(HttpMethod.POST);
         br.setBody("{\"clientId\":1,\"productId\":1,\"principal\":1000,\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\","

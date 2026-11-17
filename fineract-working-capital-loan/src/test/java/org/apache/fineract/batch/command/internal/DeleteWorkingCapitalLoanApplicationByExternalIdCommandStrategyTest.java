@@ -80,10 +80,10 @@ public class DeleteWorkingCapitalLoanApplicationByExternalIdCommandStrategyTest 
      */
     private BatchRequest getBatchRequest(final String loanExternalId) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("v1/working-capital-loans/external-id/" + loanExternalId);
         br.setMethod(HttpMethod.DELETE);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
         return br;
     }

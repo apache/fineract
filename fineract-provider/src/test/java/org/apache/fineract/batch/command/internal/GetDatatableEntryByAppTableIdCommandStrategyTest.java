@@ -70,7 +70,7 @@ public class GetDatatableEntryByAppTableIdCommandStrategyTest {
     public void testExecuteSuccessScenario(final String queryParameter, final int numberOfQueryParams) {
         final TestContext testContext = new TestContext();
 
-        final Long loanId = RandomUtils.nextLong();
+        final Long loanId = RandomUtils.secure().randomLong();
         final String datatableName = "dt_loan_xyz";
         final BatchRequest request = getBatchRequest(loanId, queryParameter, datatableName);
         final String responseBody = "{\\\"columnHeaders\\\":[{}],\\\"data\\\":\\\"{}\\\"}";
@@ -112,10 +112,10 @@ public class GetDatatableEntryByAppTableIdCommandStrategyTest {
             relativeUrl = relativeUrl + "?" + queryParameter;
         }
 
-        br.setRequestId(RandomUtils.nextLong());
+        br.setRequestId(RandomUtils.secure().randomLong());
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(RandomUtils.nextLong());
+        br.setReference(RandomUtils.secure().randomLong());
         br.setBody("{}");
 
         return br;

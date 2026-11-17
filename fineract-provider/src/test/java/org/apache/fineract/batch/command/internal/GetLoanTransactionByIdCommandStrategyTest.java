@@ -55,8 +55,8 @@ public class GetLoanTransactionByIdCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long transactionId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, transactionId, fields);
         final String responseBody = "{\"id\":12,\"officeId\":1,\"officeName\":\"Head Office\",\"type\":{\"id\":10,\"code\":"
                 + "\"loanTransactionType.accrual\",\"value\":\"Accrual\",\"disbursement\":false,\"repaymentAtDisbursement\":false,"
@@ -99,10 +99,10 @@ public class GetLoanTransactionByIdCommandStrategyTest {
             relativeUrl = relativeUrl + "?fields=" + fields;
         }
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
 
         return br;

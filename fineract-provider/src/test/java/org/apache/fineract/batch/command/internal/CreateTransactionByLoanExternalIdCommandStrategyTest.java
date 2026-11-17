@@ -78,10 +78,10 @@ public class CreateTransactionByLoanExternalIdCommandStrategyTest {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = "loans/external-id/" + loanExternalId + "/transactions?command=" + command;
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
 
         return br;

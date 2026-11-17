@@ -78,7 +78,7 @@ public class CreateAccountTransferCommandStrategyTest {
      */
     private BatchRequest getBatchRequest() {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("accounttransfers");
         br.setMethod(HttpMethod.POST);
         br.setBody("{\"fromOfficeId\":1,\"fromClientId\":2,\"fromAccountType\":2,\"fromAccountId\":3,"
