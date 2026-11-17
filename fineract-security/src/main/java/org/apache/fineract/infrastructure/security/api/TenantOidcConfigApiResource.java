@@ -22,6 +22,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -33,10 +36,11 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Locale;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.domain.TenantOidcConfig;
 import org.apache.fineract.infrastructure.core.exception.ResourceNotFoundException;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.data.TenantOidcConfigData;
 import org.apache.fineract.infrastructure.security.domain.OidcFederationType;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -62,20 +66,21 @@ public class TenantOidcConfigApiResource {
 
     private final PlatformSecurityContext context;
     private final TenantOidcConfigService tenantOidcConfigService;
-    private final ToApiJsonSerializer<TenantOidcConfigData> apiJsonSerializer;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve OIDC configuration for a tenant", description = "Returns the current OIDC/IdP configuration for the given tenant. "
             + "The clientSecret is never included in the response.")
-    public String retrieve(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(schema = @Schema(implementation = String.class)))
+    @LegacyApiResponse
+    public TenantOidcConfigData retrieve(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
 
         TenantOidcConfig config = tenantOidcConfigService.findByTenantId(tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
                         "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
 
-        return apiJsonSerializer.serialize(TenantOidcConfigData.from(config));
+        return TenantOidcConfigData.from(config);
     }
 
     @POST
@@ -84,12 +89,14 @@ public class TenantOidcConfigApiResource {
     @Operation(summary = "Create OIDC configuration for a tenant", description = "Creates a new OIDC/IdP configuration for the given tenant. "
             + "The clientSecret is encrypted at rest and never returned in responses. "
             + "The issuerUri must be globally unique across all tenants.")
-    public String create(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId, String requestBody) {
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(schema = @Schema(implementation = String.class)))
+    @LegacyApiResponse
+    public TenantOidcConfigData create(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId, String requestBody) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
 
         TenantOidcConfig config = parseRequest(tenantId, requestBody, null);
         TenantOidcConfig saved = tenantOidcConfigService.save(config);
-        return apiJsonSerializer.serialize(TenantOidcConfigData.from(saved));
+        return TenantOidcConfigData.from(saved);
     }
 
     @PUT
@@ -97,7 +104,9 @@ public class TenantOidcConfigApiResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update OIDC configuration for a tenant", description = "Updates the existing OIDC/IdP configuration for the given tenant. "
             + "If clientSecret is omitted in the request body, the existing encrypted secret is preserved.")
-    public String update(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId, String requestBody) {
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(schema = @Schema(implementation = String.class)))
+    @LegacyApiResponse
+    public TenantOidcConfigData update(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId, String requestBody) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
 
         TenantOidcConfig existing = tenantOidcConfigService.findByTenantId(tenantId)
@@ -106,21 +115,23 @@ public class TenantOidcConfigApiResource {
 
         TenantOidcConfig updated = parseRequest(tenantId, requestBody, existing);
         TenantOidcConfig saved = tenantOidcConfigService.save(updated);
-        return apiJsonSerializer.serialize(TenantOidcConfigData.from(saved));
+        return TenantOidcConfigData.from(saved);
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete OIDC configuration for a tenant", description = "Removes the OIDC/IdP configuration for the given tenant. "
             + "After deletion, authentication via this tenant's IdP will no longer work.")
-    public String delete(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(schema = @Schema(implementation = String.class)))
+    @LegacyApiResponse
+    public Map<String, Object> delete(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
 
         tenantOidcConfigService.findByTenantId(tenantId).orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
                 "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
 
         tenantOidcConfigService.deleteByTenantId(tenantId);
-        return "{}";
+        return Map.of();
     }
 
     private TenantOidcConfig parseRequest(String tenantId, String body, TenantOidcConfig existing) {

@@ -35,19 +35,16 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PermissionData;
 import org.apache.fineract.useradministration.service.PermissionReadPlatformService;
@@ -61,13 +58,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PermissionsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "PERMISSION";
 
     private final PlatformSecurityContext context;
     private final PermissionReadPlatformService permissionReadPlatformService;
-    private final DefaultToApiJsonSerializer<PermissionData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -83,7 +77,8 @@ public class PermissionsApiResource {
                     + "permissions?fields=grouping,code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionsApiResourceSwagger.GetPermissionsResponse.class)))) })
-    public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "grouping", "code", "entityName", "actionName", "selected", "isMakerChecker" })
+    public Collection<PermissionData> retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -96,7 +91,7 @@ public class PermissionsApiResource {
             permissions = this.permissionReadPlatformService.retrieveAllPermissions();
         }
 
-        return this.toApiJsonSerializer.serialize(settings, permissions, RESPONSE_DATA_PARAMETERS);
+        return permissions;
     }
 
     @PUT
@@ -108,7 +103,8 @@ public class PermissionsApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PermissionsApiResourceSwagger.PutPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })
-    public String updatePermissionsDetails(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public CommandProcessingResult updatePermissionsDetails(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updatePermissions() //
@@ -117,6 +113,6 @@ public class PermissionsApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 }

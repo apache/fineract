@@ -26,10 +26,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import jakarta.annotation.Priority;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
@@ -38,17 +43,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
+import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
+import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.LegacyApiResponseSerializer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Component;
 
+// Prefer the application writer to Jersey's automatically registered Jackson provider.
+@Priority(Priorities.ENTITY_CODER)
 @Provider
 @Produces(MediaType.APPLICATION_JSON_VALUE)
 @Consumes(MediaType.APPLICATION_JSON_VALUE)
@@ -60,6 +75,13 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
     // HTTP message converter bean, so bind directly to the Jersey object mapper instead
     @Qualifier("objectMapper")
     private final ObjectMapper objectMapper;
+    private final LegacyApiResponseSerializer legacyApiResponseSerializer;
+
+    @Context
+    private UriInfo uriInfo;
+
+    @Context
+    private ResourceInfo resourceInfo;
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, jakarta.ws.rs.core.MediaType mediaType) {
@@ -121,7 +143,12 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
             // AUTO_CLOSE_TARGET is disabled so Jersey's CommittingOutputStream stays open for the rest of
             // the WriterInterceptor chain (the GZip interceptor in particular). The removed
             // MappingJackson2HttpMessageConverter used StreamUtils.nonClosing(..) for the same reason.
-            ObjectWriter writer = objectMapper.writer().without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+            LegacyApiResponse legacyResponse = t instanceof ApiGlobalErrorResponse ? null : legacyResponse(annotations);
+            Set<String> fields = legacyResponse != null && uriInfo != null
+                    ? ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters())
+                    : Set.of();
+            ObjectWriter writer = (legacyResponse == null ? objectMapper.writer()
+                    : legacyApiResponseSerializer.writer(legacyResponse, fields)).without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
             // Container and Optional returns are serialised against the declared generic type, so the
             // element type is taken from the signature rather than from each element's runtime class -
             // this is what the converter did via ObjectWriter.forType(..). Plain POJOs keep runtime typing.
@@ -134,4 +161,17 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
             writer.writeValue(entityStream, t);
         }
     }
+
+    private LegacyApiResponse legacyResponse(Annotation[] annotations) {
+        LegacyApiResponse response = annotations == null ? null
+                : Arrays.stream(annotations).filter(LegacyApiResponse.class::isInstance).map(LegacyApiResponse.class::cast).findFirst()
+                        .orElse(null);
+        if (response != null) {
+            return response;
+        }
+        // Spring proxies can hide the annotations passed to the body writer. Resolve the resource method as well.
+        Method method = resourceInfo == null ? null : resourceInfo.getResourceMethod();
+        return method == null ? null : AnnotatedElementUtils.findMergedAnnotation(method, LegacyApiResponse.class);
+    }
+
 }

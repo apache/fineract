@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.useradministration.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public final class PasswordPreferencesApiConstants {
 
     private PasswordPreferencesApiConstants() {
@@ -40,7 +36,5 @@ public final class PasswordPreferencesApiConstants {
 
     // request parameters
     public static final String VALIDATION_POLICY_ID = "validationPolicyId";
-
-    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID_PARAM_NAME, ACTIVE, DESCRIPTION));
 
 }

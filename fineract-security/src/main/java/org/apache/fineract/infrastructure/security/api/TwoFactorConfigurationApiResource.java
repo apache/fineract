@@ -36,8 +36,8 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TwoFactorConfigurationService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -54,17 +54,17 @@ public class TwoFactorConfigurationApiResource {
 
     private final PlatformSecurityContext context;
     private final TwoFactorConfigurationService configurationService;
-    private final DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
     @Operation(operationId = "retrieveAll_4")
     @AlternativeOperationId("retrieveAll_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorConfigurationApiResourceSwagger.GetTwoFactorConfigurationResponse.class)))
-    public String retrieveAll() {
+    @LegacyApiResponse
+    public Map<String, Object> retrieveAll() {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         Map<String, Object> configurationMap = configurationService.retrieveAll();
-        return toApiJsonSerializer.serialize(configurationMap);
+        return configurationMap;
     }
 
     @PUT
@@ -73,11 +73,12 @@ public class TwoFactorConfigurationApiResource {
     @AlternativeOperationId("updateConfiguration_3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TwoFactorConfigurationApiResourceSwagger.PutTwoFactorConfigurationRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorConfigurationApiResourceSwagger.PutTwoFactorConfigurationResponse.class)))
-    public String updateConfiguration(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public CommandProcessingResult updateConfiguration(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateTwoFactorConfiguration().withJson(apiRequestBodyAsJson)
                 .build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 }

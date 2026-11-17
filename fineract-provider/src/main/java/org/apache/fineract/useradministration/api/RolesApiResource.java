@@ -40,20 +40,15 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PermissionData;
 import org.apache.fineract.useradministration.data.RoleData;
@@ -76,24 +71,11 @@ public class RolesApiResource {
     public static final String PERMISSION_USAGE_DATA = "permissionUsageData";
     public static final String DISABLE = "disable";
     public static final String ENABLE = "enable";
-    /**
-     * The set of parameters that are supported in response for {@link RoleData}
-     */
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(ID, NAME, DESCRIPTION, AVAILABLE_PERMISSIONS, SELECTED_PERMISSIONS));
-    /**
-     * The set of parameters that are supported in response for {@link RoleData}
-     */
-    private static final Set<String> PERMISSIONS_RESPONSE_PARAMETERS = new HashSet<>(
-            Arrays.asList(ID, NAME, DESCRIPTION, PERMISSION_USAGE_DATA));
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "ROLE";
 
     private final PlatformSecurityContext context;
     private final RoleReadPlatformService roleReadPlatformService;
     private final PermissionReadPlatformService permissionReadPlatformService;
-    private final DefaultToApiJsonSerializer<RoleData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<RolePermissionsData> permissionsToApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -102,14 +84,14 @@ public class RolesApiResource {
             + "roles\n" + "\n" + "\n" + "roles?fields=name")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesResponse.class)))) })
-    public String retrieveAllRoles(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "name", "description", "availablePermissions", "selectedPermissions" })
+    public Collection<RoleData> retrieveAllRoles(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAll();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, roles, RESPONSE_DATA_PARAMETERS);
+        return roles;
     }
 
     @POST
@@ -120,7 +102,8 @@ public class RolesApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesResponse.class))) })
-    public String createRole(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public CommandProcessingResult createRole(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createRole() //
@@ -129,7 +112,7 @@ public class RolesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @GET
@@ -140,15 +123,15 @@ public class RolesApiResource {
     @AlternativeOperationId("retrieveRole")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdResponse.class))) })
-    public String retrieveRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId, @Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "name", "description", "availablePermissions", "selectedPermissions" })
+    public RoleData retrieveRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
         final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
 
-        return this.toApiJsonSerializer.serialize(settings, role, RESPONSE_DATA_PARAMETERS);
+        return role;
     }
 
     /**
@@ -171,7 +154,8 @@ public class RolesApiResource {
     @Parameters({ @Parameter(description = "No Request Body", name = "No Request Body") })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesRoleIdResponse.class))) })
-    public String actionsOnRoles(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
+    @LegacyApiResponse
+    public CommandProcessingResult actionsOnRoles(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -186,7 +170,7 @@ public class RolesApiResource {
             final CommandWrapper commandRequest = builder.enableRole(roleId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @PUT
@@ -197,7 +181,8 @@ public class RolesApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdResponse.class))) })
-    public String updateRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
+    @LegacyApiResponse
+    public CommandProcessingResult updateRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -207,7 +192,7 @@ public class RolesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @GET
@@ -217,17 +202,16 @@ public class RolesApiResource {
             "Roles" }, description = "Example Requests:\n" + "\n" + "roles/1/permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdPermissionsResponse.class))) })
-    public String retrieveRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
+    @LegacyApiResponse({ "id", "name", "description", "permissionUsageData" })
+    public RolePermissionsData retrieveRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
         final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
         final Collection<PermissionData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
         final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData);
-        return this.permissionsToApiJsonSerializer.serialize(settings, permissionsData, PERMISSIONS_RESPONSE_PARAMETERS);
+        return permissionsData;
     }
 
     @PUT
@@ -238,7 +222,8 @@ public class RolesApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsResponse.class))) })
-    public String updateRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
+    @LegacyApiResponse
+    public CommandProcessingResult updateRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -248,7 +233,7 @@ public class RolesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     /**
@@ -264,7 +249,8 @@ public class RolesApiResource {
             "Roles" }, description = "Description : Delete the role in case role is not associated with any users.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.DeleteRolesRoleIdResponse.class))) })
-    public String deleteRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId) {
+    @LegacyApiResponse
+    public CommandProcessingResult deleteRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteRole(roleId) //
@@ -272,7 +258,7 @@ public class RolesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     private boolean is(final String commandParam, final String commandValue) {

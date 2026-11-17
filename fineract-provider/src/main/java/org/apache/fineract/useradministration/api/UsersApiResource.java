@@ -41,10 +41,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -53,11 +50,11 @@ import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -73,18 +70,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UsersApiResource {
 
-    /**
-     * The set of parameters that are supported in response for {@link AppUserData}.
-     */
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username",
-            "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
-
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "USER";
 
     private final PlatformSecurityContext context;
     private final AppUserReadPlatformService readPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
@@ -97,14 +87,15 @@ public class UsersApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersResponse.class)))) })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "officeId", "officeName", "username", "firstname", "lastname", "email", "allowedOffices", "availableRoles",
+            "selectedRoles", "staff" })
+    public Collection<AppUserData> retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, users, RESPONSE_DATA_PARAMETERS);
+        return users;
     }
 
     @GET
@@ -115,7 +106,10 @@ public class UsersApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersUserIdResponse.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("userId") @Parameter(description = "userId") final Long userId, @Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "officeId", "officeName", "username", "firstname", "lastname", "email", "allowedOffices", "availableRoles",
+            "selectedRoles", "staff" })
+    public AppUserData retrieveOne(@PathParam("userId") @Parameter(description = "userId") final Long userId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS, userId);
 
@@ -127,7 +121,7 @@ public class UsersApiResource {
             user = AppUserData.template(user, offices);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
+        return user;
     }
 
     @GET
@@ -139,14 +133,15 @@ public class UsersApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersTemplateResponse.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String template(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "officeId", "officeName", "username", "firstname", "lastname", "email", "allowedOffices", "availableRoles",
+            "selectedRoles", "staff" })
+    public AppUserData template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final AppUserData user = this.readPlatformService.retrieveNewUserDetails();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
+        return user;
     }
 
     @POST
@@ -161,7 +156,8 @@ public class UsersApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public CommandProcessingResult create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createUser() //
@@ -170,7 +166,7 @@ public class UsersApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @PUT
@@ -182,7 +178,8 @@ public class UsersApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("userId") @Parameter(description = "userId") final Long userId,
+    @LegacyApiResponse
+    public CommandProcessingResult update(@PathParam("userId") @Parameter(description = "userId") final Long userId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -192,7 +189,7 @@ public class UsersApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @POST
@@ -205,7 +202,8 @@ public class UsersApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdResponse.class))) })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String changePassword(@PathParam("userId") @Parameter(description = "userId") final Long userId,
+    @LegacyApiResponse
+    public CommandProcessingResult changePassword(@PathParam("userId") @Parameter(description = "userId") final Long userId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -215,7 +213,7 @@ public class UsersApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @DELETE
@@ -226,7 +224,8 @@ public class UsersApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("userId") @Parameter(description = "userId") final Long userId) {
+    @LegacyApiResponse
+    public CommandProcessingResult delete(@PathParam("userId") @Parameter(description = "userId") final Long userId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteUser(userId) //
@@ -234,7 +233,7 @@ public class UsersApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @GET
@@ -256,11 +255,13 @@ public class UsersApiResource {
     @Operation(summary = "Upload users template", operationId = "postBulkTemplateUser", description = "Uploads a filled Excel template to create multiple users in bulk.", tags = {
             "Users" })
     @AlternativeOperationId("postUsersTemplate")
-    public String postUsersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(schema = @Schema(implementation = String.class)))
+    @LegacyApiResponse
+    public Long postUsersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
         final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.USERS.toString(), uploadedInputStream,
                 fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return importDocumentId;
     }
 }

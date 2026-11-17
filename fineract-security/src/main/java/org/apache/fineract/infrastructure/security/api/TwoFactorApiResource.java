@@ -36,15 +36,13 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.data.AccessTokenData;
 import org.apache.fineract.infrastructure.security.data.OTPDeliveryMethod;
 import org.apache.fineract.infrastructure.security.data.OTPMetadata;
@@ -63,11 +61,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TwoFactorApiResource {
 
-    private final ToApiJsonSerializer<OTPMetadata> otpRequestSerializer;
-    private final ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer;
-    private final ToApiJsonSerializer<AccessTokenData> accessTokenSerializer;
-    private final DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
-
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final TwoFactorService twoFactorService;
@@ -75,34 +68,37 @@ public class TwoFactorApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TwoFactorApiResourceSwagger.GetTwoFactorDeliveryMethodsResponse.class))))
-    public String getOTPDeliveryMethods(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse
+    public List<OTPDeliveryMethod> getOTPDeliveryMethods(@Context final UriInfo uriInfo) {
         AppUser user = context.authenticatedUser();
 
         List<OTPDeliveryMethod> otpDeliveryMethods = twoFactorService.getDeliveryMethodsForUser(user);
-        return this.otpDeliveryMethodSerializer.serialize(otpDeliveryMethods);
+        return otpDeliveryMethods;
     }
 
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorRequestTokenResponse.class)))
-    public String requestToken(@QueryParam("deliveryMethod") final String deliveryMethod,
+    @LegacyApiResponse
+    public OTPMetadata requestToken(@QueryParam("deliveryMethod") final String deliveryMethod,
             @QueryParam("extendedToken") @DefaultValue("false") boolean extendedAccessToken, @Context final UriInfo uriInfo) {
         final AppUser user = context.authenticatedUser();
 
         final OTPRequest request = twoFactorService.createNewOTPToken(user, deliveryMethod, extendedAccessToken);
-        return this.otpRequestSerializer.serialize(request.getMetadata());
+        return request.getMetadata();
     }
 
     @Path("validate")
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorValidateResponse.class)))
-    public String validate(@QueryParam("token") final String token) {
+    @LegacyApiResponse
+    public AccessTokenData validate(@QueryParam("token") final String token) {
         final AppUser user = context.authenticatedUser();
 
         TFAccessToken accessToken = twoFactorService.createAccessTokenFromOTP(user, token);
 
-        return accessTokenSerializer.serialize(accessToken.toTokenData());
+        return accessToken.toTokenData();
     }
 
     @Path("invalidate")
@@ -112,11 +108,12 @@ public class TwoFactorApiResource {
     @AlternativeOperationId("updateConfiguration_2")
     @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorInvalidateRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TwoFactorApiResourceSwagger.PostTwoFactorInvalidateResponse.class)))
-    public String updateConfiguration(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public CommandProcessingResult updateConfiguration(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().invalidateTwoFactorAccessToken().withJson(apiRequestBodyAsJson)
                 .build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 }
