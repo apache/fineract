@@ -66,8 +66,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 /**
- * Runs against a server with OAuth2 and two-factor authentication enabled: an OAuth2 access token alone reaches only the
- * two-factor endpoints, and the rest of the API needs the two-factor access token as well.
+ * Runs against a server with OAuth2 and two-factor authentication enabled: an OAuth2 access token alone reaches only
+ * the two-factor endpoints, and the rest of the API needs the two-factor access token as well.
  */
 public class OAuth2TwoFactorAuthenticationTest {
 
@@ -159,8 +159,10 @@ public class OAuth2TwoFactorAuthenticationTest {
             }
         });
         server.start();
-        WebDriver driver = getWebDriver();
+        WebDriver driver = null;
         try {
+            // created inside the try, so the callback server is stopped even when the browser does not start
+            driver = getWebDriver();
             driver.get(url);
             driver.findElement(By.name("username")).sendKeys("mifos");
             driver.findElement(By.name("password")).sendKeys("password");
@@ -170,7 +172,9 @@ public class OAuth2TwoFactorAuthenticationTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
             server.stop(0);
         }
     }
@@ -219,7 +223,8 @@ public class OAuth2TwoFactorAuthenticationTest {
     }
 
     /**
-     * The actuator and the OAuth2 token endpoint are served outside {@code /api} and are not part of the generated client.
+     * The actuator and the OAuth2 token endpoint are served outside {@code /api} and are not part of the generated
+     * client.
      */
     interface ServerPagesApi {
 
@@ -233,5 +238,6 @@ public class OAuth2TwoFactorAuthenticationTest {
                 @Param("clientId") String clientId, @Param("codeVerifier") String codeVerifier);
     }
 
-    record TokenResponse(@JsonProperty("access_token") String accessToken) {}
+    record TokenResponse(@JsonProperty("access_token") String accessToken) {
+    }
 }

@@ -170,8 +170,7 @@ public class AuthorizationServerConfig {
                     if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
                         // the two-factor endpoints deliver and validate the token, so they cannot require it
                         auth.requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").authenticated()
-                                .requestMatchers("/api/*/twofactor").authenticated().anyRequest()
-                                .hasAuthority("TWOFACTOR_AUTHENTICATED");
+                                .requestMatchers("/api/*/twofactor").authenticated().anyRequest().hasAuthority("TWOFACTOR_AUTHENTICATED");
                     } else {
                         auth.anyRequest().authenticated();
                     }
