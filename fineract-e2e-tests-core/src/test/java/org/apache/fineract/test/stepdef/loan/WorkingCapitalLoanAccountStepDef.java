@@ -6682,6 +6682,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE, response);
     }
 
+    @When("Customer adjusts by delta the Working Capital loan transaction with external-id {string} by {string} with new external-id {string}")
+    public void adjustByDeltaByTransactionExternalIdWithNewExternalId(final String externalIdSlot, final String delta,
+            final String requestedExternalIdSlot) {
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final String requestedExternalId = resolveExternalIdSlot(requestedExternalIdSlot);
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse response = ok(() -> adjustByTransactionExternalId(getCreatedLoanId(),
+                externalId, "adjust-by-delta", externalIdAdjustRequest(new BigDecimal(delta), null, requestedExternalId)));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_ADJUST_BY_DELTA_TRANSACTION_RESPONSE, response);
+        testContext().set(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE, response);
+    }
+
     @When("Customer adjusts by delta the Working Capital loan transaction with external-id {string} by {string} with external-id {string} and gets error:")
     public void adjustByDeltaByTransactionExternalIdFails(final String externalIdSlot, final String delta,
             final String requestedExternalIdSlot, final DataTable table) {

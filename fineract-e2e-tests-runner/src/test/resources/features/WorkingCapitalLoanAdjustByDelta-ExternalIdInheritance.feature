@@ -6,7 +6,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
   # several times at once. Each adjustment is sent against the same transaction external id and asks for that same
   # external id on its replacement, so the external id always points to the live transaction.
 
-  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance: consecutive adjustments follow the external id
+  @TestRailId:C123845
+  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance - UC1: consecutive adjustments follow the external id
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
@@ -34,7 +35,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
       | ASSET     | 112601       | Loans Receivable          |       | 90.0   |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  Scenario: Verify Working Capital Loan adjust - external id inheritance: absolute adjust passes the external id on
+  @TestRailId:C123846
+  Scenario: Verify Working Capital Loan adjust - external id inheritance - UC2: absolute adjust passes the external id on
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
@@ -48,7 +50,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
     And a Working Capital Loan Adjust Transaction business event shows the external-id "WC-AGG-ABS" moved to the replacement
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance: the external id of another transaction is still refused
+  @TestRailId:C123847
+  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance - UC3: the external id of another transaction is still refused
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
@@ -64,7 +67,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
     And Working Capital Loan transaction with external-id "WC-AGG-OTHER" has amount "50.0" and reversed "false"
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance: concurrent adjustments against the same external id are each applied once
+  @TestRailId:C123848
+  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance - UC4: concurrent adjustments against the same external id are each applied once
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
@@ -89,7 +93,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
       | ASSET     | 112601       | Loans Receivable          |       | 87.5   |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  Scenario: Verify Working Capital Loan adjust by delta - concurrent adjustments against the same numeric id let only one win
+  @TestRailId:C123849
+  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance - UC5: concurrent adjustments against the same numeric id let only one win
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
@@ -103,7 +108,8 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
       | -7.5  |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance: after a full reversal the external id stays on the reversed transaction
+  @TestRailId:C123850
+  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance - UC6: after a full reversal the external id stays on the reversed transaction
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
@@ -117,4 +123,19 @@ Feature: Working Capital Loan Adjust By Delta Transaction - External Id Inherita
     When Customer adjusts by delta the Working Capital loan transaction with external-id "WC-AGG-FULL" by "-5" with external-id "WC-AGG-FULL" and gets error:
       | httpCode | errorMessage                                 |
       | 403      | error.msg.wc.loan.transaction.already.undone |
+    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+
+  @TestRailId:C123851
+  Scenario: Verify Working Capital Loan adjust by delta - external id inheritance - UC7: a different unique external id is set on the replacement, the reversed transaction keeps its own
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 100.0 transaction amount and external-id "WC-AGG-A" on Working Capital loan
+    # Opt-out: a different external id is requested, so the replacement gets that one and the reversed transaction keeps WC-AGG-A
+    When Customer adjusts by delta the Working Capital loan transaction with external-id "WC-AGG-A" by "-5" with new external-id "WC-NEW-B"
+    Then Working Capital Loan transaction with external-id "WC-AGG-A" has amount "100.0" and reversed "true"
+    And Working Capital Loan transaction with external-id "WC-NEW-B" has amount "95.0" and reversed "false"
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
