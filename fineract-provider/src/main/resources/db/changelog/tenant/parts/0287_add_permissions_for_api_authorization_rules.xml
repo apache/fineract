@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="0287-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_ADHOC';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="authorisation"/>
+            <column name="code" value="READ_ADHOC"/>
+            <column name="entity_name" value="ADHOC"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-2">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_TELLER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="cash_mgmt"/>
+            <column name="code" value="READ_TELLER"/>
+            <column name="entity_name" value="TELLER"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_PROVISIONCATEGORY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="LOAN_PROVISIONING"/>
+            <column name="code" value="READ_PROVISIONCATEGORY"/>
+            <column name="entity_name" value="PROVISIONCATEGORY"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-4">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_PROVISIONCRITERIA';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="LOAN_PROVISIONING"/>
+            <column name="code" value="READ_PROVISIONCRITERIA"/>
+            <column name="entity_name" value="PROVISIONINGCRITERIA"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-5">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_PROVISIONENTRIES';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="LOAN_PROVISIONING"/>
+            <column name="code" value="READ_PROVISIONENTRIES"/>
+            <column name="entity_name" value="PROVISIONINGENTRIES"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-6">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_EXTERNAL_ASSET_OWNER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="investor"/>
+            <column name="code" value="READ_EXTERNAL_ASSET_OWNER"/>
+            <column name="entity_name" value="EXTERNAL_ASSET_OWNER"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-7">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_SHAREACCOUNT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="SHAREACCOUNT"/>
+            <column name="code" value="READ_SHAREACCOUNT"/>
+            <column name="entity_name" value="SHAREACCOUNT"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-8">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_SHAREPRODUCT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="SHAREPRODUCT"/>
+            <column name="code" value="READ_SHAREPRODUCT"/>
+            <column name="entity_name" value="SHAREPRODUCT"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-9">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_SURVEY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="READ_SURVEY"/>
+            <column name="entity_name" value="SURVEY"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-10">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_SURVEY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="CREATE_SURVEY"/>
+            <column name="entity_name" value="SURVEY"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-11">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_SURVEY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="UPDATE_SURVEY"/>
+            <column name="entity_name" value="SURVEY"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-12">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_SCORECARD';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="READ_SCORECARD"/>
+            <column name="entity_name" value="SCORECARD"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-13">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_SCORECARD';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="CREATE_SCORECARD"/>
+            <column name="entity_name" value="SCORECARD"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-14">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_LOOKUPTABLE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="READ_LOOKUPTABLE"/>
+            <column name="entity_name" value="LOOKUPTABLE"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-15">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_LOOKUPTABLE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="survey"/>
+            <column name="code" value="CREATE_LOOKUPTABLE"/>
+            <column name="entity_name" value="LOOKUPTABLE"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-16">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_SHAREACCOUNTNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_SHAREACCOUNTNOTE"/>
+            <column name="entity_name" value="SHAREACCOUNTNOTE"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-17">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_SHAREACCOUNTNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CREATE_SHAREACCOUNTNOTE"/>
+            <column name="entity_name" value="SHAREACCOUNTNOTE"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-18">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_SHAREACCOUNTNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_SHAREACCOUNTNOTE"/>
+            <column name="entity_name" value="SHAREACCOUNTNOTE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-19">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_SHAREACCOUNTNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_SHAREACCOUNTNOTE"/>
+            <column name="entity_name" value="SHAREACCOUNTNOTE"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-20">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_SAVINGSTRANSACTIONNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_SAVINGSTRANSACTIONNOTE"/>
+            <column name="entity_name" value="SAVINGSTRANSACTIONNOTE"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-21">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_SAVINGSTRANSACTIONNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CREATE_SAVINGSTRANSACTIONNOTE"/>
+            <column name="entity_name" value="SAVINGSTRANSACTIONNOTE"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-22">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_SAVINGSTRANSACTIONNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_SAVINGSTRANSACTIONNOTE"/>
+            <column name="entity_name" value="SAVINGSTRANSACTIONNOTE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-23">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_SAVINGSTRANSACTIONNOTE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_SAVINGSTRANSACTIONNOTE"/>
+            <column name="entity_name" value="SAVINGSTRANSACTIONNOTE"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-24">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_INTERESTRATECHART';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_INTERESTRATECHART"/>
+            <column name="entity_name" value="INTERESTRATECHART"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-25">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_CHARTSLAB';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_CHARTSLAB"/>
+            <column name="entity_name" value="CHARTSLAB"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-26">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_COLLATERAL_PRODUCT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-27">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_CLIENT_COLLATERAL_PRODUCT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="READ_CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="entity_name" value="CLIENT_COLLATERAL_PRODUCT"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-28">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_CLIENTIMAGE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_CLIENTIMAGE"/>
+            <column name="entity_name" value="CLIENTIMAGE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="0287-29">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_STAFFIMAGE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_STAFFIMAGE"/>
+            <column name="entity_name" value="STAFFIMAGE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

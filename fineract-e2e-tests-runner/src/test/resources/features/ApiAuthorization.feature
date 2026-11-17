@@ -28,8 +28,18 @@ Feature: API authorization
       | READ_HOOK        |
       | READ_PAYMENTTYPE |
       | READ_STAFF       |
+      | READ_TELLER      |
+      | READ_ADHOC       |
     Then Created user can call the API to "list hooks"
     Then Created user can call the API to "list payment types"
     Then Created user can call the API to "list staff"
+    Then Created user can call the API to "list tellers"
+    Then Created user can call the API to "list ad hoc queries"
     Then Created user is refused when it calls the API to "create a hook"
     Then Created user is refused when it calls the API to "list templates"
+
+  Scenario: Verify the permissions of the request matcher rules are available for roles
+    Then Permission "READ_SHAREACCOUNT" is returned with grouping "SHAREACCOUNT", entity "SHAREACCOUNT" and action "READ"
+    Then Permission "READ_TELLER" is returned with grouping "cash_mgmt", entity "TELLER" and action "READ"
+    Then Permission "READ_SURVEY" is returned with grouping "survey", entity "SURVEY" and action "READ"
+    Then Permission "UPDATE_CLIENTIMAGE" is returned with grouping "portfolio", entity "CLIENTIMAGE" and action "UPDATE"
