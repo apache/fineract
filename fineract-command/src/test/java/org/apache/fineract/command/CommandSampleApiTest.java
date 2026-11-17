@@ -36,13 +36,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.CommandProperties;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.apache.fineract.command.test.sample.data.DummyResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
@@ -68,9 +66,6 @@ class CommandSampleApiTest {
     private List<ClientHttpRequestInterceptor> interceptors;
 
     private RestTemplate restTemplate;
-
-    @Autowired
-    private CommandProperties properties;
 
     @BeforeEach
     public void setUp() {
@@ -110,8 +105,10 @@ class CommandSampleApiTest {
 
         restTemplate.setInterceptors(interceptors);
 
+        // this module has no command store, so the key is only carried, not acted on; the idempotency behaviour itself
+        // is covered by IdempotencyCheckCommandHookTest and JdbcCommandStoreTest
         final var headers = new HttpHeaders();
-        headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
+        headers.add("Idempotency-Key", idempotencyKey);
 
         final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), headers);
 
@@ -123,20 +120,10 @@ class CommandSampleApiTest {
         assertNotNull(result.getContent(), "Response body should not be null.");
         assertEquals(content.toUpperCase(Locale.ROOT), result.getContent(), "Wrong response content.");
 
-        // DummyResponse response = store.getResponseByKey(idempotencyKey);
-        //
-        // assertNotNull(response, "There should be a command entity stored with a response.");
-        // assertNotNull(response, "Response should not be null.");
-        // assertNotNull(response.getContent(), "Response body should not be null.");
-        // assertNotNull(response.getTenantId(), "Tenant ID should not be null.");
-        // assertEquals("dummy", response.getTenantId(), "Unexpected tenant ID.");
-        // assertEquals(content.toUpperCase(Locale.ROOT), response.getContent(), "Wrong response content.");
-        //
-        // log.warn("Command response: {}", response);
     }
 
     @Test
-    @Disabled // TODO: implement idempotency properly with backwards compatibility
+    @Disabled // needs a command store; see JdbcCommandStoreTest and IdempotencyCheckCommandHookTest
     void dummyApiIdempotencySync() {
         dummyApiIdempotency("/sync");
     }

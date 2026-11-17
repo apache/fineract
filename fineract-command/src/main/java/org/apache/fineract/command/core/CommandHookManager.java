@@ -18,11 +18,19 @@
  */
 package org.apache.fineract.command.core;
 
+/**
+ * Runs the hooks of one phase - before, after or error - in their order.
+ *
+ * <p>
+ * A hook that throws is not isolated: the exception ends the phase and propagates to the dispatcher, which treats it
+ * like a failure of the command. A hook can stop the remaining hooks of a phase with {@code skipHooks} on the
+ * {@link CommandContext}; that request is cleared when the phase ends.
+ */
 public interface CommandHookManager {
 
-    void before(Command command);
+    void before(CommandContext<?, ?> ctx);
 
-    void after(Command command, Object response);
+    void after(CommandContext<?, ?> ctx);
 
-    void error(Command command, Throwable error);
+    void error(CommandContext<?, ?> ctx);
 }

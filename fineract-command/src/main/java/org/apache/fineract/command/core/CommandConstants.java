@@ -22,6 +22,15 @@ public final class CommandConstants {
 
     private CommandConstants() {}
 
+    public static final String COMMAND_PROPERTIES_PREFIX = "fineract.command";
+    public static final String COMMAND_PROPERTY_ENABLED = COMMAND_PROPERTIES_PREFIX + ".enabled";
+    public static final String COMMAND_PROPERTY_HOOKS_SERVLET_HEADERS_ENABLED = COMMAND_PROPERTIES_PREFIX + ".hook-servlet-headers-enabled";
+    public static final String COMMAND_PROPERTY_HOOKS_TIMESTAMP_ENABLED = COMMAND_PROPERTIES_PREFIX + ".hook-timestamp-enabled";
+    public static final String COMMAND_PROPERTY_HOOKS_USERNAME_ENABLED = COMMAND_PROPERTIES_PREFIX + ".hook-username-enabled";
+    public static final String COMMAND_BASE_PACKAGE = "org.apache.fineract.command";
+    public static final String COMMAND_CORE_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".core";
+    public static final String COMMAND_HOOK_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".hook";
+    public static final String COMMAND_IMPLEMENTATION_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".implementation";
     public static final String COMMAND_JSON_CLASS_ATTRIBUTE = "@class";
     public static final String COMMAND_HTTP_HEADER_REQUEST_ID = "x-fineract-request-id";
     public static final String COMMAND_HTTP_HEADER_TENANT_ID = "Fineract-Platform-TenantId";

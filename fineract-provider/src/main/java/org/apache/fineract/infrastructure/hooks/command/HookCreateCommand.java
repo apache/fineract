@@ -25,4 +25,15 @@ import org.apache.fineract.infrastructure.hooks.data.HookCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class HookCreateCommand extends Command<HookCreateRequest> {}
+public class HookCreateCommand extends Command<HookCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "HOOK";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

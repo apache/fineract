@@ -25,4 +25,15 @@ import org.apache.fineract.infrastructure.hooks.data.HookUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class HookUpdateCommand extends Command<HookUpdateRequest> {}
+public class HookUpdateCommand extends Command<HookUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "HOOK";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorInfo;
-import org.apache.fineract.command.core.HookableCommand;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.hooks.event.HookEvent;
@@ -53,7 +53,7 @@ class WebhookCommandEventPublisher {
     private final ObjectMapper mapper;
     private final ErrorHandler errorHandler;
 
-    void publishSuccess(HookableCommand hookable, Object request, Object response) {
+    void publishSuccess(Command<?> hookable, Object request, Object response) {
         publish(hookable, request, payload -> {
             // As in the legacy command processing, the office and client are exposed at the top level of the payload,
             // where the SMS hooks look up the client to notify, and the office is cleared from the response.
@@ -69,7 +69,7 @@ class WebhookCommandEventPublisher {
         });
     }
 
-    void publishError(HookableCommand hookable, Object request, Throwable error) {
+    void publishError(Command<?> hookable, Object request, Throwable error) {
         publish(hookable, request, payload -> {
             final ErrorInfo errorInfo = errorHandler.handle(ErrorHandler.getMappable(error));
             payload.put("status", "Exception");
@@ -77,9 +77,9 @@ class WebhookCommandEventPublisher {
         });
     }
 
-    private void publish(HookableCommand hookable, Object request, Consumer<Map<String, Object>> result) {
-        final String entityName = hookable.hookEntityName();
-        final String actionName = hookable.hookActionName();
+    private void publish(Command<?> hookable, Object request, Consumer<Map<String, Object>> result) {
+        final String entityName = hookable.entityName();
+        final String actionName = hookable.actionName();
 
         try {
             final AppUser user = context.authenticatedUser();
