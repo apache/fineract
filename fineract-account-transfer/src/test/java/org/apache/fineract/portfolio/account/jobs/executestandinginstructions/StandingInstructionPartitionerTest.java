@@ -26,7 +26,7 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.account.data.StandingInstructionPartition;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class StandingInstructionPartitionerTest {
     @Mock
     private PropertyService propertyService;
     @Mock
-    private StandingInstructionReadPlatformService readService;
+    private StandingInstructionReadService readService;
 
     private StandingInstructionPartitioner partitioner;
 

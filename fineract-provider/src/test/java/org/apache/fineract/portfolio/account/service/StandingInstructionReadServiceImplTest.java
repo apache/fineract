@@ -35,7 +35,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers(disabledWithoutDocker = true)
-class StandingInstructionReadPlatformServiceImplTest {
+class StandingInstructionReadServiceImplTest {
 
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 9, 18);
 
@@ -43,7 +43,7 @@ class StandingInstructionReadPlatformServiceImplTest {
     private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
 
     private JdbcTemplate jdbcTemplate;
-    private StandingInstructionReadPlatformServiceImpl service;
+    private StandingInstructionReadServiceImpl service;
 
     @BeforeEach
     void setUp() {
@@ -78,7 +78,7 @@ class StandingInstructionReadPlatformServiceImplTest {
 
         DatabaseSpecificSQLGenerator sqlGenerator = mock(DatabaseSpecificSQLGenerator.class);
         when(sqlGenerator.currentBusinessDate()).thenReturn("date '" + BUSINESS_DATE + "'");
-        service = new StandingInstructionReadPlatformServiceImpl(jdbcTemplate, null, null, null, null, null, sqlGenerator, null);
+        service = new StandingInstructionReadServiceImpl(jdbcTemplate, null, null, null, null, null, sqlGenerator, null);
     }
 
     @Test

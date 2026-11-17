@@ -18,31 +18,23 @@
  */
 package org.apache.fineract.portfolio.account.data.request;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
-public class StandingInstructionUpdatesRequest implements Serializable {
+@AllArgsConstructor
+public class StandingInstructionDeleteRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String amount;
-    private String validTill;
-    private String dateFormat;
-    private String validFrom;
-    private String locale;
-    private String priority;
-    private String recurrenceType;
-    private String recurrenceInterval;
-    private String instructionType;
-    private String recurrenceFrequency;
-    private String recurrenceOnMonthDay;
-    private String name;
-    private String monthDayFormat;
-    private String status;
-    private Boolean allowPartialTransfer;
+    @Hidden
+    private Long id;
 }

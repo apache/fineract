@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ class StandingInstructionItemProcessorTest {
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 5, 1);
 
     @Mock
-    private StandingInstructionReadPlatformService readService;
+    private StandingInstructionReadService readService;
 
     private StandingInstructionItemProcessor processor;
 
