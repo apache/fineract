@@ -133,6 +133,15 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @Column(name = "charge_refund_charge_type", length = 1, unique = true)
     private String chargeRefundChargeType;
 
+    /**
+     * The installment an accrual belongs to when its date does not say so: income an NPA loan recognises on receipt is
+     * dated on the receipt, usually after the installment it was paid for. {@code null} for every other transaction,
+     * whose installment follows from its date.
+     */
+    @Setter
+    @Column(name = "accrual_installment_number")
+    private Integer accrualInstallmentNumber;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
 
