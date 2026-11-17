@@ -528,7 +528,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     private static final class ReportParameterJoinMapper implements RowMapper<ReportParameterJoinData> {
 
-        public String schema(final Long reportId) {
+        private String schema(final Long reportId) {
 
             String sql = "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
                     + " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
@@ -589,7 +589,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     private static final class ReportParameterMapper implements RowMapper<ReportParameterData> {
 
-        public String schema() {
+        private String schema() {
             return "select p.id as id, p.parameter_name as parameterName from stretchy_parameter p where coalesce(p.special,'') != 'Y' order by p.id";
         }
 

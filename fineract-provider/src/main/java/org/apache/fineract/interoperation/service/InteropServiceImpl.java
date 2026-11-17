@@ -152,7 +152,7 @@ public class InteropServiceImpl implements InteropService {
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             return " country.code_value as nationality, c.date_of_birth as dateOfBirth, c.mobile_no as contactPhone, gender.code_value as gender, c.email_address as email, "
                     + "kyc.code_value as idType, ci.document_key as idNo, ci." + sqlGenerator.escape("description") + " as description, "
                     + "country.code_value as country, a.`address_line_1`, a.`address_line_2`, "

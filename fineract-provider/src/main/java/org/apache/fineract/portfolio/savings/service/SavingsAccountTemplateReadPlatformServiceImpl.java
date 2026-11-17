@@ -270,7 +270,7 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

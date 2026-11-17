@@ -50,7 +50,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
     private static final class NoteMapper implements RowMapper<NoteData> {
 
-        public String schema() {
+        private String schema() {
             return " select n.id as id, n.client_id as clientId, n.group_id as groupId, n.loan_id as loanId, n.loan_transaction_id as transactionId, "
                     + " n.note_type_enum as noteTypeEnum, n.note as note, n.created_date as createdDate, n.created_by as createdById, "
                     + "  n.created_on_utc as createdDateUtc, n.last_modified_on_utc as lastModifiedDateUtc, "

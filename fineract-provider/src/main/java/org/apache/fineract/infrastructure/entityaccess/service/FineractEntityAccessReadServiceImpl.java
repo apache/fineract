@@ -86,7 +86,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         private static final String ENTITY_RELATION_SCHEMA = "select id as id,code_name as mapping_Types from m_entity_relation ";
 
-        public String schema() {
+        private String schema() {
             return ENTITY_RELATION_SCHEMA;
         }
 
@@ -136,7 +136,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         GetOneEntityMapper() {}
 
-        public String schema() {
+        private String schema() {
             return GET_ONE_ENTITY_SCHEMA;
         }
 
@@ -204,7 +204,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         EntityToEntityMapper() {}
 
-        public String schema() {
+        private String schema() {
             return ENTITY_TO_ENTITY_SCHEMA;
         }
 

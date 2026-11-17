@@ -47,7 +47,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
     private static final class CodeMapper implements RowMapper<CodeData> {
 
-        public String schema() {
+        private String schema() {
             return " c.id as id, c.code_name as code_name, c.is_system_defined as systemDefined from m_code c ";
         }
 

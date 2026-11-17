@@ -359,7 +359,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         }
 
-        public String schema() {
+        private String schema() {
             return SHARE_ACCOUNT_SCHEMA;
         }
     }
@@ -454,7 +454,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     amount, chargeAmount, amountPaid, null);
         }
 
-        public String schema() {
+        private String schema() {
             return PURCHASED_SHARES_SCHEMA;
         }
     }
@@ -481,7 +481,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             return new ShareAccountDividendData(id, postedDate, shareAccountData, postedAmount, statusEnum, savingTransactionId);
         }
 
-        public String schema() {
+        private String schema() {
             return SHARE_ACCOUNT_DIVIDEND_SCHEMA;
         }
     }

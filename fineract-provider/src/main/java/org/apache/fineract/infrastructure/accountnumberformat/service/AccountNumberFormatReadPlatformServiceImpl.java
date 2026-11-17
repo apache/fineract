@@ -60,7 +60,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
         AccountNumberFormatMapper() {}
 
-        public String schema() {
+        private String schema() {
             return ACCOUNT_NUMBER_FORMAT_SCHEMA;
         }
 

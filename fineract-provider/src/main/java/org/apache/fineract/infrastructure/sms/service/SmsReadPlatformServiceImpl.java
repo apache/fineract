@@ -77,11 +77,11 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
         SmsMapper() {}
 
-        public String schema() {
+        private String schema() {
             return SMS_SCHEMA;
         }
 
-        public String tableName() {
+        private String tableName() {
             return "sms_messages_outbound";
         }
 

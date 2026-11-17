@@ -164,7 +164,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             return ShareProductData.generic(id, name, shortName, totalShares);
         }
 
-        public String schema() {
+        private String schema() {
             return "shareproduct.id, shareproduct.name, shareproduct.short_name, shareproduct.total_shares from m_share_product shareproduct";
         }
     }
@@ -181,7 +181,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             return new ShareProductMarketPriceData(id, fromLocalDate, shareValue);
         }
 
-        public String schema() {
+        private String schema() {
             return "marketData.id, marketData.from_date, marketData.share_value from m_share_product_market_price marketData";
         }
     }
@@ -266,7 +266,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
                     minimumActivePeriodType, accountingRuleType);
         }
 
-        public String schema() {
+        private String schema() {
             return this.buff.toString();
         }
     }

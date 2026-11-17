@@ -67,7 +67,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
 
     private static final class ReportMailingJobConfigurationMapper implements RowMapper<ReportMailingJobConfigurationData> {
 
-        public String reportMailingJobConfigurationSchema() {
+        private String reportMailingJobConfigurationSchema() {
             return "rmjc.id, rmjc.name, rmjc.value " + "from m_report_mailing_job_configuration rmjc";
         }
 

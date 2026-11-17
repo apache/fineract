@@ -92,7 +92,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
 
     private static final class ReportMailingJobRunHistoryMapper implements RowMapper<ReportMailingJobRunHistoryData> {
 
-        public String reportMailingJobRunHistorySchema() {
+        private String reportMailingJobRunHistorySchema() {
             return "rmjrh.id, rmjrh.job_id as reportMailingJobId, rmjrh.start_datetime as startDateTime, "
                     + "rmjrh.end_datetime as endDateTime, rmjrh.status, rmjrh.error_message as errorMessage, "
                     + "rmjrh.error_log as errorLog " + "from m_report_mailing_job_run_history rmjrh";
