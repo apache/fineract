@@ -1,0 +1,144 @@
+= Command auditing
+
+Every command dispatched through the new command processing is recorded in the `m_command` table by the
+`fineract-command-audit` module. The record is written before the command runs and updated as it finishes, so a command
+that is still in flight, one that completed and one that failed are all distinguishable afterwards.
+
+Auditing is on as soon as the module is on the classpath. Losing the audit trail should be a decision rather than the
+consequence of an unset property.
+
+[source,properties]
+----
+fineract.command.audit.enabled=true
+fineract.command.audit.hook-pre-enabled=true
+fineract.command.audit.hook-post-enabled=true
+fineract.command.audit.hook-error-enabled=true
+----
+
+NOTE: With auditing switched off, nothing is written to `m_command` at all - and idempotency cannot be used, because it
+is these hooks that record how a command finished. See <<Relationship with idempotency>>.
+
+== How a command is recorded
+
+Auditing is implemented as three command hooks, which run after the idempotency hooks:
+
+[cols="1,1,3"]
+|===
+| Hook | State written | When
+
+| Before
+| `UNDER_PROCESSING`
+| The command has been accepted and is about to run.
+
+| After
+| `PROCESSED`
+| The command returned. Its result is stored, along with `executed_at` and `executed_by_username`.
+
+| Error
+| `ERROR`
+| The command threw. The exception message is stored in the `error` column.
+|===
+
+A command that was never executed - a repeat of an idempotency key, which is answered from the existing record - is not
+audited again. The record that owns the key already describes the command, and writing a second one would claim an
+execution that never happened.
+
+== What is stored
+
+[cols="1,3"]
+|===
+| Column | Content
+
+| `entity_name`, `action_name`
+| What the command acted on and what it did, in the vocabulary of `m_permission` - `DOCUMENT`/`CREATE`,
+`BUSINESS_DATE`/`UPDATE`. See <<Why the names are mandatory>>.
+
+| `state`
+| `UNDER_PROCESSING`, `PROCESSED` or `ERROR`. `UNKNOWN` is reported for a key that has no record at all.
+
+| `request`
+| The command's payload, as JSON.
+
+| `response`
+| The result the command produced, as JSON, carrying a type attribute so that it can be read back as the object it was.
+
+| `error`
+| The message of the exception a failed command threw.
+
+| `initiated_by_username`, `executed_by_username`
+| Who asked for the command, and who it ran as.
+
+| `created_at`, `updated_at`, `executed_at`
+| When the record was written, last changed, and when the command ran.
+
+| `ip_address`
+| Where the request came from.
+
+| `idempotency_key`
+| The key the command was claimed under. See the idempotency chapter.
+
+| `custom_idempotency_distinctor`
+| What the key is unique together with, computed when the key was claimed. The empty string when nothing distinguishes
+it, including for a command without a key. See the idempotency chapter.
+
+| `response_status_code`
+| Only set for a command that produced no result of its own. See the idempotency chapter.
+|===
+
+WARNING: `executed_at` and `executed_by_username` are written by the before hook as well as the after hook, so they are
+set even for a command that failed or never finished. Read them as "when this record was last worked on" rather than as
+proof that the command ran to completion; `state` is what says that.
+
+== Reliability
+
+Every write to `m_command` is retried, so that a command is not left recorded in the wrong state because of a deadlock
+or a connection dropped mid-flight. A failure is retried when running the same call again could succeed, and never when
+it could not - a constraint violation is a verdict, not a mishap, and is excluded explicitly.
+
+This wider list is set on the command store alone, under `resilience4j.retry.instances.commandStore`. Retrying a write
+of the command row is safe because the idempotency key is unique, so a second attempt cannot write it twice. The same
+is not true elsewhere: a connection lost during a commit leaves the outcome of that commit unknown, which is why the
+jobs that post interest and run close-of-business keep the narrower list they already had.
+
+If the writes still fail after their attempts are spent, the command itself is unaffected: it has already been
+processed and answered. A record that could not be written is logged, and, when the dead-letter queue is enabled, the
+command is written to it so that the trail can be reconstructed.
+
+== Why the names are mandatory
+
+`Command` declares `entityName()` and `actionName()` as abstract methods, so a command cannot be written without
+saying what it acts on. That is deliberate rather than convenient.
+
+Both names are read by position, not by meaning: the audit search and the checker inbox are defined in terms of them -
+the inbox returns "the `actionNames` and `entityNames` the requestor has Checker approval permissions for" - and
+maker-checker derives the permission that governs approval by joining them with `_CHECKER`, the way
+`PortfolioCommandSourceWritePlatformServiceImpl` does for the legacy processing. The approval columns are already on
+this table. A command whose names were missing would be stored with none of that, and would simply not appear in
+either view: no error, no failing test, just a row nobody can find. Hence abstract methods and `NOT NULL` columns
+rather than an optional interface.
+
+The names have to match the vocabulary already in `m_permission`, which is not always what the class name suggests -
+`CacheSwitchCommand` is `CACHE`/`UPDATE`, not `CACHE`/`SWITCH`, and the entity is `BUSINESS_DATE` rather than
+`BUSINESSDATE`. A few commands act on different entities depending on their payload: a note belongs to whatever it is
+attached to (`CLIENTNOTE`, `LOANNOTE`, ...) and an image to either `CLIENTIMAGE` or `STAFFIMAGE`, so those compute the
+name from the request rather than returning a constant.
+
+NOTE: Rows written before this column existed are backfilled as `UNKNOWN`. They were recorded when commands did not
+carry the names, and saying so is more honest than implying they acted on an entity with an empty name.
+
+== Relationship with idempotency
+
+The audit hooks own the lifecycle of the command record. Idempotency claims the key and counts repeats, but it is the
+audit hooks that move a command out of `UNDER_PROCESSING` and store what it produced.
+
+That makes auditing a prerequisite rather than a companion. An application configured with idempotency enabled and
+auditing disabled refuses to start, naming the properties that conflict. Were it allowed to run, the first request
+under a key would be answered normally, its record would stay `UNDER_PROCESSING` for ever, and every repeat of that key
+would be answered `425 Too Early` - a failure that only appears on the second request and never resolves.
+
+The same holds for the after and error hooks individually: with idempotency enabled, switching off
+`fineract.command.audit.hook-post-enabled` or `fineract.command.audit.hook-error-enabled` also refuses to start. The
+before hook can be switched off, because claiming the key writes the record it would otherwise write.
+
+The reverse is fine and is a supported arrangement: auditing without idempotency records every command as usual, reads
+no idempotency key, and executes a repeated request again rather than replaying it.

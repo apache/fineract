@@ -43,6 +43,10 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation 'org.springframework.boot:spring-boot-liquibase'
+    // @Retry is an AspectJ aspect, so without this the annotations read as present and do nothing; the application
+    // that uses this module brings it, and the retry tests need it here to exercise the real behaviour
+    testImplementation 'org.aspectj:aspectjweaver'
+
     testImplementation(project(path: ':fineract-command-test'))
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

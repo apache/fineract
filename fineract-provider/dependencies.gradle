@@ -29,6 +29,7 @@ dependencies {
     implementation(project(path: ':fineract-command'))
     implementation(project(path: ':fineract-command-audit'))
     implementation(project(path: ':fineract-command-jdbc'))
+    implementation(project(path: ':fineract-command-idempotency'))
     implementation(project(path: ':fineract-validation'))
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-investor'))

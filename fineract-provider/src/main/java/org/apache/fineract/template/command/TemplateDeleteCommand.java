@@ -25,4 +25,15 @@ import org.apache.fineract.template.data.TemplateDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TemplateDeleteCommand extends Command<TemplateDeleteRequest> {}
+public class TemplateDeleteCommand extends Command<TemplateDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "TEMPLATE";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}
