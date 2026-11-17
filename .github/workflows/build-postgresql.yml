@@ -142,6 +142,9 @@ jobs:
             elif [ "$module" = ":twofactor-tests" ]; then
               target_auth_mode="twofactor"
               compose_args=(-f "$COMPOSE_FILE" -f docker-compose-twofactor-test.yml)
+            elif [ "$module" = ":oauth2-twofactor-tests" ]; then
+              target_auth_mode="oauth2-twofactor"
+              compose_args=(-f "$COMPOSE_FILE" -f docker-compose-oauth2-twofactor-test.yml)
             fi
 
             if [ "$FINERACT_AUTH_MODE" != "$target_auth_mode" ]; then
@@ -151,7 +154,7 @@ jobs:
               FINERACT_AUTH_MODE="$target_auth_mode"
             fi
 
-            if [ "$target_auth_mode" = "twofactor" ]; then
+            if [ "$target_auth_mode" = "twofactor" ] || [ "$target_auth_mode" = "oauth2-twofactor" ]; then
               configure_twofactor_smtp_host
             fi
           }
@@ -176,11 +179,11 @@ jobs:
 
           ordered_modules=()
           for module in "${module_order[@]}"; do
-            if [ "$module" != ":oauth2-tests" ] && [ "$module" != ":twofactor-tests" ]; then
+            if [ "$module" != ":oauth2-tests" ] && [ "$module" != ":twofactor-tests" ] && [ "$module" != ":oauth2-twofactor-tests" ]; then
               ordered_modules+=("$module")
             fi
           done
-          for module in ":oauth2-tests" ":twofactor-tests"; do
+          for module in ":oauth2-tests" ":twofactor-tests" ":oauth2-twofactor-tests"; do
             if [ -n "${module_tests[$module]}" ]; then
               ordered_modules+=("$module")
             fi
