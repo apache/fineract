@@ -436,6 +436,8 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUP")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/groups/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUP")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/command/unassign_staff"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNSTAFF_GROUP")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
