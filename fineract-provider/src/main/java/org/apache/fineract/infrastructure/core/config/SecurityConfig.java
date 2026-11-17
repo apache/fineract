@@ -379,7 +379,25 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/hooks/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK")
-
+                    // scheduler job - read
+                    // ConfigureBusinessStepApiResource also exposes GET /jobs/names under this same path prefix;
+                    // keep it on plain authentication instead of letting the READ_SCHEDULER matcher below catch it.
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/names")).fullyAuthenticated()
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/*/runhistory"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/short-name/*/runhistory"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    // scheduler job - update
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SCHEDULER")
                     // template
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/templates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE")

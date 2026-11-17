@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -65,14 +66,16 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.jobs.command.JobExecuteCommand;
+import org.apache.fineract.infrastructure.jobs.command.JobUpdateCommand;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
 import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
 import org.apache.fineract.infrastructure.jobs.data.JobExecuteResponse;
+import org.apache.fineract.infrastructure.jobs.data.JobUpdateRequest;
+import org.apache.fineract.infrastructure.jobs.data.JobUpdateResponse;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/jobs")
@@ -90,7 +93,6 @@ public class SchedulerJobApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
     private final FineractProperties fineractProperties;
-    private final SqlValidator sqlValidator;
     private final CommandDispatcher dispatcher;
 
     @GET
@@ -196,15 +198,15 @@ public class SchedulerJobApiResource {
     }
 
     @PUT
-    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
-    @Consumes({ MediaType.APPLICATION_JSON })
+    @Path("{jobId}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update a Job", description = "Updates the details of a job.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
-    public CommandProcessingResult updateJobDetail(
-            @PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
-            @Parameter(hidden = true) final String jsonRequestBody) {
-        return updateJobDetail(IdTypeResolver.resolveDefault(), Objects.toString(jobId, null), jsonRequestBody);
+    public JobUpdateResponse updateJobDetail(@PathParam("jobId") @Parameter(description = "jobId") final Long jobId,
+            @RequestBody(required = true) @Valid JobUpdateRequest request) {
+        request.setJobId(jobId);
+        var command = new JobUpdateCommand();
+        command.setPayload(request);
+        return dispatcher.<JobUpdateRequest, JobUpdateResponse>dispatch(command).get();
     }
 
     @PUT
@@ -233,8 +235,6 @@ public class SchedulerJobApiResource {
     private String retrieveHistory(@NotNull IdTypeResolver.IdType idType, String identifier, Integer offset, Integer limit, String orderBy,
             String sortOrder, UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(SCHEDULER_RESOURCE_NAME);
-        sqlValidator.validate(orderBy);
-        sqlValidator.validate(sortOrder);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
         final Page<JobDetailHistoryData> jobHistoryData = schedulerJobRunnerReadService.retrieveJobHistory(idType, identifier,
