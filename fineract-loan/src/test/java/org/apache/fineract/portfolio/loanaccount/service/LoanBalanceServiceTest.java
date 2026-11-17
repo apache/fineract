@@ -122,6 +122,22 @@ class LoanBalanceServiceTest {
         assertThat(receivable.isZero()).isTrue();
     }
 
+    @Test
+    void receivableInterestLeavesOutTheExcludedTransaction() {
+        // Adjusting a waiver: the original is still active while its replacement is built, and must not count.
+        LoanTransaction waiverBeingAdjusted = waiver("60");
+        Loan loan = loanWith(accrual("100"), waiverBeingAdjusted);
+
+        assertThat(service.getReceivableInterest(loan, TODAY).getAmount()).isEqualByComparingTo("40");
+        assertThat(service.getReceivableInterest(loan, TODAY, waiverBeingAdjusted).getAmount()).isEqualByComparingTo("100");
+    }
+
+    private static LoanTransaction waiver(String interest) {
+        LoanTransaction transaction = interestTransaction(interest);
+        when(transaction.isInterestWaiver()).thenReturn(true);
+        return transaction;
+    }
+
     private static LoanTransaction accrual(String interest) {
         LoanTransaction transaction = interestTransaction(interest);
         when(transaction.isAccrual()).thenReturn(true);

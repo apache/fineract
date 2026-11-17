@@ -233,10 +233,19 @@ public class LoanBalanceService {
     }
 
     public Money getReceivableInterest(final Loan loan, final LocalDate tillDate) {
+        return getReceivableInterest(loan, tillDate, null);
+    }
+
+    /**
+     * Interest accrued but not yet received or waived up to {@code tillDate}, leaving out {@code excludedTransaction}.
+     * An adjustment builds the replacement of a transaction before it reverses the original, so the original has to be
+     * left out explicitly for the replacement to see the balance it will actually apply to.
+     */
+    public Money getReceivableInterest(final Loan loan, final LocalDate tillDate, final LoanTransaction excludedTransaction) {
         Money receivableInterest = Money.zero(loan.getCurrency());
         for (final LoanTransaction transaction : loan.getLoanTransactions()) {
-            if (transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement() && !transaction.isDisbursement()
-                    && !DateUtils.isAfter(transaction.getTransactionDate(), tillDate)) {
+            if (transaction != excludedTransaction && transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement()
+                    && !transaction.isDisbursement() && !DateUtils.isAfter(transaction.getTransactionDate(), tillDate)) {
                 if (transaction.isAccrual()) {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(loan.getCurrency()));
                 } else if (transaction.isRepaymentLikeType() || transaction.isInterestWaiver() || transaction.isAccrualAdjustment()) {

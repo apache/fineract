@@ -93,6 +93,35 @@ public class LoanInterestWaiverUnaccruedInterestTest extends FeignLoanTestBase {
         });
     }
 
+    /**
+     * Adjusting a waiver builds its replacement while the original waiver is still active. The replacement must see the
+     * receivable without the original, or the original's interest is netted twice and the replacement reverses less
+     * accrued interest than it should.
+     */
+    @Test
+    public void testAdjustedWaiverReversesTheAccruedInterestItWaives() {
+        final Long clientId = createClient();
+        final Long[] loanId = new Long[1];
+        runAt("01 January 2036", () -> {
+            final Long productId = createLoanProduct(fourInstallmentsCumulative());
+            loanId[0] = applyAndApproveCumulativeLoan(clientId, productId, "01 January 2036", PRINCIPAL, 12.0, 4, null);
+            disburseLoan(loanId[0], BigDecimal.valueOf(PRINCIPAL), "01 January 2036");
+        });
+        runAt("01 February 2036", () -> {
+            runPeriodicAccrualAccounting("01 February 2036");
+            final LocalDate cutoff = LocalDate.of(2036, 2, 1);
+            final double accrued = interestReceivable(loanId[0], cutoff);
+
+            final Long waiverId = transactionHelper.addInterestWaiver(loanId[0], waiveInterest(4.0, "01 February 2036")).getResourceId();
+            assertEquals(accrued - 4.0, interestReceivable(loanId[0], cutoff), 0.001, "The waiver reverses accrued interest");
+
+            transactionHelper.adjustLoanTransaction(loanId[0], waiverId, "01 February 2036", 7.0);
+
+            assertEquals(accrued - 7.0, interestReceivable(loanId[0], cutoff), 0.001,
+                    "The replacement waiver reverses all 7.00 of accrued interest, not just what the original left receivable");
+        });
+    }
+
     private GetLoansLoanIdRepaymentPeriod firstInstalment(final Long loanId) {
         return getLoanDetails(loanId).getRepaymentSchedule().getPeriods().stream()
                 .filter(period -> Integer.valueOf(1).equals(period.getPeriod())).findFirst().orElseThrow();
