@@ -42,6 +42,9 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository
 
     List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> findByLoanIdAndLiftedOnDateIsNull(Long loanId);
 
+    @Query("select max(coalesce(tag.liftedOnDate, tag.addedOnDate)) from WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag where tag.rangeSchedule = :rangeSchedule")
+    LocalDate findLatestTagChangeDate(@Param("rangeSchedule") WorkingCapitalLoanDelinquencyRangeSchedule rangeSchedule);
+
     @Modifying(flushAutomatically = true)
     @Query("delete from WorkingCapitalLoanDelinquencyRangeScheduleTagHistory tag where tag.loan.id = :loanId")
     void deleteByLoanId(@Param("loanId") Long loanId);
