@@ -37,6 +37,11 @@ public class JacksonSerializerAdapter<T> extends JsonSerializer<T> implements Se
     }
 
     @Override
+    public boolean isEmpty(SerializerProvider provider, T value) {
+        return converter.isEmpty(value);
+    }
+
+    @Override
     public Class<T> handledType() {
         return converter.convertedType();
     }

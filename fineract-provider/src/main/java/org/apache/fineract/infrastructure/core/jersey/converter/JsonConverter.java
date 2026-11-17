@@ -30,4 +30,12 @@ public interface JsonConverter<T> extends Serializable {
     void convertToJson(T value, JsonGenerator generator) throws IOException;
 
     Class<T> convertedType();
+
+    /**
+     * Whether the value counts as empty for properties annotated with
+     * {@code @JsonInclude(JsonInclude.Include.NON_EMPTY)}.
+     */
+    default boolean isEmpty(T value) {
+        return value == null;
+    }
 }

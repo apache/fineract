@@ -27,7 +27,12 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +55,8 @@ public class CollectChargesCommandStrategy implements CommandStrategy {
      * Loan charges api resource {@link LoanChargesApiResource}.
      */
     private final LoanChargesApiResource loanChargesApiResource;
+    private final DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Override
     public BatchResponse execute(BatchRequest request, final UriInfo uriInfo) {
@@ -68,7 +75,9 @@ public class CollectChargesCommandStrategy implements CommandStrategy {
         // Calls 'retrieveAllLoanCharges' function from
         // 'LoanChargesApiResource' to Collect
         // Charges for a loan
-        responseBody = loanChargesApiResource.retrieveAllLoanCharges(loanId, uriInfo);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        responseBody = toApiJsonSerializer.serialize(settings, loanChargesApiResource.retrieveAllLoanCharges(loanId, uriInfo),
+                LoanChargesApiConstants.LOAN_CHARGE_RESPONSE_DATA_PARAMETERS);
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charges have been
