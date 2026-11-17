@@ -1284,7 +1284,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-02-07  |              | D00            | 1              | 30             |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 February 2026"
 
   @TestRailId:C106841
@@ -1309,7 +1309,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-02-01  |              | D00            | 1              | 30             |
+      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 February 2026"
 
   @TestRailId:C106842
@@ -1540,7 +1540,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-02-13  |              | D00            | 1              | 30             |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 February 2026"
 
   @TestRailId:C115296
@@ -1587,7 +1587,8 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | null                  | 269.99           | 58             |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-04-01  |              | D30            | 31             | 60             |
+      | 1            | 2026-03-05  |              | D30            | 31             | 60             |
+      | 1            | 2026-02-03  | 2026-03-05   | D00            | 1              | 30             |
     And Working capital loan details has the following field values:
       | delinquent.delinquentAmount   | 269.99     |
       | delinquent.pastDueDays        | 58         |
@@ -1687,6 +1688,7 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     # Period 2 expires without COB; the repayment cures period 1 and instant classification marks period 2 delinquent while it is still unevaluated (minPaymentCriteriaMet NULL)
+    # Period 2 is tagged on the day it became past due (toDate + 1), not on the day the repayment noticed it
     When Admin sets the business date to "10 March 2026"
     And Customer makes repayment on "10 March 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
@@ -1695,12 +1697,12 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | 270.0            | 6              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 2            | 2026-03-10  |              | D00            | 1              | 30             |
+      | 2            | 2026-03-05  |              | D00            | 1              | 30             |
       | 1            | 2026-02-03  | 2026-03-10   | D00            | 1              | 30             |
     And Working capital loan details has the following field values:
       | delinquent.delinquentAmount   | 270.0      |
-      | delinquent.delinquentDate     | 2026-03-10 |
-      | delinquent.delinquentDays     | 1          |
+      | delinquent.delinquentDate     | 2026-03-05 |
+      | delinquent.delinquentDays     | 6          |
       | delinquent.pastDueDays        | 6          |
       | delinquencyStartDate          | 2026-02-03 |
       | delinquencyEffectiveStartDate | null       |
@@ -1820,3 +1822,140 @@ Feature: Working Capital Delinquency
       | summary.overdueSinceDate      | 2026-02-02 |
     Then Admin closes the Working Capital loan with a full repayment on "03 February 2026"
     And Global configuration "enable-instant-delinquency-calculation" is enabled
+
+  @TestRailId:C123852
+  Scenario: Verify delinquency tags and delinquentDate are set on the date they should have happened when the first COB runs long after disbursement
+    When Admin sets the business date to "05 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 30 DAYS, minimumPayment 3 PERCENTAGE and the following ranges:
+      | classification | minimumAgeDays | maximumAgeDays |
+      | LD00           | 1              | 1              |
+      | LD01           | 2              | 30             |
+      | LD30           | 31             | 60             |
+      | LD60           | 61             |                |
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" and the created delinquency bucket for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 05 January 2026 | 05 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "05 January 2026" with "9000" amount and expected disbursement date on "05 January 2026"
+    And Admin successfully disburse the Working Capital loan on "05 January 2026" with "9000" EUR transaction amount
+    # No COB since disbursement: period 1 (toDate 2026-02-06 incl. 3 grace days) is past due (LD00) from 02-07 and delinquent (LD01) from 02-08
+    When Admin sets the business date to "11 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-05 | 2026-02-06 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 5              |
+      | 2            | 2026-02-07 | 2026-03-08 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-08  |              | LD01           | 2              | 30             |
+      | 1            | 2026-02-07  | 2026-02-08   | LD00           | 1              | 1              |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount | 270.0      |
+      | delinquent.delinquentDate   | 2026-02-07 |
+      | delinquent.delinquentDays   | 5          |
+      | delinquent.pastDueDays      | 5          |
+    Then Admin closes the Working Capital loan with a full repayment on "11 February 2026"
+
+  @TestRailId:C123853
+  Scenario: Verify delinquency tags and delinquentDate are the same when COB runs on every day since disbursement
+    When Admin sets the business date to "05 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 30 DAYS, minimumPayment 3 PERCENTAGE and the following ranges:
+      | classification | minimumAgeDays | maximumAgeDays |
+      | LD00           | 1              | 1              |
+      | LD01           | 2              | 30             |
+      | LD30           | 31             | 60             |
+      | LD60           | 61             |                |
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" and the created delinquency bucket for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 05 January 2026 | 05 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "05 January 2026" with "9000" amount and expected disbursement date on "05 January 2026"
+    And Admin successfully disburse the Working Capital loan on "05 January 2026" with "9000" EUR transaction amount
+    # COB on the disbursement day sets the last closed business date, so the next inline COB replays every day up to 02-11
+    When Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin sets the business date to "11 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-05 | 2026-02-06 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 5              |
+      | 2            | 2026-02-07 | 2026-03-08 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 1            | 2026-02-08  |              | LD01           | 2              | 30             |
+      | 1            | 2026-02-07  | 2026-02-08   | LD00           | 1              | 1              |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount | 270.0      |
+      | delinquent.delinquentDate   | 2026-02-07 |
+      | delinquent.delinquentDays   | 5          |
+      | delinquent.pastDueDays      | 5          |
+    Then Admin closes the Working Capital loan with a full repayment on "11 February 2026"
+
+  @TestRailId:C123854
+  Scenario: Verify every period is tagged through all the ranges it passed on their own dates when the first COB runs months after disbursement
+    When Admin sets the business date to "05 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 30 DAYS, minimumPayment 3 PERCENTAGE and the following ranges:
+      | classification | minimumAgeDays | maximumAgeDays |
+      | LD00           | 1              | 1              |
+      | LD01           | 2              | 30             |
+      | LD30           | 31             | 60             |
+      | LD60           | 61             |                |
+    And Admin creates a Working Capital Loan Product with delinquencyGraceDays 3 and delinquencyStartType "DISBURSEMENT" and the created delinquency bucket for loan test
+    And Admin creates a working capital loan with the grace days product and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
+      | 05 January 2026 | 05 January 2026          | 9000.0          | 100000.0           | 18.0              |
+    And Admin successfully approves the working capital loan on "05 January 2026" with "9000" amount and expected disbursement date on "05 January 2026"
+    And Admin successfully disburse the Working Capital loan on "05 January 2026" with "9000" EUR transaction amount
+    # No COB since disbursement: each period enters LD00 / LD01 / LD30 / LD60 on toDate + 1 / 2 / 31 / 61
+    When Admin sets the business date to "08 September 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-05 | 2026-02-06 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 214            |
+      | 2            | 2026-02-07 | 2026-03-08 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 184            |
+      | 3            | 2026-03-09 | 2026-04-07 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 154            |
+      | 4            | 2026-04-08 | 2026-05-07 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 124            |
+      | 5            | 2026-05-08 | 2026-06-06 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 94             |
+      | 6            | 2026-06-07 | 2026-07-06 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 64             |
+      | 7            | 2026-07-07 | 2026-08-05 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 34             |
+      | 8            | 2026-08-06 | 2026-09-04 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 4              |
+      | 9            | 2026-09-05 | 2026-10-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Delinquency Tag History for Working Capital loan has lines:
+      | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 8            | 2026-09-06  |              | LD01           | 2              | 30             |
+      | 8            | 2026-09-05  | 2026-09-06   | LD00           | 1              | 1              |
+      | 7            | 2026-09-05  |              | LD30           | 31             | 60             |
+      | 6            | 2026-09-05  |              | LD60           | 61             |                |
+      | 7            | 2026-08-07  | 2026-09-05   | LD01           | 2              | 30             |
+      | 7            | 2026-08-06  | 2026-08-07   | LD00           | 1              | 1              |
+      | 6            | 2026-08-06  | 2026-09-05   | LD30           | 31             | 60             |
+      | 5            | 2026-08-06  |              | LD60           | 61             |                |
+      | 6            | 2026-07-08  | 2026-08-06   | LD01           | 2              | 30             |
+      | 6            | 2026-07-07  | 2026-07-08   | LD00           | 1              | 1              |
+      | 5            | 2026-07-07  | 2026-08-06   | LD30           | 31             | 60             |
+      | 4            | 2026-07-07  |              | LD60           | 61             |                |
+      | 5            | 2026-06-08  | 2026-07-07   | LD01           | 2              | 30             |
+      | 5            | 2026-06-07  | 2026-06-08   | LD00           | 1              | 1              |
+      | 4            | 2026-06-07  | 2026-07-07   | LD30           | 31             | 60             |
+      | 3            | 2026-06-07  |              | LD60           | 61             |                |
+      | 4            | 2026-05-09  | 2026-06-07   | LD01           | 2              | 30             |
+      | 4            | 2026-05-08  | 2026-05-09   | LD00           | 1              | 1              |
+      | 3            | 2026-05-08  | 2026-06-07   | LD30           | 31             | 60             |
+      | 2            | 2026-05-08  |              | LD60           | 61             |                |
+      | 3            | 2026-04-09  | 2026-05-08   | LD01           | 2              | 30             |
+      | 3            | 2026-04-08  | 2026-04-09   | LD00           | 1              | 1              |
+      | 2            | 2026-04-08  | 2026-05-08   | LD30           | 31             | 60             |
+      | 1            | 2026-04-08  |              | LD60           | 61             |                |
+      | 2            | 2026-03-10  | 2026-04-08   | LD01           | 2              | 30             |
+      | 2            | 2026-03-09  | 2026-03-10   | LD00           | 1              | 1              |
+      | 1            | 2026-03-09  | 2026-04-08   | LD30           | 31             | 60             |
+      | 1            | 2026-02-08  | 2026-03-09   | LD01           | 2              | 30             |
+      | 1            | 2026-02-07  | 2026-02-08   | LD00           | 1              | 1              |
+    And Working capital loan details has the following field values:
+      | delinquent.delinquentAmount | 2160.0     |
+      | delinquent.delinquentDate   | 2026-02-07 |
+      | delinquent.delinquentDays   | 214        |
+      | delinquent.pastDueDays      | 214        |
+    Then Admin closes the Working Capital loan with a full repayment on "08 September 2026"
