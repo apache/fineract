@@ -30,8 +30,13 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +57,8 @@ public class GetChargeByChargeExternalIdCommandStrategy implements CommandStrate
      * Loan charges api resource {@link LoanChargesApiResource}.
      */
     private final LoanChargesApiResource loanChargesApiResource;
+    private final DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Override
     public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
@@ -84,7 +91,10 @@ public class GetChargeByChargeExternalIdCommandStrategy implements CommandStrate
             CommandStrategyUtils.addQueryParametersToUriInfo(parameterizedUriInfo, queryParameters);
         }
 
-        responseBody = loanChargesApiResource.retrieveLoanCharge(loanExternalId, chargeExternalId, parameterizedUriInfo);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(parameterizedUriInfo.getQueryParameters());
+        responseBody = toApiJsonSerializer.serialize(settings,
+                loanChargesApiResource.retrieveLoanCharge(loanExternalId, chargeExternalId, parameterizedUriInfo),
+                LoanChargesApiConstants.LOAN_CHARGE_RESPONSE_DATA_PARAMETERS);
         response.setStatusCode(HttpStatus.SC_OK);
         response.setBody(responseBody);
 
