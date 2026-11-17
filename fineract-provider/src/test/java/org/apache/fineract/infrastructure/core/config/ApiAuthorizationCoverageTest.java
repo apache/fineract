@@ -167,16 +167,7 @@ class ApiAuthorizationCoverageTest {
      * {@code ALL_FUNCTIONS}, {@code ALL_FUNCTIONS_READ} or {@code ALL_FUNCTIONS_WRITE} pass its rule. Remove a code
      * here when its {@code m_permission} row is added.
      */
-    private static final Set<String> NOT_YET_SEEDED_PERMISSIONS = Set.of(
-            // routes that had no rule before
-            "READ_SHAREACCOUNT", "READ_SHAREPRODUCT", "READ_ADHOC", "READ_TELLER", "READ_PROVISIONCATEGORY", "READ_PROVISIONCRITERIA",
-            "READ_PROVISIONENTRIES", "READ_EXTERNAL_ASSET_OWNER", "READ_SURVEY", "CREATE_SURVEY", "UPDATE_SURVEY", "READ_SCORECARD",
-            "CREATE_SCORECARD", "READ_LOOKUPTABLE", "CREATE_LOOKUPTABLE", "READ_SHAREACCOUNTNOTE", "CREATE_SHAREACCOUNTNOTE",
-            "UPDATE_SHAREACCOUNTNOTE", "DELETE_SHAREACCOUNTNOTE", "READ_SAVINGSTRANSACTIONNOTE", "CREATE_SAVINGSTRANSACTIONNOTE",
-            "UPDATE_SAVINGSTRANSACTIONNOTE", "DELETE_SAVINGSTRANSACTIONNOTE",
-            // older rules
-            "READ_INTERESTRATECHART", "READ_CHARTSLAB", "READ_COLLATERAL_PRODUCT", "READ_CLIENT_COLLATERAL_PRODUCT", "UPDATE_CLIENTIMAGE",
-            "UPDATE_STAFFIMAGE");
+    private static final Set<String> NOT_YET_SEEDED_PERMISSIONS = Set.of();
 
     private static final Pattern SEEDED_PERMISSION_CODE = Pattern.compile("name=\"code\"\\s+value=\"\\s*([A-Z0-9_]+)\\s*\"");
     private static final Set<String> SUPER_PERMISSIONS = Set.of("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "ALL_FUNCTIONS_WRITE");
