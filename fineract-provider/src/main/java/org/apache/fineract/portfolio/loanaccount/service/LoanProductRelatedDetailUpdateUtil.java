@@ -374,6 +374,14 @@ public class LoanProductRelatedDetailUpdateUtil {
             loanRepaymentScheduleDetail.setEnableBuyDownFee(newValue);
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME,
+                loanRepaymentScheduleDetail.isEnableChargeAmortization())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME, newValue);
+            loanRepaymentScheduleDetail.setEnableChargeAmortization(newValue);
+        }
+
         if (command.parameterExists(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME)) {
             final LoanBuyDownFeeCalculationType newValue = command.enumValueOfParameterNamed(
                     LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, LoanBuyDownFeeCalculationType.class);

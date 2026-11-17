@@ -189,4 +189,7 @@ public interface LoanProductConstants {
     String BUY_DOWN_FEE_STRATEGY_PARAM_NAME = "buyDownFeeStrategy";
     String BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME = "buyDownFeeIncomeType";
     String MERCHANT_BUY_DOWN_FEE_PARAM_NAME = "merchantBuyDownFee";
+
+    // Charge amortization
+    String ENABLE_CHARGE_AMORTIZATION_PARAM_NAME = "enableChargeAmortization";
 }
