@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PaymentTypeUpdateCommand extends Command<PaymentTypeUpdateRequest> {}
+public class PaymentTypeUpdateCommand extends Command<PaymentTypeUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "PAYMENTTYPE";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

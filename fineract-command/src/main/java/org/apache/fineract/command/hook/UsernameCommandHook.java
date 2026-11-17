@@ -19,11 +19,12 @@
 package org.apache.fineract.command.hook;
 
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_HOOK_ORDER_USERNAME;
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_PROPERTY_HOOKS_USERNAME_ENABLED;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -34,13 +35,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Order(COMMAND_HOOK_ORDER_USERNAME)
-@ConditionalOnProperty(value = "fineract.command.hooks.username-pre", havingValue = "true")
-final class UsernameCommandHook implements CommandHookBefore<Object> {
+@ConditionalOnProperty(value = COMMAND_PROPERTY_HOOKS_USERNAME_ENABLED, havingValue = "true")
+final class UsernameCommandHook implements CommandHookBefore<Object, Object> {
 
     private static final String DEFAULT_USERNAME = "unknown";
 
     @Override
-    public void onBefore(Command<Object> command) {
+    public void onBefore(CommandContext<Object, Object> ctx) {
+        var command = ctx.getCommand();
+
         if (StringUtils.isEmpty(command.getInitiatedByUsername())) {
             command.setInitiatedByUsername(getUsername());
         }

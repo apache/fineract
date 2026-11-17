@@ -1,0 +1,59 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+dependencies {
+    implementation(
+            project(path: ':fineract-command'),
+            // a claimed command is moved out of UNDER_PROCESSING, and its result stored, by the audit hooks; this
+            // module cannot replay anything without them, and says so at startup
+            project(path: ':fineract-command-audit'),
+            )
+
+    implementation(
+            'org.springframework.boot:spring-boot-starter',
+            // the key arrives on an HTTP header and the original response is replayed over HTTP, so this module
+            // owns a servlet filter and a JAX-RS exception mapper
+            'org.springframework.boot:spring-boot-starter-webmvc',
+            'jakarta.ws.rs:jakarta.ws.rs-api',
+
+            'org.apache.commons:commons-lang3',
+            )
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation(
+            project(path: ':fineract-command-test'),
+            project(path: ':fineract-command-jdbc'),
+            )
+    testImplementation (
+            'org.springframework.boot:spring-boot-starter-data-jdbc',
+            // Spring Boot 4 ships the Liquibase auto-configuration separately; the schema under test comes from it
+            'org.springframework.boot:spring-boot-liquibase',
+            'org.liquibase:liquibase-core',
+            'org.testcontainers:junit-jupiter',
+            'org.testcontainers:postgresql',
+            )
+    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'com.jayway.jsonpath', module: 'json-path'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        exclude group: 'jakarta.activation'
+        exclude group: 'javax.activation'
+        exclude group: 'org.skyscreamer'
+    }
+}

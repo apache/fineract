@@ -25,4 +25,15 @@ import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfi
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ExternalConfigurationsUpdateCommand extends Command<ExternalEventConfigurationUpdateRequest> {}
+public class ExternalConfigurationsUpdateCommand extends Command<ExternalEventConfigurationUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "EXTERNAL_EVENT_CONFIGURATION";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

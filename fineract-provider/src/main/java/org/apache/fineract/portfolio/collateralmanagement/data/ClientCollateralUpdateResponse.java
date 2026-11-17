@@ -21,11 +21,15 @@ package org.apache.fineract.portfolio.collateralmanagement.data;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClientCollateralUpdateResponse implements Serializable {
 
     @Serial
@@ -39,6 +43,8 @@ public class ClientCollateralUpdateResponse implements Serializable {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Changes implements Serializable {
 
         @Serial
