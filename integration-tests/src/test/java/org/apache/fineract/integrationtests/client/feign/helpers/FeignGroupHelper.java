@@ -25,17 +25,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsGroupIdAccountsResponse;
 import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsPageItems;
 import org.apache.fineract.client.models.GroupCreateRequest;
 import org.apache.fineract.client.models.GroupCreateResponse;
+import org.apache.fineract.client.models.GroupDeleteResponse;
+import org.apache.fineract.client.models.GroupUpdateRequest;
+import org.apache.fineract.client.models.GroupUpdateResponse;
 import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
 import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
-import org.apache.fineract.client.models.PutGroupsGroupIdRequest;
-import org.apache.fineract.client.models.PutGroupsGroupIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -115,12 +115,12 @@ public class FeignGroupHelper {
         return ok(() -> fineractClient.groups().retrieveAccountsGroup(groupId));
     }
 
-    public PutGroupsGroupIdResponse updateGroup(Long groupId, String name) {
-        PutGroupsGroupIdRequest request = new PutGroupsGroupIdRequest().name(name);
+    public GroupUpdateResponse updateGroup(Long groupId, String name) {
+        GroupUpdateRequest request = new GroupUpdateRequest().name(name);
         return ok(() -> fineractClient.groups().updateGroup(groupId, request));
     }
 
-    public DeleteGroupsGroupIdResponse deleteGroup(Long groupId) {
+    public GroupDeleteResponse deleteGroup(Long groupId) {
         return ok(() -> fineractClient.groups().deleteGroup(groupId));
     }
 

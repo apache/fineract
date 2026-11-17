@@ -216,6 +216,20 @@ public class GroupTest extends FeignLoanTestBase {
         assertThat(group.getActive()).isTrue();
     }
 
+    @Test
+    public void testPartialGroupUpdateLeavesOtherFieldsUntouched() {
+        final String externalId = UUID.randomUUID().toString();
+        final GroupCreateRequest createRequest = groupRequest(externalId);
+        final Long groupId = ok(() -> fineractClient().groups().createGroup(createRequest)).getGroupId();
+
+        final String updatedName = Utils.uniqueRandomStringGenerator("Group-", 5);
+        groupHelper.updateGroup(groupId, updatedName);
+
+        final GetGroupsGroupIdResponse group = groupHelper.retrieveGroup(groupId);
+        assertThat(group.getName()).isEqualTo(updatedName);
+        assertThat(group.getExternalId()).isEqualTo(externalId);
+    }
+
     private static GroupCreateRequest groupRequest(final String externalId) {
         final GroupCreateRequest request = new GroupCreateRequest();
         request.officeId(1L);

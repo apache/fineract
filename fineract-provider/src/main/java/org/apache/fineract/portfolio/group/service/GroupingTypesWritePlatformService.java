@@ -22,6 +22,10 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
 
 public interface GroupingTypesWritePlatformService {
 
@@ -32,12 +36,6 @@ public interface GroupingTypesWritePlatformService {
     GroupCreateResponse createGroup(GroupCreateRequest request);
 
     CommandProcessingResult activateGroupOrCenter(Long entityId, JsonCommand command);
-
-    CommandProcessingResult updateGroup(Long groupId, JsonCommand command);
-
-    CommandProcessingResult deleteGroup(Long groupId);
-
-    CommandProcessingResult closeGroup(Long groupId, JsonCommand command);
 
     CommandProcessingResult closeCenter(Long centerId, JsonCommand command);
 
@@ -52,4 +50,10 @@ public interface GroupingTypesWritePlatformService {
     CommandProcessingResult associateGroupsToCenter(Long centerId, JsonCommand command);
 
     CommandProcessingResult disassociateGroupsToCenter(Long centerId, JsonCommand command);
+
+    GroupUpdateResponse updateGroup(GroupUpdateRequest request);
+
+    GroupDeleteResponse deleteGroup(GroupDeleteRequest request);
+
+    CommandProcessingResult closeGroup(Long groupId, JsonCommand command);
 }
