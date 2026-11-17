@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PaymentTypeDeleteCommand extends Command<PaymentTypeDeleteRequest> {}
+public class PaymentTypeDeleteCommand extends Command<PaymentTypeDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "PAYMENTTYPE";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.collateralmanagement.data.CollateralProduct
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CollateralProductCreateCommand extends Command<CollateralProductCreateRequest> {}
+public class CollateralProductCreateCommand extends Command<CollateralProductCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "COLLATERAL_PRODUCT";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

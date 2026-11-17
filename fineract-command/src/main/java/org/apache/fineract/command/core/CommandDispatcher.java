@@ -22,5 +22,9 @@ import java.util.function.Supplier;
 
 public interface CommandDispatcher {
 
+    /**
+     * @return a supplier of the command's result. Call it once: whether the command runs when it is dispatched or when
+     *         the supplier is called is up to the dispatcher, so calling it again may run the command again.
+     */
     <REQ, RES> Supplier<RES> dispatch(Command<REQ> command);
 }

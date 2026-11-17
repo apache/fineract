@@ -1,0 +1,2 @@
+org.apache.fineract.command.idempotency.starter.IdempotencyCommandAutoConfiguration
+org.apache.fineract.command.idempotency.starter.IdempotencyCommandPropertyCheckAutoConfiguration

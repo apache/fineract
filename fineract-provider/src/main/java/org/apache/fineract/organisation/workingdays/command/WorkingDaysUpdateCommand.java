@@ -25,4 +25,15 @@ import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateReques
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class WorkingDaysUpdateCommand extends Command<WorkingDaysUpdateRequest> {}
+public class WorkingDaysUpdateCommand extends Command<WorkingDaysUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "WORKINGDAYS";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}
