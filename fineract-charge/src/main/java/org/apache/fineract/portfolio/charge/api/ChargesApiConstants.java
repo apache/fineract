@@ -26,5 +26,9 @@ public final class ChargesApiConstants {
 
     public static final String glAccountIdParamName = "incomeAccountId";
     public static final String taxGroupIdParamName = "taxGroupId";
+    public static final String amortizationPeriodTypeParamName = "amortizationPeriodType";
+    public static final String amortizationDaysParamName = "amortizationDays";
+    public static final String amortizationCalculationTypeParamName = "amortizationCalculationType";
+    public static final String amortizationIncomeTypeParamName = "amortizationIncomeType";
 
 }

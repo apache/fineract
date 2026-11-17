@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.charge.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -160,6 +163,25 @@ public class Charge extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
+    @Getter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amortization_period_type", length = 32, nullable = false)
+    private ChargeAmortizationPeriodType amortizationPeriodType = ChargeAmortizationPeriodType.NONE;
+
+    @Getter
+    @Column(name = "amortization_days")
+    private Integer amortizationDays;
+
+    @Getter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amortization_calculation_type", length = 32)
+    private ChargeAmortizationCalculationType amortizationCalculationType;
+
+    @Getter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amortization_income_type", length = 32)
+    private ChargeAmortizationIncomeType amortizationIncomeType;
+
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup,
             final PaymentType paymentType) {
 
@@ -202,9 +224,16 @@ public class Charge extends AbstractPersistableCustom<Long> {
             countFrequencyType = PeriodFrequencyType.fromInt(command.integerValueOfParameterNamed("countFrequencyType"));
         }
 
-        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
-                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge, freeWithdrawalFrequency,
-                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType);
+        final Charge charge = new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty,
+                active, paymentMode, feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge,
+                freeWithdrawalFrequency, restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType);
+        charge.applyAmortizationConfiguration(
+                amortizationEnumValue(command, ChargesApiConstants.amortizationPeriodTypeParamName, ChargeAmortizationPeriodType.class),
+                command.integerValueSansLocaleOfParameterNamed(ChargesApiConstants.amortizationDaysParamName),
+                amortizationEnumValue(command, ChargesApiConstants.amortizationCalculationTypeParamName,
+                        ChargeAmortizationCalculationType.class),
+                amortizationEnumValue(command, ChargesApiConstants.amortizationIncomeTypeParamName, ChargeAmortizationIncomeType.class));
+        return charge;
     }
 
     protected Charge() {}
@@ -633,11 +662,88 @@ public class Charge extends AbstractPersistableCustom<Long> {
             }
         }
 
+        updateAmortizationConfiguration(command, actualChanges);
+
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
         return actualChanges;
+    }
+
+    public boolean isAmortized() {
+        return this.amortizationPeriodType.isAmortized();
+    }
+
+    /**
+     * Sets the amortization configuration and fills in the defaults of an amortized charge: {@code FLAT} calculation
+     * and {@code FEE} income. Whether the configuration is allowed for this charge is checked by
+     * {@code ChargeDefinitionCommandFromApiJsonDeserializer#validateAmortizationConfiguration}, so values that do not
+     * apply to the period type are kept here to be rejected there.
+     */
+    private void applyAmortizationConfiguration(final ChargeAmortizationPeriodType periodType, final Integer days,
+            final ChargeAmortizationCalculationType calculationType, final ChargeAmortizationIncomeType incomeType) {
+        this.amortizationPeriodType = periodType == null ? ChargeAmortizationPeriodType.NONE : periodType;
+        this.amortizationDays = days;
+        if (this.amortizationPeriodType.isAmortized()) {
+            this.amortizationCalculationType = calculationType == null ? ChargeAmortizationCalculationType.FLAT : calculationType;
+            this.amortizationIncomeType = incomeType == null ? ChargeAmortizationIncomeType.FEE : incomeType;
+        } else {
+            this.amortizationCalculationType = calculationType;
+            this.amortizationIncomeType = incomeType;
+        }
+    }
+
+    private void updateAmortizationConfiguration(final JsonCommand command, final Map<String, Object> actualChanges) {
+        final ChargeAmortizationPeriodType periodType = command.hasParameter(ChargesApiConstants.amortizationPeriodTypeParamName)
+                ? amortizationEnumValue(command, ChargesApiConstants.amortizationPeriodTypeParamName, ChargeAmortizationPeriodType.class)
+                : this.amortizationPeriodType;
+        final ChargeAmortizationPeriodType newPeriodType = periodType == null ? ChargeAmortizationPeriodType.NONE : periodType;
+
+        // A value that is not sent is kept only while it still applies to the (new) period type, so that switching
+        // the period type clears what no longer applies. A value that is sent is always taken.
+        final Integer days = command.hasParameter(ChargesApiConstants.amortizationDaysParamName)
+                ? command.integerValueSansLocaleOfParameterNamed(ChargesApiConstants.amortizationDaysParamName)
+                : newPeriodType == ChargeAmortizationPeriodType.NUMBER_OF_DAYS ? this.amortizationDays : null;
+        final ChargeAmortizationCalculationType calculationType = command
+                .hasParameter(ChargesApiConstants.amortizationCalculationTypeParamName)
+                        ? amortizationEnumValue(command, ChargesApiConstants.amortizationCalculationTypeParamName,
+                                ChargeAmortizationCalculationType.class)
+                        : newPeriodType.isAmortized() ? this.amortizationCalculationType : null;
+        final ChargeAmortizationIncomeType incomeType = command.hasParameter(ChargesApiConstants.amortizationIncomeTypeParamName)
+                ? amortizationEnumValue(command, ChargesApiConstants.amortizationIncomeTypeParamName, ChargeAmortizationIncomeType.class)
+                : newPeriodType.isAmortized() ? this.amortizationIncomeType : null;
+
+        final ChargeAmortizationPeriodType oldPeriodType = this.amortizationPeriodType;
+        final Integer oldDays = this.amortizationDays;
+        final ChargeAmortizationCalculationType oldCalculationType = this.amortizationCalculationType;
+        final ChargeAmortizationIncomeType oldIncomeType = this.amortizationIncomeType;
+
+        applyAmortizationConfiguration(newPeriodType, days, calculationType, incomeType);
+
+        if (oldPeriodType != this.amortizationPeriodType) {
+            actualChanges.put(ChargesApiConstants.amortizationPeriodTypeParamName, this.amortizationPeriodType.name());
+        }
+        if (!Objects.equals(oldDays, this.amortizationDays)) {
+            actualChanges.put(ChargesApiConstants.amortizationDaysParamName, this.amortizationDays);
+        }
+        if (oldCalculationType != this.amortizationCalculationType) {
+            actualChanges.put(ChargesApiConstants.amortizationCalculationTypeParamName,
+                    this.amortizationCalculationType == null ? null : this.amortizationCalculationType.name());
+        }
+        if (oldIncomeType != this.amortizationIncomeType) {
+            actualChanges.put(ChargesApiConstants.amortizationIncomeTypeParamName,
+                    this.amortizationIncomeType == null ? null : this.amortizationIncomeType.name());
+        }
+    }
+
+    /**
+     * Reads an amortization enum the way the validator accepts it, that is ignoring case.
+     */
+    private static <T extends Enum<T>> T amortizationEnumValue(final JsonCommand command, final String parameterName,
+            final Class<T> enumType) {
+        final String value = command.stringValueOfParameterNamedAllowingNull(parameterName);
+        return StringUtils.isBlank(value) ? null : Enum.valueOf(enumType, value.trim().toUpperCase(Locale.ROOT));
     }
 
     /**
@@ -680,7 +786,14 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 .freeWithdrawal(this.enableFreeWithdrawal).freeWithdrawalChargeFrequency(this.freeWithdrawalFrequency)
                 .restartFrequency(this.restartFrequency).restartFrequencyEnum(this.restartFrequencyEnum)
                 .isPaymentType(this.enablePaymentType).paymentTypeOptions(paymentTypeData).minCap(this.minCap).maxCap(this.maxCap)
-                .feeFrequency(feeFrequencyType).incomeOrLiabilityAccount(accountData).taxGroup(taxGroupData).build();
+                .feeFrequency(feeFrequencyType).incomeOrLiabilityAccount(accountData).taxGroup(taxGroupData)
+                .amortizationPeriodType(this.amortizationPeriodType.getValueAsStringEnumOptionData())
+                .amortizationDays(this.amortizationDays)
+                .amortizationCalculationType(
+                        this.amortizationCalculationType == null ? null : this.amortizationCalculationType.getValueAsStringEnumOptionData())
+                .amortizationIncomeType(
+                        this.amortizationIncomeType == null ? null : this.amortizationIncomeType.getValueAsStringEnumOptionData())
+                .build();
 
     }
 
@@ -753,13 +866,17 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 && Objects.equals(feeOnMonth, other.feeOnMonth) && penalty == other.penalty && active == other.active
                 && deleted == other.deleted && Objects.equals(minCap, other.minCap) && Objects.equals(maxCap, other.maxCap)
                 && Objects.equals(feeFrequency, other.feeFrequency) && Objects.equals(account, other.account)
-                && Objects.equals(taxGroup, other.taxGroup);
+                && Objects.equals(taxGroup, other.taxGroup) && amortizationPeriodType == other.amortizationPeriodType
+                && Objects.equals(amortizationDays, other.amortizationDays)
+                && amortizationCalculationType == other.amortizationCalculationType
+                && amortizationIncomeType == other.amortizationIncomeType;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay,
-                feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
+                feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup, amortizationPeriodType,
+                amortizationDays, amortizationCalculationType, amortizationIncomeType);
     }
 
 }

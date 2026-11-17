@@ -101,6 +101,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             }
 
             final Charge charge = Charge.fromJson(command, glAccount, taxGroup, paymentType);
+            this.fromApiJsonDeserializer.validateAmortizationConfiguration(charge);
             this.chargeRepository.saveAndFlush(charge);
 
             // check if the office specific products are enabled. If yes, then
@@ -138,6 +139,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             this.fromApiJsonDeserializer.validateChargeTimeNCalculationType(chargeForUpdate.getChargeTimeType(),
                     chargeForUpdate.getChargeCalculation(), chargeForUpdate.isPenalty());
+            this.fromApiJsonDeserializer.validateAmortizationConfiguration(chargeForUpdate);
 
             if (changes.containsKey(Charge.CHARGE_TIME_PARAM_NAME) && chargeForUpdate.isDownPaymentCharge()) {
                 validateLoanProductsSupportDownPaymentCharges(chargeId);
