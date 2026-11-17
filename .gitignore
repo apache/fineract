@@ -35,3 +35,5 @@ gradleExp/
 .java-version
 
 .windsurf/
+
+.gitlab-ci.yml
