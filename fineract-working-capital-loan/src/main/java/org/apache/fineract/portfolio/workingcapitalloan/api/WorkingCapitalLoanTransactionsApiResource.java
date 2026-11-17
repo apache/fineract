@@ -78,6 +78,27 @@ public class WorkingCapitalLoanTransactionsApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = WorkingCapitalLoanConstants.WCL_RESOURCE_NAME;
 
+    private static final String TRANSACTION_COMMAND_DESCRIPTION = "Supported command query parameter: adjust, adjustByDelta, discountFee, discountFeeAdjustment, undo. "
+            + "The command value is case-insensitive and hyphens are ignored, e.g. chargeOff, chargeoff and charge-off are equivalent.\n\n"
+            + "adjust and adjustByDelta reverse the transaction and book a replacement for the new amount, linked to it. Set externalId in "
+            + "the body to the adjusted transaction's own external id and the replacement inherits it: the external id is removed from the "
+            + "reversed transaction and points to the replacement afterwards. A full reversal (new amount 0) books no replacement and "
+            + "leaves the external id on the reversed transaction.\n\n"
+            + "undo, adjust and adjustByDelta on a transaction that is already reversed fail with 403 "
+            + "error.msg.wc.loan.transaction.already.undone.";
+
+    private static final String TRANSACTION_COMMAND_BY_ID_DESCRIPTION = TRANSACTION_COMMAND_DESCRIPTION
+            + " A command sent by numeric transaction id is not retried for that error: the same id stays reversed.";
+
+    private static final String TRANSACTION_COMMAND_BY_EXTERNAL_ID_DESCRIPTION = TRANSACTION_COMMAND_DESCRIPTION
+            + "\n\nFor undo, adjust and adjustByDelta the transaction external id is resolved while the command runs, on every attempt of "
+            + "the command retry policy (fineract.retry.instances.executeCommand.*), not when the request is received. When it points to a "
+            + "reversed transaction - typically because a concurrent adjust on the same transaction has just moved it to its replacement - "
+            + "the command is retried and applies to the transaction the external id points to then. So several adjustments sent at the "
+            + "same time against the same external id are each applied once, to the live transaction, whatever order they run in. When "
+            + "the external id is still on a reversed transaction after the last attempt, the call fails with the 403 above. The response "
+            + "names the transaction that was actually reversed (subResourceId) and its replacement (resourceId).";
+
     private final PlatformSecurityContext context;
     private final WorkingCapitalLoanApplicationReadPlatformService loanReadPlatformService;
     private final WorkingCapitalLoanTransactionReadPlatformService transactionReadPlatformService;
@@ -266,7 +287,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan id and transaction id", description = "Supported command query parameter: adjust, adjustByDelta, discountFee, discountFeeAdjustment, undo. The command value is case-insensitive and hyphens are ignored, e.g. chargeOff, chargeoff and charge-off are equivalent.")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan id and transaction id", description = TRANSACTION_COMMAND_BY_ID_DESCRIPTION)
     @Path("{loanId}/transactions/{transactionId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -282,7 +303,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan id and transaction external id", description = "Supported command query parameter: adjust, adjustByDelta, discountFee, discountFeeAdjustment, undo. The command value is case-insensitive and hyphens are ignored, e.g. chargeOff, chargeoff and charge-off are equivalent.")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan id and transaction external id", description = TRANSACTION_COMMAND_BY_EXTERNAL_ID_DESCRIPTION)
     @Path("{loanId}/transactions/external-id/{transactionExternalId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -348,7 +369,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction id", description = "Supported command query parameter: adjust, adjustByDelta, discountFee, discountFeeAdjustment, undo. The command value is case-insensitive and hyphens are ignored, e.g. chargeOff, chargeoff and charge-off are equivalent.")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction id", description = TRANSACTION_COMMAND_BY_ID_DESCRIPTION)
     @Path("external-id/{loanExternalId}/transactions/{transactionId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -364,7 +385,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction external id", description = "Supported command query parameter: adjust, adjustByDelta, discountFee, discountFeeAdjustment, undo. The command value is case-insensitive and hyphens are ignored, e.g. chargeOff, chargeoff and charge-off are equivalent.")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionCommandByLoanExternalIdTransactionExternalId", summary = "Execute Working Capital Loan transaction command by loan external id and transaction external id", description = TRANSACTION_COMMAND_BY_EXTERNAL_ID_DESCRIPTION)
     @Path("external-id/{loanExternalId}/transactions/external-id/{transactionExternalId}")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.ExecuteWorkingCapitalLoanTransactionCommandRequest.class)))
     @ApiResponses({
@@ -381,30 +402,45 @@ public class WorkingCapitalLoanTransactionsApiResource {
     private CommandProcessingResult executeWorkingCapitalLoanTransactionCommand(Long loanId, String loanExternalId, Long transactionId,
             String transactionExternalId, String commandParam, String apiRequestBodyAsJson) {
         final Long resolvedLoanId = resolveLoanId(loanId, loanExternalId);
-        final Long resolvedTransactionId = resolveTransactionId(resolvedLoanId, transactionId, transactionExternalId);
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         final CommandWrapper commandRequest;
         if (WorkingCapitalLoanCommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.UNDO_COMMAND)) {
-            commandRequest = builder.undoWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+            commandRequest = (transactionId != null
+                    ? builder.undoWorkingCapitalLoanTransaction(resolvedLoanId, resolveTransactionId(resolvedLoanId, transactionId))
+                    : builder.undoWorkingCapitalLoanTransaction(resolvedLoanId, transactionExternalId)).build();
         } else if (WorkingCapitalLoanCommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.DISCOUNT_FEE_LOAN_COMMAND)) {
-            commandRequest = builder.discountFeeWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+            commandRequest = builder.discountFeeWorkingCapitalLoanTransaction(resolvedLoanId,
+                    resolveTransactionId(resolvedLoanId, transactionId, transactionExternalId)).build();
         } else if (WorkingCapitalLoanCommandParameterUtil.is(commandParam,
                 WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND)) {
-            commandRequest = builder.discountFeeAdjustmentWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+            commandRequest = builder.discountFeeAdjustmentWorkingCapitalLoanTransaction(resolvedLoanId,
+                    resolveTransactionId(resolvedLoanId, transactionId, transactionExternalId)).build();
         } else if (WorkingCapitalLoanCommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.ADJUST_COMMAND)) {
-            commandRequest = builder.adjustWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+            commandRequest = (transactionId != null
+                    ? builder.adjustWorkingCapitalLoanTransaction(resolvedLoanId, resolveTransactionId(resolvedLoanId, transactionId))
+                    : builder.adjustWorkingCapitalLoanTransaction(resolvedLoanId, transactionExternalId)).build();
         } else if (WorkingCapitalLoanCommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.ADJUST_BY_DELTA_COMMAND)) {
-            commandRequest = builder.adjustByDeltaWorkingCapitalLoanTransaction(resolvedLoanId, resolvedTransactionId).build();
+            commandRequest = (transactionId != null
+                    ? builder.adjustByDeltaWorkingCapitalLoanTransaction(resolvedLoanId,
+                            resolveTransactionId(resolvedLoanId, transactionId))
+                    : builder.adjustByDeltaWorkingCapitalLoanTransaction(resolvedLoanId, transactionExternalId)).build();
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
+        // Undo, adjust and adjustByDelta sent by transaction external id are not resolved here: the external id goes
+        // into the command and is resolved inside every execution attempt, so a retry after a concurrent adjust follows
+        // it to the replacement that took it over.
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    }
+
+    private Long resolveTransactionId(final Long loanId, final Long transactionId) {
+        return transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId).map(WorkingCapitalLoanTransaction::getId)
+                .orElseThrow(() -> new WorkingCapitalLoanTransactionNotFoundException(transactionId, loanId));
     }
 
     private Long resolveTransactionId(final Long loanId, final Long transactionId, final String transactionExternalId) {
         if (transactionId != null) {
-            return transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId).map(WorkingCapitalLoanTransaction::getId)
-                    .orElseThrow(() -> new WorkingCapitalLoanTransactionNotFoundException(transactionId, loanId));
+            return resolveTransactionId(loanId, transactionId);
         }
         final ExternalId externalId = ExternalIdFactory.produce(transactionExternalId);
         return transactionRepository.findByWcLoan_IdAndExternalId(loanId, externalId).map(WorkingCapitalLoanTransaction::getId)

@@ -48,6 +48,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -137,6 +144,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private static final String MANDATORY_DATATABLE_ENTRY_ERROR = "error.msg.entry.required.in.datatable.[%s]";
 
     private static final String DATE_FORMAT = "dd MMMM yyyy";
+    private static final String WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE = "wcLastExternalIdAdjustResponse";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final Long NON_EXISTENT_LOAN_ID = 999_999_999L;
@@ -5731,8 +5739,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             final String transactionDate, final String amount, final String adjustTransactionDate) {
         CallFailedRuntimeException exception = adjustAlreadyUndoneNthWorkingCapitalLoanTransactionByTypeFailure(nthItemStr, transactionType,
                 transactionDate, adjustTransactionDate, amount);
-        assertHttpStatus(exception, 400);
-        assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.transaction.transaction.already.undone");
+        assertHttpStatus(exception, 403);
+        assertValidationError(exception, "error.msg.wc.loan.transaction.already.undone");
     }
 
     @When("Customer adjust {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and date {string} is failed:")
@@ -5962,8 +5970,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             final String transactionDate, final String amount, final String adjustTransactionDate) {
         CallFailedRuntimeException exception = adjustByDeltaAlreadyUndoneNthWorkingCapitalLoanTransactionByTypeFailure(nthItemStr,
                 transactionType, transactionDate, adjustTransactionDate, amount);
-        assertHttpStatus(exception, 400);
-        assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.transaction.transaction.already.undone");
+        assertHttpStatus(exception, 403);
+        assertValidationError(exception, "error.msg.wc.loan.transaction.already.undone");
     }
 
     @When("Customer adjust by delta {string}th {string} transaction made on {string} on Working Capital loan with amount {string} and date {string} is failed:")
@@ -6654,6 +6662,164 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .retrieveAllCodeValuesByCodeName(CodeNames.CHARGE_OFF.getValue());
         return codeValues.stream().filter(v -> chargeOffReasonName.equals(v.getName())).map(GetCodeValuesDataResponse::getId).findFirst()
                 .orElseThrow(() -> new IllegalStateException("Charge-off reason not found: " + chargeOffReasonName));
+    }
+
+    @When("Customer adjusts by delta the Working Capital loan transaction with external-id {string} by {string} inheriting its external-id")
+    public void adjustByDeltaByTransactionExternalIdInheritingIt(final String externalIdSlot, final String delta) {
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse response = ok(() -> adjustByTransactionExternalId(getCreatedLoanId(),
+                externalId, "adjust-by-delta", externalIdAdjustRequest(new BigDecimal(delta), null, externalId)));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_ADJUST_BY_DELTA_TRANSACTION_RESPONSE, response);
+        testContext().set(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE, response);
+    }
+
+    @When("Customer adjusts the Working Capital loan transaction with external-id {string} to amount {string} on {string} inheriting its external-id")
+    public void adjustByTransactionExternalIdInheritingIt(final String externalIdSlot, final String amount, final String transactionDate) {
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse response = ok(() -> adjustByTransactionExternalId(getCreatedLoanId(),
+                externalId, "adjust", externalIdAdjustRequest(new BigDecimal(amount), transactionDate, externalId)));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_ADJUST_TRANSACTION_RESPONSE, response);
+        testContext().set(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE, response);
+    }
+
+    @When("Customer adjusts by delta the Working Capital loan transaction with external-id {string} by {string} with new external-id {string}")
+    public void adjustByDeltaByTransactionExternalIdWithNewExternalId(final String externalIdSlot, final String delta,
+            final String requestedExternalIdSlot) {
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final String requestedExternalId = resolveExternalIdSlot(requestedExternalIdSlot);
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse response = ok(() -> adjustByTransactionExternalId(getCreatedLoanId(),
+                externalId, "adjust-by-delta", externalIdAdjustRequest(new BigDecimal(delta), null, requestedExternalId)));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_ADJUST_BY_DELTA_TRANSACTION_RESPONSE, response);
+        testContext().set(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE, response);
+    }
+
+    @When("Customer adjusts by delta the Working Capital loan transaction with external-id {string} by {string} with external-id {string} and gets error:")
+    public void adjustByDeltaByTransactionExternalIdFails(final String externalIdSlot, final String delta,
+            final String requestedExternalIdSlot, final DataTable table) {
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final String requestedExternalId = resolveExternalIdSlot(requestedExternalIdSlot);
+        final CallFailedRuntimeException exception = fail(() -> adjustByTransactionExternalId(getCreatedLoanId(), externalId,
+                "adjust-by-delta", externalIdAdjustRequest(new BigDecimal(delta), null, requestedExternalId)));
+        final Map<String, String> expected = table.asMaps().get(0);
+        assertHttpStatus(exception, Integer.parseInt(expected.get("httpCode")));
+        assertValidationError(exception, expected.get("errorMessage").trim());
+    }
+
+    @When("Customer sends these adjust by delta calls at the same time against the Working Capital loan transaction with external-id {string}, each inheriting its external-id:")
+    public void adjustByDeltaConcurrentlyByTransactionExternalId(final String externalIdSlot, final DataTable deltas) {
+        final Long loanId = getCreatedLoanId();
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final List<Supplier<Object>> calls = deltas.asMaps().stream()
+                .<Supplier<Object>>map(row -> () -> adjustByTransactionExternalId(loanId, externalId, "adjust-by-delta",
+                        externalIdAdjustRequest(new BigDecimal(row.get("delta")), null, externalId)))
+                .toList();
+
+        final List<Object> outcomes = runAtTheSameTime(calls);
+
+        assertThat(outcomes).as("every concurrent adjustment against the external id succeeds")
+                .allMatch(ExecuteWorkingCapitalLoanTransactionCommandResponse.class::isInstance);
+        assertThat(outcomes.stream().map(ExecuteWorkingCapitalLoanTransactionCommandResponse.class::cast)
+                .map(ExecuteWorkingCapitalLoanTransactionCommandResponse::getSubResourceId).distinct().count())
+                .as("each concurrent adjustment reversed a different transaction").isEqualTo(outcomes.size());
+    }
+
+    @When("Customer sends these adjust by delta calls at the same time against the numeric id of the Working Capital loan transaction with external-id {string}, only one succeeds:")
+    public void adjustByDeltaConcurrentlyByNumericId(final String externalIdSlot, final DataTable deltas) {
+        final Long loanId = getCreatedLoanId();
+        final Long transactionId = findTransactionByExternalId(loanId, resolveExternalIdSlot(externalIdSlot)).getId();
+        final List<Supplier<Object>> calls = deltas.asMaps().stream()
+                .<Supplier<Object>>map(row -> () -> fineractClient.workingCapitalLoanTransactions()
+                        .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, transactionId, "adjust-by-delta",
+                                externalIdAdjustRequest(new BigDecimal(row.get("delta")), null, null)))
+                .toList();
+
+        final List<Object> outcomes = runAtTheSameTime(calls);
+
+        assertThat(outcomes.stream().filter(ExecuteWorkingCapitalLoanTransactionCommandResponse.class::isInstance).count())
+                .as("a numeric id is not followed to the replacement, so only one adjustment wins").isEqualTo(1);
+        outcomes.stream().filter(CallFailedRuntimeException.class::isInstance).map(CallFailedRuntimeException.class::cast)
+                .forEach(exception -> {
+                    assertHttpStatus(exception, 403);
+                    assertValidationError(exception, "error.msg.wc.loan.transaction.already.undone");
+                });
+    }
+
+    @Then("the Working Capital loan transaction with external-id {string} is the replacement created by the last adjustment")
+    public void verifyExternalIdPointsToTheLastReplacement(final String externalIdSlot) {
+        final Long loanId = getCreatedLoanId();
+        final String externalId = resolveExternalIdSlot(externalIdSlot);
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse response = testContext().get(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE);
+        assertNotNull(response, "No adjustment by external id was made");
+
+        final GetWorkingCapitalLoanTransactionIdResponse live = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .retrieveWorkingCapitalLoanTransactionByExternalTransactionId(loanId, externalId));
+        assertThat(live.getId()).as("external id %s points to the replacement", externalId).isEqualTo(response.getResourceId());
+        assertThat(live.getReversed()).as("replacement reversed flag").isFalse();
+
+        final GetWorkingCapitalLoanTransactionIdResponse reversed = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .retrieveWorkingCapitalLoanTransactionById(loanId, response.getSubResourceId()));
+        assertThat(reversed.getReversed()).as("adjusted transaction reversed flag").isTrue();
+        assertThat(reversed.getExternalId()).as("adjusted transaction gave its external id up").isNull();
+    }
+
+    @Then("a Working Capital Loan Adjust Transaction business event shows the external-id {string} moved to the replacement")
+    public void verifyAdjustEventShowsTheExternalIdMove(final String externalIdSlot) {
+        final ExecuteWorkingCapitalLoanTransactionCommandResponse response = testContext().get(WC_LAST_EXTERNAL_ID_ADJUST_RESPONSE);
+        eventCheckHelper.workingCapitalLoanAdjustTransactionExternalIdMoveEventCheck(getCreatedLoanId(), response.getSubResourceId(),
+                response.getResourceId(), resolveExternalIdSlot(externalIdSlot));
+    }
+
+    private ExecuteWorkingCapitalLoanTransactionCommandResponse adjustByTransactionExternalId(final Long loanId,
+            final String transactionExternalId, final String command, final ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
+        return fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionExternalId(loanId, transactionExternalId, command, request);
+    }
+
+    private ExecuteWorkingCapitalLoanTransactionCommandRequest externalIdAdjustRequest(final BigDecimal amount,
+            final String transactionDate, final String externalId) {
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest() //
+                .locale(WorkingCapitalLoanRequestFactory.DEFAULT_LOCALE) //
+                .dateFormat(DATE_FORMAT) //
+                .transactionAmount(amount);
+        if (transactionDate != null) {
+            request.transactionDate(transactionDate);
+        }
+        if (externalId != null) {
+            request.externalId(externalId);
+        }
+        return request;
+    }
+
+    /**
+     * Fires the calls at the same moment and returns each one's response, or the {@link CallFailedRuntimeException} it
+     * failed with.
+     */
+    private static List<Object> runAtTheSameTime(final List<Supplier<Object>> calls) {
+        final ExecutorService executor = Executors.newFixedThreadPool(calls.size());
+        try {
+            final CountDownLatch start = new CountDownLatch(1);
+            final List<Future<Object>> futures = calls.stream().map(call -> executor.submit(() -> {
+                start.await();
+                try {
+                    return ok(call::get);
+                } catch (final CallFailedRuntimeException e) {
+                    return (Object) e;
+                }
+            })).toList();
+            start.countDown();
+            final List<Object> outcomes = new ArrayList<>();
+            for (final Future<Object> future : futures) {
+                outcomes.add(future.get(2, TimeUnit.MINUTES));
+            }
+            return outcomes;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        } catch (final ExecutionException | TimeoutException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     private FineractFeignClient userClient() {

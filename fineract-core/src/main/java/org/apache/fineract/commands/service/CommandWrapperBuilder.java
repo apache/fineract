@@ -914,6 +914,34 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    /*
+     * The Working Capital Loan transaction commands below address their target by transaction external id. The external
+     * id travels in transactionId and is resolved by the handler on every attempt, so a retry follows it to the
+     * transaction it points to then; entityId stays empty and the result names the transaction.
+     */
+
+    public CommandWrapperBuilder undoWorkingCapitalLoanTransaction(final Long loanId, final String transactionExternalId) {
+        return workingCapitalLoanTransactionByExternalId(ACTION_UNDO, loanId, transactionExternalId, "undo");
+    }
+
+    public CommandWrapperBuilder adjustByDeltaWorkingCapitalLoanTransaction(final Long loanId, final String transactionExternalId) {
+        return workingCapitalLoanTransactionByExternalId(ACTION_ADJUST_BY_DELTA, loanId, transactionExternalId, "adjust-by-delta");
+    }
+
+    public CommandWrapperBuilder adjustWorkingCapitalLoanTransaction(final Long loanId, final String transactionExternalId) {
+        return workingCapitalLoanTransactionByExternalId(ACTION_ADJUST, loanId, transactionExternalId, "adjust");
+    }
+
+    private CommandWrapperBuilder workingCapitalLoanTransactionByExternalId(final String action, final Long loanId,
+            final String transactionExternalId, final String command) {
+        this.actionName = action;
+        this.entityName = ENTITY_WORKINGCAPITALLOANTRANSACTION;
+        this.loanId = loanId;
+        this.transactionId = transactionExternalId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions/external-id/" + transactionExternalId + "?command=" + command;
+        return this;
+    }
+
     public CommandWrapperBuilder createWorkingCapitalLoanDelinquencyAction(final Long workingCapitalLoanId) {
         this.actionName = "CREATE";
         this.entityName = "WC_DELINQUENCY_ACTION";

@@ -246,7 +246,8 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
             final CallFailedRuntimeException ex = assertThrows(CallFailedRuntimeException.class,
                     () -> wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
                             WorkingCapitalLoanRequestBuilders.undoTransaction()));
-            assertEquals(400, ex.getStatus(), "Undoing an already-reversed charge adjustment must fail");
+            assertEquals(403, ex.getStatus(), "Undoing an already-reversed charge adjustment must fail");
+            assertTrue(ex.getResponseBody().contains("error.msg.wc.loan.transaction.already.undone"), ex.getResponseBody());
         });
     }
 

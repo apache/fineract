@@ -28,8 +28,8 @@ For a deeper understanding of resilience4j, refer to the https://resilience4j.re
 
 |fineract.retry.instances.executeCommand.retryExceptions
 |FINERACT_COMMAND_PROCESSING_RETRY_EXCEPTIONS
-|org.springframework.dao.ConcurrencyFailureException,org.eclipse.persistence.exceptions.OptimisticLockException,jakarta.persistence.OptimisticLockException,org.springframework.orm.jpa.JpaOptimisticLockingFailureException,org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException
-|This property specifies the list of exceptions that the execute command retry instance will retry on
+|org.springframework.dao.ConcurrencyFailureException,org.eclipse.persistence.exceptions.OptimisticLockException,jakarta.persistence.OptimisticLockException,org.springframework.orm.jpa.JpaOptimisticLockingFailureException,org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException,org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionAlreadyUndoneByExternalIdException
+|This property specifies the list of exceptions that the execute command retry instance will retry on. `WorkingCapitalLoanTransactionAlreadyUndoneByExternalIdException` is thrown when a Working Capital Loan undo, adjust or adjustByDelta command sent by transaction external id finds that external id on a reversed transaction; every retry attempt resolves the external id again, so a concurrent adjust that moved it to its replacement is followed. Leaving it out of an overridden list turns that retry off.
 
 |resilience4j.retry.instances.processJobDetailForExecution.max-attempts
 |FINERACT_PROCESS_JOB_DETAIL_RETRY_MAX_ATTEMPTS
