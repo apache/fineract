@@ -18,19 +18,27 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -40,6 +48,8 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -50,6 +60,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -60,6 +72,16 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
+
+    @BeforeEach
+    void setBusinessDate() {
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1))));
+    }
+
+    @AfterEach
+    void resetContext() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Mock
     private PlatformSecurityContext context;
@@ -133,5 +155,70 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
         when(groupLevelRepository.findById(groupLevelId)).thenReturn(Optional.empty());
 
         assertThrows(GroupLevelNotFoundException.class, () -> service.updateGroup(groupId, command));
+    }
+
+    @Test
+    void createGroupParsesUnderscoreLocaleLikeLegacyDid() {
+        ExternalIdFactory externalIdFactory = new ExternalIdFactory(configurationDomainService);
+        GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
+                groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
+                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
+                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
+
+        when(officeRepositoryWrapper.findOneWithNotFoundDetection(1L)).thenReturn(office);
+        when(office.getId()).thenReturn(1L);
+        when(office.getOpeningLocalDate()).thenReturn(LocalDate.of(2000, 1, 1));
+        when(groupLevelRepository.findById(any())).thenReturn(Optional.of(groupLevel));
+        when(groupLevel.isCenter()).thenReturn(false);
+
+        // "en_GB" is the legacy underscore form Fineract clients send; Locale.forLanguageTag would silently
+        // resolve this to the root locale instead, and "04 March 2011" would then fail to parse.
+        GroupCreateRequest request = GroupCreateRequest.builder() //
+                .name("Pending Group") //
+                .officeId(1L) //
+                .accountNo("GRP001") //
+                .active(false) //
+                .activationDate("04 March 2011") //
+                .locale("en_GB") //
+                .dateFormat("dd MMMM yyyy") //
+                .build();
+
+        GroupCreateResponse response = assertDoesNotThrow(() -> service.createGroup(request));
+
+        assertThat(response.getOfficeId()).isEqualTo(1L);
+    }
+
+    @Test
+    void createGroupRejectsActivationWhenMakerCheckerIsEnabled() {
+        ExternalIdFactory externalIdFactory = new ExternalIdFactory(configurationDomainService);
+        GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
+                groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
+                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
+                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
+
+        when(officeRepositoryWrapper.findOneWithNotFoundDetection(1L)).thenReturn(office);
+        when(office.getId()).thenReturn(1L);
+        when(office.getOpeningLocalDate()).thenReturn(LocalDate.of(2000, 1, 1));
+        when(groupLevelRepository.findById(any())).thenReturn(Optional.of(groupLevel));
+        when(groupLevel.isCenter()).thenReturn(false);
+        when(groupLevel.isGroup()).thenReturn(true);
+        when(configurationDomainService.retrieveMinAllowedClientsInGroup()).thenReturn(0);
+        when(configurationDomainService.retrieveMaxAllowedClientsInGroup()).thenReturn(100);
+        // Maker-checker enabled for ACTIVATE_GROUP: the legacy JsonCommand path parks the command for checker
+        // approval; the typed path has nowhere to park it yet, so it must reject instead of activating anyway.
+        when(commandProcessingService.validateRollbackCommand(any(), any())).thenReturn(true);
+
+        GroupCreateRequest request = GroupCreateRequest.builder() //
+                .name("Active Group") //
+                .officeId(1L) //
+                .accountNo("GRP002") //
+                .active(true) //
+                .activationDate("04 March 2011") //
+                .dateFormat("dd MMMM yyyy") //
+                .build();
+
+        assertThrows(GeneralPlatformDomainRuleException.class, () -> service.createGroup(request));
     }
 }
