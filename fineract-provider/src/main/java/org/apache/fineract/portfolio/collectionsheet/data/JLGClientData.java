@@ -19,11 +19,13 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable data object for clients with loans due for disbursement or collection.
  */
+@Getter
 public final class JLGClientData {
 
     private final Long clientId;

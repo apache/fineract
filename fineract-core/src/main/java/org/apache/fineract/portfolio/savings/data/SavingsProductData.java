@@ -72,13 +72,16 @@ public final class SavingsProductData implements Serializable {
     private final BigDecimal overdraftLimit;
     @Getter
     private final BigDecimal minRequiredBalance;
+    @Getter
     private final boolean enforceMinRequiredBalance;
     @Getter
     private final BigDecimal maxAllowedLienLimit;
+    @Getter
     private final boolean lienAllowed;
     private final BigDecimal minBalanceForInterestCalculation;
     private final BigDecimal nominalAnnualInterestRateOverdraft;
     private final BigDecimal minOverdraftForInterestCalculation;
+    @Getter
     private final boolean withHoldTax;
     private final TaxGroupData taxGroup;
     @Setter
