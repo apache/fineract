@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -74,6 +76,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -177,8 +180,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.getAmount(currency)).thenReturn(chargeAmountMoney);
         when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
-        when(loanTransaction.getLoan()).thenReturn(loan);
-        when(loan.getDisbursementDate()).thenReturn(disbursementDate);
         when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
         when(installment.getInstallmentNumber()).thenReturn(1);
         when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
@@ -221,8 +222,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.getAmount(currency)).thenReturn(transactionAmountMoney);
         when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
-        when(loanTransaction.getLoan()).thenReturn(loan);
-        when(loan.getDisbursementDate()).thenReturn(disbursementDate);
         when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
         when(installment.getInstallmentNumber()).thenReturn(1);
         when(charge.updatePaidAmountBy(refEq(transactionAmountMoney), eq(1), refEq(zero))).thenReturn(transactionAmountMoney);
@@ -270,7 +269,6 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loan.getCurrency()).thenReturn(currency);
         when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
-        when(loan.getDisbursementDate()).thenReturn(disbursementDate);
         when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
         when(installment.getInstallmentNumber()).thenReturn(1);
         when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
@@ -290,6 +288,77 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         assertEquals(0, BigDecimal.ZERO.compareTo(installment.getFeeChargesOutstanding(currency).getAmount()));
         assertEquals(0, BigDecimal.valueOf(80).compareTo(installment.getPrincipalOutstanding(currency).getAmount()));
         Mockito.verify(loan, times(2)).getPaymentAllocationRules();
+    }
+
+    @Test
+    public void chargePaymentTransactionIsAllocatedToTheInstallmentWhereTheChargeIsDue() {
+        // A charge due within installment #2's period must stay attributed to installment #2, not fall through
+        // to installment #3 just because the old code widened every installment's "from" to the disbursement
+        // date (see FINERACT-3014). The mock delegates to the real isInPeriod logic so the charge's actual due
+        // date - not a per-call stub - decides the outcome, the same way production code decides it.
+        final BigDecimal chargeAmount = BigDecimal.valueOf(50);
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        LocalDate chargeDueDate = LocalDate.of(2023, 2, 15);
+        LocalDate transactionDate = LocalDate.of(2023, 1, 10);
+        LoanTransaction loanTransaction = mock(LoanTransaction.class);
+        MonetaryCurrency currency = MONETARY_CURRENCY;
+        LoanCharge charge = mock(LoanCharge.class);
+        LoanChargePaidBy chargePaidBy = mock(LoanChargePaidBy.class);
+        Money overpaidAmount = Money.zero(currency);
+        Money zero = Money.zero(currency);
+        Loan loan = mock(Loan.class);
+        Money chargeAmountMoney = Money.of(currency, chargeAmount);
+
+        LoanRepaymentScheduleInstallment installment1 = spy(
+                new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate, disbursementDate.plusMonths(1), BigDecimal.valueOf(0L),
+                        BigDecimal.valueOf(0L), BigDecimal.ZERO, BigDecimal.valueOf(0L), false, null, BigDecimal.ZERO));
+        LoanRepaymentScheduleInstallment installment2 = spy(new LoanRepaymentScheduleInstallment(loan, 2, disbursementDate.plusMonths(1),
+                disbursementDate.plusMonths(2), BigDecimal.valueOf(0L), BigDecimal.valueOf(0L), chargeAmount, BigDecimal.valueOf(0L), false,
+                null, BigDecimal.ZERO));
+        LoanRepaymentScheduleInstallment installment3 = spy(new LoanRepaymentScheduleInstallment(loan, 3, disbursementDate.plusMonths(2),
+                disbursementDate.plusMonths(3), BigDecimal.valueOf(0L), BigDecimal.valueOf(0L), BigDecimal.ZERO, BigDecimal.valueOf(0L),
+                false, null, BigDecimal.ZERO));
+        List<LoanRepaymentScheduleInstallment> installments = List.of(installment1, installment2, installment3);
+
+        when(loanTransaction.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_PAYMENT);
+        when(chargePaidBy.getLoanCharge()).thenReturn(charge);
+        when(loanTransaction.getLoanChargesPaid()).thenReturn(Set.of(chargePaidBy));
+        when(loanTransaction.getAmount()).thenReturn(chargeAmount);
+        when(loanTransaction.getAmount(currency)).thenReturn(chargeAmountMoney);
+        when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
+        when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
+        // Stubbed leniently (unlike the pre-FINERACT-3014 version of this test) so that reverting the fix fails
+        // this test via the installment-attribution assertions below, not an unrelated NPE on an un-stubbed call.
+        // The fixed production code never calls these, hence lenient().
+        lenient().when(loanTransaction.getLoan()).thenReturn(loan);
+        lenient().when(loan.getDisbursementDate()).thenReturn(disbursementDate);
+        // Delegate to the real isInPeriod logic with a fixed charge due date, instead of stubbing one exact
+        // call - this is what makes the test actually exercise the fromDate-vs-disbursementDate distinction.
+        when(charge.isDueInPeriod(any(), any(), anyBoolean())).thenAnswer(invocation -> LoanRepaymentScheduleProcessingWrapper
+                .isInPeriod(chargeDueDate, invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2)));
+        when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(2), refEq(zero))).thenReturn(chargeAmountMoney);
+        // Lenient: only a reverted fix calls this (it would wrongly match installment #3 too), and it must not
+        // NPE downstream so the test fails on the verify() assertions below with a clear message, not a stack trace.
+        lenient().when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(3), refEq(zero))).thenReturn(chargeAmountMoney);
+        when(loanTransaction.isPenaltyPayment()).thenReturn(false);
+
+        underTest.processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, Set.of(charge),
+                new MoneyHolder(overpaidAmount), null, loan.getActiveLoanTermVariations()));
+
+        Mockito.verify(installment1, never()).payFeeChargesComponent(any(), any());
+        Mockito.verify(installment2, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
+        Mockito.verify(installment3, never()).payFeeChargesComponent(any(), any());
+        // The old code (using disbursementDate as every installment's "from") would have matched both
+        // installment #2 and #3, paying the charge twice.
+        Mockito.verify(charge, times(1)).updatePaidAmountBy(any(), any(), any());
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Set<LoanChargePaidBy>> chargesPaidCaptor = ArgumentCaptor.forClass(Set.class);
+        Mockito.verify(loanTransaction, times(1)).setLoanChargesPaid(chargesPaidCaptor.capture());
+        LoanChargePaidBy paidBy = chargesPaidCaptor.getValue().iterator().next();
+        assertEquals(2, paidBy.getInstallmentNumber());
+        assertEquals(0, chargeAmount.compareTo(paidBy.getAmount()));
+        Mockito.verify(loan, times(0)).getPaymentAllocationRules();
     }
 
     @Test
@@ -673,6 +742,183 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         assertEquals(postMaturityDisbursementDate, newInstallment.getDueDate());
 
         assertEquals(0, newInstallment.getPrincipal(currency).getAmount().compareTo(postMaturityDisbursementAmount));
+    }
+
+    /**
+     * The Interest Refund simulation (FINERACT-3014) tells the processor how much principal to treat as never disbursed
+     * via {@link ProgressiveTransactionCtx#setAmortizablePrincipalReduction}. That reduction must shrink only the
+     * amortizable part of the disbursement: the down-payment installment keeps matching the full disbursement amount,
+     * exactly like the real (unreduced) DOWN_PAYMENT transaction copy does.
+     */
+    @Test
+    public void disbursementWithDownPaymentReducesOnlyTheAmortizableAmount() {
+        final MonetaryCurrency currency = MONETARY_CURRENCY;
+        final LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        final BigDecimal disbursedAmount = BigDecimal.valueOf(1000);
+        // Money.of() reads the statically mocked MoneyHelper, so it must not be evaluated inside a when() call
+        final Money disbursementMoney = Money.of(currency, disbursedAmount);
+        final Money zeroMoney = Money.zero(currency);
+        final Money reduction = Money.of(currency, BigDecimal.valueOf(750));
+
+        LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
+        when(detail.getInstallmentAmountInMultiplesOf()).thenReturn(null);
+        when(detail.isEnableDownPayment()).thenReturn(true);
+        when(detail.getDisbursedAmountPercentageForDownPayment()).thenReturn(BigDecimal.valueOf(25));
+
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(detail);
+
+        LoanRepaymentScheduleInstallment downPaymentInstallment = new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate,
+                disbursementDate, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO, true);
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 2, disbursementDate,
+                disbursementDate.plusMonths(1), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null,
+                BigDecimal.ZERO);
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>(List.of(downPaymentInstallment, installment));
+
+        LoanTransaction disbursementTransaction = mock(LoanTransaction.class);
+        when(disbursementTransaction.getTypeOf()).thenReturn(LoanTransactionType.DISBURSEMENT);
+        when(disbursementTransaction.getTransactionDate()).thenReturn(disbursementDate);
+        when(disbursementTransaction.getAmount()).thenReturn(disbursedAmount);
+        when(disbursementTransaction.getAmount(currency)).thenReturn(disbursementMoney);
+        when(disbursementTransaction.getLoan()).thenReturn(loan);
+
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.getMaturityDate()).thenReturn(disbursementDate.plusMonths(1));
+
+        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), new MoneyHolder(zeroMoney),
+                mock(ChangedTransactionDetail.class), model, zeroMoney, loan.getActiveLoanTermVariations());
+        ctx.setAmortizablePrincipalReduction(reduction);
+
+        underTest.processLatestTransaction(disbursementTransaction, ctx);
+
+        assertEquals(0, downPaymentInstallment.getPrincipal(currency).getAmount().compareTo(BigDecimal.valueOf(250)));
+        // Money has no equals()/hashCode(), and minus() returns a new instance whenever the subtrahend isn't zero, so
+        // the amount must be compared by value instead of eq(zeroMoney).
+        Mockito.verify(emiCalculator).addDisbursement(eq(model), eq(disbursementDate),
+                argThat(m -> m.getAmount().compareTo(BigDecimal.ZERO) == 0));
+        assertEquals(0, ctx.getAmortizablePrincipalReduction().getAmount().compareTo(BigDecimal.ZERO));
+    }
+
+    /**
+     * Same as above, but the reduction is smaller than the amortizable amount: only part of it is consumed, and the
+     * down-payment installment is still unaffected.
+     */
+    @Test
+    public void disbursementWithDownPaymentPartiallyReducesTheAmortizableAmount() {
+        final MonetaryCurrency currency = MONETARY_CURRENCY;
+        final LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        final BigDecimal disbursedAmount = BigDecimal.valueOf(1000);
+        // Money.of() reads the statically mocked MoneyHelper, so it must not be evaluated inside a when() call
+        final Money disbursementMoney = Money.of(currency, disbursedAmount);
+        final Money zeroMoney = Money.zero(currency);
+        final Money reduction = Money.of(currency, BigDecimal.valueOf(300));
+        final BigDecimal expectedAmortizableAmount = BigDecimal.valueOf(450);
+
+        LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
+        when(detail.getInstallmentAmountInMultiplesOf()).thenReturn(null);
+        when(detail.isEnableDownPayment()).thenReturn(true);
+        when(detail.getDisbursedAmountPercentageForDownPayment()).thenReturn(BigDecimal.valueOf(25));
+
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(detail);
+
+        LoanRepaymentScheduleInstallment downPaymentInstallment = new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate,
+                disbursementDate, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO, true);
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 2, disbursementDate,
+                disbursementDate.plusMonths(1), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null,
+                BigDecimal.ZERO);
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>(List.of(downPaymentInstallment, installment));
+
+        LoanTransaction disbursementTransaction = mock(LoanTransaction.class);
+        when(disbursementTransaction.getTypeOf()).thenReturn(LoanTransactionType.DISBURSEMENT);
+        when(disbursementTransaction.getTransactionDate()).thenReturn(disbursementDate);
+        when(disbursementTransaction.getAmount()).thenReturn(disbursedAmount);
+        when(disbursementTransaction.getAmount(currency)).thenReturn(disbursementMoney);
+        when(disbursementTransaction.getLoan()).thenReturn(loan);
+
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.getMaturityDate()).thenReturn(disbursementDate.plusMonths(1));
+
+        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), new MoneyHolder(zeroMoney),
+                mock(ChangedTransactionDetail.class), model, zeroMoney, loan.getActiveLoanTermVariations());
+        ctx.setAmortizablePrincipalReduction(reduction);
+
+        underTest.processLatestTransaction(disbursementTransaction, ctx);
+
+        assertEquals(0, downPaymentInstallment.getPrincipal(currency).getAmount().compareTo(BigDecimal.valueOf(250)));
+        Mockito.verify(emiCalculator).addDisbursement(eq(model), eq(disbursementDate),
+                argThat(m -> m.getAmount().compareTo(expectedAmortizableAmount) == 0));
+        assertEquals(0, ctx.getAmortizablePrincipalReduction().getAmount().compareTo(BigDecimal.ZERO));
+    }
+
+    /**
+     * Two tranches, each with its own down-payment installment: the reduction is consumed greedily, tranche by tranche,
+     * and each tranche must pick a different (still zero-principal) down-payment installment instead of overwriting the
+     * one the previous tranche already populated.
+     */
+    @Test
+    public void multipleDisbursementsConsumeTheAmortizablePrincipalReductionInOrderWithoutReusingTheSameDownPaymentInstallment() {
+        final MonetaryCurrency currency = MONETARY_CURRENCY;
+        final LocalDate firstDisbursementDate = LocalDate.of(2023, 1, 1);
+        final LocalDate secondDisbursementDate = LocalDate.of(2023, 2, 1);
+        final BigDecimal disbursedAmount = BigDecimal.valueOf(1000);
+        // Money.of() reads the statically mocked MoneyHelper, so it must not be evaluated inside a when() call
+        final Money disbursementMoney = Money.of(currency, disbursedAmount);
+        final Money zeroMoney = Money.zero(currency);
+        final Money reduction = Money.of(currency, BigDecimal.valueOf(900));
+        final BigDecimal expectedSecondAmortizableAmount = BigDecimal.valueOf(600);
+
+        LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
+        when(detail.getInstallmentAmountInMultiplesOf()).thenReturn(null);
+        when(detail.isEnableDownPayment()).thenReturn(true);
+        when(detail.getDisbursedAmountPercentageForDownPayment()).thenReturn(BigDecimal.valueOf(25));
+
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(detail);
+
+        LoanRepaymentScheduleInstallment downPaymentInstallment1 = new LoanRepaymentScheduleInstallment(loan, 1, firstDisbursementDate,
+                firstDisbursementDate, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO,
+                true);
+        LoanRepaymentScheduleInstallment downPaymentInstallment2 = new LoanRepaymentScheduleInstallment(loan, 2, secondDisbursementDate,
+                secondDisbursementDate, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, BigDecimal.ZERO,
+                true);
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, 3, firstDisbursementDate,
+                secondDisbursementDate.plusMonths(1), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null,
+                BigDecimal.ZERO);
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>(
+                List.of(downPaymentInstallment1, downPaymentInstallment2, installment));
+
+        LoanTransaction firstDisbursementTransaction = mock(LoanTransaction.class);
+        when(firstDisbursementTransaction.getTypeOf()).thenReturn(LoanTransactionType.DISBURSEMENT);
+        when(firstDisbursementTransaction.getTransactionDate()).thenReturn(firstDisbursementDate);
+        when(firstDisbursementTransaction.getAmount()).thenReturn(disbursedAmount);
+        when(firstDisbursementTransaction.getAmount(currency)).thenReturn(disbursementMoney);
+        when(firstDisbursementTransaction.getLoan()).thenReturn(loan);
+
+        LoanTransaction secondDisbursementTransaction = mock(LoanTransaction.class);
+        when(secondDisbursementTransaction.getTypeOf()).thenReturn(LoanTransactionType.DISBURSEMENT);
+        when(secondDisbursementTransaction.getTransactionDate()).thenReturn(secondDisbursementDate);
+        when(secondDisbursementTransaction.getAmount()).thenReturn(disbursedAmount);
+        when(secondDisbursementTransaction.getAmount(currency)).thenReturn(disbursementMoney);
+        when(secondDisbursementTransaction.getLoan()).thenReturn(loan);
+
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.getMaturityDate()).thenReturn(secondDisbursementDate.plusMonths(1));
+
+        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), new MoneyHolder(zeroMoney),
+                mock(ChangedTransactionDetail.class), model, zeroMoney, loan.getActiveLoanTermVariations());
+        ctx.setAmortizablePrincipalReduction(reduction);
+
+        underTest.processLatestTransaction(firstDisbursementTransaction, ctx);
+        underTest.processLatestTransaction(secondDisbursementTransaction, ctx);
+
+        assertEquals(0, downPaymentInstallment1.getPrincipal(currency).getAmount().compareTo(BigDecimal.valueOf(250)));
+        assertEquals(0, downPaymentInstallment2.getPrincipal(currency).getAmount().compareTo(BigDecimal.valueOf(250)));
+        Mockito.verify(emiCalculator).addDisbursement(eq(model), eq(firstDisbursementDate),
+                argThat(m -> m.getAmount().compareTo(BigDecimal.ZERO) == 0));
+        Mockito.verify(emiCalculator).addDisbursement(eq(model), eq(secondDisbursementDate),
+                argThat(m -> m.getAmount().compareTo(expectedSecondAmortizableAmount) == 0));
+        assertEquals(0, ctx.getAmortizablePrincipalReduction().getAmount().compareTo(BigDecimal.ZERO));
     }
 
     /**

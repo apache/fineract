@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -52,6 +53,11 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     private boolean isContractTerminated = false;
     @Setter
     private boolean isPrepayAttempt = false;
+    // Interest Refund simulation: principal that should be treated as if it was never disbursed. Consumed by the
+    // disbursement handlers so only the amortizable part of a disbursement shrinks, leaving the down-payment
+    // installment matched to the real DOWN_PAYMENT transaction amount (see FINERACT-3014).
+    @Setter
+    private Money amortizablePrincipalReduction;
     private final List<LoanRepaymentScheduleInstallment> skipRepaymentScheduleInstallments = new ArrayList<>();
     private final List<Long> processedLoanChargeIds;
 
@@ -79,6 +85,17 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
         this.sumOfInterestRefundAmount = sumOfInterestRefundAmount;
         this.model = model;
         this.processedLoanChargeIds = processedLoanChargeIds;
+        this.amortizablePrincipalReduction = Money.zero(currency);
+    }
+
+    /**
+     * Consumes up to {@code amortizableAmount} from the remaining {@link #amortizablePrincipalReduction} and returns
+     * the amount actually applied.
+     */
+    public Money consumeAmortizablePrincipalReduction(Money amortizableAmount) {
+        Money applied = MathUtil.min(amortizablePrincipalReduction, amortizableAmount, false);
+        amortizablePrincipalReduction = amortizablePrincipalReduction.minus(applied);
+        return applied;
     }
 
     public Set<LoanCharge> getProcessedLoanCharges() {
