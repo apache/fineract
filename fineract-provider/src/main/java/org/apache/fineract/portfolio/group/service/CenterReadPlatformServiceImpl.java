@@ -134,7 +134,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             this.schemaSql = SQL_QUERY;
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -203,7 +203,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     + " where g.office_id=?";
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -258,7 +258,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             this.schemaSql = SQL_QUERY;
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

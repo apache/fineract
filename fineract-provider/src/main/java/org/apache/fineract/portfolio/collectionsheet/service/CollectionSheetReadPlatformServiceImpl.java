@@ -203,7 +203,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String collectionSheetSchema(final boolean isCenterCollection) {
+        private String collectionSheetSchema(final boolean isCenterCollection) {
             StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT loandata.*, (SELECT sum(lc.amount_outstanding_derived) FROM m_loan_charge lc ")
                     .append("WHERE lc.loan_id = loandata.loanId AND lc.is_paid_derived = false AND lc.is_active = true ")
@@ -476,7 +476,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String collectionSheetSchema(final boolean isCenterCollection) {
+        private String collectionSheetSchema(final boolean isCenterCollection) {
 
             final StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT gp.display_name As groupName, ").append("gp.id As groupId, ").append("cl.display_name As clientName, ")
@@ -541,7 +541,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         private GroupSavingsDataMapper() {}
 
-        public JLGGroupData mapRowData(ResultSet rs, int rowNum) throws SQLException {
+        private JLGGroupData mapRowData(ResultSet rs, int rowNum) throws SQLException {
             final List<JLGClientData> clients = new ArrayList<>();
             final JLGGroupData group = this.mapRow(rs, rowNum);
             final Long previousGroupId = group.getGroupId();
@@ -583,7 +583,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         private ClientSavingsDataMapper() {}
 
-        public JLGClientData mapRowData(ResultSet rs, int rowNum) throws SQLException {
+        private JLGClientData mapRowData(ResultSet rs, int rowNum) throws SQLException {
 
             List<SavingsDueData> savings = new ArrayList<>();
 
@@ -742,7 +742,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sql = sb.toString();
         }
 
-        public String sqlSchema() {
+        private String sqlSchema() {
             return sql;
         }
 
@@ -825,7 +825,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             this.sql = sb.toString();
         }
 
-        public String collectionSheetSchema() {
+        private String collectionSheetSchema() {
             return this.sql;
         }
 

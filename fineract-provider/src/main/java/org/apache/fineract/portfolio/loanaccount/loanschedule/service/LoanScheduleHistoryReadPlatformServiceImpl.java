@@ -115,7 +115,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
             this.loanScheduleType = loanScheduleType;
         }
 
-        public String schema() {
+        private String schema() {
             StringBuilder stringBuilder = new StringBuilder(200);
             stringBuilder.append(" ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ");
             stringBuilder.append(

@@ -51,7 +51,7 @@ public class ProvisioningCategoryReadPlatformServiceImpl implements Provisioning
             return new ProvisioningCategoryData().setId(id).setCategoryName(categoryName).setCategoryDescription(description);
         }
 
-        public String schema() {
+        private String schema() {
             return " pc.id as id, pc.category_name as category_name, pc.description as description";
         }
     }

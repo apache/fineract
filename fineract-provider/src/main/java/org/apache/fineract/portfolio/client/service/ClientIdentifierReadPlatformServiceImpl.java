@@ -85,7 +85,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
 
         ClientIdentityMapper() {}
 
-        public String schema() {
+        private String schema() {
             return "ci.id as id, ci.client_id as clientId, ci.document_type_id as documentTypeId, ci.status as status, ci.document_key as documentKey,"
                     + " ci.description as description, ci.issuance_date as issuanceDate, ci.expiry_date as expiryDate,"
                     + " cv.code_value as documentType " + " from m_client_identifier ci, m_client c, m_office o, m_code_value cv"

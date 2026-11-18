@@ -143,7 +143,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                 .append(" left join m_deposit_account_on_hold_transaction oht on oht.id = gt.deposit_on_hold_transaction_id")//
                 .append(" left JOIN m_savings_account sa on sa.id = COALESCE(aa.linked_savings_account_id, oht.savings_account_id)");
 
-        public String schema() {
+        private String schema() {
             return this.sqlBuilder.toString();
         }
 
@@ -215,7 +215,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
             sql = sb.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.sql;
         }
 
@@ -270,7 +270,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
             sql = sb.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.sql;
         }
 
@@ -354,7 +354,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
             sql = sb.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.sql;
         }
 

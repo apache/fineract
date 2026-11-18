@@ -226,7 +226,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             this.creditAllocationData = creditAllocationData;
         }
 
-        public String loanProductSchema() {
+        private String loanProductSchema() {
             return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.loan_transaction_strategy_code as transactionStrategyCode, lp.loan_transaction_strategy_name as transactionStrategyName, "
                     + "lp.name as name, lp.short_name as shortName, lp.description as description, "
                     + "lp.principal_amount as principal, lp.min_principal_amount as minPrincipal, lp.max_principal_amount as maxPrincipal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, lp.currency_multiplesof as inMultiplesOf, "
@@ -615,24 +615,24 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_loan lp";
         }
 
-        public String activeOnlySchema() {
+        private String activeOnlySchema() {
             return schema() + " where (close_date is null or close_date >= " + sqlGenerator.currentBusinessDate() + ")";
         }
 
-        public String productMixSchema() {
+        private String productMixSchema() {
             return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
                     + "select lp.id from m_product_loan lp inner join m_product_mix pm on pm.product_id=lp.id)";
         }
 
-        public String restrictedProductsSchema() {
+        private String restrictedProductsSchema() {
             return "pm.restricted_product_id as id, rp.name as name, rp.allow_multiple_disbursals as multiDisburseLoan from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
         }
 
-        public String derivedRestrictedProductsSchema() {
+        private String derivedRestrictedProductsSchema() {
             return "pm.product_id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
         }
 
@@ -649,7 +649,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private static final class AdvancedPaymentDataMapper implements RowMapper<AdvancedPaymentData> {
 
-        public String schema() {
+        private String schema() {
             return "transaction_type, allocation_types, future_installment_allocation_rule from m_loan_product_payment_allocation_rule";
         }
 
@@ -673,7 +673,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private static final class CreditAllocationDataMapper implements RowMapper<CreditAllocationData> {
 
-        public String schema() {
+        private String schema() {
             return "transaction_type, allocation_strategy, allocation_types from m_loan_product_credit_allocation_rule";
         }
 
@@ -700,7 +700,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private static final class LoanProductBorrowerCycleMapper implements RowMapper<LoanProductBorrowerCycleVariationData> {
 
-        public String schema() {
+        private String schema() {
             return "bc.id as id,bc.borrower_cycle_number as cycleNumber,bc.value_condition as conditionType,bc.param_type as paramType,"
                     + "bc.default_value as defaultValue,bc.max_value as maxVal,bc.min_value as minVal "
                     + "from m_product_loan_variations_borrower_cycle bc";
@@ -789,7 +789,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         LoanProductFloatingRateMapper() {}
 
-        public String schema() {
+        private String schema() {
             return "lp.id as id,  lp.name as name," + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
                     + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
                     + "lfr.interest_rate_differential as interestRateDifferential, "
