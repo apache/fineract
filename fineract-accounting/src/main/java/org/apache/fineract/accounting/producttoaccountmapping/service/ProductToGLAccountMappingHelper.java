@@ -309,14 +309,12 @@ public class ProductToGLAccountMappingHelper {
         }
 
         final JsonArray chargeToIncomeAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(arrayFragmentName, element);
-        /**
+        /*
          * Variable stores a map representation of charges (key) and their associated income Id's (value) extracted from
          * the passed in Jsoncommand
-         **/
+         */
         final Map<Long, Long> inputChargeToIncomeAccountMap = new HashMap<>();
-        /***
-         * Variable stores all charges which have already been mapped to Income Accounts in the system
-         **/
+        // Variable stores all charges which have already been mapped to Income Accounts in the system
         final Set<Long> existingCharges = new HashSet<>();
         if (chargeToIncomeAccountMappingArray != null) {
             if (changes != null) {
@@ -333,13 +331,11 @@ public class ProductToGLAccountMappingHelper {
             // If input map is empty, delete all existing mappings
             if (inputChargeToIncomeAccountMap.size() == 0) {
                 this.accountMappingRepository.deleteAll(existingChargeToIncomeAccountMappings);
-            } /**
-               * Else, <br/>
-               * update existing mappings OR <br/>
-               * delete old mappings (which are already present, but not passed in as a part of Jsoncommand)<br/>
-               * Create new mappings for charges that are passed in as a part of the Jsoncommand but not already present
-               *
-               **/
+            } /*
+               * Else, <br/> update existing mappings OR <br/> delete old mappings (which are already present, but not
+               * passed in as a part of Jsoncommand)<br/> Create new mappings for charges that are passed in as a part
+               * of the Jsoncommand but not already present
+               */
             else {
                 for (final ProductToGLAccountMapping chargeToIncomeAccountMapping : existingChargeToIncomeAccountMappings) {
                     final Long currentCharge = chargeToIncomeAccountMapping.getChargeId();
@@ -388,14 +384,13 @@ public class ProductToGLAccountMappingHelper {
                 .findAllPaymentTypeToFundSourceMappings(productId, portfolioProductType.getValue());
         final JsonArray paymentChannelMappingArray = this.fromApiJsonHelper
                 .extractJsonArrayNamed(LoanProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
-        /**
+        /*
          * Variable stores a map representation of Payment channels (key) and their fund sources (value) extracted from
          * the passed in Jsoncommand
-         **/
+         */
         final Map<Long, Long> inputPaymentChannelFundSourceMap = new HashMap<>();
-        /***
-         * Variable stores all payment types which have already been mapped to Fund Sources in the system
-         **/
+
+        // Variable stores all payment types which have already been mapped to Fund Sources in the system
         final Set<Long> existingPaymentTypes = new HashSet<>();
         if (paymentChannelMappingArray != null) {
             if (changes != null) {
@@ -413,14 +408,11 @@ public class ProductToGLAccountMappingHelper {
             // If input map is empty, delete all existing mappings
             if (inputPaymentChannelFundSourceMap.isEmpty()) {
                 this.accountMappingRepository.deleteAll(existingPaymentChannelToFundSourceMappings);
-            } /**
-               * Else, <br/>
-               * update existing mappings OR <br/>
-               * delete old mappings (which re already present, but not passed in as a part of Jsoncommand)<br/>
-               * Create new mappings for payment types that are passed in as a part of the Jsoncommand but not already
-               * present
-               *
-               **/
+            } /*
+               * Else, <br/> update existing mappings OR <br/> delete old mappings (which re already present, but not
+               * passed in as a part of Jsoncommand)<br/> Create new mappings for payment types that are passed in as a
+               * part of the Jsoncommand but not already present
+               */
             else {
                 for (final ProductToGLAccountMapping existingPaymentChannelToFundSourceMapping : existingPaymentChannelToFundSourceMappings) {
                     final Long currentPaymentChannelId = existingPaymentChannelToFundSourceMapping.getPaymentType().getId();
@@ -617,9 +609,7 @@ public class ProductToGLAccountMappingHelper {
         // based on input condition
 
         GLAccount glAccount;
-        /**
-         * Both CASH and Accrual placeholders have the same value for income from Interest and penalties
-         **/
+        // Both CASH and Accrual placeholders have the same value for income from Interest and penalties
         CashAccountsForLoan placeHolderAccountType;
         if (isPenalty) {
             glAccount = getAccountByIdAndType(LoanProductAccountingParams.INCOME_ACCOUNT_ID.getValue(), GLAccountType.INCOME,

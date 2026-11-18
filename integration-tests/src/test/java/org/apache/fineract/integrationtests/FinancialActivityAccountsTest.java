@@ -59,26 +59,22 @@ public class FinancialActivityAccountsTest extends FeignIntegrationTest {
     @Test
     public void testFinancialActivityAccounts() {
 
-        /** Create a Liability and an Asset Transfer Account **/
+        // Create a Liability and an Asset Transfer Account
         Account liabilityTransferAccount = accountHelper.createLiabilityAccount();
         Account assetTransferAccount = accountHelper.createAssetAccount();
         Assertions.assertNotNull(assetTransferAccount);
         Assertions.assertNotNull(liabilityTransferAccount);
 
-        /*** Create A Financial Activity to Account Mapping **/
+        // Create A Financial Activity to Account Mapping
         Long financialActivityAccountId = financialActivityAccountHelper
                 .createMapping(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount).getResourceId();
         Assertions.assertNotNull(financialActivityAccountId);
 
-        /***
-         * Fetch Created Financial Activity to Account Mapping and validate created values
-         **/
+        // Fetch Created Financial Activity to Account Mapping and validate created values
         assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
                 liabilityTransferAccount);
 
-        /**
-         * Update Existing Financial Activity to Account Mapping and assert changes
-         **/
+        // Update Existing Financial Activity to Account Mapping and assert changes
         Account newLiabilityTransferAccount = accountHelper.createLiabilityAccount();
         Assertions.assertNotNull(newLiabilityTransferAccount);
 
@@ -87,39 +83,37 @@ public class FinancialActivityAccountsTest extends FeignIntegrationTest {
                 .getChanges();
         Assertions.assertEquals(newLiabilityTransferAccount.getAccountID().longValue(), changes.getGlAccountId());
 
-        /** Validate update works correctly **/
+        // Validate update works correctly
         assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
                 newLiabilityTransferAccount);
 
-        /** Update with Invalid Financial Activity should fail **/
+        // Update with Invalid Financial Activity should fail
         CallFailedRuntimeException invalidFinancialActivityUpdateError = financialActivityAccountHelper
                 .updateMappingExpectingError(financialActivityAccountId, INVALID_FINANCIAL_ACTIVITY_ID, newLiabilityTransferAccount);
         assertEquals(BAD_REQUEST, invalidFinancialActivityUpdateError.getStatus());
         assertEquals("validation.msg.financialactivityaccount.financialActivityId.is.not.one.of.expected.enumerations",
                 FeignErrors.errorGlobalisationCode(invalidFinancialActivityUpdateError));
 
-        /** Creating Duplicate Financial Activity should fail **/
+        // Creating Duplicate Financial Activity should fail
         CallFailedRuntimeException duplicateFinancialActivityAccountError = financialActivityAccountHelper
                 .createMappingExpectingError(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount);
         assertEquals(FORBIDDEN, duplicateFinancialActivityAccountError.getStatus());
         assertEquals(DuplicateFinancialActivityAccountFoundException.getErrorcode(),
                 FeignErrors.errorGlobalisationCode(duplicateFinancialActivityAccountError));
 
-        /**
-         * Associating incorrect GL account types with a financial activity should fail
-         **/
+        // Associating incorrect GL account types with a financial activity should fail
         CallFailedRuntimeException invalidFinancialActivityAccountError = financialActivityAccountHelper
                 .updateMappingExpectingError(financialActivityAccountId, assetTransferFinancialActivityId, newLiabilityTransferAccount);
         assertEquals(FORBIDDEN, invalidFinancialActivityAccountError.getStatus());
         assertEquals(FinancialActivityAccountInvalidException.getErrorcode(),
                 FeignErrors.errorGlobalisationCode(invalidFinancialActivityAccountError));
 
-        /** Should be able to delete a Financial Activity to Account Mapping **/
+        // Should be able to delete a Financial Activity to Account Mapping
         Long deletedFinancialActivityAccountId = financialActivityAccountHelper.deleteMapping(financialActivityAccountId).getResourceId();
         Assertions.assertNotNull(deletedFinancialActivityAccountId);
         Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
 
-        /*** Trying to fetch a Deleted Account Mapping should give me a 404 **/
+        // Trying to fetch a Deleted Account Mapping should give me a 404
         assertEquals(NOT_FOUND, financialActivityAccountHelper.getMappingExpectingError(deletedFinancialActivityAccountId).getStatus());
     }
 

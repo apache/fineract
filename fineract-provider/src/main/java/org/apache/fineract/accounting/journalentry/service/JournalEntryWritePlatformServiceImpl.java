@@ -133,11 +133,11 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
 
             validateBusinessRulesForJournalEntries(journalEntryCommand);
 
-            /** Capture payment details **/
+            // Capture payment details
             final Map<String, Object> changes = new LinkedHashMap<>();
             final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-            /** Set a transaction Id and save these Journal entries **/
+            // Set a transaction Id and save these Journal entries
             final LocalDate transactionDate = command
                     .localDateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId(officeId);
@@ -226,7 +226,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
 
     private void validateDebitOrCreditArrayForExistingGLAccount(final GLAccount glaccount,
             final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
-        /**
+        /*
          * If a glaccount is assigned for a rule the credits or debits array should have only one entry and it must be
          * same as existing account
          */
@@ -303,9 +303,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
     }
 
     private void validateGLAccountForTransaction(final GLAccount creditOrDebitAccountHead) {
-        /***
-         * validate that the account allows manual adjustments and is not disabled
-         **/
+        // validate that the account allows manual adjustments and is not disabled
         if (creditOrDebitAccountHead.isDisabled()) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.GL_ACCOUNT_DISABLED, null,
                     creditOrDebitAccountHead.getName(), creditOrDebitAccountHead.getGlCode());
@@ -542,7 +540,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
             final JournalEntryType type, final String referenceNumber, final ExternalAssetOwner externalAssetOwner) {
         final boolean manualEntry = true;
 
-        /** Validate current code is appropriate **/
+        // Validate current code is appropriate
         this.organisationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
 
         for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
@@ -608,9 +606,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
 
             validateBusinessRulesForJournalEntries(journalEntryCommand);
 
-            /**
-             * revert old journal entries
-             */
+            // revert old journal entries
             final List<String> transactionIdsToBeReversed = this.glJournalEntryRepository.findNonReversedContraTransactionIds(contraId,
                     officeId);
             for (String transactionId : transactionIdsToBeReversed) {
@@ -619,7 +615,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
                 revertJournalEntry(journalEntries, "defining opening balance");
             }
 
-            /** Set a transaction Id and save these Journal entries **/
+            // Set a transaction Id and save these Journal entries
             final LocalDate transactionDate = command
                     .localDateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId(officeId);
