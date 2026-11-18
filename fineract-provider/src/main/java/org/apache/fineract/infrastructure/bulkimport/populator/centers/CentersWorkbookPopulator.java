@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator.centers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import org.apache.fineract.infrastructure.bulkimport.constants.CenterConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -222,13 +225,17 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         repeatsOnWeekly.setRefersToFormula(TemplatePopulateImportConstants.CENTER_SHEET_NAME + "!$IV$2:$IV$8");
 
         // Staff Names for each office
+        Set<String> seenOfficeScopedNames = new HashSet<>();
         for (Integer i = 0; i < offices.size(); i++) {
             Integer[] officeNameToBeginEndIndexesOfStaff = personnelSheetPopulator.getOfficeNameToBeginEndIndexesOfStaff().get(i);
-            Name loanOfficerName = centerWorkbook.createName();
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                loanOfficerName.setNameName("Staff_" + offices.get(i).getName().trim().replaceAll("[ )(]", "_"));
-                loanOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
-                        + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
+                String staffName = "Staff_" + offices.get(i).getName();
+                if (seenOfficeScopedNames.add(sanitizeName(staffName).toUpperCase(Locale.ROOT))) {
+                    Name loanOfficerName = centerWorkbook.createName();
+                    setSanitized(loanOfficerName, staffName);
+                    loanOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
+                            + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
+                }
             }
         }
     }
