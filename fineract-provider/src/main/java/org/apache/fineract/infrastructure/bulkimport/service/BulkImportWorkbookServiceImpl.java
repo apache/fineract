@@ -33,13 +33,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.mapping.ImportDocumentMapper;
 import org.apache.fineract.infrastructure.contentstore.util.ContentPipe;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -97,72 +95,19 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     throw unreadableWorkbook(null);
                 }
                 Workbook workbook = readWorkbook(clonedInputStream);
-                GlobalEntityType entityType = null;
-                int primaryColumn = 0;
-                if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
-                    entityType = GlobalEntityType.CLIENTS_PERSON;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTITY.toString())) {
-                    entityType = GlobalEntityType.CLIENTS_ENTITY;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.CENTERS.toString())) {
-                    entityType = GlobalEntityType.CENTERS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.GROUPS.toString())) {
-                    entityType = GlobalEntityType.GROUPS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.LOANS.toString())) {
-                    entityType = GlobalEntityType.LOANS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.LOAN_TRANSACTIONS.toString())) {
-                    entityType = GlobalEntityType.LOAN_TRANSACTIONS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.GUARANTORS.toString())) {
-                    entityType = GlobalEntityType.GUARANTORS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.OFFICES.toString())) {
-                    entityType = GlobalEntityType.OFFICES;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.CHART_OF_ACCOUNTS.toString())) {
-                    entityType = GlobalEntityType.CHART_OF_ACCOUNTS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.GL_JOURNAL_ENTRIES.toString())) {
-                    entityType = GlobalEntityType.GL_JOURNAL_ENTRIES;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.STAFF.toString())) {
-                    entityType = GlobalEntityType.STAFF;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.SHARE_ACCOUNTS.toString())) {
-                    entityType = GlobalEntityType.SHARE_ACCOUNTS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.SAVINGS_ACCOUNT.toString())) {
-                    entityType = GlobalEntityType.SAVINGS_ACCOUNT;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.SAVINGS_TRANSACTIONS.toString())) {
-                    entityType = GlobalEntityType.SAVINGS_TRANSACTIONS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.RECURRING_DEPOSIT_ACCOUNTS.toString())) {
-                    entityType = GlobalEntityType.RECURRING_DEPOSIT_ACCOUNTS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS.toString())) {
-                    entityType = GlobalEntityType.RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.FIXED_DEPOSIT_ACCOUNTS.toString())) {
-                    entityType = GlobalEntityType.FIXED_DEPOSIT_ACCOUNTS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.FIXED_DEPOSIT_TRANSACTIONS.toString())) {
-                    entityType = GlobalEntityType.FIXED_DEPOSIT_TRANSACTIONS;
-                    primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.USERS.toString())) {
-                    entityType = GlobalEntityType.USERS;
-                    primaryColumn = 0;
-                } else {
+                final GlobalEntityType entityType = BulkImportTemplateLayout.findEntityType(entity).orElse(null);
+                if (entityType == null) {
                     workbook.close();
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
-
                 }
-                requireDataSheet(workbook, entityType);
-                return publishEvent(primaryColumn, fileDetail, fileType, entityType, workbook, locale, dateFormat);
+                final BulkImportTemplateLayout layout = BulkImportTemplateLayout.of(entityType);
+                try {
+                    layout.validate(workbook);
+                } catch (PlatformApiDataValidationException e) {
+                    workbook.close();
+                    throw e;
+                }
+                return publishEvent(layout, fileDetail, fileType, entityType, workbook, locale, dateFormat);
             }
             throw new GeneralPlatformDomainRuleException("error.msg.null", "One or more of the given parameters not found");
         } catch (IOException e) {
@@ -200,39 +145,6 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         }
     }
 
-    private static void requireDataSheet(final Workbook workbook, final GlobalEntityType entityType) throws IOException {
-        final String sheetName = dataSheetName(entityType);
-        if (sheetName != null && workbook.getSheet(sheetName) == null) {
-            workbook.close();
-            throw invalidFile("error.msg.bulk.import.sheet.not.found", "Sheet '" + sheetName + "' not found in the file");
-        }
-    }
-
-    static String dataSheetName(final GlobalEntityType entityType) {
-        return switch (entityType) {
-            case OFFICES -> TemplatePopulateImportConstants.OFFICE_SHEET_NAME;
-            case CENTERS -> TemplatePopulateImportConstants.CENTER_SHEET_NAME;
-            case CHART_OF_ACCOUNTS -> TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME;
-            case CLIENTS_ENTITY -> TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME;
-            case CLIENTS_PERSON -> TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME;
-            case FIXED_DEPOSIT_ACCOUNTS -> TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME;
-            case FIXED_DEPOSIT_TRANSACTIONS -> TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME;
-            case GROUPS -> TemplatePopulateImportConstants.GROUP_SHEET_NAME;
-            case GUARANTORS -> TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME;
-            case GL_JOURNAL_ENTRIES -> TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME;
-            case LOANS -> TemplatePopulateImportConstants.LOANS_SHEET_NAME;
-            case LOAN_TRANSACTIONS -> TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME;
-            case RECURRING_DEPOSIT_ACCOUNTS -> TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME;
-            case RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS, SAVINGS_TRANSACTIONS ->
-                TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME;
-            case SAVINGS_ACCOUNT -> TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME;
-            case SHARE_ACCOUNTS -> TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME;
-            case STAFF -> TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME;
-            case USERS -> TemplatePopulateImportConstants.USER_SHEET_NAME;
-            default -> null;
-        };
-    }
-
     private static PlatformApiDataValidationException unreadableWorkbook(final Throwable cause) {
         return new PlatformApiDataValidationException("error.msg.bulk.import.file.unreadable",
                 "File could not be read as an Excel workbook", FILE_PARAMETER, cause);
@@ -256,11 +168,11 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                         .fileName(fileDetail.getFileName()).size(fileDetail.getSize()).type(fileType).stream(pipedInputStream).build());
     }
 
-    private Long publishEvent(final Integer primaryColumn, final FormDataContentDisposition fileDetail, final String fileType,
+    private Long publishEvent(final BulkImportTemplateLayout layout, final FormDataContentDisposition fileDetail, final String fileType,
             final GlobalEntityType entityType, final Workbook workbook, final String locale, final String dateFormat) {
 
         final var importDocument = ImportDocument.instance(null, DateUtils.getLocalDateTimeOfTenant(), entityType.getValue(),
-                securityContext.authenticatedUser(), ImportHandlerUtils.getNumberOfRows(workbook.getSheetAt(0), primaryColumn));
+                securityContext.authenticatedUser(), layout.countRecords(workbook));
 
         final var response = createDocument(workbook, fileDetail, fileType);
 
