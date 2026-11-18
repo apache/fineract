@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralD
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ClientCollateralDeleteCommand extends Command<ClientCollateralDeleteRequest> {}
+public class ClientCollateralDeleteCommand extends Command<ClientCollateralDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "CLIENT_COLLATERAL_PRODUCT";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}
