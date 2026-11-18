@@ -20,8 +20,12 @@ package org.apache.fineract.organisation.monetary.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -35,6 +39,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.junit.jupiter.api.Test;
@@ -44,9 +49,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Runs the QueryDSL query of {@link CurrencyReadPlatformServiceImpl#retrieveCurrency(String)} through a real
- * {@link SQLQueryFactory} on top of a mocked JDBC connection, so that the generated SQL, the bound parameters and the
- * result mapping are all verified.
+ * Runs the QueryDSL queries of {@link CurrencyReadPlatformServiceImpl#retrieveCurrency(String)} and
+ * {@link CurrencyReadPlatformServiceImpl#retrieveAllPlatformCurrencies()} through a real {@link SQLQueryFactory} on top
+ * of a mocked JDBC connection, so that the generated SQL, the bound parameters and the result mapping are all verified.
  */
 class CurrencyReadPlatformServiceImplTest {
 
@@ -57,6 +62,12 @@ class CurrencyReadPlatformServiceImplTest {
             where m_currency.code = ?
             order by m_currency.name asc
             limit ?""";
+
+    private static final String EXPECTED_ALL_PLATFORM_CURRENCIES_SQL = """
+            select m_currency.code, m_currency.name, m_currency.decimal_places, m_currency.currency_multiplesof, \
+            m_currency.display_symbol, m_currency.internationalized_name_code
+            from m_currency m_currency
+            order by m_currency.name asc""";
 
     private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
     private final Connection connection = mock(Connection.class);
@@ -109,6 +120,58 @@ class CurrencyReadPlatformServiceImplTest {
         assertEquals(1, exception.getExpectedSize());
         assertEquals(0, exception.getActualSize());
         verify(statement).setString(1, "XXX");
+    }
+
+    @Test
+    void retrieveAllPlatformCurrenciesMapsAllRowsOnPostgreSQL() throws SQLException {
+        CurrencyReadPlatformService service = service(PostgreSQLTemplates.builder().build(),
+                new Object[] { "EUR", "Euro", 2, 0, "€", "currency.EUR" }, new Object[] { "JPY", "Japanese Yen", 0, null, null, null },
+                new Object[] { "USD", "US Dollar", 2, 5, "$", "currency.USD" });
+
+        List<CurrencyData> currencies = service.retrieveAllPlatformCurrencies();
+
+        assertEquals(List.of(new CurrencyData("EUR", "Euro", 2, 0, "€", "currency.EUR"),
+                new CurrencyData("JPY", "Japanese Yen", 0, null, null, null),
+                new CurrencyData("USD", "US Dollar", 2, 5, "$", "currency.USD")), currencies);
+        assertEquals(EXPECTED_ALL_PLATFORM_CURRENCIES_SQL, executedSql);
+        verifyNoParametersBound();
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveAllPlatformCurrenciesMapsAllRowsOnMySQL() throws SQLException {
+        CurrencyReadPlatformService service = service(MySQLTemplates.builder().build(),
+                new Object[] { "USD", "US Dollar", 2, 5, "$", "currency.USD" });
+
+        List<CurrencyData> currencies = service.retrieveAllPlatformCurrencies();
+
+        assertEquals(List.of(new CurrencyData("USD", "US Dollar", 2, 5, "$", "currency.USD")), currencies);
+        assertEquals(EXPECTED_ALL_PLATFORM_CURRENCIES_SQL, executedSql);
+        verifyNoParametersBound();
+    }
+
+    @Test
+    void retrieveAllPlatformCurrenciesReturnsEmptyListWhenTableIsEmpty() throws SQLException {
+        CurrencyReadPlatformService service = service(PostgreSQLTemplates.builder().build());
+
+        assertTrue(service.retrieveAllPlatformCurrencies().isEmpty());
+    }
+
+    @Test
+    void retrieveAllPlatformCurrenciesReturnsModifiableList() throws SQLException {
+        // OrganisationCurrencyReadPlatformServiceImpl removes the selected currencies from this list
+        CurrencyReadPlatformService service = service(PostgreSQLTemplates.builder().build(),
+                new Object[] { "EUR", "Euro", 2, 0, "€", "currency.EUR" }, new Object[] { "USD", "US Dollar", 2, 5, "$", "currency.USD" });
+
+        List<CurrencyData> currencies = service.retrieveAllPlatformCurrencies();
+        currencies.removeAll(List.of(new CurrencyData("EUR", "Euro", 2, 0, "€", "currency.EUR")));
+
+        assertEquals(List.of(new CurrencyData("USD", "US Dollar", 2, 5, "$", "currency.USD")), currencies);
+    }
+
+    private void verifyNoParametersBound() throws SQLException {
+        verify(statement, never()).setString(anyInt(), anyString());
+        verify(statement, never()).setObject(anyInt(), any());
     }
 
     private CurrencyReadPlatformService service(SQLTemplates templates, Object[]... rows) throws SQLException {

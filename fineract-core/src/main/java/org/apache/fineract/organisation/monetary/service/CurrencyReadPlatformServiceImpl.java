@@ -50,9 +50,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
     @Override
     public List<CurrencyData> retrieveAllPlatformCurrencies() {
-        final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c order by c.name";
-
-        return this.jdbcTemplate.query(sql, this.currencyRowMapper); // NOSONAR
+        return queryFactory.select(new CurrencyDataProjection()).from(mCurrency).orderBy(mCurrency.name.asc()).fetch();
     }
 
     @Override
