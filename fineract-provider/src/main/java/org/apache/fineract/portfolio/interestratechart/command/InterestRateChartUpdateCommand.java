@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartUpd
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class InterestRateChartUpdateCommand extends Command<InterestRateChartUpdateRequest> {}
+public class InterestRateChartUpdateCommand extends Command<InterestRateChartUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "INTERESTRATECHART";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}
