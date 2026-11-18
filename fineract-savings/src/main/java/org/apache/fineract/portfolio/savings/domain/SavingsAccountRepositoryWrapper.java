@@ -57,6 +57,11 @@ public class SavingsAccountRepositoryWrapper {
     private final PlatformSecurityContext context;
 
     @Transactional(readOnly = true)
+    public Integer findCurrencyDigitsById(final Long savingsId) {
+        return this.repository.findCurrencyDigitsById(savingsId);
+    }
+
+    @Transactional(readOnly = true)
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
         final SavingsAccount account = this.repository.findById(savingsId)
                 .orElseThrow(() -> new SavingsAccountNotFoundException(savingsId));

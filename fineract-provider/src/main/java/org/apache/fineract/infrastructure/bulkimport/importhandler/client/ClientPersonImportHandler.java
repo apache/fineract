@@ -23,7 +23,9 @@ import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -37,6 +39,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -61,11 +64,16 @@ public class ClientPersonImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
-        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat, locale);
+        Map<Integer, RuntimeException> rowErrors = new LinkedHashMap<>();
+        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        Count count = importEntity(workbook, clients, dateFormat, locale);
+        Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
+        int failedRows = ImportHandlerUtils.writeRowErrors(sheet, rowErrors, ClientPersonConstants.STATUS_COL);
+        return Count.instance(count.getSuccessCount(), count.getErrorCount() + failedRows);
     }
 
-    public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, RuntimeException> rowErrors) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(clientSheet, 0);
@@ -73,7 +81,11 @@ public class ClientPersonImportHandler implements ImportHandler {
             Row row;
             row = clientSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ClientPersonConstants.STATUS_COL)) {
-                clients.add(readClient(workbook, row, locale, dateFormat));
+                try {
+                    clients.add(readClient(workbook, row, locale, dateFormat));
+                } catch (RuntimeException ex) {
+                    rowErrors.put(rowIndex, ex);
+                }
             }
         }
         return clients;
@@ -100,6 +112,8 @@ public class ClientPersonImportHandler implements ImportHandler {
         Boolean active = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ACTIVE_COL, row);
         if (!active) {
             activationDate = submittedOn;
+        } else {
+            requireSubmittedOnNotAfterActivation(submittedOn, activationDate);
         }
         String mobileNo = null;
         if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row) != null) {
@@ -216,4 +230,9 @@ public class ClientPersonImportHandler implements ImportHandler {
         return Count.instance(successCount, errorCount);
     }
 
+    static void requireSubmittedOnNotAfterActivation(final LocalDate submittedOn, final LocalDate activationDate) {
+        if (submittedOn != null && activationDate != null && DateUtils.isAfter(submittedOn, activationDate)) {
+            throw new IllegalArgumentException("Submitted On date cannot be after the Activation date");
+        }
+    }
 }

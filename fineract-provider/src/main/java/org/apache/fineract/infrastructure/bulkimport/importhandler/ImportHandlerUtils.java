@@ -19,11 +19,13 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
 import com.google.common.base.Splitter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -70,6 +72,12 @@ public final class ImportHandlerUtils {
             noOfEntries++;
         }
         return noOfEntries;
+    }
+
+    public static void requireAmountWithinCurrencyDigits(final BigDecimal amount, final Integer currencyDigits) {
+        if (amount != null && currencyDigits != null && amount.stripTrailingZeros().scale() > currencyDigits) {
+            throw new IllegalArgumentException("Amount has more decimal places than the currency allows (" + currencyDigits + ")");
+        }
     }
 
     public static boolean isNotImported(Row row, int statusColumn) {
@@ -438,6 +446,14 @@ public final class ImportHandlerUtils {
                 return re.getClass().getCanonicalName();
             }
         }
+    }
+
+    public static int writeRowErrors(Sheet sheet, Map<Integer, RuntimeException> rowErrors, int statusColumn) {
+        rowErrors.forEach((rowIndex, ex) -> {
+            log.error("Problem occurred while reading row {}", rowIndex, ex);
+            writeErrorMessage(sheet, rowIndex, getErrorMessage(ex), statusColumn);
+        });
+        return rowErrors.size();
     }
 
     public static Long getIdByName(Sheet sheet, String name) {
