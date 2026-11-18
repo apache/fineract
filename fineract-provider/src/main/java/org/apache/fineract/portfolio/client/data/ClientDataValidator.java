@@ -44,9 +44,8 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.validator.PhoneNumberValidationService;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
-import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
-import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.validation.constraints.DateFormatValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,17 +56,17 @@ public final class ClientDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
-    private final EntityDatatableChecksRepository entityDatatableChecksRepository;
+    private final ClientDatatableChecksReadService clientDatatableChecksReadService;
     private final PhoneNumberValidationService phoneNumberValidationService;
 
     @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-            final EntityDatatableChecksRepository entityDatatableChecksRepository,
+            final ClientDatatableChecksReadService clientDatatableChecksReadService,
             final PhoneNumberValidationService phoneNumberValidationService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationReadPlatformService = configurationReadPlatformService;
-        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
+        this.clientDatatableChecksReadService = clientDatatableChecksReadService;
         this.phoneNumberValidationService = phoneNumberValidationService;
     }
 
@@ -918,11 +917,7 @@ public final class ClientDataValidator {
         final Integer createStatus = StatusEnum.CREATE.getValue();
         final String entitySubtype = resolveEntitySubtype(legalFormId);
 
-        final List<EntityDatatableChecks> requiredDatatables = entitySubtype == null
-                ? entityDatatableChecksRepository.findByEntityAndStatus(entityName, createStatus)
-                : entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(entityName, createStatus, entitySubtype);
-
-        return requiredDatatables != null && !requiredDatatables.isEmpty();
+        return this.clientDatatableChecksReadService.hasDatatableChecks(entityName, createStatus, entitySubtype);
     }
 
     /**

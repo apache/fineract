@@ -25,13 +25,11 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsActivationService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountDataDTO;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,19 +39,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClientActivationHelper {
 
-    private final SavingsAccountRepositoryWrapper savingsRepositoryWrapper;
-    private final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService;
+    private final ClientSavingsActivationService clientSavingsActivationService;
     private final ConfigurationDomainService configurationDomainService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
 
     public CommandProcessingResult openSavingsAccount(final Client client, final DateTimeFormatter fmt) {
         CommandProcessingResult commandProcessingResult = CommandProcessingResult.empty();
         if (client.isActive() && client.savingsProductId() != null) {
-            SavingsAccountDataDTO savingsAccountDataDTO = new SavingsAccountDataDTO(client, null, client.savingsProductId(),
-                    client.getActivationDate(), client.activatedBy(), fmt);
-            commandProcessingResult = this.savingsApplicationProcessWritePlatformService.createActiveApplication(savingsAccountDataDTO);
+            commandProcessingResult = this.clientSavingsActivationService.createSavingsForClientActivation(client, fmt);
             if (commandProcessingResult.getSavingsId() != null) {
-                this.savingsRepositoryWrapper.findOneWithNotFoundDetection(commandProcessingResult.getSavingsId());
                 client.updateSavingsAccount(commandProcessingResult.getSavingsId());
                 client.updateSavingsProduct(null);
             }

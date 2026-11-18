@@ -22,8 +22,9 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
+import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
 
-public interface EntityDatatableChecksReadService extends EntityDatatableTemplatesReadService {
+public interface EntityDatatableChecksReadService extends EntityDatatableTemplatesReadService, ClientDatatableChecksReadService {
 
     EntityDataTableChecksTemplateData retrieveTemplate();
 

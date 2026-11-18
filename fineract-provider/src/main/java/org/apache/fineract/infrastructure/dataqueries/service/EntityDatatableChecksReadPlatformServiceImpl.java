@@ -116,6 +116,14 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     }
 
     @Override
+    public boolean hasDatatableChecks(final String entity, final Integer status, final String subtype) {
+        final List<EntityDatatableChecks> checks = subtype == null
+                ? this.entityDatatableChecksRepository.findByEntityAndStatus(entity, status)
+                : this.entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(entity, status, subtype);
+        return checks != null && !checks.isEmpty();
+    }
+
+    @Override
     public List<DatatableData> retrieveTemplates(final Integer status, final String entity, final Long productId) {
         List<EntityDatatableChecks> tableRequiredBeforeAction = null;
         if (productId != null) {
