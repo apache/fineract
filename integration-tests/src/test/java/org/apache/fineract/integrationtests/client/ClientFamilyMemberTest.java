@@ -40,6 +40,19 @@ public class ClientFamilyMemberTest extends FeignIntegrationTest {
     private final ClientFamilyMemberApi familyMemberApi = fineractClient().clientFamilyMember();
 
     @Test
+    public void createFamilyMemberAcceptsZeroAge() {
+        Long clientId = createClient();
+        Long relationshipId = createRelationship();
+
+        // an infant: the legacy create stored age 0 as given
+        Long familyMemberId = ok(() -> familyMemberApi.createClientFamilyMember(clientId,
+                new FamilyMemberCreateRequest().firstName("Ada").lastName("Lovelace").relationshipId(relationshipId).age(0L)))
+                .getResourceId();
+
+        assertEquals(0L, ok(() -> familyMemberApi.retrieveOneClientFamilyMember(familyMemberId, clientId)).getAge());
+    }
+
+    @Test
     public void retrieveFamilyMemberReturns404WhenNotExisting() {
         Long clientId = createClient();
 

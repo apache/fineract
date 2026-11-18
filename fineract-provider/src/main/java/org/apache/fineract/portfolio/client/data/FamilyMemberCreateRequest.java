@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -59,7 +60,7 @@ public class FamilyMemberCreateRequest implements Serializable {
     @Length(max = 100, message = "{org.apache.fineract.portfolio.client.familymember.mobile-number.max}")
     private String mobileNumber;
 
-    @Positive(message = "{org.apache.fineract.portfolio.client.familymember.age.positive}")
+    @PositiveOrZero(message = "{org.apache.fineract.portfolio.client.familymember.age.positive-or-zero}")
     private Long age;
 
     @JsonProperty("isDependent")
