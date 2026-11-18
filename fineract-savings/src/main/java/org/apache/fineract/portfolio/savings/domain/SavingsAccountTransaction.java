@@ -311,6 +311,15 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
                 isReversed, isManualTransaction, lienTransaction, refNo);
     }
 
+    public static SavingsAccountTransaction charge(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final Money amount, final String refNo) {
+        final boolean isReversed = false;
+        final boolean isManualTransaction = false;
+        final Boolean lienTransaction = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.PAY_CHARGE.getValue(), date, amount,
+                isReversed, isManualTransaction, lienTransaction, refNo);
+    }
+
     public static SavingsAccountTransaction waiver(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount) {
         final boolean isReversed = false;
@@ -908,6 +917,11 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
     public boolean isFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
         return isPayCharge() && chargePaidBy != null && chargePaidBy.isFeeCharge();
+    }
+
+    public boolean isOverdraftFeeChargeAndNotReversed() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return isPayCharge() && isNotReversed() && chargePaidBy != null && chargePaidBy.getSavingsAccountCharge().isOverdraftFee();
     }
 
     public boolean isPenaltyCharge() {
