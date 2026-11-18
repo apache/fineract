@@ -115,6 +115,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final NoteRepository noteRepository;
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
+    private final SavingsAccountApplicationTransitionValidator savingsAccountApplicationTransitionValidator;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final FromJsonHelper fromJsonHelper;
@@ -610,6 +611,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
+        this.savingsAccountApplicationTransitionValidator.validateApproval(savingsAccount, command);
         final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
@@ -680,6 +682,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
+        this.savingsAccountApplicationTransitionValidator.validateRejection(savingsAccount, command);
         final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
@@ -714,6 +717,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
+        this.savingsAccountApplicationTransitionValidator.validateApplicantWithdrawal(savingsAccount, command);
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
