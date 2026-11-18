@@ -25,8 +25,6 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 public interface ClientFamilyMembersWritePlatformService {
 
-    CommandProcessingResult addFamilyMember(long clientId, JsonCommand command);
-
     CommandProcessingResult addClientFamilyMember(Client client, JsonCommand command);
 
     CommandProcessingResult updateFamilyMember(Long familyMemberId, JsonCommand command);
