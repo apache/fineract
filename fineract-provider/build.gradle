@@ -315,8 +315,45 @@ tasks.named('sourcesJar') {
 }
 
 
+def customModulesForDev = [
+        ':custom:core-banking:creditarrangement:service'
+        ,':custom:core-banking:creditarrangement:api'
+        ,':custom:core-banking:creditarrangement:domain'
+        ,':custom:core-banking:creditarrangement:starter'
+        ,':custom:core-banking:loanaccount:api'
+        ,':custom:core-banking:loanaccount:data'
+        ,':custom:core-banking:loanaccount:domain'
+        ,':custom:core-banking:loanaccount:handler'
+        ,':custom:core-banking:loanaccount:service'
+        ,':custom:core-banking:loanaccount:starter'
+        ,':custom:core-banking:loanproduct:domain'
+        ,':custom:core-banking:loanproduct:service'
+        ,':custom:core-banking:loanproduct:starter'
+        ,':custom:core-banking:jobs:starter'
+        ,':custom:core-banking:accounting:starter'
+        ,':custom:core-banking:accounting:domain'
+        ,':custom:core-banking:accounting:service'
+]
+
+// Custom modules are declared as dependencies so Gradle resolves their jars and transitive
+// runtime dependencies as task inputs. Resolving another project's runtimeClasspath inside a
+// task's doFirst is unsafe and fails with "attempted without an exclusive lock" under parallel builds.
+configurations {
+    customModulesRuntime
+}
+dependencies {
+    // Exclude transitive Fineract core/provider projects: they are already on the classpath via this
+    // project, and adding their jars again duplicates resources (e.g. Liquibase db.changelog-master.xml).
+    customModulesForDev.each { path ->
+        customModulesRuntime(project(path)) {
+            exclude group: 'org.apache.fineract'
+        }
+    }
+}
+
 bootRun {
     classpath += configurations.bootRunDriver
+    classpath += configurations.customModulesRuntime
     jvmArgs = [
             "-Dspring.output.ansi.enabled=ALWAYS"
     ]
@@ -474,6 +511,9 @@ tasks.register('devRun', org.springframework.boot.gradle.tasks.run.BootRun) {
     classpath = bootRun.classpath
     mainClass = bootRun.mainClass
     jvmArgs = bootRun.jvmArgs
+
+    // Also build and inject custom module JARs (same as bootRun)
+    dependsOn customModulesForDev.collect { "${it}:jar" }
 
     doFirst {
         println "Running in development mode - quality checks are disabled"
