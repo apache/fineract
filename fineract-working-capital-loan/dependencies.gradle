@@ -28,6 +28,7 @@ dependencies {
     implementation(
             project(path: ':fineract-avro-schemas')
             )
+    implementation(project(path: ':fineract-fund'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-webmvc',
