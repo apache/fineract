@@ -79,6 +79,10 @@ public final class LoanTransactionTypeExternalEvents {
         register(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION, LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent.class);
         register(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT,
                 LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent.class);
+        register(LoanTransactionType.DEFERRED_CHARGE, LoanDeferredChargeTransactionCreatedBusinessEvent.class);
+        register(LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION, LoanDeferredChargeAmortizationTransactionCreatedBusinessEvent.class);
+        register(LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT,
+                LoanDeferredChargeAmortizationAdjustmentTransactionCreatedBusinessEvent.class);
     }
 
     private LoanTransactionTypeExternalEvents() {}

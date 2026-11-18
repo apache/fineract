@@ -135,7 +135,10 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REJECT_TRANSFER,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.WITHDRAW_TRANSFER,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT
             )
             """)
     Optional<LocalDate> findLastTransactionDateForReprocessing(@Param("loan") Loan loan);
@@ -417,7 +420,10 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                         org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REJECT_TRANSFER,
                         org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.WITHDRAW_TRANSFER,
                         org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION,
-                        org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT
+                        org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT,
+                        org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE,
+                        org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION,
+                        org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT
                 )
             ORDER BY lt.dateOf, lt.createdDate, lt.id
             """)
@@ -475,7 +481,10 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CONTRACT_TERMINATION,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.LOAN_WITHDRAWAL,
-                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT
                 )
             ORDER BY lt.dateOf, lt.createdDate, lt.id
             """)

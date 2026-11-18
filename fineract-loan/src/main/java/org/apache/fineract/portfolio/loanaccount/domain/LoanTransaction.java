@@ -398,6 +398,34 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         };
     }
 
+    public static LoanTransaction deferredCharge(final Loan loan, final Money amount, final LocalDate transactionDate,
+            final ExternalId externalId) {
+        final BigDecimal deferredChargeAmount = amount.getAmount();
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.DEFERRED_CHARGE, transactionDate, deferredChargeAmount, null,
+                null, deferredChargeAmount, null, null, false, null, externalId);
+    }
+
+    public static LoanTransaction deferredChargeAmortization(final Loan loan, final LocalDate transactionDate, final BigDecimal feePortion,
+            final BigDecimal interestPortion, final ExternalId externalId) {
+        return deferredChargeAmortizationTransaction(loan, LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION, transactionDate, feePortion,
+                interestPortion, externalId);
+    }
+
+    public static LoanTransaction deferredChargeAmortizationAdjustment(final Loan loan, final LocalDate transactionDate,
+            final BigDecimal feePortion, final BigDecimal interestPortion, final ExternalId externalId) {
+        return deferredChargeAmortizationTransaction(loan, LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT, transactionDate,
+                feePortion, interestPortion, externalId);
+    }
+
+    private static LoanTransaction deferredChargeAmortizationTransaction(final Loan loan, final LoanTransactionType type,
+            final LocalDate transactionDate, final BigDecimal feePortion, final BigDecimal interestPortion, final ExternalId externalId) {
+        final BigDecimal fee = MathUtil.zeroToNull(feePortion);
+        final BigDecimal interest = MathUtil.zeroToNull(interestPortion);
+        final BigDecimal amount = MathUtil.add(fee, interest);
+        return new LoanTransaction(loan, loan.getOffice(), type, transactionDate, amount, null, interest, fee, null, null, false, null,
+                externalId);
+    }
+
     public LoanTransaction copyTransactionPropertiesAndMappings() {
         LoanTransaction newTransaction = copyTransactionProperties(this);
         newTransaction.updateLoanTransactionToRepaymentScheduleMappings(loanTransactionToRepaymentScheduleMappings);
@@ -861,7 +889,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isAmortizationRelated() {
         return isCapitalizedIncomeAmortization() || isCapitalizedIncomeAmortizationAdjustment() || isBuyDownFeeAmortization()
-                || isBuyDownFeeAmortizationAdjustment();
+                || isBuyDownFeeAmortizationAdjustment() || isDeferredChargeAmortization() || isDeferredChargeAmortizationAdjustment();
     }
 
     public boolean isWaiveCharge() {
@@ -883,7 +911,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 || type == LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION || type == LoanTransactionType.CONTRACT_TERMINATION
                 || type == LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT || type == LoanTransactionType.BUY_DOWN_FEE
                 || type == LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT || type == LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION
-                || type == LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT || type == LoanTransactionType.LOAN_WITHDRAWAL);
+                || type == LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT || type == LoanTransactionType.LOAN_WITHDRAWAL
+                || type == LoanTransactionType.DEFERRED_CHARGE || type == LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION
+                || type == LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT);
     }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
@@ -1093,5 +1123,17 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isBuyDownFeeAmortizationAdjustment() {
         return LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.equals(this.typeOf);
+    }
+
+    public boolean isDeferredCharge() {
+        return LoanTransactionType.DEFERRED_CHARGE.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isDeferredChargeAmortization() {
+        return LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isDeferredChargeAmortizationAdjustment() {
+        return LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
     }
 }

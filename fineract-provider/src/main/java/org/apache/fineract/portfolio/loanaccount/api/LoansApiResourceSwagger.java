@@ -787,6 +787,12 @@ final class LoansApiResourceSwagger {
                 public boolean buyDownFeeAmortization;
                 @Schema(example = "false")
                 public boolean buyDownFeeAmortizationAdjustment;
+                @Schema(example = "false")
+                public boolean deferredCharge;
+                @Schema(example = "false")
+                public boolean deferredChargeAmortization;
+                @Schema(example = "false")
+                public boolean deferredChargeAmortizationAdjustment;
             }
 
             static final class GetLoansLoanIdPaymentDetailData {

@@ -61,6 +61,9 @@ public interface LoanTransactionApiConstants {
         capitalizedIncomeAmortizationAdjustment, //
         buyDownFeeAmortization, //
         buyDownFeeAmortizationAdjustment, //
+        deferredCharge, //
+        deferredChargeAmortization, //
+        deferredChargeAmortizationAdjustment, //
     }
 
     String TRANSACTION_CLASSIFICATIONID_PARAMNAME = "classificationId";
