@@ -85,6 +85,9 @@ public enum LoanTransactionType {
     DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT(47, "loanTransactionType.discountFeeAmortizationAdjustment"), //
     LOAN_WITHDRAWAL(48, "loanTransactionType.loanWithdrawal"), //
     FEE_REFUND(49, "loanTransactionType.feeRefund"), //
+    DEFERRED_CHARGE(50, "loanTransactionType.deferredCharge"), //
+    DEFERRED_CHARGE_AMORTIZATION(51, "loanTransactionType.deferredChargeAmortization"), //
+    DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT(52, "loanTransactionType.deferredChargeAmortizationAdjustment"), //
     ;
 
     private final Integer value;
@@ -150,6 +153,9 @@ public enum LoanTransactionType {
             case 47 -> LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT;
             case 48 -> LoanTransactionType.LOAN_WITHDRAWAL;
             case 49 -> LoanTransactionType.FEE_REFUND;
+            case 50 -> LoanTransactionType.DEFERRED_CHARGE;
+            case 51 -> LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION;
+            case 52 -> LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -293,6 +299,18 @@ public enum LoanTransactionType {
 
     public boolean isBuyDownFeeAdjustment() {
         return this == LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT;
+    }
+
+    public boolean isDeferredCharge() {
+        return this == LoanTransactionType.DEFERRED_CHARGE;
+    }
+
+    public boolean isDeferredChargeAmortization() {
+        return this == LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION;
+    }
+
+    public boolean isDeferredChargeAmortizationAdjustment() {
+        return this == LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT;
     }
 
     public boolean isDiscountFee() {

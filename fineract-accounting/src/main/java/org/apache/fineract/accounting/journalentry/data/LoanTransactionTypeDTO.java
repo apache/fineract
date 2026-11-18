@@ -40,6 +40,12 @@ public interface LoanTransactionTypeDTO {
 
     boolean isBuyDownFeeAmortizationAdjustment();
 
+    boolean isDeferredCharge();
+
+    boolean isDeferredChargeAmortization();
+
+    boolean isDeferredChargeAmortizationAdjustment();
+
     boolean isCapitalizedIncome();
 
     boolean isCapitalizedIncomeAdjustment();

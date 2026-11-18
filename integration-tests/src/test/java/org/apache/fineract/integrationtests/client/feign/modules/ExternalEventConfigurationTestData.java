@@ -163,6 +163,9 @@ public final class ExternalEventConfigurationTestData {
             "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent", //
             "LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent", //
             "LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent", //
+            "LoanDeferredChargeTransactionCreatedBusinessEvent", //
+            "LoanDeferredChargeAmortizationTransactionCreatedBusinessEvent", //
+            "LoanDeferredChargeAmortizationAdjustmentTransactionCreatedBusinessEvent", //
             "LoanApprovedAmountChangedBusinessEvent", //
             "SavingsAccountsStayedLockedBusinessEvent", //
             "SavingsAccountForceWithdrawalBusinessEvent", //

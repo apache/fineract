@@ -100,7 +100,7 @@ Feature: External Asset Owner Loan Product Attributes
       | SETTLEMENT_MODEL                         | DEFAULT_SETTLEMENT,DELAYED_SETTLEMENT | false      |
       | CAPITALIZED_INCOME_AMORTIZATION_STRATEGY | DEFERRED,IMMEDIATE                    | false      |
       | BUY_DOWN_FEE_AMORTIZATION_STRATEGY       | DEFERRED,IMMEDIATE                    | false      |
-    Then External asset owner loan product attributes template attribute "EXCLUDED_TRANSACTION_TYPES" has multiValue "true", contains "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT" and does not contain "INVALID,DEFERRED,IMMEDIATE"
+    Then External asset owner loan product attributes template attribute "EXCLUDED_TRANSACTION_TYPES" has multiValue "true", contains "BUY_DOWN_FEE,BUY_DOWN_FEE_ADJUSTMENT,BUY_DOWN_FEE_AMORTIZATION,BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT,DEFERRED_CHARGE,DEFERRED_CHARGE_AMORTIZATION,DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT" and does not contain "INVALID,DEFERRED,IMMEDIATE"
 
   @TestRailId:C106798
   Scenario Outline: Verify external asset owner loan product attribute with key "<attributeKey>" and value "<attributeValue>" is rejected as invalid

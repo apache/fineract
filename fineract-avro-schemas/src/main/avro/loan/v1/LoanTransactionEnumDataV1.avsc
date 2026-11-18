@@ -362,6 +362,30 @@
                 "null",
                 "boolean"
             ]
+        },
+        {
+            "default": null,
+            "name": "deferredCharge",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "deferredChargeAmortization",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "deferredChargeAmortizationAdjustment",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }
