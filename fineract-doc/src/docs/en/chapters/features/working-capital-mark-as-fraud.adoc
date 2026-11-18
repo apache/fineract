@@ -40,6 +40,10 @@ PUT /v1/working-capital-loans/external-id/{loanExternalId}/mark-as-fraud
 
 Both take the same body and produce the same result. An unknown external id returns a 404.
 
+Both forms can also be sent as `PUT` sub-requests of `POST /v1/batches`, with the same relative URL
+(`v1/working-capital-loans/{loanId}/mark-as-fraud` or
+`v1/working-capital-loans/external-id/{loanExternalId}/mark-as-fraud`) and body.
+
 [source,json]
 ----
 {
