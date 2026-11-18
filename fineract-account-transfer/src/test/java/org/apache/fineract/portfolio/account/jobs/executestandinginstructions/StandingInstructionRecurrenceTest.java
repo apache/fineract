@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +51,7 @@ import org.junit.jupiter.api.Test;
  */
 class StandingInstructionRecurrenceTest {
 
-    private final StandingInstructionReadPlatformService readPlatformService = mock(StandingInstructionReadPlatformService.class);
+    private final StandingInstructionReadService readPlatformService = mock(StandingInstructionReadService.class);
     private final StandingInstructionItemProcessor processor = new StandingInstructionItemProcessor(readPlatformService);
 
     @BeforeEach

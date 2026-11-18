@@ -30,7 +30,7 @@ import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
@@ -48,7 +48,7 @@ import org.springframework.batch.infrastructure.item.ItemProcessor;
 @RequiredArgsConstructor
 public class StandingInstructionItemProcessor implements ItemProcessor<StandingInstructionData, DueStandingInstruction> {
 
-    private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private final StandingInstructionReadService standingInstructionReadService;
 
     @Override
     public DueStandingInstruction process(final StandingInstructionData data) {
@@ -62,7 +62,7 @@ public class StandingInstructionItemProcessor implements ItemProcessor<StandingI
 
         if (PortfolioAccountType.LOAN.equals(data.getToAccountTypeEnum())
                 && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
-            final StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadPlatformService
+            final StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadService
                     .retriveLoanDuesData(data.getToAccount().getId());
             if (instructionType.isDuesAmoutTransfer()) {
                 transactionAmount = standingInstructionDuesData.totalDueAmount();

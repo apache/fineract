@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.service;
+package org.apache.fineract.portfolio.account.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.account.data.request.StandingInstructionCreationRequest;
 
-public interface StandingInstructionWritePlatformService {
-
-    CommandProcessingResult create(JsonCommand command);
-
-    CommandProcessingResult update(Long id, JsonCommand command);
-
-    CommandProcessingResult delete(Long id);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class StandingInstructionCreateCommand extends Command<StandingInstructionCreationRequest> {}

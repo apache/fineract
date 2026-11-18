@@ -20,11 +20,13 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyAuthority;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 
 import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -35,6 +37,7 @@ import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
 import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
@@ -413,6 +416,15 @@ public class SecurityConfig {
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructionrunhistory"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    // standing instruction
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructions"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructions/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/standinginstructions"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/standinginstructions/*"))
+                    .access(standingInstructionUpdateOrDeleteAuthorization())
                     // floatingrate
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/floatingrates"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FLOATINGRATE")
@@ -558,6 +570,20 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    /**
+     * {@code PUT /standinginstructions/{id}} serves both {@code command=update} and {@code command=delete}, so it is
+     * authorized per command: {@code UPDATE_STANDINGINSTRUCTION} alone must not allow a delete, nor the other way
+     * round.
+     */
+    static AuthorizationManager<RequestAuthorizationContext> standingInstructionUpdateOrDeleteAuthorization() {
+        return new CommandParameterAuthorizationManager(
+                Map.of(CommandParameterUtil.UPDATE_COMMAND_VALUE,
+                        hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION"),
+                        CommandParameterUtil.DELETE_COMMAND_VALUE,
+                        hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_STANDINGINSTRUCTION")),
+                hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION", "DELETE_STANDINGINSTRUCTION"));
     }
 
     private AuthorizationManager<RequestAuthorizationContext> allOfRequestManagers(

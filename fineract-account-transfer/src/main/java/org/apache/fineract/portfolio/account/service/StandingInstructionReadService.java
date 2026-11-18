@@ -25,7 +25,7 @@ import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionPartition;
 
-public interface StandingInstructionReadPlatformService {
+public interface StandingInstructionReadService {
 
     StandingInstructionData retrieveTemplate(Long fromOfficeId, Long fromClientId, Long fromAccountId, Integer fromAccountType,
             Long toOfficeId, Long toClientId, Long toAccountId, Integer toAccountType, Integer transferType);

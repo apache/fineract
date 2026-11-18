@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.account.data.StandingInstructionPartition;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.partition.Partitioner;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
@@ -48,14 +48,14 @@ import org.springframework.batch.infrastructure.item.ExecutionContext;
 public class StandingInstructionPartitioner implements Partitioner {
 
     private final PropertyService propertyService;
-    private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private final StandingInstructionReadService standingInstructionReadService;
 
     @NonNull
     @Override
     public Map<String, ExecutionContext> partition(final int gridSize) {
         final int partitionSize = propertyService.getPartitionSize(ExecuteStandingInstructionsConstant.JOB_NAME);
         final List<StandingInstructionPartition> partitions = new ArrayList<>(
-                standingInstructionReadPlatformService.retrieveDuePartitions(StandingInstructionStatus.ACTIVE.getValue(), partitionSize));
+                standingInstructionReadService.retrieveDuePartitions(StandingInstructionStatus.ACTIVE.getValue(), partitionSize));
         if (partitions.isEmpty()) {
             // A step needs at least one partition to run at all, so hand it an account range that matches nothing
             // rather than an empty map: the run then completes normally having done no work.

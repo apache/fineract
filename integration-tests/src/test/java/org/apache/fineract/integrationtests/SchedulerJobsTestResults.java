@@ -110,8 +110,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestMethodOrder(MethodName.class)
 public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
-    private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
-    private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";
+    private static final Integer FROM_ACCOUNT_TYPE_SAVINGS = 2;
+    private static final Integer TO_ACCOUNT_TYPE_SAVINGS = 2;
     private static final String DATE_OF_JOINING = "01 January 2011";
     private static final String TRANSACTION_DATE = "01 March 2013";
     public static final String LOAN_APPROVAL_DATE = "01 March 2013";
@@ -629,8 +629,8 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
 
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID, fromSavingsId, toSavingsId,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
         Assertions.assertNotNull(standingInstructionId);
 
         String JobName = "Execute Standing Instruction";
@@ -695,10 +695,10 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         final BigDecimal shortSourceBefore = savingsHelper.getSavingsSummary(shortSource).getAccountBalance();
         final BigDecimal destinationBefore = savingsHelper.getSavingsSummary(destination).getAccountBalance();
 
-        final Integer instructionFunded = standingInstructionsHelper.createStandingInstruction(clientId.toString(), fundedSource.toString(),
-                destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
-        final Integer instructionShort = standingInstructionsHelper.createStandingInstruction(clientId.toString(), shortSource.toString(),
-                destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
+        final Long instructionFunded = standingInstructionsHelper.createStandingInstruction(clientId, fundedSource, destination,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
+        final Long instructionShort = standingInstructionsHelper.createStandingInstruction(clientId, shortSource, destination,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
         Assertions.assertNotNull(instructionFunded);
         Assertions.assertNotNull(instructionShort);
 
@@ -777,22 +777,18 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         final BigDecimal fundedSourceBefore = savingsHelper.getSavingsSummary(fundedSource).getAccountBalance();
         final BigDecimal destinationBefore = savingsHelper.getSavingsSummary(destination).getAccountBalance();
 
-        final List<Integer> instructions = new ArrayList<>();
+        final List<Long> instructions = new ArrayList<>();
         try {
             for (int i = 0; i < 3; i++) {
-                instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(),
-                        threeInstructionSource.toString(), destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS,
-                        validFrom, validTo, monthDay, "100", false));
+                instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, threeInstructionSource, destination,
+                        FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("100"), false));
             }
-            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(), partlyShortSource.toString(),
-                    destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, "300",
-                    false));
-            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(), partlyShortSource.toString(),
-                    destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, "200",
-                    false));
-            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(), fundedSource.toString(),
-                    destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, "250",
-                    false));
+            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, partlyShortSource, destination,
+                    FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("300"), false));
+            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, partlyShortSource, destination,
+                    FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("200"), false));
+            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, fundedSource, destination,
+                    FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("250"), false));
             instructions.forEach(Assertions::assertNotNull);
 
             SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
@@ -859,10 +855,9 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
 
         // ask for more than the account holds, so the transfer can only be covered in part
-        final String amountBeyondTheBalance = fromSavingsBalanceBefore.multiply(BigDecimal.valueOf(2)).toPlainString();
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
-                amountBeyondTheBalance, true);
+        final BigDecimal amountBeyondTheBalance = fromSavingsBalanceBefore.multiply(BigDecimal.valueOf(2));
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID, fromSavingsId, toSavingsId,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY, amountBeyondTheBalance, true);
         Assertions.assertNotNull(standingInstructionId);
 
         SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
@@ -916,9 +911,8 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         // more than the balance but within the overdraft limit, so the whole amount is covered
         final BigDecimal amount = fromSavingsBalanceBefore.add(new BigDecimal("500"));
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
-                amount.toPlainString(), true);
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID, fromSavingsId, toSavingsId,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY, amount, true);
         Assertions.assertNotNull(standingInstructionId);
 
         SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");

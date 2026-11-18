@@ -36,8 +36,8 @@ import org.junit.jupiter.api.Test;
 class StandingInstructionMonthEndRecurrenceTest extends FeignSavingsTestBase {
 
     private static final String JOB_NAME = "Execute Standing Instruction";
-    private static final String SAVINGS_ACCOUNT_TYPE = "2";
-    private static final String RECURRENCE_FREQUENCY_MONTHS = "2";
+    private static final Integer SAVINGS_ACCOUNT_TYPE = 2;
+    private static final Integer RECURRENCE_FREQUENCY_MONTHS = 2;
 
     @Test
     void monthlyInstructionOnThe31stRunsOnTheLastDayOfAShorterMonth() {
@@ -50,9 +50,9 @@ class StandingInstructionMonthEndRecurrenceTest extends FeignSavingsTestBase {
             deposit(accounts[0], "1000", "01 April 2026");
 
             final StandingInstructionCreationRequest request = new StandingInstructionsHelper()
-                    .build(clientId.toString(), accounts[0].toString(), accounts[1].toString(), SAVINGS_ACCOUNT_TYPE, SAVINGS_ACCOUNT_TYPE,
-                            "10 April 2026", "31 December 2026", "31 January")
-                    .recurrenceFrequency(RECURRENCE_FREQUENCY_MONTHS).amount("100");
+                    .build(clientId, accounts[0], accounts[1], SAVINGS_ACCOUNT_TYPE, SAVINGS_ACCOUNT_TYPE, "10 April 2026",
+                            "31 December 2026", "31 January")
+                    .recurrenceFrequency(RECURRENCE_FREQUENCY_MONTHS).amount(new BigDecimal("100"));
             ok(() -> FineractFeignClientHelper.getFineractFeignClient().standingInstructions().createStandingInstruction(request));
         });
 
