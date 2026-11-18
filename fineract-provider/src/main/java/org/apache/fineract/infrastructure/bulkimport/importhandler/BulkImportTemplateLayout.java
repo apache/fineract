@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.bulkimport.service;
+package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.bulkimport.constants.LoanRepaymentCons
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -38,12 +37,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
- * Where an import handler finds its rows: the sheet it reads and the column it counts them on, which must stay the same
- * as in the handler so that Total Records matches the rows it processes. The header of that column tells the real sheet
- * from a lookup sheet of the same name in another template (the Clients template has an "Offices" lookup sheet, for
- * example). Recurring deposit and savings transactions share one layout, so those two templates cannot be told apart.
+ * Where an import handler finds its rows: the sheet it reads and the column it counts them on. The handlers count their
+ * rows through {@link #countRows(Sheet)}, so Total Records and the "no data rows" check use the same count as the
+ * import itself. The header of that column tells the real sheet from a lookup sheet of the same name in another
+ * template (the Clients template has an "Offices" lookup sheet, for example). Recurring deposit and savings
+ * transactions share one layout, so those two templates cannot be told apart.
  */
-record BulkImportTemplateLayout(String templateName, String sheetName, int primaryColumn, String primaryHeader) {
+public record BulkImportTemplateLayout(String templateName, String sheetName, int primaryColumn, String primaryHeader) {
 
     private static final int FIRST_COLUMN = TemplatePopulateImportConstants.FIRST_COLUMN_INDEX;
     private static final String OFFICE_NAME = "Office Name";
@@ -88,15 +88,15 @@ record BulkImportTemplateLayout(String templateName, String sheetName, int prima
         return Map.entry(entityType, new BulkImportTemplateLayout(templateName, sheetName, primaryColumn, primaryHeader));
     }
 
-    static Optional<GlobalEntityType> findEntityType(final String entity) {
+    public static Optional<GlobalEntityType> findEntityType(final String entity) {
         return LAYOUTS.keySet().stream().filter(entityType -> entity.trim().equalsIgnoreCase(entityType.toString())).findFirst();
     }
 
-    static BulkImportTemplateLayout of(final GlobalEntityType entityType) {
+    public static BulkImportTemplateLayout of(final GlobalEntityType entityType) {
         return LAYOUTS.get(entityType);
     }
 
-    void validate(final Workbook workbook) {
+    public void validate(final Workbook workbook) {
         if (!matches(workbook)) {
             final String article = "AEIOU".indexOf(this.templateName.charAt(0)) >= 0 ? "an" : "a";
             final String message = "This file is not " + article + " " + this.templateName + " template (sheet '" + this.sheetName
@@ -107,8 +107,12 @@ record BulkImportTemplateLayout(String templateName, String sheetName, int prima
         }
     }
 
-    int countRecords(final Workbook workbook) {
-        return ImportHandlerUtils.getNumberOfRows(workbook.getSheet(this.sheetName), this.primaryColumn);
+    public int countRecords(final Workbook workbook) {
+        return countRows(workbook.getSheet(this.sheetName));
+    }
+
+    public int countRows(final Sheet sheet) {
+        return ImportHandlerUtils.getNumberOfRows(sheet, this.primaryColumn);
     }
 
     private boolean matches(final Workbook workbook) {

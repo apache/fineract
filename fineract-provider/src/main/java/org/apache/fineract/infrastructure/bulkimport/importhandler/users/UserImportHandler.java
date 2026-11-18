@@ -28,6 +28,8 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.UserConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -64,7 +66,7 @@ public class UserImportHandler implements ImportHandler {
     private List<AppUserData> readExcelFile(final Workbook workbook, final List<String> statuses) {
         List<AppUserData> users = new ArrayList<>();
         Sheet usersSheet = workbook.getSheet(TemplatePopulateImportConstants.USER_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(usersSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.USERS).countRows(usersSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = usersSheet.getRow(rowIndex);
