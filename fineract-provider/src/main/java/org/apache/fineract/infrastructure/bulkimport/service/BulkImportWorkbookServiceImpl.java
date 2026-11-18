@@ -27,8 +27,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
@@ -39,6 +44,7 @@ import org.apache.fineract.infrastructure.bulkimport.mapping.ImportDocumentMappe
 import org.apache.fineract.infrastructure.contentstore.util.ContentPipe;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
@@ -60,6 +66,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService {
 
+    static final int MAX_FILE_NAME_LENGTH = 250;
+    private static final Set<String> ACCEPTED_EXTENSIONS = Set.of("xls", "xlsx");
+    private static final String FILE_PARAMETER = "file";
+
     private final TransactionBoundApplicationEventPublisher eventPublisher;
     private final PlatformSecurityContext securityContext;
     private final ImportDocumentRepository importDocumentRepository;
@@ -73,6 +83,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
             final String dateFormat) {
         try {
             if (entity != null && inputStream != null && fileDetail != null && locale != null && dateFormat != null) {
+                validateFileName(fileDetail.getFileName());
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 inputStream.transferTo(baos);
                 final byte[] bytes = baos.toByteArray();
@@ -83,14 +94,9 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final String fileType = tika.detect(tikaInputStream);
                 if (!fileType.contains("msoffice") && !fileType.contains("application/vnd.ms-excel")
                         && !fileType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
-                    // We had a problem where we tried to upload the downloaded
-                    // file from the import options, it was somehow changed the
-                    // extension we use this fix.
-                    throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
-                            "Uploaded file extension is not recognized.");
-
+                    throw unreadableWorkbook(null);
                 }
-                Workbook workbook = WorkbookFactory.create(clonedInputStream);
+                Workbook workbook = readWorkbook(clonedInputStream);
                 GlobalEntityType entityType = null;
                 int primaryColumn = 0;
                 if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
@@ -155,6 +161,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
 
                 }
+                requireDataSheet(workbook, entityType);
                 return publishEvent(primaryColumn, fileDetail, fileType, entityType, workbook, locale, dateFormat);
             }
             throw new GeneralPlatformDomainRuleException("error.msg.null", "One or more of the given parameters not found");
@@ -164,6 +171,75 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     "IO exception occurred with " + fileDetail.getFileName() + " " + e.getMessage(), e);
 
         }
+    }
+
+    private static void validateFileName(final String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            throw invalidFile("error.msg.bulk.import.file.name.missing", "File name is required");
+        }
+        if (fileName.length() > MAX_FILE_NAME_LENGTH) {
+            throw invalidFile("error.msg.bulk.import.file.name.too.long",
+                    "File name is too long (max " + MAX_FILE_NAME_LENGTH + " characters)");
+        }
+        final String extension = FilenameUtils.getExtension(fileName);
+        if (StringUtils.isBlank(extension)) {
+            throw invalidFile("error.msg.bulk.import.file.extension.missing", "File has no extension - only .xls and .xlsx are accepted");
+        }
+        if (!ACCEPTED_EXTENSIONS.contains(extension.toLowerCase(Locale.ROOT))) {
+            throw invalidFile("error.msg.bulk.import.file.extension.invalid",
+                    "File extension ." + extension + " is not supported - only .xls and .xlsx are accepted");
+        }
+    }
+
+    private static Workbook readWorkbook(final InputStream inputStream) {
+        try {
+            return WorkbookFactory.create(inputStream);
+        } catch (IOException | RuntimeException e) {
+            log.warn("Uploaded bulk import file could not be read as a workbook", e);
+            throw unreadableWorkbook(e);
+        }
+    }
+
+    private static void requireDataSheet(final Workbook workbook, final GlobalEntityType entityType) throws IOException {
+        final String sheetName = dataSheetName(entityType);
+        if (sheetName != null && workbook.getSheet(sheetName) == null) {
+            workbook.close();
+            throw invalidFile("error.msg.bulk.import.sheet.not.found", "Sheet '" + sheetName + "' not found in the file");
+        }
+    }
+
+    static String dataSheetName(final GlobalEntityType entityType) {
+        return switch (entityType) {
+            case OFFICES -> TemplatePopulateImportConstants.OFFICE_SHEET_NAME;
+            case CENTERS -> TemplatePopulateImportConstants.CENTER_SHEET_NAME;
+            case CHART_OF_ACCOUNTS -> TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME;
+            case CLIENTS_ENTITY -> TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME;
+            case CLIENTS_PERSON -> TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME;
+            case FIXED_DEPOSIT_ACCOUNTS -> TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME;
+            case FIXED_DEPOSIT_TRANSACTIONS -> TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME;
+            case GROUPS -> TemplatePopulateImportConstants.GROUP_SHEET_NAME;
+            case GUARANTORS -> TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME;
+            case GL_JOURNAL_ENTRIES -> TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME;
+            case LOANS -> TemplatePopulateImportConstants.LOANS_SHEET_NAME;
+            case LOAN_TRANSACTIONS -> TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME;
+            case RECURRING_DEPOSIT_ACCOUNTS -> TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME;
+            case RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS, SAVINGS_TRANSACTIONS ->
+                TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME;
+            case SAVINGS_ACCOUNT -> TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME;
+            case SHARE_ACCOUNTS -> TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME;
+            case STAFF -> TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME;
+            case USERS -> TemplatePopulateImportConstants.USER_SHEET_NAME;
+            default -> null;
+        };
+    }
+
+    private static PlatformApiDataValidationException unreadableWorkbook(final Throwable cause) {
+        return new PlatformApiDataValidationException("error.msg.bulk.import.file.unreadable",
+                "File could not be read as an Excel workbook", FILE_PARAMETER, cause);
+    }
+
+    private static PlatformApiDataValidationException invalidFile(final String messageCode, final String message) {
+        return new PlatformApiDataValidationException(messageCode, message, FILE_PARAMETER);
     }
 
     private DocumentCreateResponse createDocument(final Workbook workbook, final FormDataContentDisposition fileDetail,

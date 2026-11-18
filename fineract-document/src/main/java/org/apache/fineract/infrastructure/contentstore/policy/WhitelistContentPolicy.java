@@ -41,7 +41,8 @@ public class WhitelistContentPolicy implements ContentPolicy {
 
     @EventListener(ApplicationStartedEvent.class)
     void onStartup() {
-        regexWhitelist = properties.getContent().getRegexWhitelist().stream().map(Pattern::compile).toList();
+        regexWhitelist = properties.getContent().getRegexWhitelist().stream().map(regex -> Pattern.compile(regex, Pattern.CASE_INSENSITIVE))
+                .toList();
     }
 
     @Override
