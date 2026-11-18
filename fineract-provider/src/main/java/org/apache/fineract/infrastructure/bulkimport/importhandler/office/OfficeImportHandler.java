@@ -21,7 +21,9 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.office;
 import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -57,11 +59,16 @@ public class OfficeImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, offices, dateFormat, locale);
+        Map<Integer, RuntimeException> rowErrors = new LinkedHashMap<>();
+        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        Count count = importEntity(workbook, offices, dateFormat, locale);
+        Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+        int failedRows = ImportHandlerUtils.writeRowErrors(sheet, rowErrors, OfficeConstants.STATUS_COL);
+        return Count.instance(count.getSuccessCount(), count.getErrorCount() + failedRows);
     }
 
-    private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, RuntimeException> rowErrors) {
         List<OfficeData> offices = new ArrayList<>();
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
@@ -69,7 +76,11 @@ public class OfficeImportHandler implements ImportHandler {
             Row row;
             row = officeSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)) {
-                offices.add(readOffice(row, locale, dateFormat));
+                try {
+                    offices.add(readOffice(row, locale, dateFormat));
+                } catch (RuntimeException ex) {
+                    rowErrors.put(rowIndex, ex);
+                }
             }
         }
         return offices;

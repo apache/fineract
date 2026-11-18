@@ -23,7 +23,9 @@ import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -62,11 +64,16 @@ public class ClientEntityImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
-        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat, locale);
+        Map<Integer, RuntimeException> rowErrors = new LinkedHashMap<>();
+        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        Count count = importEntity(workbook, clients, dateFormat, locale);
+        Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
+        int failedRows = ImportHandlerUtils.writeRowErrors(sheet, rowErrors, ClientEntityConstants.STATUS_COL);
+        return Count.instance(count.getSuccessCount(), count.getErrorCount() + failedRows);
     }
 
-    private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, RuntimeException> rowErrors) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(clientSheet, 0);
@@ -74,7 +81,11 @@ public class ClientEntityImportHandler implements ImportHandler {
             Row row;
             row = clientSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ClientEntityConstants.STATUS_COL)) {
-                clients.add(readClient(workbook, row, locale, dateFormat));
+                try {
+                    clients.add(readClient(workbook, row, locale, dateFormat));
+                } catch (RuntimeException ex) {
+                    rowErrors.put(rowIndex, ex);
+                }
             }
         }
         return clients;
@@ -84,10 +95,9 @@ public class ClientEntityImportHandler implements ImportHandler {
         Long legalFormId = 2L;
         String name = ImportHandlerUtils.readAsString(ClientEntityConstants.NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientEntityConstants.OFFICE_NAME_COL, row);
-        Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        if (officeId == 0L) {
-            officeId = null;
-        }
+        Long officeId = ImportHandlerUtils.requireLookupId(
+                ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName), "Office",
+                officeName);
         String staffName = ImportHandlerUtils.readAsString(ClientEntityConstants.STAFF_NAME_COL, row);
         Long staffId = null;
         if (staffName != null) {
@@ -95,10 +105,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         }
         LocalDate incorportionDate = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_DATE_COL, row);
         LocalDate incorporationTill = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL, row);
-        String mobileNo = null;
-        if (ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row) != null) {
-            mobileNo = Objects.requireNonNull(ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row)).toString();
-        }
+        String mobileNo = ImportHandlerUtils.readAsDigits(ClientEntityConstants.MOBILE_NO_COL, row, "Mobile number");
 
         String clientType = ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;
