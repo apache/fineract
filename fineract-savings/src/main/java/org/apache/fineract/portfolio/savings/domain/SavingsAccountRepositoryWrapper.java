@@ -219,6 +219,16 @@ public class SavingsAccountRepositoryWrapper {
     }
 
     @Transactional(readOnly = true)
+    public Long findClientIdById(final Long savingsAccountId) {
+        return this.repository.findClientIdById(savingsAccountId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(final Long savingsAccountId) {
+        return this.repository.existsById(savingsAccountId);
+    }
+
+    @Transactional(readOnly = true)
     public List<SavingsAccrualData> findAccrualData(final LocalDate tillDate, final Long savingsId, final Integer status,
             final Integer accountingRule) {
         return this.repository.findAccrualData(tillDate, savingsId, status, accountingRule);
