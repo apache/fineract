@@ -43,16 +43,15 @@ import org.apache.fineract.infrastructure.event.business.domain.client.ClientWit
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientLoanReadService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsReadService;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
+import org.apache.fineract.portfolio.client.data.ClientLoanStatusData;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -72,8 +71,8 @@ public class ClientLifecycleWritePlatformService {
     private final ClientRepositoryWrapper clientRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
     private final CodeValueRepositoryWrapper codeValueRepository;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final SavingsAccountRepositoryWrapper savingsRepositoryWrapper;
+    private final ClientLoanReadService clientLoanReadService;
+    private final ClientSavingsReadService clientSavingsReadService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final ClientActivationHelper clientActivationHelper;
@@ -142,28 +141,24 @@ public class ClientLifecycleWritePlatformService {
             entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.CLOSE.getValue(),
                     EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
 
-            final List<Loan> clientLoans = this.loanRepositoryWrapper.findLoanByClientId(clientId);
-            for (final Loan loan : clientLoans) {
-                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.getStatus().getValue());
+            final List<ClientLoanStatusData> clientLoans = this.clientLoanReadService.retrieveClientLoanStatuses(clientId);
+            for (final ClientLoanStatusData loan : clientLoans) {
+                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.statusId());
                 if (loanStatus.isOpen() || loanStatus.isPendingApproval() || loanStatus.isAwaitingDisbursal()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
-                } else if (loanStatus.isClosed() && DateUtils.isAfter(loan.getClosedOnDate(), closureDate)) {
+                } else if (loanStatus.isClosed() && DateUtils.isAfter(loan.closedOnDate(), closureDate)) {
                     final String errorMessage = "The client closureDate cannot be before the loan closedOnDate.";
                     throw new InvalidClientStateTransitionException("close", "date.cannot.before.loan.closed.date", errorMessage,
-                            closureDate, loan.getClosedOnDate());
+                            closureDate, loan.closedOnDate());
                 } else if (loanStatus.isOverpaid()) {
                     final String errorMessage = "Client cannot be closed because of overpaid loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.overpaid", errorMessage);
                 }
             }
-            final List<SavingsAccount> clientSavingAccounts = this.savingsRepositoryWrapper.findSavingAccountByClientId(clientId);
-
-            for (final SavingsAccount saving : clientSavingAccounts) {
-                if (saving.isActive() || saving.isSubmittedAndPendingApproval() || saving.isApproved()) {
-                    final String errorMessage = "Client cannot be closed because of non-closed savings account.";
-                    throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
-                }
+            if (this.clientSavingsReadService.hasNonClosedSavingsAccountsForClient(clientId)) {
+                final String errorMessage = "Client cannot be closed because of non-closed savings account.";
+                throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
             }
 
             client.close(currentUser, closureReason, closureDate);

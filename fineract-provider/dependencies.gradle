@@ -193,6 +193,8 @@ dependencies {
 
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     testCompileOnly 'com.github.spotbugs:spotbugs-annotations'
+    // Only for the @ApplicationModule annotation in package-info.java; not needed at runtime
+    compileOnly 'org.springframework.modulith:spring-modulith-api'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'

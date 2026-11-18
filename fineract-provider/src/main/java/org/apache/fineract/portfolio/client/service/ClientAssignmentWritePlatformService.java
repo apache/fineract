@@ -29,13 +29,12 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsReadService;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientSavingProductException;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +50,7 @@ public class ClientAssignmentWritePlatformService {
     private final ClientRepositoryWrapper clientRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
     private final StaffRepositoryWrapper staffRepository;
-    private final SavingsAccountRepositoryWrapper savingsRepositoryWrapper;
+    private final ClientSavingsReadService clientSavingsReadService;
 
     @Transactional
     public CommandProcessingResult unassignClientStaff(final Long clientId, final JsonCommand command) {
@@ -131,11 +130,9 @@ public class ClientAssignmentWritePlatformService {
 
         final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-        SavingsAccount savingsAccount = null;
         final Long savingsId = command.longValueOfParameterNamed(ClientApiConstants.savingsAccountIdParamName);
         if (savingsId != null) {
-            savingsAccount = this.savingsRepositoryWrapper.findOneWithNotFoundDetection(savingsId);
-            if (!savingsAccount.getClient().identifiedBy(clientId)) {
+            if (!this.clientSavingsReadService.isSavingsAccountForClient(savingsId, clientId)) {
                 String defaultUserMessage = "saving account must belongs to client";
                 throw new InvalidClientSavingProductException("saving.account", "must.belongs.to.client", defaultUserMessage, savingsId,
                         clientForUpdate.getId());
