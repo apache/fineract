@@ -188,7 +188,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -251,7 +251,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -297,7 +297,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             this.sqlGenerator = sqlGenerator;
         }
 
-        public String schema() {
+        private String schema() {
             final StringBuilder amountQueryString = new StringBuilder(400);
             amountQueryString.append("(select (SUM(COALESCE(mr.principal_completed_derived, 0)) +");
             amountQueryString.append("SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
