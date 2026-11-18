@@ -37,18 +37,16 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.command.AddressCreateCommand;
+import org.apache.fineract.portfolio.address.command.AddressUpdateCommand;
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
 import org.apache.fineract.portfolio.address.data.AddressData;
+import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
+import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
 import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
 import org.apache.fineract.portfolio.address.service.AddressReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
@@ -63,8 +61,6 @@ public class ClientAddressApiResource {
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
     private final PlatformSecurityContext context;
     private final AddressReadPlatformServiceImpl readPlatformService;
-    private final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CommandDispatcher dispatcher;
 
     @GET
@@ -128,14 +124,17 @@ public class ClientAddressApiResource {
 
             Mandatory Fields
             type and addressId""")
+    // The documented body stays ClientAddressRequest so the published API contract does not change.
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientAddressRequest.class)))
-
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesResponse.class)))
-    public CommandProcessingResult updateClientAddress(@PathParam("clientid") @Parameter(description = "clientId") final long clientid,
-            @Parameter(hidden = true) ClientAddressRequest clientAddressRequest) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientAddress(clientid)
-                .withJson(toApiJsonSerializer.serialize(clientAddressRequest)).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AddressUpdateResponse.class)))
+    public AddressUpdateResponse updateClientAddress(@PathParam("clientid") @Parameter(description = "clientId") final Long clientId,
+            @Parameter(hidden = true) final AddressUpdateRequest request) {
+        if (request == null) {
+            throw new InvalidJsonException();
+        }
+        request.setClientId(clientId);
+        final var command = new AddressUpdateCommand();
+        command.setPayload(request);
+        return dispatcher.<AddressUpdateRequest, AddressUpdateResponse>dispatch(command).get();
     }
 }

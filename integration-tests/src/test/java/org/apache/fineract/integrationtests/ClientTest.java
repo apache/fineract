@@ -298,6 +298,25 @@ public class ClientTest extends FeignIntegrationTest {
     }
 
     @Test
+    public void testClientAddressUpdateRejectsFieldDisabledByFieldConfiguration() {
+        // latitude is disabled in the default ADDRESS field configuration
+        enableAddress();
+        final Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+        clientHelper.createClientAddress(clientId, addressTypeId, new ClientAddressRequest().city("Budapest"));
+        final Long addressId = clientHelper.getClientAddresses(clientId).get(0).getAddressId();
+
+        CallFailedRuntimeException error = clientHelper.updateClientAddressExpectingError(clientId,
+                new ClientAddressRequest().addressId(addressId).city("Szeged").latitude(new BigDecimal("47.4979")));
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        FeignErrors.ReportedError reportedError = FeignErrors.firstError(error);
+        assertEquals("error.msg.parameter.unsupported", reportedError.userMessageGlobalisationCode());
+        assertEquals("latitude", reportedError.parameterName());
+        assertThat(clientHelper.getClientAddresses(clientId).get(0).getCity()).isEqualTo("Budapest");
+    }
+
+    @Test
     public void testClientCreationRejectsAddressWithoutAddressType() {
         enableAddress();
         PostClientsRequest request = ClientRequestBuilders.defaultClient()
