@@ -83,7 +83,7 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(JournalEntryConstants.OFFICE_NAME_COL, rowHeader, "Office Name*");
         writeString(JournalEntryConstants.TRANSACION_ON_DATE_COL, rowHeader, "Transaction On *");
         writeString(JournalEntryConstants.CURRENCY_NAME_COL, rowHeader, "Currecy Type*");
-        writeString(JournalEntryConstants.PAYMENT_TYPE_ID_COL, rowHeader, "Payment Type*");
+        writeString(JournalEntryConstants.PAYMENT_TYPE_ID_COL, rowHeader, "Payment Type");
         writeString(JournalEntryConstants.TRANSACTION_ID_COL, rowHeader, "Transaction Id*");
         writeString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, rowHeader, "Credit Account Type*");
         writeString(JournalEntryConstants.AMOUNT_CREDIT_COL, rowHeader, "Amount*");

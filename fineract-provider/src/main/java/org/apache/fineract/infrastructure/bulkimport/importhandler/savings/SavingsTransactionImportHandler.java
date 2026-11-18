@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConsta
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.SavingsAccountTransactionEnumValueSerialiser;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -72,7 +73,8 @@ public class SavingsTransactionImportHandler implements ImportHandler {
     private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
         List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.TRANSACTION_TYPE_COL,
+                TransactionConstants.NOTE_COL);
         Long savingsAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
@@ -127,6 +129,14 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
         for (SavingsAccountTransactionData transaction : savingsTransactions) {
             try {
+                ImportHandlerUtils.requireColumns(savingsTransactionSheet.getRow(transaction.getRowIndex()),
+                        new MandatoryColumn(TransactionConstants.OFFICE_NAME_COL, "Office Name"),
+                        new MandatoryColumn(TransactionConstants.CLIENT_NAME_COL, "Client Name"),
+                        new MandatoryColumn(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, "Account No."),
+                        new MandatoryColumn(TransactionConstants.TRANSACTION_TYPE_COL, "Transaction Type"),
+                        new MandatoryColumn(TransactionConstants.AMOUNT_COL, "Amount"),
+                        new MandatoryColumn(TransactionConstants.TRANSACTION_DATE_COL, "Date"),
+                        new MandatoryColumn(TransactionConstants.PAYMENT_TYPE_COL, "Type"));
                 JsonObject savingsTransactionJsonob = gsonBuilder.create().toJsonTree(transaction).getAsJsonObject();
                 savingsTransactionJsonob.remove(TRANSACTION_TYPE);
                 savingsTransactionJsonob.remove(REVERSED);

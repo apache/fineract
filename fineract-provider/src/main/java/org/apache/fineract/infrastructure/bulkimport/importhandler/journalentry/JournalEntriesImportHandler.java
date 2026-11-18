@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateI
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.CurrencyDateCodeSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -74,14 +75,15 @@ public class JournalEntriesImportHandler implements ImportHandler {
         LocalDate transactionDate = null;
 
         Sheet addJournalEntriesSheet = workbook.getSheet(TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addJournalEntriesSheet, 4);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addJournalEntriesSheet, JournalEntryConstants.OFFICE_NAME_COL,
+                JournalEntryConstants.AMOUNT_DEBIT_COL);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = addJournalEntriesSheet.getRow(rowIndex);
 
             currentTransactionId = ImportHandlerUtils.readAsString(JournalEntryConstants.TRANSACTION_ID_COL, row);
 
-            if (currentTransactionId.equals(prevTransactionId)) {
+            if (currentTransactionId != null && currentTransactionId.equals(prevTransactionId)) {
                 if (journalEntry != null) {
 
                     String creditGLAcct = ImportHandlerUtils.readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
@@ -197,6 +199,11 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
         for (JournalEntryData transaction : glTransactions) {
             try {
+                ImportHandlerUtils.requireColumns(addJournalEntriesSheet.getRow(transaction.getRowIndex()),
+                        new MandatoryColumn(JournalEntryConstants.OFFICE_NAME_COL, "Office Name"),
+                        new MandatoryColumn(JournalEntryConstants.TRANSACION_ON_DATE_COL, "Transaction On"),
+                        new MandatoryColumn(JournalEntryConstants.CURRENCY_NAME_COL, "Currency Type"),
+                        new MandatoryColumn(JournalEntryConstants.TRANSACTION_ID_COL, "Transaction Id"));
                 String payload = gsonBuilder.create().toJson(transaction);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createJournalEntry() //

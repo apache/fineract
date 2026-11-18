@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateI
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -64,7 +65,8 @@ public class OfficeImportHandler implements ImportHandler {
     private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
         List<OfficeData> offices = new ArrayList<>();
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
+        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, OfficeConstants.OFFICE_NAME_COL,
+                OfficeConstants.PARENT_OFFICE_NAME_COL);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = officeSheet.getRow(rowIndex);
@@ -95,6 +97,15 @@ public class OfficeImportHandler implements ImportHandler {
         String errorMessage;
         for (OfficeData office : offices) {
             try {
+                ImportHandlerUtils.requireColumns(officeSheet.getRow(office.getRowIndex()),
+                        new MandatoryColumn(OfficeConstants.OFFICE_NAME_COL, "Office Name"),
+                        new MandatoryColumn(OfficeConstants.OPENED_ON_COL, "Opened On Date"));
+                if (office.getParentId() == null) {
+                    String parentOffice = ImportHandlerUtils.readAsString(OfficeConstants.PARENT_OFFICE_NAME_COL,
+                            officeSheet.getRow(office.getRowIndex()));
+                    throw new IllegalArgumentException(
+                            parentOffice == null ? "Parent Office is mandatory" : "Parent Office `" + parentOffice + "` not found");
+                }
                 String payload = gsonBuilder.create().toJson(office);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createOffice() //
