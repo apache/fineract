@@ -22,6 +22,7 @@ import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +57,12 @@ public class StaffImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<StaffData> staffList = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, staffList, dateFormat);
+        AtomicInteger errorCount = new AtomicInteger();
+        List<StaffData> staffList = readExcelFile(workbook, locale, dateFormat, errorCount);
+        return importEntity(workbook, staffList, dateFormat, errorCount.get());
     }
 
-    private List<StaffData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<StaffData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat, AtomicInteger errorCount) {
         List<StaffData> staffList = new ArrayList<>();
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(staffSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
@@ -68,7 +70,14 @@ public class StaffImportHandler implements ImportHandler {
             Row row;
             row = staffSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, StaffConstants.STATUS_COL)) {
-                staffList.add(readStaff(workbook, row, locale, dateFormat));
+                try {
+                    staffList.add(readStaff(workbook, row, locale, dateFormat));
+                } catch (RuntimeException re) {
+                    log.error("Problem occurred in readExcelFile function", re);
+                    errorCount.incrementAndGet();
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(staffSheet, rowIndex, errorMessage, StaffConstants.STATUS_COL);
+                }
             }
         }
         return staffList;
@@ -84,7 +93,7 @@ public class StaffImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row) != null) {
             mobileNo = ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row).toString();
         }
-        LocalDate joinedOnDate = ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL, row);
+        LocalDate joinedOnDate = ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL, row, dateFormat, locale);
         String externalId = ImportHandlerUtils.readAsString(StaffConstants.EXTERNAL_ID_COL, row);
         Boolean isActive = ImportHandlerUtils.readAsBoolean(StaffConstants.IS_ACTIVE_COL, row);
 
@@ -93,10 +102,9 @@ public class StaffImportHandler implements ImportHandler {
                 .rowIndex(row.getRowNum()).build();
     }
 
-    private Count importEntity(final Workbook workbook, final List<StaffData> staffList, final String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<StaffData> staffList, final String dateFormat, int errorCount) {
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));

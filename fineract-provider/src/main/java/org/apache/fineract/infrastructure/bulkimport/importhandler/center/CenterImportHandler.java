@@ -31,6 +31,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.CenterConstants;
+import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
@@ -74,27 +75,37 @@ public class CenterImportHandler implements ImportHandler {
         List<CenterData> centers = new ArrayList<>();
         List<CalendarData> meetings = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, centers, meetings, statuses, locale, dateFormat);
-        return importEntity(workbook, centers, meetings, statuses, dateFormat);
+        int errorCount = readExcelFile(workbook, centers, meetings, statuses, locale, dateFormat);
+        return importEntity(workbook, centers, meetings, statuses, dateFormat, errorCount);
     }
 
-    private void readExcelFile(final Workbook workbook, final List<CenterData> centers, final List<CalendarData> meetings,
+    private int readExcelFile(final Workbook workbook, final List<CenterData> centers, final List<CalendarData> meetings,
             final List<String> statuses, final String locale, final String dateFormat) {
-
+        int errorCount = 0;
         Sheet centersSheet = workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(centersSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = centersSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, CenterConstants.STATUS_COL)) {
-                centers.add(readCenter(workbook, statuses, row, locale, dateFormat));
-                meetings.add(readMeeting(row, locale, dateFormat));
+                try {
+                    CenterData centerData = readCenter(workbook, statuses, row, locale, dateFormat);
+                    CalendarData calendarData = readMeeting(row, locale, dateFormat);
+                    centers.add(centerData);
+                    meetings.add(calendarData);
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount++;
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(centersSheet, rowIndex, errorMessage, OfficeConstants.STATUS_COL);
+                }
             }
         }
+        return errorCount;
     }
 
     private CalendarData readMeeting(final Row row, final String locale, final String dateFormat) {
-        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row);
+        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row, dateFormat, locale);
         Boolean isRepeating = ImportHandlerUtils.readAsBoolean(CenterConstants.IS_REPEATING_COL, row);
         String frequency = ImportHandlerUtils.readAsString(CenterConstants.FREQUENCY_COL, row);
         EnumOptionData frequencyEnum = new EnumOptionData(null, null, ImportHandlerUtils.getFrequencyId(frequency));
@@ -124,10 +135,10 @@ public class CenterImportHandler implements ImportHandler {
 
         String externalId = ImportHandlerUtils.readAsString(CenterConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(CenterConstants.ACTIVE_COL, row);
-        LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         LocalDate activationDate;
         if (Boolean.TRUE.equals(active)) {
-            activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row);
+            activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         } else {
             activationDate = submittedOn;
         }
@@ -163,12 +174,11 @@ public class CenterImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<CenterData> centers, final List<CalendarData> meetings,
-            final List<String> statuses, final String dateFormat) {
+            final List<String> statuses, final String dateFormat, int errorCount) {
         Sheet centerSheet = workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         int progressLevel = 0;
         String centerId = EMPTY_STR;
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage;
         for (int i = 0; i < centers.size(); i++) {
             Row row = centerSheet.getRow(centers.get(i).getRowIndex());

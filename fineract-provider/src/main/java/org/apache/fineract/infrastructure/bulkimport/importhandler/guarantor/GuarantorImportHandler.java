@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -60,11 +61,13 @@ public class GuarantorImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<GuarantorData> guarantors = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, guarantors, dateFormat);
+        AtomicInteger errorCount = new AtomicInteger();
+        List<GuarantorData> guarantors = readExcelFile(workbook, locale, dateFormat, errorCount);
+        return importEntity(workbook, guarantors, dateFormat, errorCount.get());
     }
 
-    private List<GuarantorData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<GuarantorData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            AtomicInteger errorCount) {
         List<GuarantorData> guarantors = new ArrayList<>();
         Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addGuarantorSheet, GuarantorConstants.LOAN_ACCOUNT_NO_COL);
@@ -73,7 +76,14 @@ public class GuarantorImportHandler implements ImportHandler {
             Row row;
             row = addGuarantorSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL)) {
-                guarantors.add(readGuarantor(workbook, row, loanAccountId, locale, dateFormat));
+                try {
+                    guarantors.add(readGuarantor(workbook, row, loanAccountId, locale, dateFormat));
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount.incrementAndGet();
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(addGuarantorSheet, rowIndex, errorMessage, GuarantorConstants.STATUS_COL);
+                }
             }
         }
         return guarantors;
@@ -111,7 +121,7 @@ public class GuarantorImportHandler implements ImportHandler {
         String addressLine1 = ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_1_COL, row);
         String addressLine2 = ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_2_COL, row);
         String city = ImportHandlerUtils.readAsString(GuarantorConstants.CITY_COL, row);
-        LocalDate dob = ImportHandlerUtils.readAsDate(GuarantorConstants.DOB_COL, row);
+        LocalDate dob = ImportHandlerUtils.readAsDate(GuarantorConstants.DOB_COL, row, dateFormat, locale);
         String zip = ImportHandlerUtils.readAsString(GuarantorConstants.ZIP_COL, row);
         Integer savingsId = ImportHandlerUtils.readAsInt(GuarantorConstants.SAVINGS_ID_COL, row);
         BigDecimal amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(GuarantorConstants.AMOUNT, row));
@@ -120,10 +130,9 @@ public class GuarantorImportHandler implements ImportHandler {
                 addressLine2, city, dob, zip, savingsId, amount, row.getRowNum(), loanAccountId, locale, dateFormat);
     }
 
-    private Count importEntity(final Workbook workbook, final List<GuarantorData> guarantors, final String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<GuarantorData> guarantors, final String dateFormat, int errorCount) {
         Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage = "";
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));

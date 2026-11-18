@@ -79,26 +79,39 @@ public class LoanImportHandler implements ImportHandler {
         List<LoanTransactionData> loanRepayments = new ArrayList<>();
         List<DisbursementData> disbursalDates = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, loans, approvalDates, loanRepayments, disbursalDates, statuses, locale, dateFormat);
-        return importEntity(workbook, loans, approvalDates, loanRepayments, disbursalDates, statuses, dateFormat);
+        int errorCount = readExcelFile(workbook, loans, approvalDates, loanRepayments, disbursalDates, statuses, locale, dateFormat);
+        return importEntity(workbook, loans, approvalDates, loanRepayments, disbursalDates, statuses, dateFormat, errorCount);
     }
 
-    private void readExcelFile(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
+    private int readExcelFile(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
             final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, List<String> statuses,
             final String locale, final String dateFormat) {
+        int errorCount = 0;
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(loanSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = loanSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, LoanConstants.STATUS_COL)) {
-                loans.add(readLoan(workbook, row, statuses, locale, dateFormat));
-                approvalDates.add(readLoanApproval(row, locale, dateFormat));
-                disbursalDates.add(readDisbursalData(row, locale, dateFormat));
-                loanRepayments.add(readLoanRepayment(workbook, row, locale, dateFormat));
+                try {
+                    LoanAccountData loan = readLoan(workbook, row, statuses, locale, dateFormat);
+                    LoanApprovalData approvalDate = readLoanApproval(row, locale, dateFormat);
+                    DisbursementData disbursalDate = readDisbursalData(row, locale, dateFormat);
+                    LoanTransactionData loanRepayment = readLoanRepayment(workbook, row, locale, dateFormat);
+                    loans.add(loan);
+                    approvalDates.add(approvalDate);
+                    disbursalDates.add(disbursalDate);
+                    loanRepayments.add(loanRepayment);
+                } catch (RuntimeException re) {
+                    log.error("Problem occurred in readExcelFile function", re);
+                    errorCount++;
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(loanSheet, rowIndex, errorMessage, LoanConstants.STATUS_COL);
+                }
             }
         }
 
+        return errorCount;
     }
 
     private LoanTransactionData readLoanRepayment(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
@@ -106,7 +119,7 @@ public class LoanImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row) != null) {
             repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row));
         }
-        LocalDate lastRepaymentDate = ImportHandlerUtils.readAsDate(LoanConstants.LAST_REPAYMENT_DATE_COL, row);
+        LocalDate lastRepaymentDate = ImportHandlerUtils.readAsDate(LoanConstants.LAST_REPAYMENT_DATE_COL, row, dateFormat, locale);
         String repaymentType = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_TYPE_COL, row);
         Long repaymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
                 repaymentType);
@@ -119,7 +132,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private DisbursementData readDisbursalData(final Row row, final String locale, final String dateFormat) {
-        LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row);
+        LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row, dateFormat, locale);
         String linkAccountId = null;
         if (ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row) != null) {
             linkAccountId = Objects.requireNonNull(ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row)).toString();
@@ -131,7 +144,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private LoanApprovalData readLoanApproval(final Row row, final String locale, final String dateFormat) {
-        LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row);
+        LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row, dateFormat, locale);
         if (approvedDate != null) {
             return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat);
         }
@@ -148,7 +161,7 @@ public class LoanImportHandler implements ImportHandler {
         String loanOfficerName = ImportHandlerUtils.readAsString(LoanConstants.LOAN_OFFICER_NAME_COL, row);
         Long loanOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME),
                 loanOfficerName);
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(LoanConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(LoanConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         String fundName = ImportHandlerUtils.readAsString(LoanConstants.FUND_NAME_COL, row);
         Long fundId;
         if (fundName == null) {
@@ -248,8 +261,8 @@ public class LoanImportHandler implements ImportHandler {
         Integer graceOnPrincipalPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
         Integer graceOnInterestPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL, row);
         Integer graceOnInterestCharged = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_CHARGED_COL, row);
-        LocalDate interestChargedFromDate = ImportHandlerUtils.readAsDate(LoanConstants.INTEREST_CHARGED_FROM_COL, row);
-        LocalDate firstRepaymentOnDate = ImportHandlerUtils.readAsDate(LoanConstants.FIRST_REPAYMENT_COL, row);
+        LocalDate interestChargedFromDate = ImportHandlerUtils.readAsDate(LoanConstants.INTEREST_CHARGED_FROM_COL, row, dateFormat, locale);
+        LocalDate firstRepaymentOnDate = ImportHandlerUtils.readAsDate(LoanConstants.FIRST_REPAYMENT_COL, row, dateFormat, locale);
         String loanType = null;
         EnumOptionData loanTypeEnumOption = null;
         if (ImportHandlerUtils.readAsString(LoanConstants.LOAN_TYPE_COL, row) != null) {
@@ -297,10 +310,12 @@ public class LoanImportHandler implements ImportHandler {
                     chargeAmount = LoanCharge.percentageOf(principal, amountOrPercentage);
                 }
 
-                charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row),
-                        chargeAmount, chargeOneAmountTypeEnum, chargeOneTimeTypeEnum));
+                charges.add(new LoanChargeData(chargeOneId,
+                        ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale), chargeAmount,
+                        chargeOneAmountTypeEnum, chargeOneTimeTypeEnum));
             } else {
-                charges.add(new LoanChargeData(chargeOneId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row), null));
+                charges.add(new LoanChargeData(chargeOneId,
+                        ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_1, row, dateFormat, locale), null));
             }
         }
 
@@ -319,10 +334,12 @@ public class LoanImportHandler implements ImportHandler {
                     chargeAmount = LoanCharge.percentageOf(principal, amountOrPercentage);
                 }
 
-                charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row),
-                        chargeAmount, chargeTwoAmountTypeEnum, chargeTwoTimeTypeEnum));
+                charges.add(new LoanChargeData(chargeTwoId,
+                        ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale), chargeAmount,
+                        chargeTwoAmountTypeEnum, chargeTwoTimeTypeEnum));
             } else {
-                charges.add(new LoanChargeData(chargeTwoId, ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row), null));
+                charges.add(new LoanChargeData(chargeTwoId,
+                        ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row, dateFormat, locale), null));
             }
         }
 
@@ -376,10 +393,9 @@ public class LoanImportHandler implements ImportHandler {
 
     private Count importEntity(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
             final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, final List<String> statuses,
-            final String dateFormat) {
+            final String dateFormat, int errorCount) {
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         int progressLevel = 0;
         String loanId;
         String errorMessage;

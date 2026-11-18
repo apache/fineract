@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -82,11 +83,12 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         List<CreditDebit> credits = new ArrayList<>();
         List<CreditDebit> debits = new ArrayList<>();
 
-        boolean flagForOpBal = readExcelFile(workbook, glAccounts);
-        return importEntity(workbook, glAccounts, glTransactions, credits, debits, flagForOpBal, locale, dateFormat);
+        AtomicInteger errorCount = new AtomicInteger();
+        boolean flagForOpBal = readExcelFile(workbook, glAccounts, errorCount);
+        return importEntity(workbook, glAccounts, glTransactions, credits, debits, flagForOpBal, locale, dateFormat, errorCount.get());
     }
 
-    private boolean readExcelFile(final Workbook workbook, final List<GLAccountData> glAccounts) {
+    private boolean readExcelFile(final Workbook workbook, final List<GLAccountData> glAccounts, AtomicInteger errorCount) {
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(chartOfAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         boolean flagForOpBal = false;
@@ -94,11 +96,18 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
             Row row;
             row = chartOfAccountsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ChartOfAccountsConstants.STATUS_COL)) {
-                glAccounts.add(readGlAccounts(row));
-                if (ImportHandlerUtils.readAsString(ChartOfAccountsConstants.OFFICE_COL, row) != null) {
-                    flagForOpBal = Boolean.TRUE;
-                } else {
-                    flagForOpBal = Boolean.FALSE;
+                try {
+                    glAccounts.add(readGlAccounts(row));
+                    if (ImportHandlerUtils.readAsString(ChartOfAccountsConstants.OFFICE_COL, row) != null) {
+                        flagForOpBal = Boolean.TRUE;
+                    } else {
+                        flagForOpBal = Boolean.FALSE;
+                    }
+                } catch (RuntimeException re) {
+                    LOG.error("Problem occurred in readExcelFile function", re);
+                    errorCount.incrementAndGet();
+                    String errorMessage = ImportHandlerUtils.getErrorMessage(re);
+                    ImportHandlerUtils.writeErrorMessage(chartOfAccountsSheet, rowIndex, errorMessage, ChartOfAccountsConstants.STATUS_COL);
                 }
             }
         }
@@ -142,7 +151,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
     private Count importEntity(final Workbook workbook, final List<GLAccountData> glAccounts, final List<JournalEntryData> glTransactions,
             final List<CreditDebit> credits, final List<CreditDebit> debits, final boolean flagForOpBal, final String locale,
-            final String dateFormat) {
+            final String dateFormat, int errorCount) {
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
 
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
@@ -151,8 +160,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         gsonBuilder.registerTypeAdapter(CurrencyData.class, new CurrencyDateCodeSerializer());
         int successCount = 0;
-        int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
 
         if (glAccounts != null) {
             for (GLAccountData glAccount : glAccounts) {
