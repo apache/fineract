@@ -133,6 +133,10 @@ public class LoanProductChargeAmortizationStepDef extends AbstractStepDef {
         if (enableChargeAmortization != null) {
             request.enableChargeAmortization(Boolean.valueOf(enableChargeAmortization));
         }
+        if (Boolean.parseBoolean(cell(data, ATTACH_CHARGE))) {
+            request.currencyCode(LoanProductsRequestFactory.CURRENCY_CODE)
+                    .charges(List.of(new LoanProductChargeData().id(createdChargeId())));
+        }
         return request;
     }
 
@@ -157,7 +161,7 @@ public class LoanProductChargeAmortizationStepDef extends AbstractStepDef {
     private static void assertFailure(final CallFailedRuntimeException failure, final Map<String, String> data) {
         final int expectedHttpCode = Integer.parseInt(data.get("httpCode"));
         final String expectedErrorMessage = data.get("errorMessage").trim();
-        assertThat(failure.getStatus()).as("HTTP status code").isEqualTo(expectedHttpCode);
+        assertThat(failure.getStatus()).as("HTTP status code, response: " + failure.getMessage()).isEqualTo(expectedHttpCode);
         assertThat(failure.getMessage()).as("Error message should contain: " + expectedErrorMessage).contains(expectedErrorMessage);
     }
 
