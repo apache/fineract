@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.hooks.command;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookAfter;
 import org.apache.fineract.command.core.HookableCommand;
 import org.springframework.stereotype.Component;
@@ -38,10 +38,15 @@ final class WebhookCommandHookAfter implements CommandHookAfter<Object, Object> 
     private final WebhookCommandEventPublisher publisher;
 
     @Override
-    public void onAfter(Command<Object> command, Object response) {
-        if (!(command instanceof HookableCommand hookable)) {
+    public void onAfter(CommandContext<Object, Object> ctx) {
+        var command = ctx.getCommand();
+
+        if (!(command instanceof HookableCommand)) {
             return;
         }
+
+        // read before registering, so that what is published is the response as it was when the command finished
+        var response = ctx.getResponse();
 
         // Inside an enclosing (e.g. batch) transaction, wait for the commit so that webhooks never fire for a command
         // that is rolled back by a later failure, as in the legacy command processing.
@@ -50,11 +55,11 @@ final class WebhookCommandHookAfter implements CommandHookAfter<Object, Object> 
 
                 @Override
                 public void afterCommit() {
-                    publisher.publishSuccess(hookable, command.getPayload(), response);
+                    publisher.publishSuccess(command, command.getPayload(), response);
                 }
             });
         } else {
-            publisher.publishSuccess(hookable, command.getPayload(), response);
+            publisher.publishSuccess(command, command.getPayload(), response);
         }
     }
 }

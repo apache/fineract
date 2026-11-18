@@ -19,11 +19,12 @@
 package org.apache.fineract.command.jdbc;
 
 import static org.apache.fineract.command.core.CommandState.ERROR;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.jdbc.store.domain.CommandRepository;
-import org.apache.fineract.command.jdbc.store.mapping.CommandMapper;
+import org.apache.fineract.command.jdbc.store.domain.JdbcCommandRepository;
+import org.apache.fineract.command.jdbc.store.mapping.JdbcCommandMapper;
 import org.apache.fineract.command.test.CommandBaseTest;
 import org.apache.fineract.command.test.sample.command.DummyCommand;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
@@ -36,13 +37,13 @@ import org.springframework.test.context.ContextConfiguration;
 @Slf4j
 @SpringBootTest
 @ContextConfiguration(classes = TestConfiguration.class)
-class CommandRepositoryTest extends CommandBaseTest {
+class JdbcCommandRepositoryTest extends CommandBaseTest {
 
     @Autowired
-    protected CommandRepository commandRepository;
+    protected JdbcCommandRepository commandRepository;
 
     @Autowired
-    protected CommandMapper commandMapper;
+    protected JdbcCommandMapper commandMapper;
 
     @Test
     void save() {
@@ -75,5 +76,26 @@ class CommandRepositoryTest extends CommandBaseTest {
         var found = commandRepository.findById(result.getId());
 
         log.info("Found command: {}", found.orElse(null));
+    }
+
+    @Test
+    void theCommandRecordsWhatItActedOnAndWhatItDid() {
+        var command = new DummyCommand();
+
+        command.setPayload(DummyRequest.builder().content("hello").build());
+        command.setCreatedAt(Instant.now());
+
+        var saved = commandRepository.save(commandMapper.map(command));
+        var stored = commandRepository.findById(saved.getId()).orElseThrow();
+
+        // the names an audit search and a checker inbox look a command up by, and from which the approval permission
+        // is derived; a row without them is invisible to both
+        assertEquals("DUMMY", stored.getEntityName(), "The entity the command acted on must be recorded.");
+        assertEquals("CREATE", stored.getActionName(), "The action it performed must be recorded.");
+
+        var readBack = commandMapper.map(stored);
+
+        assertEquals("DUMMY", readBack.entityName(), "A command read back must carry the names it was recorded with.");
+        assertEquals("CREATE", readBack.actionName());
     }
 }
