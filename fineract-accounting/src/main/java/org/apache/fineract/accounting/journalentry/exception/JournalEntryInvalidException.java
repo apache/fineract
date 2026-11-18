@@ -37,7 +37,8 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
         DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, //
         GL_ACCOUNT_DISABLED, //
         GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, //
-        INVALID_DEBIT_OR_CREDIT_ACCOUNTS; //
+        INVALID_DEBIT_OR_CREDIT_ACCOUNTS, //
+        DEBIT_CREDIT_SAME_ACCOUNT; //
 
         public String errorMessage() {
             if (name().equalsIgnoreCase("FUTURE_DATE")) {
@@ -58,6 +59,8 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
                 return "Invalid debit or credit accounts are passed";
             } else if (name().equalsIgnoreCase("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED")) {
                 return "Target account does not allow manual adjustments";
+            } else if (name().equalsIgnoreCase("DEBIT_CREDIT_SAME_ACCOUNT")) {
+                return "Debit and credit account cannot be the same";
             }
             return name();
         }
@@ -79,6 +82,8 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
                 return "error.msg.glJournalEntry.invalid.debit.or.credit.accounts";
             } else if (name().equalsIgnoreCase("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED")) {
                 return "error.msg.glJournalEntry.invalid.account.manual.adjustments.not.permitted";
+            } else if (name().equalsIgnoreCase("DEBIT_CREDIT_SAME_ACCOUNT")) {
+                return "error.msg.glJournalEntry.invalid.debit.credit.same.account";
             }
             return name();
         }
