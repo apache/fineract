@@ -127,8 +127,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         if (associationParametersData != null && associationParametersData.isRunningBalanceRequired()) {
             sql = sql + " and gl_j.id in (select t1.id from (select t2.account_id, max(t2.id) as id from "
                     + "(select id, max(entry_date) as entry_date, account_id from acc_gl_journal_entry where is_running_balance_calculated = true "
-                    + "group by account_id desc, id) t3 inner join acc_gl_journal_entry t2 on t2.account_id = t3.account_id and t2.entry_date = t3.entry_date "
-                    + "group by t2.account_id desc) t1)";
+                    + "group by account_id, id) t3 inner join acc_gl_journal_entry t2 on t2.account_id = t3.account_id and t2.entry_date = t3.entry_date "
+                    + "group by t2.account_id) t1)";
         }
         final Object[] parameterArray = new Object[3];
         int arrayPos = 0;

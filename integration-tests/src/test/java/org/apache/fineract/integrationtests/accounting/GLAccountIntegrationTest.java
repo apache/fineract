@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Calendar;
+import java.util.List;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
@@ -149,6 +150,23 @@ public class GLAccountIntegrationTest extends FeignLoanTestBase {
                     () -> accountHelper.deleteGLAccount(newAccount.getResourceId()));
             assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("error.msg.glaccount.glcode.invalid.delete.transactions.logged"));
+        });
+    }
+
+    @Test
+    public void testRetrieveGLAccountsWithRunningBalance() {
+        runAt("01 January 2024", () -> {
+            String uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
+            final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
+            uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
+            final PostGLAccountsResponse newAccount2 = createGLAccount(uniqueString);
+            journalHelper.createJournalEntry(new JournalEntryCommand().amount(BigDecimal.TEN).officeId(1L).currencyCode("USD").locale("en")
+                    .dateFormat("uuuu-MM-dd").transactionDate(LocalDate.of(2024, Month.JANUARY, 1))
+                    .addCreditsItem(new SingleDebitOrCreditEntryCommand().glAccountId(newAccount.getResourceId()).amount(BigDecimal.TEN))
+                    .addDebitsItem(new SingleDebitOrCreditEntryCommand().glAccountId(newAccount2.getResourceId()).amount(BigDecimal.TEN)));
+
+            List<GetGLAccountsResponse> accounts = accountHelper.getGLAccountsWithRunningBalance();
+            assertTrue(accounts.stream().anyMatch(account -> newAccount.getResourceId().equals(account.getId())));
         });
     }
 
