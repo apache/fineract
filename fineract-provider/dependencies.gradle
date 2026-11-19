@@ -195,6 +195,8 @@ dependencies {
         exclude group: 'xml-apis'
     }
 
+    // Tags http.server.requests with the JAX-RS uri template instead of UNKNOWN
+    runtimeOnly('org.glassfish.jersey.ext:jersey-micrometer')
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
         exclude group: 'com.sun.activation'
     }
