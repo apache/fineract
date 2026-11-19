@@ -50,12 +50,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningDataProjection;
+import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntryProjection;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.query.QAccGlAccount;
 import org.apache.fineract.query.QMAppuser;
 import org.apache.fineract.query.QMLoanRepaymentSchedule;
+import org.apache.fineract.query.QMLoanproductProvisioningEntry;
+import org.apache.fineract.query.QMOffice;
+import org.apache.fineract.query.QMProductLoan;
+import org.apache.fineract.query.QMProvisionCategory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -268,11 +274,21 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     @Override
     public ProvisioningEntryData retrieveProvisioningEntryDataByCriteriaId(Long criteriaId) {
         ProvisioningEntryData data = null;
-        LoanProductProvisioningEntryRowMapper mapper = new LoanProductProvisioningEntryRowMapper();
-        final String sql = "select " + mapper.getSchema() + " where entry.criteria_id = ?";
-        Collection<LoanProductProvisioningEntryData> entries = this.jdbcTemplate.query(sql, mapper, criteriaId); // NOSONAR
+        QMLoanproductProvisioningEntry entry = new QMLoanproductProvisioningEntry("entry");
+        QMOffice office = new QMOffice("office");
+        QMProductLoan product = new QMProductLoan("product");
+        QMProvisionCategory category = new QMProvisionCategory("category");
+        QAccGlAccount liability = new QAccGlAccount("liability");
+        QAccGlAccount expense = new QAccGlAccount("expense");
+
+        List<LoanProductProvisioningEntryData> entries = this.queryFactory
+                .select(new LoanProductProvisioningEntryProjection(entry, office, product, category, liability, expense)).from(entry)
+                .leftJoin(office).on(office.id.eq(entry.officeId)).leftJoin(product).on(product.id.eq(entry.productId)).leftJoin(category)
+                .on(category.id.eq(entry.categoryId)).leftJoin(liability).on(liability.id.eq(entry.liabilityAccount)).leftJoin(expense)
+                .on(expense.id.eq(entry.expenseAccount)).where(entry.criteriaId.eq(criteriaId)).fetch();
+
         if (entries != null && !entries.isEmpty()) {
-            Long entryId = ((LoanProductProvisioningEntryData) entries.toArray()[0]).getHistoryId();
+            Long entryId = entries.get(0).getHistoryId();
             ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
             final String sql1 = "select " + mapper1.getSchema() + " where entry.id = ?";
             data = this.jdbcTemplate.queryForObject(sql1, mapper1, entryId); // NOSONAR
