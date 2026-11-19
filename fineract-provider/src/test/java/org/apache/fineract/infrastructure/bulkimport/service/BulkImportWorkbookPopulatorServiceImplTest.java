@@ -44,7 +44,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.service.StaffReadService;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
@@ -77,7 +77,7 @@ class BulkImportWorkbookPopulatorServiceImplTest {
             readService(LoanReadPlatformService.class), readService(GLAccountReadPlatformService.class),
             readService(SavingsAccountReadPlatformService.class), readService(CodeValueReadPlatformService.class),
             readService(SavingsProductReadPlatformService.class), readService(ShareProductReadPlatformService.class),
-            readService(ChargeReadPlatformService.class), readService(DepositProductReadPlatformService.class),
+            readService(ChargeReadService.class), readService(DepositProductReadPlatformService.class),
             readService(RoleReadPlatformService.class));
 
     // Every read service answers with no data, and an empty Page where it returns one.

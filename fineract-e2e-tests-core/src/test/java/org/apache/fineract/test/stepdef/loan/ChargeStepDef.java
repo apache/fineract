@@ -33,8 +33,9 @@ import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeData;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
@@ -89,7 +90,7 @@ public class ChargeStepDef extends AbstractStepDef {
         if (exists) {
             return;
         }
-        final ChargeRequest request = new ChargeRequest() //
+        final ChargeCreateRequest request = new ChargeCreateRequest() //
                 .chargeAppliesTo(ChargeProductAppliesTo.LOAN.value) //
                 .chargeTimeType(ChargeTimeType.DOWN_PAYMENT.value) //
                 .chargeCalculationType(calculationType.value) //
@@ -107,7 +108,7 @@ public class ChargeStepDef extends AbstractStepDef {
     public void rememberChargeForRestoration(final String chargeType) {
         final ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
         final Long chargeId = chargeProductResolver.resolve(chargeProductType);
-        final GetChargesResponse charge = ok(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+        final ChargeData charge = ok(() -> fineractClient.charges().retrieveOneCharge(chargeId, (Boolean) null));
         assertThat(charge).as("Charge %s before modification", chargeId).isNotNull();
         assertThat(charge.getId()).as("Charge ID before modification").isEqualTo(chargeId);
         assertThat(charge.getAmount()).as("Charge %s amount before modification", chargeId).isNotNull();
@@ -120,13 +121,12 @@ public class ChargeStepDef extends AbstractStepDef {
 
     @After(value = "@ProgressiveLoanBackdatedPeriodicAccrual", order = Integer.MAX_VALUE - 1)
     public void restoreRememberedCharges() {
-        final List<GetChargesResponse> charges = testContext().get().entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(REMEMBERED_CHARGE_PREFIX)).map(entry -> (GetChargesResponse) entry.getValue())
-                .toList();
+        final List<ChargeData> charges = testContext().get().entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(REMEMBERED_CHARGE_PREFIX)).map(entry -> (ChargeData) entry.getValue()).toList();
         final IllegalStateException cleanupFailure = new IllegalStateException("Unable to restore remembered charges");
-        charges.forEach((final GetChargesResponse charge) -> {
+        charges.forEach((final ChargeData charge) -> {
             try {
-                final ChargeRequest request = new ChargeRequest().amount(charge.getAmount())
+                final ChargeUpdateRequest request = new ChargeUpdateRequest().amount(charge.getAmount().doubleValue())
                         .chargeCalculationType(Math.toIntExact(charge.getChargeCalculationType().getId())).locale(LOCALE_EN);
                 ok(() -> fineractClient.charges().updateCharge(charge.getId(), request));
             } catch (final RuntimeException | AssertionError exception) {
@@ -141,7 +141,7 @@ public class ChargeStepDef extends AbstractStepDef {
 
     @When("Admin updates charge {string} with {string} calculation type and {double} % of transaction amount")
     public void updateCharge(String chargeType, String chargeCalculationType, double amount) {
-        ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
+        ChargeUpdateRequest disbursementChargeUpdateRequest = new ChargeUpdateRequest();
         ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
         disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(amount).locale("en");
 
@@ -153,7 +153,7 @@ public class ChargeStepDef extends AbstractStepDef {
 
     @When("Admin updates charge {string} with {string} calculation type and {double} EUR amount")
     public void updateChargeWithFlatAmount(String chargeType, String chargeCalculationType, double flatAmount) {
-        ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
+        ChargeUpdateRequest disbursementChargeUpdateRequest = new ChargeUpdateRequest();
         ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
         disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(flatAmount).locale("en");
 
@@ -167,7 +167,7 @@ public class ChargeStepDef extends AbstractStepDef {
     public void createLoanChargeWithInvalidParamsFails(String chargeTimeTypeName, String chargeCalcTypeName, DataTable table) {
         final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
         final ChargeCalculationType calcType = ChargeCalculationType.valueOf(chargeCalcTypeName);
-        final ChargeRequest request = new ChargeRequest() //
+        final ChargeCreateRequest request = new ChargeCreateRequest() //
                 .chargeAppliesTo(ChargeProductAppliesTo.LOAN.value) //
                 .chargeTimeType(timeType.value) //
                 .chargeCalculationType(calcType.value) //
@@ -188,7 +188,7 @@ public class ChargeStepDef extends AbstractStepDef {
         final ChargeProductAppliesTo appliesTo = ChargeProductAppliesTo.valueOf(appliesToName);
         final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
         final ChargeCalculationType calcType = ChargeCalculationType.valueOf(chargeCalcTypeName);
-        final ChargeRequest request = new ChargeRequest() //
+        final ChargeCreateRequest request = new ChargeCreateRequest() //
                 .chargeAppliesTo(appliesTo.value) //
                 .chargeTimeType(timeType.value) //
                 .chargeCalculationType(calcType.value) //
@@ -207,7 +207,7 @@ public class ChargeStepDef extends AbstractStepDef {
 
     @Then("Changing a charge attached to a loan product without down payment to {string} chargeTimeType results an error with the following data:")
     public void changeChargeTimeTypeOfChargeOnProductWithoutDownPaymentFails(final String chargeTimeTypeName, final DataTable table) {
-        final ChargeRequest chargeRequest = new ChargeRequest() //
+        final ChargeCreateRequest chargeRequest = new ChargeCreateRequest() //
                 .chargeAppliesTo(ChargeProductAppliesTo.LOAN.value) //
                 .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.value) //
                 .chargeCalculationType(ChargeCalculationType.FLAT.value) //
@@ -222,12 +222,12 @@ public class ChargeStepDef extends AbstractStepDef {
         ok(() -> fineractClient.loanProducts()
                 .createLoanProduct(loanProductsRequestFactory.defaultLoanProductsRequestLP2WithoutDownPayment(chargeId)));
 
-        final ChargeRequest updateRequest = new ChargeRequest().chargeTimeType(ChargeTimeType.valueOf(chargeTimeTypeName).value)
+        final ChargeUpdateRequest updateRequest = new ChargeUpdateRequest().chargeTimeType(ChargeTimeType.valueOf(chargeTimeTypeName).value)
                 .locale(LOCALE_EN);
         assertCallFails(() -> fineractClient.charges().updateCharge(chargeId, updateRequest), table);
     }
 
-    private void assertChargeCreateFails(final ChargeRequest request, final DataTable table) {
+    private void assertChargeCreateFails(final ChargeCreateRequest request, final DataTable table) {
         assertCallFails(() -> fineractClient.charges().createCharge(request), table);
     }
 

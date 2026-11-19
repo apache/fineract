@@ -79,7 +79,7 @@ import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformServic
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -178,7 +178,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final GroupReadPlatformService groupReadPlatformService;
     private final LoanDropdownReadPlatformService loanDropdownReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final StaffReadService staffReadPlatformService;
@@ -1512,10 +1512,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .retrieveCodeValuesByCode("LoanCollateral");
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
-            chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
+            chargeOptions = this.chargeReadService.retrieveLoanProductApplicableCharges(productId,
                     new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT }, officeId);
         } else {
-            chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
+            chargeOptions = this.chargeReadService.retrieveLoanProductApplicableCharges(productId,
                     new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT }, officeId);
         }
 
@@ -1554,7 +1554,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .setLoanScheduleProcessingTypeOptions(LoanScheduleProcessingType.getValuesAsEnumOptionDataList()); //
 
         if (officeId != null) {
-            final Set<Long> visibleChargeIds = this.chargeReadPlatformService.retrieveLoanProductCharges(productId, officeId).stream()
+            final Set<Long> visibleChargeIds = this.chargeReadService.retrieveLoanProductCharges(productId, officeId).stream()
                     .map(ChargeData::getId).collect(Collectors.toSet());
             if (loanAccountData.getCharges() != null) {
                 loanAccountData.setCharges(

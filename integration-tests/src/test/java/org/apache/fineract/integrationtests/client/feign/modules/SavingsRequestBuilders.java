@@ -19,7 +19,7 @@
 package org.apache.fineract.integrationtests.client.feign.modules;
 
 import java.math.BigDecimal;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsGsimClient;
@@ -136,49 +136,49 @@ public final class SavingsRequestBuilders {
         return account.getAccountID().longValue();
     }
 
-    public static ChargeRequest savingsWithdrawalFeeCharge() {
+    public static ChargeCreateRequest savingsWithdrawalFeeCharge() {
         return savingsCharge(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE);
     }
 
     /** A withdrawal fee that only applies to withdrawals made with the given payment type. */
-    public static ChargeRequest savingsWithdrawalFeeCharge(Double amount, Long paymentTypeId) {
+    public static ChargeCreateRequest savingsWithdrawalFeeCharge(Double amount, Long paymentTypeId) {
         return savingsCharge(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
                 .amount(amount)//
                 .enablePaymentType(true)//
                 .paymentTypeId(paymentTypeId);
     }
 
-    public static ChargeRequest savingsActivationFeeCharge() {
+    public static ChargeCreateRequest savingsActivationFeeCharge() {
         return savingsCharge(SavingsTestData.ChargeTimeType.SAVINGS_ACTIVATION);
     }
 
-    public static ChargeRequest savingsNoActivityFeeCharge() {
+    public static ChargeCreateRequest savingsNoActivityFeeCharge() {
         return savingsCharge(SavingsTestData.ChargeTimeType.SAVINGS_NO_ACTIVITY_FEE);
     }
 
-    public static ChargeRequest savingsSpecifiedDueDateCharge() {
-        return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).feeInterval("2");
+    public static ChargeCreateRequest savingsSpecifiedDueDateCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).feeInterval(2);
     }
 
-    public static ChargeRequest savingsSpecifiedDueDateCharge(Double amount, String currencyCode) {
+    public static ChargeCreateRequest savingsSpecifiedDueDateCharge(Double amount, String currencyCode) {
         return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).amount(amount).currencyCode(currencyCode);
     }
 
     /** The recurring fees carry the day they fall due; the annual one recurs yearly, so it needs no interval. */
-    public static ChargeRequest savingsAnnualFeeCharge() {
+    public static ChargeCreateRequest savingsAnnualFeeCharge() {
         return savingsCharge(SavingsTestData.ChargeTimeType.ANNUAL_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY);
     }
 
-    public static ChargeRequest savingsMonthlyFeeCharge() {
-        return savingsCharge(SavingsTestData.ChargeTimeType.MONTHLY_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY).feeInterval("2");
+    public static ChargeCreateRequest savingsMonthlyFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.MONTHLY_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY).feeInterval(2);
     }
 
-    public static ChargeRequest savingsWeeklyFeeCharge() {
-        return savingsCharge(SavingsTestData.ChargeTimeType.WEEKLY_FEE).feeInterval("1");
+    public static ChargeCreateRequest savingsWeeklyFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WEEKLY_FEE).feeInterval(1);
     }
 
-    public static ChargeRequest savingsCharge(int chargeTimeType) {
-        return new ChargeRequest()//
+    public static ChargeCreateRequest savingsCharge(int chargeTimeType) {
+        return new ChargeCreateRequest()//
                 .active(true)//
                 .name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))//
                 .currencyCode(SavingsTestData.CURRENCY_CODE)//

@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividentPayOutDetailsRepositoryWrapper;
@@ -82,12 +82,12 @@ public class ShareProductsConfiguration {
     @Bean(value = "shareReadPlatformService")
     @ConditionalOnMissingBean(ShareProductReadPlatformService.class)
     public ShareProductReadPlatformService shareProductReadPlatformService(JdbcTemplate jdbcTemplate,
-            CurrencyReadPlatformService currencyReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
+            CurrencyReadPlatformService currencyReadPlatformService, ChargeReadService chargeReadService,
             ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
             AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
             PaginationHelper shareProductDataPaginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
-        return new ShareProductReadPlatformServiceImpl(jdbcTemplate, currencyReadPlatformService, chargeReadPlatformService,
+        return new ShareProductReadPlatformServiceImpl(jdbcTemplate, currencyReadPlatformService, chargeReadService,
                 shareProductDropdownReadPlatformService, accountingDropdownReadPlatformService, accountMappingReadPlatformService,
                 shareProductDataPaginationHelper, sqlGenerator);
     }

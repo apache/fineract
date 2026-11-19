@@ -30,13 +30,13 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -1539,7 +1539,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private void chargeFee(Long loanId, Double amount, String dueDate) {
         LOG.info("Charge FEE amount {} dueDate {}", amount, dueDate);
-        PostChargesResponse feeCharge = chargesHelper.createCharge(new ChargeRequest().penalty(false).amount(9.0)
+        ChargeCreateResponse feeCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(false).amount(9.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5)).chargeAppliesTo(1).locale("en")
@@ -1552,7 +1552,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private void chargePenalty(Long loanId, Double amount, String dueDate) {
         LOG.info("Charge PENALTY amount {} dueDate {}", amount, dueDate);
-        PostChargesResponse penaltyCharge = chargesHelper.createCharge(new ChargeRequest().penalty(true).amount(10.0)
+        ChargeCreateResponse penaltyCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(true).amount(10.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5)).chargeAppliesTo(1).locale("en")

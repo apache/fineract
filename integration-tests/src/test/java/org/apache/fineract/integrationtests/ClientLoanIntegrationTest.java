@@ -43,7 +43,8 @@ import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.CollateralManagementData;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -62,7 +63,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionId
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
 import org.apache.fineract.client.models.PostGLAccountsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -5130,13 +5130,13 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                     .name(Utils.uniqueRandomStringGenerator("UNIQUE_PENALTY_INCOME" + Calendar.getInstance().getTimeInMillis(), 5))
                     .usage(1));
 
-            PostChargesResponse penaltyCharge = chargesHelper.createCharge(new ChargeRequest().penalty(true).amount(10.0)
+            ChargeCreateResponse penaltyCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(true).amount(10.0)
                     .chargeCalculationType(ChargeCalculationType.FLAT.getValue())
                     .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
                     .currencyCode("USD").name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
                     .chargeAppliesTo(1).locale("en").active(true));
 
-            PostChargesResponse feeCharge = chargesHelper.createCharge(new ChargeRequest().penalty(false).amount(9.0)
+            ChargeCreateResponse feeCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(false).amount(9.0)
                     .chargeCalculationType(ChargeCalculationType.FLAT.getValue())
                     .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
                     .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
@@ -6583,7 +6583,7 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
             PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             final Long loanProductId = createLoanProduct(loanProductsRequest);
             LOG.info("-----------------------------------CREATE CHARGES-----------------------------------------");
-            PostChargesResponse penaltyCharge = chargesHelper.createCharge(new ChargeRequest().penalty(true).amount(10.0)
+            ChargeCreateResponse penaltyCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(true).amount(10.0)
                     .chargeCalculationType(ChargeCalculationType.FLAT.getValue())
                     .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
                     .currencyCode("USD").name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))

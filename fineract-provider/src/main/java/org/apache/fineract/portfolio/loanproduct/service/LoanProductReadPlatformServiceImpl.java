@@ -42,7 +42,7 @@ import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAcc
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
@@ -86,7 +86,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final RateReadService rateReadService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
@@ -97,7 +97,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public LoanProductData retrieveLoanProduct(final Long loanProductId) {
 
         try {
-            final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
+            final Collection<ChargeData> charges = this.chargeReadService.retrieveLoanProductCharges(loanProductId);
             final Collection<RateData> rates = this.rateReadService.retrieveProductLoanRates(loanProductId);
             final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(
                     loanProductId);

@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
@@ -603,7 +603,7 @@ public class LoanChargeSpecificDueDateTest extends FeignLoanTestBase {
         return loanId;
     }
 
-    private static ChargeRequest installmentFee() {
+    private static ChargeCreateRequest installmentFee() {
         return ChargeRequestBuilders.loanInstallmentFee(1.5)
                 .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue()).penalty(false);
     }

@@ -465,6 +465,18 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/familymembers/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_FAMILYMEMBERS")
 
+                    // charge
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/charges"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/charges/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/charges"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/charges/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/charges/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CHARGE")
+
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));

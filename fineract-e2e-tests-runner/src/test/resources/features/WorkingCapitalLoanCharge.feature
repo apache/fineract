@@ -40,14 +40,14 @@ Feature: WorkingCapitalLoanChargesFeature
   @TestRailId:C80960
   Scenario: Verify Working Capital Charge product - UC7: invalid chargeCalculationType Percentage Amount fails (Negative)
     Then Creating working capital loan charge with "SPECIFIED_DUE_DATE" chargeTimeType and "PERCENTAGE_AMOUNT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                                 |
-      | 400      | The parameter `chargeCalculationType` must be one of [ 1 ] . |
+      | httpCode | errorMessage                                                                                        |
+      | 400      | The parameter 'chargeCalculationType' is not one of the values supported for this 'chargeAppliesTo' |
 
   @TestRailId:C80961
   Scenario: Verify Working Capital Charge product - UC8: invalid chargeTimeType Instalment Fee fails (Negative)
     Then Creating working capital loan charge with "INSTALLMENT_FEE" chargeTimeType and "FLAT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                             |
-      | 400      | The parameter `chargeTimeType` must be one of [ 1, 2 ] . |
+      | httpCode | errorMessage                                                                                 |
+      | 400      | The parameter 'chargeTimeType' is not one of the values supported for this 'chargeAppliesTo' |
 
   @TestRailId:C102435
   Scenario: Verify Working Capital Charge product - UC9: template API with Disbursement returns Flat and % Amount calculation types
@@ -68,15 +68,15 @@ Feature: WorkingCapitalLoanChargesFeature
   @TestRailId:C102438
   Scenario: Verify Working Capital Charge product - UC12: invalid chargePaymentMode Account transfer fails (Negative)
     When Creating working capital loan charge with "ACCOUNT_TRANSFER" chargePaymentMode results an error with the following data:
-      | httpCode | errorMessage                                                |
-      | 400      | The parameter `chargePaymentMode` must be one of [ 0 ] .   |
+      | httpCode | errorMessage                                                         |
+      | 400      | The parameter 'chargePaymentMode' is not one of the supported values |
 
   @TestRailId:C102439
   Scenario: Verify Working Capital Charge product - UC13: updating a Disbursement % Amount charge to Specified due date fails (Negative)
     When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "PERCENTAGE_AMOUNT" calculation type
     Then Updating working capital loan charge chargeTimeType to "SPECIFIED_DUE_DATE" results an error with the following data:
-      | httpCode | errorMessage                                                 |
-      | 400      | The parameter `chargeCalculationType` must be one of [ 1 ] . |
+      | httpCode | errorMessage                                                                                        |
+      | 400      | The parameter 'chargeCalculationType' is not one of the values supported for this 'chargeAppliesTo' |
     When Admin deletes working capital loan charge
 
 #    #############################################

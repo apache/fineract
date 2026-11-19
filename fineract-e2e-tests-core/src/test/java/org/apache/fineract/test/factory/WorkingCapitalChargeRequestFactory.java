@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.test.factory;
 
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargeProductAppliesTo;
 import org.apache.fineract.test.data.ChargeTimeType;
@@ -34,8 +34,8 @@ public class WorkingCapitalChargeRequestFactory {
     public static final String DEFAULT_NAME_PREFIX = "WCL_CHARGE_";
     public static final int DEFAULT_NAME_RANDOM_LENGTH = 10;
 
-    public ChargeRequest defaultWorkingCapitalChargeRequest() {
-        return new ChargeRequest() //
+    public ChargeCreateRequest defaultWorkingCapitalChargeRequest() {
+        return new ChargeCreateRequest() //
                 .chargeAppliesTo(ChargeProductAppliesTo.WORKING_CAPITAL_LOAN.value) //
                 .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.value) //
                 .chargeCalculationType(ChargeCalculationType.FLAT.value) //

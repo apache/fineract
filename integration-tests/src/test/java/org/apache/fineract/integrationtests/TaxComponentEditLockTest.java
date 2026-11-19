@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Set;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetTaxesComponentsResponse;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
@@ -135,7 +135,7 @@ public class TaxComponentEditLockTest {
     }
 
     private void linkToCharge(final Long taxGroupId) {
-        new FeignChargesHelper(fineractClient).createCharge(new ChargeRequest().penalty(false).amount(10.0)
+        new FeignChargesHelper(fineractClient).createCharge(new ChargeCreateRequest().penalty(false).amount(10.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(Utils.LOCALE).active(true)

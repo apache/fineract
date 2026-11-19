@@ -796,8 +796,8 @@ Feature: LoanChargesDownPayment
   @TestRailId:C119562
   Scenario Outline: Verify creating Down payment charge with unsupported calculation type fails
     Then Creating loan charge with "DOWN_PAYMENT" chargeTimeType and "<calc_type>" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                                    |
-      | 400      | The parameter `chargeCalculationType` must be one of [ 1, 2 ] . |
+      | httpCode | errorMessage                                                                                       |
+      | 400      | The parameter 'chargeCalculationType' is not one of the values supported for a down payment charge |
 
     Examples:
       | calc_type                             |
@@ -812,9 +812,9 @@ Feature: LoanChargesDownPayment
       | 400      | <error_message>                                                              |
 
     Examples:
-      | applies_to | error_message                                                                    |
-      | SAVINGS    | The parameter `chargeTimeType` must be one of [ 2, 3, 4, 5, 6, 7, 10, 11, 16 ] . |
-      | CLIENT     | The parameter `chargeTimeType` must be one of [ 2 ] .                            |
+      | applies_to | error_message                                                                                |
+      | SAVINGS    | The parameter 'chargeTimeType' is not one of the values supported for this 'chargeAppliesTo' |
+      | CLIENT     | The parameter 'chargeTimeType' is not one of the values supported for this 'chargeAppliesTo' |
 
   @TestRailId:C119636
   Scenario: Verify changing a charge attached to a loan product without down payment to Down payment fails

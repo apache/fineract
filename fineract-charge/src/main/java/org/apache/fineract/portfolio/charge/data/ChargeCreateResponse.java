@@ -16,16 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.charge.service;
+package org.apache.fineract.portfolio.charge.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface ChargeWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChargeCreateResponse implements Serializable {
 
-    CommandProcessingResult createCharge(JsonCommand command);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    CommandProcessingResult updateCharge(Long chargeId, JsonCommand command);
-
-    CommandProcessingResult deleteCharge(Long chargeId);
+    private Long resourceId;
 }

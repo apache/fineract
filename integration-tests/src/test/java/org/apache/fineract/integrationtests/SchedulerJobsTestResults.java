@@ -42,7 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetHolidaysResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -126,8 +126,8 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
     private static final String LOAN_MAX_OUTSTANDING_BALANCE = "36000";
     private static final double CHARGE_AMOUNT = 100;
     private static final String FEE_ON_MONTH_DAY = "04 March";
-    private static final String FEE_FREQUENCY_MONTHS = "2";
-    private static final String FEE_INTERVAL = "2";
+    private static final int FEE_FREQUENCY_MONTHS = 2;
+    private static final int FEE_INTERVAL = 2;
 
     private TimeZone systemTimeZone;
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
@@ -266,7 +266,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         SchedulerJobHelper.executeAndAwaitJob(JobName);
         final BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(specifiedDueDateChargeId).getAmount());
+        final BigDecimal chargeAmount = chargesHelper.getCharge(specifiedDueDateChargeId).getAmount();
 
         final BigDecimal balance = balanceBefore.subtract(chargeAmount);
 
@@ -956,7 +956,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         String JobName = "Apply penalty to overdue loans";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
 
-        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(overdueFeeChargeId).getAmount());
+        final BigDecimal chargeAmount = chargesHelper.getCharge(overdueFeeChargeId).getAmount();
 
         List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
 
@@ -1507,7 +1507,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
                 .locale("en").monthDayFormat("dd MMMM").dateFormat("dd MMMM yyy").dueDate("10 January 2013");
     }
 
-    private static ChargeRequest loanOverdueFee() {
+    private static ChargeCreateRequest loanOverdueFee() {
         return ChargeRequestBuilders.loanOverdueFee(CHARGE_AMOUNT).feeFrequency(FEE_FREQUENCY_MONTHS).feeOnMonthDay(FEE_ON_MONTH_DAY)
                 .feeInterval(FEE_INTERVAL).monthDayFormat("dd MMM");
     }

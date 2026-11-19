@@ -22,18 +22,18 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
 import org.apache.fineract.client.models.GLAccountData;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
 import org.apache.fineract.client.models.PostTaxesComponentsResponse;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupResponse;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
-import org.apache.fineract.client.models.PutChargesChargeIdRequest;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -55,9 +56,9 @@ public class ChargesTest extends FeignIntegrationTest {
     private static final double CHARGE_AMOUNT = 100.0;
     private static final double MODIFIED_AMOUNT = 200.0;
     private static final String LOCALE = "en";
-    private static final String FEE_FREQUENCY_MONTHS = "2";
-    private static final String FEE_FREQUENCY_YEARS = "3";
-    private static final String FEE_INTERVAL = "2";
+    private static final int FEE_FREQUENCY_MONTHS = 2;
+    private static final int FEE_FREQUENCY_YEARS = 3;
+    private static final int FEE_INTERVAL = 2;
     private static final String FEE_ON_MONTH_DAY = "04 March";
     private static final String MONTH_DAY_FORMAT = "dd MMM";
 
@@ -93,11 +94,35 @@ public class ChargesTest extends FeignIntegrationTest {
         Assertions.assertTrue(
                 accountIds(editTemplate.getIncomeOrLiabilityAccountOptions().get("incomeAccountOptions")).contains(incomeAccountId));
 
-        chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE).incomeAccountId(otherIncomeAccountId));
+        chargesHelper.updateCharge(chargeId, new ChargeUpdateRequest().locale(LOCALE).incomeAccountId(otherIncomeAccountId));
         Assertions.assertEquals(otherIncomeAccountId, chargesHelper.getChargeWithTemplate(chargeId).getIncomeOrLiabilityAccount().getId(),
                 "Income account must be changed on update");
 
         verifyDeletion(chargeId);
+    }
+
+    @Test
+    public void testSavingsWithdrawalFeeKeepsFreeWithdrawalSettingsOnCreate() {
+        Long chargeId = chargesHelper
+                .createCharge(SavingsRequestBuilders.savingsWithdrawalFeeCharge().enableFreeWithdrawalCharge(true)
+                        .freeWithdrawalFrequency(3).restartCountFrequency(1).countFrequencyType(PeriodFrequencyType.MONTHS.getValue()))
+                .getResourceId();
+
+        ChargeData charge = chargesHelper.getCharge(chargeId);
+        Assertions.assertEquals(Boolean.TRUE, charge.getFreeWithdrawal(), "Free withdrawals must be stored on create");
+        Assertions.assertEquals(3, charge.getFreeWithdrawalChargeFrequency());
+        Assertions.assertEquals(1, charge.getRestartFrequency());
+        Assertions.assertEquals(PeriodFrequencyType.MONTHS.getValue(), charge.getRestartFrequencyEnum());
+
+        verifyDeletion(chargeId);
+    }
+
+    @Test
+    public void testFreeWithdrawalsWithoutFrequenciesAreRejected() {
+        Assertions.assertEquals(400,
+                chargesHelper
+                        .createChargeExpectingError(SavingsRequestBuilders.savingsWithdrawalFeeCharge().enableFreeWithdrawalCharge(true))
+                        .getStatus());
     }
 
     private static List<Long> accountIds(List<GLAccountData> accounts) {
@@ -140,10 +165,10 @@ public class ChargesTest extends FeignIntegrationTest {
         Assertions.assertNotNull(overdueFeeChargeId);
         verifyLoanChargeModifications(overdueFeeChargeId);
 
-        PutChargesChargeIdRequest changes = chargesHelper.updateCharge(overdueFeeChargeId,
-                new ChargeRequest().locale(LOCALE).feeFrequency(FEE_FREQUENCY_YEARS).feeInterval(FEE_INTERVAL)).getChanges();
-        GetChargesResponse chargeDataAfterChanges = chargesHelper.getCharge(overdueFeeChargeId);
-        Assertions.assertEquals(chargeDataAfterChanges.getFeeFrequency().getId(), Long.valueOf(changes.getFeeFrequency()),
+        Map<String, Object> changes = chargesHelper.updateCharge(overdueFeeChargeId,
+                new ChargeUpdateRequest().locale(LOCALE).feeFrequency(FEE_FREQUENCY_YEARS).feeInterval(FEE_INTERVAL)).getChanges();
+        ChargeData chargeDataAfterChanges = chargesHelper.getCharge(overdueFeeChargeId);
+        Assertions.assertEquals(chargeDataAfterChanges.getFeeFrequency().getId(), longChange(changes, "feeFrequency"),
                 "Verifying Charge after Modification");
 
         verifyDeletion(overdueFeeChargeId);
@@ -154,7 +179,7 @@ public class ChargesTest extends FeignIntegrationTest {
         final Long chargeId = chargesHelper.createLoanSpecifiedDueDateCharge(CHARGE_AMOUNT).getResourceId();
         Assertions.assertNotNull(chargeId);
         Assertions.assertTrue(chargesHelper.getCharge(chargeId).getActive(), "Charge must be active after creation.");
-        chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE).active(false));
+        chargesHelper.updateCharge(chargeId, new ChargeUpdateRequest().locale(LOCALE).active(false));
         Assertions.assertFalse(chargesHelper.getCharge(chargeId).getActive(), "Charge must be inactive after update.");
         verifyDeletion(chargeId);
     }
@@ -181,12 +206,12 @@ public class ChargesTest extends FeignIntegrationTest {
         Assertions.assertNotNull(withdrawalFeeChargeId);
 
         // Updating Charge-Calculation-Type to Withdrawal-Fee
-        PutChargesChargeIdRequest changes = chargesHelper
+        Map<String, Object> changes = chargesHelper
                 .updateCharge(withdrawalFeeChargeId,
-                        new ChargeRequest().locale(LOCALE).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue()))
+                        new ChargeUpdateRequest().locale(LOCALE).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue()))
                 .getChanges();
-        GetChargesResponse chargeDataAfterChanges = chargesHelper.getCharge(withdrawalFeeChargeId);
-        Assertions.assertEquals(chargeDataAfterChanges.getChargeCalculationType().getId(), changes.getChargeCalculationType().longValue(),
+        ChargeData chargeDataAfterChanges = chargesHelper.getCharge(withdrawalFeeChargeId);
+        Assertions.assertEquals(chargeDataAfterChanges.getChargeCalculationType().getId(), longChange(changes, "chargeCalculationType"),
                 "Verifying Charge after Modification");
         verifyDeletion(withdrawalFeeChargeId);
 
@@ -215,17 +240,17 @@ public class ChargesTest extends FeignIntegrationTest {
         final BigDecimal minCapVal = BigDecimal.valueOf(23);
         final BigDecimal maxCapVal = BigDecimal.valueOf(45);
 
-        final PostChargesResponse feeCharge = chargesHelper.createCharge(
-                new ChargeRequest().penalty(false).amount(9.0).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
-                        .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
-                        .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .chargeAppliesTo(1).locale("en").active(true).minCap(minCapVal).maxCap(maxCapVal));
+        final ChargeCreateResponse feeCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(false).amount(9.0)
+                .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true).minCap(minCapVal).maxCap(maxCapVal));
 
         Assertions.assertNotNull(feeCharge);
         final Long chargeId = feeCharge.getResourceId();
         Assertions.assertNotNull(chargeId);
 
-        final GetChargesResponse chargeResponseData = chargesHelper.getCharge(chargeId);
+        final ChargeData chargeResponseData = chargesHelper.getCharge(chargeId);
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertEquals(minCapVal.stripTrailingZeros(), chargeResponseData.getMinCap().stripTrailingZeros());
         Assertions.assertEquals(maxCapVal.stripTrailingZeros(), chargeResponseData.getMaxCap().stripTrailingZeros());
@@ -248,17 +273,17 @@ public class ChargesTest extends FeignIntegrationTest {
         final PostTaxesGroupResponse taxGroupResponse = taxGroupHelper.createTaxGroup(taxGroupRequest);
         Assertions.assertNotNull(taxGroupResponse);
 
-        final PostChargesResponse feeCharge = chargesHelper.createCharge(
-                new ChargeRequest().penalty(false).amount(9.0).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
-                        .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
-                        .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .chargeAppliesTo(1).locale("en").active(true).taxGroupId(taxGroupResponse.getResourceId()));
+        final ChargeCreateResponse feeCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(false).amount(9.0)
+                .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true).taxGroupId(taxGroupResponse.getResourceId()));
 
         Assertions.assertNotNull(feeCharge);
         final Long chargeId = feeCharge.getResourceId();
         Assertions.assertNotNull(chargeId);
 
-        final GetChargesResponse chargeResponseData = chargesHelper.getCharge(chargeId);
+        final ChargeData chargeResponseData = chargesHelper.getCharge(chargeId);
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertNotNull(chargeResponseData.getTaxGroup());
         Assertions.assertEquals(chargeResponseData.getTaxGroup().getId(), taxGroupResponse.getResourceId());
@@ -267,12 +292,12 @@ public class ChargesTest extends FeignIntegrationTest {
     private void verifyLoanChargeModifications(Long chargeId) {
         verifyAmountModification(chargeId);
 
-        PutChargesChargeIdRequest changes = chargesHelper.updateCharge(chargeId, percentageUpdate(ChargeCalculationType.PERCENT_OF_AMOUNT))
+        Map<String, Object> changes = chargesHelper.updateCharge(chargeId, percentageUpdate(ChargeCalculationType.PERCENT_OF_AMOUNT))
                 .getChanges();
-        GetChargesResponse chargeDataAfterChanges = chargesHelper.getCharge(chargeId);
-        Assertions.assertEquals(chargeDataAfterChanges.getChargePaymentMode().getId(), changes.getChargePaymentMode().longValue(),
+        ChargeData chargeDataAfterChanges = chargesHelper.getCharge(chargeId);
+        Assertions.assertEquals(chargeDataAfterChanges.getChargePaymentMode().getId(), longChange(changes, "chargePaymentMode"),
                 "Verifying Charge after Modification");
-        Assertions.assertEquals(chargeDataAfterChanges.getChargeCalculationType().getId(), changes.getChargeCalculationType().longValue(),
+        Assertions.assertEquals(chargeDataAfterChanges.getChargeCalculationType().getId(), longChange(changes, "chargeCalculationType"),
                 "Verifying Charge after Modification");
 
         verifyCalculationTypeModification(chargeId, ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST);
@@ -280,17 +305,18 @@ public class ChargesTest extends FeignIntegrationTest {
     }
 
     private void verifyCalculationTypeModification(Long chargeId, ChargeCalculationType chargeCalculationType) {
-        PutChargesChargeIdRequest changes = chargesHelper.updateCharge(chargeId, percentageUpdate(chargeCalculationType)).getChanges();
-        GetChargesResponse chargeDataAfterChanges = chargesHelper.getCharge(chargeId);
-        Assertions.assertEquals(chargeDataAfterChanges.getChargeCalculationType().getId(), changes.getChargeCalculationType().longValue(),
+        Map<String, Object> changes = chargesHelper.updateCharge(chargeId, percentageUpdate(chargeCalculationType)).getChanges();
+        ChargeData chargeDataAfterChanges = chargesHelper.getCharge(chargeId);
+        Assertions.assertEquals(chargeDataAfterChanges.getChargeCalculationType().getId(), longChange(changes, "chargeCalculationType"),
                 "Verifying Charge after Modification");
     }
 
     private void verifyAmountModification(Long chargeId) {
-        PutChargesChargeIdRequest changes = chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE).amount(MODIFIED_AMOUNT))
+        Map<String, Object> changes = chargesHelper.updateCharge(chargeId, new ChargeUpdateRequest().locale(LOCALE).amount(MODIFIED_AMOUNT))
                 .getChanges();
-        GetChargesResponse chargeDataAfterChanges = chargesHelper.getCharge(chargeId);
-        Assertions.assertEquals(chargeDataAfterChanges.getAmount(), changes.getAmount(), "Verifying Charge after Modification");
+        ChargeData chargeDataAfterChanges = chargesHelper.getCharge(chargeId);
+        Assertions.assertEquals(0, chargeDataAfterChanges.getAmount().compareTo(new BigDecimal(String.valueOf(changes.get("amount")))),
+                "Verifying Charge after Modification");
     }
 
     private void verifyDeletion(Long chargeId) {
@@ -298,8 +324,12 @@ public class ChargesTest extends FeignIntegrationTest {
         Assertions.assertEquals(chargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
     }
 
-    private static ChargeRequest percentageUpdate(ChargeCalculationType chargeCalculationType) {
-        return new ChargeRequest().locale(LOCALE).chargeCalculationType(chargeCalculationType.getValue())
+    private static Long longChange(Map<String, Object> changes, String parameterName) {
+        return ((Number) changes.get(parameterName)).longValue();
+    }
+
+    private static ChargeUpdateRequest percentageUpdate(ChargeCalculationType chargeCalculationType) {
+        return new ChargeUpdateRequest().locale(LOCALE).chargeCalculationType(chargeCalculationType.getValue())
                 .chargePaymentMode(ChargePaymentMode.ACCOUNT_TRANSFER.getValue());
     }
 }

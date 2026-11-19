@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.FundRequest;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
@@ -101,7 +101,7 @@ public class LoanImportHandlerTest {
         collateralHashMap.put("quantity", "1");
         collaterals.add(collateralHashMap);
 
-        final ChargeRequest disbursementCharge = ChargeRequestBuilders.loanDisbursementFee(DISBURSEMENT_CHARGE_AMOUNT);
+        final ChargeCreateRequest disbursementCharge = ChargeRequestBuilders.loanDisbursementFee(DISBURSEMENT_CHARGE_AMOUNT);
 
         final Long disbursementChargeId = new FeignChargesHelper(fineractClient).createCharge(disbursementCharge).getResourceId();
 
