@@ -81,6 +81,8 @@ import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransacti
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetWorkingCapitalLoanTransactionByLoanIdAndExternalTransactionIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.LoanStateTransistionsByExternalIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.MarkWorkingCapitalLoanAsFraudByExternalIdCommandStrategy;
+import org.apache.fineract.batch.command.internal.MarkWorkingCapitalLoanAsFraudCommandStrategy;
 import org.apache.fineract.batch.command.internal.ModifyLoanApplicationCommandStrategy;
 import org.apache.fineract.batch.command.internal.ModifyWorkingCapitalLoanApplicationByExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.ModifyWorkingCapitalLoanApplicationCommandStrategy;
@@ -359,6 +361,11 @@ public class CommandStrategyProviderTest {
                 Arguments.of("working-capital-loans/123/delinquency-range-schedule?fields=id", HttpMethod.GET,
                         "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy",
                         mock(GetWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy.class)),
+                Arguments.of("working-capital-loans/123/mark-as-fraud", HttpMethod.PUT, "markWorkingCapitalLoanAsFraudCommandStrategy",
+                        mock(MarkWorkingCapitalLoanAsFraudCommandStrategy.class)),
+                Arguments.of("working-capital-loans/external-id/8dfad438-2319-48ce-8520-10a62801e9a1/mark-as-fraud", HttpMethod.PUT,
+                        "markWorkingCapitalLoanAsFraudByExternalIdCommandStrategy",
+                        mock(MarkWorkingCapitalLoanAsFraudByExternalIdCommandStrategy.class)),
                 Arguments.of("working-capital-loans/123/breach-actions", HttpMethod.POST,
                         "createWorkingCapitalLoanBreachActionCommandStrategy",
                         mock(CreateWorkingCapitalLoanBreachActionCommandStrategy.class)),
