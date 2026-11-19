@@ -251,6 +251,8 @@ public final class LoanProductsApiResourceSwagger {
         public String buyDownFeeIncomeType;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
+        @Schema(example = "false")
+        public Boolean enableChargeAmortization;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -773,6 +775,8 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData buyDownFeeIncomeType;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
+        @Schema(example = "false")
+        public Boolean enableChargeAmortization;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1245,6 +1249,8 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData buyDownFeeStrategy;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
+        @Schema(example = "false")
+        public Boolean enableChargeAmortization;
         @Schema(example = "FEE")
         public StringEnumOptionData buyDownFeeIncomeType;
         public List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
@@ -1619,6 +1625,8 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData buyDownFeeIncomeType;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
+        @Schema(example = "false")
+        public Boolean enableChargeAmortization;
         public List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
         public List<StringEnumOptionData> buyDownFeeStrategyOptions;
         public List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
@@ -1921,6 +1929,8 @@ public final class LoanProductsApiResourceSwagger {
         public String buyDownFeeIncomeType;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
+        @Schema(example = "false")
+        public Boolean enableChargeAmortization;
     }
 
     public static final class AdvancedPaymentData {

@@ -173,6 +173,10 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
                 validateLoanProductsSupportDownPaymentCharges(chargeId);
             }
 
+            if (chargeForUpdate.isAmortized()) {
+                validateLoanProductsSupportChargeAmortization(chargeId);
+            }
+
             // MIFOSX-900: Check if the Charge has been active before and now is deactivated:
             if (changes.containsKey(ACTIVE_PARAM_NAME)) {
                 // IF the key exists then it has changed (otherwise it would have been filtered), so check current
@@ -496,6 +500,15 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
         if (attachedToUnsupportedProduct) {
             throw new ChargeCannotBeUpdatedException("error.msg.charge.down.payment.requires.progressive.down.payment.loan.product",
                     "Charge cannot be changed to a down payment charge, it is attached to a loan product that is not progressive or has no down payment enabled.");
+        }
+    }
+
+    private void validateLoanProductsSupportChargeAmortization(final Long chargeId) {
+        final boolean attachedToUnsupportedProduct = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId).stream()
+                .anyMatch(product -> !product.getLoanProductRelatedDetail().isEnableChargeAmortization());
+        if (attachedToUnsupportedProduct) {
+            throw new ChargeCannotBeUpdatedException("error.msg.charge.amortization.requires.charge.amortization.loan.product",
+                    "Charge cannot be amortized, it is attached to a loan product that does not have charge amortization enabled.");
         }
     }
 

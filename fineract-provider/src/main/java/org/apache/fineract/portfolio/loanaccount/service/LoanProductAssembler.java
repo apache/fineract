@@ -349,14 +349,17 @@ public class LoanProductAssembler {
         final boolean merchantBuyDownFee = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME);
 
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, loanProductCreditAllocationRules,
-                name, shortName, description, currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
-                minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod,
-                interestCalculationPeriodMethod, allowPartialPeriodInterestCalculation, repaymentEvery, repaymentFrequencyType,
-                firstRepaymentDayOfMonth, secondRepaymentDayOfMonth, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments,
-                graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
-                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate,
-                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
+        final boolean enableChargeAmortization = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME);
+
+        final LoanProduct loanProduct = new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules,
+                loanProductCreditAllocationRules, name, shortName, description, currency, principal, minPrincipal, maxPrincipal,
+                interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
+                interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalculation, repaymentEvery,
+                repaymentFrequencyType, firstRepaymentDayOfMonth, secondRepaymentDayOfMonth, numberOfRepayments, minNumberOfRepayments,
+                maxNumberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
+                graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
+                startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
                 holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
@@ -373,6 +376,8 @@ public class LoanProductAssembler {
                 enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType,
                 enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee,
                 allowFullTermForTranche, monthEndDueDateStrategy);
+        loanProduct.getLoanProductRelatedDetail().setEnableChargeAmortization(enableChargeAmortization);
+        return loanProduct;
     }
 
     private void populateBorrowerCycleVariations(final JsonCommand command,

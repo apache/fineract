@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingHelper;
@@ -50,7 +51,10 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
+import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationIncomeType;
 import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -219,7 +223,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME,
             LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME,
             LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(),
-            LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME,
+            LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME,
             LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue(), //
             LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue(), //
             LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME //
@@ -939,6 +943,8 @@ public final class LoanProductDataValidator {
         validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
 
         validateBuyDownFee(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
+
+        validateChargeAmortization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType, null);
 
         validateMonthEndDueDateStrategy(element, baseDataValidator);
 
@@ -2082,6 +2088,8 @@ public final class LoanProductDataValidator {
 
         validateBuyDownFee(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
 
+        validateChargeAmortization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType, loanProduct);
+
         validateMonthEndDueDateStrategy(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -2909,6 +2917,92 @@ public final class LoanProductDataValidator {
                         .value(graceOnPrincipal).value(recurMoratoriumOnPrincipal)
                         .failWithCode("causes.principal.moratorium.for.last.installment");
             }
+        }
+    }
+
+    /**
+     * Validates the {@code enableChargeAmortization} flag of a create or update request. On update, values that are not
+     * in the request are taken from the loan product.
+     */
+    private void validateChargeAmortization(final String transactionProcessingStrategyCode, final JsonElement element,
+            final DataValidatorBuilder baseDataValidator, final Integer accountingRuleType, final LoanProduct loanProduct) {
+        final String paramName = LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME;
+        boolean enableChargeAmortization = loanProduct != null && loanProduct.getLoanProductRelatedDetail().isEnableChargeAmortization();
+        if (this.fromApiJsonHelper.parameterExists(paramName, element)) {
+            final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(paramName, element);
+            baseDataValidator.reset().parameter(paramName).value(value).ignoreIfNull().validateForBooleanValue();
+            enableChargeAmortization = Boolean.TRUE.equals(value);
+        }
+        if (!enableChargeAmortization) {
+            return;
+        }
+
+        if (!AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)) {
+            baseDataValidator.reset().parameter(paramName).failWithCodeAndMessage("supported.only.for.progressive.loan.charge.amortization",
+                    "Charge amortization is only supported for Progressive loans");
+        }
+
+        Integer effectiveAccountingRuleType = accountingRuleType;
+        if (effectiveAccountingRuleType == null && loanProduct != null && loanProduct.getAccountingRule() != null) {
+            effectiveAccountingRuleType = loanProduct.getAccountingRule().getValue();
+        }
+        if (AccountingValidations.isCashBasedAccounting(effectiveAccountingRuleType)) {
+            baseDataValidator.reset().parameter(paramName).failWithCodeAndMessage("not.supported.for.cash.based.accounting",
+                    "Charge amortization is not supported with cash based accounting");
+        }
+
+        // Accounting: on update the mapping may already be stored, which validateChargeAmortization(LoanProduct) checks
+        if (loanProduct == null && AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
+            final Long deferredIncomeLiabilityAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(), element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue())
+                    .value(deferredIncomeLiabilityAccountId).notNull()
+                    .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME, true)
+                    .integerGreaterThanZero();
+        }
+    }
+
+    /**
+     * Validates the charge amortization rules that depend on the stored state of a created or updated loan product:
+     * amortized charges can be attached only when charge amortization is enabled, and with accrual accounting the GL
+     * accounts that the amortization posts to must be mapped.
+     */
+    public void validateChargeAmortization(final LoanProduct loanProduct) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LOANPRODUCT);
+
+        final List<Charge> amortizedCharges = loanProduct.getCharges() == null ? List.of()
+                : loanProduct.getCharges().stream().filter(Charge::isAmortized).toList();
+
+        if (!loanProduct.getLoanProductRelatedDetail().isEnableChargeAmortization()) {
+            if (!amortizedCharges.isEmpty()) {
+                final List<Long> chargeIds = amortizedCharges.stream().map(Charge::getId).toList();
+                baseDataValidator.reset().parameter("charges").value(chargeIds).failWithCodeAndMessage("charge.amortization.not.enabled",
+                        "Amortized charges " + chargeIds + " can be attached only to a loan product with charge amortization enabled");
+            }
+        } else if (loanProduct.getAccountingRule() != null
+                && AccountingValidations.isAccrualBasedAccounting(loanProduct.getAccountingRule().getValue())) {
+            validateChargeAmortizationAccountMapping(baseDataValidator, loanProduct, LoanProductAccountingParams.FEES_RECEIVABLE,
+                    AccrualAccountsForLoan.FEES_RECEIVABLE);
+            validateChargeAmortizationAccountMapping(baseDataValidator, loanProduct, LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY,
+                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY);
+            validateChargeAmortizationAccountMapping(baseDataValidator, loanProduct, LoanProductAccountingParams.INCOME_FROM_FEES,
+                    AccrualAccountsForLoan.INCOME_FROM_FEES);
+            if (amortizedCharges.stream().anyMatch(charge -> ChargeAmortizationIncomeType.INTEREST == charge.getAmortizationIncomeType())) {
+                validateChargeAmortizationAccountMapping(baseDataValidator, loanProduct, LoanProductAccountingParams.INTEREST_ON_LOANS,
+                        AccrualAccountsForLoan.INTEREST_ON_LOANS);
+            }
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateChargeAmortizationAccountMapping(final DataValidatorBuilder baseDataValidator, final LoanProduct loanProduct,
+            final LoanProductAccountingParams param, final AccrualAccountsForLoan accountType) {
+        if (!productToGLAccountMappingHelper.hasCoreProductToAccountMapping(loanProduct.getId(), PortfolioProductType.LOAN,
+                accountType.getValue())) {
+            baseDataValidator.reset().parameter(param.getValue()).failWithCodeAndMessage("required.when.charge.amortization.enabled",
+                    "The " + param.getValue() + " mapping is required when charge amortization is enabled with accrual accounting");
         }
     }
 

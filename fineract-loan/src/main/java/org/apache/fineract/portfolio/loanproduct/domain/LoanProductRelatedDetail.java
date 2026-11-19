@@ -224,6 +224,9 @@ public class LoanProductRelatedDetail {
     @Column(name = "is_merchant_buy_down_fee")
     private boolean merchantBuyDownFee = true;
 
+    @Column(name = "enable_charge_amortization", nullable = false)
+    private boolean enableChargeAmortization = false;
+
     @Column(name = "installment_amount_in_multiples_of")
     private Integer installmentAmountInMultiplesOf;
 

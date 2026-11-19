@@ -68,6 +68,12 @@ public class ProductToGLAccountMappingHelper {
     private final PaymentTypeRepository paymentTypeRepository;
     private final CodeValueRepository codeValueRepository;
 
+    public boolean hasCoreProductToAccountMapping(final Long productId, final PortfolioProductType portfolioProductType,
+            final int financialAccountType) {
+        return this.accountMappingRepository.findCoreProductToFinAccountMapping(productId, portfolioProductType.getValue(),
+                financialAccountType) != null;
+    }
+
     public void saveProductToAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId, final GLAccountType expectedAccountType, final PortfolioProductType portfolioProductType) {
         final Long accountId = this.fromApiJsonHelper.extractLongNamed(paramName, element);

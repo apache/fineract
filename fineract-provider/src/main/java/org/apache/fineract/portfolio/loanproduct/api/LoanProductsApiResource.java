@@ -152,7 +152,8 @@ public class LoanProductsApiResource {
             LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME,
             LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME,
-            LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME));
+            LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME,
+            LoanProductConstants.ENABLE_CHARGE_AMORTIZATION_PARAM_NAME));
 
     private static final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
