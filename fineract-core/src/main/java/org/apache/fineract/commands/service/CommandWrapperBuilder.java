@@ -187,7 +187,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FAMILYMEMBERS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FINANCIALACTIVITYACCOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITACCOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITPRODUCT;
@@ -362,22 +361,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_CREDITBUREAU_CONFIGURATION;
         this.entityId = configurationId;
         this.href = "/updateCreditBureauConfigurationData/";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateFamilyMembers(final long familyMemberId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_FAMILYMEMBERS;
-        this.href = "/clients/" + clientId + "/familymembers";
-        this.entityId = familyMemberId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteFamilyMembers(final long familyMemberId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_FAMILYMEMBERS;
-        this.href = "/clients/" + clientId + "/familymembers";
-        this.entityId = familyMemberId;
         return this;
     }
 
