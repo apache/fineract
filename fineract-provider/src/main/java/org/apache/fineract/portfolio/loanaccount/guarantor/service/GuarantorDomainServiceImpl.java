@@ -70,6 +70,7 @@ import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransact
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSummaryWrapper;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.springframework.stereotype.Service;
 
@@ -333,8 +334,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                                     transactions.add(transaction);
                                 }
                             }
-                            this.savingsAccountAssembler.setHelpers(savingsAccount);
-                            savingsAccount.updateSavingsAccountSummary(transactions);
+                            savingsAccount.updateSavingsAccountSummary(SavingsAccountTransactionSummaryWrapper
+                                    .calculateSummaryTotals(savingsAccount.getCurrency(), transactions));
                         }
                         savingsAccount.holdFunds(guarantorFundingDetails.getAmount());
                         totalGuarantee = totalGuarantee.add(guarantorFundingDetails.getAmount());
@@ -348,7 +349,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
                             insufficientBalanceIds.add(savingsAccount.getId());
                         }
-                        savingsAccount.updateSavingsAccountSummary(savingsAccount.getTransactions());
+                        savingsAccount.updateSavingsAccountSummary(SavingsAccountTransactionSummaryWrapper
+                                .calculateSummaryTotals(savingsAccount.getCurrency(), savingsAccount.getTransactions()));
                     }
                 }
             }

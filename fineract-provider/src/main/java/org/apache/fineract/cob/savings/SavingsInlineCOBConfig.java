@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterReposito
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.Job;
@@ -57,8 +56,6 @@ public class SavingsInlineCOBConfig {
     private PropertyService propertyService;
     @Autowired
     private SavingsAccountRepository savingsAccountRepository;
-    @Autowired
-    private SavingsAccountAssembler savingsAccountAssembler;
     @Autowired
     private COBBusinessStepService cobBusinessStepService;
     @Autowired
@@ -111,8 +108,7 @@ public class SavingsInlineCOBConfig {
     @JobScope
     @Bean
     public InlineCOBSavingsItemWriter inlineCobSavingsItemWriter() {
-        return new InlineCOBSavingsItemWriter(cobBusinessStepService, savingsLockingService, savingsAccountRepository,
-                savingsAccountAssembler);
+        return new InlineCOBSavingsItemWriter(cobBusinessStepService, savingsLockingService, savingsAccountRepository);
     }
 
     @Bean

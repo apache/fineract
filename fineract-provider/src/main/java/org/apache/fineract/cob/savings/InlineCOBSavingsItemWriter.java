@@ -21,15 +21,14 @@ package org.apache.fineract.cob.savings;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.springframework.batch.core.step.StepExecution;
 
 public class InlineCOBSavingsItemWriter extends AbstractSavingsItemWriter {
 
     public InlineCOBSavingsItemWriter(COBBusinessStepService cobBusinessStepService, LockingService savingsLockingService,
-            SavingsAccountRepository savingsAccountRepository, SavingsAccountAssembler savingsAccountAssembler) {
-        super(cobBusinessStepService, savingsLockingService, savingsAccountRepository, savingsAccountAssembler);
+            SavingsAccountRepository savingsAccountRepository) {
+        super(cobBusinessStepService, savingsLockingService, savingsAccountRepository);
     }
 
     @Override

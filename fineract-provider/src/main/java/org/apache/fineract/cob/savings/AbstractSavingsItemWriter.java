@@ -22,25 +22,13 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.writer.AbstractCOBItemWriter;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 
 public abstract class AbstractSavingsItemWriter extends AbstractCOBItemWriter<SavingsAccount> {
 
-    private final SavingsAccountAssembler savingsAccountAssembler;
-
     protected AbstractSavingsItemWriter(COBBusinessStepService cobBusinessStepService, LockingService savingsLockingService,
-            SavingsAccountRepository savingsAccountRepository, SavingsAccountAssembler savingsAccountAssembler) {
+            SavingsAccountRepository savingsAccountRepository) {
         super(cobBusinessStepService, savingsLockingService, savingsAccountRepository);
-        this.savingsAccountAssembler = savingsAccountAssembler;
-    }
-
-    @Override
-    protected SavingsAccount beforeBusinessSteps(SavingsAccount savingsAccount) {
-        // Populate the transient helpers (e.g. SavingsHelper) which are not part of the persisted entity and are
-        // required by interest posting and other business steps.
-        savingsAccountAssembler.setHelpers(savingsAccount);
-        return savingsAccount;
     }
 
     @Override
