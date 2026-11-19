@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
@@ -244,7 +245,7 @@ public class LoanBalanceService {
     public Money getReceivableInterest(final Loan loan, final LocalDate tillDate, final LoanTransaction excludedTransaction) {
         Money receivableInterest = Money.zero(loan.getCurrency());
         for (final LoanTransaction transaction : loan.getLoanTransactions()) {
-            if (transaction != excludedTransaction && transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement()
+            if (!Objects.equals(transaction, excludedTransaction) && transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement()
                     && !transaction.isDisbursement() && !DateUtils.isAfter(transaction.getTransactionDate(), tillDate)) {
                 if (transaction.isAccrual()) {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(loan.getCurrency()));
