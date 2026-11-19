@@ -134,6 +134,7 @@ import org.springframework.util.CollectionUtils;
 public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long> implements IDepositAccountType {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
+    private static final SavingsAccountLockPeriodCalculator LOCK_PERIOD_CALCULATOR = new SavingsAccountLockPeriodCalculator();
 
     @Version
     int version;
@@ -2613,22 +2614,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     }
 
     private LocalDate calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
-
-        LocalDate lockedInUntilLocalDate = null;
-        final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
-        switch (lockinPeriodFrequencyType) {
-            case INVALID, SEMI_MONTHLY -> {
-                // SEMI_MONTHLY is a loan repayment frequency and is never offered as a savings lock-in period, so it
-                // leaves the account unlocked just like an unset frequency does.
-            }
-            case DAYS -> lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency);
-            case WEEKS -> lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency);
-            case MONTHS -> lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency);
-            case YEARS -> lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency);
-            case WHOLE_TERM -> LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
-        }
-
-        return lockedInUntilLocalDate;
+        return LOCK_PERIOD_CALCULATOR.calculateDateAccountIsLockedUntil(activationLocalDate, this.lockinPeriodFrequency,
+                PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType));
     }
 
     public Group group() {
