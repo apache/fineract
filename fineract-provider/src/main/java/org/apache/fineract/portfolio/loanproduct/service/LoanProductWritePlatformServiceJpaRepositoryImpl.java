@@ -155,6 +155,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanProduct.getId(), command);
+            this.fromApiJsonDeserializer.validateChargeAmortization(loanProduct);
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
@@ -296,13 +297,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             if (changes.containsKey(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME)) {
                 enableBuyDownFee = (boolean) changes.get(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME);
             }
+            final boolean enableChargeAmortization = product.getLoanProductRelatedDetail().isEnableChargeAmortization();
 
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey("accountingRule");
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
                     .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingRule(),
-                            enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee);
+                            enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee, enableChargeAmortization);
             changes.putAll(accountingMappingChanges);
+            this.fromApiJsonDeserializer.validateChargeAmortization(product);
 
             if (changes.containsKey(LoanProductConstants.RATES_PARAM_NAME)) {
                 final List<Rate> productRates = assembleListOfProductRates(command);

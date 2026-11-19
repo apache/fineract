@@ -2019,6 +2019,14 @@ public class LoanProductsRequestFactory {
                 .paymentAllocation(createDefaultPaymentAllocation());//
     }
 
+    /**
+     * LP2 EMI with accrual accounting and the default advanced payment allocation
+     */
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiAdvancedPaymentAllocation() {
+        return defaultLoanProductsRequestLP2Emi()//
+                .paymentAllocation(createDefaultPaymentAllocation());
+    }
+
     public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiWithCreditAllocation(final List<CreditAllocationData> creditAllocation) {
         return defaultLoanProductsRequestLP2Emi()//
                 .daysInYearType(DaysInYearType.DAYS360.value)//

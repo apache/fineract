@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.group;
 
-import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,23 +27,22 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.command.core.CommandDispatcher;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.GroupConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.CollectionMeetingRequestFactory;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.calendar.command.CalendarCreateCommand;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
@@ -249,33 +247,13 @@ public class GroupImportHandler implements ImportHandler {
     private Integer importGroupMeeting(final List<CalendarData> meetings, CommandProcessingResult result, int rowIndex, String dateFormat) {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("group_" + result.getGroupId().toString() + "_CollectionMeeting");
-        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, meetings.get(rowIndex).getLocale()));
-        gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataValueSerializer());
 
-        String payload;
-        CalendarData modifiedCalendarData;
-        if (calendarData.isRepeating() == false) {
-            modifiedCalendarData = new CalendarData(calendarData.getTitle(), calendarData.getDescription(), calendarData.getStartDate(),
-                    calendarData.isRepeating(), null, calendarData.getInterval(), calendarData.getRepeatsOnDay(),
-                    calendarData.getDateFormat(), calendarData.getLocale(), calendarData.getTypeId());
+        final var request = CollectionMeetingRequestFactory.build(calendarData, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE,
+                result.getGroupId(), calendarData.getTitle(), dateFormat);
 
-        } else {
-            modifiedCalendarData = new CalendarData(calendarData.getTitle(), calendarData.getDescription(), calendarData.getStartDate(),
-                    calendarData.isRepeating(), calendarData.getFrequency(), calendarData.getInterval(), calendarData.getRepeatsOnDay(),
-                    calendarData.getDateFormat(), calendarData.getLocale(), calendarData.getTypeId());
-
-        }
-        payload = gsonBuilder.create().toJson(modifiedCalendarData);
-
-        CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
-                result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create(), null, null);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
-                .withJson(payload) //
-                .build(); //
-        commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final var command = new CalendarCreateCommand();
+        command.setPayload(request);
+        dispatcher.<CalendarCreateRequest, CalendarCreateResponse>dispatch(command).get();
         return 2;
     }
 

@@ -396,7 +396,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Transactional
     public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
             final boolean accountingRuleChanged, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
-            final boolean enableBuyDownFee, final boolean merchantBuyDownFee) {
+            final boolean enableBuyDownFee, final boolean merchantBuyDownFee, final boolean enableChargeAmortization) {
         // Variable tracks all accounting mapping properties that have been updated
         Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
@@ -412,7 +412,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         } // else examine and update individual changes
         else {
             this.loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
-                    accountingRuleType, enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee);
+                    accountingRuleType, enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee, enableChargeAmortization);
             this.loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateChargeOffReasonToExpenseAccountMappings(command, element, loanProductId,

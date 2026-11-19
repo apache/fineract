@@ -136,6 +136,16 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return createRepeatingCalendar(title, startDate, typeId, recurrence);
     }
 
+    public static Calendar createRepeatingCalendar(final String title, final String description, final String location,
+            final LocalDate startDate, final LocalDate endDate, final Integer duration, final Integer typeId,
+            final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,
+            final Integer repeatsOnNthDayOfMonth, final Integer remindById, final Integer firstReminder, final Integer secondReminder,
+            final LocalTime meetingtime) {
+        final String recurrence = constructRecurrence(frequencyType, interval, repeatsOnDay, repeatsOnNthDayOfMonth);
+        return new Calendar(title, description, location, startDate, endDate, duration, typeId, true, recurrence, remindById, firstReminder,
+                secondReminder, meetingtime);
+    }
+
     public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
             final String recurrence) {
         final String description = null;

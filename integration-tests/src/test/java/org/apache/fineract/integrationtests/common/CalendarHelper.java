@@ -21,7 +21,8 @@ package org.apache.fineract.integrationtests.common;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.fineract.client.models.CalendarRequest;
+import org.apache.fineract.client.models.CalendarCreateRequest;
+import org.apache.fineract.client.models.CalendarCreateResponse;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public final class CalendarHelper {
 
     private CalendarHelper() {}
 
-    public static CommandProcessingResult createMeetingCalendarForGroup(final Long groupId, final String startDate, final String frequency,
+    public static CalendarCreateResponse createMeetingCalendarForGroup(final Long groupId, final String startDate, final String frequency,
             final String interval, final String repeatsOnDay) {
         LOG.info("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().calendar().createCalendar("groups", groupId,
@@ -46,7 +47,7 @@ public final class CalendarHelper {
                 Long.parseLong(calendarID), buildCalendarJson(frequency, interval, repeatsOnDay, startDate)));
     }
 
-    public static CommandProcessingResult createMeetingForGroup(final Long groupId, final String startDate, final String frequency,
+    public static CalendarCreateResponse createMeetingForGroup(final Long groupId, final String startDate, final String frequency,
             final String interval, final String repeatsOnDay) {
         LOG.info("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().calendar().createCalendar("centers", groupId,
@@ -60,10 +61,10 @@ public final class CalendarHelper {
                 Long.parseLong(calendarID), buildRescheduleMeetingJson(oldDate, startDate)));
     }
 
-    public static CommandProcessingResult createNonRepeatingCalendarForGroup(final Long groupId, final String startDate) {
+    public static CalendarCreateResponse createNonRepeatingCalendarForGroup(final Long groupId, final String startDate) {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().calendar().createCalendar("groups", groupId,
-                new CalendarRequest().dateFormat("dd MMMM yyyy").locale("en").repeating("false")
-                        .title(Utils.randomStringGenerator("groups_General", 4)).typeId("4").startDate(startDate)));
+                new CalendarCreateRequest().dateFormat("dd MMMM yyyy").locale("en").repeating(false)
+                        .title(Utils.randomStringGenerator("groups_General", 4)).typeId(4).startDate(startDate)));
     }
 
     public static CommandProcessingResult updateCalendarTitleForGroup(final Long groupId, final Long calendarId, final String title) {
@@ -78,11 +79,11 @@ public final class CalendarHelper {
         assertEquals(generatedCalendarId, id, "ERROR IN CREATING THE CALENDAR");
     }
 
-    private static CalendarRequest buildCalendarRequest(final String frequency, final String interval, final String repeatsOnDay,
+    private static CalendarCreateRequest buildCalendarRequest(final String frequency, final String interval, final String repeatsOnDay,
             final String startDate) {
-        return new CalendarRequest().dateFormat("dd MMMM yyyy").locale("en").frequency(frequency).interval(interval).repeating("true")
-                .repeatsOnDay(repeatsOnDay).title(Utils.randomStringGenerator("groups_CollectionMeeting", 4)).typeId("1")
-                .startDate(startDate);
+        return new CalendarCreateRequest().dateFormat("dd MMMM yyyy").locale("en").frequency(Integer.parseInt(frequency))
+                .interval(Integer.parseInt(interval)).repeating(true).repeatsOnDay(Integer.parseInt(repeatsOnDay))
+                .title(Utils.randomStringGenerator("groups_CollectionMeeting", 4)).typeId(1).startDate(startDate);
     }
 
     private static String buildCalendarJson(final String frequency, final String interval, final String repeatsOnDay,

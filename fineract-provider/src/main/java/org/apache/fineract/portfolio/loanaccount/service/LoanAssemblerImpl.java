@@ -232,6 +232,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final LoanProductRelatedDetail loanProductRelatedDetail = this.loanScheduleAssembler
                 .assembleLoanProductRelatedDetail(loanApplicationTerms, element);
+        loanProductRelatedDetail.setEnableChargeAmortization(loanProduct.getLoanProductRelatedDetail().isEnableChargeAmortization());
 
         final BigDecimal interestRateDifferential = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRateDifferentialParameterName, element);

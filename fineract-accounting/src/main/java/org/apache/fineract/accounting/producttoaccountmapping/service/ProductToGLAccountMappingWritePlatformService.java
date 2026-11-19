@@ -31,7 +31,7 @@ public interface ProductToGLAccountMappingWritePlatformService {
 
     Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged,
             AccountingRuleType accountingRuleTypeId, boolean enableIncomeCapitalization, boolean enableBuyDownFee,
-            boolean merchantBuyDownFee);
+            boolean merchantBuyDownFee, boolean enableChargeAmortization);
 
     Map<String, Object> updateSavingsProductToGLAccountMapping(Long savingsProductId, JsonCommand command, boolean accountingRuleChanged,
             int accountingRuleTypeId, DepositAccountType accountType);

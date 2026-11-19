@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ChargeAmortizationStepDef extends AbstractStepDef {
 
-    private static final String CHARGE_ID = "chargeAmortizationChargeId";
+    static final String CHARGE_ID = "chargeAmortizationChargeId";
     private static final String CURRENCY_CODE = "EUR";
     private static final String LOCALE_EN = "en";
     private static final String PERIOD_TYPE = "amortizationPeriodType";
