@@ -37,12 +37,12 @@ import org.springframework.jdbc.core.RowMapper;
 
 public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccountReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    protected final JdbcTemplate jdbcTemplate;
 
     // mapper
-    private final PortfolioSavingsAccountMapper savingsAccountMapper;
-    private final PortfolioLoanAccountMapper loanAccountMapper;
-    private final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
+    protected final PortfolioSavingsAccountMapper savingsAccountMapper;
+    protected final PortfolioLoanAccountMapper loanAccountMapper;
+    protected final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
 
     public PortfolioAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.jdbcTemplate = jdbcTemplate;

@@ -45,9 +45,9 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 @RequiredArgsConstructor
 public class InterestRateChartAssembler {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private final InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper;
-    private final InterestRateChartSlabAssembler chartSlabAssembler;
+    protected final FromJsonHelper fromApiJsonHelper;
+    protected final InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper;
+    protected final InterestRateChartSlabAssembler chartSlabAssembler;
 
     /**
      * Assembles a new {@link InterestRateChart} from JSON Slabs passed in request

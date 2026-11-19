@@ -37,9 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final SQLQueryFactory queryFactory;
-    private final CurrencyRowMapper currencyRowMapper = new CurrencyRowMapper();
+    protected final JdbcTemplate jdbcTemplate;
+    protected final SQLQueryFactory queryFactory;
+    protected final CurrencyRowMapper currencyRowMapper = new CurrencyRowMapper();
 
     @Override
     public List<CurrencyData> retrieveAllowedCurrencies() {

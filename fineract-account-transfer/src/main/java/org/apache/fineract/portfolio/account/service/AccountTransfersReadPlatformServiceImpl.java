@@ -53,17 +53,17 @@ import org.springframework.util.CollectionUtils;
 public class AccountTransfersReadPlatformServiceImpl implements AccountTransfersReadPlatformService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final JdbcTemplate jdbcTemplate;
-    private final ClientReadPlatformService clientReadPlatformService;
-    private final OfficeReadPlatformService officeReadPlatformService;
-    private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
-    private final ColumnValidator columnValidator;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    protected final JdbcTemplate jdbcTemplate;
+    protected final ClientReadPlatformService clientReadPlatformService;
+    protected final OfficeReadPlatformService officeReadPlatformService;
+    protected final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
+    protected final ColumnValidator columnValidator;
+    protected final DatabaseSpecificSQLGenerator sqlGenerator;
     // mapper
-    private final AccountTransfersMapper accountTransfersMapper;
+    protected final AccountTransfersMapper accountTransfersMapper;
     // pagination
-    private final PaginationHelper paginationHelper;
-    private final SqlValidator sqlValidator;
+    protected final PaginationHelper paginationHelper;
+    protected final SqlValidator sqlValidator;
 
     @Override
     public AccountTransferData retrieveTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,

@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 @RequiredArgsConstructor
 public class SavingsAccountPostInterestServiceImpl implements SavingsAccountPostInterestService {
 
-    private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
+    protected final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
 
     @Override
     public void postInterest(final SavingsAccount account, final MathContext mc, final LocalDate postingDate,

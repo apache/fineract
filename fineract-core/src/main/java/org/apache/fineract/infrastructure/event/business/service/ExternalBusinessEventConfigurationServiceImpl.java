@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ExternalBusinessEventConfigurationServiceImpl implements ExternalBusinessEventConfigurationService {
 
-    private final ExternalEventConfigurationRepository eventConfigurationRepository;
+    protected final ExternalEventConfigurationRepository eventConfigurationRepository;
 
     @Override
     @Transactional(readOnly = true)

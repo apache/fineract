@@ -39,11 +39,11 @@ import org.springframework.jdbc.core.RowMapper;
 @RequiredArgsConstructor
 public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements DepositAccountOnHoldTransactionReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final ColumnValidator columnValidator;
-    private final PaginationHelper paginationHelper;
-    private final DepositAccountOnHoldTransactionsMapper mapper = new DepositAccountOnHoldTransactionsMapper();
+    protected final JdbcTemplate jdbcTemplate;
+    protected final DatabaseSpecificSQLGenerator sqlGenerator;
+    protected final ColumnValidator columnValidator;
+    protected final PaginationHelper paginationHelper;
+    protected final DepositAccountOnHoldTransactionsMapper mapper = new DepositAccountOnHoldTransactionsMapper();
 
     @Override
     public Page<DepositAccountOnHoldTransactionData> retriveAll(Long savingsId, Long guarantorFundingId,

@@ -58,12 +58,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements AccountingRuleWritePlatformService {
 
-    private final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper;
-    private final AccountingRuleRepository accountingRuleRepository;
-    private final GLAccountRepositoryWrapper accountRepositoryWrapper;
-    private final OfficeRepositoryWrapper officeRepositoryWrapper;
-    private final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final CodeValueRepository codeValueRepository;
+    protected final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper;
+    protected final AccountingRuleRepository accountingRuleRepository;
+    protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
+    protected final OfficeRepositoryWrapper officeRepositoryWrapper;
+    protected final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    protected final CodeValueRepository codeValueRepository;
 
     /**
      * @param command
