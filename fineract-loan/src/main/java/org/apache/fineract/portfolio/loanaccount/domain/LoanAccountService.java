@@ -24,6 +24,18 @@ public interface LoanAccountService {
 
     Loan saveAndFlushLoanWithDataIntegrityViolationChecks(Loan loan);
 
+    /**
+     * Due to the "saveAndFlushLoanWithDataIntegrityViolationChecks" method the loan is saved and flushed in the middle
+     * of the transaction. EclipseLink is in some situations are saving inconsistently the newly created associations,
+     * like the newly created repayment schedule installments. The save and flush cannot be removed safely till any
+     * native queries are used as part of this transaction either. See:
+     * this.loanAccountDomainService.recalculateAccruals(loan);
+     *
+     * As a workaround, we iterate over and save each LoanRepaymentScheduleInstallment entity before saving and flushing
+     * the Loan entity.
+     */
+    Loan saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(Loan loan);
+
     Loan saveLoanWithDataIntegrityViolationChecks(Loan loan);
 
 }
