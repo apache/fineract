@@ -18,25 +18,33 @@
  */
 package org.apache.fineract.accounting.closure.service;
 
+import static org.apache.fineract.query.QAccGlClosure.accGlClosure;
+import static org.apache.fineract.query.QMOffice.mOffice;
+
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
+import org.apache.fineract.accounting.closure.domain.GLClosureProjection;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.query.QMAppuser;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
 
     private static final class GLClosureMapper implements RowMapper<GLClosureData> {
 
@@ -72,22 +80,13 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GLClosureData> retrieveAllGLClosures(final Long officeId) {
-        final GLClosureMapper rm = new GLClosureMapper();
-
-        String sql = "select " + rm.schema() + " and glClosure.is_deleted = false";
-        final Object[] objectArray = new Object[1];
-        int arrayPos = 0;
+        final SQLQuery<GLClosureData> query = baseQuery().where(accGlClosure.isDeleted.isFalse());
         if (officeId != null && officeId != 0) {
-            sql += " and glClosure.office_id = ?";
-            objectArray[arrayPos] = officeId;
-            arrayPos = arrayPos + 1;
+            query.where(accGlClosure.officeId.eq(officeId));
         }
-
-        sql = sql + " order by glClosure.closing_date desc";
-
-        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray); // NOSONAR
+        return query.orderBy(accGlClosure.closingDate.desc()).fetch();
     }
 
     @Override
@@ -103,6 +102,14 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         } catch (final EmptyResultDataAccessException e) {
             throw new GLClosureNotFoundException(glClosureId, e);
         }
+    }
+
+    private SQLQuery<GLClosureData> baseQuery() {
+        final QMAppuser creatingUser = new QMAppuser("creatingUser");
+        final QMAppuser updatingUser = new QMAppuser("updatingUser");
+        return queryFactory.select(new GLClosureProjection(creatingUser, updatingUser)).from(accGlClosure).join(mOffice)
+                .on(mOffice.id.eq(accGlClosure.officeId)).join(creatingUser).on(creatingUser.id.eq(accGlClosure.createdbyId))
+                .join(updatingUser).on(updatingUser.id.eq(accGlClosure.lastmodifiedbyId));
     }
 
 }
