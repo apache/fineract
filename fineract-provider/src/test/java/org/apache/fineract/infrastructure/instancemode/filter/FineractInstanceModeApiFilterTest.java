@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.instancemode.InstanceModeMock;
-import org.apache.hc.core5.http.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
