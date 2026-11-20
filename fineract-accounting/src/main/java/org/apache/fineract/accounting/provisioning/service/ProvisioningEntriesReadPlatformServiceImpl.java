@@ -18,9 +18,21 @@
  */
 package org.apache.fineract.accounting.provisioning.service;
 
+import static com.querydsl.sql.DatePart.day;
+import static com.querydsl.sql.SQLExpressions.datediff;
+import static com.querydsl.sql.SQLExpressions.select;
+import static org.apache.fineract.query.QMClient.mClient;
+import static org.apache.fineract.query.QMGroup.mGroup;
+import static org.apache.fineract.query.QMLoan.mLoan;
+import static org.apache.fineract.query.QMLoanRepaymentSchedule.mLoanRepaymentSchedule;
+import static org.apache.fineract.query.QMLoanproductProvisioningMapping.mLoanproductProvisioningMapping;
+import static org.apache.fineract.query.QMProvisioningCriteriaDefinition.mProvisioningCriteriaDefinition;
 import static org.apache.fineract.query.QMProvisioningHistory.mProvisioningHistory;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
@@ -37,12 +49,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningDataProjection;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.query.QMAppuser;
+import org.apache.fineract.query.QMLoanRepaymentSchedule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,58 +76,26 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     private final SQLQueryFactory queryFactory;
 
     @Override
-    public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(LocalDate date) {
-        String formattedDate = DateUtils.DEFAULT_DATE_FORMATTER.format(date);
-        LoanProductProvisioningEntryMapper mapper = new LoanProductProvisioningEntryMapper(sqlGenerator);
-        final String sql = mapper.schema();
-        return this.jdbcTemplate.query(sql, mapper, formattedDate, formattedDate, formattedDate);
+    public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(final LocalDate date) {
+        final QMLoanRepaymentSchedule unpaidSchedule = new QMLoanRepaymentSchedule("unpaidSchedule");
+        return loanProductProvisioningQuery(date)
+                .where(mLoan.loanStatusId.eq(300), mLoanRepaymentSchedule.duedate.eq(select(unpaidSchedule.duedate.min())
+                        .from(unpaidSchedule).where(unpaidSchedule.loanId.eq(mLoan.id), unpaidSchedule.completedDerived.isFalse())))
+                .fetch();
     }
 
-    private static final class LoanProductProvisioningEntryMapper implements RowMapper<LoanProductProvisioningEntryData> {
-
-        private final StringBuilder sqlQuery;
-
-        private LoanProductProvisioningEntryMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
-            sqlQuery = new StringBuilder().append(
-                    "select (CASE WHEN loan.loan_type_enum=1 THEN mclient.office_id ELSE mgroup.office_id END) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
-                    .append("GREATEST(" + sqlGenerator.dateDiff("?", "sch.duedate")
-                            + ", 0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
-                    .append("loan.total_outstanding_derived as outstandingbalance, pcd.liability_account, pcd.expense_account from m_loan_repayment_schedule sch")
-                    .append(" LEFT JOIN m_loan loan on sch.loan_id = loan.id")
-                    .append(" JOIN m_loanproduct_provisioning_mapping lpm on lpm.product_id = loan.product_id")
-                    .append(" JOIN m_provisioning_criteria_definition pcd on pcd.criteria_id = lpm.criteria_id and ")
-                    .append("(pcd.min_age <= GREATEST(" + sqlGenerator.dateDiff("?", "sch.duedate") + ",0) and GREATEST("
-                            + sqlGenerator.dateDiff("?", "sch.duedate") + ",0) <= pcd.max_age) and pcd.criteria_id is not null ")
-                    .append("LEFT JOIN m_client mclient ON mclient.id = loan.client_id ")
-                    .append("LEFT JOIN m_group mgroup ON mgroup.id = loan.group_id ")
-                    .append("where loan.loan_status_id=300 and sch.duedate = ")
-                    .append("(select MIN(sch1.duedate) from m_loan_repayment_schedule sch1 where sch1.loan_id=loan.id and sch1.completed_derived=false)");
-        }
-
-        @Override
-        @SuppressWarnings("unused")
-        public LoanProductProvisioningEntryData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Long officeId = rs.getLong("office_id");
-            Long productId = rs.getLong("product_id");
-            String currentcyCode = rs.getString("currency_code");
-            Long overdueDays = rs.getLong("numberofdaysoverdue");
-            Long categoryId = rs.getLong("category_id");
-            BigDecimal percentage = rs.getBigDecimal("provision_percentage");
-            BigDecimal outstandingBalance = rs.getBigDecimal("outstandingbalance");
-            Long liabilityAccountCode = rs.getLong("liability_account");
-            Long expenseAccountCode = rs.getLong("expense_account");
-            Long criteriaId = rs.getLong("criteriaid");
-            Long historyId = null;
-
-            return new LoanProductProvisioningEntryData().setHistoryId(historyId).setOfficeId(officeId).setCurrencyCode(currentcyCode)
-                    .setProductId(productId).setCategoryId(categoryId).setOverdueInDays(overdueDays).setPercentage(percentage)
-                    .setBalance(outstandingBalance).setLiablityAccount(liabilityAccountCode).setExpenseAccount(expenseAccountCode)
-                    .setCriteriaId(criteriaId);
-        }
-
-        private String schema() {
-            return sqlQuery.toString();
-        }
+    private SQLQuery<LoanProductProvisioningEntryData> loanProductProvisioningQuery(final LocalDate date) {
+        final NumberExpression<Long> officeId = new CaseBuilder().when(mLoan.loanTypeEnum.eq(1)).then(mClient.officeId)
+                .otherwise(mGroup.officeId);
+        final NumberExpression<Long> overdueDays = Expressions.numberTemplate(Long.class, "greatest({0}, 0)",
+                datediff(day, mLoanRepaymentSchedule.duedate, Date.valueOf(date)));
+        return queryFactory.select(new LoanProductProvisioningDataProjection(officeId, overdueDays)).from(mLoanRepaymentSchedule)
+                .leftJoin(mLoan).on(mLoanRepaymentSchedule.loanId.eq(mLoan.id)).join(mLoanproductProvisioningMapping)
+                .on(mLoanproductProvisioningMapping.productId.eq(mLoan.productId)).join(mProvisioningCriteriaDefinition)
+                .on(mProvisioningCriteriaDefinition.criteriaId.eq(mLoanproductProvisioningMapping.criteriaId),
+                        mProvisioningCriteriaDefinition.minAge.loe(overdueDays), overdueDays.loe(mProvisioningCriteriaDefinition.maxAge),
+                        mProvisioningCriteriaDefinition.criteriaId.isNotNull())
+                .leftJoin(mClient).on(mClient.id.eq(mLoan.clientId)).leftJoin(mGroup).on(mGroup.id.eq(mLoan.groupId));
     }
 
     @Override
