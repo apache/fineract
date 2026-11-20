@@ -24,9 +24,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -34,16 +36,21 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.domain.CalendarHistoryRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
+import org.apache.fineract.portfolio.calendar.exception.CalendarEntityTypeNotSupportedException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.calendar.serialization.CalendarCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -54,6 +61,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
@@ -69,44 +77,78 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepository;
 
+    @Transactional
     @Override
-    public CommandProcessingResult createCalendar(final JsonCommand command) {
-
-        this.fromApiJsonDeserializer.validateForCreate(command.json());
-        Long entityId = null;
-        CalendarEntityType entityType = CalendarEntityType.INVALID;
-        LocalDate entityActivationDate = null;
-        Group centerOrGroup = null;
-        if (command.getGroupId() != null) {
-            centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(command.getGroupId());
-            entityActivationDate = centerOrGroup.getActivationDate();
-            entityType = centerOrGroup.isCenter() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
-            entityId = command.getGroupId();
-        } else if (command.getLoanId() != null) {
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(command.getLoanId(), true);
-            entityActivationDate = (loan.getApprovedOnDate() == null) ? loan.getSubmittedOnDate() : loan.getApprovedOnDate();
-            entityType = CalendarEntityType.LOANS;
-            entityId = command.getLoanId();
-        } else if (command.getClientId() != null) {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(command.getClientId());
-            entityActivationDate = client.getActivationDate();
-            entityType = CalendarEntityType.CLIENTS;
-            entityId = command.getClientId();
+    public CalendarCreateResponse createCalendar(final CalendarCreateRequest request) {
+        CalendarEntityType entityType = request.getEntityType();
+        if (entityType == CalendarEntityType.INVALID) {
+            throw new CalendarEntityTypeNotSupportedException(entityType.name());
         }
 
-        final Integer entityTypeId = entityType.getValue();
-        final Calendar newCalendar = Calendar.fromJson(command);
+        Long clientId = null;
+        Long groupId = null;
+        Long loanId = null;
+        LocalDate entityActivationDate = null;
+        Group centerOrGroup = null;
+
+        switch (entityType) {
+            case CENTERS:
+            case GROUPS:
+                centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(request.getEntityId());
+                entityActivationDate = centerOrGroup.getActivationDate();
+                entityType = centerOrGroup.isCenter() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
+                groupId = request.getEntityId();
+            break;
+            case LOANS:
+                final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(request.getEntityId(), true);
+                entityActivationDate = loan.getApprovedOnDate() == null ? loan.getSubmittedOnDate() : loan.getApprovedOnDate();
+                loanId = request.getEntityId();
+            break;
+            case CLIENTS:
+                final Client client = this.clientRepository.findOneWithNotFoundDetection(request.getEntityId());
+                entityActivationDate = client.getActivationDate();
+                clientId = request.getEntityId();
+            break;
+            default:
+                throw new CalendarEntityTypeNotSupportedException(entityType.name());
+        }
+
+        final LocalDate startDate = parseDate(CalendarSupportedParameters.START_DATE.getValue(), request.getStartDate(),
+                request.getDateFormat(), request.getLocale());
+        final LocalDate endDate = parseDate(CalendarSupportedParameters.END_DATE.getValue(), request.getEndDate(), request.getDateFormat(),
+                request.getLocale());
+        final boolean repeating = Boolean.TRUE.equals(request.getRepeating());
+
+        Calendar newCalendar;
+        if (repeating) {
+            if (request.getFrequency() == null) {
+                final List<ApiParameterError> errors = List
+                        .of(ApiParameterError.parameterError("org.apache.fineract.portfolio.calendar.frequency.required-when-repeating",
+                                "The parameter 'frequency' is mandatory when 'repeating' is true",
+                                CalendarSupportedParameters.FREQUENCY.getValue()));
+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors);
+            }
+            final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(request.getFrequency());
+            newCalendar = Calendar.createRepeatingCalendar(request.getTitle(), request.getDescription(), request.getLocation(), startDate,
+                    endDate, request.getDuration(), request.getTypeId(), frequencyType, request.getInterval(), request.getRepeatsOnDay(),
+                    request.getRepeatsOnNthDayOfMonth(), request.getRemindBy(), request.getFirstReminder(), request.getSecondReminder(),
+                    null);
+        } else {
+            newCalendar = new Calendar(request.getTitle(), request.getDescription(), request.getLocation(), startDate, endDate,
+                    request.getDuration(), request.getTypeId(), false, null, request.getRemindBy(), request.getFirstReminder(),
+                    request.getSecondReminder(), null);
+        }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
         if (entityActivationDate == null || DateUtils.isBefore(newCalendar.getStartDateLocalDate(), entityActivationDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
             String dateAsString = "";
             if (entityActivationDate != null) {
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(request.getDateFormat())
+                        .withLocale(JsonParserHelper.localeFromString(request.getLocale()));
                 dateAsString = formatter.format(entityActivationDate);
             }
-
-            final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase() + ".activation.date";
+            final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase(Locale.ROOT) + ".activation.date";
             baseDataValidator.reset().parameter(CalendarSupportedParameters.START_DATE.getValue()).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode(errorMessage);
         }
@@ -114,19 +156,16 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (centerOrGroup != null) {
             Long centerOrGroupId = centerOrGroup.getId();
             Integer centerOrGroupEntityTypeId = entityType.getValue();
-
             final Group parent = centerOrGroup.getParent();
             if (parent != null) {
                 centerOrGroupId = parent.getId();
                 centerOrGroupEntityTypeId = CalendarEntityType.CENTERS.getValue();
             }
-
             final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
                     .findByEntityIdAndEntityTypeIdAndCalendarTypeId(centerOrGroupId, centerOrGroupEntityTypeId,
                             CalendarType.COLLECTION.getValue());
             if (collectionCalendarInstance != null) {
-                final String errorMessage = "multiple.collection.calendar.not.supported";
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.collection.calendar.not.supported");
             }
         }
 
@@ -135,18 +174,24 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         }
 
         this.calendarRepository.saveAndFlush(newCalendar);
-
-        final CalendarInstance newCalendarInstance = CalendarInstance.from(newCalendar, entityId, entityTypeId);
+        final CalendarInstance newCalendarInstance = CalendarInstance.from(newCalendar, request.getEntityId(), entityType.getValue());
         this.calendarInstanceRepository.save(newCalendarInstance);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(newCalendar.getId()) //
-                .withClientId(command.getClientId()) //
-                .withGroupId(command.getGroupId()) //
-                .withLoanId(command.getLoanId()) //
-                .build();
+        return CalendarCreateResponse.builder().resourceId(newCalendar.getId()).entityType(request.getEntityType().name())
+                .entityId(request.getEntityId()).clientId(clientId).groupId(groupId).loanId(loanId).build();
+    }
 
+    /**
+     * Delegates to {@link JsonParserHelper#convertFrom}, not a raw {@link DateTimeFormatter}, so a bad date/format
+     * combination is a 400 (with the parameter name) instead of an uncaught
+     * {@link java.time.format.DateTimeParseException}.
+     */
+    private LocalDate parseDate(final String parameterName, final String value, final String dateFormat, final String localeValue) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        final Locale locale = JsonParserHelper.localeFromString(localeValue);
+        return JsonParserHelper.convertFrom(value, parameterName, dateFormat, locale);
     }
 
     public void validateIsEditMeetingAllowed(Long groupId) {
