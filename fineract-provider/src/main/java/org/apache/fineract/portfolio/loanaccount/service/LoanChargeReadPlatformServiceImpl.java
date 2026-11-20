@@ -26,13 +26,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationCalculationType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationIncomeType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationPeriodType;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
@@ -69,6 +74,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, lc.charge_calculation_enum as chargeCalculation, " //
                     + "lc.charge_payment_mode_enum as chargePaymentMode, lc.is_paid_derived as paid, lc.waived as waived, " //
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, lc.charge_amount_or_percentage as amountOrPercentage, " //
+                    + "lc.amortization_period_type as amortizationPeriodType, lc.amortization_days as amortizationDays, " //
+                    + "lc.amortization_calculation_type as amortizationCalculationType, lc.amortization_income_type as amortizationIncomeType, " //
                     + "lc.loan_id as loanId, c.currency_code as currencyCode, oc.name as currencyName, " //
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, " //
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, " //
@@ -136,9 +143,21 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final String externalLoanIdStr = rs.getString("externalLoanId");
             final ExternalId externalLoanId = ExternalIdFactory.produce(externalLoanIdStr);
 
-            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
-                    chargeTimeType, submittedOnDate, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty,
-                    paymentMode, paid, waived, loanId, externalLoanId, minCap, maxCap, amountOrPercentage, null, externalId);
+            final StringEnumOptionData amortizationPeriodType = ApiFacingEnum.getStringEnumOptionData(ChargeAmortizationPeriodType.class,
+                    rs.getString("amortizationPeriodType"));
+            final Integer amortizationDays = JdbcSupport.getInteger(rs, "amortizationDays");
+            final StringEnumOptionData amortizationCalculationType = ApiFacingEnum
+                    .getStringEnumOptionData(ChargeAmortizationCalculationType.class, rs.getString("amortizationCalculationType"));
+            final StringEnumOptionData amortizationIncomeType = ApiFacingEnum.getStringEnumOptionData(ChargeAmortizationIncomeType.class,
+                    rs.getString("amortizationIncomeType"));
+
+            final LoanChargeData loanChargeData = new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived,
+                    amountWrittenOff, amountOutstanding, chargeTimeType, submittedOnDate, dueAsOfDate, chargeCalculationType, percentageOf,
+                    amountPercentageAppliedTo, penalty, paymentMode, paid, waived, loanId, externalLoanId, minCap, maxCap,
+                    amountOrPercentage, null, externalId);
+            loanChargeData.updateAmortizationConfiguration(amortizationPeriodType, amortizationDays, amortizationCalculationType,
+                    amortizationIncomeType);
+            return loanChargeData;
         }
     }
 

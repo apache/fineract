@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -37,6 +39,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationT
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeAdjustmentException;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,6 +98,40 @@ class LoanChargeValidatorTest {
         LoanChargeAdjustmentException exception = assertThrows(LoanChargeAdjustmentException.class,
                 () -> underTest.validateChargeAdjustmentAmount(loanCharge, BigDecimal.valueOf(101), null));
         assertEquals("error.msg.loan.charge.adjustment.invalid.amount", exception.getGlobalisationMessageCode());
+    }
+
+    @Test
+    void validateChargeAmortizationAllowedRejectsAmortizedChargeWhenProductFlagIsOff() {
+        final Charge charge = mock(Charge.class);
+        when(charge.isAmortized()).thenReturn(true);
+        when(charge.getId()).thenReturn(11L);
+        when(charge.getName()).thenReturn("Amortized fee");
+        final LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
+        when(detail.isEnableChargeAmortization()).thenReturn(false);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(detail);
+
+        final LoanChargeCannotBeAddedException exception = assertThrows(LoanChargeCannotBeAddedException.class,
+                () -> underTest.validateChargeAmortizationAllowed(loan, charge));
+        assertEquals("error.msg.loanCharge.cannot.be.added.as.charge.amortization.not.enabled", exception.getGlobalisationMessageCode());
+    }
+
+    @Test
+    void validateChargeAmortizationAllowedAllowsAmortizedChargeWhenProductFlagIsOn() {
+        final Charge charge = mock(Charge.class);
+        when(charge.isAmortized()).thenReturn(true);
+        final LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
+        when(detail.isEnableChargeAmortization()).thenReturn(true);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(detail);
+
+        assertDoesNotThrow(() -> underTest.validateChargeAmortizationAllowed(loan, charge));
+    }
+
+    @Test
+    void validateChargeAmortizationAllowedAllowsNonAmortizedChargeWhenProductFlagIsOff() {
+        final Charge charge = mock(Charge.class);
+        when(charge.isAmortized()).thenReturn(false);
+
+        assertDoesNotThrow(() -> underTest.validateChargeAmortizationAllowed(loan, charge));
     }
 
     @Test

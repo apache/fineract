@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationPeriodType;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -590,7 +591,33 @@ public class LoanChargeService {
         loanCharge.setPaid(loanCharge.determineIfFullyPaid());
         loanCharge.setExternalId(externalId);
 
+        applyAmortizationConfiguration(loanCharge, loan, chargeDefinition);
+
         return loanCharge;
+    }
+
+    private void applyAmortizationConfiguration(final LoanCharge loanCharge, final Loan loan, final Charge chargeDefinition) {
+        final LoanCharge siblingTrancheCharge = findExistingTrancheLoanCharge(loan, chargeDefinition.getId(), loanCharge);
+        if (siblingTrancheCharge != null) {
+            loanCharge.setAmortizationPeriodType(siblingTrancheCharge.getAmortizationPeriodType());
+            loanCharge.setAmortizationDays(siblingTrancheCharge.getAmortizationDays());
+            loanCharge.setAmortizationCalculationType(siblingTrancheCharge.getAmortizationCalculationType());
+            loanCharge.setAmortizationIncomeType(siblingTrancheCharge.getAmortizationIncomeType());
+            return;
+        }
+        loanCharge.setAmortizationPeriodType(chargeDefinition.getAmortizationPeriodType() == null ? ChargeAmortizationPeriodType.NONE
+                : chargeDefinition.getAmortizationPeriodType());
+        loanCharge.setAmortizationDays(chargeDefinition.getAmortizationDays());
+        loanCharge.setAmortizationCalculationType(chargeDefinition.getAmortizationCalculationType());
+        loanCharge.setAmortizationIncomeType(chargeDefinition.getAmortizationIncomeType());
+    }
+
+    private LoanCharge findExistingTrancheLoanCharge(final Loan loan, final Long chargeId, final LoanCharge created) {
+        if (loan == null || chargeId == null || !created.isTrancheDisbursementCharge()) {
+            return null;
+        }
+        return loan.getCharges().stream().filter(LoanCharge::isActive).filter(LoanCharge::isTrancheDisbursementCharge)
+                .filter(existing -> existing.getCharge() != null && chargeId.equals(existing.getCharge().getId())).findFirst().orElse(null);
     }
 
     public LoanCharge fetchLoanChargesById(final Loan loan, final Long id) {
