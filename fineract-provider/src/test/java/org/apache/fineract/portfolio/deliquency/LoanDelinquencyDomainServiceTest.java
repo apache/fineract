@@ -73,6 +73,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class LoanDelinquencyDomainServiceTest {
 
+    private static final Long LOAN_ID = 1L;
+
     @Mock
     private LoanProductRelatedDetail loanProductRelatedDetail;
     @Mock
@@ -158,7 +160,8 @@ public class LoanDelinquencyDomainServiceTest {
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loanTransactionReadService.fetchLoanTransactionsByType(LOAN_ID, null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
@@ -230,7 +233,8 @@ public class LoanDelinquencyDomainServiceTest {
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loanTransactionReadService.fetchLoanTransactionsByType(LOAN_ID, null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
@@ -289,7 +293,8 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
         when(loan.getCurrency()).thenReturn(currency);
         when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loanTransactionReadService.fetchLoanTransactionsByType(LOAN_ID, null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Arrays.asList(loanTransaction));
         when(delinquencyEffectivePauseHelper.getPausedDaysWithinRange(Mockito.eq(effectiveDelinquencyList), Mockito.any(),
                 Mockito.eq(businessDate))).thenReturn(0L);
@@ -339,7 +344,8 @@ public class LoanDelinquencyDomainServiceTest {
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loanTransactionReadService.fetchLoanTransactionsByType(LOAN_ID, null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(installmentThree);
         when(loan.getCurrency()).thenReturn(currency);
@@ -400,7 +406,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(localLoan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
         when(localLoan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
-        when(loanTransactionReadService.fetchLoanTransactionsByType(localLoan.getId(), null, LoanTransactionType.CHARGEBACK))
+        when(loanTransactionReadService.fetchLoanTransactionsByType(42L, null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Collections.emptyList());
 
         LoanDelinquencyAction pauseAction = new LoanDelinquencyAction(localLoan, DelinquencyAction.PAUSE, LocalDate.of(2022, 1, 15),
