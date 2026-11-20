@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -251,7 +252,7 @@ final class LegacyMeetingAttendanceListener {
         final CalendarInstance calendarInstance = this.calendarInstanceRepository
                 .findByCalendarIdAndEntityIdAndEntityTypeId(calendarForUpdate.getId(), entityId, entityType.getValue());
         if (calendarInstance == null) {
-            final String postFix = "for." + entityType.name().toLowerCase() + "not.found";
+            final String postFix = "for." + entityType.name().toLowerCase(Locale.ROOT) + "not.found";
             final String defaultUserMessage = "No Calendar Instance details found for group with identifier " + entityId
                     + " and calendar with identifier " + calendarId;
             throw new CalendarInstanceNotFoundException(postFix, defaultUserMessage, entityId, calendarId);

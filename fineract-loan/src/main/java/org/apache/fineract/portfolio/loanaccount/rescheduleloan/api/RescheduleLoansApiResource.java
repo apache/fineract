@@ -37,6 +37,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -183,7 +184,7 @@ public class RescheduleLoansApiResource {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        if (StringUtils.isNotBlank(command) && !RescheduleLoansApiConstants.commandParams.contains(command.toLowerCase())) {
+        if (StringUtils.isNotBlank(command) && !RescheduleLoansApiConstants.commandParams.contains(command.toLowerCase(Locale.ROOT))) {
             throw new UnrecognizedQueryParamException("command", command, RescheduleLoansApiConstants.allCommandParamName,
                     RescheduleLoansApiConstants.pendingCommandParamName, RescheduleLoansApiConstants.approveCommandParamName,
                     RescheduleLoansApiConstants.rejectCommandParamName);

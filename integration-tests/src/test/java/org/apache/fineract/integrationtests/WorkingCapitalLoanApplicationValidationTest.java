@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -1082,7 +1083,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 new WorkingCapitalLoanApplicationTestBuilder().withPrincipal(BigDecimal.valueOf(1000)).buildModifyRequest());
         assertEquals(404, ex.getStatus());
         assertNotNull(ex.getDeveloperMessage());
-        final String msg = ex.getDeveloperMessage().toLowerCase();
+        final String msg = ex.getDeveloperMessage().toLowerCase(Locale.ROOT);
         assertTrue(msg.contains("not found") || msg.contains("not available") || msg.contains("resource not found")
                 || msg.contains("does not exist"), "Expected message to indicate resource not found: " + ex.getDeveloperMessage());
     }

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -932,6 +933,6 @@ public final class ClientDataValidator {
             return null;
         }
         final LegalForm legalForm = LegalForm.fromInt(legalFormId);
-        return legalForm != null ? legalForm.getLabel().toUpperCase() : null;
+        return legalForm != null ? legalForm.getLabel().toUpperCase(Locale.ROOT) : null;
     }
 }

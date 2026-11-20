@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -177,7 +178,7 @@ public class GroupTest extends FeignLoanTestBase {
 
     @Test
     public void testGroupCreationSavesDatatableEntry() {
-        final String datatableName = Utils.uniqueRandomStringGenerator("dt_group_", 5).toLowerCase();
+        final String datatableName = Utils.uniqueRandomStringGenerator("dt_group_", 5).toLowerCase(Locale.ROOT);
         final PostDataTablesRequest createDatatableRequest = new PostDataTablesRequest().datatableName(datatableName)
                 .apptableName(EntityTables.GROUP.getName()).multiRow(false).addColumnsItem(new PostColumnHeaderData().name("aNote")
                         .type("String").mandatory(false).length(50L).code("").unique(false).indexed(false));
