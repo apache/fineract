@@ -37,8 +37,6 @@ public class WorkingCapitalLoanOriginatorHelper {
         return FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanOriginators();
     }
 
-    private static final String WORKING_CAPITAL_LOAN_ORIGINATOR_API_URL = "/fineract-provider/api/v1/working-capital-loans";
-
     public Long createOriginator(final String externalId, final String name) {
         PostLoanOriginatorsRequest request = new PostLoanOriginatorsRequest();
         request.setExternalId(externalId);

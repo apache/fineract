@@ -62,13 +62,11 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest extends Feig
 
         final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, strategyCode);
 
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("5 September 2022")
-                        .locale(LoanTestData.LOCALE).transactionAmount(450.0));
+        makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
+                .transactionDate("5 September 2022").locale(LoanTestData.LOCALE).transactionAmount(450.0));
 
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("6 September 2022")
-                        .locale(LoanTestData.LOCALE).transactionAmount(450.0));
+        makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
+                .transactionDate("6 September 2022").locale(LoanTestData.LOCALE).transactionAmount(450.0));
 
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = makeLoanRepayment(loanExternalIdStr,
                 new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("7 September 2022")

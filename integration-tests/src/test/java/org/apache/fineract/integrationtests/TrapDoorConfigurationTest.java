@@ -40,6 +40,7 @@ public class TrapDoorConfigurationTest {
     private JdbcTemplate jdbcTemplate;
 
     @Mock
+    @SuppressWarnings("unused")
     private GlobalConfigurationDataValidator globalConfigurationDataValidator;
 
     @InjectMocks

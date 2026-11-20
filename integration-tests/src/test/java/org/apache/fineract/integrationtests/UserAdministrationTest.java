@@ -29,7 +29,6 @@ import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
-import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
@@ -175,7 +174,7 @@ public class UserAdministrationTest extends FeignIntegrationTest {
         Assertions.assertEquals(401, unauthorized.status());
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(() -> clientFor(simpleUsername, updatedPassword).users().retrieveOneUser(userId));
+        ok(() -> clientFor(simpleUsername, updatedPassword).users().retrieveOneUser(userId));
     }
 
     @Test
@@ -206,7 +205,7 @@ public class UserAdministrationTest extends FeignIntegrationTest {
         Assertions.assertEquals(401, unauthorized.status());
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(() -> clientFor(simpleUsername, updatedPassword).users().retrieveOneUser(userId));
+        ok(() -> clientFor(simpleUsername, updatedPassword).users().retrieveOneUser(userId));
     }
 
     @Test

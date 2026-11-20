@@ -82,8 +82,6 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignLoanHelper {
 
-    private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
-
     private final FineractFeignClient fineractClient;
     private final LoanProductTemplateApi loanProductTemplateApi;
 

@@ -104,7 +104,6 @@ public class LoanContractTerminationTest extends FeignLoanTestBase {
 
     @Test
     public void testNegativeLoanContractTerminationInNoProgressiveLoan() {
-        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
         final Long clientId = createClient();
 

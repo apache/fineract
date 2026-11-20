@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
-import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -229,7 +228,7 @@ public class LoanTransactionTest extends FeignLoanTestBase {
     public void testGetLoanTransactionTemplateForBuyDownFee() {
         Long clientId = createClient();
         final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE);
-        final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
+        codeHelper.createCodeValue(code.getId(),
                 new PostCodeValuesDataRequest().name(Utils.uniqueRandomStringGenerator("CLASS_", 6)).isActive(true).position(10));
 
         final Long loanProductId = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)

@@ -276,7 +276,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         runWithBusinessDate("2020-03-02", () -> {
             Long clientId = createClient("01 March 2020");
             String originatorExternalId = UUID.randomUUID().toString();
-            Long loanId = createAndDisburseLoan(clientId, "01 March 2020", "02 March 2020", null, originatorExternalId);
+            createAndDisburseLoan(clientId, "01 March 2020", "02 March 2020", null, originatorExternalId);
 
             advanceBusinessDateAndRunCob("2020-03-03");
 

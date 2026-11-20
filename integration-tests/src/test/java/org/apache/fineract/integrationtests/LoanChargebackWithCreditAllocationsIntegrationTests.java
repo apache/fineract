@@ -66,8 +66,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -240,8 +240,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -305,8 +305,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -447,8 +447,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "15 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -522,8 +522,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "15 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -602,8 +602,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -666,8 +666,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -734,8 +734,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -801,8 +801,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -868,8 +868,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -952,8 +952,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -1046,8 +1046,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             // Add Charges
-            Long feeId = addCharge(loanId, false, 50, "15 January 2023");
-            Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
+            addCharge(loanId, false, 50, "15 January 2023");
+            addCharge(loanId, true, 20, "15 January 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -1209,7 +1209,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
-            Long feeId = addCharge(loanId, false, 30, "15 February 2023");
+            addCharge(loanId, false, 30, "15 February 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(750.0, null, "01 January 2023"), //
@@ -1287,7 +1287,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
-            Long feeId = addCharge(loanId, true, 30, "15 February 2023");
+            addCharge(loanId, true, 30, "15 February 2023");
 
             verifyRepaymentSchedule(loanId, //
                     installment(750.0, null, "01 January 2023"), //
@@ -1521,7 +1521,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLo
 
             // Add fee & Repayment #2
             updateBusinessDate("01 March 2023");
-            Long feeId = addCharge(loanId, false, 30, "01 March 2023");
+            addCharge(loanId, false, 30, "01 March 2023");
             Long repaymentTransaction2 = addRepaymentForLoan(loanId, 280.0, "01 March 2023");
             schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 

@@ -103,8 +103,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
 
             mapLiabilityTransferFinancialActivity();
 
-            Long loanId = applyForLoanApplication(clientId, loanProductId, savingsId, 1000L, 45, 15, 3, BigDecimal.ZERO, "01 January 2023",
-                    "01 January 2023");
+            Long loanId = applyForLoanApplication(clientId, loanProductId, savingsId, "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
                     .approvedOnDate("01 January 2023").locale("en"));
@@ -205,8 +204,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
         return createLoanProduct(loanProductRequest);
     }
 
-    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, final Long savingsId, final Long principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, final Long savingsId,
             final String expectedDisbursementDate, final String submittedOnDate) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return applyForLoan(new PostLoansRequest()//
