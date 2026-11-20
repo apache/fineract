@@ -688,7 +688,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, amount, PortfolioAccountType.SAVINGS,
                 PortfolioAccountType.LOAN, portfolioAccountData.getId(), loanId, "Loan Charge Payment", locale, fmt, null, null,
                 LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId, loanInstallmentNumber,
-                AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, externalId, null, null, fromSavingsAccount, isRegularTransaction,
+                AccountTransferType.CHARGE_PAYMENT.getValue(), null, externalId, null, null, fromSavingsAccount, isRegularTransaction,
                 isExceptionForBalanceCheck);
         Long transferTransactionId = this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         AccountTransferDetails transferDetails = this.accountTransferDetailRepository.findById(transferTransactionId)

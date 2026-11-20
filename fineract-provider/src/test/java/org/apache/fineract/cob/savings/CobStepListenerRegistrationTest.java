@@ -1,0 +1,79 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.cob.savings;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Stream;
+import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.batch.core.listener.StepExecutionListener;
+import org.springframework.batch.core.listener.StepListener;
+import org.springframework.batch.core.listener.StepListenerFactoryBean;
+
+/**
+ * Savings counterpart of {@code org.apache.fineract.cob.loan.CobStepListenerRegistrationTest}, which explains why a COB
+ * item component must implement {@link StepExecutionListener} without also carrying
+ * {@code @BeforeStep}/{@code @AfterStep}.
+ */
+class CobStepListenerRegistrationTest {
+
+    private static Stream<Arguments> itemComponents() {
+        COBBusinessStepService businessStepService = mock(COBBusinessStepService.class);
+        LockingService lockingService = mock(LockingService.class);
+        SavingsAccountRepository savingsAccountRepository = mock(SavingsAccountRepository.class);
+        RetrieveSavingsIdService retrieveSavingsIdService = mock(RetrieveSavingsIdService.class);
+
+        return Stream.of(//
+                Arguments.of("SavingsItemReader", new SavingsItemReader(retrieveSavingsIdService, lockingService)), //
+                Arguments.of("InlineCOBSavingsItemReader", new InlineCOBSavingsItemReader()), //
+                Arguments.of("SavingsItemWriter", new SavingsItemWriter(businessStepService, lockingService, savingsAccountRepository)), //
+                Arguments.of("InlineCOBSavingsItemWriter",
+                        new InlineCOBSavingsItemWriter(businessStepService, lockingService, savingsAccountRepository)));
+    }
+
+    @ParameterizedTest(name = "{0} registers exactly once as a step listener")
+    @MethodSource("itemComponents")
+    void shouldRegisterExactlyOnceAsStepListener(String name, Object itemComponent) {
+        assertThat(itemComponent).as("%s must implement StepExecutionListener so the builder can register it", name)
+                .isInstanceOf(StepExecutionListener.class);
+        assertThat(StepListenerFactoryBean.isListener(itemComponent)).as("%s must be recognised as a step listener", name).isTrue();
+
+        // getListener must hand back the delegate itself, not an annotation proxy - a proxy is a second,
+        // distinct object and would survive alongside the instance in the builder's listener set.
+        StepListener resolved = StepListenerFactoryBean.getListener(itemComponent);
+        assertThat(resolved)
+                .as("%s resolves to an annotation proxy, so it would be registered twice - "
+                        + "remove the @BeforeStep/@AfterStep annotations and rely on the StepExecutionListener interface", name)
+                .isSameAs(itemComponent);
+
+        // Mirrors how ChunkOrientedStepBuilder.addAsStreamAndListener accumulates listeners.
+        Set<StepListener> stepListeners = new LinkedHashSet<>();
+        stepListeners.add((StepListener) itemComponent);
+        stepListeners.add(StepListenerFactoryBean.getListener(itemComponent));
+        assertThat(stepListeners).as("%s would fire beforeStep/afterStep more than once per step", name).hasSize(1);
+    }
+}
