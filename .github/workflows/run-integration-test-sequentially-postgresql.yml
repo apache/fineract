@@ -125,7 +125,7 @@ jobs:
             docker compose -f "$COMPOSE_FILE" exec -T db sh -lc 'PGPASSWORD="$POSTGRES_PASSWORD" psql -U "$POSTGRES_USER" -d fineract_default -c "UPDATE c_external_service_properties SET value = '\''host.docker.internal'\'' WHERE name = '\''host'\'' AND external_service_id = (SELECT id FROM c_external_service WHERE name = '\''SMTP_Email_Account'\'')"'
           }
 
-          # The twofactor and oauth2 suites need the server started with a different authentication
+          # The twofactor, oauth2 and oauth2-twofactor suites need the server started with a different authentication
           # mode, so Fineract is recreated with the matching compose override before each of them.
           recreate_fineract_with_auth_mode() {
             local override="$1"
@@ -143,7 +143,7 @@ jobs:
           configure_sms_gateway_host
 
           echo "::group::Running tests against basic authentication"
-          run_gradle test -x :twofactor-tests:test -x :oauth2-tests:test -x :fineract-e2e-tests-runner:test
+          run_gradle test -x :twofactor-tests:test -x :oauth2-tests:test -x :oauth2-twofactor-tests:test -x :fineract-e2e-tests-runner:test
           echo "::endgroup::"
 
           echo "::group::Running :twofactor-tests:test"
@@ -155,6 +155,12 @@ jobs:
           echo "::group::Running :oauth2-tests:test"
           recreate_fineract_with_auth_mode docker-compose-oauth2-test.yml
           run_gradle :oauth2-tests:test
+          echo "::endgroup::"
+
+          echo "::group::Running :oauth2-twofactor-tests:test"
+          recreate_fineract_with_auth_mode docker-compose-oauth2-twofactor-test.yml
+          configure_twofactor_smtp_host
+          run_gradle :oauth2-twofactor-tests:test
           echo "::endgroup::"
 
           # Exit with failure status if any test failed
@@ -175,6 +181,7 @@ jobs:
             integration-tests/build/reports/
             twofactor-tests/build/reports/
             oauth2-tests/build/reports/
+            oauth2-twofactor-tests/build/reports/
 
       - name: Collect Docker logs
         if: always()

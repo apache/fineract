@@ -58,6 +58,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -166,9 +167,12 @@ public class AuthorizationServerConfig {
         http
                 // TODO: Make it configurable
                 .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> {
-                    auth.anyRequest().authenticated();
                     if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
-                        auth.anyRequest().hasAuthority("TWOFACTOR_AUTHENTICATED");
+                        // the two-factor endpoints deliver and validate the token, so they cannot require it
+                        auth.requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").authenticated()
+                                .requestMatchers("/api/*/twofactor").authenticated().anyRequest().hasAuthority("TWOFACTOR_AUTHENTICATED");
+                    } else {
+                        auth.anyRequest().authenticated();
                     }
                 }).authenticationProvider(customAuthenticationProvider())
                 .formLogin(form -> form.loginPage("/login").authenticationDetailsSource(tenantAuthDetailsSource()).permitAll())
