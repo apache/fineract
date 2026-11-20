@@ -19,6 +19,8 @@
 package org.apache.fineract.accounting.financialactivityaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
@@ -40,6 +42,7 @@ final class FinancialActivityAccountsApiResourceSwagger {
         public Long id;
         public FinancialActivityData financialActivityData;
         public GLAccountData glAccountData;
+        public Map<String, List<GLAccountData>> glAccountOptions;
 
     }
 

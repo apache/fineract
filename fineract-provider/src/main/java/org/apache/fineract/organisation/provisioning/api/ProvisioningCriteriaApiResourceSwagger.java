@@ -20,6 +20,8 @@ package org.apache.fineract.organisation.provisioning.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
+import java.util.List;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
@@ -73,6 +75,8 @@ final class ProvisioningCriteriaApiResourceSwagger {
 
     @Schema(description = "GetProvisioningCriteriaCriteriaIdResponse")
     public static final class GetProvisioningCriteriaCriteriaIdResponse {
+
+        public List<GLAccountData> glAccounts;
 
         private GetProvisioningCriteriaCriteriaIdResponse() {
 

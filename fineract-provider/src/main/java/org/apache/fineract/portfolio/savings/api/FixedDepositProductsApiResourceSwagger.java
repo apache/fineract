@@ -21,7 +21,10 @@ package org.apache.fineract.portfolio.savings.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
 /**
  * Created by Chirag Gupta on 12/23/17.
@@ -568,6 +571,7 @@ final class FixedDepositProductsApiResourceSwagger {
         public GetFixedDepositProductsResponse.GetFixedDepositProductsInterestCalculationType interestCalculationType;
         public GetFixedDepositProductsResponse.GetFixedDepositProductsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
         public GetFixedDepositProductsProductIdAccountingMappings accountingMappings;
+        public Map<String, List<GLAccountData>> accountingMappingOptions;
         public Set<GetFixedDepositProductsProductIdFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public Set<GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings> penaltyToIncomeAccountMappings;
         @Schema(example = "true")

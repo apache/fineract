@@ -72,6 +72,12 @@ final class GLAccountsApiResourceSwagger {
 
         @Schema(example = "118437")
         public Long organizationRunningBalance;
+
+        public List<GLAccountData> assetHeaderAccountOptions;
+        public List<GLAccountData> liabilityHeaderAccountOptions;
+        public List<GLAccountData> equityHeaderAccountOptions;
+        public List<GLAccountData> incomeHeaderAccountOptions;
+        public List<GLAccountData> expenseHeaderAccountOptions;
     }
 
     @Schema(description = "GetGLAccountsTemplateResponse")
@@ -94,6 +100,7 @@ final class GLAccountsApiResourceSwagger {
         public List<GLAccountData> assetHeaderAccountOptions;
         public List<GLAccountData> liabilityHeaderAccountOptions;
         public List<GLAccountData> equityHeaderAccountOptions;
+        public List<GLAccountData> incomeHeaderAccountOptions;
         public List<GLAccountData> expenseHeaderAccountOptions;
         public Collection<CodeValueData> allowedAssetsTagOptions;
         public Collection<CodeValueData> allowedLiabilitiesTagOptions;

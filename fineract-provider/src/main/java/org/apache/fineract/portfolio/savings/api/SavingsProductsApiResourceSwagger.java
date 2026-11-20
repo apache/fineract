@@ -21,7 +21,9 @@ package org.apache.fineract.portfolio.savings.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
 /**
  * Created by Chirag Gupta on 12/31/17.
@@ -552,6 +554,7 @@ final class SavingsProductsApiResourceSwagger {
         @Schema(example = "90")
         public Long daysToEscheat;
         public GetSavingsProductsAccountingMappings accountingMappings;
+        public Map<String, List<GLAccountData>> accountingMappingOptions;
         public Set<GetSavingsProductsPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public Set<GetSavingsProductsFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public Set<GetSavingsProductsPenaltyToIncomeAccountMappings> penaltyToIncomeAccountMappings;
@@ -773,6 +776,7 @@ final class SavingsProductsApiResourceSwagger {
             }
 
             public Set<GetSavingsProductsLiabilityAccountOptions> liabilityAccountOptions;
+            public List<GLAccountData> equityAccountOptions;
             public Set<GetSavingsProductsAssetAccountOptions> assetAccountOptions;
             public Set<GetSavingsProductsExpenseAccountOptions> expenseAccountOptions;
             public Set<GetSavingsProductsIncomeAccountOptions> incomeAccountOptions;
