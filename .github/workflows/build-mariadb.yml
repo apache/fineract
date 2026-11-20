@@ -33,6 +33,7 @@ jobs:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       IMAGE_NAME: fineract
       COMPOSE_FILE: docker-compose-mariadb-test.yml
+      ORG_GRADLE_PROJECT_testDatabaseEngine: mariadb
       DOCKER_LOG_DIR: ci-logs/mariadb-shard-${{ matrix.shard_index }}
       AWS_ENDPOINT_URL: http://localhost:4566
       AWS_ACCESS_KEY_ID: localstack

@@ -21,7 +21,11 @@ package org.apache.fineract.accounting.provisioning.service;
 import static org.apache.fineract.query.QMProvisioningHistory.mProvisioningHistory;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.Param;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.sql.SQLOps;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import java.math.BigDecimal;
@@ -34,9 +38,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
+import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntryProjection;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -45,13 +49,14 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.query.QMAppuser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
-@Slf4j
 @Service
 @ConditionalOnMissingBean(value = ProvisioningEntriesReadPlatformService.class, ignored = ProvisioningEntriesReadPlatformServiceImpl.class)
 public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningEntriesReadPlatformService {
@@ -270,18 +275,18 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     }
 
     @Override
-    public ProvisioningEntryData retrieveProvisioningEntryData(String date) {
-        ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
-        date = date + "%";
-        final String sql1 = "select " + mapper1.getSchema() + " where entry.created_date like ? ";
-        ProvisioningEntryData data = null;
-        try {
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, date); // NOSONAR
-        } catch (EmptyResultDataAccessException e) {
-            log.error("Problem occurred in retrieveProvisioningEntryData function", e);
-        }
+    @Transactional(readOnly = true, noRollbackFor = IncorrectResultSizeDataAccessException.class)
+    public ProvisioningEntryData retrieveProvisioningEntryData(final String date) {
+        final QMAppuser createdUser = new QMAppuser("createdUser");
+        final QMAppuser modifiedUser = new QMAppuser("modifiedUser");
+        final Param<String> datePattern = new Param<>(String.class, "datePattern");
+        final StringExpression createdDateText = Expressions.stringOperation(SQLOps.CAST, mProvisioningHistory.createdDate,
+                Expressions.constant("char(10)"));
 
-        return data;
+        return DataAccessUtils.singleResult(queryFactory.select(new ProvisioningEntryProjection(createdUser, modifiedUser))
+                .from(mProvisioningHistory).leftJoin(createdUser).on(createdUser.id.eq(mProvisioningHistory.createdbyId))
+                .leftJoin(modifiedUser).on(modifiedUser.id.eq(mProvisioningHistory.lastmodifiedbyId))
+                .where(createdDateText.like(datePattern)).set(datePattern, date + "%").fetch());
     }
 
     @Override
