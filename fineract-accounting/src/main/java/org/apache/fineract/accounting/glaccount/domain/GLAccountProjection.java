@@ -55,7 +55,10 @@ public final class GLAccountProjection extends MappingProjection<GLAccountData> 
                 "GL account classification is required");
         final int usageId = Objects.requireNonNull(row.get(accGlAccount.accountUsage), "GL account usage is required");
         final String nameDecorated = row.get(NAME_DECORATED);
+        // Preserve the API response: a null nameDecorated produces a null tag ID;
+        // otherwise, an account without a tag has tag ID 0.
         final Long tagId = nameDecorated == null ? null : Objects.requireNonNullElse(row.get(mCodeValue.id), 0).longValue();
+        // Preserve the API response: read the balance as Long, discarding the fractional part (e.g. 24.75 becomes 24).
         final Long balance = runningBalance == null ? null : Objects.requireNonNullElse(row.get(runningBalance), 0L);
 
         return new GLAccountData().setId(row.get(accGlAccount.id)).setName(row.get(accGlAccount.name))

@@ -44,7 +44,6 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.query.QAccGlJournalEntry;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -172,21 +171,25 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     }
 
     @Override
-    public GLAccountData retrieveGLAccountById(final long glAccountId, JournalEntryAssociationParametersData associationParametersData) {
-        try {
-            final GLAccountMapper rm = new GLAccountMapper(associationParametersData);
-            final StringBuilder sql = new StringBuilder();
-            sql.append("select ").append(rm.schema());
-            sql.append(" where gl.id = ?");
-            if (associationParametersData.isRunningBalanceRequired()) {
-                sql.append(" and gl_j.is_running_balance_calculated = true ")
-                        .append("  ORDER BY gl_j.entry_date DESC,gl_j.id DESC LIMIT 1");
-            }
-
-            return this.jdbcTemplate.queryForObject(sql.toString(), rm, new Object[] { glAccountId });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new GLAccountNotFoundException(glAccountId, e);
+    public GLAccountData retrieveGLAccountById(final long glAccountId,
+            final JournalEntryAssociationParametersData associationParametersData) {
+        final boolean runningBalanceRequired = associationParametersData.isRunningBalanceRequired();
+        final SQLQuery<GLAccountData> query = glAccountQuery(runningBalanceRequired).where(accGlAccount.id.eq(glAccountId));
+        if (runningBalanceRequired) {
+            query.leftJoin(BALANCE_ENTRY).on(BALANCE_ENTRY.accountId.eq(accGlAccount.id))
+                    .where(BALANCE_ENTRY.isRunningBalanceCalculated.isTrue())
+                    .orderBy(BALANCE_ENTRY.entryDate.desc(), BALANCE_ENTRY.id.desc()).limit(1);
         }
+        final GLAccountData account = query.fetchOne();
+        if (account == null) {
+            throw new GLAccountNotFoundException(glAccountId);
+        }
+        return account;
+    }
+
+    private SQLQuery<GLAccountData> glAccountQuery(final boolean runningBalanceRequired) {
+        return queryFactory.select(new GLAccountProjection(runningBalanceRequired ? ORGANIZATION_RUNNING_BALANCE : null)).from(accGlAccount)
+                .leftJoin(mCodeValue).on(accGlAccount.tagId.eq(mCodeValue.id));
     }
 
     @Override
