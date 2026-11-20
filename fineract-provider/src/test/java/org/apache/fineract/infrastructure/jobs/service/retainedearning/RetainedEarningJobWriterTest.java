@@ -60,7 +60,7 @@ class RetainedEarningJobWriterTest {
     @BeforeEach
     public void setup() {
         final JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
-        retainedEarningJobWriter.beforeStep(new StepExecution(JOB_SUMMARY_STEP_NAME, jobExecution));
+        retainedEarningJobWriter.beforeStep(new StepExecution(1L, JOB_SUMMARY_STEP_NAME, jobExecution));
     }
 
     @Test
