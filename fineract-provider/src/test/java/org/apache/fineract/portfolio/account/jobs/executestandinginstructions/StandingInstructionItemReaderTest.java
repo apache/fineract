@@ -56,7 +56,7 @@ class StandingInstructionItemReaderTest {
     @BeforeEach
     void setUp() {
         reader = new StandingInstructionItemReader(PAGE_SIZE, readService);
-        final StepExecution stepExecution = new StepExecution(ExecuteStandingInstructionsConstant.WORKER_STEP,
+        final StepExecution stepExecution = new StepExecution(1L, ExecuteStandingInstructionsConstant.WORKER_STEP,
                 new JobExecution(1L, new JobInstance(1L, ExecuteStandingInstructionsConstant.JOB_NAME), new JobParameters()));
         stepExecution.getExecutionContext().putLong(ExecuteStandingInstructionsConstant.MIN_ACCOUNT_KEY, 100L);
         stepExecution.getExecutionContext().putLong(ExecuteStandingInstructionsConstant.MAX_ACCOUNT_KEY, 199L);
