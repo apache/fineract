@@ -25,18 +25,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.sms.SmsApiConstants;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -110,17 +106,8 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
 
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
-
-        if (command.isChangeInStringParameterNamed(SmsApiConstants.messageParamName, this.message)) {
-            final String newValue = command.stringValueOfParameterNamed(SmsApiConstants.messageParamName);
-            actualChanges.put(SmsApiConstants.messageParamName, newValue);
-            this.message = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        return actualChanges;
+    public void updateMessage(final String message) {
+        this.message = StringUtils.defaultIfEmpty(message, null);
     }
 
 }
