@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.paymenttype.data;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -44,16 +45,20 @@ public class PaymentTypeUpdateRequest implements Serializable {
     private Long id;
     @NotBlank(message = "{org.apache.fineract.portfolio.paymenttype.name.not-blank}")
     private String name;
+    @Schema(description = "Omitted or null keeps the current value")
     @Size(max = 500, message = "{org.apache.fineract.portfolio.paymenttype.description.size}")
     private String description;
+    @Schema(description = "Omitted or null keeps the current value")
     private Boolean isCashPayment;
+    @Schema(description = "Omitted or null keeps the current value")
     @PositiveOrZero(message = "{org.apache.fineract.portfolio.paymenttype.position.positive-or-zero}")
     private Long position;
     // @JsonProperty("code_name") // TODO: fix this, for backwards compatibility only... leave this for Jackson config
+    @Schema(description = "Omitted or null keeps the current value")
     @Size(max = 100, message = "{org.apache.fineract.portfolio.paymenttype.code-name.size}")
     private String codeName;
     // @JsonProperty("system_defined") // TODO: fix this, for backwards compatibility only... leave this for Jackson
     // config
-    // null leaves the stored value unchanged
+    @Schema(description = "Omitted or null keeps the current value")
     private Boolean isSystemDefined;
 }
