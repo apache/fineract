@@ -1,3 +1,50 @@
 = Unit Testing
 
-TBD
+== Testing service methods on PostgreSQL, MySQL and MariaDB
+
+With Docker running, use the module's `test` task to run a class on all three databases.
+
+[source,shell]
+----
+./gradlew :fineract-accounting:test --tests '*ProvisioningEntryByDateDatabaseTest'
+----
+
+Select one engine with `-PtestDatabaseEngine=postgresql`, `mysql` or `mariadb`. Each database CI workflow selects its own engine.
+
+To add service database tests to any Fineract Java module, apply the convention plugin once in that module's `build.gradle`.
+It adds the shared test support and generated tenant QueryDSL classes to the test classpath
+and passes the selected database engine to the module's `test` task.
+
+[source,groovy]
+----
+apply plugin: 'org.apache.fineract.jdbc-testcontainers'
+----
+
+Extend `JdbcTestcontainersSupport` in `src/test/java` and list every table the query reads, including joins.
+Use QueryDSL to insert fixtures and pass the supplied `jdbc` or `queryFactory` to the service.
+
+[source,java]
+----
+@DatabaseTables({ QMProvisioningHistory.class, QMAppuser.class })
+class ProvisioningEntryByDateDatabaseTest extends JdbcTestcontainersSupport {
+
+    @Test
+    void findsEntryByDate() {
+        final QMProvisioningHistory history = QMProvisioningHistory.mProvisioningHistory;
+        queryFactory.insert(history).set(history.id, 10L).set(history.createdDate, Date.valueOf("2025-06-15")).execute();
+        final ProvisioningEntriesReadPlatformServiceImpl service =
+                new ProvisioningEntriesReadPlatformServiceImpl(jdbc, null, null, queryFactory);
+
+        assertThat(service.retrieveProvisioningEntryData("2025-06-15").getId()).isEqualTo(10L);
+    }
+}
+----
+
+Each JUnit run shares one container and its default schema per engine. Tables are created on first use.
+The local run executes the three engines sequentially. CI runs them in separate jobs.
+The fixture and service share one connection. Each test rolls back its transaction before the next test uses that engine.
+JUnit closes the containers at the end of the run.
+
+The schema is generated directly from the PostgreSQL-derived Q-classes. It reproduces columns, nullability and primary keys.
+Supply generated IDs and defaulted values explicitly. Use the migrated integration-test database for behavior that depends on defaults, foreign keys, unique constraints, indexes or seed data.
+An unsupported JDBC type (such as `OTHER` for UUID or JSON) fails setup with the table and column name.
