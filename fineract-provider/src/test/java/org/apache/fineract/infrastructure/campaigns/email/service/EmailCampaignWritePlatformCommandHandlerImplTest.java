@@ -322,8 +322,11 @@ class EmailCampaignWritePlatformCommandHandlerImplTest {
     }
 
     /**
-     * Documents existing behaviour: the start date change check reads the value with the separate {@code timeFormat}
-     * parameter, so an update of the start date without it fails.
+     * Documents a known defect, not intended behaviour: the start date change check reads the value with the separate
+     * {@code timeFormat} parameter, so an update of the start date without it fails. Because the update validator does
+     * not accept {@code timeFormat}, updating a scheduled campaign through the API returns 500. Tracked in
+     * <a href="https://issues.apache.org/jira/browse/FINERACT-3315">FINERACT-3315</a>; update this test when that is
+     * fixed.
      */
     @Test
     void updateOfTheStartDateWithoutATimeFormatFails() {
