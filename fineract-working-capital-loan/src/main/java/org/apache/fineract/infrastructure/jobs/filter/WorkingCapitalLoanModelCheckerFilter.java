@@ -37,7 +37,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>
  * Close-of-business rebuilds too, but only once a day and only for the loans it processes. A repayment arriving between
  * runs would otherwise read a model that has silently lost part of itself and write the loss back for good, so the
- * repair has to happen on the request path as well. The counterpart of {@link ProgressiveLoanModelCheckerFilter}.
+ * repair has to happen on the request path as well. The counterpart of {@code ProgressiveLoanModelCheckerFilter}.
  */
 @Component
 @RequiredArgsConstructor

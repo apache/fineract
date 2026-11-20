@@ -45,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
  * the current version before the request reads or writes them.
  *
  * <p>
- * The counterpart of {@link ProgressiveLoanModelCheckerHelper} for working capital loans, and deliberately the same
+ * The counterpart of {@code ProgressiveLoanModelCheckerHelper} for working capital loans, and deliberately the same
  * shape: the URL patterns and loan-id extraction match {@link WorkingCapitalLoanCOBFilterHelperImpl}, but this is a
  * separate bean because that one exists only when close-of-business is enabled, and a model has to be brought up to
  * date whether or not it is.
