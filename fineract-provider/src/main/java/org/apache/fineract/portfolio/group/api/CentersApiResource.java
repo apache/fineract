@@ -274,8 +274,9 @@ public class CentersApiResource {
                             .generateNextTenRecurringDates(collectionMeetingCalendar);
                     final MeetingData lastMeeting = this.meetingReadPlatformService
                             .retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
+                    final LocalDate lastMeetingDate = lastMeeting == null ? null : lastMeeting.getMeetingDate();
                     final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService
-                            .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
+                            .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeetingDate);
                     collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates,
                             nextTenRecurringDates, recentEligibleMeetingDate);
                 }
