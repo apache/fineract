@@ -165,9 +165,16 @@ public class GLAccountIntegrationTest extends FeignLoanTestBase {
                     .addCreditsItem(new SingleDebitOrCreditEntryCommand().glAccountId(newAccount.getResourceId()).amount(BigDecimal.TEN))
                     .addDebitsItem(new SingleDebitOrCreditEntryCommand().glAccountId(newAccount2.getResourceId()).amount(BigDecimal.TEN)));
 
+            schedulerHelper.executeAndAwaitJob("Update Accounting Running Balances");
+
             List<GetGLAccountsResponse> accounts = accountHelper.getGLAccountsWithRunningBalance();
-            assertTrue(accounts.stream().anyMatch(account -> newAccount.getResourceId().equals(account.getId())));
+            assertEquals(10L, findAccount(accounts, newAccount.getResourceId()).getOrganizationRunningBalance());
+            assertEquals(-10L, findAccount(accounts, newAccount2.getResourceId()).getOrganizationRunningBalance());
         });
+    }
+
+    private GetGLAccountsResponse findAccount(List<GetGLAccountsResponse> accounts, Long accountId) {
+        return accounts.stream().filter(account -> accountId.equals(account.getId())).findFirst().orElseThrow();
     }
 
     private PostGLAccountsResponse createGLAccount(String uniqueString) {
