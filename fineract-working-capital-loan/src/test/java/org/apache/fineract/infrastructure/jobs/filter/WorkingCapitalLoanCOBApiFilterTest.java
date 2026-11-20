@@ -33,7 +33,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.sun.research.ws.wadl.HTTPMethods;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,6 +74,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -130,7 +130,7 @@ class WorkingCapitalLoanCOBApiFilterTest {
     private static MockHttpServletRequest request(String pathInfo, String body) throws IOException {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         given(request.getPathInfo()).willReturn(pathInfo);
-        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
         given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(
                 new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8))));
         return request;

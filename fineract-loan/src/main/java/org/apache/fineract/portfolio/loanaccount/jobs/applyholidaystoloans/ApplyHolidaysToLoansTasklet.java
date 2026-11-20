@@ -43,7 +43,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanTermVariationsMapper;
-import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanaccount.service.ILoanUtilService;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -58,7 +58,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
     private final ConfigurationDomainService configurationDomainService;
     private final HolidayRepositoryWrapper holidayRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanUtilService loanUtilService;
+    private final ILoanUtilService loanUtilService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTermVariationsMapper loanTermVariationsMapper;
 
