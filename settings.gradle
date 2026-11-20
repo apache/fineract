@@ -55,7 +55,6 @@ buildCache {
 }
 
 rootProject.name='fineract'
-include ':fineract-fund'
 include ':fineract-core'
 include ':fineract-security'
 include ':fineract-cob'
@@ -72,6 +71,7 @@ include ':fineract-branch'
 include ':fineract-document'
 include ':fineract-investor'
 include ':fineract-rates'
+include ':fineract-fund'
 include ':fineract-charge'
 include ':fineract-tax'
 include ':fineract-loan-origination'
