@@ -72,7 +72,7 @@ public class InitialisationTaskletStepDefinitions implements En {
             JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
             jobExecution.getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     cobBusinessDate.format(DateTimeFormatter.ISO_DATE));
-            StepExecution stepExecution = new StepExecution("step", jobExecution);
+            StepExecution stepExecution = new StepExecution(1L, "step", jobExecution);
             StepContext stepContext = new StepContext(stepExecution);
             chunkContext = new ChunkContext(stepContext);
         });

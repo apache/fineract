@@ -75,7 +75,7 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
             businessDateMap.put(BusinessDateType.COB_DATE, LocalDate.now(ZoneId.systemDefault()));
             ThreadLocalContextUtil.setBusinessDates(businessDateMap);
             JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
-            StepExecution stepExecution = new StepExecution("test", jobExecution);
+            StepExecution stepExecution = new StepExecution(1L, "test", jobExecution);
             ExecutionContext executionContext = new ExecutionContext();
             COBParameter loanCOBParameter = new COBParameter(1L, 4L);
             executionContext.put(LoanCOBConstant.COB_PARAMETER, loanCOBParameter);
