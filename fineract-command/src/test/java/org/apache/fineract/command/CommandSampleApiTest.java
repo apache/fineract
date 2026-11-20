@@ -123,7 +123,7 @@ class CommandSampleApiTest {
         assertNotNull(result.getContent(), "Response body should not be null.");
         assertEquals(content.toUpperCase(Locale.ROOT), result.getContent(), "Wrong response content.");
 
-        // DummyResponse response = store.getResponseByKey(idempotencyKey);
+        // DummyResponse response = store.getResponseByKey(idempotencyKey, DummyResponse.class);
         //
         // assertNotNull(response, "There should be a command entity stored with a response.");
         // assertNotNull(response, "Response should not be null.");
