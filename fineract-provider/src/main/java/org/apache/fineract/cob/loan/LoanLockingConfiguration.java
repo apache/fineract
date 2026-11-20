@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -39,7 +40,7 @@ public class LoanLockingConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "retrieveLoanLockingService")
-    public LockingService retrieveLoanLockingService() {
-        return new LoanLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties);
+    public LockingService retrieveLoanLockingService(final SQLQueryFactory queryFactory) {
+        return new LoanLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory);
     }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.savings;
 
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -39,7 +40,7 @@ public class SavingsLockingConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "savingsLockingService")
-    public LockingService savingsLockingService() {
-        return new SavingsLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties);
+    public LockingService savingsLockingService(final SQLQueryFactory queryFactory) {
+        return new SavingsLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory);
     }
 }

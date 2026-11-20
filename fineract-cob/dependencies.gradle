@@ -27,6 +27,7 @@ dependencies {
     implementation(project(path: ':fineract-command'))
     implementation(project(path: ':fineract-validation'))
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-querydsl'))
 
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)

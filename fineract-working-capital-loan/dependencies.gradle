@@ -23,6 +23,7 @@ dependencies {
     implementation(project(path: ':fineract-loan'))
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-cob'))
+    implementation(project(path: ':fineract-querydsl'))
     implementation('org.apache.avro:avro')
     implementation(
             project(path: ':fineract-avro-schemas')

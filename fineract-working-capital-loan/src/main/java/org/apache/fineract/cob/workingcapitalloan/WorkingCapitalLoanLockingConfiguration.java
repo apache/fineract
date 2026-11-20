@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
+import com.querydsl.sql.SQLQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -37,7 +38,7 @@ public class WorkingCapitalLoanLockingConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "workingCapitalLoanLockingService")
-    public LockingService workingCapitalLoanLockingService() {
-        return new WorkingCapitalLoanLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties);
+    public LockingService workingCapitalLoanLockingService(final SQLQueryFactory queryFactory) {
+        return new WorkingCapitalLoanLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory);
     }
 }

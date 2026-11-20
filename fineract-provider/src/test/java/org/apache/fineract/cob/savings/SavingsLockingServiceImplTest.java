@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.savings;
 
+import static org.apache.fineract.query.QMSavingsAccountLocks.mSavingsAccountLocks;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,6 +29,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.querydsl.sql.Configuration;
+import com.querydsl.sql.MySQLTemplates;
+import com.querydsl.sql.SQLBindings;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -37,6 +43,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,13 +69,16 @@ class SavingsLockingServiceImplTest {
     @Mock
     private FineractProperties.FineractQueryProperties queryProperties;
 
+    @Mock
+    private SQLQueryFactory queryFactory;
+
     private SavingsLockingServiceImpl service;
 
     @BeforeEach
     void setUp() {
         lenient().when(fineractProperties.getQuery()).thenReturn(queryProperties);
         lenient().when(queryProperties.getInClauseParameterSizeLimit()).thenReturn(1000);
-        service = new SavingsLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties);
+        service = new SavingsLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties, queryFactory);
 
         HashMap<BusinessDateType, LocalDate> dates = new HashMap<>();
         dates.put(BusinessDateType.COB_DATE, COB_BUSINESS_DATE);
@@ -161,21 +171,31 @@ class SavingsLockingServiceImplTest {
         List<Long> result = service.findLockIdsByLoanIdIn(List.of());
 
         assertThat(result).isEmpty();
-        verifyNoInteractions(jdbcTemplate, sqlGenerator);
+        verifyNoInteractions(jdbcTemplate, sqlGenerator, queryFactory);
     }
 
     @Test
     void findLockIdsByLoanIdInQueriesByIdList() {
-        List<Long> savingsIds = List.of(10L, 20L, 30L);
-        when(sqlGenerator.in("savings_id", savingsIds)).thenReturn("savings_id IN (?,?,?)");
-        when(sqlGenerator.inParametersFor(savingsIds)).thenReturn(new Object[] { 10L, 20L, 30L });
-        when(jdbcTemplate.queryForList(anyString(), eq(Long.class), any(Object[].class))).thenReturn(List.of(10L, 30L));
+        final List<Long> savingsIds = List.of(10L, 20L, 30L);
+        when(sqlGenerator.getDialect()).thenReturn(DatabaseType.MYSQL);
+        final SQLQuery<Long> query = new SQLQuery<>(new Configuration(MySQLTemplates.builder().build())) {
 
-        List<Long> result = service.findLockIdsByLoanIdIn(savingsIds);
+            @Override
+            public List<Long> fetch() {
+                return List.of(10L, 30L);
+            }
+        };
+        when(queryFactory.select(mSavingsAccountLocks.savingsId)).thenReturn(query.select(mSavingsAccountLocks.savingsId));
+
+        final List<Long> result = service.findLockIdsByLoanIdIn(savingsIds);
 
         assertThat(result).containsExactly(10L, 30L);
-        verify(jdbcTemplate).queryForList("SELECT savings_id FROM m_savings_account_locks WHERE savings_id IN (?,?,?)", Long.class,
-                new Object[] { 10L, 20L, 30L });
+        final SQLBindings bindings = query.getSQL();
+        assertThat(normalize(bindings.getSQL()))
+                .isEqualTo("select m_savings_account_locks.savings_id from m_savings_account_locks m_savings_account_locks "
+                        + "where m_savings_account_locks.savings_id in (?, ?, ?)");
+        assertThat(bindings.getNullFriendlyBindings()).containsExactly(10L, 20L, 30L);
+        verifyNoInteractions(jdbcTemplate);
     }
 
     // ---------- findLockIdsByLoanIdInAndLockOwner ----------
