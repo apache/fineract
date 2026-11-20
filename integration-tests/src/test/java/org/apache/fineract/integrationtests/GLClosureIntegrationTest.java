@@ -20,14 +20,20 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.integrationtests.client.feign.modules.FeignTestConstants.ISO_DATE_PATTERN;
 import static org.apache.fineract.integrationtests.client.feign.modules.FeignTestConstants.LOCALE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import feign.Headers;
+import feign.Param;
+import feign.RequestLine;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.DeleteGlClosuresResponse;
 import org.apache.fineract.client.models.GetGlClosureResponse;
@@ -35,6 +41,7 @@ import org.apache.fineract.client.models.PostGlClosuresRequest;
 import org.apache.fineract.client.models.PostGlClosuresResponse;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutGlClosuresRequest;
+import org.apache.fineract.client.models.PutGlClosuresResponse;
 import org.apache.fineract.integrationtests.ConfigProperties.Backend;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
@@ -56,6 +63,18 @@ class GLClosureIntegrationTest extends FeignIntegrationTest {
 
     private final FeignBusinessDateHelper businessDateHelper = new FeignBusinessDateHelper(fineractClient());
     private final List<Long> createdClosureIds = new ArrayList<>();
+
+    @Headers({ "Accept: application/json", "Content-Type: application/json" })
+    public interface GLClosureCustomApi {
+
+        @RequestLine("POST /v1/glclosures")
+        PostGlClosuresResponse createRaw(Map<String, Object> request);
+
+        @RequestLine("PUT /v1/glclosures/{id}")
+        PutGlClosuresResponse updateRaw(@Param("id") Long id, Map<String, Object> request);
+    }
+
+    private final GLClosureCustomApi glClosureCustomApi = fineractClient().create(GLClosureCustomApi.class);
 
     @AfterEach
     void deleteClosures() {
@@ -186,6 +205,70 @@ class GLClosureIntegrationTest extends FeignIntegrationTest {
             Assertions.assertThat(response.getResourceId()).isEqualTo(laterClosureId);
             Assertions.assertThat(retrieveClosures(officeId)).extracting(GetGlClosureResponse::getId).containsExactly(earlierClosureId);
         });
+    }
+
+    @Test
+    void testGLClosureLifecycleWithDocumentedDateFormat() {
+        // 1. Setup isolated branch office
+        final PostOfficesResponse officeResponse = createOffice();
+        final Long officeId = officeResponse.getResourceId();
+        assertNotNull(officeId);
+
+        // 2. Create accounting closure using documented payload format ("06 December 2012", "dd MMMM yyyy", "en")
+        final Map<String, Object> createPayload = Map.of("officeId", officeId, "closingDate", "06 December 2012", "dateFormat",
+                "dd MMMM yyyy", "locale", "en", "comments", "Documented format closure test");
+        final PostGlClosuresResponse createResponse = ok(() -> glClosureCustomApi.createRaw(createPayload));
+        final Long closureId = createResponse.getResourceId();
+        assertNotNull(closureId);
+        createdClosureIds.add(closureId);
+
+        // 3. Retrieve and assert parsed date and properties
+        final GetGlClosureResponse retrieved = ok(() -> fineractClient().accountingClosure().retrieveOneGLClosure(closureId));
+        assertEquals(officeId, retrieved.getOfficeId());
+        assertEquals(LocalDate.of(2012, 12, 6), retrieved.getClosingDate());
+        assertEquals("Documented format closure test", retrieved.getComments());
+
+        // 4. Verify PUT without comments ({}) is rejected with 400 Bad Request
+        final CallFailedRuntimeException emptyPutError = FeignCalls.fail(() -> glClosureCustomApi.updateRaw(closureId, Map.of()));
+        assertEquals(400, emptyPutError.getStatus());
+
+        // 5. Update comments
+        final Map<String, Object> updatePayload = Map.of("comments", "Updated closure comments");
+        final PutGlClosuresResponse updateResponse = ok(() -> glClosureCustomApi.updateRaw(closureId, updatePayload));
+        assertNotNull(updateResponse);
+
+        final GetGlClosureResponse updated = ok(() -> fineractClient().accountingClosure().retrieveOneGLClosure(closureId));
+        assertEquals("Updated closure comments", updated.getComments());
+
+        // 6. Delete closure
+        final DeleteGlClosuresResponse deleteResponse = ok(() -> fineractClient().accountingClosure().deleteGLClosure(closureId));
+        createdClosureIds.remove(closureId);
+        assertEquals(closureId, deleteResponse.getResourceId());
+
+        final CallFailedRuntimeException getAfterDeleteError = FeignCalls
+                .fail(() -> fineractClient().accountingClosure().retrieveOneGLClosure(closureId));
+        assertEquals(404, getAfterDeleteError.getStatus());
+    }
+
+    @Test
+    void testGLClosureCreateWithStandardClientModel() {
+        // 1. Setup isolated branch office
+        final PostOfficesResponse officeResponse = createOffice();
+        final Long officeId = officeResponse.getResourceId();
+        assertNotNull(officeId);
+
+        // 2. Create accounting closure with standard generated client model
+        final PostGlClosuresRequest request = new PostGlClosuresRequest().officeId(officeId).closingDate(LocalDate.of(2013, 5, 10))
+                .dateFormat("yyyy-MM-dd").locale("en").comments("Standard model closure");
+
+        final PostGlClosuresResponse createResponse = ok(() -> fineractClient().accountingClosure().createGLClosure(request));
+        final Long closureId = createResponse.getResourceId();
+        assertNotNull(closureId);
+        createdClosureIds.add(closureId);
+
+        // 3. Retrieve and assert
+        final GetGlClosureResponse retrieved = ok(() -> fineractClient().accountingClosure().retrieveOneGLClosure(closureId));
+        assertEquals(LocalDate.of(2013, 5, 10), retrieved.getClosingDate());
     }
 
     private PostOfficesResponse createOffice() {
