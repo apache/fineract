@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -38,6 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreditBureauConfigurationWritePlatformServiceImpl implements CreditBureauConfigurationWritePlatformService {
+
+    private static final String CONFIG_KEY_PARAM = "configkey";
+    private static final String VALUE_PARAM = "value";
+    private static final String DESCRIPTION_PARAM = "description";
 
     private final PlatformSecurityContext context;
 
@@ -67,7 +72,9 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
 
         final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getReferenceById(creditBureauId);
 
-        final CreditBureauConfiguration cb_config = CreditBureauConfiguration.fromJson(command, orgcb);
+        final CreditBureauConfiguration cb_config = CreditBureauConfiguration.createNew(
+                command.stringValueOfParameterNamed(CONFIG_KEY_PARAM), command.stringValueOfParameterNamed(VALUE_PARAM),
+                command.stringValueOfParameterNamed(DESCRIPTION_PARAM), orgcb);
 
         this.creditBureauConfigurationRepository.saveAndFlush(cb_config);
 
@@ -87,7 +94,7 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final CreditBureauConfiguration config = retrieveConfigBy(configurationId);
-            final Map<String, Object> changes = config.update(command);
+            final Map<String, Object> changes = updateConfiguration(config, command);
 
             if (!changes.isEmpty()) {
                 this.creditBureauConfigurationRepository.save(config);
@@ -104,6 +111,32 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
                     "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
         }
 
+    }
+
+    private Map<String, Object> updateConfiguration(final CreditBureauConfiguration config, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+
+        if (command.isChangeInStringParameterNamed(CONFIG_KEY_PARAM, config.getConfigurationKey())) {
+            final String newValue = command.stringValueOfParameterNamed(CONFIG_KEY_PARAM);
+            actualChanges.put(CONFIG_KEY_PARAM, newValue);
+            config.updateConfigurationKey(newValue);
+        }
+
+        if (command.isChangeInStringParameterNamed(VALUE_PARAM, config.getValue())) {
+            final String newValue = command.stringValueOfParameterNamed(VALUE_PARAM);
+            actualChanges.put(VALUE_PARAM, newValue);
+            config.updateValue(newValue);
+        }
+
+        // Existing behaviour kept as is: the description is compared with the configuration key, not with the
+        // description.
+        if (command.isChangeInStringParameterNamed(DESCRIPTION_PARAM, config.getConfigurationKey())) {
+            final String newValue = command.stringValueOfParameterNamed(DESCRIPTION_PARAM);
+            actualChanges.put(DESCRIPTION_PARAM, newValue);
+            config.updateDescription(newValue);
+        }
+
+        return actualChanges;
     }
 
     private CreditBureauConfiguration retrieveConfigBy(final Long creditBureauId) {
