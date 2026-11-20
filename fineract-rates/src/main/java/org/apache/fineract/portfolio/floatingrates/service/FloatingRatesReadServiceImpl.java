@@ -128,7 +128,7 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
                     null);
         }
 
-        public String schema() {
+        private String schema() {
             return FLOATING_RATE_SCHEMA;
         }
     }
@@ -165,7 +165,7 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
                     modifiedBy, modifiedOn);
         }
 
-        public String schema() {
+        private String schema() {
             return FLOATING_RATE_PERIOD_SCHEMA;
         }
     }
@@ -184,7 +184,7 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
             return new FloatingRateData(id, name, isBaseLendingRate, true, null, null, null, null, null, null);
         }
 
-        public String schema() {
+        private String schema() {
             return FLOATING_RATE_LOOKUP_SCHEMA;
         }
     }
@@ -238,7 +238,7 @@ public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
             return new InterestRatePeriodData(fromLocalDate, interestRate, isDifferentialToBLR, blrFromLocalDate, blrInterestRate);
         }
 
-        public String schema() {
+        private String schema() {
             return FLOATING_INTEREST_RATE_PERIOD_SCHEMA;
         }
     }
