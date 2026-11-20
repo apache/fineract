@@ -122,7 +122,6 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
-import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
@@ -224,7 +223,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final ConfigurationDomainService configurationDomainService;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final FromJsonHelper fromApiJsonHelper;
@@ -264,7 +262,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanOriginatorLinkingService loanOriginatorLinkingService;
     private final LoanChargeService loanChargeService;
     private final LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier;
-    private final LoanTransactionWritePlatformService loanTransactionWritePlatformService;
 
     @Transactional
     @Override
@@ -909,33 +906,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public CommandProcessingResult makeGLIMLoanRepayment(final Long loanId, final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.makeGLIMLoanRepayment(loanId, command);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
-            final JsonCommand command, final boolean isRecoveryRepayment) {
-        return this.loanTransactionWritePlatformService.makeLoanRepayment(repaymentTransactionType, loanId, command, isRecoveryRepayment);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(final LoanTransactionType repaymentTransactionType,
-            final Long loanId, final JsonCommand command, final boolean isRecoveryRepayment, final String chargeRefundChargeType) {
-        return this.loanTransactionWritePlatformService.makeLoanRepaymentWithChargeRefundChargeType(repaymentTransactionType, loanId,
-                command, isRecoveryRepayment, chargeRefundChargeType);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult makeInterestPaymentWaiver(final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.makeInterestPaymentWaiver(command);
-    }
-
-    @Transactional
-    @Override
     public Map<String, Object> makeLoanBulkRepayment(final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand) {
 
         final SingleRepaymentCommand[] repaymentCommand = bulkRepaymentCommand.getLoanTransactions();
@@ -991,24 +961,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         changes.put("loanTransactions", transactionIds);
         return changes;
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.adjustLoanTransaction(loanId, transactionId, command);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult chargebackLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.chargebackLoanTransaction(loanId, transactionId, command);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult waiveInterestOnLoan(final Long loanId, final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.waiveInterestOnLoan(loanId, command);
     }
 
     @Transactional
@@ -1933,11 +1885,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return loan;
     }
 
-    @Override
-    public CommandProcessingResult recoverFromGuarantor(final Long loanId) {
-        return this.loanTransactionWritePlatformService.recoverFromGuarantor(loanId);
-    }
-
     @SuppressWarnings("unused")
     public void fallbackRecalculateInterest(Throwable t) {
         // NOTE: allow caller to catch the exceptions
@@ -2027,11 +1974,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     @Override
-    public CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command) {
-        return this.loanTransactionWritePlatformService.creditBalanceRefund(loanId, command);
-    }
-
-    @Override
     @Transactional
     public CommandProcessingResult markLoanAsFraud(Long loanId, JsonCommand command) {
         this.loanTransactionValidator.validateMarkAsFraudLoan(command.json());
@@ -2055,12 +1997,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
-    }
-
-    @Override
-    @Transactional
-    public CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command) {
-        return this.loanTransactionWritePlatformService.makeLoanRefund(loanId, command);
     }
 
     private AppUser getAppUserIfPresent() {
@@ -2320,17 +2256,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withEntityId(chargedOffTransaction.getId()) //
                 .withEntityExternalId(chargedOffTransaction.getExternalId()) //
                 .build();
-    }
-
-    @Override
-    public CommandProcessingResult makeRefund(final Long loanId, final LoanTransactionType loanTransactionType, final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.makeRefund(loanId, loanTransactionType, command);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult makeManualInterestRefund(final Long loanId, final Long transactionId, final JsonCommand command) {
-        return this.loanTransactionWritePlatformService.makeManualInterestRefund(loanId, transactionId, command);
     }
 
     private void validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(Loan loan) {
