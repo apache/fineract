@@ -79,7 +79,7 @@ class RetainedEarningJobReaderTest {
     private StepExecution newStepExecution(final LocalDate fiscalYearEndDate) {
         final JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
         jobExecution.getExecutionContext().put(FISCAL_YEAR_END_DATE_CONTEXT_KEY, fiscalYearEndDate);
-        return new StepExecution(JOB_SUMMARY_STEP_NAME, jobExecution);
+        return new StepExecution(1L, JOB_SUMMARY_STEP_NAME, jobExecution);
     }
 
     @Test
