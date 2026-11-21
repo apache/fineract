@@ -156,6 +156,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentFeeEventNotifier;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanForeclosureDetailService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanMaximumAmountCalculator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
@@ -464,13 +465,13 @@ public class LoanAccountConfiguration {
             LoanBalanceService loanBalanceService, LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
             LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository,
             @Lazy InterestRefundServiceDelegate interestRefundServiceDelegate, LoanMaximumAmountCalculator loanMaximumAmountCalculator,
-            LoanAccountDataReadService loanAccountDataReadService) {
+            LoanAccountDataReadService loanAccountDataReadService, LoanForeclosureDetailService loanForeclosureDetailService) {
         return new LoanTemplateReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, applicationCurrencyRepository,
                 loanProductReadPlatformService, loanDropdownReadPlatformService, fundReadPlatformService, chargeReadService,
                 codeValueReadPlatformService, paymentTypeReadPlatformService, loanUtilService, accountDetailsReadPlatformService,
                 sqlGenerator, delinquencyReadPlatformService, loanForeclosureValidator, loadTransactionProcessingService,
                 loanBalanceService, loanCapitalizedIncomeBalanceRepository, loanBuyDownFeeBalanceRepository, interestRefundServiceDelegate,
-                loanMaximumAmountCalculator, loanAccountDataReadService);
+                loanMaximumAmountCalculator, loanAccountDataReadService, loanForeclosureDetailService);
     }
 
     @Bean
