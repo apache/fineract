@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.sms.service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.sms.SmsApiConstants;
 import org.apache.fineract.infrastructure.sms.data.SmsDataValidator;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageAssembler;
@@ -89,7 +91,7 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
             this.validator.validateForUpdate(command.json());
 
             final SmsMessage message = this.assembler.assembleFromResourceId(resourceId);
-            final Map<String, Object> changes = message.update(command);
+            final Map<String, Object> changes = updateMessage(message, command);
             if (!changes.isEmpty()) {
                 this.repository.save(message);
             }
@@ -137,5 +139,17 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
         LOG.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.sms.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
+
+    private static Map<String, Object> updateMessage(final SmsMessage message, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+
+        if (command.isChangeInStringParameterNamed(SmsApiConstants.messageParamName, message.getMessage())) {
+            final String newValue = command.stringValueOfParameterNamed(SmsApiConstants.messageParamName);
+            actualChanges.put(SmsApiConstants.messageParamName, newValue);
+            message.updateMessage(newValue);
+        }
+
+        return actualChanges;
     }
 }

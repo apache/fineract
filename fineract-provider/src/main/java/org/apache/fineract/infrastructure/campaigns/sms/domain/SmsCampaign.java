@@ -35,16 +35,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
 import org.apache.fineract.infrastructure.campaigns.sms.serialization.SmsCampaignValidator;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -143,114 +139,40 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         this.isNotification = isNotification;
     }
 
-    public static SmsCampaign instance(final AppUser submittedBy, final Report report, final JsonCommand command) {
-        final String campaignName = command.stringValueOfParameterNamed(SmsCampaignValidator.campaignName);
-        final Long campaignType = command.longValueOfParameterNamed(SmsCampaignValidator.campaignType);
-        final Long triggerType = command.longValueOfParameterNamed(SmsCampaignValidator.triggerType);
-        boolean isNotification = false;
-        if (command.parameterExists(SmsCampaignValidator.isNotificationParamName)) {
-            isNotification = command.booleanPrimitiveValueOfParameterNamed(SmsCampaignValidator.isNotificationParamName);
-        }
-        Long providerId = null;
-        if (!isNotification) {
-            providerId = command.longValueOfParameterNamed(SmsCampaignValidator.providerId);
-        }
-
-        final String paramValue = command.jsonFragment(SmsCampaignValidator.paramValue);
-
-        final String message = command.stringValueOfParameterNamed(SmsCampaignValidator.message);
-        LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
-        if (command.hasParameter(SmsCampaignValidator.submittedOnDateParamName)) {
-            submittedOnDate = command.localDateValueOfParameterNamed(SmsCampaignValidator.submittedOnDateParamName);
-        }
-        String recurrence = null;
-
-        LocalDateTime recurrenceStartDate = null;
-        if (SCHEDULE.getValue().equals(triggerType.intValue())) {
-            final Locale locale = command.extractLocale();
-            String dateTimeFormat;
-            recurrenceStartDate = DateUtils.getLocalDateTimeOfTenant();
-            if (command.hasParameter(SmsCampaignValidator.dateTimeFormat)) {
-                dateTimeFormat = command.stringValueOfParameterNamed(SmsCampaignValidator.dateTimeFormat);
-                final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateTimeFormat).withLocale(locale);
-                if (command.hasParameter(SmsCampaignValidator.recurrenceStartDate)) {
-                    recurrenceStartDate = LocalDateTime.parse(command.stringValueOfParameterNamed(SmsCampaignValidator.recurrenceStartDate),
-                            fmt);
-                }
-                recurrence = constructRecurrence(command);
-            }
-        }
-
-        return new SmsCampaign(campaignName, campaignType.intValue(), triggerType.intValue(), report, providerId, paramValue, message,
-                submittedOnDate, submittedBy, recurrence, recurrenceStartDate, isNotification);
+    public static SmsCampaign createNew(final String campaignName, final Integer campaignType, final Integer triggerType,
+            final Report businessRuleId, final Long providerId, final String paramValue, final String message,
+            final LocalDate submittedOnDate, final AppUser submittedBy, final String recurrence, final LocalDateTime recurrenceStartDate,
+            final boolean isNotification) {
+        return new SmsCampaign(campaignName, campaignType, triggerType, businessRuleId, providerId, paramValue, message, submittedOnDate,
+                submittedBy, recurrence, recurrenceStartDate, isNotification);
     }
 
-    public Map<String, Object> update(JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+    public void updateCampaignName(final String campaignName) {
+        this.campaignName = StringUtils.defaultIfEmpty(campaignName, null);
+    }
 
-        if (command.isChangeInStringParameterNamed(SmsCampaignValidator.campaignName, this.campaignName)) {
-            final String newValue = command.stringValueOfParameterNamed(SmsCampaignValidator.campaignName);
-            actualChanges.put(SmsCampaignValidator.campaignName, newValue);
-            this.campaignName = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        if (command.isChangeInStringParameterNamed(SmsCampaignValidator.message, this.message)) {
-            final String newValue = command.stringValueOfParameterNamed(SmsCampaignValidator.message);
-            actualChanges.put(SmsCampaignValidator.message, newValue);
-            this.message = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        if (command.isChangeInStringParameterNamed(SmsCampaignValidator.paramValue, this.paramValue)) {
-            final String newValue = command.jsonFragment(SmsCampaignValidator.paramValue);
-            actualChanges.put(SmsCampaignValidator.paramValue, newValue);
-            this.paramValue = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        if (command.isChangeInIntegerParameterNamed(SmsCampaignValidator.campaignType, this.campaignType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(SmsCampaignValidator.campaignType);
-            actualChanges.put(SmsCampaignValidator.campaignType, CampaignType.fromInt(newValue));
-            this.campaignType = CampaignType.fromInt(newValue).getValue();
-        }
+    public void updateMessage(final String message) {
+        this.message = StringUtils.defaultIfEmpty(message, null);
+    }
 
-        if (command.isChangeInIntegerParameterNamed(SmsCampaignValidator.triggerType, this.triggerType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(SmsCampaignValidator.triggerType);
-            actualChanges.put(SmsCampaignValidator.triggerType, SmsCampaignTriggerType.fromInt(newValue));
-            this.triggerType = SmsCampaignTriggerType.fromInt(newValue).getValue();
-        }
+    public void updateParamValue(final String paramValue) {
+        this.paramValue = StringUtils.defaultIfEmpty(paramValue, null);
+    }
 
-        if (command.isChangeInLongParameterNamed(SmsCampaignValidator.runReportId,
-                this.businessRuleId != null ? this.businessRuleId.getId() : null)) {
-            final String newValue = command.stringValueOfParameterNamed(SmsCampaignValidator.runReportId);
-            actualChanges.put(SmsCampaignValidator.runReportId, newValue);
-        }
-        if (command.isChangeInStringParameterNamed(SmsCampaignValidator.recurrenceParamName, this.recurrence)) {
-            final String newValue = command.stringValueOfParameterNamed(SmsCampaignValidator.recurrenceParamName);
-            actualChanges.put(SmsCampaignValidator.recurrenceParamName, newValue);
-            this.recurrence = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        if (command.isChangeInLongParameterNamed(SmsCampaignValidator.providerId, this.providerId)) {
-            final Long newValue = command.longValueOfParameterNamed(SmsCampaignValidator.providerId);
-            actualChanges.put(SmsCampaignValidator.providerId, newValue);
-        }
-        if (command.isChangeInBooleanParameterNamed(SmsCampaignValidator.isNotificationParamName, this.isNotification)) {
-            final Boolean newValue = command.booleanObjectValueOfParameterNamed(SmsCampaignValidator.isNotificationParamName);
-            this.isNotification = newValue;
-            actualChanges.put(SmsCampaignValidator.isNotificationParamName, newValue);
-        }
+    public void updateCampaignType(final CampaignType campaignType) {
+        this.campaignType = campaignType.getValue();
+    }
 
-        if (isSchedule()) {
-            final String dateFormatAsInput = command.dateFormat();
-            final String dateTimeFormatAsInput = command.stringValueOfParameterNamed(SmsCampaignValidator.dateTimeFormat);
-            final String localeAsInput = command.locale();
-            final Locale locale = command.extractLocale();
-            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateTimeFormatAsInput).withLocale(locale);
-            final String valueAsInput = command.stringValueOfParameterNamed(SmsCampaignValidator.recurrenceStartDate);
-            actualChanges.put(SmsCampaignValidator.recurrenceStartDate, valueAsInput);
-            actualChanges.put(SmsCampaignValidator.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(SmsCampaignValidator.dateTimeFormat, dateTimeFormatAsInput);
-            actualChanges.put(SmsCampaignValidator.localeParamName, localeAsInput);
+    public void updateTriggerType(final SmsCampaignTriggerType triggerType) {
+        this.triggerType = triggerType.getValue();
+    }
 
-            this.recurrenceStartDate = LocalDateTime.parse(valueAsInput, fmt);
-        }
+    public void updateRecurrence(final String recurrence) {
+        this.recurrence = StringUtils.defaultIfEmpty(recurrence, null);
+    }
 
-        return actualChanges;
+    public void updateRecurrenceStartDate(final LocalDateTime recurrenceStartDate) {
+        this.recurrenceStartDate = recurrenceStartDate;
     }
 
     public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
@@ -507,18 +429,15 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         return this.providerId;
     }
 
-    private static String constructRecurrence(final JsonCommand command) {
-        final Integer frequency = command.integerValueOfParameterNamed(SmsCampaignValidator.frequencyParamName);
-        final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(frequency);
-        final Integer interval = command.integerValueOfParameterNamed(SmsCampaignValidator.intervalParamName);
-        Integer repeatsOnDay = null;
-        if (frequencyType.isWeekly()) {
-            repeatsOnDay = command.integerValueOfParameterNamed(SmsCampaignValidator.repeatsOnDayParamName);
-        }
-        return constructRecurrence(frequencyType, interval, repeatsOnDay);
+    public Integer getCampaignType() {
+        return this.campaignType;
     }
 
-    private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval,
+    public Integer getTriggerType() {
+        return this.triggerType;
+    }
+
+    public static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval,
             final Integer repeatsOnDay) {
         final StringBuilder recurrenceBuilder = new StringBuilder(200);
 
