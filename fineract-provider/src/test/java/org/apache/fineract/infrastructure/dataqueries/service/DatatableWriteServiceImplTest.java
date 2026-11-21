@@ -60,6 +60,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.TableColumnReader;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,6 +114,8 @@ class DatatableWriteServiceImplTest {
     private DatatableUtil datatableUtil;
     @Mock
     private GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
+    @Mock
+    private TableColumnReader tableColumnReader;
 
     @InjectMocks
     private DatatableWriteServiceImpl underTest;
