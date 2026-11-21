@@ -19,9 +19,14 @@
 package org.apache.fineract.accounting.provisioning.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.sql.Configuration;
@@ -29,6 +34,7 @@ import com.querydsl.sql.MySQLTemplates;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -38,6 +44,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -46,10 +53,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
- * Runs the QueryDSL queries of
- * {@link ProvisioningEntriesReadPlatformServiceImpl#retrieveAllProvisioningEntries(Integer, Integer)} through a real
+ * Runs the QueryDSL queries of {@link ProvisioningEntriesReadPlatformServiceImpl} through a real
  * {@link SQLQueryFactory} on top of a mocked JDBC connection, so that the generated SQL, the paging and the result
  * mapping are all verified.
  */
@@ -67,9 +74,27 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
 
     private static final String COUNT_SQL = "select count(*)\nfrom m_provisioning_history m_provisioning_history";
 
+    private static final String EXPECTED_SQL = """
+            select entry.history_id, entry.office_id, office.name, entry.currency_code, entry.product_id, \
+            product.name, entry.category_id, category.category_name, entry.overdue_in_days, entry.reseve_amount, \
+            liability.id, liability.gl_code, liability.name, expense.id, expense.gl_code, expense.name, entry.criteria_id
+            from m_loanproduct_provisioning_entry entry
+            left join m_office office
+            on office.id = entry.office_id
+            left join m_product_loan product
+            on product.id = entry.product_id
+            left join m_provision_category category
+            on category.id = entry.category_id
+            left join acc_gl_account liability
+            on liability.id = entry.liability_account
+            left join acc_gl_account expense
+            on expense.id = entry.expense_account
+            where entry.criteria_id = ?""";
+
     private final Connection connection = mock(Connection.class);
     private final PreparedStatement statement = mock(PreparedStatement.class);
     private final List<String> executedSql = new ArrayList<>();
+    private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
     @Test
     void retrieveAllProvisioningEntriesMapsRowsAndTotalOnPostgreSQL() throws SQLException {
@@ -170,6 +195,102 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
         assertEquals(SELECT_SQL, executedSql.get(0));
     }
 
+    @Test
+    void retrieveProvisioningEntryDataByCriteriaIdMapsAllFieldsOnPostgreSQL() throws SQLException {
+        Object[] row = new Object[] { 100L, 1L, "Head Office", "USD", 2L, "Personal Loan", 3L, "Standard", 15L,
+                new BigDecimal("500.000000"), 20L, "2000", "Provision Liability", 30L, "5000", "Provision Expense", 10L };
+        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build(), row);
+
+        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(100L))).thenReturn(new ProvisioningEntryData().setId(100L));
+
+        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(10L);
+
+        assertNotNull(result);
+        assertEquals(100L, result.getId());
+        assertNotNull(result.getProvisioningEntries());
+        assertEquals(1, result.getProvisioningEntries().size());
+
+        LoanProductProvisioningEntryData entryData = result.getProvisioningEntries().iterator().next();
+        assertEquals(100L, entryData.getHistoryId());
+        assertEquals(1L, entryData.getOfficeId());
+        assertEquals("Head Office", entryData.getOfficeName());
+        assertEquals("USD", entryData.getCurrencyCode());
+        assertEquals(2L, entryData.getProductId());
+        assertEquals("Personal Loan", entryData.getProductName());
+        assertEquals(3L, entryData.getCategoryId());
+        assertEquals("Standard", entryData.getCategoryName());
+        assertEquals(15L, entryData.getOverdueInDays());
+        assertEquals(new BigDecimal("500.000000"), entryData.getAmountreserved());
+        assertEquals(20L, entryData.getLiablityAccount());
+        assertEquals("2000", entryData.getLiabilityAccountCode());
+        assertEquals("Provision Liability", entryData.getLiabilityAccountName());
+        assertEquals(30L, entryData.getExpenseAccount());
+        assertEquals("5000", entryData.getExpenseAccountCode());
+        assertEquals("Provision Expense", entryData.getExpenseAccountName());
+        assertEquals(10L, entryData.getCriteriaId());
+
+        assertEquals(EXPECTED_SQL, executedSql.get(0));
+        verify(statement).setLong(1, 10L);
+    }
+
+    @Test
+    void retrieveProvisioningEntryDataByCriteriaIdMapsAllFieldsOnMySQL() throws SQLException {
+        Object[] row = new Object[] { 101L, 2L, "Regional Branch", "EUR", 5L, "Auto Loan", 4L, "Substandard", 30L,
+                new BigDecimal("750.500000"), 25L, "2100", "Auto Liability", 35L, "5100", "Auto Expense", 20L };
+        ProvisioningEntriesReadPlatformService service = service(MySQLTemplates.builder().build(), row);
+
+        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(101L))).thenReturn(new ProvisioningEntryData().setId(101L));
+
+        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(20L);
+
+        assertNotNull(result);
+        assertEquals(101L, result.getId());
+        assertEquals(EXPECTED_SQL, executedSql.get(0));
+        verify(statement).setLong(1, 20L);
+    }
+
+    @Test
+    void retrieveProvisioningEntryDataByCriteriaIdReturnsNullWhenNoEntriesFound() throws SQLException {
+        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build());
+
+        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(999L);
+
+        assertNull(result);
+        assertEquals(EXPECTED_SQL, executedSql.get(0));
+        verify(statement).setLong(1, 999L);
+    }
+
+    @Test
+    void retrieveProvisioningEntryDataByCriteriaIdKeepsNullableFieldsNull() throws SQLException {
+        Object[] row = new Object[] { 200L, null, null, "USD", null, null, null, null, null, null, null, null, null, null, null, null,
+                50L };
+        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build(), row);
+
+        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(200L))).thenReturn(new ProvisioningEntryData().setId(200L));
+
+        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(50L);
+
+        assertNotNull(result);
+        LoanProductProvisioningEntryData entryData = result.getProvisioningEntries().iterator().next();
+        assertEquals(200L, entryData.getHistoryId());
+        assertNull(entryData.getOfficeId());
+        assertNull(entryData.getOfficeName());
+        assertEquals("USD", entryData.getCurrencyCode());
+        assertNull(entryData.getProductId());
+        assertNull(entryData.getProductName());
+        assertNull(entryData.getCategoryId());
+        assertNull(entryData.getCategoryName());
+        assertNull(entryData.getOverdueInDays());
+        assertNull(entryData.getAmountreserved());
+        assertNull(entryData.getLiablityAccount());
+        assertNull(entryData.getLiabilityAccountCode());
+        assertNull(entryData.getLiabilityAccountName());
+        assertNull(entryData.getExpenseAccount());
+        assertNull(entryData.getExpenseAccountCode());
+        assertNull(entryData.getExpenseAccountName());
+        assertEquals(50L, entryData.getCriteriaId());
+    }
+
     private ProvisioningEntriesReadPlatformService service(SQLTemplates templates, Long total, Object[]... rows) throws SQLException {
         when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
             executedSql.add(invocation.getArgument(0));
@@ -180,7 +301,18 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
             return isCount ? resultSet(new Object[] { total }) : resultSet(rows);
         });
 
-        return new ProvisioningEntriesReadPlatformServiceImpl(mock(JdbcTemplate.class), mock(PaginationHelper.class),
+        return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, mock(PaginationHelper.class),
+                mock(DatabaseSpecificSQLGenerator.class), new SQLQueryFactory(new Configuration(templates), () -> connection));
+    }
+
+    private ProvisioningEntriesReadPlatformService service(SQLTemplates templates, Object[]... rows) throws SQLException {
+        when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
+            executedSql.add(invocation.getArgument(0));
+            return statement;
+        });
+        when(statement.executeQuery()).thenReturn(resultSet(rows));
+
+        return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, mock(PaginationHelper.class),
                 mock(DatabaseSpecificSQLGenerator.class), new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
