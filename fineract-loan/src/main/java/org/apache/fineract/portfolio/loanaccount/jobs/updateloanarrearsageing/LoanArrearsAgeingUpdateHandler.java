@@ -63,7 +63,7 @@ public class LoanArrearsAgeingUpdateHandler {
 
     public void updateLoanArrearsAgeingDetailsForAllLoans() {
         truncateLoanArrearsAgingDetails();
-        String insertSQLStatement = buildQueryForInsertAgeingDetails(Boolean.TRUE);
+        String insertSQLStatement = buildQueryForInsertAgeingDetails(true);
         List<String> insertStatements = updateLoanArrearsAgeingDetailsWithOriginalScheduleForAllLoans();
         insertStatements.add(0, insertSQLStatement);
         final int[] records = this.jdbcTemplate.batchUpdate(insertStatements.toArray(new String[0]));
@@ -79,7 +79,7 @@ public class LoanArrearsAgeingUpdateHandler {
     public void updateLoanArrearsAgeingDetails(List<Long> loanIdsForUpdate) {
 
         deleteLoanArrearsAgingDetails(loanIdsForUpdate);
-        String insertSQLStatement = buildQueryForInsertAgeingDetails(Boolean.FALSE);
+        String insertSQLStatement = buildQueryForInsertAgeingDetails(false);
         List<Object[]> batch = new ArrayList<Object[]>();
         if (!loanIdsForUpdate.isEmpty()) {
             for (Long loanId : loanIdsForUpdate) {
@@ -149,7 +149,7 @@ public class LoanArrearsAgeingUpdateHandler {
 
     private List<String> updateLoanArrearsAgeingDetailsWithOriginalSchedule(List<Long> loanIdsForUpdate) {
         List<String> insertStatement = new ArrayList<>();
-        String sqlForLoanIdentifiers = buildQueryForLoanIdentifiersWithOriginalSchedule(Boolean.FALSE);
+        String sqlForLoanIdentifiers = buildQueryForLoanIdentifiersWithOriginalSchedule(false);
         List<Object> loanIdsForQuery = new ArrayList<>();
         for (Long loanId : loanIdsForUpdate) {
             loanIdsForQuery.add(loanId);
@@ -168,7 +168,7 @@ public class LoanArrearsAgeingUpdateHandler {
 
     private List<String> updateLoanArrearsAgeingDetailsWithOriginalScheduleForAllLoans() {
         List<String> insertStatement = new ArrayList<>();
-        String sqlForLoanIdentifiers = buildQueryForLoanIdentifiersWithOriginalSchedule(Boolean.TRUE);
+        String sqlForLoanIdentifiers = buildQueryForLoanIdentifiersWithOriginalSchedule(true);
         List<Long> loanIds = this.jdbcTemplate.queryForList(sqlForLoanIdentifiers, Long.class);
         if (!loanIds.isEmpty()) {
             Map<Long, List<LoanSchedulePeriodData>> scheduleDate = getScheduleDate(loanIds);

@@ -88,7 +88,7 @@ class WorkingCapitalLoanJournalEntryDataMapperTest {
         assertEquals(9L, result.getOfficeId());
         assertEquals("2024-01-15", result.getTransactionDate());
         assertEquals("2024-02-01", result.getSubmittedOnDate());
-        assertEquals(Boolean.FALSE, result.getReversed());
+        assertEquals(Boolean.valueOf(false), result.getReversed());
         assertEquals(600L, result.getReversalId());
 
         assertNotNull(result.getType());
@@ -101,8 +101,8 @@ class WorkingCapitalLoanJournalEntryDataMapperTest {
         assertEquals("Loans Receivable", result.getGlAccount().getName());
         assertEquals("112601", result.getGlAccount().getGlCode());
         assertEquals(31L, result.getGlAccount().getParentId());
-        assertEquals(Boolean.FALSE, result.getGlAccount().getDisabled());
-        assertEquals(Boolean.TRUE, result.getGlAccount().getManualEntriesAllowed());
+        assertEquals(Boolean.valueOf(false), result.getGlAccount().getDisabled());
+        assertEquals(Boolean.valueOf(true), result.getGlAccount().getManualEntriesAllowed());
         assertEquals("receivables", result.getGlAccount().getDescription());
         assertEquals(GLAccountType.ASSET.getValue(), result.getGlAccount().getType().getId());
         assertEquals(GLAccountUsage.DETAIL.getValue(), result.getGlAccount().getUsage().getId());

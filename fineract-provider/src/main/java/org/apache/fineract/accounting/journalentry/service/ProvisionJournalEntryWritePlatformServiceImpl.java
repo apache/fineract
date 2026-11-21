@@ -57,14 +57,14 @@ public class ProvisionJournalEntryWritePlatformServiceImpl implements ProvisionJ
                     + journalEntry.getTransactionId();
             if (journalEntry.isDebitEntry()) {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                        journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), Boolean.FALSE,
+                        journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), false,
                         reversalTransactionDate, JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment,
                         journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
                         journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(),
                         journalEntry.getShareTransactionId());
             } else {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                        journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), Boolean.FALSE,
+                        journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), journalEntry.getTransactionId(), false,
                         reversalTransactionDate, JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment,
                         journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
                         journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(),

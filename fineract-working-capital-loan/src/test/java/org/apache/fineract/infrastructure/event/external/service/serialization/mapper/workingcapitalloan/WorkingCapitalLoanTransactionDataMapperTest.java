@@ -70,7 +70,7 @@ public class WorkingCapitalLoanTransactionDataMapperTest {
         assertEquals(new BigDecimal("125.50"), result.getTransactionAmount());
         assertEquals("transaction-external-id", result.getExternalId());
         assertEquals("reversal-external-id", result.getReversalExternalId());
-        assertEquals(Boolean.FALSE, result.getReversed());
+        assertEquals(Boolean.valueOf(false), result.getReversed());
         assertEquals("EUR", result.getCurrency().getCode());
         assertEquals(2, result.getCurrency().getDecimalPlaces());
 
@@ -78,8 +78,8 @@ public class WorkingCapitalLoanTransactionDataMapperTest {
         assertEquals(LoanTransactionType.CHARGE_ADJUSTMENT.getValue(), result.getType().getId());
         assertEquals(LoanTransactionType.CHARGE_ADJUSTMENT.getCode(), result.getType().getCode());
         assertEquals("Charge Adjustment", result.getType().getValue());
-        assertEquals(Boolean.TRUE, result.getType().getChargeAdjustment());
-        assertEquals(Boolean.FALSE, result.getType().getRepayment());
+        assertEquals(Boolean.valueOf(true), result.getType().getChargeAdjustment());
+        assertEquals(Boolean.valueOf(false), result.getType().getRepayment());
 
         assertNotNull(result.getClassification());
         assertEquals(7L, result.getClassification().getId());
@@ -108,7 +108,7 @@ public class WorkingCapitalLoanTransactionDataMapperTest {
 
         final WorkingCapitalLoanTransactionDataV1 result = mapper.map(source);
 
-        assertEquals(Boolean.TRUE, result.getReversed());
+        assertEquals(Boolean.valueOf(true), result.getReversed());
         assertEquals(REVERSED_ON_DATE.toString(), result.getReversedOnDate());
     }
 

@@ -62,7 +62,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                     .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertEquals(Boolean.valueOf(true), loanProductsProductIdResponse.getEnableIncomeCapitalization());
             Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
             Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
                     loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
@@ -77,7 +77,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                 Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "20 December 2024", 430.0, 7.0, 6, null);
 
                 final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-                Assertions.assertEquals(Boolean.TRUE, loanDetails.getEnableIncomeCapitalization());
+                Assertions.assertEquals(Boolean.valueOf(true), loanDetails.getEnableIncomeCapitalization());
                 Assertions.assertNotNull(loanDetails.getCapitalizedIncomeCalculationType());
                 Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
                         loanDetails.getCapitalizedIncomeCalculationType().getCode());
@@ -103,7 +103,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                     .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.FALSE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertEquals(Boolean.valueOf(false), loanProductsProductIdResponse.getEnableIncomeCapitalization());
             Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
             Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
                     loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
@@ -118,7 +118,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                 Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "20 December 2024", 430.0, 7.0, 6, null);
 
                 final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-                Assertions.assertEquals(Boolean.FALSE, loanDetails.getEnableIncomeCapitalization());
+                Assertions.assertEquals(Boolean.valueOf(false), loanDetails.getEnableIncomeCapitalization());
                 Assertions.assertNotNull(loanDetails.getCapitalizedIncomeCalculationType());
                 Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
                         loanDetails.getCapitalizedIncomeCalculationType().getCode());
@@ -142,7 +142,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                     .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertEquals(Boolean.valueOf(true), loanProductsProductIdResponse.getEnableIncomeCapitalization());
             Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
             Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
                     loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
@@ -161,7 +161,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                             .incomeFromCapitalizationAccountId(getAccounts().getInterestIncomeAccount().getAccountID().longValue())
                             .capitalizedIncomeType(PutLoanProductsProductIdRequest.CapitalizedIncomeTypeEnum.INTEREST));
             GetLoanProductsProductIdResponse updatedLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.TRUE, updatedLoanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertEquals(Boolean.valueOf(true), updatedLoanProductsProductIdResponse.getEnableIncomeCapitalization());
             Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
             Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
                     updatedLoanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
@@ -175,7 +175,7 @@ public class LoanProductTest extends FeignLoanTestBase {
             updateLoanProduct(loanProductId, new PutLoanProductsProductIdRequest().enableIncomeCapitalization(false));
 
             updatedLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.FALSE, updatedLoanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertEquals(Boolean.valueOf(false), updatedLoanProductsProductIdResponse.getEnableIncomeCapitalization());
             Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getAccountingMappings());
             Assertions.assertNull(updatedLoanProductsProductIdResponse.getAccountingMappings().getIncomeFromCapitalizationAccount());
             Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeType());
@@ -260,7 +260,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                     .incomeFromBuyDownAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableBuyDownFee());
+            Assertions.assertEquals(Boolean.valueOf(true), loanProductsProductIdResponse.getEnableBuyDownFee());
             Assertions.assertNotNull(loanProductsProductIdResponse.getBuyDownFeeCalculationType());
             Assertions.assertEquals(LoanBuyDownFeeCalculationType.FLAT.getCode(),
                     loanProductsProductIdResponse.getBuyDownFeeCalculationType().getCode());
@@ -275,7 +275,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                 Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "20 December 2024", 430.0, 7.0, 6, null);
 
                 final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-                Assertions.assertEquals(Boolean.TRUE, loanDetails.getEnableBuyDownFee());
+                Assertions.assertEquals(Boolean.valueOf(true), loanDetails.getEnableBuyDownFee());
                 Assertions.assertNotNull(loanDetails.getBuyDownFeeCalculationType());
                 Assertions.assertEquals(LoanBuyDownFeeCalculationType.FLAT.getCode(), loanDetails.getBuyDownFeeCalculationType().getCode());
                 Assertions.assertNotNull(loanDetails.getBuyDownFeeStrategy());
@@ -299,7 +299,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                     .incomeFromBuyDownAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.FALSE, loanProductsProductIdResponse.getEnableBuyDownFee());
+            Assertions.assertEquals(Boolean.valueOf(false), loanProductsProductIdResponse.getEnableBuyDownFee());
             Assertions.assertNotNull(loanProductsProductIdResponse.getBuyDownFeeCalculationType());
             Assertions.assertEquals(LoanBuyDownFeeCalculationType.FLAT.getCode(),
                     loanProductsProductIdResponse.getBuyDownFeeCalculationType().getCode());
@@ -314,7 +314,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                 Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "20 December 2024", 430.0, 7.0, 6, null);
 
                 final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-                Assertions.assertEquals(Boolean.FALSE, loanDetails.getEnableBuyDownFee());
+                Assertions.assertEquals(Boolean.valueOf(false), loanDetails.getEnableBuyDownFee());
                 Assertions.assertNotNull(loanDetails.getBuyDownFeeCalculationType());
                 Assertions.assertEquals(LoanBuyDownFeeCalculationType.FLAT.getCode(), loanDetails.getBuyDownFeeCalculationType().getCode());
                 Assertions.assertNotNull(loanDetails.getBuyDownFeeStrategy());
@@ -336,7 +336,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                     .incomeFromBuyDownAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableBuyDownFee());
+            Assertions.assertEquals(Boolean.valueOf(true), loanProductsProductIdResponse.getEnableBuyDownFee());
             Assertions.assertNotNull(loanProductsProductIdResponse.getBuyDownFeeCalculationType());
             Assertions.assertEquals(LoanBuyDownFeeCalculationType.FLAT.getCode(),
                     loanProductsProductIdResponse.getBuyDownFeeCalculationType().getCode());
@@ -359,7 +359,7 @@ public class LoanProductTest extends FeignLoanTestBase {
                             .incomeFromBuyDownAccountId(getAccounts().getInterestIncomeAccount().getAccountID().longValue()));
 
             GetLoanProductsProductIdResponse updatedLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.TRUE, updatedLoanProductsProductIdResponse.getEnableBuyDownFee());
+            Assertions.assertEquals(Boolean.valueOf(true), updatedLoanProductsProductIdResponse.getEnableBuyDownFee());
             Assertions.assertEquals(LoanBuyDownFeeStrategy.EQUAL_AMORTIZATION.getCode(),
                     updatedLoanProductsProductIdResponse.getBuyDownFeeStrategy().getCode());
             Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getBuyDownFeeIncomeType());
@@ -374,7 +374,7 @@ public class LoanProductTest extends FeignLoanTestBase {
             updateLoanProduct(loanProductId, new PutLoanProductsProductIdRequest().enableBuyDownFee(false));
 
             updatedLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
-            Assertions.assertEquals(Boolean.FALSE, updatedLoanProductsProductIdResponse.getEnableBuyDownFee());
+            Assertions.assertEquals(Boolean.valueOf(false), updatedLoanProductsProductIdResponse.getEnableBuyDownFee());
             Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getBuyDownFeeCalculationType());
             Assertions.assertEquals(LoanBuyDownFeeCalculationType.FLAT.getCode(),
                     updatedLoanProductsProductIdResponse.getBuyDownFeeCalculationType().getCode());
