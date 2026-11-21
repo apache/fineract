@@ -138,8 +138,8 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt1
       | NONE           | 360         | DAYS                   | 1              |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
-    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "0" discount amount and expected disbursement date on "01 January 2026"
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "0" discount amount
     # --- Discount fee added after disbursement ---
     And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
@@ -165,8 +165,8 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt1
       | NONE           | 360         | DAYS                   | 1              |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
-    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "0" discount amount and expected disbursement date on "01 January 2026"
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "0" discount amount
     # --- Discount fee ---
     And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
