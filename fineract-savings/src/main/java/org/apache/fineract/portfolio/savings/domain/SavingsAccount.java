@@ -962,10 +962,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
                 transactionDTO.getTransactionDate(), transactionDTO.getTransactionTime(), amount, savingsAccountTransactionType, refNo);
 
+        this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
+
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
-            this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
             addTransaction(transaction);
         }
 
@@ -1099,10 +1100,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionDTO.getTransactionTime(),
                 transactionAmountMoney, refNo);
 
+        this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
+
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
-            this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
             addTransaction(transaction);
         }
 
