@@ -455,7 +455,7 @@ public class MakercheckerTest extends FeignIntegrationTest {
 
             assertEquals(clientId, checkerOnlyClientHelper
                     .activateClient(clientId, ClientRequestBuilders.activateClient(TRANSACTION_DATE_STRING)).getClientId());
-            assertEquals(Boolean.TRUE, clientHelper.getClient(clientId).getActive());
+            assertEquals(Boolean.valueOf(true), clientHelper.getClient(clientId).getActive());
             assertEquals(0,
                     retrieveCommands(Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString())).size(),
                     "The pending activation should have been approved");

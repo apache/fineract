@@ -95,7 +95,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
 
         List<ColumnFilterData> columnFilters = new ArrayList<>();
         columnFilters.add(ColumnFilterData.eq("savings_account_id", savingsId.toString()));
-        columnFilters.add(ColumnFilterData.eq("is_reversal", Boolean.FALSE.toString()));
+        columnFilters.add(ColumnFilterData.eq("is_reversal", "false"));
         addFromToFilter("transaction_date", DateUtils.format(searchParameters.getFromDate()),
                 DateUtils.format(searchParameters.getToDate()), columnFilters);
         addFromToFilter("submitted_on_date", DateUtils.format(searchParameters.getFromSubmittedDate()),

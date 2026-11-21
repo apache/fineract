@@ -96,9 +96,9 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
             if (ImportHandlerUtils.isNotImported(row, ChartOfAccountsConstants.STATUS_COL)) {
                 glAccounts.add(readGlAccounts(row));
                 if (ImportHandlerUtils.readAsString(ChartOfAccountsConstants.OFFICE_COL, row) != null) {
-                    flagForOpBal = Boolean.TRUE;
+                    flagForOpBal = true;
                 } else {
-                    flagForOpBal = Boolean.FALSE;
+                    flagForOpBal = false;
                 }
             }
         }

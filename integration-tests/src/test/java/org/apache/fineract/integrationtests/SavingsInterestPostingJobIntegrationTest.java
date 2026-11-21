@@ -278,7 +278,7 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
         schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
         final SavingsAccountTransactionData holdTransaction = savingsTransactionHelper.getTransaction(savingsId, holdTransactionId);
-        assertEquals(Boolean.FALSE, holdTransaction.getReversed(), "Interest posting must not reverse the hold transaction");
+        assertEquals(Boolean.valueOf(false), holdTransaction.getReversed(), "Interest posting must not reverse the hold transaction");
         SavingsTestValidators.verifyAmount(new BigDecimal("-100"), holdTransaction.getRunningBalance(),
                 "Hold running balance must remain equal to the ledger balance");
         assertEquals(0,

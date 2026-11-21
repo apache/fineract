@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -232,7 +231,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Feig
         Long loanProductId = createLoanProduct(product);
         GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
 
-        assertEquals(TRUE, getLoanProductsProductIdResponse.getEnableDownPayment());
+        assertEquals(Boolean.valueOf(true), getLoanProductsProductIdResponse.getEnableDownPayment());
         assertNotNull(getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment());
         assertEquals(0, getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment().compareTo(DOWN_PAYMENT_PERCENTAGE));
         assertEquals(autoDownPaymentEnabled, getLoanProductsProductIdResponse.getEnableAutoRepaymentForDownPayment());

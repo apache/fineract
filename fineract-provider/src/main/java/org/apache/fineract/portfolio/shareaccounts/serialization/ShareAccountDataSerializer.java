@@ -581,7 +581,7 @@ public class ShareAccountDataSerializer {
         }
         account.undoApprove();
         updateTotalChargeDerivedForUndoApproval(account);
-        actualChanges.put(ShareAccountApiConstants.charges_paramname, Boolean.TRUE);
+        actualChanges.put(ShareAccountApiConstants.charges_paramname, true);
         return actualChanges;
     }
 
@@ -619,7 +619,7 @@ public class ShareAccountDataSerializer {
         AppUser rejectedUser = this.platformSecurityContext.authenticatedUser();
         LocalDate rejectedDate = DateUtils.getBusinessLocalDate();
         account.reject(rejectedDate, rejectedUser);
-        actualChanges.put(ShareAccountApiConstants.charges_paramname, Boolean.TRUE);
+        actualChanges.put(ShareAccountApiConstants.charges_paramname, true);
         return actualChanges;
     }
 

@@ -111,7 +111,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         verify(breachScheduleRepository, never()).saveAll(any());
 
         assertTrue(underTest.evaluateNearBreachOnCob(loan, LocalDate.of(2026, 1, 3)));
-        assertEquals(Boolean.TRUE, period.getNearBreach());
+        assertEquals(Boolean.valueOf(true), period.getNearBreach());
         verify(breachScheduleRepository).saveAll(List.of(period));
 
         assertFalse(underTest.evaluateNearBreachOnCob(loan, LocalDate.of(2026, 1, 4)));
@@ -129,7 +129,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         assertNull(period.getNearBreach());
 
         assertTrue(underTest.evaluateNearBreachOnCob(loan, LocalDate.of(2026, 1, 6)));
-        assertEquals(Boolean.TRUE, period.getNearBreach());
+        assertEquals(Boolean.valueOf(true), period.getNearBreach());
         verify(breachScheduleRepository).saveAll(List.of(period));
     }
 
@@ -200,11 +200,11 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         period.setPaidAmount(BigDecimal.valueOf(132));
 
         assertTrue(underTest.rederiveNearBreach(List.of(period), PARAMETERS, LocalDate.of(2026, 1, 3)));
-        assertEquals(Boolean.FALSE, period.getNearBreach());
+        assertEquals(Boolean.valueOf(false), period.getNearBreach());
 
         period.setPaidAmount(BigDecimal.valueOf(131));
         assertTrue(underTest.rederiveNearBreach(List.of(period), PARAMETERS, LocalDate.of(2026, 1, 3)));
-        assertEquals(Boolean.TRUE, period.getNearBreach());
+        assertEquals(Boolean.valueOf(true), period.getNearBreach());
         verify(breachScheduleRepository, times(2)).saveAll(List.of(period));
     }
 
@@ -222,9 +222,9 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         assertFalse(underTest.rederiveNearBreach(List.of(withoutDemand, withoutCheckpoint), PARAMETERS, LocalDate.of(2026, 1, 9)));
         assertFalse(underTest.rederiveNearBreach(List.of(noneElapsed), PARAMETERS, LocalDate.of(2026, 1, 2)));
 
-        assertEquals(Boolean.TRUE, withoutDemand.getNearBreach());
-        assertEquals(Boolean.FALSE, withoutCheckpoint.getNearBreach());
-        assertEquals(Boolean.TRUE, noneElapsed.getNearBreach());
+        assertEquals(Boolean.valueOf(true), withoutDemand.getNearBreach());
+        assertEquals(Boolean.valueOf(false), withoutCheckpoint.getNearBreach());
+        assertEquals(Boolean.valueOf(true), noneElapsed.getNearBreach());
         verify(breachScheduleRepository, never()).saveAll(any());
     }
 
@@ -235,7 +235,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         period.setNearBreach(true);
 
         assertFalse(underTest.rederiveNearBreach(List.of(period), PARAMETERS, LocalDate.of(2026, 1, 3)));
-        assertEquals(Boolean.TRUE, period.getNearBreach());
+        assertEquals(Boolean.valueOf(true), period.getNearBreach());
         verify(breachScheduleRepository, never()).saveAll(any());
     }
 
