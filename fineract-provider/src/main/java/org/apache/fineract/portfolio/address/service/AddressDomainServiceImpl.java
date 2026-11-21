@@ -119,10 +119,12 @@ public class AddressDomainServiceImpl implements AddressDomainService {
 
         final Address address = clientAddress.getAddress();
         addressMapper.updateAddressFromRequest(request, address);
-        if (request.getStateProvinceId() != null) {
+        // Like the legacy update: 0 means no selection and keeps the stored value. Reading an address without a state
+        // or country returns 0 for its id, and clients send it back unchanged.
+        if (request.getStateProvinceId() != null && request.getStateProvinceId() != 0) {
             address.setStateProvince(codeValueRepository.getReferenceById(request.getStateProvinceId()));
         }
-        if (request.getCountryId() != null) {
+        if (request.getCountryId() != null && request.getCountryId() != 0) {
             address.setCountry(codeValueRepository.getReferenceById(request.getCountryId()));
         }
         address.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
