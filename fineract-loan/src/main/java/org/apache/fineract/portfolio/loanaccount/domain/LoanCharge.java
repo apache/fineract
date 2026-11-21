@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -48,6 +50,9 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationCalculationType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationIncomeType;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationPeriodType;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -165,6 +170,25 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanChargeTaxDetails> taxDetails = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amortization_period_type", length = 32, nullable = false)
+    private ChargeAmortizationPeriodType amortizationPeriodType = ChargeAmortizationPeriodType.NONE;
+
+    @Column(name = "amortization_days")
+    private Integer amortizationDays;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amortization_calculation_type", length = 32)
+    private ChargeAmortizationCalculationType amortizationCalculationType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amortization_income_type", length = 32)
+    private ChargeAmortizationIncomeType amortizationIncomeType;
+
+    public boolean isAmortized() {
+        return this.amortizationPeriodType != null && this.amortizationPeriodType.isAmortized();
+    }
 
     public void markAsFullyPaid() {
         this.amountPaid = this.amount;
@@ -786,7 +810,13 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 .submittedOnDate(submittedOnDate).dueDate(dueDate).chargeCalculationType(chargeCalculationTypeData).percentage(percentage)
                 .amountPercentageAppliedTo(amountPercentageAppliedTo).amountOrPercentage(amountOrPercentage).penalty(penaltyCharge)
                 .chargePaymentMode(chargePaymentModeData).paid(paid).waived(waived).loanId(loan.getId()).minCap(minCap).maxCap(maxCap)
-                .installmentChargeData(loanInstallmentChargeDataList).externalId(externalId).build();
+                .installmentChargeData(loanInstallmentChargeDataList).externalId(externalId)
+                .amortizationPeriodType(amortizationPeriodType == null ? null : amortizationPeriodType.getValueAsStringEnumOptionData())
+                .amortizationDays(amortizationDays)
+                .amortizationCalculationType(
+                        amortizationCalculationType == null ? null : amortizationCalculationType.getValueAsStringEnumOptionData())
+                .amortizationIncomeType(amortizationIncomeType == null ? null : amortizationIncomeType.getValueAsStringEnumOptionData())
+                .build();
     }
 
     public boolean hasInstallmentFor(final LoanRepaymentScheduleInstallment installment) {

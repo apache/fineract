@@ -306,4 +306,6 @@
     <include file="parts/0284_fee_refund_business_events.xml" relativeToChangelogFile="true" />
     <include file="parts/0285_add_amortization_configuration_to_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0286_add_enable_charge_amortization_to_loan_product.xml" relativeToChangelogFile="true" />
+    <include file="parts/0287_add_amortization_configuration_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0288_create_loan_deferred_charge_balance.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

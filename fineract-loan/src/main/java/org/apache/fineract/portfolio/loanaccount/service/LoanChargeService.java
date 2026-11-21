@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeAmortizationPeriodType;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -552,6 +553,13 @@ public class LoanChargeService {
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
             final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final BigDecimal loanChargeAmount,
             final ExternalId externalId) {
+        // Defense-in-depth for paths that build a LoanCharge with a known loan but skip validateAddLoanCharge,
+        // notably LoanDisbursementService (new tranche / down-payment fees). createNewWithoutLoan passes loan=null
+        // and relies on LoanChargeApiJsonValidator / product-level checks instead.
+        if (loan != null) {
+            loanChargeValidator.validateChargeAmortizationAllowed(loan, chargeDefinition);
+        }
+
         final LoanCharge loanCharge = new LoanCharge();
         loanCharge.setLoan(loan);
         loanCharge.setCharge(chargeDefinition);
@@ -589,6 +597,12 @@ public class LoanChargeService {
 
         loanCharge.setPaid(loanCharge.determineIfFullyPaid());
         loanCharge.setExternalId(externalId);
+
+        loanCharge.setAmortizationPeriodType(chargeDefinition.getAmortizationPeriodType() == null ? ChargeAmortizationPeriodType.NONE
+                : chargeDefinition.getAmortizationPeriodType());
+        loanCharge.setAmortizationDays(chargeDefinition.getAmortizationDays());
+        loanCharge.setAmortizationCalculationType(chargeDefinition.getAmortizationCalculationType());
+        loanCharge.setAmortizationIncomeType(chargeDefinition.getAmortizationIncomeType());
 
         return loanCharge;
     }
