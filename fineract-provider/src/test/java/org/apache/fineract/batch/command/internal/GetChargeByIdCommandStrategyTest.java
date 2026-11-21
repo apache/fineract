@@ -25,13 +25,19 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -68,7 +74,12 @@ public class GetChargeByIdCommandStrategyTest {
         final BatchRequest request = getBatchRequest(loanId, chargeId, queryParameter);
         final String responseBody = "someResponseBody";
 
-        given(testContext.loanChargesApiResource.retrieveLoanCharge(eq(loanId), eq(chargeId), any(UriInfo.class))).willReturn(responseBody);
+        final LoanChargeData chargeData = LoanChargeData.builder().build();
+        given(testContext.uriInfo.getQueryParameters()).willReturn(new MultivaluedHashMap<>());
+        given(testContext.apiRequestParameterHelper.process(any())).willReturn(testContext.settings);
+        given(testContext.toApiJsonSerializer.serialize(testContext.settings, chargeData,
+                LoanChargesApiConstants.LOAN_CHARGE_RESPONSE_DATA_PARAMETERS)).willReturn(responseBody);
+        given(testContext.loanChargesApiResource.retrieveLoanCharge(eq(loanId), eq(chargeId), any(UriInfo.class))).willReturn(chargeData);
 
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
 
@@ -133,6 +144,24 @@ public class GetChargeByIdCommandStrategyTest {
         private LoanChargesApiResource loanChargesApiResource;
 
         /**
+         * The mock serializer turning the typed loan charge data into the batch response body.
+         */
+        @Mock
+        private DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer;
+
+        /**
+         * The mock helper reading the serialization settings from the query parameters.
+         */
+        @Mock
+        private ApiRequestParameterHelper apiRequestParameterHelper;
+
+        /**
+         * The mock serialization settings.
+         */
+        @Mock
+        private ApiRequestJsonSerializationSettings settings;
+
+        /**
          * The uri info captor
          */
         @Captor
@@ -143,7 +172,7 @@ public class GetChargeByIdCommandStrategyTest {
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new GetChargeByIdCommandStrategy(loanChargesApiResource);
+            subjectToTest = new GetChargeByIdCommandStrategy(loanChargesApiResource, toApiJsonSerializer, apiRequestParameterHelper);
         }
     }
 }

@@ -22,9 +22,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 @Getter
 @Builder
+@JsonLocalDateArrayFormat
 public class LoanInstallmentChargeData {
 
     private final Integer installmentNumber;
