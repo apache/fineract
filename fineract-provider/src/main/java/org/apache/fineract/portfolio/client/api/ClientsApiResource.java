@@ -57,7 +57,6 @@ import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -88,8 +87,6 @@ public class ClientsApiResource {
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final ClientTemplateReadPlatformService clientTemplateReadPlatformService;
-    private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
-    private final ToApiJsonSerializer<AccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
@@ -106,7 +103,7 @@ public class ClientsApiResource {
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n" + "clients/template")
     @AlternativeOperationId("retrieveTemplate_5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsTemplateResponse.class)))
-    public String retrieveTemplate(@Context final UriInfo uriInfo,
+    public ClientData retrieveTemplate(@Context final UriInfo uriInfo,
             @Parameter(description = "officeId") @QueryParam("officeId") final Long officeId,
             @QueryParam("commandParam") @Parameter(description = "commandParam") final String commandParam,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
@@ -126,8 +123,7 @@ public class ClientsApiResource {
             clientData = clientTemplateReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         }
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        return clientData;
     }
 
     @GET
@@ -137,7 +133,7 @@ public class ClientsApiResource {
             + "clients?offset=10&limit=50\n" + "\n" + "clients?orderBy=displayName&sortOrder=DESC")
     @AlternativeOperationId("retrieveAll_21")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsResponse.class)))
-    public String retrieveAll(@Context final UriInfo uriInfo,
+    public Page<ClientData> retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("displayName") @Parameter(description = "displayName") final String displayName,
@@ -153,8 +149,8 @@ public class ClientsApiResource {
             @QueryParam("legalForm") final Integer legalForm,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId) {
 
-        return retrieveAll(uriInfo, officeId, externalId, displayName, firstname, lastname, status, legalForm, hierarchy, offset, limit,
-                orderBy, sortOrder, orphansOnly, staffId);
+        return retrieveAll(officeId, externalId, displayName, firstname, lastname, status, legalForm, hierarchy, offset, limit, orderBy,
+                sortOrder, orphansOnly, staffId);
     }
 
     @GET
@@ -164,7 +160,7 @@ public class ClientsApiResource {
             + "\n" + "\n" + "clients/1?template=true\n" + "\n" + "\n" + "clients/1?fields=id,displayName,officeName")
     @AlternativeOperationId("retrieveOne_11")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)))
-    public String retrieveOne(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientData retrieveOne(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
         return retrieveClient(clientId, null, staffInSelectedOfficeOnly, uriInfo);
@@ -181,16 +177,14 @@ public class ClientsApiResource {
     @AlternativeOperationId("create_6")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createClient() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
 
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -204,7 +198,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("update_10")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdResponse.class)))
-    public String update(@Parameter(description = "clientId") @PathParam("clientId") final Long clientId,
+    public CommandProcessingResult update(@Parameter(description = "clientId") @PathParam("clientId") final Long clientId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return updateClient(clientId, null, apiRequestBodyAsJson);
     }
@@ -215,7 +209,7 @@ public class ClientsApiResource {
     @Operation(summary = "Delete a Client", operationId = "deleteClient", description = "If a client is in Pending state, you are allowed to Delete it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with them, you cannot delete the client but you may Close the client if they have left the program.")
     @AlternativeOperationId("delete_8")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.DeleteClientsClientIdResponse.class)))
-    public String delete(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
+    public CommandProcessingResult delete(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
         return deleteClient(clientId, null);
     }
 
@@ -256,7 +250,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("activate_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdResponse.class)))
-    public String activate(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public CommandProcessingResult activate(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return applyCommandOverClient(clientId, null, commandParam, apiRequestBodyAsJson);
@@ -267,13 +261,13 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client accounts overview", operationId = "retrieveAllClientAccounts", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n "
-            + "\n" + "clients/1/accounts\n" + "\n" + "clients/1/accounts?fields=loanAccounts,savingsAccounts")
+            + "\n" + "clients/1/accounts")
     @AlternativeOperationId("retrieveAssociatedAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public String retrieveAssociatedAccounts(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @Context final UriInfo uriInfo) {
-        return retrieveClientAccounts(clientId, null, uriInfo);
+    public AccountSummaryCollectionData retrieveAssociatedAccounts(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
+        return retrieveClientAccounts(clientId, null);
     }
 
     @GET
@@ -291,12 +285,10 @@ public class ClientsApiResource {
     @Operation(summary = "Upload client template for bulk import", operationId = "postClientTemplate")
     @RequestBody(description = "Upload client template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String postClientTemplate(@QueryParam("legalFormType") final String legalFormType,
+    public Long postClientTemplate(@QueryParam("legalFormType") final String legalFormType,
             @FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail,
             @FormDataParam("locale") final String locale, @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(legalFormType, uploadedInputStream, fileDetail, locale,
-                dateFormat);
-        return toApiJsonSerializer.serialize(importDocumentId);
+        return bulkImportWorkbookService.importWorkbook(legalFormType, uploadedInputStream, fileDetail, locale, dateFormat);
     }
 
     @GET
@@ -306,7 +298,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveObligeeDetails")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClientsApiResourceSwagger.GetObligeeData.class))))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+    public List<ObligeeData> retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
         return retrieveClientObligeeDetails(clientId, null);
     }
 
@@ -317,7 +309,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveTransferTemplate")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientTransferProposalDateResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+    public LocalDate retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
         return retrieveClientTransferTemplate(clientId, null);
     }
 
@@ -329,7 +321,7 @@ public class ClientsApiResource {
             + "clients/123-456?fields=id,displayName,officeName")
     @AlternativeOperationId("retrieveOne_12")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)))
-    public String retrieveOne(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+    public ClientData retrieveOne(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
         return retrieveClient(null, externalId, staffInSelectedOfficeOnly, uriInfo);
@@ -340,13 +332,13 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client accounts overview", operationId = "retrieveAllClientAccountsByExternalId", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n "
-            + "\n" + "clients/123-456/accounts\n" + "\n" + "clients/123-456/accounts?fields=loanAccounts,savingsAccounts")
+            + "\n" + "clients/123-456/accounts")
     @AlternativeOperationId("retrieveAssociatedAccounts_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public String retrieveAssociatedAccounts(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
-            @Context final UriInfo uriInfo) {
-        return retrieveClientAccounts(null, externalId, uriInfo);
+    public AccountSummaryCollectionData retrieveAssociatedAccounts(
+            @PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
+        return retrieveClientAccounts(null, externalId);
     }
 
     @PUT
@@ -360,7 +352,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("update_11")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdResponse.class)))
-    public String update(@Parameter(description = "externalId") @PathParam("externalId") final String externalId,
+    public CommandProcessingResult update(@Parameter(description = "externalId") @PathParam("externalId") final String externalId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return updateClient(null, externalId, apiRequestBodyAsJson);
     }
@@ -402,7 +394,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("applyCommand")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdResponse.class)))
-    public String applyCommand(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
+    public CommandProcessingResult applyCommand(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return applyCommandOverClient(null, externalId, commandParam, apiRequestBodyAsJson);
@@ -414,7 +406,7 @@ public class ClientsApiResource {
     @Operation(summary = "Delete a Client", operationId = "deleteClientByExternalId", description = "If a client is in Pending state, you are allowed to Delete it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with them, you cannot delete the client but you may Close the client if they have left the program.")
     @AlternativeOperationId("delete_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.DeleteClientsClientIdResponse.class)))
-    public String delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
+    public CommandProcessingResult delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
         return deleteClient(null, externalId);
     }
 
@@ -425,7 +417,7 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveObligeeDetails_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClientsApiResourceSwagger.GetObligeeData.class))))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public String retrieveObligeeDetails(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {
+    public List<ObligeeData> retrieveObligeeDetails(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {
         return retrieveClientObligeeDetails(null, externalId);
     }
 
@@ -436,14 +428,13 @@ public class ClientsApiResource {
     @AlternativeOperationId("retrieveTransferTemplate_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientTransferProposalDateResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public String retrieveTransferTemplate(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {
+    public LocalDate retrieveTransferTemplate(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {
         return retrieveClientTransferTemplate(null, externalId);
     }
 
-    public String retrieveAll(final UriInfo uriInfo, final Long officeId, final String externalId, final String displayName,
-            final String firstname, final String lastname, final String status, final Integer legalForm, final String hierarchy,
-            final Integer offset, final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly,
-            final Long staffId) {
+    public Page<ClientData> retrieveAll(final Long officeId, final String externalId, final String displayName, final String firstname,
+            final String lastname, final String status, final Integer legalForm, final String hierarchy, final Integer offset,
+            final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly, final Long staffId) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
@@ -452,9 +443,7 @@ public class ClientsApiResource {
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
                 .name(displayName).hierarchy(hierarchy).firstname(firstname).lastname(lastname).status(status).orphansOnly(orphansOnly)
                 .offset(offset).orderBy(orderBy).sortOrder(sortOrder).legalForm(legalForm).staffId(staffId).build();
-        final Page<ClientData> clientData = clientReadPlatformService.retrieveAll(searchParameters);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        return clientReadPlatformService.retrieveAll(searchParameters);
     }
 
     private ClientData retrieveClientData(final Long clientId, final boolean staffInSelectedOfficeOnly, final boolean isTemplate) {
@@ -526,18 +515,18 @@ public class ClientsApiResource {
         return commandRequest;
     }
 
-    private String retrieveClient(Long clientId, final String externalId, final boolean staffInSelectedOfficeOnly, final UriInfo uriInfo) {
+    private ClientData retrieveClient(Long clientId, final String externalId, final boolean staffInSelectedOfficeOnly,
+            final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        final ClientData clientData = retrieveClientData(clientId, staffInSelectedOfficeOnly, settings.isTemplate());
-        return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        return retrieveClientData(clientId, staffInSelectedOfficeOnly, settings.isTemplate());
     }
 
-    private String updateClient(Long clientId, final String externalId, final String jsonPayload) {
+    private CommandProcessingResult updateClient(Long clientId, final String externalId, final String jsonPayload) {
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
@@ -546,11 +535,10 @@ public class ClientsApiResource {
                 .withJson(jsonPayload) //
                 .build(); //
 
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    private String deleteClient(Long clientId, final String externalId) {
+    private CommandProcessingResult deleteClient(Long clientId, final String externalId) {
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
@@ -558,50 +546,43 @@ public class ClientsApiResource {
                 .deleteClient(clientId) //
                 .build(); //
 
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    private String retrieveClientAccounts(Long clientId, final String externalId, final UriInfo uriInfo) {
+    private AccountSummaryCollectionData retrieveClientAccounts(Long clientId, final String externalId) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
-        final AccountSummaryCollectionData clientAccount = accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount,
-                ClientApiConstants.CLIENT_ACCOUNTS_DATA_PARAMETERS);
+        return accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
     }
 
-    private String applyCommandOverClient(Long clientId, final String externalId, final String command, final String jsonPayload) {
+    private CommandProcessingResult applyCommandOverClient(Long clientId, final String externalId, final String command,
+            final String jsonPayload) {
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonPayload);
         final CommandWrapper commandRequest = evaluateCommand(clientId, command, builder);
-        CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    private String retrieveClientObligeeDetails(Long clientId, final String externalId) {
+    private List<ObligeeData> retrieveClientObligeeDetails(Long clientId, final String externalId) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
-        final List<ObligeeData> ObligeeList = guarantorReadPlatformService.retrieveObligeeDetails(clientId);
-        return toApiJsonSerializer.serialize(ObligeeList);
+        return guarantorReadPlatformService.retrieveObligeeDetails(clientId);
     }
 
-    private String retrieveClientTransferTemplate(Long clientId, final String externalId) {
+    private LocalDate retrieveClientTransferTemplate(Long clientId, final String externalId) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
-        final LocalDate transferDate = clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-        return toApiJsonSerializer.serialize(transferDate);
+        return clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
     }
 
 }
