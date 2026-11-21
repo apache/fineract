@@ -33,6 +33,7 @@ import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -209,6 +210,39 @@ class AddressDomainServiceImplTest {
         verify(clientAddress).setIs_active(false);
         assertThat(response.getResourceId()).isEqualTo(CLIENT_ADDRESS_ID);
         assertThat(response.getClientId()).isEqualTo(CLIENT_ID);
+    }
+
+    @Test
+    void updateSetsTheSentStateProvinceAndCountry() {
+        givenFieldConfiguration(field("stateProvinceId", true, false, ""), field("countryId", true, false, ""));
+        final Address address = new Address();
+        givenClientAddress(address);
+        final CodeValue state = mock(CodeValue.class);
+        final CodeValue country = mock(CodeValue.class);
+        when(codeValueRepository.getReferenceById(5L)).thenReturn(state);
+        when(codeValueRepository.getReferenceById(6L)).thenReturn(country);
+
+        underTest.update(updateRequest().stateProvinceId(5L).countryId(6L).build());
+
+        assertThat(address.getStateProvince()).isSameAs(state);
+        assertThat(address.getCountry()).isSameAs(country);
+    }
+
+    @Test
+    void updateKeepsStateProvinceAndCountryWhenZeroIsSent() {
+        givenFieldConfiguration(field("stateProvinceId", true, false, ""), field("countryId", true, false, ""));
+        final CodeValue state = mock(CodeValue.class);
+        final CodeValue country = mock(CodeValue.class);
+        final Address address = new Address();
+        address.setStateProvince(state);
+        address.setCountry(country);
+        givenClientAddress(address);
+
+        underTest.update(updateRequest().stateProvinceId(0L).countryId(0L).build());
+
+        assertThat(address.getStateProvince()).isSameAs(state);
+        assertThat(address.getCountry()).isSameAs(country);
+        verify(codeValueRepository, never()).getReferenceById(0L);
     }
 
     @Test

@@ -252,6 +252,26 @@ public class ClientTest extends FeignIntegrationTest {
     }
 
     @Test
+    public void testUpdateCityWhenClientAddressHasNoStateOrCountry() {
+        enableAddress();
+        Long typeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
+        Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+        clientHelper.createClientAddress(clientId, typeId,
+                new ClientAddressRequest().addressLine1("Main Street").city("Mumbai").postalCode("400001").isActive(true));
+
+        AddressData original = clientHelper.getClientAddresses(clientId).get(0);
+        assertThat(original.getStateProvinceId()).isZero();
+        assertThat(original.getCountryId()).isZero();
+        clientHelper.updateClientAddress(clientId, new ClientAddressRequest().addressId(original.getAddressId()).city("Pune")
+                .stateProvinceId(original.getStateProvinceId()).countryId(original.getCountryId()));
+
+        AddressData updated = clientHelper.getClientAddresses(clientId).get(0);
+        assertThat(updated.getCity()).isEqualTo("Pune");
+        assertThat(updated.getStateProvinceId()).isZero();
+        assertThat(updated.getCountryId()).isZero();
+    }
+
+    @Test
     public void testClientAddressCreationRejectsMissingAddressType() {
         enableAddress();
         final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
