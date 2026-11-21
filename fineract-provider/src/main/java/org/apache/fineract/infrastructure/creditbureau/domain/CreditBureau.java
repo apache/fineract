@@ -25,7 +25,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -44,15 +43,5 @@ public class CreditBureau extends AbstractPersistableCustom<Long> {
 
     @Column(name = "implementation_key")
     private String implementationKey;
-
-    public static CreditBureau fromJson(final JsonCommand command) {
-
-        final String tname = command.stringValueOfParameterNamed("name");
-        final String tproduct = command.stringValueOfParameterNamed("product");
-        final String tcountry = command.stringValueOfParameterNamed("country");
-        final String timplementationKey = command.stringValueOfParameterNamed("implementationKey");
-
-        return new CreditBureau().setName(tname).setProduct(tproduct).setCountry(tcountry).setImplementationKey(timplementationKey);
-    }
 
 }

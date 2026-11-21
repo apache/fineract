@@ -23,14 +23,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -54,43 +51,22 @@ public class CreditBureauConfiguration extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "organisation_creditbureau_id")
     private OrganisationCreditBureau organisationCreditbureau;
 
-    public static CreditBureauConfiguration fromJson(JsonCommand command, OrganisationCreditBureau organisation_creditbureau) {
-        final String configkey = command.stringValueOfParameterNamed("configkey");
-        final String value = command.stringValueOfParameterNamed("value");
-        final String description = command.stringValueOfParameterNamed("description");
-
-        return new CreditBureauConfiguration().setConfigurationKey(configkey).setValue(value).setDescription(description)
+    public static CreditBureauConfiguration createNew(final String configurationKey, final String value, final String description,
+            final OrganisationCreditBureau organisation_creditbureau) {
+        return new CreditBureauConfiguration().setConfigurationKey(configurationKey).setValue(value).setDescription(description)
                 .setOrganisationCreditbureau(organisation_creditbureau);
-
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public void updateConfigurationKey(final String configurationKey) {
+        this.configurationKey = StringUtils.defaultIfEmpty(configurationKey, null);
+    }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+    public void updateValue(final String value) {
+        this.value = StringUtils.defaultIfEmpty(value, null);
+    }
 
-        final String configurationKey = "configkey";
-
-        if (command.isChangeInStringParameterNamed(configurationKey, this.configurationKey)) {
-            final String newValue = command.stringValueOfParameterNamed(configurationKey);
-            actualChanges.put(configurationKey, newValue);
-            this.configurationKey = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String value = "value";
-        if (command.isChangeInStringParameterNamed(value, this.value)) {
-            final String newValue = command.stringValueOfParameterNamed(value);
-            actualChanges.put(value, newValue);
-            this.value = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String description = "description";
-        if (command.isChangeInStringParameterNamed(description, this.configurationKey)) {
-            final String newValue = command.stringValueOfParameterNamed(description);
-            actualChanges.put(description, newValue);
-            this.description = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        return actualChanges;
+    public void updateDescription(final String description) {
+        this.description = StringUtils.defaultIfEmpty(description, null);
     }
 
 }

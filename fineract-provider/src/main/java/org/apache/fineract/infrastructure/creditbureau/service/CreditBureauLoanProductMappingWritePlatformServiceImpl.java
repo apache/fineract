@@ -72,7 +72,14 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
         final LoanProduct lp = this.loanProductRepository.getReferenceById(lpid);
 
-        final CreditBureauLoanProductMapping cb_lp = CreditBureauLoanProductMapping.fromJson(command, orgcb, lp);
+        final boolean isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");
+        final boolean skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");
+        final Integer stalePeriodParam = command.integerValueOfParameterNamed("stalePeriod");
+        final int stalePeriod = stalePeriodParam != null ? stalePeriodParam : -1;
+        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
+
+        final CreditBureauLoanProductMapping cb_lp = CreditBureauLoanProductMapping.createNew(isCreditCheckMandatory,
+                skipCreditCheckInFailure, stalePeriod, isActive, orgcb, lp);
 
         this.creditBureauLoanProductMappingRepository.saveAndFlush(cb_lp);
 

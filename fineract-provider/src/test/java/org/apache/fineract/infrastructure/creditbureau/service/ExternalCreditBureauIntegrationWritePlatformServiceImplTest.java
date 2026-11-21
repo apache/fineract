@@ -37,9 +37,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -600,6 +602,47 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
         assertNull(result.getCreditScore());
         assertNull(result.getOpenAccounts());
         assertNull(result.getClosedAccounts());
+    }
+
+    @Test
+    void buildTokenReadsTheTokenResponseAndParsesTheExpiryDate() throws JsonProcessingException {
+        // formatted with the same formatter as buildToken, so the test does not depend on the JVM default locale
+        final String expires = ZonedDateTime.of(2024, 1, 2, 10, 0, 0, 0, ZoneId.of("GMT"))
+                .format(new DateTimeFormatterBuilder().appendPattern("EEE, dd MMM yyyy kk:mm:ss zzz").toFormatter());
+        final ObjectNode response = mapper.createObjectNode();
+        response.put("userName", "user");
+        response.put("access_token", "abc123");
+        response.put("token_type", "bearer");
+        response.put("expires_in", "3599");
+        response.put(".issued", "issued");
+        response.put(".expires", expires);
+
+        final CreditBureauToken token = ExternalCreditBureauIntegrationWritePlatformServiceImpl.buildToken(tokenCommand(response));
+
+        assertEquals("user", token.getUserName());
+        assertEquals("abc123", token.getAccessToken());
+        assertEquals("bearer", token.getTokenType());
+        assertEquals("3599", token.getExpiresIn());
+        assertEquals("issued", token.getIssued());
+        assertEquals(LocalDate.of(2024, 1, 2), token.getExpires());
+    }
+
+    @Test
+    void buildTokenFailsWhenTheExpiryDateIsMissing() {
+        final ObjectNode response = mapper.createObjectNode();
+        response.put("userName", "user");
+        response.put("access_token", "abc123");
+        response.put("token_type", "bearer");
+        response.put("expires_in", "3599");
+
+        assertThrows(DateTimeParseException.class,
+                () -> ExternalCreditBureauIntegrationWritePlatformServiceImpl.buildToken(tokenCommand(response)));
+    }
+
+    private JsonCommand tokenCommand(final ObjectNode response) throws JsonProcessingException {
+        final String json = mapper.writeValueAsString(response);
+        return JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null);
     }
 
     private interface CheckedFunction<T, R> {
