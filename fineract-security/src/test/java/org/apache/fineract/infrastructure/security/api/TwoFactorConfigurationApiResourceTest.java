@@ -19,11 +19,11 @@
 
 package org.apache.fineract.infrastructure.security.api;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TwoFactorConfigurationService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -44,9 +44,6 @@ class TwoFactorConfigurationApiResourceTest {
     private TwoFactorConfigurationService configurationService;
 
     @Mock
-    private DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
-
-    @Mock
     private AppUser appUser;
 
     @InjectMocks
@@ -61,9 +58,8 @@ class TwoFactorConfigurationApiResourceTest {
     void retrieveAllChecksTwoFactorConfigurationReadPermission() {
         Map<String, Object> configuration = Map.of();
         when(configurationService.retrieveAll()).thenReturn(configuration);
-        when(toApiJsonSerializer.serialize(configuration)).thenReturn("{}");
 
-        resource.retrieveAll();
+        assertSame(configuration, resource.retrieveAll());
 
         verify(appUser).validateHasReadPermission("TWOFACTOR_CONFIGURATION");
     }

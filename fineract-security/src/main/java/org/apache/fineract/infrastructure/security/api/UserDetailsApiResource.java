@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
 import org.apache.fineract.infrastructure.security.data.AuthenticatedOauthUserData;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
@@ -57,7 +57,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserDetailsApiResource {
 
-    private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
 
     @Value("${fineract.security.2fa.enabled}")
@@ -67,7 +66,8 @@ public class UserDetailsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Fetch authenticated user details\n", description = "checks the Authentication and returns the set roles and permissions allowed.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class)))
-    public String fetchAuthenticatedUserData() {
+    @LegacyApiResponse
+    public AuthenticatedOauthUserData fetchAuthenticatedUserData() {
 
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context == null) {
@@ -120,6 +120,6 @@ public class UserDetailsApiResource {
                     .setTwoFactorAuthenticationRequired(isTwoFactorRequired);
         }
 
-        return this.apiJsonSerializerService.serialize(authenticatedUserData);
+        return authenticatedUserData;
     }
 }

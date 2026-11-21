@@ -37,8 +37,8 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
 import org.apache.fineract.infrastructure.security.data.AuthenticatedUserData;
 import org.apache.fineract.infrastructure.security.exception.PasswordResetRequiredException;
@@ -73,7 +73,6 @@ public class AuthenticationApiResource {
 
     @Qualifier("customAuthenticationProvider")
     private final DaoAuthenticationProvider customAuthenticationProvider;
-    private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
 
     @POST
@@ -84,7 +83,8 @@ public class AuthenticationApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class)))
     @ApiResponse(responseCode = "400", description = "Unauthenticated. Please login")
     @ApiResponse(responseCode = "403", description = "Password reset required")
-    public String authenticate(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public AuthenticatedUserData authenticate(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         // TODO FINERACT-819: sort out Jersey so JSON conversion does not have
         // to be done explicitly via GSON here, but implicit by arg
         AuthenticateRequest request = new Gson().fromJson(apiRequestBodyAsJson, AuthenticateRequest.class);
@@ -146,6 +146,6 @@ public class AuthenticationApiResource {
 
         }
 
-        return this.apiJsonSerializerService.serialize(authenticatedUserData);
+        return authenticatedUserData;
     }
 }

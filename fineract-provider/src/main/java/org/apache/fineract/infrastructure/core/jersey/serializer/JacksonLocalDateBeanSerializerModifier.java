@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.serializer;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -28,10 +29,12 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.jersey.converter.LocalDateJsonConverter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArraySerializer;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.LegacyApiResponseModule;
 
 public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifier {
 
-    private final JsonSerializer<?> localDateSerializer = new JacksonSerializerAdapter<>(new LocalDateJsonConverter());
+    private final JsonSerializer<?> localDateSerializer = LegacyApiResponseModule
+            .localDateSerializer(new JacksonSerializerAdapter<>(new LocalDateJsonConverter()));
     private final JsonSerializer<?> localDateArraySerializer = new JacksonLocalDateArraySerializer();
 
     @Override
@@ -49,7 +52,8 @@ public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifi
 
     private void assignLocalDateSerializer(List<BeanPropertyWriter> beanProperties, JsonSerializer<Object> serializer) {
         for (BeanPropertyWriter writer : beanProperties) {
-            if (LocalDate.class.equals(writer.getType().getRawClass())) {
+            if (LocalDate.class.equals(writer.getType().getRawClass()) && !writer.hasSerializer()
+                    && writer.getAnnotation(JsonFormat.class) == null) {
                 writer.assignSerializer(serializer);
             }
         }

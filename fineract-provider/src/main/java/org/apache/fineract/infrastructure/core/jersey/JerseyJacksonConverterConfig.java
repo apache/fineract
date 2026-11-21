@@ -29,7 +29,9 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.jersey.converter.JsonConverter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonDeserializerAdapter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonSerializerAdapter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.SecurityApiJacksonMixins;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArrayModule;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.LegacyApiResponseModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -51,8 +53,10 @@ public class JerseyJacksonConverterConfig {
                 .deserializers(mergedDeserializers.toArray(new JsonDeserializer[0])) //
                 .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES) //
                 .featuresToEnable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS) //
+                .mixIns(SecurityApiJacksonMixins.MIXINS) //
                 .build(); //
         objectMapper.registerModule(new JacksonLocalDateArrayModule());
+        objectMapper.registerModule(new LegacyApiResponseModule());
         return objectMapper;
     }
 }
