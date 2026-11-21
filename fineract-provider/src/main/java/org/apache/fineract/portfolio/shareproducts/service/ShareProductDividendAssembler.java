@@ -98,12 +98,12 @@ public class ShareProductDividendAssembler {
                 if (status.isApproved() && !type.isChargePayment()) {
 
                     LocalDate shareStartDate = purchasedSharesData.getPurchasedDate();
+                    int holdingAgeInDays = DateUtils.getExactDifferenceInDays(shareStartDate, postingDate);
+                    if (type.isPurchased() && holdingAgeInDays < minimumActivePeriod) {
+                        continue;
+                    }
                     if (DateUtils.isBefore(shareStartDate, lastDividendPostDate)) {
                         shareStartDate = lastDividendPostDate;
-                    }
-                    int numberOfPurchseDays = DateUtils.getExactDifferenceInDays(shareStartDate, postingDate);
-                    if (type.isPurchased() && numberOfPurchseDays < minimumActivePeriod) {
-                        continue;
                     }
 
                     if (lastDividendAppliedDate != null) {

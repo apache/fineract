@@ -534,7 +534,8 @@ final class ProductsApiResourceSwagger {
         public Integer nominalShares;
         @Schema(example = "30")
         public Integer maximumShares;
-        @Schema(example = "1")
+        @Schema(description = "Minimum holding age in days, measured from the original share purchase date to the dividend period end date. "
+                + "Purchases at least this old qualify; dividend weighting counts only days within the dividend period.", example = "1")
         public Integer minimumActivePeriodForDividends;
         @Schema(example = "0")
         public Integer minimumactiveperiodFrequencyType;
