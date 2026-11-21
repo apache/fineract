@@ -368,6 +368,14 @@ public final class LoanEnumerations {
                         LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT.getCode(), "Discount Fee Amortization Adjustment");
             case LOAN_WITHDRAWAL -> new LoanTransactionEnumData(LoanTransactionType.LOAN_WITHDRAWAL.getValue().longValue(),
                     LoanTransactionType.LOAN_WITHDRAWAL.getCode(), "Loan Withdrawal");
+            case DEFERRED_CHARGE -> new LoanTransactionEnumData(LoanTransactionType.DEFERRED_CHARGE.getValue().longValue(),
+                    LoanTransactionType.DEFERRED_CHARGE.getCode(), "Deferred Charge");
+            case DEFERRED_CHARGE_AMORTIZATION ->
+                new LoanTransactionEnumData(LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION.getValue().longValue(),
+                        LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION.getCode(), "Deferred Charge Amortization");
+            case DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT ->
+                new LoanTransactionEnumData(LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT.getValue().longValue(),
+                        LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT.getCode(), "Deferred Charge Amortization Adjustment");
         };
     }
 

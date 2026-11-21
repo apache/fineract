@@ -20,12 +20,15 @@ package org.apache.fineract.test.stepdef.common;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -59,6 +62,15 @@ public class ExternalEventConfigurationStepDef extends AbstractStepDef {
     @After("@ExternalEventConfigurationScenario")
     public void restoreExternalEventConfiguration() {
         updateExternalEventConfiguration(savedExternalEventConfiguration);
+    }
+
+    @Then("External event configuration contains the following event types: {string}")
+    public void externalEventConfigurationContainsEventTypes(final String eventTypes) {
+        final Set<String> configuredTypes = ok(() -> fineractClient.externalEventConfiguration().getExternalEventConfigurations(Map.of()))
+                .getExternalEventConfiguration().stream().map(ExternalEventConfigurationItemResponse::getType).collect(Collectors.toSet());
+        final String[] expectedTypes = Arrays.stream(eventTypes.split(",")).map(String::trim).filter(type -> !type.isEmpty())
+                .toArray(String[]::new);
+        assertThat(configuredTypes).contains(expectedTypes);
     }
 
     @When("Admin disables external business event {string}")
