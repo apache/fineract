@@ -200,9 +200,8 @@ public class ClientCreateUpdateWritePlatformService {
             }
 
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
-            if (savingsProductId != null) {
-                this.savingsProductRepository.findById(savingsProductId)
-                        .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+            if (savingsProductId != null && !this.savingsProductRepository.existsById(savingsProductId)) {
+                throw new SavingsProductNotFoundException(savingsProductId);
             }
 
             boolean isEntity = false;
@@ -546,9 +545,8 @@ public class ClientCreateUpdateWritePlatformService {
                     throw new ClientActiveForUpdateException(clientId, ClientApiConstants.savingsProductIdParamName);
                 }
                 final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
-                if (savingsProductId != null) {
-                    this.savingsProductRepository.findById(savingsProductId)
-                            .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                if (savingsProductId != null && !this.savingsProductRepository.existsById(savingsProductId)) {
+                    throw new SavingsProductNotFoundException(savingsProductId);
                 }
                 clientForUpdate.updateSavingsProduct(savingsProductId);
             }

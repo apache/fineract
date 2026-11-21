@@ -157,6 +157,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
         return this.office.getId();
     }
 
+    @SuppressWarnings("ReturnValueIgnored") // Reading the size loads the lazy collection
     public void initializeLazyCollections() {
         this.office.getId();
         this.cashiers.size();

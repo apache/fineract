@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,9 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.contentstore.util.ContentPipe;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.documentmanagement.command.DocumentUpdateCommand;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdateRequest;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdateResponse;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -83,8 +87,8 @@ class BulkImportEventListenerTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 11, 5))));
         when(applicationContext.getBean(anyString(), eq(ImportHandler.class))).thenReturn(importHandler);
         workbook = new XSSFWorkbook();
-        importDocument = ImportDocument.instance(1L, LocalDateTime.of(2026, 11, 5, 9, 55), GlobalEntityType.CENTERS.getValue(),
-                mock(AppUser.class), TOTAL_RECORDS);
+        importDocument = spy(ImportDocument.instance(1L, LocalDateTime.of(2026, 11, 5, 9, 55), GlobalEntityType.CENTERS.getValue(),
+                mock(AppUser.class), TOTAL_RECORDS));
         event = new BulkImportEvent(this, workbook, "CLIENTS_ENTITY_TEMPLATE.xls", "application/vnd.ms-excel", importDocument, "en",
                 DATE_FORMAT, ThreadLocalContextUtil.getContext(), 1L);
         listener = new BulkImportEventListener(applicationContext, importRepository, pipe, dispatcher);
@@ -124,12 +128,14 @@ class BulkImportEventListenerTest {
     @Test
     void finishedImportIsSavedOnceWithItsCounts() {
         when(importHandler.process(any(), any(), any())).thenReturn(Count.instance(2, 1));
-        when(dispatcher.dispatch(any())).thenReturn(() -> null);
+        when(dispatcher.<DocumentUpdateRequest, DocumentUpdateResponse>dispatch(any(DocumentUpdateCommand.class)))
+                .thenReturn(() -> DocumentUpdateResponse.builder().resourceId(1L).build());
 
         listener.onApplicationEvent(event);
 
         assertThat(importDocument.getSuccessCount()).isEqualTo(2);
         assertThat(importDocument.getFailureCount()).isEqualTo(1);
+        verify(importDocument).update(any(LocalDateTime.class), eq(2), eq(1));
         verify(importRepository).saveAndFlush(importDocument);
     }
 }

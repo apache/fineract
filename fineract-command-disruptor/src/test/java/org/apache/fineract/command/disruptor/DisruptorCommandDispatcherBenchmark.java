@@ -79,13 +79,13 @@ public class DisruptorCommandDispatcherBenchmark {
     }
 
     @Benchmark
-    public void processCommand() {
+    public DummyResponse processCommand() {
         var command = new DummyCommand();
         command.setPayload(DummyRequest.builder().content("hello").build());
 
         Supplier<DummyResponse> result = dispatcher.dispatch(command);
 
         // NOTE: force yield
-        result.get();
+        return result.get();
     }
 }

@@ -33,8 +33,8 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentUpdateCommand;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdateRequest;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdateResponse;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
@@ -96,9 +96,9 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
             command.setPayload(DocumentUpdateRequest.builder().id(event.getImportDocument().getDocumentId()).entityId(event.getEntityId())
                     .entityType("IMPORT").stream(pipedInputStream).build());
 
-            final Supplier<DocumentCreateResponse> response = dispatcher.dispatch(command);
+            final Supplier<DocumentUpdateResponse> response = dispatcher.dispatch(command);
 
-            response.get();
+            log.debug("Updated import document {}", response.get().getResourceId());
 
             importRepository.saveAndFlush(event.getImportDocument());
         } catch (Exception e) {

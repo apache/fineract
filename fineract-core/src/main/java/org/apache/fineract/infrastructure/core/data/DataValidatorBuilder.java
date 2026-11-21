@@ -1123,6 +1123,7 @@ public class DataValidatorBuilder {
      *
      * @return this {@code DataValidatorBuilder} for method chaining
      */
+    @SuppressWarnings("ReturnValueIgnored") // Parsing the pattern is the validation
     public DataValidatorBuilder validDateTimeFormatPattern() {
         if (this.value == null && this.ignoreNullValue) {
             return this;
