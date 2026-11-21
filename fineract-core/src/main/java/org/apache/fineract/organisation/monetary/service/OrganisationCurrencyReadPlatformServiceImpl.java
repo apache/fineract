@@ -24,7 +24,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
 @RequiredArgsConstructor
 public class OrganisationCurrencyReadPlatformServiceImpl implements OrganisationCurrencyReadPlatformService {
 
-    private final CurrencyReadPlatformService currencyReadPlatformService;
+    protected final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Override
     public CurrencyConfigurationData retrieveCurrencyConfiguration() {

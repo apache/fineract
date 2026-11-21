@@ -44,8 +44,8 @@ public class WorkingCapitalLoanRetrieveIdServiceImpl implements WorkingCapitalLo
             Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE,
                     LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD));
 
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final WorkingCapitalLoanRepository loanRepository;
+    protected final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    protected final WorkingCapitalLoanRepository loanRepository;
 
     @Override
     public List<COBPartition> retrieveLoanCOBPartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp, int partitionSize) {

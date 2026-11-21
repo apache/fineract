@@ -52,19 +52,19 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanRefundValidat
 @RequiredArgsConstructor
 public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandlerService {
 
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
-    private final LoanScheduleService loanScheduleService;
-    private final LoanRefundService loanRefundService;
-    private final LoanRefundValidator loanRefundValidator;
-    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
-    private final LoanTransactionProcessingService loanTransactionProcessingService;
-    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
-    private final LoanBalanceService loanBalanceService;
-    private final LoanTransactionService loanTransactionService;
-    private final LoanJournalEntryPoster journalEntryPoster;
-    private final LoanChargeService loanChargeService;
+    protected final LoanTransactionRepository loanTransactionRepository;
+    protected final BusinessEventNotifierService businessEventNotifierService;
+    protected final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
+    protected final LoanScheduleService loanScheduleService;
+    protected final LoanRefundService loanRefundService;
+    protected final LoanRefundValidator loanRefundValidator;
+    protected final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    protected final LoanTransactionProcessingService loanTransactionProcessingService;
+    protected final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    protected final LoanBalanceService loanBalanceService;
+    protected final LoanTransactionService loanTransactionService;
+    protected final LoanJournalEntryPoster journalEntryPoster;
+    protected final LoanChargeService loanChargeService;
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,

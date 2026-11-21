@@ -35,8 +35,8 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 @RequiredArgsConstructor
 public class SavingsAccountActivationServiceImpl implements SavingsAccountActivationService {
 
-    private final SavingsAccountPostInterestService savingsAccountPostInterestService;
-    private final SavingsAccountInterestCalculationService savingsAccountInterestCalculationService;
+    protected final SavingsAccountPostInterestService savingsAccountPostInterestService;
+    protected final SavingsAccountInterestCalculationService savingsAccountInterestCalculationService;
 
     @Override
     public void processAccountUponActivation(final SavingsAccount account, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,

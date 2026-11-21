@@ -58,7 +58,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 @RequiredArgsConstructor
 public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {
 
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    protected final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Override
     public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {

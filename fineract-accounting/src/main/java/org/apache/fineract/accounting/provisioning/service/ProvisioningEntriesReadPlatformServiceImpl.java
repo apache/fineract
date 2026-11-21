@@ -69,11 +69,11 @@ import org.springframework.transaction.annotation.Transactional;
 @ConditionalOnMissingBean(value = ProvisioningEntriesReadPlatformService.class, ignored = ProvisioningEntriesReadPlatformServiceImpl.class)
 public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningEntriesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    protected final JdbcTemplate jdbcTemplate;
 
-    private final PaginationHelper loanProductProvisioningEntryDataPaginationHelper;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final SQLQueryFactory queryFactory;
+    protected final PaginationHelper loanProductProvisioningEntryDataPaginationHelper;
+    protected final DatabaseSpecificSQLGenerator sqlGenerator;
+    protected final SQLQueryFactory queryFactory;
 
     @Override
     public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(final LocalDate date) {

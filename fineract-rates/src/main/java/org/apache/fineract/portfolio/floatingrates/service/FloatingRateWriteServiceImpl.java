@@ -48,8 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class FloatingRateWriteServiceImpl implements FloatingRateWriteService {
 
-    private final Validator validator;
-    private final FloatingRateRepositoryWrapper floatingRateRepository;
+    protected final Validator validator;
+    protected final FloatingRateRepositoryWrapper floatingRateRepository;
 
     @Transactional
     @Override

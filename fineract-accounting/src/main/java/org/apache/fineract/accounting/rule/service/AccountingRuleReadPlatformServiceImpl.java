@@ -45,8 +45,8 @@ import org.springframework.jdbc.core.RowMapper;
 @RequiredArgsConstructor
 public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final GLAccountReadPlatformService glAccountReadPlatformService;
+    protected final JdbcTemplate jdbcTemplate;
+    protected final GLAccountReadPlatformService glAccountReadPlatformService;
 
     private static final class AccountingRuleDataExtractor implements ResultSetExtractor<Map<Long, AccountingRuleData>> {
 
