@@ -397,10 +397,11 @@ public class ShareProductDataSerializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.charges_paramname, element)) {
-            final String currencyCode = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.currency_paramname, element);
-            Set<Charge> charges = assembleListOfProductCharges(element, currencyCode);
+            // The product's currency, which already reflects a currency change in this request
+            Set<Charge> charges = assembleListOfProductCharges(element, product.getCurrency().getCode());
             if (product.setCharges(charges)) {
-                actualChanges.put(ShareProductApiConstants.charges_paramname, charges);
+                // The charge ids, not the entities, which the command result can't serialize
+                actualChanges.put(ShareProductApiConstants.charges_paramname, charges.stream().map(Charge::getId).toList());
             }
         }
 
