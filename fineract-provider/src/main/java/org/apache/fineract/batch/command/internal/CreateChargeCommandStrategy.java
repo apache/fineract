@@ -27,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -49,6 +51,7 @@ import org.springframework.stereotype.Component;
 public class CreateChargeCommandStrategy implements CommandStrategy {
 
     private final LoanChargesApiResource loanChargesApiResource;
+    private final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
 
     @Override
     public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
@@ -65,7 +68,7 @@ public class CreateChargeCommandStrategy implements CommandStrategy {
         // Calls 'executeLoanCharge' function from 'LoanChargesApiResource'
         // to create
         // a new charge for a loan
-        responseBody = loanChargesApiResource.executeLoanCharge(loanId, null, request.getBody());
+        responseBody = toApiJsonSerializer.serialize(loanChargesApiResource.executeLoanCharge(loanId, null, request.getBody()));
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charge has been successfully
