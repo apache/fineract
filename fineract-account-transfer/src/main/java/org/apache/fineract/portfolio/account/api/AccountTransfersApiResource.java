@@ -75,7 +75,7 @@ public class AccountTransfersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
 
-        return accountTransfersReadPlatformService.retrieveTemplate(accountTransSearchParam.getFromAccountId(),
+        return accountTransfersReadPlatformService.retrieveTemplate(accountTransSearchParam.getFromOfficeId(),
                 accountTransSearchParam.getFromClientId(), accountTransSearchParam.getFromAccountId(),
                 accountTransSearchParam.getFromAccountType(), accountTransSearchParam.getToOfficeId(),
                 accountTransSearchParam.getToClientId(), accountTransSearchParam.getToAccountId(),
