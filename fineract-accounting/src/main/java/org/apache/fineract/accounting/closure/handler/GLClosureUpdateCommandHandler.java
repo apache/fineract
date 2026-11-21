@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.accounting.closure.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.closure.data.GLClosureUpdateRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureUpdateResponse;
 import org.apache.fineract.accounting.closure.service.GLClosureWritePlatformService;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.stereotype.Service;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GLCLOSURE", action = "CREATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class CreateGLClosureCommandHandler implements NewCommandSourceHandler {
+public class GLClosureUpdateCommandHandler implements CommandHandler<GLClosureUpdateRequest, GLClosureUpdateResponse> {
 
     private final GLClosureWritePlatformService writePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGLClosureUpdate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public GLClosureUpdateResponse handle(Command<GLClosureUpdateRequest> command) {
+        return writePlatformService.updateGLClosure(command.getPayload());
+    }
 
-        return this.writePlatformService.createGLClosure(command);
+    @Override
+    public GLClosureUpdateResponse fallback(Command<GLClosureUpdateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
