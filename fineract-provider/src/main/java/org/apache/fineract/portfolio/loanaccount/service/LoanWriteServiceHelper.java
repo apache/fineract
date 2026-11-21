@@ -21,10 +21,15 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -36,6 +41,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanSchedu
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanMapper;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 
 @RequiredArgsConstructor
 public class LoanWriteServiceHelper {
@@ -226,5 +233,22 @@ public class LoanWriteServiceHelper {
             user = this.context.getAuthenticatedUserIfPresent();
         }
         return user;
+    }
+
+    public void saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
+        try {
+            this.loanRepositoryWrapper.save(loan);
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+            final Throwable realCause = e.getCause();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+            if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("external_id_unique")) {
+                baseDataValidator.reset().parameter(LoanApiConstants.externalIdParameterName).failWithCode("value.must.be.unique");
+            }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                        dataValidationErrors, e);
+            }
+        }
     }
 }
