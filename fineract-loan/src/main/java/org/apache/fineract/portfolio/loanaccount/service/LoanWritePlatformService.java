@@ -31,7 +31,6 @@ import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulk
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface LoanWritePlatformService {
@@ -45,23 +44,7 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult undoLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult makeLoanRepayment(LoanTransactionType repaymentTransactionType, Long loanId, JsonCommand command,
-            boolean isRecoveryRepayment);
-
-    @Transactional
-    CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType repaymentTransactionType, Long loanId,
-            JsonCommand command, boolean isRecoveryRepayment, String chargeRefundChargeType);
-
-    @Transactional
-    CommandProcessingResult makeInterestPaymentWaiver(JsonCommand command);
-
     Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
-
-    CommandProcessingResult adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
-
-    CommandProcessingResult chargebackLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
-
-    CommandProcessingResult waiveInterestOnLoan(Long loanId, JsonCommand command);
 
     CommandProcessingResult writeOff(Long loanId, JsonCommand command);
 
@@ -93,11 +76,7 @@ public interface LoanWritePlatformService {
     @Transactional
     Loan recalculateInterest(Loan loan);
 
-    CommandProcessingResult recoverFromGuarantor(Long loanId);
-
     void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
-
-    CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
 
     CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
 
@@ -111,11 +90,7 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult undoGLIMLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
-
     void updateOriginalSchedule(Loan loan);
-
-    CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
 
     CommandProcessingResult markLoanAsFraud(Long loanId, JsonCommand command);
 
@@ -123,8 +98,4 @@ public interface LoanWritePlatformService {
 
     @Transactional
     CommandProcessingResult undoChargeOff(JsonCommand command);
-
-    CommandProcessingResult makeRefund(Long loanId, LoanTransactionType loanTransactionType, JsonCommand command);
-
-    CommandProcessingResult makeManualInterestRefund(Long loanId, Long transactionId, JsonCommand command);
 }

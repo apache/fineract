@@ -198,6 +198,9 @@ class LoanChargeWritePlatformServiceImplTest {
     @Mock
     private ExternalIdFactory externalIdFactory;
 
+    @Mock
+    private LoanTransactionWritePlatformService loanTransactionWritePlatformService;
+
     @BeforeEach
     void setUp() {
         // build the real services around the mocks, as @InjectMocks did for the single class before the split
