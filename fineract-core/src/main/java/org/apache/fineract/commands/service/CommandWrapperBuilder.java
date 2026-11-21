@@ -189,7 +189,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FINANCIALACTIVITYACCOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITACCOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITPRODUCT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FUND;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLACCOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLCLOSURE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLIMLOAN;
@@ -538,22 +537,6 @@ public class CommandWrapperBuilder {
         this.subentityId = guarantorFundingId;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/guarantors/" + guarantorId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createFund() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_FUND;
-        this.entityId = null;
-        this.href = "/funds/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateFund(final Long fundId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_FUND;
-        this.entityId = fundId;
-        this.href = "/funds/" + fundId;
         return this;
     }
 

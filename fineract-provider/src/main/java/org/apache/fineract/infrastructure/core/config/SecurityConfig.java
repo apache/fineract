@@ -322,6 +322,15 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/import/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_IMPORT")
+                    // fund
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/funds"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FUND")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/funds/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FUND")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/funds"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FUND")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/funds/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FUND")
                     // payment type
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/paymenttypes/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PAYMENTTYPE")

@@ -20,11 +20,10 @@ package org.apache.fineract.portfolio.fund.starter;
 
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
-import org.apache.fineract.portfolio.fund.serialization.FundCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.fund.service.FundWritePlatformService;
-import org.apache.fineract.portfolio.fund.service.FundWritePlatformServiceJpaRepositoryImpl;
+import org.apache.fineract.portfolio.fund.service.FundWriteService;
+import org.apache.fineract.portfolio.fund.service.FundWriteServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,9 +39,8 @@ public class FundConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FundWritePlatformService.class)
-    public FundWritePlatformService fundWritePlatformService(PlatformSecurityContext context,
-            FundCommandFromApiJsonDeserializer fromApiJsonDeserializer, FundRepository fundRepository) {
-        return new FundWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer, fundRepository);
+    @ConditionalOnMissingBean(FundWriteService.class)
+    public FundWriteService fundWriteService(FundRepository fundRepository) {
+        return new FundWriteServiceImpl(fundRepository);
     }
 }
