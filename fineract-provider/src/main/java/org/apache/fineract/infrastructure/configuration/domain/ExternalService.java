@@ -26,7 +26,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -43,9 +42,4 @@ public class ExternalService extends AbstractPersistableCustom<Long> {
     // @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy =
     // "externalServicePropertiesPK.externalService", orphanRemoval = true)
     // private Set<ExternalServicesProperties> values;
-
-    public static ExternalService fromJson(final JsonCommand command) {
-        final String name = command.stringValueOfParameterNamed("name");
-        return new ExternalService().setName(name);
-    }
 }

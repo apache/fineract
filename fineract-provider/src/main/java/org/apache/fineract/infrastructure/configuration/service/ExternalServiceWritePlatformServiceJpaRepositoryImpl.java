@@ -28,6 +28,8 @@ import org.apache.fineract.infrastructure.configuration.domain.ExternalServicesP
 import org.apache.fineract.infrastructure.configuration.domain.ExternalServicesPropertiesRepository;
 import org.apache.fineract.infrastructure.configuration.domain.ExternalServicesPropertiesRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.serialization.ExternalServicesPropertiesCommandFromApiJsonDeserializer;
+import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.ExternalservicePropertiesJSONinputParams;
+import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.SMTPJSONinputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -64,7 +66,7 @@ public class ExternalServiceWritePlatformServiceJpaRepositoryImpl implements Ext
             String name = it.next();
             final ExternalServicesProperties externalServicesProperties = this.repositoryWrapper.findOneByIdAndName(externalServiceId, name,
                     externalServiceName);
-            final Map<String, Object> changes = externalServicesProperties.update(command, name);
+            final Map<String, Object> changes = updateProperty(externalServicesProperties, command, name);
             changesList.putAll(changes);
             if (!changes.isEmpty()) {
                 this.repository.saveAndFlush(externalServicesProperties);
@@ -77,6 +79,25 @@ public class ExternalServiceWritePlatformServiceJpaRepositoryImpl implements Ext
                 .build();
         //
 
+    }
+
+    private Map<String, Object> updateProperty(final ExternalServicesProperties property, final JsonCommand command,
+            final String paramName) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
+
+        final String valueParamName = ExternalservicePropertiesJSONinputParams.VALUE.getValue();
+        if (command.isChangeInStringParameterNamed(paramName, property.getValue())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            if (paramName.equals(SMTPJSONinputParams.PASSWORD.getValue()) && newValue.equals("XXXX")) {
+                // If Param Name is Password and ParamValue is XXXX that means
+                // the password has not been changed.
+            } else {
+                actualChanges.put(valueParamName, newValue);
+            }
+            property.updateValue(newValue);
+        }
+
+        return actualChanges;
     }
 
 }
