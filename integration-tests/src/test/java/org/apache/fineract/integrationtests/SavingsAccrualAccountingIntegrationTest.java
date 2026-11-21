@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
@@ -450,6 +451,64 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         withdraw(savingsAccountId, new BigDecimal(AMOUNT).add(OVERDRAWN_BY).toPlainString(),
                 DATE_FORMATTER.format(TODAY.minusDays(DAYS_TO_SUBTRACT).plusDays(DAYS_IN_CREDIT)));
         return savingsAccountId;
+    }
+
+    @Test
+    public void testUndoingTheDepositReversesItsAccrualsAndTheirJournalEntries() {
+        verifyAccrualsAreReversedWithTheDeposit(
+                (savingsAccountId, depositId) -> savingsTransactionHelper.undoTransaction(savingsAccountId, depositId));
+    }
+
+    @Test
+    public void testReversingTheDepositReversesItsAccrualsAndTheirJournalEntries() {
+        verifyAccrualsAreReversedWithTheDeposit(
+                (savingsAccountId, depositId) -> savingsTransactionHelper.reverseTransaction(savingsAccountId, depositId));
+    }
+
+    /**
+     * FINERACT-2994: accrue interest on a deposit, then take the deposit back. The accruals on the money that is gone
+     * must be reversed with their journal entries, so Interest Payable goes back to 0.
+     */
+    private void verifyAccrualsAreReversedWithTheDeposit(final BiConsumer<Long, Long> takeBackDeposit) {
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(withMappings(accrualProduct(INTEREST_RATE), accounts))
+                    .getResourceId();
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            final Long depositId = deposit(savingsAccountId, AMOUNT, startDateString()).getResourceId();
+
+            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
+            final List<SavingsAccountTransactionData> accruals = savingsTransactionHelper.getAccrualTransactions(savingsAccountId);
+            assertFalse(accruals.isEmpty(), "No accrual transactions were found.");
+            assertTrue(interestPayableBalance(accruals, accounts).signum() > 0, "The accruals did not credit Interest Payable.");
+
+            takeBackDeposit.accept(savingsAccountId, depositId);
+
+            final List<SavingsAccountTransactionData> afterUndo = savingsTransactionHelper.getAccrualTransactions(savingsAccountId);
+            for (SavingsAccountTransactionData accrual : afterUndo) {
+                assertTrue(Boolean.TRUE.equals(accrual.getReversed()), "The accrual of " + accrual.getDate() + " was not reversed.");
+                final List<JournalEntryTransactionItem> entries = journalEntriesOf(accrual);
+                assertHasEntry(entries, CREDIT, accounts.interestPayable(), "No accrual entry for " + accrual.getDate() + ".");
+                assertHasEntry(entries, DEBIT, accounts.interestPayable(), "No reversal entry for " + accrual.getDate() + ".");
+            }
+            assertEquals(0, interestPayableBalance(afterUndo, accounts).signum(), "Interest Payable did not return to 0.");
+        });
+    }
+
+    /** Credits minus debits on Interest Payable over the journal entries of the given accruals. */
+    private BigDecimal interestPayableBalance(final List<SavingsAccountTransactionData> accruals, final AccrualAccounts accounts) {
+        final Long interestPayableId = SavingsRequestBuilders.accountId(accounts.interestPayable());
+        BigDecimal balance = BigDecimal.ZERO;
+        for (SavingsAccountTransactionData accrual : accruals) {
+            for (JournalEntryTransactionItem entry : journalEntriesOf(accrual)) {
+                if (!interestPayableId.equals(entry.getGlAccountId()) || entry.getEntryType() == null || entry.getAmount() == null) {
+                    continue;
+                }
+                final BigDecimal amount = BigDecimal.valueOf(entry.getAmount());
+                balance = CREDIT.equals(entry.getEntryType().getValue()) ? balance.add(amount) : balance.subtract(amount);
+            }
+        }
+        return balance;
     }
 
     private SavingsAccountTransactionData interestPostingOf(final Long savingsAccountId) {

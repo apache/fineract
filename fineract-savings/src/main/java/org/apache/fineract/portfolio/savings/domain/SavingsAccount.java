@@ -2155,6 +2155,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION, transactionToUndo.getTransactionDate());
         transactionToUndo.reverse();
+        if (!transactionToUndo.isAccrual()) {
+            reverseAccrualsFrom(transactionToUndo.getTransactionDate(), false);
+        }
         if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
             // undo charge
             final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
@@ -2180,6 +2183,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION, transactionToUndo.getTransactionDate());
         transactionToUndo.reverse();
+        if (!transactionToUndo.isAccrual()) {
+            reverseAccrualsFrom(transactionToUndo.getTransactionDate(), true);
+        }
         if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
             // undo charge
             final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
@@ -2189,7 +2195,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    public void undoTransaction(final SavingsAccountTransaction transactionToUndo) {
+    public void undoTransaction(final SavingsAccountTransaction transactionToUndo, final boolean backdatedTxnsAllowedTill) {
 
         if (transactionToUndo.isReversed()) {
             throw new SavingsAccountTransactionNotFoundException(this.getId(), transactionToUndo.getId());
@@ -2198,6 +2204,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION, transactionToUndo.getTransactionDate());
         transactionToUndo.reverse();
+        if (!transactionToUndo.isAccrual()) {
+            reverseAccrualsFrom(transactionToUndo.getTransactionDate(), backdatedTxnsAllowedTill);
+        }
         if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
             // undo charge
             final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
@@ -3650,6 +3659,13 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     }
 
     public void accrualsForSavingsReverse(SavingsAccountTransactionDTO transactionDTO, final boolean backdatedTxnsAllowedTill) {
+        reverseAccrualsFrom(transactionDTO.getTransactionDate(), backdatedTxnsAllowedTill);
+    }
+
+    /**
+     * Reverses the accruals dated on or after the given date, so they are calculated again from the changed balance.
+     */
+    private void reverseAccrualsFrom(final LocalDate date, final boolean backdatedTxnsAllowedTill) {
         List<SavingsAccountTransaction> accountTransactionsSorted = null;
 
         if (backdatedTxnsAllowedTill) {
@@ -3659,8 +3675,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
         for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
             boolean typeTransaccionValidation = transaction.getTransactionType() == SavingsAccountTransactionType.ACCRUAL;
-            if (typeTransaccionValidation && (transaction.getDateOf().isAfter(transactionDTO.getTransactionDate())
-                    || transaction.getDateOf().isEqual(transactionDTO.getTransactionDate()))) {
+            if (typeTransaccionValidation && (transaction.getDateOf().isAfter(date) || transaction.getDateOf().isEqual(date))) {
                 transaction.reverse();
             }
         }
