@@ -20,6 +20,7 @@ package org.apache.fineract.interoperation.service;
 
 import java.time.LocalDateTime;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.interoperation.data.InteropAccountData;
 import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
 import org.apache.fineract.interoperation.data.InteropIdentifiersResponseData;
@@ -80,8 +81,8 @@ public interface InteropService {
     InteropKycResponseData getKyc(@NonNull String accountId);
 
     @NonNull
-    String disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson);
+    CommandProcessingResult disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson);
 
     @NonNull
-    String loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson);
+    CommandProcessingResult loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson);
 }

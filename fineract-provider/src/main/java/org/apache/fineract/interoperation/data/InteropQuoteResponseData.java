@@ -22,8 +22,10 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.interoperation.domain.InteropActionState;
 
+@Getter
 public final class InteropQuoteResponseData extends InteropResponseData {
 
     @NotNull
