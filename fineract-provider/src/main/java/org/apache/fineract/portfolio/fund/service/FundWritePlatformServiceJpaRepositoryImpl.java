@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.fund.service;
 
 import jakarta.persistence.PersistenceException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatformService {
 
+    private static final String NAME_PARAM = "name";
+    private static final String EXTERNAL_ID_PARAM = "externalId";
+
     private final PlatformSecurityContext context;
     private final FundCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final FundRepository fundRepository;
@@ -56,7 +60,8 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Fund fund = Fund.fromJson(command);
+            final Fund fund = Fund.createNew(command.stringValueOfParameterNamed(NAME_PARAM),
+                    command.stringValueOfParameterNamed(EXTERNAL_ID_PARAM));
 
             this.fundRepository.saveAndFlush(fund);
 
@@ -86,7 +91,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             final Fund fund = this.fundRepository.findById(fundId).orElseThrow(() -> new FundNotFoundException(fundId));
 
-            final Map<String, Object> changes = fund.update(command);
+            final Map<String, Object> changes = updateFund(fund, command);
             if (!changes.isEmpty()) {
                 this.fundRepository.saveAndFlush(fund);
             }
@@ -104,6 +109,24 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
             handleFundDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private Map<String, Object> updateFund(final Fund fund, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        if (command.isChangeInStringParameterNamed(NAME_PARAM, fund.getName())) {
+            final String newValue = command.stringValueOfParameterNamed(NAME_PARAM);
+            actualChanges.put(NAME_PARAM, newValue);
+            fund.updateName(newValue);
+        }
+
+        if (command.isChangeInStringParameterNamed(EXTERNAL_ID_PARAM, fund.getExternalId())) {
+            final String newValue = command.stringValueOfParameterNamed(EXTERNAL_ID_PARAM);
+            actualChanges.put(EXTERNAL_ID_PARAM, newValue);
+            fund.updateExternalId(newValue);
+        }
+
+        return actualChanges;
     }
 
     /*

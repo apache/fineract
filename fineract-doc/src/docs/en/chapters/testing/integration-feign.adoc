@@ -43,7 +43,8 @@ The check reads import statements only, so it is a deterrent rather than a proof
 
 [source,bash]
 ----
-./gradlew :integration-tests:checkstyleTest :oauth2-tests:checkstyleTest :twofactor-tests:checkstyleTest
+./gradlew :integration-tests:checkstyleTest :oauth2-tests:checkstyleTest :twofactor-tests:checkstyleTest \
+  :oauth2-twofactor-tests:checkstyleTest
 ----
 
 The report is written to each module's `build/reports/checkstyle/` directory.

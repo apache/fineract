@@ -152,7 +152,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

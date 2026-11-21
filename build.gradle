@@ -50,6 +50,7 @@ buildscript {
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
+                'oauth2-twofactor-tests',
                 'fineract-client',
                 'fineract-client-feign',
                 'fineract-avro-schemas',

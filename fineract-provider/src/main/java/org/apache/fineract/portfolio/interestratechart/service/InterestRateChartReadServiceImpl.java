@@ -162,7 +162,7 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
         }
 
         public InterestRateChartExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
-            chartSlabsMapper = new InterestRateChartSlabExtractor(sqlGenerator);
+            chartSlabsMapper = new InterestRateChartSlabExtractor();
             this.schemaSql = """
                     irc.id as ircId, irc.name as ircName, irc.description as ircDescription,\
                     irc.from_date as ircFromDate, irc.end_date as ircEndDate, \
@@ -258,33 +258,6 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
 
     private static final class InterestRateChartSlabsMapper implements RowMapper<InterestRateChartSlabData> {
 
-        private final String schemaSql;
-
-        private String schema() {
-            return this.schemaSql;
-        }
-
-        private InterestRateChartSlabsMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
-            this.schemaSql = """
-                    ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, \
-                    ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, \
-                    ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, \
-                    curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, \
-                    curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, \
-                    iri.id as iriId, iri.entiry_type as entityType, iri.attribute_name as attributeName ,\
-                    iri.condition_type as conditionType, iri.attribute_value as attributeValue, \
-                    iri.incentive_type as incentiveType, iri.amount as amount, code.code_value as attributeValueDesc \
-                    from \
-                    m_interest_rate_slab ircd \
-                    left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id \
-                    left join m_code_value code on \
-                    """
-                    + sqlGenerator.castChar("code.id") + """
-                             = iri.attribute_value \
-                            left join m_currency curr on ircd.currency_code= curr.code \
-                            """;
-        }
-
         @Override
         public InterestRateChartSlabData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "ircdId");
@@ -325,20 +298,8 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
 
     private static final class InterestRateChartSlabExtractor implements ResultSetExtractor<InterestRateChartSlabData> {
 
-        InterestRateChartSlabsMapper chartSlabsMapper;
+        InterestRateChartSlabsMapper chartSlabsMapper = new InterestRateChartSlabsMapper();
         InterestIncentiveMapper incentiveMapper = new InterestIncentiveMapper();
-
-        private final String schemaSql;
-
-        @SuppressWarnings("unused")
-        String schema() {
-            return this.schemaSql;
-        }
-
-        private InterestRateChartSlabExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
-            chartSlabsMapper = new InterestRateChartSlabsMapper(sqlGenerator);
-            this.schemaSql = chartSlabsMapper.schema();
-        }
 
         @Override
         public InterestRateChartSlabData extractData(ResultSet rs) throws SQLException, DataAccessException {

@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -55,7 +56,6 @@ import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.organisation.staff.exception.StaffRoleException;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
-import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -126,7 +126,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
     private final ExternalIdFactory externalIdFactory;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final GLIMAccountInfoRepository glimRepository;
-    private final AccountNumberGenerator accountNumberGenerator;
+    private final AccountNumberGeneratorService accountNumberGenerator;
     private final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService;
     private final LoanCollateralAssembler loanCollateralAssembler;
     private final LoanDisbursementDetailsAssembler loanDisbursementDetailsAssembler;
@@ -373,13 +373,13 @@ public class LoanAssemblerImpl implements LoanAssembler {
                 }
             }
         } else { // for applications other than GLIM
-            loan.setAccountNumber(this.accountNumberGenerator.generate(loan, accountNumberFormat));
+            loan.setAccountNumber(this.accountNumberGenerator.generate(EntityAccountType.LOAN, loan, accountNumberFormat));
         }
     }
 
     private void createAndSetGLIMAccount(BigDecimal totalLoan, Loan loan, AccountNumberFormat accountNumberFormat, Group group,
             BigDecimal applicationId) {
-        final String accountNumber = this.accountNumberGenerator.generate(loan, accountNumberFormat);
+        final String accountNumber = this.accountNumberGenerator.generate(EntityAccountType.LOAN, loan, accountNumberFormat);
         loan.setAccountNumber(accountNumber + "1");
         GroupLoanIndividualMonitoringAccount glimAccount = glimAccountInfoWritePlatformService.createGLIMAccount(accountNumber, group,
                 totalLoan, 1L, true, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);

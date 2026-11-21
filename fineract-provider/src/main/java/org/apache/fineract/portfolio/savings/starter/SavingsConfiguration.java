@@ -22,6 +22,7 @@ import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlat
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
@@ -46,7 +47,6 @@ import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepository
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
-import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
@@ -264,7 +264,7 @@ public class SavingsConfiguration {
             DepositAccountInterestCalculationService depositAccountInterestCalculationService,
             SavingsAccountRepositoryWrapper savingAccountRepository, FixedDepositAccountRepository fixedDepositAccountRepository,
             RecurringDepositAccountRepository recurringDepositAccountRepository, DepositAccountAssembler depositAccountAssembler,
-            DepositAccountDataValidator depositAccountDataValidator, AccountNumberGenerator accountNumberGenerator,
+            DepositAccountDataValidator depositAccountDataValidator, AccountNumberGeneratorService accountNumberGenerator,
             ClientRepositoryWrapper clientRepository, GroupRepository groupRepository, SavingsProductRepository savingsProductRepository,
             NoteRepository noteRepository, StaffRepositoryWrapper staffRepository,
             SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
@@ -434,7 +434,7 @@ public class SavingsConfiguration {
     @ConditionalOnMissingBean(SavingsApplicationProcessWritePlatformService.class)
     public SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService(PlatformSecurityContext context,
             SavingsAccountRepositoryWrapper savingAccountRepository, SavingsAccountAssembler savingAccountAssembler,
-            SavingsAccountDataValidator savingsAccountDataValidator, AccountNumberGenerator accountNumberGenerator,
+            SavingsAccountDataValidator savingsAccountDataValidator, AccountNumberGeneratorService accountNumberGenerator,
             ClientRepositoryWrapper clientRepository, GroupRepository groupRepository, SavingsProductRepository savingsProductRepository,
             NoteRepository noteRepository, StaffRepositoryWrapper staffRepository,
             SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,

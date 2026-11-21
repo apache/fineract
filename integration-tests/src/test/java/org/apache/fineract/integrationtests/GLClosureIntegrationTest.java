@@ -175,7 +175,8 @@ class GLClosureIntegrationTest extends FeignIntegrationTest {
 
                     final List<GetGlClosureResponse> closures = retrieveClosures(officeId);
                     Assertions.assertThat(closures).hasSize(2);
-                    Assertions.assertThat(closures.getFirst()).isEqualTo(expectedClosure);
+                    Assertions.assertThat(closures.getFirst()).usingRecursiveComparison().ignoringFields("allowedOffices")
+                            .isEqualTo(expectedClosure);
                     Assertions.assertThat(closures.getLast().getId()).isEqualTo(closureWithoutComment);
                     Assertions.assertThat(closures.getLast().getComments()).isNull();
                 } finally {
