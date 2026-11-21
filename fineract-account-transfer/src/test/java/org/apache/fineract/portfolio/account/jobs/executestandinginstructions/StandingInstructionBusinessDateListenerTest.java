@@ -38,7 +38,7 @@ class StandingInstructionBusinessDateListenerTest {
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2023, 3, 31);
 
     private final StandingInstructionBusinessDateListener listener = new StandingInstructionBusinessDateListener();
-    private final StepExecution stepExecution = new StepExecution(ExecuteStandingInstructionsConstant.WORKER_STEP,
+    private final StepExecution stepExecution = new StepExecution(1L, ExecuteStandingInstructionsConstant.WORKER_STEP,
             new JobExecution(1L, new JobInstance(1L, ExecuteStandingInstructionsConstant.JOB_NAME), new JobParameters()));
 
     @BeforeEach

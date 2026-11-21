@@ -184,7 +184,7 @@ class LoanItemWriterTest {
     private static StepExecution stepExecution(ExecutionContext stepContext) {
         JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
         jobExecution.getExecutionContext().put(COBConstant.BUSINESS_DATE_PARAMETER_NAME, BUSINESS_DATE);
-        StepExecution stepExecution = new StepExecution("test", jobExecution);
+        StepExecution stepExecution = new StepExecution(1L, "test", jobExecution);
         stepExecution.setExecutionContext(stepContext);
         return stepExecution;
     }
