@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.core.config.ApiAuthorizationRules;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.filters.CallerIpTrackingFilter;
@@ -62,6 +63,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthenticatedAuthorizationManager;
+import org.springframework.security.authorization.AuthorityAuthorizationManager;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationManagers;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -83,6 +88,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenResolv
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
@@ -167,6 +173,11 @@ public class AuthorizationServerConfig {
         http
                 // TODO: Make it configurable
                 .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> {
+                    AuthorizationManager<RequestAuthorizationContext> base = AuthenticatedAuthorizationManager.authenticated();
+                    if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
+                        base = AuthorizationManagers.allOf(base, AuthorityAuthorizationManager.hasAuthority("TWOFACTOR_AUTHENTICATED"));
+                    }
+                    ApiAuthorizationRules.configure(auth, base);
                     if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
                         // the two-factor endpoints deliver and validate the token, so they cannot require it
                         auth.requestMatchers(HttpMethod.POST, "/api/*/twofactor/validate").authenticated()
