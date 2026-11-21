@@ -33,18 +33,22 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.campaigns.email.ScheduledEmailConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
 import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignRepository;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignType;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRepository;
+import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailAttachmentFileFormat;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToBeDeletedException;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToEditException;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
@@ -64,6 +68,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -120,7 +125,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             }
         }
 
-        EmailCampaign emailCampaign = EmailCampaign.instance(currentUser, businessRule, report, command);
+        EmailCampaign emailCampaign = newCampaign(currentUser, businessRule, report, command);
         if (stretchyReportParams != null) {
             emailCampaign.setStretchyReportParamMap(new Gson().toJson(stretchyReportParams));
         }
@@ -145,7 +150,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             if (emailCampaign.isActive()) {
                 throw new EmailCampaignMustBeClosedToEditException(emailCampaign.getId());
             }
-            final Map<String, Object> changes = emailCampaign.update(command);
+            final Map<String, Object> changes = updateCampaign(emailCampaign, command);
 
             if (changes.containsKey(EmailCampaignValidator.businessRuleId)) {
                 final Long newValue = command.longValueOfParameterNamed(EmailCampaignValidator.businessRuleId);
@@ -463,5 +468,99 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             final NonTransientDataAccessException dve) {
         throw ErrorHandler.getMappable(dve, "error.msg.email.campaign.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
+
+    private static EmailCampaign newCampaign(final AppUser submittedBy, final Report businessRuleId, final Report stretchyReport,
+            final JsonCommand command) {
+
+        final String campaignName = command.stringValueOfParameterNamed(EmailCampaignValidator.campaignName);
+        final Long campaignType = command.longValueOfParameterNamed(EmailCampaignValidator.campaignType);
+
+        final String paramValue = command.stringValueOfParameterNamed(EmailCampaignValidator.paramValue);
+        final String emailSubject = command.stringValueOfParameterNamed(EmailCampaignValidator.emailSubject);
+        final String emailMessage = command.stringValueOfParameterNamed(EmailCampaignValidator.emailMessage);
+        final String stretchyReportParamMap = command
+                .stringValueOfParameterNamed(ScheduledEmailConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME);
+        final Integer emailAttachmentFileFormatId = command
+                .integerValueOfParameterNamed(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME);
+        final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat;
+        if (emailAttachmentFileFormatId != null) {
+            emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat.instance(emailAttachmentFileFormatId);
+        } else {
+            emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat.instance(2);
+        }
+        LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
+        if (command.hasParameter(EmailCampaignValidator.submittedOnDateParamName)) {
+            submittedOnDate = command.localDateValueOfParameterNamed(EmailCampaignValidator.submittedOnDateParamName);
+        }
+
+        final String recurrence = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceParamName);
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        LocalDateTime recurrenceStartDate = DateUtils.getLocalDateTimeOfTenant();
+        if (EmailCampaignType.fromInt(campaignType.intValue()).isSchedule()) {
+            if (command.hasParameter(EmailCampaignValidator.recurrenceStartDate)) {
+                recurrenceStartDate = LocalDateTime.parse(command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate),
+                        fmt);
+            }
+        } else {
+            recurrenceStartDate = null;
+        }
+
+        return EmailCampaign.createNew(campaignName, campaignType.intValue(), businessRuleId, paramValue, emailSubject, emailMessage,
+                submittedOnDate, submittedBy, stretchyReport, emailAttachmentFileFormat.getValue(), recurrence, recurrenceStartDate,
+                stretchyReportParamMap);
+    }
+
+    private static Map<String, Object> updateCampaign(final EmailCampaign emailCampaign, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+
+        if (command.isChangeInStringParameterNamed(EmailCampaignValidator.campaignName, emailCampaign.getCampaignName())) {
+            final String newValue = command.stringValueOfParameterNamed(EmailCampaignValidator.campaignName);
+            actualChanges.put(EmailCampaignValidator.campaignName, newValue);
+            emailCampaign.updateCampaignName(newValue);
+        }
+        if (command.isChangeInStringParameterNamed(EmailCampaignValidator.emailMessage, emailCampaign.getEmailMessage())) {
+            final String newValue = command.stringValueOfParameterNamed(EmailCampaignValidator.emailMessage);
+            actualChanges.put(EmailCampaignValidator.emailMessage, newValue);
+            emailCampaign.updateEmailMessage(newValue);
+        }
+        if (command.isChangeInStringParameterNamed(EmailCampaignValidator.paramValue, emailCampaign.getParamValue())) {
+            final String newValue = command.stringValueOfParameterNamed(EmailCampaignValidator.paramValue);
+            actualChanges.put(EmailCampaignValidator.paramValue, newValue);
+            emailCampaign.updateParamValue(newValue);
+        }
+        if (command.isChangeInIntegerParameterNamed(EmailCampaignValidator.campaignType, emailCampaign.getCampaignType())) {
+            final Integer newValue = command.integerValueOfParameterNamed(EmailCampaignValidator.campaignType);
+            actualChanges.put(EmailCampaignValidator.campaignType, EmailCampaignType.fromInt(newValue));
+            emailCampaign.updateCampaignType(EmailCampaignType.fromInt(newValue));
+        }
+        if (command.isChangeInLongParameterNamed(EmailCampaignValidator.businessRuleId,
+                (emailCampaign.getBusinessRuleId() != null) ? emailCampaign.getBusinessRuleId().getId() : null)) {
+            final String newValue = command.stringValueOfParameterNamed(EmailCampaignValidator.businessRuleId);
+            actualChanges.put(EmailCampaignValidator.businessRuleId, newValue);
+        }
+        if (command.isChangeInStringParameterNamed(EmailCampaignValidator.recurrenceParamName, emailCampaign.getRecurrence())) {
+            final String newValue = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceParamName);
+            actualChanges.put(EmailCampaignValidator.recurrenceParamName, newValue);
+            emailCampaign.updateRecurrence(newValue);
+        }
+        final String dateFormatAsInput = command.dateFormat();
+        final String localeAsInput = command.locale();
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        if (command.isChangeInLocalDateTimeParameterNamed(EmailCampaignValidator.recurrenceStartDate,
+                emailCampaign.getRecurrenceStartDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate);
+            actualChanges.put(EmailCampaignValidator.recurrenceStartDate, valueAsInput);
+            actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
+            actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
+
+            emailCampaign.updateRecurrenceStartDate(LocalDateTime.parse(valueAsInput, fmt));
+        }
+
+        return actualChanges;
     }
 }

@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailDataValidator;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageAssembler;
@@ -82,7 +84,7 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
             this.validator.validateUpdateRequest(command);
 
             final EmailMessage message = this.assembler.assembleFromResourceId(resourceId);
-            final Map<String, Object> changes = message.update(command);
+            final Map<String, Object> changes = updateMessage(message, command);
             if (!changes.isEmpty()) {
                 this.repository.save(message);
             }
@@ -130,5 +132,17 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
         LOG.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.email.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
+
+    private static Map<String, Object> updateMessage(final EmailMessage message, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+
+        if (command.isChangeInStringParameterNamed(EmailApiConstants.messageParamName, message.getMessage())) {
+            final String newValue = command.stringValueOfParameterNamed(EmailApiConstants.messageParamName);
+            actualChanges.put(EmailApiConstants.messageParamName, newValue);
+            message.updateMessage(newValue);
+        }
+
+        return actualChanges;
     }
 }

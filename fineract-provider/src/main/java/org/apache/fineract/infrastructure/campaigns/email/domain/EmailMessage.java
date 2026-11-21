@@ -24,15 +24,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -99,17 +95,8 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
 
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
-
-        if (command.isChangeInStringParameterNamed(EmailApiConstants.messageParamName, this.message)) {
-            final String newValue = command.stringValueOfParameterNamed(EmailApiConstants.messageParamName);
-            actualChanges.put(EmailApiConstants.messageParamName, newValue);
-            this.message = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        return actualChanges;
+    public void updateMessage(final String message) {
+        this.message = StringUtils.defaultIfEmpty(message, null);
     }
 
     public boolean isPending() {
