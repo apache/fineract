@@ -136,7 +136,7 @@ class CobNoRetryTest {
     @Test
     void loanCobWorkerStepAttemptsAFailingLoanOnceWithItsChunkAndOnceAlone() throws Exception {
         LoanRepository loanRepository = mock(LoanRepository.class);
-        when(loanRepository.findById(anyLong())).thenReturn(Optional.of(mock(Loan.class)));
+        when(loanRepository.findByIdWithRepaymentSchedule(anyLong())).thenReturn(Optional.of(mock(Loan.class)));
         AppUserRepositoryWrapper userRepository = mock(AppUserRepositoryWrapper.class);
         when(userRepository.fetchSystemUser()).thenReturn(mock(AppUser.class));
         LoanCOBWorkerConfiguration configuration = new LoanCOBWorkerConfiguration();
