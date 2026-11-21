@@ -37,13 +37,13 @@ import org.apache.fineract.infrastructure.event.business.domain.client.ClientWit
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientLoanReadService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsReadService;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,9 +63,9 @@ public class ClientLifecycleWritePlatformServiceTest {
     @Mock
     private ClientRepositoryWrapper clientRepositoryWrapper;
     @Mock
-    private LoanRepositoryWrapper loanRepositoryWrapper;
+    private ClientLoanReadService clientLoanReadService;
     @Mock
-    private SavingsAccountRepositoryWrapper savingsRepositoryWrapper;
+    private ClientSavingsReadService clientSavingsReadService;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
     @Mock
@@ -93,8 +93,8 @@ public class ClientLifecycleWritePlatformServiceTest {
         when(currentClient.isNotPending()).thenReturn(Boolean.FALSE);
         when(currentClient.getLegalForm()).thenReturn(LegalForm.PERSON.getValue());
         // no opening loan and savings
-        when(loanRepositoryWrapper.findLoanByClientId(clientId)).thenReturn(Collections.emptyList());
-        when(savingsRepositoryWrapper.findSavingAccountByClientId(clientId)).thenReturn(Collections.emptyList());
+        when(clientLoanReadService.retrieveClientLoanStatuses(clientId)).thenReturn(Collections.emptyList());
+        when(clientSavingsReadService.hasNonClosedSavingsAccountsForClient(clientId)).thenReturn(false);
         clientLifecycleWritePlatformService.closeClient(clientId, command);
         verify(businessEventNotifierService).notifyPostBusinessEvent(any(ClientCloseBusinessEvent.class));
     }

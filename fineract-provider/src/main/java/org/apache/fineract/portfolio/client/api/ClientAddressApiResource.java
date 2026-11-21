@@ -48,7 +48,7 @@ import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
 import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
 import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
-import org.apache.fineract.portfolio.address.service.AddressReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +60,7 @@ public class ClientAddressApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
     private final PlatformSecurityContext context;
-    private final AddressReadPlatformServiceImpl readPlatformService;
+    private final AddressReadPlatformService readPlatformService;
     private final CommandDispatcher dispatcher;
 
     @GET

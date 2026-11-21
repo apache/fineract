@@ -26,7 +26,6 @@ import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -39,6 +38,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -62,10 +62,11 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 import org.apache.fineract.portfolio.address.service.AddressDomainService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientNoteWriteService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsReadService;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
@@ -79,10 +80,6 @@ import org.apache.fineract.portfolio.client.exception.ClientMustBePendingToBeDel
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
-import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -101,13 +98,13 @@ public class ClientCreateUpdateWritePlatformService {
     private final ClientRepositoryWrapper clientRepository;
     private final ClientNonPersonRepositoryWrapper clientNonPersonRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
-    private final NoteRepository noteRepository;
+    private final ClientNoteWriteService clientNoteWriteService;
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
-    private final AccountNumberGenerator accountNumberGenerator;
+    private final AccountNumberGeneratorService accountNumberGenerator;
     private final StaffRepositoryWrapper staffRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
-    private final SavingsProductRepository savingsProductRepository;
+    private final ClientSavingsReadService clientSavingsReadService;
     private final CommandProcessingService commandProcessingService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
@@ -128,8 +125,7 @@ public class ClientCreateUpdateWritePlatformService {
             if (client.isNotPending()) {
                 throw new ClientMustBePendingToBeDeletedException(clientId);
             }
-            final List<Note> relatedNotes = this.noteRepository.findByClient(client);
-            this.noteRepository.deleteAllInBatch(relatedNotes);
+            this.clientNoteWriteService.deleteNotesByClient(client);
 
             final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientId);
             if (clientNonPerson != null) {
@@ -201,8 +197,7 @@ public class ClientCreateUpdateWritePlatformService {
 
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
-                this.savingsProductRepository.findById(savingsProductId)
-                        .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                this.clientSavingsReadService.validateSavingsProductExists(savingsProductId);
             }
 
             boolean isEntity = false;
@@ -262,7 +257,7 @@ public class ClientCreateUpdateWritePlatformService {
             this.clientRepository.saveAndFlush(newClient);
             if (StringUtils.isBlank(accountNo)) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
-                newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
+                newClient.updateAccountNo(accountNumberGenerator.generate(EntityAccountType.CLIENT, newClient, accountNumberFormat));
                 this.clientRepository.saveAndFlush(newClient);
             }
 
@@ -547,8 +542,7 @@ public class ClientCreateUpdateWritePlatformService {
                 }
                 final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
                 if (savingsProductId != null) {
-                    this.savingsProductRepository.findById(savingsProductId)
-                            .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                    this.clientSavingsReadService.validateSavingsProductExists(savingsProductId);
                 }
                 clientForUpdate.updateSavingsProduct(savingsProductId);
             }

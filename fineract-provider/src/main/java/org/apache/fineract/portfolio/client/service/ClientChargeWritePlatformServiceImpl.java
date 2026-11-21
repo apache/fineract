@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -47,10 +46,11 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
-import org.apache.fineract.portfolio.charge.domain.Charge;
-import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeAppliedToException;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientChargeDefinitionData;
+import org.apache.fineract.portfolio.client.contract.ClientChargeReadService;
+import org.apache.fineract.portfolio.client.contract.ClientJournalEntryWriteService;
 import org.apache.fineract.portfolio.client.data.ClientChargeDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientCharge;
@@ -71,7 +71,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePlatformService {
 
-    private final ChargeRepositoryWrapper chargeRepository;
+    private final ClientChargeReadService clientChargeReadService;
+    private final ClientChargeDefinitionResolver clientChargeDefinitionResolver;
     private final ClientRepositoryWrapper clientRepository;
     private final ClientChargeDataValidator clientChargeDataValidator;
     private final ConfigurationDomainService configurationDomainService;
@@ -80,7 +81,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     private final ClientChargeRepositoryWrapper clientChargeRepository;
     private final ClientTransactionRepository clientTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final ClientJournalEntryWriteService journalEntryWritePlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
 
     @Override
@@ -91,12 +92,13 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             final Client client = clientRepository.getActiveClientInUserScope(clientId);
 
             final Long chargeDefinitionId = command.longValueOfParameterNamed(ClientApiConstants.chargeIdParamName);
-            final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
+            final ClientChargeDefinitionData charge = this.clientChargeReadService
+                    .retrieveApplicableClientChargeDefinition(chargeDefinitionId);
 
             // validate for client charge
-            if (!charge.isClientCharge()) {
-                final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to a Client";
-                throw new ChargeCannotBeAppliedToException("client", errorMessage, charge.getId());
+            if (!charge.applicableToClients()) {
+                final String errorMessage = "Charge with identifier " + charge.chargeId() + " cannot be applied to a Client";
+                throw new ChargeCannotBeAppliedToException("client", errorMessage, charge.chargeId());
             }
 
             Money roundedAmount = calculateRoundedChargeAmount(charge, command);
@@ -141,6 +143,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
 
             final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientChargeDefinitionData chargeDefinition = this.clientChargeDefinitionResolver.applyCurrency(clientCharge);
 
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
@@ -169,7 +172,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
 
             // generate accounting entries
-            generateAccountingEntries(clientTransaction);
+            generateAccountingEntries(clientTransaction, chargeDefinition);
 
             return new CommandProcessingResultBuilder() //
                     .withTransactionId(clientTransaction.getId().toString()) //
@@ -187,8 +190,9 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
 
     }
 
-    private void generateAccountingEntries(ClientTransaction clientTransaction) {
-        Map<String, Object> accountingBridgeData = clientTransaction.toMapData();
+    private void generateAccountingEntries(final ClientTransaction clientTransaction, final ClientChargeDefinitionData chargeDefinition) {
+        final Map<String, Object> accountingBridgeData = this.clientChargeDefinitionResolver.toAccountingBridgeData(clientTransaction,
+                Map.of(chargeDefinition.chargeId(), chargeDefinition));
         journalEntryWritePlatformService.createJournalEntriesForClientTransactions(accountingBridgeData);
     }
 
@@ -197,6 +201,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
         try {
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
             final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            this.clientChargeDefinitionResolver.applyCurrency(clientCharge);
             final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
             // Validate business rules for payment
@@ -232,6 +237,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
         try {
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
             final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            this.clientChargeDefinitionResolver.applyCurrency(clientCharge);
 
             // Validate business rules for charge deletion
             validateChargeDeletion(client, clientCharge);
@@ -435,11 +441,11 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
-    private Money calculateRoundedChargeAmount(final Charge charge, final JsonCommand command) {
+    private Money calculateRoundedChargeAmount(final ClientChargeDefinitionData charge, final JsonCommand command) {
         BigDecimal amount = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
-        amount = (amount == null) ? charge.getAmount() : amount;
+        amount = (amount == null) ? charge.amount() : amount;
 
-        ApplicationCurrency currency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(charge.getCurrencyCode());
+        ApplicationCurrency currency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(charge.currencyCode());
 
         CurrencyData currencyData = currency.toData();
         return Money.of(currencyData, amount);

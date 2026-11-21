@@ -21,10 +21,10 @@ package org.apache.fineract.portfolio.client.service;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
+import org.apache.fineract.portfolio.client.contract.ClientChargeDefinitionData;
+import org.apache.fineract.portfolio.client.contract.ClientJournalEntryWriteService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientCharge;
 import org.apache.fineract.portfolio.client.domain.ClientChargePaidBy;
@@ -41,8 +41,8 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
     private final ClientTransactionRepositoryWrapper clientTransactionRepository;
 
     private final ClientRepositoryWrapper clientRepository;
-    private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final ClientJournalEntryWriteService journalEntryWritePlatformService;
+    private final ClientChargeDefinitionResolver clientChargeDefinitionResolver;
 
     @Override
     public CommandProcessingResult undo(Long clientId, Long transactionId) {
@@ -59,14 +59,16 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
         // mark transaction as reversed
         clientTransaction.reverse();
 
+        final Map<Long, ClientChargeDefinitionData> chargeDefinitions = this.clientChargeDefinitionResolver
+                .retrieveChargeDefinitions(clientTransaction);
+
         // revert any charges paid back to their original state
         if (clientTransaction.isPayChargeTransaction() || clientTransaction.isWaiveChargeTransaction()) {
             // undo charge
             final Set<ClientChargePaidBy> chargesPaidBy = clientTransaction.getClientChargePaidByCollection();
             for (final ClientChargePaidBy clientChargePaidBy : chargesPaidBy) {
                 final ClientCharge clientCharge = clientChargePaidBy.getClientCharge();
-                clientCharge.setCurrency(
-                        organisationCurrencyRepository.findOneWithNotFoundDetection(clientCharge.getCharge().getCurrencyCode()));
+                this.clientChargeDefinitionResolver.applyCurrency(clientCharge, chargeDefinitions.get(clientCharge.getChargeId()));
                 if (clientTransaction.isPayChargeTransaction()) {
                     clientCharge.undoPayment(clientTransaction.getAmount());
                 } else if (clientTransaction.isWaiveChargeTransaction()) {
@@ -77,7 +79,7 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
 
         // generate accounting entries
         this.clientTransactionRepository.saveAndFlush(clientTransaction);
-        generateAccountingEntries(clientTransaction);
+        generateAccountingEntries(clientTransaction, chargeDefinitions);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(transactionId) //
@@ -86,8 +88,10 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
                 .build();
     }
 
-    private void generateAccountingEntries(ClientTransaction clientTransaction) {
-        Map<String, Object> accountingBridgeData = clientTransaction.toMapData();
+    private void generateAccountingEntries(final ClientTransaction clientTransaction,
+            final Map<Long, ClientChargeDefinitionData> chargeDefinitions) {
+        final Map<String, Object> accountingBridgeData = this.clientChargeDefinitionResolver.toAccountingBridgeData(clientTransaction,
+                chargeDefinitions);
         journalEntryWritePlatformService.createJournalEntriesForClientTransactions(accountingBridgeData);
     }
 
