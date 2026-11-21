@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.organisation.office.api;
 
-import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -27,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -45,25 +45,28 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
+import org.apache.fineract.organisation.office.command.OfficeUpdateCommand;
+import org.apache.fineract.organisation.office.data.OfficeCreateRequest;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
 import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.organisation.office.data.OfficeUpdateRequest;
+import org.apache.fineract.organisation.office.data.OfficeUpdateResponse;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -88,12 +91,10 @@ public class OfficesApiResource {
     private final OfficeReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher dispatcher;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final SqlValidator sqlValidator;
-
-    private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -138,13 +139,11 @@ public class OfficesApiResource {
             + "name, openingDate, parentId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PostOfficesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PostOfficesResponse.class)))
-    public String createOffice(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createOffice() //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    public OfficesApiResourceSwagger.PostOfficesResponse createOffice(@Parameter(hidden = true) @Valid final OfficeCreateRequest request) {
+        final var command = new OfficeCreateCommand();
+        command.setPayload(request);
+        final Supplier<OfficeCreateResponse> response = dispatcher.dispatch(command);
+        return officeSwaggerMapper.toPostOfficesResponse(response.get());
     }
 
     @GET
@@ -192,14 +191,14 @@ public class OfficesApiResource {
     @Operation(summary = "Update Office", operationId = "updateOffice", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.class)))
-    public String updateOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateOffice(officeId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    public OfficesApiResourceSwagger.PutOfficesOfficeIdResponse updateOffice(
+            @PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
+            @Parameter(hidden = true) @Valid final OfficeUpdateRequest request) {
+        request.setId(officeId);
+        final var command = new OfficeUpdateCommand();
+        command.setPayload(request);
+        final Supplier<OfficeUpdateResponse> response = dispatcher.dispatch(command);
+        return officeSwaggerMapper.toPutOfficesOfficeIdResponse(response.get());
     }
 
     @PUT
@@ -211,14 +210,13 @@ public class OfficesApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
     public OfficesApiResourceSwagger.PutOfficesOfficeIdResponse updateOfficeWithExternalId(
             @Parameter(description = "externalId") @PathParam("externalId") final String externalId,
-            final OfficesApiResourceSwagger.PutOfficesOfficeIdRequest apiRequestBody) {
-        OfficeData office = readPlatformService.retrieveOfficeWithExternalId(ExternalIdFactory.produce(externalId));
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateOffice(office.getId()) //
-                .withJson(gson.toJson(apiRequestBody)) //
-                .build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return officeSwaggerMapper.toPutOfficesOfficeIdResponse(result);
+            @Parameter(hidden = true) @Valid final OfficeUpdateRequest request) {
+        final OfficeData office = readPlatformService.retrieveOfficeWithExternalId(ExternalIdFactory.produce(externalId));
+        request.setId(office.getId());
+        final var command = new OfficeUpdateCommand();
+        command.setPayload(request);
+        final Supplier<OfficeUpdateResponse> response = dispatcher.dispatch(command);
+        return officeSwaggerMapper.toPutOfficesOfficeIdResponse(response.get());
     }
 
     @GET
