@@ -85,6 +85,9 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 inputStream.transferTo(baos);
                 final byte[] bytes = baos.toByteArray();
+                if (bytes.length == 0) {
+                    throw invalidFile("error.msg.bulk.import.file.is.empty", "The file is empty.");
+                }
                 InputStream clonedInputStream = new ByteArrayInputStream(bytes);
                 final BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(bytes));
                 final Tika tika = new Tika();
@@ -101,13 +104,18 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
                 }
                 final BulkImportTemplateLayout layout = BulkImportTemplateLayout.of(entityType);
+                final int totalRecords;
                 try {
                     layout.validate(workbook);
+                    totalRecords = layout.countRecords(workbook);
+                    if (totalRecords == 0) {
+                        throw invalidFile("error.msg.bulk.import.file.has.no.data.rows", "The file contains no data rows.");
+                    }
                 } catch (PlatformApiDataValidationException e) {
                     workbook.close();
                     throw e;
                 }
-                return publishEvent(layout, fileDetail, fileType, entityType, workbook, locale, dateFormat);
+                return publishEvent(totalRecords, fileDetail, fileType, entityType, workbook, locale, dateFormat);
             }
             throw new GeneralPlatformDomainRuleException("error.msg.null", "One or more of the given parameters not found");
         } catch (IOException e) {
@@ -168,11 +176,11 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                         .fileName(fileDetail.getFileName()).size(fileDetail.getSize()).type(fileType).stream(pipedInputStream).build());
     }
 
-    private Long publishEvent(final BulkImportTemplateLayout layout, final FormDataContentDisposition fileDetail, final String fileType,
+    private Long publishEvent(final int totalRecords, final FormDataContentDisposition fileDetail, final String fileType,
             final GlobalEntityType entityType, final Workbook workbook, final String locale, final String dateFormat) {
 
         final var importDocument = ImportDocument.instance(null, DateUtils.getLocalDateTimeOfTenant(), entityType.getValue(),
-                securityContext.authenticatedUser(), layout.countRecords(workbook));
+                securityContext.authenticatedUser(), totalRecords);
 
         final var response = createDocument(workbook, fileDetail, fileType);
 
