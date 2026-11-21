@@ -96,6 +96,16 @@ public class ShareAccountIntegrationTests {
     }
 
     @Test
+    public void testUpdateShareProductWithoutSharesIssuedKeepsIt() {
+        final Long shareProductId = createShareProduct();
+        shareAccountHelper.updateShareProduct(shareProductId, new PutProductsTypeProductIdRequest().description("Updated description"));
+
+        GetProductsTypeProductIdResponse shareProductData = shareAccountHelper.getShareProduct(shareProductId);
+        Assertions.assertEquals("Updated description", shareProductData.getDescription());
+        Assertions.assertEquals(10000, shareProductData.getTotalSharesIssued());
+    }
+
+    @Test
     public void testCreateShareAccount() {
         final Long productId = createShareProduct();
         Assertions.assertNotNull(productId);
