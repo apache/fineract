@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -208,8 +208,8 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         public JobDetailHistoryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Long version = rs.getLong("version");
-            final Date jobRunStartTime = rs.getTimestamp("runStartTime");
-            final Date jobRunEndTime = rs.getTimestamp("runEndTime");
+            final Instant jobRunStartTime = rs.getTimestamp("runStartTime") != null ? rs.getTimestamp("runStartTime").toInstant() : null;
+            final Instant jobRunEndTime = rs.getTimestamp("runEndTime") != null ? rs.getTimestamp("runEndTime").toInstant() : null;
             final String status = rs.getString("status");
             final String jobRunErrorMessage = rs.getString("jobRunErrorMessage");
             final String triggerType = rs.getString("triggerType");

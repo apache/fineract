@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service;
 import com.google.common.base.Splitter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
@@ -184,8 +185,9 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                             try {
                                 final List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                                 for (final Trigger trigger : triggers) {
-                                    if (trigger.getNextFireTime() != null && trigger.getNextFireTime().after(jobDetail.getNextRunTime())) {
-                                        jobDetail.setNextRunTime(trigger.getNextFireTime());
+                                    if (trigger.getNextFireTime() != null
+                                            && trigger.getNextFireTime().toInstant().isAfter(jobDetail.getNextRunTime())) {
+                                        jobDetail.setNextRunTime(trigger.getNextFireTime().toInstant());
                                     }
                                 }
                             } catch (final SchedulerException e) {
@@ -293,7 +295,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             final Trigger trigger = createTrigger(scheduledJobDetails, jobDetail, replayMissedRuns);
             final Scheduler scheduler = getScheduler(scheduledJobDetails);
             scheduler.scheduleJob(jobDetail, trigger);
-            scheduledJobDetails.setNextRunTime(trigger.getNextFireTime());
+            scheduledJobDetails.setNextRunTime(trigger.getNextFireTime().toInstant());
             scheduledJobDetails.setErrorLog(null);
         } catch (final Exception throwable) {
             scheduledJobDetails.setNextRunTime(null);
@@ -407,19 +409,19 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         if (replayMissedRuns && isInThePast(scheduledJobDetails.getNextRunTime())) {
             // The first run that never happened: Quartz applies the misfire instruction to it and what follows.
             // The cron itself is still evaluated in the tenant's time zone.
-            cronTriggerFactoryBean.setStartTime(Date.from(scheduledJobDetails.getNextRunTime().toInstant()));
+            cronTriggerFactoryBean.setStartTime(Date.from(scheduledJobDetails.getNextRunTime()));
         }
         cronTriggerFactoryBean.afterPropertiesSet();
         return cronTriggerFactoryBean.getObject();
     }
 
     /**
-     * next_run_time is the instant of a Quartz fire time (a Date, mapped by the JVM's default zone to a zone-less
-     * column), so it is compared as an instant. Neither the tenant's nor the system zone takes part in it.
+     * next_run_time is represented as an Instant, which identifies an absolute point on the timeline. It is compared as
+     * an instant. Neither the tenant's nor the system default zone takes part in it.
      */
-    private static boolean isInThePast(final Date nextRunTime) {
-        return nextRunTime != null && DateUtils.isBefore(OffsetDateTime.ofInstant(nextRunTime.toInstant(), ZoneOffset.UTC),
-                DateUtils.getAuditOffsetDateTime());
+    private static boolean isInThePast(final Instant nextRunTime) {
+        return nextRunTime != null
+                && DateUtils.isBefore(OffsetDateTime.ofInstant(nextRunTime, ZoneOffset.UTC), DateUtils.getAuditOffsetDateTime());
     }
 
     private String getStackTraceAsString(final Throwable throwable) {

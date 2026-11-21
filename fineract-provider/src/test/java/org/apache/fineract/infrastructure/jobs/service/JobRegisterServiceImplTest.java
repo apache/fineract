@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class JobRegisterServiceImplTest {
             fixture.boot();
             fixture.asRequest(fixture.jobRegisterService::pauseScheduler);
             // what the fires vetoed during the suspension leave behind (see the restart test for the veto itself)
-            job.setNextRunTime(midnightDaysAgo(DAYS_DOWN));
+            job.setNextRunTime(midnightDaysAgo(DAYS_DOWN).toInstant());
             job.setTriggerMisfired(true);
 
             fixture.asRequest(fixture.jobRegisterService::startScheduler);
@@ -50,7 +51,7 @@ class JobRegisterServiceImplTest {
             await().atMost(TIMEOUT).untilAsserted(() -> assertThat(fixture.executionCount(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY))
                     .isEqualTo(missedDailyRuns(DAYS_DOWN)));
             assertThat(job.isTriggerMisfired()).isFalse();
-            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(new Date()));
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(Instant.now()));
         }
     }
 
@@ -68,7 +69,7 @@ class JobRegisterServiceImplTest {
             await().atMost(TIMEOUT).until(job::isTriggerMisfired);
             await().during(Duration.ofSeconds(1)).atMost(TIMEOUT)
                     .untilAsserted(() -> assertThat(fixture.executions).as("everything is vetoed while suspended").isEmpty());
-            assertThat(job.getNextRunTime()).as("a vetoed fire does not advance next_run_time").isEqualTo(missedSince);
+            assertThat(job.getNextRunTime()).as("a vetoed fire does not advance next_run_time").isEqualTo(missedSince.toInstant());
 
             fixture.asRequest(fixture.jobRegisterService::startScheduler);
 
@@ -76,7 +77,7 @@ class JobRegisterServiceImplTest {
                 assertThat(fixture.executionCount(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY)).isEqualTo(missedDailyRuns(DAYS_DOWN));
                 assertThat(fixture.executionCount(JobName.UPDATE_LOAN_ARREARS_AGEING)).isEqualTo(1);
             });
-            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(new Date()));
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(Instant.now()));
             assertThat(job.isTriggerMisfired()).isFalse();
         }
     }
@@ -88,7 +89,7 @@ class JobRegisterServiceImplTest {
             final ScheduledJobDetail job = fixture.addJob(JobName.UPDATE_LOAN_ARREARS_AGEING, DAILY_AT_MIDNIGHT,
                     new Date(System.currentTimeMillis() + 3_600_000));
             fixture.boot();
-            final Date nextRunTime = job.getNextRunTime();
+            final Instant nextRunTime = job.getNextRunTime();
 
             fixture.asRequest(fixture.jobRegisterService::startScheduler);
 
@@ -106,14 +107,14 @@ class JobRegisterServiceImplTest {
                     midnightDaysAgo(DAYS_DOWN));
             fixture.boot();
             fixture.schedulerDetail.setSuspended(true);
-            job.setNextRunTime(midnightDaysAgo(DAYS_DOWN));
+            job.setNextRunTime(midnightDaysAgo(DAYS_DOWN).toInstant());
             job.setTriggerMisfired(true);
 
             fixture.asRequest(fixture.jobRegisterService::startScheduler);
 
             assertThat(fixture.schedulerDetail.isSuspended()).isFalse();
             assertThat(job.isTriggerMisfired()).isFalse();
-            assertThat(job.getNextRunTime()).as("legacy resume takes the trigger's next fire time").isAfter(new Date());
+            assertThat(job.getNextRunTime()).as("legacy resume takes the trigger's next fire time").isAfter(Instant.now());
             // The legacy replay is fired asynchronously, then next_run_time is moved to the future on the same,
             // synchronous call above - a "cron" fire would be vetoed by that future next_run_time on whichever
             // thread processes it (FINERACT-2918). Firing it as "misfire" bypasses that veto, so the replay runs

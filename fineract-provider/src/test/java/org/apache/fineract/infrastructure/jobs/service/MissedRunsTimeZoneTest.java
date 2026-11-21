@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -53,8 +54,8 @@ class MissedRunsTimeZoneTest {
 
             await().atMost(TIMEOUT)
                     .untilAsserted(() -> assertThat(fixture.executionCount(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY)).isEqualTo(4));
-            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(new Date()));
-            assertThat(job.getNextRunTime().toInstant().atZone(tenant).toLocalTime()).as("next run is the tenant's midnight")
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(Instant.now()));
+            assertThat(job.getNextRunTime().atZone(tenant).toLocalTime()).as("next run is the tenant's midnight")
                     .isEqualTo(java.time.LocalTime.MIDNIGHT);
         }
     }

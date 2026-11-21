@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.data;
 
-import java.util.Date;
+import java.time.Instant;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -35,10 +35,10 @@ public class JobDetailHistoryData {
     private Long version;
 
     @SuppressWarnings("unused")
-    private Date jobRunStartTime;
+    private Instant jobRunStartTime;
 
     @SuppressWarnings("unused")
-    private Date jobRunEndTime;
+    private Instant jobRunEndTime;
 
     @SuppressWarnings("unused")
     private String status;
