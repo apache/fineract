@@ -2038,20 +2038,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     public Map<String, Object> approveApplication(final AppUser currentUser, final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.approvalAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
         this.status = SavingsAccountStatusType.APPROVED.getValue();
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
@@ -2065,26 +2051,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
         actualChanges.put(SavingsApiConstants.approvedOnDateParamName, approvedOnDateChange);
 
-        final LocalDate submittalDate = getSubmittedOnDate();
-        if (DateUtils.isBefore(approvedOn, submittalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.format(submittalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName).value(submittalDateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        if (DateUtils.isAfterBusinessDate(approvedOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_APPROVED, approvedOn);
 
         // FIXME - kw - support field officer history for savings accounts
@@ -2306,21 +2272,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     public Map<String, Object> rejectApplication(final AppUser currentUser, final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.rejectAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
         this.status = SavingsAccountStatusType.REJECTED.getValue();
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
@@ -2339,26 +2290,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         actualChanges.put(SavingsApiConstants.rejectedOnDateParamName, rejectedOnAsString);
         actualChanges.put(SavingsApiConstants.closedOnDateParamName, rejectedOnAsString);
 
-        final LocalDate submittalDate = getSubmittedOnDate();
-        if (DateUtils.isBefore(rejectedOn, submittalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.format(submittalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(submittalDateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        if (DateUtils.isAfterBusinessDate(rejectedOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(rejectedOn)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_REJECTED, rejectedOn);
 
         return actualChanges;
@@ -2366,21 +2297,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public Map<String, Object> applicantWithdrawsFromApplication(final AppUser currentUser, final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.withdrawnByApplicantAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
 
         this.status = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue();
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
@@ -2400,26 +2316,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         actualChanges.put(SavingsApiConstants.withdrawnOnDateParamName, withdrawnOnAsString);
         actualChanges.put(SavingsApiConstants.closedOnDateParamName, withdrawnOnAsString);
 
-        final LocalDate submittalDate = getSubmittedOnDate();
-        if (DateUtils.isBefore(withdrawnOn, submittalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.format(submittalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(submittalDateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        if (DateUtils.isAfterBusinessDate(withdrawnOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(withdrawnOn)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_WITHDRAWAL_BY_CUSTOMER, withdrawnOn);
 
         return actualChanges;
