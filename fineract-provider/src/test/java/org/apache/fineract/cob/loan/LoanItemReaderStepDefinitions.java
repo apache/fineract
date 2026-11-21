@@ -68,7 +68,7 @@ public class LoanItemReaderStepDefinitions implements En {
             JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());
             ExecutionContext jobExecutionContext = new ExecutionContext();
             jobExecution.setExecutionContext(jobExecutionContext);
-            StepExecution stepExecution = new StepExecution("test", jobExecution);
+            StepExecution stepExecution = new StepExecution(1L, "test", jobExecution);
             ExecutionContext stepExecutionContext = new ExecutionContext();
             Long minLoanId = null;
             Long maxLoanId = null;
