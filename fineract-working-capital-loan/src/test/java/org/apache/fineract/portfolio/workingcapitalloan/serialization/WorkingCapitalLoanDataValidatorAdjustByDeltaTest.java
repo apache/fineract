@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -44,6 +45,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionAlreadyUndoneByExternalIdException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionAlreadyUndoneException;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +75,8 @@ class WorkingCapitalLoanDataValidatorAdjustByDeltaTest {
     private WorkingCapitalLoan loan;
     @Mock
     private WorkingCapitalLoanTransaction transaction;
+    @Mock
+    private WorkingCapitalLoanTransactionRepository transactionRepository;
 
     @BeforeEach
     void setUp() {
@@ -78,7 +84,7 @@ class WorkingCapitalLoanDataValidatorAdjustByDeltaTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, transactionRepository, null, null, null, null);
 
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         lenient().when(loan.getFirstActualDisbursementDate()).thenReturn(LocalDate.of(2026, 1, 1));
@@ -162,14 +168,46 @@ class WorkingCapitalLoanDataValidatorAdjustByDeltaTest {
     }
 
     @Test
-    void shouldRejectAnAlreadyReversedTransactionLikeUndoDoes() {
+    void shouldRefuseAnAlreadyReversedTransactionAsANonRetriedDomainRule() {
+        lenient().when(transaction.getId()).thenReturn(7L);
         lenient().when(transaction.isReversed()).thenReturn(true);
 
-        final PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+        final WorkingCapitalLoanTransactionAlreadyUndoneException ex = assertThrows(
+                WorkingCapitalLoanTransactionAlreadyUndoneException.class,
                 () -> validator.validateAdjustByDelta(deltaCommand("-40.00"), loan, transaction));
 
+        // A 403, and not the subclass the command retry policy retries: a numeric id stays reversed.
+        assertThat(ex).isNotInstanceOf(WorkingCapitalLoanTransactionAlreadyUndoneByExternalIdException.class);
+        assertThat(ex.getGlobalisationMessageCode()).isEqualTo("error.msg.wc.loan.transaction.already.undone");
+        assertThat(ex.getDefaultUserMessageArgs()).containsExactly(7L);
+    }
+
+    @Test
+    void shouldLetTheReplacementInheritTheAdjustedTransactionsOwnExternalId() {
+        // The external id is taken - by the transaction being adjusted - but it is about to move to the replacement.
+        lenient().when(transactionRepository.existsByExternalId(new ExternalId("WC123"))).thenReturn(true);
+        lenient().when(transaction.isExternalIdInheritedBy(new ExternalId("WC123"))).thenReturn(true);
+
+        assertDoesNotThrow(() -> validator.validateAdjustByDelta(deltaCommandWithExternalId("-5.00", "WC123"), loan, transaction));
+    }
+
+    @Test
+    void shouldRefuseAnExternalIdOfAnotherTransaction() {
+        lenient().when(transactionRepository.existsByExternalId(new ExternalId("WC999"))).thenReturn(true);
+        lenient().when(transaction.isExternalIdInheritedBy(new ExternalId("WC999"))).thenReturn(false);
+
+        final PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateAdjustByDelta(deltaCommandWithExternalId("-5.00", "WC999"), loan, transaction));
+
         assertThat(ex.getErrors()).extracting(ApiParameterError::getUserMessageGlobalisationCode)
-                .containsExactly("validation.msg.WORKINGCAPITALLOAN.transaction.transaction.already.undone");
+                .containsExactly("validation.msg.WORKINGCAPITALLOAN.externalId.already.exists");
+    }
+
+    @Test
+    void shouldAcceptANewUniqueExternalId() {
+        lenient().when(transactionRepository.existsByExternalId(new ExternalId("WC124"))).thenReturn(false);
+
+        assertDoesNotThrow(() -> validator.validateAdjustByDelta(deltaCommandWithExternalId("-5.00", "WC124"), loan, transaction));
     }
 
     @Test
@@ -199,6 +237,13 @@ class WorkingCapitalLoanDataValidatorAdjustByDeltaTest {
     private JsonCommand deltaCommand(final String delta) {
         final JsonObject json = baseJson();
         json.addProperty(WorkingCapitalLoanConstants.transactionAmountParamName, new BigDecimal(delta));
+        return command(json);
+    }
+
+    private JsonCommand deltaCommandWithExternalId(final String delta, final String externalId) {
+        final JsonObject json = baseJson();
+        json.addProperty(WorkingCapitalLoanConstants.transactionAmountParamName, new BigDecimal(delta));
+        json.addProperty(WorkingCapitalLoanConstants.externalIdParameterName, externalId);
         return command(json);
     }
 

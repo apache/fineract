@@ -168,7 +168,6 @@ public final class CommandWrapperConstants {
     public static final String ENTITY_CREDITREPORT = "CREDITREPORT";
     public static final String ENTITY_CREDITBUREAU_CONFIGURATION = "CREDITBUREAU_CONFIGURATION";
     public static final String ENTITY_ADDRESS = "ADDRESS";
-    public static final String ENTITY_FAMILYMEMBERS = "FAMILYMEMBERS";
     public static final String ENTITY_CONFIGURATION = "CONFIGURATION";
     public static final String ENTITY_PERMISSION = "PERMISSION";
     public static final String ENTITY_ROLE = "ROLE";
@@ -250,6 +249,7 @@ public final class CommandWrapperConstants {
     public static final String ENTITY_BATCH_BUSINESS_STEP = "BATCH_BUSINESS_STEP";
     public static final String ENTITY_INLINE_JOB = "INLINE_JOB";
     public static final String ENTITY_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE = "EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE";
+    public static final String ENTITY_EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE = "EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTE";
     public static final String ENTITY_EXTERNAL_ASSET_OWNER = "EXTERNAL_ASSET_OWNER";
     public static final String ENTITY_ASSET_OWNER_TRANSACTION = "ASSET_OWNER_TRANSACTION";
     public static final String ENTITY_DELINQUENCY_ACTION = "DELINQUENCY_ACTION";

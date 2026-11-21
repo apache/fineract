@@ -17,6 +17,14 @@
  * under the License.
  */
 
+pluginManagement {
+    includeBuild('fineract-querydsl-gradle-plugin')
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 plugins {
     id 'com.gradle.develocity' version '4.5.1'
     id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.8.0'
@@ -75,6 +83,7 @@ include ':fineract-war'
 include ':integration-tests'
 include ':twofactor-tests'
 include ':oauth2-tests'
+include ':oauth2-twofactor-tests'
 include ':fineract-client'
 include ':fineract-client-feign'
 include ':fineract-doc'
@@ -84,6 +93,7 @@ include ':fineract-e2e-tests-runner'
 include 'fineract-progressive-loan'
 include 'fineract-progressive-loan-embeddable-schedule-generator'
 include 'fineract-working-capital-loan'
+include 'fineract-querydsl'
 // NOTE: custom Docker image with all custom modules included
 include ':custom:docker'
 // NOTE: dynamically load custom modules with pattern "custom -> company -> category -> module"

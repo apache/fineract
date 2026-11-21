@@ -36,12 +36,8 @@ public enum ShareProductDividendStatusType {
 
         ShareProductDividendStatusType enumeration = ShareProductDividendStatusType.INVALID;
         switch (type) {
-            case 100:
-                enumeration = ShareProductDividendStatusType.INITIATED;
-            break;
-            case 300:
-                enumeration = ShareProductDividendStatusType.APPROVED;
-            break;
+            case 100 -> enumeration = ShareProductDividendStatusType.INITIATED;
+            case 300 -> enumeration = ShareProductDividendStatusType.APPROVED;
 
         }
         return enumeration;

@@ -25,17 +25,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsGroupIdAccountsResponse;
 import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsPageItems;
+import org.apache.fineract.client.models.GroupCreateRequest;
+import org.apache.fineract.client.models.GroupCreateResponse;
+import org.apache.fineract.client.models.GroupDeleteResponse;
+import org.apache.fineract.client.models.GroupUpdateRequest;
+import org.apache.fineract.client.models.GroupUpdateResponse;
 import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
 import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
-import org.apache.fineract.client.models.PostGroupsRequest;
-import org.apache.fineract.client.models.PostGroupsResponse;
-import org.apache.fineract.client.models.PutGroupsGroupIdRequest;
-import org.apache.fineract.client.models.PutGroupsGroupIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -61,13 +61,13 @@ public class FeignGroupHelper {
     }
 
     /** Creates a group in {@code pending} status (active=false) in the default office. */
-    public PostGroupsResponse createGroup() {
+    public GroupCreateResponse createGroup() {
         return createGroup(DEFAULT_OFFICE_ID);
     }
 
     /** Creates a group in {@code pending} status (active=false). */
-    public PostGroupsResponse createGroup(Long officeId) {
-        PostGroupsRequest request = new PostGroupsRequest()//
+    public GroupCreateResponse createGroup(Long officeId) {
+        GroupCreateRequest request = new GroupCreateRequest()//
                 .officeId(officeId)//
                 .name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))//
                 .externalId(UUID.randomUUID().toString())//
@@ -79,12 +79,12 @@ public class FeignGroupHelper {
     }
 
     /** Creates an {@code active} group in the default office. */
-    public PostGroupsResponse createActiveGroup() {
+    public GroupCreateResponse createActiveGroup() {
         return createActiveGroup(DEFAULT_OFFICE_ID, DEFAULT_ACTIVATION_DATE);
     }
 
-    public PostGroupsResponse createActiveGroup(Long officeId, String activationDate) {
-        PostGroupsRequest request = new PostGroupsRequest()//
+    public GroupCreateResponse createActiveGroup(Long officeId, String activationDate) {
+        GroupCreateRequest request = new GroupCreateRequest()//
                 .officeId(officeId)//
                 .name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))//
                 .externalId(UUID.randomUUID().toString())//
@@ -95,7 +95,7 @@ public class FeignGroupHelper {
         return createGroup(request);
     }
 
-    public PostGroupsResponse createGroup(PostGroupsRequest request) {
+    public GroupCreateResponse createGroup(GroupCreateRequest request) {
         return ok(() -> fineractClient.groups().createGroup(request));
     }
 
@@ -115,12 +115,12 @@ public class FeignGroupHelper {
         return ok(() -> fineractClient.groups().retrieveAccountsGroup(groupId));
     }
 
-    public PutGroupsGroupIdResponse updateGroup(Long groupId, String name) {
-        PutGroupsGroupIdRequest request = new PutGroupsGroupIdRequest().name(name);
+    public GroupUpdateResponse updateGroup(Long groupId, String name) {
+        GroupUpdateRequest request = new GroupUpdateRequest().name(name);
         return ok(() -> fineractClient.groups().updateGroup(groupId, request));
     }
 
-    public DeleteGroupsGroupIdResponse deleteGroup(Long groupId) {
+    public GroupDeleteResponse deleteGroup(Long groupId) {
         return ok(() -> fineractClient.groups().deleteGroup(groupId));
     }
 

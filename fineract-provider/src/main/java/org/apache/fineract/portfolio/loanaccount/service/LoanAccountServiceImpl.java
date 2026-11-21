@@ -20,12 +20,14 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -37,6 +39,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
 
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanTransactionRepository loanTransactionRepository;
+    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     @Override
     public LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
@@ -58,6 +61,27 @@ public class LoanAccountServiceImpl implements LoanAccountService {
         }
     }
 
+    /*
+     * Due to the "saveAndFlushLoanWithDataIntegrityViolationChecks" method the loan is saved and flushed in the middle
+     * of the transaction. EclipseLink is in some situations are saving inconsistently the newly created associations,
+     * like the newly created repayment schedule installments. The save and flush cannot be removed safely till any
+     * native queries are used as part of this transaction either. See:
+     * this.loanAccountDomainService.recalculateAccruals(loan);
+     *
+     * As a workaround, we iterate over and save each LoanRepaymentScheduleInstallment entity before saving and flushing
+     * the Loan entity.
+     */
+    @Override
+    public Loan saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(final Loan loan) {
+        try {
+            loanRepaymentScheduleInstallmentRepository.saveAll(loan.getRepaymentScheduleInstallments());
+            return this.loanRepositoryWrapper.saveAndFlush(loan);
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+            raiseValidationExceptionForUniqueConstraintViolation(e);
+            throw e;
+        }
+    }
+
     @Override
     public Loan saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
@@ -72,7 +96,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
         final Throwable realCause = e.getCause();
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-        if (realCause.getMessage().toLowerCase().contains("external_id_unique") || realCause.getMessage()
+        if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("external_id_unique") || realCause.getMessage()
                 .contains("duplicate key value violates unique constraint \"m_loan_transaction_external_id_key\"")) {
             baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
         }

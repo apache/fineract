@@ -52,18 +52,13 @@ public enum SharePeriodFrequencyType {
             return INVALID;
         }
 
-        switch (v) {
-            case 0:
-                return DAYS;
-            case 1:
-                return WEEKS;
-            case 2:
-                return MONTHS;
-            case 3:
-                return YEARS;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 0 -> DAYS;
+            case 1 -> WEEKS;
+            case 2 -> MONTHS;
+            case 3 -> YEARS;
+            default -> INVALID;
+        };
     }
 
     // TODO: do we really need this?!?

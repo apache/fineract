@@ -51,7 +51,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
                 .append(" JOIN m_loan loan on lc.loan_id = loan.id")//
                 .append(" JOIN m_organisation_currency oc on loan.currency_code = oc.code");
 
-        public String schema() {
+        private String schema() {
             return this.sqlBuilder.toString();
         }
 

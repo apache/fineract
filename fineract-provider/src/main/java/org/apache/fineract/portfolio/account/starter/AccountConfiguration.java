@@ -26,13 +26,12 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
-import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
 import org.apache.fineract.portfolio.account.domain.AccountTransferAssembler;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
-import org.apache.fineract.portfolio.account.domain.StandingInstructionAssembler;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.mapper.AccountTransfersMapper;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
@@ -45,10 +44,11 @@ import org.apache.fineract.portfolio.account.service.PortfolioAccountReadPlatfor
 import org.apache.fineract.portfolio.account.service.PortfolioAccountReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.account.service.StandingInstructionHistoryReadService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionHistoryReadServiceImpl;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.account.service.StandingInstructionWritePlatformService;
-import org.apache.fineract.portfolio.account.service.StandingInstructionWritePlatformServiceImpl;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadServiceImpl;
+import org.apache.fineract.portfolio.account.service.StandingInstructionWriteService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionWriteServiceImpl;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
@@ -118,22 +118,23 @@ public class AccountConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(StandingInstructionReadPlatformService.class)
-    public StandingInstructionReadPlatformService standingInstructionReadPlatformService(JdbcTemplate jdbcTemplate,
+    @ConditionalOnMissingBean(StandingInstructionReadService.class)
+    public StandingInstructionReadService standingInstructionReadService(JdbcTemplate jdbcTemplate,
             ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
             PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             DropdownReadPlatformService dropdownReadPlatformService, ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        return new StandingInstructionReadPlatformServiceImpl(jdbcTemplate, clientReadPlatformService, officeReadPlatformService,
+        return new StandingInstructionReadServiceImpl(jdbcTemplate, clientReadPlatformService, officeReadPlatformService,
                 portfolioAccountReadPlatformService, dropdownReadPlatformService, columnValidator, sqlGenerator, paginationHelper);
     }
 
     @Bean
-    @ConditionalOnMissingBean(StandingInstructionWritePlatformService.class)
-    public StandingInstructionWritePlatformService standingInstructionWritePlatformService(
-            StandingInstructionDataValidator standingInstructionDataValidator, StandingInstructionAssembler standingInstructionAssembler,
-            AccountTransferDetailRepository accountTransferDetailRepository, StandingInstructionRepository standingInstructionRepository) {
-        return new StandingInstructionWritePlatformServiceImpl(standingInstructionDataValidator, standingInstructionAssembler,
-                accountTransferDetailRepository, standingInstructionRepository);
+    @ConditionalOnMissingBean(StandingInstructionWriteService.class)
+    public StandingInstructionWriteService standingInstructionWriteService(AccountTransferDetailRepository accountTransferDetailRepository,
+            StandingInstructionRepository standingInstructionRepository, SavingsAccountAssembler savingsAccountAssembler,
+            LoanAssembler loanAccountAssembler, OfficeRepositoryWrapper officeRepositoryWrapper,
+            ClientRepositoryWrapper clientRepositoryWrapper) {
+        return new StandingInstructionWriteServiceImpl(accountTransferDetailRepository, standingInstructionRepository,
+                savingsAccountAssembler, loanAccountAssembler, officeRepositoryWrapper, clientRepositoryWrapper);
     }
 }

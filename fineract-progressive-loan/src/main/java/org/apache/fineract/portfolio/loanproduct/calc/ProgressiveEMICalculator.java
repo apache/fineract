@@ -900,7 +900,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public void updateModelRepaymentPeriodsDuringReAge(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate reAgePeriodStartDate, final LocalDate reAgeFirstDueDate, final LocalDate targetDate,
-            final LoanApplicationTerms loanApplicationTerms, final MathContext mc) {
+            final LoanApplicationTerms loanApplicationTerms, final OutstandingDetails amountsNotInModel, final MathContext mc) {
         liftPrincipalPaymentGrace(scheduleModel);
         final Money futureCreditedPrincipals = scheduleModel.repaymentPeriods().stream()
                 .filter(rp -> !rp.getFromDate().isBefore(targetDate)).filter(rp -> rp.getDueDate().isAfter(targetDate))
@@ -921,7 +921,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 reAgePeriodStartDate, reAgePeriodStartDate);
 
         attachTemporaryScheduleModelReAgedPeriodsToExistingModel(scheduleModel, temporaryReAgedScheduleModel, reAgeFirstDueDate, targetDate,
-                paidBalancesFromTransactionDate);
+                paidBalancesFromTransactionDate, amountsNotInModel);
     }
 
     @Override
@@ -1192,7 +1192,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      */
     private void attachTemporaryScheduleModelReAgedPeriodsToExistingModel(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final ProgressiveLoanInterestScheduleModel temporaryReAgedScheduleModel, final LocalDate reAgeFirstDueDate,
-            final LocalDate targetDate, final OutstandingDetails paidBalancesFromTransactionDate) {
+            final LocalDate targetDate, final OutstandingDetails paidBalancesFromTransactionDate,
+            final OutstandingDetails amountsNotInModel) {
         final List<RepaymentPeriod> newPeriods = temporaryReAgedScheduleModel.repaymentPeriods();
 
         if (newPeriods.isEmpty()) {
@@ -1241,9 +1242,49 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             }
         }
 
+        // Re-aged periods with an EMI of zero count as paid, so interest can only be amortized by a positive EMI
+        final boolean amortizeInterest = newPeriods.getFirst().getDuePrincipal().add(newPeriods.getFirst().getDueInterest())
+                .isGreaterThanZero();
+        addAmountsNotInModelToReAgedPeriods(scheduleModel, targetDate, amountsNotInModel, amortizeInterest);
+
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, targetDate);
         checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(scheduleModel, reAgedRepaymentPeriods);
+    }
+
+    /**
+     * Adds outstanding amounts that the model does not hold yet (a chargeback posted after maturity is booked only on
+     * an additional installment) to the re-aged periods. They are credited on the re-age date, so the principal bears
+     * interest from then on, and marked as moved by the re-age, so they are amortized by the re-aged EMIs instead of
+     * falling due on top of the EMI of the period they are credited to. Interest that the EMIs cannot amortize falls
+     * due on top of it. The periods closed by the re-age keep their amounts.
+     */
+    private void addAmountsNotInModelToReAgedPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate reAgeDate,
+            final OutstandingDetails amountsNotInModel, final boolean amortizeInterest) {
+        final Money principal = amountsNotInModel == null ? null : amountsNotInModel.getOutstandingPrincipal();
+        final Money interest = amountsNotInModel == null ? null : amountsNotInModel.getOutstandingInterest();
+        final boolean hasPrincipal = principal != null && principal.isGreaterThanZero();
+        final boolean hasInterest = interest != null && interest.isGreaterThanZero();
+        if (!hasPrincipal && !hasInterest) {
+            return;
+        }
+        final Money creditedPrincipal = hasPrincipal ? principal : scheduleModel.zero();
+        final Money creditedInterest = hasInterest ? interest : scheduleModel.zero();
+        final RepaymentPeriod creditedPeriod = scheduleModel.repaymentPeriods().stream()
+                .filter(checkRepaymentPeriodIsInCreditRange(scheduleModel, reAgeDate)).findFirst()
+                .orElseThrow(() -> new IllegalStateException("No re-aged repayment period found for " + reAgeDate));
+        // Marked before the credit is booked: the memoized due interest of the period does not depend on these markers,
+        // only on its interest periods, which the credit changes afterwards.
+        creditedPeriod
+                .setCreditedPrincipalMovedDueReAge(MathUtil.plus(creditedPeriod.getCreditedPrincipalMovedDueReAge(), creditedPrincipal));
+        if (amortizeInterest) {
+            creditedPeriod
+                    .setCreditedInterestMovedDueReAge(MathUtil.plus(creditedPeriod.getCreditedInterestMovedDueReAge(), creditedInterest));
+        }
+        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(reAgeDate, scheduleModel.zero(), creditedPrincipal,
+                scheduleModel.zero());
+        addCreditedAmountsToInterestPeriod(scheduleModel, reAgeDate, creditedPrincipal, creditedInterest);
+        calculateRateFactorForRepaymentPeriod(creditedPeriod, scheduleModel);
     }
 
     /**
@@ -2317,17 +2358,31 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         }
     }
 
+    /**
+     * Shares the principal and interest equally between the re-aged periods. The credited interest is part of the
+     * interest, but it is credited to the periods instead of being fixed interest: it was already recognized (for
+     * example the interest part of a chargeback), so it must not be accrued again.
+     */
     private void updateEMIForReAgeEqualAmortization(List<RepaymentPeriod> repaymentPeriods, Money principal, Money interest,
-            Money feesPenaltiesOutstanding, EqualAmortizationValues feesPenaltiesEqualAmortizationValues, MonetaryCurrency currency) {
-        EqualAmortizationValues interestEAV = calculateEqualAmortizationValues(interest, repaymentPeriods.size(), null, currency);
+            Money creditedInterest, Money feesPenaltiesOutstanding, EqualAmortizationValues feesPenaltiesEqualAmortizationValues,
+            MonetaryCurrency currency) {
+        final Money totalInterest = interest.add(creditedInterest);
+        EqualAmortizationValues interestEAV = calculateEqualAmortizationValues(totalInterest, repaymentPeriods.size(), null, currency);
+        EqualAmortizationValues creditedInterestEAV = calculateEqualAmortizationValues(creditedInterest, repaymentPeriods.size(), null,
+                currency);
         EqualAmortizationValues principalEAV = calculateAdjustedEqualAmortizationValues(principal,
-                principal.add(interest).add(feesPenaltiesOutstanding),
+                principal.add(totalInterest).add(feesPenaltiesOutstanding),
                 interestEAV.value().add(feesPenaltiesEqualAmortizationValues.value()), repaymentPeriods.size(), null, currency);
         EqualAmortizationValues emiAEV = principalEAV.add(interestEAV);
         for (int i = 0; i < repaymentPeriods.size(); i++) {
             RepaymentPeriod rp = repaymentPeriods.get(i);
-            rp.setFixedInterest(interestEAV.calculateValue(i));
-            Money emi = emiAEV.calculateValue(i);
+            Money credited = creditedInterestEAV.calculateValue(i);
+            if (credited.isGreaterThanZero()) {
+                // credited amounts are due on top of the EMI
+                rp.getInterestPeriods().getLast().addCreditedInterestAmount(credited);
+            }
+            rp.setFixedInterest(MathUtil.negativeToZero(interestEAV.calculateValue(i).minus(credited)));
+            Money emi = emiAEV.calculateValue(i).minus(credited);
             rp.setEmi(emi);
             rp.setOriginalEmi(emi);
         }
@@ -2345,7 +2400,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public void reAgeEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule, LocalDate transactionDate,
             LoanReAgeParameterData reageParameter, Money feesPenaltiesOutstanding,
-            EqualAmortizationValues feesPenaltiesEqualAmortizationValues) {
+            EqualAmortizationValues feesPenaltiesEqualAmortizationValues, OutstandingDetails amountsNotInModel) {
         LocalDate originalMaturityDate = interestSchedule.getMaturityDate();
         List<RepaymentPeriod> reAgedRepaymentPeriods = new ArrayList<>(reageParameter.getNumberOfInstallments());
         OutstandingDetails reAgeingAmounts = precalculateReAgeEqualAmortizationAmount(interestSchedule, transactionDate, reageParameter);
@@ -2367,6 +2422,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         // close all open repayment period while keep paid amounts
         interestSchedule.repaymentPeriods().forEach(rp -> {
+            // Interest deferred here from a paid in advance period is already part of the re-aged amounts
+            rp.setFutureUnrecognizedInterest(zero);
             rp.getInterestPeriods().getLast()
                     .addCreditedInterestAmount(MathUtil.min(rp.getOutstandingInterest(), rp.getCreditedInterest(), false).negated());
             rp.setEmi(rp.getTotalPaidAmount());
@@ -2384,9 +2441,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         updateModelForReageEqualAmortization(interestSchedule, reageParameter, reAgedRepaymentPeriods);
 
-        updateEMIForReAgeEqualAmortization(reAgedRepaymentPeriods, reAgeingAmounts.getOutstandingPrincipal(),
-                reAgeingAmounts.getOutstandingInterest(), feesPenaltiesOutstanding, feesPenaltiesEqualAmortizationValues,
-                zero.getCurrency());
+        // The interest not in the model is shared by the re-aged periods together with the interest of the model
+        final Money principalNotInModel = amountsNotInModel == null ? zero : amountsNotInModel.getOutstandingPrincipal();
+        final Money interestNotInModel = amountsNotInModel == null ? zero : amountsNotInModel.getOutstandingInterest();
+        addAmountsNotInModelToReAgedPeriods(interestSchedule, transactionDate, new OutstandingDetails(principalNotInModel, zero), false);
+
+        updateEMIForReAgeEqualAmortization(reAgedRepaymentPeriods,
+                MathUtil.plus(reAgeingAmounts.getOutstandingPrincipal(), principalNotInModel), reAgeingAmounts.getOutstandingInterest(),
+                interestNotInModel, feesPenaltiesOutstanding, feesPenaltiesEqualAmortizationValues, zero.getCurrency());
 
         calculateOutstandingBalance(interestSchedule);
 

@@ -172,6 +172,7 @@ public interface LoanProductConstants {
 
     String ENABLE_ACCRUAL_ACTIVITY_POSTING = "enableAccrualActivityPosting";
     String SUPPORTED_INTEREST_REFUND_TYPES = "supportedInterestRefundTypes";
+    String SUPPORTED_FEE_REFUND_TYPES = "supportedFeeRefundTypes";
     String CHARGE_OFF_BEHAVIOUR = "chargeOffBehaviour";
 
     String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";
@@ -188,4 +189,7 @@ public interface LoanProductConstants {
     String BUY_DOWN_FEE_STRATEGY_PARAM_NAME = "buyDownFeeStrategy";
     String BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME = "buyDownFeeIncomeType";
     String MERCHANT_BUY_DOWN_FEE_PARAM_NAME = "merchantBuyDownFee";
+
+    // Charge amortization
+    String ENABLE_CHARGE_AMORTIZATION_PARAM_NAME = "enableChargeAmortization";
 }

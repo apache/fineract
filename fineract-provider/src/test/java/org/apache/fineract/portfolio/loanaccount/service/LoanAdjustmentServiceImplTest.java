@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -216,10 +217,13 @@ class LoanAdjustmentServiceImplTest {
         // Mock transaction date
         when(transactionForAdjustment.getTransactionDate()).thenReturn(LocalDate.now(ZoneId.systemDefault()));
 
-        // Mock the non-reversed interest refunds related to the adjusted one
-        LoanTransaction relatedTransaction = mock(LoanTransaction.class);
+        // Mock the non-reversed interest / fee refunds related to the adjusted one
+        LoanTransaction relatedInterestRefund = mock(LoanTransaction.class);
+        LoanTransaction relatedFeeRefund = mock(LoanTransaction.class);
         when(loanTransactionRelationRepository.findNonReversedInterestRefundsRelatedTo(transactionForAdjustment))
-                .thenReturn(List.of(relatedTransaction));
+                .thenReturn(List.of(relatedInterestRefund));
+        when(loanTransactionRelationRepository.findNonReversedFeeRefundsRelatedTo(transactionForAdjustment))
+                .thenReturn(List.of(relatedFeeRefund));
 
         doNothing().when(loanTransactionValidator).validateActivityNotBeforeClientOrGroupTransferDate(any(), any(), any());
         when(loan.isClosedWrittenOff()).thenReturn(false);
@@ -229,15 +233,16 @@ class LoanAdjustmentServiceImplTest {
         underTest.adjustExistingTransaction(loan, newTransactionDetail, transactionForAdjustment, scheduleGeneratorDTO, reversalExternalId);
 
         // Assert
-        // Verify that related transaction is reversed and event is triggered
-        verify(relatedTransaction).reverse();
-        verify(relatedTransaction).manuallyAdjustedOrReversed();
+        verify(relatedInterestRefund).reverse();
+        verify(relatedInterestRefund).manuallyAdjustedOrReversed();
+        verify(relatedFeeRefund).reverse();
+        verify(relatedFeeRefund).manuallyAdjustedOrReversed();
 
         ArgumentCaptor<LoanAdjustTransactionBusinessEvent> eventCaptor = ArgumentCaptor.forClass(LoanAdjustTransactionBusinessEvent.class);
-        verify(businessEventNotifierService).notifyPostBusinessEvent(eventCaptor.capture());
+        verify(businessEventNotifierService, times(2)).notifyPostBusinessEvent(eventCaptor.capture());
 
-        LoanAdjustTransactionBusinessEvent event = eventCaptor.getValue();
-        assertEquals(relatedTransaction, event.get().getTransactionToAdjust());
+        assertEquals(List.of(relatedInterestRefund, relatedFeeRefund),
+                eventCaptor.getAllValues().stream().map(e -> e.get().getTransactionToAdjust()).toList());
     }
 
     @Test

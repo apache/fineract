@@ -43,8 +43,8 @@ There is a separate task per database engine: `createPGDB` for PostgreSQL, `crea
 
 === Fineract Instance
 
-The build never starts a server. `:integration-tests:test`, `:twofactor-tests:test` and `:oauth2-tests:test` all
-run against whatever is already answering at the address in <<Default Connection Settings>>, so you have to bring
+The build never starts a server. `:integration-tests:test`, `:twofactor-tests:test`, `:oauth2-tests:test` and
+`:oauth2-twofactor-tests:test` all run against whatever is already answering at the address in <<Default Connection Settings>>, so you have to bring
 an instance up yourself first. Start it any of these three ways.
 
 ==== Docker Compose (recommended)
@@ -118,7 +118,7 @@ Boot jar through the jib image, so this is the only place a WAR-specific regress
 
 ==== Authentication modes
 
-`twofactor-tests` and `oauth2-tests` need the server started with a different authentication mode than the default,
+`twofactor-tests`, `oauth2-tests` and `oauth2-twofactor-tests` need the server started with a different authentication mode than the default,
 so they cannot run against the same instance as `integration-tests`. Layer the matching compose override on top and
 recreate the `fineract` service:
 
@@ -133,7 +133,16 @@ docker compose -f docker-compose-postgresql-test.yml -f docker-compose-twofactor
 docker compose -f docker-compose-postgresql-test.yml -f docker-compose-oauth2-test.yml \
   up -d --force-recreate fineract
 ./gradlew :oauth2-tests:test
+
+# OAuth2 with two-factor authentication
+docker compose -f docker-compose-postgresql-test.yml -f docker-compose-oauth2-twofactor-test.yml \
+  up -d --force-recreate fineract
+./gradlew :oauth2-twofactor-tests:test
 ----
+
+Both two-factor suites read the one-time password from an e-mail that the server sends to an SMTP server the test
+starts on the host. CI points the `SMTP_Email_Account` external service at `host.docker.internal` before running them
+(`configure_twofactor_smtp_host` in `.github/workflows/build-postgresql.yml`); do the same when you run them locally.
 
 == Configuration
 

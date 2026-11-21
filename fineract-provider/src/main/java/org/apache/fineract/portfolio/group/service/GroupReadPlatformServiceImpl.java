@@ -269,9 +269,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
 
-        public static final String G_ID_AS_ID_G_ACCOUNT_NO_AS_ACCOUNT_NO_G_DISPLAY_NAME_AS_DISPLAY_NAME_FROM_M_GROUP_G_WHERE_G_LEVEL_ID_2 = "g.id as id, g.account_no as accountNo, g.display_name as displayName from m_group g where g.level_id = 2 ";
+        private static final String G_ID_AS_ID_G_ACCOUNT_NO_AS_ACCOUNT_NO_G_DISPLAY_NAME_AS_DISPLAY_NAME_FROM_M_GROUP_G_WHERE_G_LEVEL_ID_2 = "g.id as id, g.account_no as accountNo, g.display_name as displayName from m_group g where g.level_id = 2 ";
 
-        public String schema() {
+        private String schema() {
             return G_ID_AS_ID_G_ACCOUNT_NO_AS_ACCOUNT_NO_G_DISPLAY_NAME_AS_DISPLAY_NAME_FROM_M_GROUP_G_WHERE_G_LEVEL_ID_2;
         }
 

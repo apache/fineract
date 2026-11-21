@@ -196,7 +196,9 @@ public class FineractProperties {
         // steps register no task executor at all - because concurrent item processing takes COB business step writes
         // out of the chunk transaction (see FINERACT-2621). Exposing a pool size would offer an override for a
         // correctness invariant, so the knob does not exist. Scale via partition-size and worker instances.
-        private Integer retryLimit;
+        // No retry limit either: Spring Batch 6 retries an item inside the chunk transaction it failed in, which a COB
+        // failure has already marked rollback-only, so a retry cannot succeed and one that seems to loses the chunk.
+        // See StepRetryPolicyFactory#noRetryPolicy.
         private Integer pollInterval;
         /**
          * Maximum number of skipped items tolerated per step execution (per partition). Independent of chunk size on
@@ -596,6 +598,8 @@ public class FineractProperties {
             private boolean autoCreateUser = false;
             // Comma-separated role names assigned to auto-created users.
             private String defaultRoles = "";
+            // Audience a token must name in its aud claim. Empty: the audience is not checked.
+            private String audience = "";
             // Controls the RP-Initiated Logout URL format.
             // Values: keycloak | azure_ad | okta | auth0 | generic (default)
             private OidcFederationType provider = OidcFederationType.GENERIC;
@@ -618,6 +622,15 @@ public class FineractProperties {
                 private String jwksUri;
                 // Optional: per-issuer override for the username claim.
                 private String usernameClaim;
+                // Optional: per-issuer override for the audience.
+                private String audience;
+                // Optional: claim holding the names of the user's Fineract roles: a list, or a comma-separated
+                // string; a dotted name reaches into nested claims (realm_access.roles). When set, a token of this
+                // issuer that carries the claim decides the user's roles whenever it is resolved to a user: at every
+                // browser login, and on every request with a Bearer token. Absent: roles are managed in Fineract.
+                private String rolesClaim;
+                // Optional: the only roles a token of this issuer may grant or remove. Empty: every role.
+                private List<String> managedRoles = new ArrayList<>();
             }
         }
 

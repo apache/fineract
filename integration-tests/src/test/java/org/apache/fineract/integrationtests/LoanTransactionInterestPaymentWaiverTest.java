@@ -39,10 +39,10 @@ import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.BatchRequest;
 import org.apache.fineract.client.models.BatchResponse;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -1592,7 +1592,6 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
 
     @Test
     public void testInterestPaymentWaiverBatchExternalIdOnChargedOffLoan() {
-        Long[] loanIdContainer = new Long[1];
         String[] loanExternalIdContainer = new String[1];
 
         runAt("01 January 2025", () -> {
@@ -1616,11 +1615,9 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
             Long chargeOffTransactionId = chargeOffLoan(createdLoanId, "15 June 2022");
             assertNotNull(chargeOffTransactionId);
 
-            loanIdContainer[0] = createdLoanId;
             loanExternalIdContainer[0] = loanExternalId;
         });
 
-        Long loanId = loanIdContainer[0];
         String loanExternalId = loanExternalIdContainer[0];
 
         runAt("01 January 2025", () -> {
@@ -1999,7 +1996,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
     }
 
     private void chargeFee(Long loanId, Double amount, String dueDate) {
-        PostChargesResponse feeCharge = chargesHelper.createLoanSpecifiedDueDateCharge(9.0);
+        ChargeCreateResponse feeCharge = chargesHelper.createLoanSpecifiedDueDateCharge(9.0);
         PostLoansLoanIdChargesResponse feeLoanChargeResult = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
                 .chargeId(feeCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en").amount(amount).dueDate(dueDate));
         assertNotNull(feeLoanChargeResult);
@@ -2007,7 +2004,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
     }
 
     private void chargePenalty(Long loanId, Double amount, String dueDate) {
-        PostChargesResponse penaltyCharge = chargesHelper.createLoanSpecifiedDueDatePenalty(10.0);
+        ChargeCreateResponse penaltyCharge = chargesHelper.createLoanSpecifiedDueDatePenalty(10.0);
         PostLoansLoanIdChargesResponse penaltyLoanChargeResult = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
                 .chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en").amount(amount).dueDate(dueDate));
         assertNotNull(penaltyLoanChargeResult);

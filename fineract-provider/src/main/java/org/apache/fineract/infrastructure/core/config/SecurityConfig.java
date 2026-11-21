@@ -20,11 +20,13 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyAuthority;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 
 import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -35,6 +37,7 @@ import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
 import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
@@ -379,6 +382,25 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/hooks/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK")
+                    // scheduler job - read
+                    // ConfigureBusinessStepApiResource also exposes GET /jobs/names under this same path prefix;
+                    // keep it on plain authentication instead of letting the READ_SCHEDULER matcher below catch it.
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/names")).fullyAuthenticated()
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/*/runhistory"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/short-name/*/runhistory"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    // scheduler job - update
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SCHEDULER")
                     // template
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/templates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE")
@@ -394,6 +416,15 @@ public class SecurityConfig {
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructionrunhistory"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    // standing instruction
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructions"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructions/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/standinginstructions"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/standinginstructions/*"))
+                    .access(standingInstructionUpdateOrDeleteAuthorization())
                     // floatingrate
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/floatingrates"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_FLOATINGRATE")
@@ -403,6 +434,48 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FLOATINGRATE")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/floatingrates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE")
+
+                    // execute scheduler job (by id)
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, "EXECUTEJOB_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, "EXECUTEJOB_SCHEDULER")
+
+                    // group
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUP")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/groups/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUP")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/groups/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUP")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/command/unassign_staff"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNSTAFF_GROUP")
+
+                    // client address
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/client/*/addresses"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_ADDRESS")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/client/*/addresses"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_ADDRESS")
+
+                    // family members
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/familymembers"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FAMILYMEMBERS")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/clients/*/familymembers/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FAMILYMEMBERS")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/familymembers/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_FAMILYMEMBERS")
+
+                    // charge
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/charges"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/charges/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/charges"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/charges/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CHARGE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/charges/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CHARGE")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
@@ -519,6 +592,20 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    /**
+     * {@code PUT /standinginstructions/{id}} serves both {@code command=update} and {@code command=delete}, so it is
+     * authorized per command: {@code UPDATE_STANDINGINSTRUCTION} alone must not allow a delete, nor the other way
+     * round.
+     */
+    static AuthorizationManager<RequestAuthorizationContext> standingInstructionUpdateOrDeleteAuthorization() {
+        return new CommandParameterAuthorizationManager(
+                Map.of(CommandParameterUtil.UPDATE_COMMAND_VALUE,
+                        hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION"),
+                        CommandParameterUtil.DELETE_COMMAND_VALUE,
+                        hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_STANDINGINSTRUCTION")),
+                hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION", "DELETE_STANDINGINSTRUCTION"));
     }
 
     private AuthorizationManager<RequestAuthorizationContext> allOfRequestManagers(

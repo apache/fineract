@@ -41,9 +41,9 @@ Feature: COB Reader
       |       |
 
   @cob
-  Scenario Outline: LoanItemReader - run test: exception
+  Scenario Outline: LoanItemReader - run test: reading does not load the loan
     Given The LoanItemReader.read method with loanIds <loanIds>
-    Then throw exception LoanItemReader.read method
+    Then The LoanItemReader.read returns the loan id without loading the loan
 
     Examples:
       |loanIds|

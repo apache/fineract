@@ -209,6 +209,7 @@ class AdvancedPaymentScheduleReAgeMappingTest {
         lenient().when(period.getPaidPrincipal()).thenReturn(paidAmount);
         lenient().when(period.getPaidInterest()).thenReturn(zero);
         lenient().when(period.getCreditedPrincipal()).thenReturn(zero);
+        lenient().when(period.getCreditedInterest()).thenReturn(zero);
         return period;
     }
 

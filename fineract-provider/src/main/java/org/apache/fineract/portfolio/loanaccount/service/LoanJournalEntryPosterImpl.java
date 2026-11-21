@@ -52,11 +52,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocati
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeTaxDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationStrategy;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.stereotype.Component;
 
@@ -178,9 +180,14 @@ public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
         transactionDTO.setNetDisbursalAmount(loanTransaction.getLoan().getNetDisbursalAmount());
 
         // Handle principalPortion for chargeback
-        if (transactionDTO.getType().isChargeback() && (loanTransaction.getLoan().getCreditAllocationRules() == null
-                || loanTransaction.getLoan().getCreditAllocationRules().isEmpty())) {
-            transactionDTO.setPrincipalPortion(loanTransaction.getAmount());
+        if (transactionDTO.getType().isChargeback()) {
+            final CreditAllocationStrategy creditAllocationStrategy = LoanCreditAllocationRule
+                    .resolveAllocationStrategy(loanTransaction.getLoan().getCreditAllocationRules(), loanTransaction.getTypeOf());
+            final BigDecimal principalPortion = switch (creditAllocationStrategy) {
+                case PRINCIPAL_ONLY -> loanTransaction.getAmount();
+                case RULE_BASED -> loanTransaction.getPrincipalPortion();
+            };
+            transactionDTO.setPrincipalPortion(principalPortion);
         } else {
             transactionDTO.setPrincipalPortion(loanTransaction.getPrincipalPortion());
         }
@@ -222,15 +229,19 @@ public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
             transactionDTO.setLoanChargesPaid(loanChargesPaidData);
         }
 
-        // Handle chargeback principalPaid/feePaid/penaltyPaid
+        // Handle chargeback principalPaid/interestPaid/feePaid/penaltyPaid
         if (transactionDTO.getType().isChargeback() && loanTransaction.getOverPaymentPortion() != null
                 && loanTransaction.getOverPaymentPortion().compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal principalPaid = loanTransaction.getOverPaymentPortion();
+            BigDecimal interestPaid = BigDecimal.ZERO;
             BigDecimal feePaid = BigDecimal.ZERO;
             BigDecimal penaltyPaid = BigDecimal.ZERO;
             if (!loanTransaction.getLoanTransactionToRepaymentScheduleMappings().isEmpty()) {
                 principalPaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
                         .map(mapping -> Optional.ofNullable(mapping.getPrincipalPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                interestPaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getInterestPortion()).orElse(BigDecimal.ZERO))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
                 feePaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
                         .map(mapping -> Optional.ofNullable(mapping.getFeeChargesPortion()).orElse(BigDecimal.ZERO))
@@ -240,6 +251,7 @@ public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
             }
             transactionDTO.setPrincipalPaid(principalPaid);
+            transactionDTO.setInterestPaid(interestPaid);
             transactionDTO.setFeePaid(feePaid);
             transactionDTO.setPenaltyPaid(penaltyPaid);
         }

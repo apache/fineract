@@ -175,8 +175,18 @@ public interface EMICalculator {
      */
     void applyInterestPause(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate, LocalDate endDate);
 
+    /**
+     * Re-ages the model with the default interest handling.
+     *
+     * @param amountsNotInModel
+     *            outstanding principal and interest that the model does not hold, such as a chargeback posted after
+     *            maturity, which only an additional installment carries. They are credited on the re-age date and the
+     *            EMI of the re-aged periods is adjusted so they amortize them together with the outstanding amounts of
+     *            the model.
+     */
     void updateModelRepaymentPeriodsDuringReAge(ProgressiveLoanInterestScheduleModel ctx, LocalDate loanTransaction,
-            LocalDate reAgeFirstDueDate, LocalDate transactionDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
+            LocalDate reAgeFirstDueDate, LocalDate transactionDate, LoanApplicationTerms loanApplicationTerms,
+            OutstandingDetails amountsNotInModel, MathContext mc);
 
     boolean recalculateModelOverdueAmountsTillDate(ProgressiveLoanInterestScheduleModel ctx, LocalDate targetDate, boolean prepayAttempt);
 
@@ -189,9 +199,17 @@ public interface EMICalculator {
     OutstandingDetails precalculateReAgeEqualAmortizationAmount(ProgressiveLoanInterestScheduleModel interestSchedule,
             LocalDate transactionDate, LoanReAgeParameterData reageParameter);
 
+    /**
+     * Re-ages the model with an equal amortization interest handling.
+     *
+     * @param amountsNotInModel
+     *            outstanding principal and interest that the model does not hold, such as a chargeback posted after
+     *            maturity, which only an additional installment carries. They are amortized by the re-aged periods
+     *            together with the outstanding amounts of the model.
+     */
     void reAgeEqualAmortization(ProgressiveLoanInterestScheduleModel interestSchedule, LocalDate transactionDate,
             LoanReAgeParameterData reageParameter, Money feesPenaltiesOutstanding,
-            EqualAmortizationValues feesPenaltiesEqualAmortizationValues);
+            EqualAmortizationValues feesPenaltiesEqualAmortizationValues, OutstandingDetails amountsNotInModel);
 
     EqualAmortizationValues calculateEqualAmortizationValues(Money totalOutstanding, Integer numberOfInstallments,
             Integer installmentAmountInMultiplesOf, MonetaryCurrency currency);

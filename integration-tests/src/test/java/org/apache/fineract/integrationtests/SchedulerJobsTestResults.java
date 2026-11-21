@@ -42,7 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetHolidaysResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -53,6 +53,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
+import org.apache.fineract.client.models.JobUpdateRequest;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
 import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
@@ -65,7 +66,6 @@ import org.apache.fineract.client.models.PostLoansRequestCollateralData;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -110,8 +110,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestMethodOrder(MethodName.class)
 public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
-    private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
-    private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";
+    private static final Integer FROM_ACCOUNT_TYPE_SAVINGS = 2;
+    private static final Integer TO_ACCOUNT_TYPE_SAVINGS = 2;
     private static final String DATE_OF_JOINING = "01 January 2011";
     private static final String TRANSACTION_DATE = "01 March 2013";
     public static final String LOAN_APPROVAL_DATE = "01 March 2013";
@@ -126,8 +126,8 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
     private static final String LOAN_MAX_OUTSTANDING_BALANCE = "36000";
     private static final double CHARGE_AMOUNT = 100;
     private static final String FEE_ON_MONTH_DAY = "04 March";
-    private static final String FEE_FREQUENCY_MONTHS = "2";
-    private static final String FEE_INTERVAL = "2";
+    private static final int FEE_FREQUENCY_MONTHS = 2;
+    private static final int FEE_INTERVAL = 2;
 
     private TimeZone systemTimeZone;
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
@@ -266,7 +266,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         SchedulerJobHelper.executeAndAwaitJob(JobName);
         final BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(specifiedDueDateChargeId).getAmount());
+        final BigDecimal chargeAmount = chargesHelper.getCharge(specifiedDueDateChargeId).getAmount();
 
         final BigDecimal balance = balanceBefore.subtract(chargeAmount);
 
@@ -391,7 +391,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         holidayId = HolidayHelper.activateHolidays(holidayId);
         Assertions.assertNotNull(holidayId);
 
-        GetHolidaysResponse holidayData = HolidayHelper.getHolidayById(holidayId);
+        HolidayHelper.getHolidayById(holidayId);
 
         List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
         String JobName = "Apply Holidays To Loans";
@@ -546,7 +546,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
                 liabilityAccount, incomeAccount, expenseAccount)).getResourceId();
 
         final Long clientID = clientHelper.createClient(DATE_OF_JOINING);
-        final Long savingsID = applyApproveAndActivateSavings(clientID, savingsProductID);
+        applyApproveAndActivateSavings(clientID, savingsProductID);
 
         // Checking initial Account entries.
         journalHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE,
@@ -629,8 +629,8 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
 
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID, fromSavingsId, toSavingsId,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
         Assertions.assertNotNull(standingInstructionId);
 
         String JobName = "Execute Standing Instruction";
@@ -695,10 +695,10 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         final BigDecimal shortSourceBefore = savingsHelper.getSavingsSummary(shortSource).getAccountBalance();
         final BigDecimal destinationBefore = savingsHelper.getSavingsSummary(destination).getAccountBalance();
 
-        final Integer instructionFunded = standingInstructionsHelper.createStandingInstruction(clientId.toString(), fundedSource.toString(),
-                destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
-        final Integer instructionShort = standingInstructionsHelper.createStandingInstruction(clientId.toString(), shortSource.toString(),
-                destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
+        final Long instructionFunded = standingInstructionsHelper.createStandingInstruction(clientId, fundedSource, destination,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
+        final Long instructionShort = standingInstructionsHelper.createStandingInstruction(clientId, shortSource, destination,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
         Assertions.assertNotNull(instructionFunded);
         Assertions.assertNotNull(instructionShort);
 
@@ -777,22 +777,18 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         final BigDecimal fundedSourceBefore = savingsHelper.getSavingsSummary(fundedSource).getAccountBalance();
         final BigDecimal destinationBefore = savingsHelper.getSavingsSummary(destination).getAccountBalance();
 
-        final List<Integer> instructions = new ArrayList<>();
+        final List<Long> instructions = new ArrayList<>();
         try {
             for (int i = 0; i < 3; i++) {
-                instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(),
-                        threeInstructionSource.toString(), destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS,
-                        validFrom, validTo, monthDay, "100", false));
+                instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, threeInstructionSource, destination,
+                        FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("100"), false));
             }
-            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(), partlyShortSource.toString(),
-                    destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, "300",
-                    false));
-            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(), partlyShortSource.toString(),
-                    destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, "200",
-                    false));
-            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId.toString(), fundedSource.toString(),
-                    destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, "250",
-                    false));
+            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, partlyShortSource, destination,
+                    FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("300"), false));
+            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, partlyShortSource, destination,
+                    FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("200"), false));
+            instructions.add(standingInstructionsHelper.createStandingInstruction(clientId, fundedSource, destination,
+                    FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay, new BigDecimal("250"), false));
             instructions.forEach(Assertions::assertNotNull);
 
             SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
@@ -859,10 +855,9 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         BigDecimal toSavingsBalanceBefore = savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance();
 
         // ask for more than the account holds, so the transfer can only be covered in part
-        final String amountBeyondTheBalance = fromSavingsBalanceBefore.multiply(BigDecimal.valueOf(2)).toPlainString();
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
-                amountBeyondTheBalance, true);
+        final BigDecimal amountBeyondTheBalance = fromSavingsBalanceBefore.multiply(BigDecimal.valueOf(2));
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID, fromSavingsId, toSavingsId,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY, amountBeyondTheBalance, true);
         Assertions.assertNotNull(standingInstructionId);
 
         SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
@@ -916,9 +911,8 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
 
         // more than the balance but within the overdraft limit, so the whole amount is covered
         final BigDecimal amount = fromSavingsBalanceBefore.add(new BigDecimal("500"));
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY,
-                amount.toPlainString(), true);
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID, fromSavingsId, toSavingsId,
+                FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY, amount, true);
         Assertions.assertNotNull(standingInstructionId);
 
         SchedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
@@ -962,7 +956,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
         String JobName = "Apply penalty to overdue loans";
         SchedulerJobHelper.executeAndAwaitJob(JobName);
 
-        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(overdueFeeChargeId).getAmount());
+        final BigDecimal chargeAmount = chargesHelper.getCharge(overdueFeeChargeId).getAmount();
 
         List<GetLoansLoanIdRepaymentPeriod> repaymentScheduleDataAfter = repaymentPeriods(loanID);
 
@@ -1473,15 +1467,14 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
             addSpecifiedDueDateCharge(loanId, penalty, penaltyCharge1AddedDate, "10");
 
             SchedulerJobHelper.updateSchedulerStatus(true);
-            SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/1 * * * * ?"));
-
+            SchedulerJobHelper.updateSchedulerJob(16L, new JobUpdateRequest().active(true).cronExpression("0/1 * * * * ?"));
             Thread.sleep(2000);
             GetLoansLoanIdResponse loanDetails = loanHelper.getLoanDetails(loanId, "transactions");
             assertEquals(LocalDate.of(2022, 9, 5), loanDetails.getTransactions().get(1).getDate());
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
-            SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0 2 0 1/1 * ? *"));
+            SchedulerJobHelper.updateSchedulerJob(16L, new JobUpdateRequest().cronExpression("0 2 0 1/1 * ? *"));
         }
     }
 
@@ -1514,7 +1507,7 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
                 .locale("en").monthDayFormat("dd MMMM").dateFormat("dd MMMM yyy").dueDate("10 January 2013");
     }
 
-    private static ChargeRequest loanOverdueFee() {
+    private static ChargeCreateRequest loanOverdueFee() {
         return ChargeRequestBuilders.loanOverdueFee(CHARGE_AMOUNT).feeFrequency(FEE_FREQUENCY_MONTHS).feeOnMonthDay(FEE_ON_MONTH_DAY)
                 .feeInterval(FEE_INTERVAL).monthDayFormat("dd MMM");
     }

@@ -63,8 +63,8 @@ public class LoanInlineCOBConfig {
     @Autowired
     private COBBusinessStepService cobBusinessStepService;
     @Autowired
-    @Qualifier("requiresNewTransactionJdbcTemplate")
-    private TransactionTemplate requiresNewTransactionJdbcTemplate;
+    @Qualifier("requiresNewTransactionTemplate")
+    private TransactionTemplate requiresNewTransactionTemplate;
     @Autowired
     private CustomJobParameterRepository customJobParameterRepository;
     @Autowired
@@ -89,10 +89,9 @@ public class LoanInlineCOBConfig {
 
     @Bean
     public Step inlineLoanCOBStep() {
-        ChunkOrientedStepBuilder<Loan, Loan> stepBuilder = new StepBuilder("Inline Loan COB Step", jobRepository)
-                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).transactionManager(transactionManager)
-                .reader(inlineCobWorkerItemReader()).processor(inlineCobWorkerItemProcessor()).writer(inlineCobWorkerItemWriter())
-                .listener(inlineCobLoanItemListener());
+        ChunkOrientedStepBuilder<Long, Long> stepBuilder = new StepBuilder("Inline Loan COB Step", jobRepository)
+                .<Long, Long>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).transactionManager(transactionManager)
+                .reader(inlineCobWorkerItemReader()).writer(inlineCobWorkerItemWriter()).listener(inlineCobLoanItemListener());
         return stepBuilder.build();
     }
 
@@ -106,13 +105,7 @@ public class LoanInlineCOBConfig {
     @JobScope
     @Bean
     public InlineCOBLoanItemReader inlineCobWorkerItemReader() {
-        return new InlineCOBLoanItemReader(loanRepository);
-    }
-
-    @JobScope
-    @Bean
-    public InlineCOBLoanItemProcessor inlineCobWorkerItemProcessor() {
-        return new InlineCOBLoanItemProcessor(cobBusinessStepService, progressiveLoanModelProcessingService);
+        return new InlineCOBLoanItemReader();
     }
 
     @Bean
@@ -120,14 +113,18 @@ public class LoanInlineCOBConfig {
         return new StepBuilder("Reset context - Step", jobRepository).tasklet(inlineCOBResetContext(), transactionManager).build();
     }
 
+    // Job-scoped: the writer keeps the job's execution context and business date in instance fields, and inline COB
+    // jobs run concurrently.
+    @JobScope
     @Bean
     public InlineCOBLoanItemWriter inlineCobWorkerItemWriter() {
-        return new InlineCOBLoanItemWriter(loanLockingService, loanRepository);
+        return new InlineCOBLoanItemWriter(cobBusinessStepService, progressiveLoanModelProcessingService, loanLockingService,
+                loanRepository);
     }
 
     @Bean
     public InlineCOBLoanItemListener inlineCobLoanItemListener() {
-        return new InlineCOBLoanItemListener(loanLockingService, requiresNewTransactionJdbcTemplate);
+        return new InlineCOBLoanItemListener(loanLockingService, requiresNewTransactionTemplate);
     }
 
     @Bean

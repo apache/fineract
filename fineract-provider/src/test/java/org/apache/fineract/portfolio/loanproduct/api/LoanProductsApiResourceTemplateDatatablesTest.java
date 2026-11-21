@@ -44,7 +44,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadService;
@@ -87,7 +87,7 @@ class LoanProductsApiResourceTemplateDatatablesTest {
 
     @BeforeEach
     void setUp() {
-        resource = new LoanProductsApiResource(context, loanProductReadPlatformService, mock(ChargeReadPlatformService.class),
+        resource = new LoanProductsApiResource(context, loanProductReadPlatformService, mock(ChargeReadService.class),
                 mock(CurrencyReadPlatformService.class), mock(FundReadPlatformService.class), toApiJsonSerializer,
                 apiRequestParameterHelper, mock(LoanDropdownReadPlatformService.class),
                 mock(PortfolioCommandSourceWritePlatformService.class), mock(ProductToGLAccountMappingReadPlatformService.class),

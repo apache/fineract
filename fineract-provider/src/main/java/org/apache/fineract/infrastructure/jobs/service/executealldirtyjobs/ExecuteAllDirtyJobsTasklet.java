@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.service.executealldirtyjobs;
 
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
@@ -44,7 +45,7 @@ public class ExecuteAllDirtyJobsTasklet implements Tasklet {
 
         for (ScheduledJobDetail scheduledJobDetail : jobDetails) {
             if (scheduledJobDetail.getNodeId().toString().equals(fineractProperties.getNodeId())) {
-                jobRegisterService.executeJobWithParameters(scheduledJobDetail.getId(), null);
+                jobRegisterService.executeJobWithParameters(scheduledJobDetail.getId(), Set.of());
             }
         }
         return RepeatStatus.FINISHED;

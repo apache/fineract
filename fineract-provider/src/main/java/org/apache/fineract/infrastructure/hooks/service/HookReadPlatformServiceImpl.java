@@ -110,7 +110,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
         private final JdbcTemplate jdbcTemplate;
 
-        public String schema() {
+        private String schema() {
             return " h.id, s.name as name, h.name as display_name, h.is_active, h.created_date,"
                     + " h.lastmodified_date, h.ugd_template_id, tp.name as ugd_template_name, "
                     + "h.ugd_template_id from m_hook h left join m_hook_templates s on h.template_id = s.id"
@@ -154,7 +154,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     private static final class HookEventMapper implements RowMapper<HookEventData> {
 
-        public String schema() {
+        private String schema() {
             return " re.action_name, re.entity_name from m_hook h inner join m_hook_registered_events re on h.id = re.hook_id ";
         }
 
@@ -168,7 +168,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     private static final class HookConfigMapper implements RowMapper<HookFieldData> {
 
-        public String schema() {
+        private String schema() {
             return " hc.field_name, hc.field_value from m_hook h inner join m_hook_configuration hc on h.id = hc.hook_id ";
         }
 
@@ -185,7 +185,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
         private final JdbcTemplate jdbcTemplate;
 
-        public String schema() {
+        private String schema() {
             return " s.id, s.name from m_hook_templates s ";
         }
 
@@ -210,7 +210,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     private static final class TemplateSchemaMapper implements RowMapper<HookFieldData> {
 
-        public String schema() {
+        private String schema() {
             return " hs.field_type, hs.field_name, hs.placeholder, hs.optional from m_hook_templates s "
                     + " inner join m_hook_schema hs on s.id = hs.hook_template_id ";
         }

@@ -106,6 +106,6 @@ public class LoanApplicationTermsSemiMonthlyEmiTest {
                 false, null, EMPTY_LIST, null, null, DaysInMonthType.ACTUAL, DaysInYearType.DAYS_365, false, null, null, null, null, null,
                 ZERO, null, NONE, null, ZERO, EMPTY_LIST, true, 0, false, holidayDetailDTO, false, false, false, null, false, false, null,
                 false, DISBURSEMENT_DATE, disbursementDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null, null,
-                false, null, false, null, null, null, false, null, null, null, false, false, null);
+                null, false, null, false, null, null, null, false, null, null, null, false, false, null);
     }
 }

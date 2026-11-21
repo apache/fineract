@@ -92,6 +92,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionAlreadyUndoneByExternalIdException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
@@ -809,9 +811,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult undoTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         context.validateAccessRights(loan.getOffice().getHierarchy());
-        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
-                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
-                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+        final WorkingCapitalLoanTransaction transaction = findTransactionToReverse(loanId, transactionId, command);
         return switch (transaction.getTypeOf()) {
             case DISCOUNT_FEE_ADJUSTMENT -> undoDiscountFeeAdjustment(loan, transaction, command);
             // A recovery payment never entered the balance, so the generic undo (which rewinds an allocation and
@@ -825,13 +825,33 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         };
     }
 
+    /**
+     * Finds the transaction an undo or adjust command reverses. A command sent by transaction external id carries that
+     * external id rather than a numeric id, and it is looked up here, inside the command execution, so every retry
+     * attempt sees where the external id points now: a concurrent adjust may have moved it to its replacement. When it
+     * is on a reversed transaction the attempt fails with an exception the retry policy retries; a numeric id is not
+     * retried, since looking it up again finds the same reversed transaction.
+     */
+    private WorkingCapitalLoanTransaction findTransactionToReverse(final Long loanId, final Long transactionId, final JsonCommand command) {
+        final ExternalId transactionExternalId = ExternalIdFactory.produce(command.getTransactionId());
+        if (transactionExternalId.isEmpty()) {
+            return transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
+                    .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
+                            "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+        }
+        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByWcLoan_IdAndExternalId(loanId, transactionExternalId)
+                .orElseThrow(() -> new WorkingCapitalLoanTransactionNotFoundException(transactionExternalId));
+        if (transaction.isReversed()) {
+            throw new WorkingCapitalLoanTransactionAlreadyUndoneByExternalIdException(transaction.getId(), transactionExternalId);
+        }
+        return transaction;
+    }
+
     @Override
     public CommandProcessingResult adjustByDeltaTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         context.validateAccessRights(loan.getOffice().getHierarchy());
-        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
-                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
-                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+        final WorkingCapitalLoanTransaction transaction = findTransactionToReverse(loanId, transactionId, command);
 
         return switch (transaction.getTypeOf()) {
             case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND ->
@@ -923,9 +943,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     public CommandProcessingResult adjustTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         final WorkingCapitalLoan loan = loanRepository.findById(loanId).orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         context.validateAccessRights(loan.getOffice().getHierarchy());
-        final WorkingCapitalLoanTransaction transaction = transactionRepository.findByIdAndWcLoan_Id(transactionId, loanId)
-                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.not.found",
-                        "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
+        final WorkingCapitalLoanTransaction transaction = findTransactionToReverse(loanId, transactionId, command);
 
         return switch (transaction.getTypeOf()) {
             case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND ->
@@ -961,6 +979,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
 
         final boolean isReverseOnly = newTransactionAmount.compareTo(BigDecimal.ZERO) == 0;
+
+        // Asking for the adjusted transaction's own external id moves it to the replacement, so the caller can keep
+        // addressing the live transaction by it. The column is unique: the release is flushed before the replacement is
+        // inserted. A full reversal has no replacement, so the external id stays on the reversed transaction.
+        final boolean externalIdInherited = !isReverseOnly && transactionToAdjust.isExternalIdInheritedBy(ExternalIdFactory
+                .produce(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.externalIdParameterName)));
+        if (externalIdInherited) {
+            transactionToAdjust.releaseExternalId();
+            transactionRepository.saveAndFlush(transactionToAdjust);
+        }
 
         final WorkingCapitalLoanTransaction newTransaction = !isReverseOnly
                 ? resolveNewTransaction(loan, transactionToAdjust, newTransactionAmount, command, changes)
@@ -1001,7 +1029,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             transactionProcessor.recalculateSettlementDates(loan);
 
             propagateChangesByTransaction(newTransaction, changes);
-            changes.put("adjustedTransaction", propagateChangesByTransaction(transactionToAdjust, new HashMap<>()));
+            final Map<String, Object> adjustedTransactionChanges = new HashMap<>();
+            adjustedTransactionChanges.put("id", transactionToAdjust.getId());
+            changes.put("adjustedTransaction", propagateChangesByTransaction(transactionToAdjust, adjustedTransactionChanges));
+            changes.put("externalIdInherited", externalIdInherited);
         }
 
         changes.put("status", loan.getLoanStatus());
@@ -1017,19 +1048,21 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
-        Long entityId = transactionToAdjust.getId();
-        ExternalId entityExternalId = transactionToAdjust.getExternalId();
-
+        // The resource is the transaction the call leaves live: the replacement, or the reversed transaction after a
+        // full
+        // reversal. With a replacement, the sub-resource is the transaction that was actually reversed - when the call
+        // came by external id, possibly not the one that external id pointed to when the request was sent.
+        final CommandProcessingResultBuilder resultBuilder = new CommandProcessingResultBuilder();
         if (newTransaction != null) {
-            entityId = newTransaction.getId();
-            entityExternalId = newTransaction.getExternalId();
+            resultBuilder.withEntityId(newTransaction.getId()).withEntityExternalId(newTransaction.getExternalId())
+                    .withSubEntityId(transactionToAdjust.getId()).withSubEntityExternalId(transactionToAdjust.getExternalId());
+        } else {
+            resultBuilder.withEntityId(transactionToAdjust.getId()).withEntityExternalId(transactionToAdjust.getExternalId());
         }
 
-        return new CommandProcessingResultBuilder() //
+        return resultBuilder //
                 .withLoanId(loan.getId()) //
                 .withLoanExternalId(loan.getExternalId()) //
-                .withEntityId(entityId) //
-                .withEntityExternalId(entityExternalId) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withLoanId(loan.getId()) //

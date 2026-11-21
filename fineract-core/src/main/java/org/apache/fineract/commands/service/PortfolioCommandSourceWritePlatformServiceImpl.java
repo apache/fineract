@@ -163,14 +163,29 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         return !user.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", taskPermission + "_CHECKER");
     }
 
+    /**
+     * Finds a pending submission of the same command against the same target. The target is the entity id, or, for a
+     * command without one, the transaction id it carries: a Working Capital Loan transaction command sent by
+     * transaction external id names its transaction only there, since the external id is resolved when the command
+     * runs. A command with neither (a repayment, say) has no target to compare, so several of them may wait for
+     * approval at once.
+     */
     private Optional<CommandSource> findPendingCommand(final CommandWrapper wrapper) {
-        if (wrapper.getEntityId() == null) {
-            return Optional.empty();
+        final String json = Objects.requireNonNullElse(wrapper.getJson(), "{}");
+        final Integer awaitingApproval = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
+        if (wrapper.getEntityId() != null) {
+            return this.commandSourceRepository
+                    .findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                            wrapper.getActionName(), wrapper.getEntityName(), wrapper.getEntityId(), wrapper.getSubentityId(), json,
+                            awaitingApproval);
         }
-        return this.commandSourceRepository
-                .findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
-                        wrapper.getActionName(), wrapper.getEntityName(), wrapper.getEntityId(), wrapper.getSubentityId(),
-                        Objects.requireNonNullElse(wrapper.getJson(), "{}"), CommandProcessingResultType.AWAITING_APPROVAL.getValue());
+        if (wrapper.getTransactionId() != null) {
+            return this.commandSourceRepository
+                    .findFirstByActionNameAndEntityNameAndLoanIdAndTransactionIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                            wrapper.getActionName(), wrapper.getEntityName(), wrapper.getLoanId(), wrapper.getTransactionId(), json,
+                            awaitingApproval);
+        }
+        return Optional.empty();
     }
 
     @Override

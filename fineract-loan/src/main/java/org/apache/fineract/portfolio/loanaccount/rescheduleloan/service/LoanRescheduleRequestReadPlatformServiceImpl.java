@@ -114,7 +114,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             this.schema = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
 
@@ -188,7 +188,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
     private static final class LoanRescheduleRequestRowMapperForBulkApproval implements RowMapper<LoanRescheduleRequestData> {
 
-        public String schema() {
+        private String schema() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
             sqlBuilder.append("lrr.id as id, lrr.status_enum as statusEnum, lrr.reschedule_from_date as rescheduleFromDate, ");

@@ -48,7 +48,7 @@ public class CommandProcessingResultSerializationTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         CommandProcessingResult commandProcessingResult = CommandProcessingResult.fromDetails(1L, null, null, null, null, null,
                 "resourceIdentifier", null, null, null, null, null, null, null, Boolean.TRUE, null, new ExternalId("externalId"),
-                ExternalId.empty(), null);
+                ExternalId.empty(), null, null);
         objectMapper.writeValue(os, commandProcessingResult);
         Map<String, Object> result = new Gson().fromJson(os.toString(Charset.defaultCharset()), Map.class);
         assertEquals(4, result.size());

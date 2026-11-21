@@ -20,18 +20,13 @@ package org.apache.fineract.cob.loan;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.apache.fineract.cob.AbstractAccountItemReader;
 import org.apache.fineract.cob.COBConstant;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
 
-public class WorkingCapitalInlineCOBLoanItemReader extends AbstractLoanItemReader<WorkingCapitalLoan> {
-
-    public WorkingCapitalInlineCOBLoanItemReader(WorkingCapitalLoanRepository loanRepository) {
-        super(loanRepository);
-    }
+public class WorkingCapitalInlineCOBLoanItemReader extends AbstractAccountItemReader {
 
     @Override
     @SuppressWarnings({ "unchecked" })

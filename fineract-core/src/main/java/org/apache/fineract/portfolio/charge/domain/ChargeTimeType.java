@@ -210,6 +210,13 @@ public enum ChargeTimeType {
         return this.equals(ChargeTimeType.OVERDUE_INSTALLMENT);
     }
 
+    /**
+     * Whether the income of a loan fee with this charge time type can be amortized.
+     */
+    public boolean isAllowedChargeAmortizationTime() {
+        return isTimeOfDisbursement() || isTrancheDisbursement() || isSpecifiedDueDate();
+    }
+
     public boolean isAllowedLoanChargeTime() {
         return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isTrancheDisbursement()
                 || isTimeOfDownPayment();

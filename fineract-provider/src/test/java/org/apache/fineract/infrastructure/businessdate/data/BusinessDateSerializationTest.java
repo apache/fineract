@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 class BusinessDateSerializationTest {
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule())
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
 
     @Test
     void serializeBusinessDateData() throws JsonProcessingException {

@@ -39,32 +39,45 @@ public class CreditAllocationsJsonParser {
     public List<LoanProductCreditAllocationRule> assembleLoanProductCreditAllocationRules(final JsonCommand command,
             String loanTransactionProcessingStrategyCode) {
         JsonArray creditAllocation = command.arrayOfParameterNamed("creditAllocation");
-        List<LoanProductCreditAllocationRule> productCreditAllocationRules = null;
+        List<CreditAllocationRequest> creditAllocationRequests = null;
         if (creditAllocation != null) {
-            productCreditAllocationRules = creditAllocation.asList().stream().map(json -> {
-                Map<String, JsonElement> map = json.getAsJsonObject().asMap();
-                LoanProductCreditAllocationRule creditAllocationRule = new LoanProductCreditAllocationRule();
-                populateCreditAllocationRules(map, creditAllocationRule);
-                populateTransactionType(map, creditAllocationRule);
-                return creditAllocationRule;
-            }).toList();
+            creditAllocationRequests = creditAllocation.asList().stream()
+                    .map(json -> parseCreditAllocationRequest(json.getAsJsonObject().asMap())).toList();
         }
-        creditAllocationsValidator.validate(productCreditAllocationRules, loanTransactionProcessingStrategyCode);
-        return productCreditAllocationRules;
+        creditAllocationsValidator.validate(creditAllocationRequests, loanTransactionProcessingStrategyCode);
+        return creditAllocationRequests == null ? null
+                : creditAllocationRequests.stream().map(CreditAllocationRequest::toLoanProductCreditAllocationRule).toList();
     }
 
-    private void populateCreditAllocationRules(Map<String, JsonElement> map, LoanProductCreditAllocationRule creditAllocationRule) {
+    private CreditAllocationRequest parseCreditAllocationRequest(Map<String, JsonElement> map) {
+        CreditAllocationStrategy allocationStrategy = getAllocationStrategy(map);
         JsonArray creditAllocationOrder = asJsonArrayOrNull(map.get("creditAllocationOrder"));
-        if (creditAllocationOrder != null) {
-            creditAllocationRule.setAllocationTypes(getAllocationTypes(creditAllocationOrder));
-        }
+        boolean creditAllocationOrderProvided = creditAllocationOrder != null && !creditAllocationOrder.isEmpty();
+        // the strategy and order combination is checked by the validator, once the payment strategy is known to allow
+        // it
+        List<AllocationType> allocationTypes = CreditAllocationStrategy.RULE_BASED.equals(allocationStrategy)
+                && creditAllocationOrderProvided ? getAllocationTypes(creditAllocationOrder) : List.of();
+        return new CreditAllocationRequest(getTransactionType(map), allocationStrategy, allocationTypes, creditAllocationOrderProvided);
     }
 
-    private void populateTransactionType(Map<String, JsonElement> map, LoanProductCreditAllocationRule creditAllocationRule) {
-        String transactionType = asStringOrNull(map.get("transactionType"));
-        if (transactionType != null) {
-            creditAllocationRule.setTransactionType(Enums.getIfPresent(CreditAllocationTransactionType.class, transactionType).orNull());
+    /**
+     * Returns the requested strategy, {@link CreditAllocationStrategy#RULE_BASED} when none was sent, or null when the
+     * value is not a valid strategy. The validator rejects null.
+     */
+    private CreditAllocationStrategy getAllocationStrategy(Map<String, JsonElement> map) {
+        JsonElement element = map.get("creditAllocationStrategy");
+        if (element == null || element.isJsonNull()) {
+            return CreditAllocationStrategy.RULE_BASED;
         }
+        if (!element.isJsonPrimitive()) {
+            return null;
+        }
+        return Enums.getIfPresent(CreditAllocationStrategy.class, element.getAsString()).orNull();
+    }
+
+    private CreditAllocationTransactionType getTransactionType(Map<String, JsonElement> map) {
+        String transactionType = asStringOrNull(map.get("transactionType"));
+        return transactionType == null ? null : Enums.getIfPresent(CreditAllocationTransactionType.class, transactionType).orNull();
     }
 
     @NonNull
@@ -87,21 +100,21 @@ public class CreditAllocationsJsonParser {
     }
 
     private Integer asIntegerOrNull(JsonElement element) {
-        if (!element.isJsonNull()) {
+        if (element != null && !element.isJsonNull()) {
             return element.getAsInt();
         }
         return null;
     }
 
     private String asStringOrNull(JsonElement element) {
-        if (!element.isJsonNull()) {
+        if (element != null && !element.isJsonNull()) {
             return element.getAsString();
         }
         return null;
     }
 
     private JsonArray asJsonArrayOrNull(JsonElement element) {
-        if (!element.isJsonNull()) {
+        if (element != null && !element.isJsonNull()) {
             return element.getAsJsonArray();
         }
         return null;

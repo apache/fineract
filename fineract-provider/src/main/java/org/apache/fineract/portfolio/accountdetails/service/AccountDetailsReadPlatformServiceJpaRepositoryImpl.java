@@ -303,7 +303,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     approvedShares, pendingShares, timeline);
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
     }
@@ -370,7 +370,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             this.schemaSql = accountsSummary.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 
@@ -460,7 +460,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
     private static final class LoanAccountSummaryDataMapper implements RowMapper<LoanAccountSummaryData> {
 
-        public String loanAccountSummarySchema() {
+        private String loanAccountSummarySchema() {
 
             final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append(" l.product_id as productId, lp.name as productName, lp.short_name as shortProductName,")
@@ -607,7 +607,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
     private static final class GuarantorLoanAccountSummaryDataMapper implements RowMapper<GuarantorAccountSummaryData> {
 
-        public String guarantorLoanAccountSummarySchema() {
+        private String guarantorLoanAccountSummarySchema() {
 
             final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append(" l.product_id as productId, lp.name as productName, lp.short_name as shortProductName,")

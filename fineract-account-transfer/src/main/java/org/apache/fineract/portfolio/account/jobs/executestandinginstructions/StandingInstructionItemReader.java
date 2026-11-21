@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ItemReader;
@@ -50,7 +50,7 @@ import org.springframework.batch.infrastructure.item.ItemReader;
 public class StandingInstructionItemReader implements ItemReader<StandingInstructionData> {
 
     private final int pageSize;
-    private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private final StandingInstructionReadService standingInstructionReadService;
 
     private final Deque<StandingInstructionData> page = new ArrayDeque<>();
 
@@ -80,7 +80,7 @@ public class StandingInstructionItemReader implements ItemReader<StandingInstruc
     }
 
     private void fetchNextPage() {
-        final List<StandingInstructionData> nextPage = standingInstructionReadPlatformService
+        final List<StandingInstructionData> nextPage = standingInstructionReadService
                 .retrieveDuePage(StandingInstructionStatus.ACTIVE.getValue(), minAccountKey, maxAccountKey, lastPriority, lastId, pageSize);
         if (nextPage.size() < pageSize) {
             exhausted = true;

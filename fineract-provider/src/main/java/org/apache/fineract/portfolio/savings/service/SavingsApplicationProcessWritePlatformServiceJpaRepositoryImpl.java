@@ -40,6 +40,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -58,7 +59,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
@@ -96,7 +96,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountDataValidator savingsAccountDataValidator;
-    private final AccountNumberGenerator accountNumberGenerator;
+    private final AccountNumberGeneratorService accountNumberGenerator;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
@@ -172,7 +172,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                         if (gsimRepository.count() != 0) {
                             // Parent-Not an empty table
 
-                            accountNumber = this.accountNumberGenerator.generate(account, accountNumberFormat);
+                            accountNumber = this.accountNumberGenerator.generate(EntityAccountType.SAVINGS, account, accountNumberFormat);
                             account.updateAccountNo(accountNumber + "1");
                             gsimAccount = gsimWritePlatformService.addGSIMAccountInfo(accountNumber, group, BigDecimal.ZERO,
                                     Long.valueOf(1), true, SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
@@ -182,7 +182,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                         } else {
                             // Parent-empty table
-                            accountNumber = this.accountNumberGenerator.generate(account, accountNumberFormat);
+                            accountNumber = this.accountNumberGenerator.generate(EntityAccountType.SAVINGS, account, accountNumberFormat);
                             account.updateAccountNo(accountNumber + "1");
                             gsimWritePlatformService.addGSIMAccountInfo(accountNumber, group, BigDecimal.ZERO, Long.valueOf(1), true,
                                     SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
@@ -208,7 +208,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                             // Child-empty table
                             // if the gsim info is empty set the current account
                             // as parent
-                            accountNumber = this.accountNumberGenerator.generate(account, accountNumberFormat);
+                            accountNumber = this.accountNumberGenerator.generate(EntityAccountType.SAVINGS, account, accountNumberFormat);
                             account.updateAccountNo(accountNumber + "1");
                             gsimWritePlatformService.addGSIMAccountInfo(accountNumber, group, BigDecimal.ZERO, Long.valueOf(1), true,
                                     SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
@@ -260,7 +260,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private void generateAccountNumber(final SavingsAccount account) {
         if (account.isAccountNumberRequiresAutoGeneration()) {
             final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
-            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
+            account.updateAccountNo(this.accountNumberGenerator.generate(EntityAccountType.SAVINGS, account, accountNumberFormat));
 
             this.savingAccountRepository.saveAndFlush(account);
         }

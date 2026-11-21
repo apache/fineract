@@ -52,75 +52,47 @@ public final class SharesEnumerations {
         final boolean isActive = type.isActive();
         final boolean isClosed = type.isClosed();
 
-        ShareAccountStatusEnumData optionData = null;
-        switch (type) {
-            case INVALID:
-                optionData = new ShareAccountStatusEnumData(ShareAccountStatusType.INVALID.getValue().longValue(),
-                        ShareAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected, isActive,
-                        isClosed);
-            break;
-
-            case SUBMITTED_AND_PENDING_APPROVAL:
-                optionData = new ShareAccountStatusEnumData(ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
+        return switch (type) {
+            case INVALID -> new ShareAccountStatusEnumData(ShareAccountStatusType.INVALID.getValue().longValue(),
+                    ShareAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected, isActive,
+                    isClosed);
+            case SUBMITTED_AND_PENDING_APPROVAL ->
+                new ShareAccountStatusEnumData(ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
                         ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval",
                         submittedAndPendingApproval, isApproved, isRejected, isActive, isClosed);
-            break;
-            case APPROVED:
-                optionData = new ShareAccountStatusEnumData(ShareAccountStatusType.APPROVED.getValue().longValue(),
-                        ShareAccountStatusType.APPROVED.getCode(), "Approved", submittedAndPendingApproval, isApproved, isRejected,
-                        isActive, isClosed);
-            break;
-
-            case ACTIVE:
-                optionData = new ShareAccountStatusEnumData(ShareAccountStatusType.ACTIVE.getValue().longValue(),
-                        ShareAccountStatusType.ACTIVE.getCode(), "Active", submittedAndPendingApproval, isApproved, isRejected, isActive,
-                        isClosed);
-            break;
-            case REJECTED:
-                optionData = new ShareAccountStatusEnumData(ShareAccountStatusType.REJECTED.getValue().longValue(),
-                        ShareAccountStatusType.REJECTED.getCode(), "Rejected", submittedAndPendingApproval, isApproved, isRejected,
-                        isActive, isClosed);
-            break;
-            case CLOSED:
-                optionData = new ShareAccountStatusEnumData(ShareAccountStatusType.CLOSED.getValue().longValue(),
-                        ShareAccountStatusType.CLOSED.getCode(), "Closed", submittedAndPendingApproval, isApproved, isRejected, isActive,
-                        isClosed);
-            break;
-        }
-
-        return optionData;
+            case APPROVED -> new ShareAccountStatusEnumData(ShareAccountStatusType.APPROVED.getValue().longValue(),
+                    ShareAccountStatusType.APPROVED.getCode(), "Approved", submittedAndPendingApproval, isApproved, isRejected, isActive,
+                    isClosed);
+            case ACTIVE -> new ShareAccountStatusEnumData(ShareAccountStatusType.ACTIVE.getValue().longValue(),
+                    ShareAccountStatusType.ACTIVE.getCode(), "Active", submittedAndPendingApproval, isApproved, isRejected, isActive,
+                    isClosed);
+            case REJECTED -> new ShareAccountStatusEnumData(ShareAccountStatusType.REJECTED.getValue().longValue(),
+                    ShareAccountStatusType.REJECTED.getCode(), "Rejected", submittedAndPendingApproval, isApproved, isRejected, isActive,
+                    isClosed);
+            case CLOSED -> new ShareAccountStatusEnumData(ShareAccountStatusType.CLOSED.getValue().longValue(),
+                    ShareAccountStatusType.CLOSED.getCode(), "Closed", submittedAndPendingApproval, isApproved, isRejected, isActive,
+                    isClosed);
+        };
     }
 
     public static EnumOptionData purchasedSharesEnum(PurchasedSharesStatusType type) {
         EnumOptionData data = new EnumOptionData(PurchasedSharesStatusType.INVALID.getValue().longValue(),
                 PurchasedSharesStatusType.INVALID.getCode(), "Invalid");
         switch (type) {
-            case INVALID:
-            break;
-            case APPLIED:
-                data = new EnumOptionData(PurchasedSharesStatusType.APPLIED.getValue().longValue(),
-                        PurchasedSharesStatusType.APPLIED.getCode(), "Pending Approval");
-            break;
-            case APPROVED:
-                data = new EnumOptionData(PurchasedSharesStatusType.APPROVED.getValue().longValue(),
-                        PurchasedSharesStatusType.APPROVED.getCode(), "Approved");
-            break;
-            case REJECTED:
-                data = new EnumOptionData(PurchasedSharesStatusType.REJECTED.getValue().longValue(),
-                        PurchasedSharesStatusType.REJECTED.getCode(), "Rejected");
-            break;
-            case PURCHASED:
-                data = new EnumOptionData(PurchasedSharesStatusType.PURCHASED.getValue().longValue(),
-                        PurchasedSharesStatusType.PURCHASED.getCode(), "Purchase");
-            break;
-            case REDEEMED:
-                data = new EnumOptionData(PurchasedSharesStatusType.REDEEMED.getValue().longValue(),
-                        PurchasedSharesStatusType.REDEEMED.getCode(), "Redeem");
-            break;
-            case CHARGE_PAYMENT:
-                data = new EnumOptionData(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue().longValue(),
-                        PurchasedSharesStatusType.CHARGE_PAYMENT.getCode(), "Charge Payment");
-            break;
+            case INVALID -> {
+            }
+            case APPLIED -> data = new EnumOptionData(PurchasedSharesStatusType.APPLIED.getValue().longValue(),
+                    PurchasedSharesStatusType.APPLIED.getCode(), "Pending Approval");
+            case APPROVED -> data = new EnumOptionData(PurchasedSharesStatusType.APPROVED.getValue().longValue(),
+                    PurchasedSharesStatusType.APPROVED.getCode(), "Approved");
+            case REJECTED -> data = new EnumOptionData(PurchasedSharesStatusType.REJECTED.getValue().longValue(),
+                    PurchasedSharesStatusType.REJECTED.getCode(), "Rejected");
+            case PURCHASED -> data = new EnumOptionData(PurchasedSharesStatusType.PURCHASED.getValue().longValue(),
+                    PurchasedSharesStatusType.PURCHASED.getCode(), "Purchase");
+            case REDEEMED -> data = new EnumOptionData(PurchasedSharesStatusType.REDEEMED.getValue().longValue(),
+                    PurchasedSharesStatusType.REDEEMED.getCode(), "Redeem");
+            case CHARGE_PAYMENT -> data = new EnumOptionData(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue().longValue(),
+                    PurchasedSharesStatusType.CHARGE_PAYMENT.getCode(), "Charge Payment");
 
         }
         return data;
@@ -143,24 +115,16 @@ public final class SharesEnumerations {
         EnumOptionData optionData = new EnumOptionData(SharePeriodFrequencyType.INVALID.getValue().longValue(),
                 SharePeriodFrequencyType.INVALID.getCode(), "Invalid");
         switch (type) {
-            case INVALID:
-            break;
-            case DAYS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.DAYS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.DAYS.getCode(), "Days");
-            break;
-            case WEEKS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.WEEKS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.WEEKS.getCode(), "Weeks");
-            break;
-            case MONTHS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.MONTHS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.MONTHS.getCode(), "Months");
-            break;
-            case YEARS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.YEARS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.YEARS.getCode(), "Years");
-            break;
+            case INVALID -> {
+            }
+            case DAYS -> optionData = new EnumOptionData(SharePeriodFrequencyType.DAYS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.DAYS.getCode(), "Days");
+            case WEEKS -> optionData = new EnumOptionData(SharePeriodFrequencyType.WEEKS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            case MONTHS -> optionData = new EnumOptionData(SharePeriodFrequencyType.MONTHS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.MONTHS.getCode(), "Months");
+            case YEARS -> optionData = new EnumOptionData(SharePeriodFrequencyType.YEARS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.YEARS.getCode(), "Years");
         }
         return optionData;
     }
@@ -170,24 +134,16 @@ public final class SharesEnumerations {
         EnumOptionData optionData = new EnumOptionData(SharePeriodFrequencyType.INVALID.getValue().longValue(),
                 SharePeriodFrequencyType.INVALID.getCode(), "Invalid");
         switch (type) {
-            case INVALID:
-            break;
-            case DAYS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.DAYS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.DAYS.getCode(), "Days");
-            break;
-            case WEEKS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.WEEKS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.WEEKS.getCode(), "Weeks");
-            break;
-            case MONTHS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.MONTHS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.MONTHS.getCode(), "Months");
-            break;
-            case YEARS:
-                optionData = new EnumOptionData(SharePeriodFrequencyType.YEARS.getValue().longValue(),
-                        codePrefix + SharePeriodFrequencyType.YEARS.getCode(), "Years");
-            break;
+            case INVALID -> {
+            }
+            case DAYS -> optionData = new EnumOptionData(SharePeriodFrequencyType.DAYS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.DAYS.getCode(), "Days");
+            case WEEKS -> optionData = new EnumOptionData(SharePeriodFrequencyType.WEEKS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            case MONTHS -> optionData = new EnumOptionData(SharePeriodFrequencyType.MONTHS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.MONTHS.getCode(), "Months");
+            case YEARS -> optionData = new EnumOptionData(SharePeriodFrequencyType.YEARS.getValue().longValue(),
+                    codePrefix + SharePeriodFrequencyType.YEARS.getCode(), "Years");
         }
         return optionData;
     }
@@ -196,16 +152,12 @@ public final class SharesEnumerations {
         EnumOptionData data = new EnumOptionData(ShareAccountDividendStatusType.INVALID.getValue().longValue(),
                 ShareAccountDividendStatusType.INVALID.getCode(), "Invalid");
         switch (type) {
-            case INVALID:
-            break;
-            case POSTED:
-                data = new EnumOptionData(ShareAccountDividendStatusType.POSTED.getValue().longValue(),
-                        ShareAccountDividendStatusType.POSTED.getCode(), "Dividend Posted");
-            break;
-            case INITIATED:
-                data = new EnumOptionData(ShareAccountDividendStatusType.INITIATED.getValue().longValue(),
-                        ShareAccountDividendStatusType.INITIATED.getCode(), "Dividend Initiated");
-            break;
+            case INVALID -> {
+            }
+            case POSTED -> data = new EnumOptionData(ShareAccountDividendStatusType.POSTED.getValue().longValue(),
+                    ShareAccountDividendStatusType.POSTED.getCode(), "Dividend Posted");
+            case INITIATED -> data = new EnumOptionData(ShareAccountDividendStatusType.INITIATED.getValue().longValue(),
+                    ShareAccountDividendStatusType.INITIATED.getCode(), "Dividend Initiated");
 
         }
         return data;
@@ -219,16 +171,12 @@ public final class SharesEnumerations {
         EnumOptionData data = new EnumOptionData(ShareAccountDividendStatusType.INVALID.getValue().longValue(),
                 ShareAccountDividendStatusType.INVALID.getCode(), "Invalid");
         switch (type) {
-            case INVALID:
-            break;
-            case APPROVED:
-                data = new EnumOptionData(ShareProductDividendStatusType.APPROVED.getValue().longValue(),
-                        ShareProductDividendStatusType.APPROVED.getCode(), "Dividend Approved");
-            break;
-            case INITIATED:
-                data = new EnumOptionData(ShareProductDividendStatusType.INITIATED.getValue().longValue(),
-                        ShareProductDividendStatusType.INITIATED.getCode(), "Dividend Initiated");
-            break;
+            case INVALID -> {
+            }
+            case APPROVED -> data = new EnumOptionData(ShareProductDividendStatusType.APPROVED.getValue().longValue(),
+                    ShareProductDividendStatusType.APPROVED.getCode(), "Dividend Approved");
+            case INITIATED -> data = new EnumOptionData(ShareProductDividendStatusType.INITIATED.getValue().longValue(),
+                    ShareProductDividendStatusType.INITIATED.getCode(), "Dividend Initiated");
 
         }
         return data;

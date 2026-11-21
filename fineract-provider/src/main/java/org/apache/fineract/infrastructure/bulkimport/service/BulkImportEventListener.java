@@ -23,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
+import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.contentstore.util.ContentPipe;
@@ -49,6 +51,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
 
     @Override
     public void onApplicationEvent(final BulkImportEvent event) {
+        Count count = null;
         try {
             ThreadLocalContextUtil.init(event.getContext());
 
@@ -80,7 +83,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
             };
 
-            final var count = importHandler.process(event.getWorkbook(), event.getLocale(), event.getDateFormat());
+            count = importHandler.process(event.getWorkbook(), event.getLocale(), event.getDateFormat());
 
             event.getImportDocument().update(DateUtils.getLocalDateTimeOfTenant(), count.getSuccessCount(), count.getErrorCount());
 
@@ -100,8 +103,27 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
             importRepository.saveAndFlush(event.getImportDocument());
         } catch (Exception e) {
             log.error("Bulk import error:", e);
+            recordFailedImport(event, count);
         } finally {
             ThreadLocalContextUtil.reset();
+        }
+    }
+
+    /**
+     * An import that stops early must still end as a finished document: without this it stays not completed with 0
+     * successes and 0 failures, and nothing tells the user it failed. Rows already counted keep their counts; when the
+     * handler never returned any (a file without the sheet it reads, for example), every record is a failure.
+     */
+    private void recordFailedImport(final BulkImportEvent event, final Count count) {
+        try {
+            ThreadLocalContextUtil.init(event.getContext());
+            final ImportDocument importDocument = event.getImportDocument();
+            final int successCount = count == null ? 0 : count.getSuccessCount();
+            final int failureCount = count == null ? importDocument.getTotalRecords() : count.getErrorCount();
+            importDocument.update(DateUtils.getLocalDateTimeOfTenant(), successCount, failureCount);
+            importRepository.saveAndFlush(importDocument);
+        } catch (Exception e) {
+            log.error("Could not record the failed bulk import:", e);
         }
     }
 }

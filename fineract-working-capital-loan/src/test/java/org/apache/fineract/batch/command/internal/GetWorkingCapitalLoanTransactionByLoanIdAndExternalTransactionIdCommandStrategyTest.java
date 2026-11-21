@@ -47,7 +47,7 @@ public class GetWorkingCapitalLoanTransactionByLoanIdAndExternalTransactionIdCom
     public void testExecuteSuccessScenarioWithoutQueryParams() {
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String transactionExternalId = UUID.randomUUID().toString();
         final BatchRequest request = getBatchRequest(loanId, transactionExternalId, null);
         final WorkingCapitalLoanTransactionData transactionData = WorkingCapitalLoanTransactionData.builder().id(1L).build();
@@ -73,7 +73,7 @@ public class GetWorkingCapitalLoanTransactionByLoanIdAndExternalTransactionIdCom
     public void testExecuteSuccessScenarioWithQueryParams() {
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String transactionExternalId = UUID.randomUUID().toString();
         final BatchRequest request = getBatchRequest(loanId, transactionExternalId, "fields=id");
         final WorkingCapitalLoanTransactionData transactionData = WorkingCapitalLoanTransactionData.builder().id(1L).build();
@@ -98,10 +98,10 @@ public class GetWorkingCapitalLoanTransactionByLoanIdAndExternalTransactionIdCom
         if (queryParams != null) {
             relativeUrl = relativeUrl + "?" + queryParams;
         }
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
         return br;
     }

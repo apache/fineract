@@ -96,10 +96,10 @@ public class ModifyLoanApplicationByExternalIdCommandStrategyTest {
             relativeUrl = relativeUrl + "?command=" + queryParameter;
         }
 
-        batchRequest.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        batchRequest.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         batchRequest.setRelativeUrl(relativeUrl);
         batchRequest.setMethod(HttpMethod.PUT);
-        batchRequest.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        batchRequest.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         batchRequest.setBody("{\"fraud\": \"true\"}");
         return batchRequest;
     }

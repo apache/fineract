@@ -48,7 +48,7 @@ public class GetWorkingCapitalLoanTransactionByExternalLoanIdAndTransactionIdCom
         final TestContext testContext = new TestContext();
 
         final String loanExternalId = UUID.randomUUID().toString();
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long transactionId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanExternalId, transactionId, null);
         final WorkingCapitalLoanTransactionData transactionData = WorkingCapitalLoanTransactionData.builder().id(transactionId).build();
         final String serializedResponse = "{\"id\":" + transactionId + "}";
@@ -74,7 +74,7 @@ public class GetWorkingCapitalLoanTransactionByExternalLoanIdAndTransactionIdCom
         final TestContext testContext = new TestContext();
 
         final String loanExternalId = UUID.randomUUID().toString();
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long transactionId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanExternalId, transactionId, "fields=id");
         final WorkingCapitalLoanTransactionData transactionData = WorkingCapitalLoanTransactionData.builder().id(transactionId).build();
         final String serializedResponse = "{\"id\":" + transactionId + "}";
@@ -98,10 +98,10 @@ public class GetWorkingCapitalLoanTransactionByExternalLoanIdAndTransactionIdCom
         if (queryParams != null) {
             relativeUrl = relativeUrl + "?" + queryParams;
         }
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
         return br;
     }

@@ -23,7 +23,7 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.jobs.service.SchedularWritePlatformService;
+import org.apache.fineract.infrastructure.jobs.service.SchedulerWritePlatformService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,11 +31,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UpdateJobDetailCommandhandler implements NewCommandSourceHandler {
 
-    private final SchedularWritePlatformService schedularWritePlatformService;
+    private final SchedulerWritePlatformService schedulerWritePlatformService;
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.schedularWritePlatformService.updateJobDetail(command.entityId(), command);
+        return this.schedulerWritePlatformService.updateJobDetail(command.entityId(), command);
     }
 
 }

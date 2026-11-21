@@ -49,8 +49,8 @@ public class AdjustChargeCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long loanChargeId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long loanChargeId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final String command = "adjustment";
         final BatchRequest request = getBatchRequest(loanId, loanChargeId, command);
         final String responseBody = "{\"loanId\":13,\"resourceId\":16,\"subResourceId\":26,\"changes\":{\"amount\":10.0,"
@@ -78,8 +78,8 @@ public class AdjustChargeCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long loanChargeId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long loanChargeId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, loanChargeId, null);
 
         // when
@@ -109,13 +109,13 @@ public class AdjustChargeCommandStrategyTest {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("loans/%s/charges/%s", loanId, transactionId);
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         if (StringUtils.isNotBlank(chargeCommand)) {
             br.setRelativeUrl(br.getRelativeUrl() + String.format("?command=%s", chargeCommand));
         }
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"amount\":7.00,\"locale\":\"en\"}");
 
         return br;

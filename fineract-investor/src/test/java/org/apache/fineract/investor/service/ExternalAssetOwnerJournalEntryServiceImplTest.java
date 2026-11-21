@@ -84,7 +84,7 @@ public class ExternalAssetOwnerJournalEntryServiceImplTest {
         JournalEntry journalEntry = journalEntry();
         ExternalAssetOwner owner = stubActiveOwner();
         stubTaggingData(LoanTransactionType.REPAYMENT);
-        when(excludedTransactionTypesService.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.REPAYMENT)).thenReturn(false);
+        when(excludedTransactionTypesService.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.REPAYMENT)).thenReturn(false);
 
         underTest.handleJournalEntryCreated(journalEntry);
 
@@ -99,7 +99,7 @@ public class ExternalAssetOwnerJournalEntryServiceImplTest {
         JournalEntry journalEntry = journalEntry();
         stubActiveOwner();
         stubTaggingData(LoanTransactionType.BUY_DOWN_FEE);
-        when(excludedTransactionTypesService.isExcluded(LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE)).thenReturn(true);
+        when(excludedTransactionTypesService.isExcluded(LOAN_ID, LOAN_PRODUCT_ID, LoanTransactionType.BUY_DOWN_FEE)).thenReturn(true);
 
         underTest.handleJournalEntryCreated(journalEntry);
 

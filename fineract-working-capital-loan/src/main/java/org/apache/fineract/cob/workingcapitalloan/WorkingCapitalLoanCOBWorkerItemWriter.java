@@ -18,22 +18,29 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
-import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.springframework.data.repository.CrudRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
+import org.springframework.batch.core.step.StepExecution;
 
-@Slf4j
 public class WorkingCapitalLoanCOBWorkerItemWriter extends AbstractWorkingCapitalLoanCOBWorkerItemWriter {
 
-    public WorkingCapitalLoanCOBWorkerItemWriter(LockingService loanLockingService, CrudRepository<WorkingCapitalLoan, Long> repository) {
-        super(loanLockingService, repository);
+    public WorkingCapitalLoanCOBWorkerItemWriter(COBBusinessStepService cobBusinessStepService,
+            WorkingCapitalLoanModelProcessingService modelProcessingService, LockingService loanLockingService,
+            WorkingCapitalLoanRepository repository) {
+        super(cobBusinessStepService, modelProcessingService, loanLockingService, repository);
+    }
+
+    @Override
+    public void beforeStep(StepExecution stepExecution) {
+        setExecutionContext(stepExecution.getExecutionContext());
+        setBusinessDate(stepExecution);
     }
 
     @Override
     protected LockOwner getLockOwner() {
         return LockOwner.LOAN_COB_CHUNK_PROCESSING;
     }
-
 }

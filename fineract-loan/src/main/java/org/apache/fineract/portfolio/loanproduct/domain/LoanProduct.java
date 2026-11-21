@@ -284,9 +284,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes, final LoanChargeOffBehaviour chargeOffBehaviour,
+            final boolean isInterestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
             final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType,
             final boolean enableBuyDownFee, final LoanBuyDownFeeCalculationType buyDownFeeCalculationType,
             final LoanBuyDownFeeStrategy buyDownFeeStrategy, final LoanBuyDownFeeIncomeType buyDownFeeIncomeType,
@@ -341,7 +341,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 graceOnInterestCharged, amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(),
                 daysInYearType.getValue(), isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment,
                 disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType,
-                fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
+                fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, supportedFeeRefundTypes, chargeOffBehaviour,
                 isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
                 capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType, installmentAmountInMultiplesOf,
                 enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType, merchantBuyDownFee,
@@ -687,15 +687,15 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 } else if (cycleVariation.getBorrowerCycleNumber() < cycleNumber
                         && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.GREATERTHAN)) {
                     switch (cycleVariation.getParamType()) {
-                        case PRINCIPAL:
+                        case PRINCIPAL -> {
                             if (principalCycleUsed < cycleVariation.getBorrowerCycleNumber()) {
                                 borrowerCycleVariations.put(LoanProductConstants.PRINCIPAL, cycleVariation.getDefaultValue());
                                 borrowerCycleVariations.put(LoanProductConstants.MIN_PRINCIPAL, cycleVariation.getMinValue());
                                 borrowerCycleVariations.put(LoanProductConstants.MAX_PRINCIPAL, cycleVariation.getMaxValue());
                                 principalCycleUsed = cycleVariation.getBorrowerCycleNumber();
                             }
-                        break;
-                        case INTERESTRATE:
+                        }
+                        case INTERESTRATE -> {
                             if (interestCycleUsed < cycleVariation.getBorrowerCycleNumber()) {
                                 borrowerCycleVariations.put(LoanProductConstants.INTEREST_RATE_PER_PERIOD,
                                         cycleVariation.getDefaultValue());
@@ -705,8 +705,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                                         cycleVariation.getMaxValue());
                                 interestCycleUsed = cycleVariation.getBorrowerCycleNumber();
                             }
-                        break;
-                        case REPAYMENT:
+                        }
+                        case REPAYMENT -> {
                             if (repaymentCycleUsed < cycleVariation.getBorrowerCycleNumber()) {
                                 borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD,
                                         cycleVariation.getDefaultValue());
@@ -714,9 +714,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                                 borrowerCycleVariations.put(LoanProductConstants.MAX_NUMBER_OF_REPAYMENTS, cycleVariation.getMaxValue());
                                 repaymentCycleUsed = cycleVariation.getBorrowerCycleNumber();
                             }
-                        break;
-                        default:
-                        break;
+                        }
+                        default -> {
+                        }
                     }
                 }
             }

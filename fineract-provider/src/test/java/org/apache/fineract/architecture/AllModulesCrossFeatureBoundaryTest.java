@@ -41,7 +41,7 @@ class AllModulesCrossFeatureBoundaryTest {
 
     private static final String BASE = "org.apache.fineract";
 
-    private static final Set<String> FOUNDATION_ARTIFACTS = Set.of("fineract-core", "fineract-command");
+    private static final Set<String> FOUNDATION_ARTIFACTS = Set.of("fineract-core", "fineract-command", "fineract-querydsl");
 
     private static final Pattern FINERACT_ARTIFACT = Pattern.compile("(?<=/)fineract-[a-z0-9-]+");
 

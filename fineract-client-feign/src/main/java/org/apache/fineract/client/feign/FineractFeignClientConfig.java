@@ -121,14 +121,11 @@ public final class FineractFeignClientConfig {
     }
 
     private Client createHttpClient() {
-        switch (clientType) {
-            case APACHE:
-                return createApacheHttpClient();
-            case OKHTTP:
-                return createOkHttpClient();
-            default:
-                throw new IllegalStateException("Unsupported HTTP client type: " + clientType);
-        }
+        return switch (clientType) {
+            case APACHE -> createApacheHttpClient();
+            case OKHTTP -> createOkHttpClient();
+            default -> throw new IllegalStateException("Unsupported HTTP client type: " + clientType);
+        };
     }
 
     private Client createApacheHttpClient() {

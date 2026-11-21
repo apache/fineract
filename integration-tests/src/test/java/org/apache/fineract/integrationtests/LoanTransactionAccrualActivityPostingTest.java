@@ -30,13 +30,13 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -1097,7 +1097,6 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
         final String disbursementDay2 = "02 February 2023";
         final String repaymentDate1 = "15 January 2023";
         final String repaymentPeriod1DueDate = "01 February 2023";
-        final String repaymentPeriod2DueDate = "01 March 2023";
         final String repaymentPeriod1CloseDate = "02 February 2023";
         final String repaymentPeriod2CloseDate = "02 March 2023";
         final String creationBusinessDay = "15 January 2023";
@@ -1539,7 +1538,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private void chargeFee(Long loanId, Double amount, String dueDate) {
         LOG.info("Charge FEE amount {} dueDate {}", amount, dueDate);
-        PostChargesResponse feeCharge = chargesHelper.createCharge(new ChargeRequest().penalty(false).amount(9.0)
+        ChargeCreateResponse feeCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(false).amount(9.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5)).chargeAppliesTo(1).locale("en")
@@ -1552,7 +1551,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private void chargePenalty(Long loanId, Double amount, String dueDate) {
         LOG.info("Charge PENALTY amount {} dueDate {}", amount, dueDate);
-        PostChargesResponse penaltyCharge = chargesHelper.createCharge(new ChargeRequest().penalty(true).amount(10.0)
+        ChargeCreateResponse penaltyCharge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(true).amount(10.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5)).chargeAppliesTo(1).locale("en")
@@ -1611,9 +1610,9 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .locale("en_GB").dateFormat("dd MMMM yyyy").expectedDisbursementDate(applicationDisbursementDate)
                 .submittedOnDate(applicationDisbursementDate).interestCalculationPeriodType(0).repaymentFrequencyType(0).repaymentEvery(30)
-                .principal(BigDecimal.valueOf(1000)).loanTermFrequency(120).loanTermFrequencyType(0)
-                .transactionProcessingStrategyCode(DEFAULT_STRATEGY).interestType(0).loanType("individual").numberOfRepayments(4)
-                .amortizationType(1).interestRatePerPeriod(BigDecimal.valueOf(2)).clientId(clientId).productId(loanProductID);
+                .principal(principal).loanTermFrequency(120).loanTermFrequencyType(0).transactionProcessingStrategyCode(DEFAULT_STRATEGY)
+                .interestType(0).loanType("individual").numberOfRepayments(4).amortizationType(1)
+                .interestRatePerPeriod(BigDecimal.valueOf(2)).clientId(clientId).productId(loanProductID);
         Long loanId = loanHelper.applyForLoan(loanRequest).getLoanId();
         LOG.info("Test Loan http://localhost:4200/#/clients/{}/loans-accounts/{}/transactions", clientId, loanId);
         return loanId;

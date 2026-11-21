@@ -116,8 +116,7 @@ public class FeignWorkingCapitalLoanReprocessJournalEntryTest extends FeignInteg
 
             // R1 on day 20 settles the 100 fee: DR fund source 100, CR fees receivable 100.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-20");
-            final Long r1Id = wcLoanHelper.makeRepayment(loanId,
-                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(100), "20 January 2026"));
+            wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(100), "20 January 2026"));
 
             // Backdated R2 on day 10 settles the fee first on replay, triggering the full reprocess. R2 is the newly
             // created transaction whose entries must be booked exactly once (not once by the write flow AND again by

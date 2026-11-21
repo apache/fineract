@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
@@ -57,6 +56,9 @@ public class LoanCOBWorkerConfiguration {
     @Autowired
     @Qualifier("requiresNewTransactionJdbcTemplate")
     private TransactionTemplate requiresNewTransactionJdbcTemplate;
+    @Autowired
+    @Qualifier("requiresNewTransactionTemplate")
+    private TransactionTemplate requiresNewTransactionTemplate;
     @Autowired
     private RemotePartitioningWorkerStepBuilderFactory stepBuilderFactory;
 
@@ -84,15 +86,15 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
-        final ChunkOrientedStepBuilder<Loan, Loan> stepBuilder = stepBuilderFactory.get("Loan COB worker - Step")
+        final ChunkOrientedStepBuilder<Long, Long> stepBuilder = stepBuilderFactory.get("Loan COB worker - Step")
                 .inputChannel(inboundRequests) //
-                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())) //
+                .<Long, Long>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())) //
                 .reader(cobWorkerItemReader()) //
-                .processor(cobWorkerItemProcessor()) //
+                // No processor: the business steps run in the writer, where a failure is recovered by scan mode
+                // (see AbstractCOBItemWriter). A retry would only run again inside the doomed chunk transaction.
                 .writer(cobWorkerItemWriter()) //
                 .faultTolerant() //
-                .retryPolicy(StepRetryPolicyFactory.immediateRetryPolicy(propertyService.getRetryLimit(LoanCOBConstant.JOB_NAME),
-                        Exception.class)) //
+                .retryPolicy(StepRetryPolicyFactory.noRetryPolicy()) //
                 .skip(Exception.class) //
                 .skipLimit(propertyService.getSkipLimit(LoanCOBConstant.JOB_NAME)) //
                 .listener(loanItemListener()) //
@@ -102,19 +104,16 @@ public class LoanCOBWorkerConfiguration {
         // No task executor is registered, deliberately and unconditionally.
         //
         // Batch 6's ChunkOrientedStep keeps the chunk transaction on the step thread and, when a task executor is
-        // present, submits the ITEMS of a chunk to it (ChunkOrientedStep.processChunkConcurrently). Item processing
-        // then runs with no transaction of its own, so COBBusinessStepService.run has to open one - which commits
-        // independently of the chunk write. A chunk-write rollback, a skip in scan mode or a step restart therefore
-        // leaves the business-step writes committed while the loan is not marked COB'd, and the next pass re-runs
-        // them over it.
+        // present, submits the ITEMS of a chunk to it (ChunkOrientedStep.processChunkConcurrently) for processing. The
+        // business steps run in the writer, on the step thread and inside the chunk transaction, so an executor would
+        // parallelise nothing but the pass-through processor. Should the business steps ever move back into a
+        // processor, an executor would run them with no transaction of their own, committing independently of the
+        // chunk write; a chunk-write rollback, a skip in scan mode or a step restart would then leave their writes
+        // committed while the loan is not marked COB'd, and the next pass would re-run them over it.
         //
-        // Leaving the executor unset keeps isConcurrent() false, so processing stays on the step thread and joins the
-        // chunk transaction exactly as it did under Batch 5. This is NOT configurable on purpose: the thread pool size
-        // reads like a throughput dial but decides transactional semantics, so it must not be reachable from
-        // configuration. Concurrency comes from partitioning instead - lower partition-size and add worker instances.
-        //
-        // Do not reintroduce a task executor until FINERACT-2621 establishes that every COB business step is
-        // idempotent under a second pass.
+        // This is NOT configurable on purpose: the thread pool size reads like a throughput dial but decides
+        // transactional semantics, so it must not be reachable from configuration. Concurrency comes from
+        // partitioning instead - lower partition-size and add worker instances.
 
         return stepBuilder.build();
     }
@@ -131,7 +130,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ChunkProcessingLoanItemListener loanItemListener() {
-        return new ChunkProcessingLoanItemListener(loanLockingService, requiresNewTransactionJdbcTemplate);
+        return new ChunkProcessingLoanItemListener(loanLockingService, requiresNewTransactionTemplate);
     }
 
     @Bean
@@ -147,18 +146,12 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemReader cobWorkerItemReader() {
-        return new LoanItemReader(loanRepository, new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
-    }
-
-    @Bean
-    @StepScope
-    public LoanItemProcessor cobWorkerItemProcessor() {
-        return new LoanItemProcessor(cobBusinessStepService, progressiveLoanModelProcessingService);
+        return new LoanItemReader(new BeforeStepLockingItemReaderHelper(retrieveIdService, loanLockingService));
     }
 
     @Bean
     @StepScope
     public LoanItemWriter cobWorkerItemWriter() {
-        return new LoanItemWriter(loanLockingService, loanRepository);
+        return new LoanItemWriter(cobBusinessStepService, progressiveLoanModelProcessingService, loanLockingService, loanRepository);
     }
 }

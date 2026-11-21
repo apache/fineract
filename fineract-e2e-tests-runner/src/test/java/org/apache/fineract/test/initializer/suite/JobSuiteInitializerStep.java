@@ -24,9 +24,9 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsResponse;
-import org.apache.fineract.client.models.PutJobsJobIDRequest;
+import org.apache.fineract.client.models.JobExecuteRequest;
+import org.apache.fineract.client.models.JobUpdateRequest;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -65,7 +65,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
 
         // Manually execute once immediately to publish any queued events from initialization
         log.debug("Manually executing '{}' job once to publish queued events...", SEND_ASYNCHRONOUS_EVENTS_JOB_NAME);
-        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), Map.of("command", "executeJob")));
+        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new JobExecuteRequest(), Map.of("command", "executeJob")));
 
         // Poll job history to confirm it ran
         log.debug("Polling job history to confirm initial execution...");
@@ -126,7 +126,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
                 .filter(r -> r.getDisplayName().equals(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME)).findAny()
                 .orElseThrow(() -> new IllegalStateException(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME + " is not found"));
         Long jobId = externalEventJobResponse.getJobId();
-        executeVoid(() -> fineractClient.schedulerJob().updateJobDetail(jobId, new PutJobsJobIDRequest().cronExpression(cronExpression)));
+        executeVoid(() -> fineractClient.schedulerJob().updateJobDetail(jobId, new JobUpdateRequest().cronExpression(cronExpression)));
         return jobId;
     }
 }

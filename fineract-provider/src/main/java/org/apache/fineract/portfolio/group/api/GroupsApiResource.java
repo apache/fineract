@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +29,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -51,6 +57,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -64,6 +71,7 @@ import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
+import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -86,8 +94,26 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
+import org.apache.fineract.portfolio.group.command.GroupActivateCommand;
+import org.apache.fineract.portfolio.group.command.GroupAssignStaffCommand;
+import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
+import org.apache.fineract.portfolio.group.command.GroupDeleteCommand;
+import org.apache.fineract.portfolio.group.command.GroupUnassignStaffCommand;
+import org.apache.fineract.portfolio.group.command.GroupUpdateCommand;
+import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
+import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffResponse;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupRolesReadPlatformService;
@@ -133,6 +159,9 @@ public class GroupsApiResource {
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final SqlValidator sqlValidator;
+    private final CommandDispatcher dispatcher;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @GET
     @Path("template")
@@ -291,8 +320,9 @@ public class GroupsApiResource {
                             .generateNextTenRecurringDates(collectionMeetingCalendar);
                     final MeetingData lastMeeting = meetingReadPlatformService
                             .retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
+                    final LocalDate lastMeetingDate = lastMeeting == null ? null : lastMeeting.getMeetingDate();
                     final LocalDate recentEligibleMeetingDate = calendarReadPlatformService
-                            .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
+                            .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeetingDate);
                     collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates,
                             nextTenRecurringDates, recentEligibleMeetingDate);
                 }
@@ -326,16 +356,10 @@ public class GroupsApiResource {
             + "Mandatory Fields: name, officeId, active, activationDate (if active=true)\n\n"
             + "Optional Fields: externalId, staffId, clientMembers")
     @AlternativeOperationId("create_8")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsResponse.class)))
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createGroup() //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    public GroupCreateResponse create(@RequestBody(required = true) @Valid GroupCreateRequest request) {
+        var command = new GroupCreateCommand();
+        command.setPayload(request);
+        return dispatcher.<GroupCreateRequest, GroupCreateResponse>dispatch(command).get();
     }
 
     @POST
@@ -347,16 +371,12 @@ public class GroupsApiResource {
     @AlternativeOperationId("unassignLoanOfficer")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class)))
-    public String unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .unassignGroupStaff(groupId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
-
+    public GroupUnassignStaffResponse unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
+            @Valid final GroupUnassignStaffRequest request) {
+        request.setGroupId(groupId);
+        final GroupUnassignStaffCommand command = new GroupUnassignStaffCommand();
+        command.setPayload(request);
+        return dispatcher.<GroupUnassignStaffRequest, GroupUnassignStaffResponse>dispatch(command).get();
     }
 
     @PUT
@@ -365,17 +385,12 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Group", operationId = "updateGroup", description = "Updates a Group")
     @AlternativeOperationId("update_13")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdResponse.class)))
-    public String update(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateGroup(groupId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    public GroupUpdateResponse update(@PathParam("groupId") final Long groupId,
+            @RequestBody(required = true) @Valid GroupUpdateRequest request) {
+        request.setGroupId(groupId);
+        var command = new GroupUpdateCommand();
+        command.setPayload(request);
+        return dispatcher.<GroupUpdateRequest, GroupUpdateResponse>dispatch(command).get();
     }
 
     @DELETE
@@ -383,14 +398,11 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Group", operationId = "deleteGroup", description = "A group can be deleted if it is in pending state and has no associations - clients, loans or savings")
     @AlternativeOperationId("delete_11")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.DeleteGroupsGroupIdResponse.class)))
-    public String delete(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteGroup(groupId) //
-                .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    public GroupDeleteResponse delete(@PathParam("groupId") final Long groupId) {
+        final GroupDeleteRequest request = GroupDeleteRequest.builder().groupId(groupId).build();
+        var command = new GroupDeleteCommand();
+        command.setPayload(request);
+        return dispatcher.<GroupDeleteRequest, GroupDeleteResponse>dispatch(command).get();
     }
 
     @POST
@@ -439,9 +451,30 @@ public class GroupsApiResource {
 
         CommandProcessingResult result = null;
         if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.activateGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
+            validateHasPermissionTo(new CommandWrapperBuilder().activateGroup(groupId).build());
+            final GroupActivateRequest request = parseAndValidate(apiRequestBodyAsJson, GroupActivateRequest.class);
+            request.setGroupId(groupId);
+            final GroupActivateCommand command = new GroupActivateCommand();
+            command.setPayload(request);
+            final GroupActivateResponse response = dispatcher.<GroupActivateRequest, GroupActivateResponse>dispatch(command).get();
+            return toApiJsonSerializer.serialize(response);
+        } else if (is(commandParam, "assignStaff")) {
+            validateHasPermissionTo(new CommandWrapperBuilder().assignGroupStaff(groupId).build());
+            final GroupAssignStaffRequest request = parseAndValidate(apiRequestBodyAsJson, GroupAssignStaffRequest.class);
+            request.setGroupId(groupId);
+            final GroupAssignStaffCommand command = new GroupAssignStaffCommand();
+            command.setPayload(request);
+            final GroupAssignStaffResponse response = dispatcher.<GroupAssignStaffRequest, GroupAssignStaffResponse>dispatch(command).get();
+            return toApiJsonSerializer.serialize(response);
+        } else if (is(commandParam, "unassignStaff")) {
+            validateHasPermissionTo(new CommandWrapperBuilder().unassignGroupStaff(groupId).build());
+            final GroupUnassignStaffRequest request = parseAndValidate(apiRequestBodyAsJson, GroupUnassignStaffRequest.class);
+            request.setGroupId(groupId);
+            final GroupUnassignStaffCommand command = new GroupUnassignStaffCommand();
+            command.setPayload(request);
+            final GroupUnassignStaffResponse response = dispatcher.<GroupUnassignStaffRequest, GroupUnassignStaffResponse>dispatch(command)
+                    .get();
+            return toApiJsonSerializer.serialize(response);
         } else if (is(commandParam, "associateClients")) {
             final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -458,14 +491,6 @@ public class GroupsApiResource {
             return toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
         } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveGroupCollectionSheet(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "unassignStaff")) {
-            final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "assignStaff")) {
-            final CommandWrapper commandRequest = builder.assignGroupStaff(groupId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "assignRole")) {
@@ -489,10 +514,34 @@ public class GroupsApiResource {
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
         } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
-                    "saveCollectionSheet", "unassignStaff", "assignRole", "unassignRole", "updateassignRole" });
+            throw new UnrecognizedQueryParamException("command", commandParam,
+                    new Object[] { "activate", "assignStaff", "unassignStaff", "associateClients", "disassociateClients",
+                            "generateCollectionSheet", "saveCollectionSheet", "assignRole", "unassignRole", "updateRole", "transferClients",
+                            "close" });
         }
+    }
 
+    // The ?command= actions dispatched through CommandDispatcher skip the legacy pipeline's permission check, and a
+    // SecurityConfig path matcher cannot tell them apart by query parameter, so the task permission is checked here.
+    private void validateHasPermissionTo(final CommandWrapper commandWrapper) {
+        context.authenticatedUser().validateHasPermissionTo(commandWrapper.getTaskPermissionName());
+    }
+
+    private <T> T parseAndValidate(final String apiRequestBodyAsJson, final Class<T> type) {
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) {
+            throw new InvalidJsonException();
+        }
+        final T request;
+        try {
+            request = objectMapper.readValue(apiRequestBodyAsJson, type);
+        } catch (final JsonProcessingException e) {
+            throw new InvalidJsonException(e);
+        }
+        final Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        return request;
     }
 
     private boolean is(final String commandParam, final String commandValue) {

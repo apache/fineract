@@ -31,7 +31,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +49,7 @@ class StandingInstructionItemReaderTest {
     private static final int PAGE_SIZE = 2;
 
     @Mock
-    private StandingInstructionReadPlatformService readService;
+    private StandingInstructionReadService readService;
 
     private StandingInstructionItemReader reader;
 

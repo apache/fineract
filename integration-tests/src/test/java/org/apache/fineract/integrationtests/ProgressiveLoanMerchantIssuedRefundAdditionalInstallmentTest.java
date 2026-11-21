@@ -27,9 +27,9 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -78,7 +78,7 @@ public class ProgressiveLoanMerchantIssuedRefundAdditionalInstallmentTest extend
             long loanId = createdLoanId.get();
 
             // A specified due date charge after maturity appends an additional installment carrying only the charge
-            PostChargesResponse charge = createCharge(25.0, CURRENCY);
+            ChargeCreateResponse charge = createCharge(25.0, CURRENCY);
             addLoanCharge(loanId, charge.getResourceId(), "01 July 2021", 25.0);
 
             assertEquals(LocalDate.of(2021, 7, 1), lastPeriodDueDate(loanId),

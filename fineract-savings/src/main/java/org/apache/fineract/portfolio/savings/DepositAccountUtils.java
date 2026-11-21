@@ -40,26 +40,15 @@ public final class DepositAccountUtils {
         LocalDate nextDepositDate = lastDepositDate;
 
         switch (frequency) {
-            case DAYS:
-                nextDepositDate = lastDepositDate.plusDays(recurringEvery);
-            break;
-            case WEEKS:
-                nextDepositDate = lastDepositDate.plusWeeks(recurringEvery);
-            break;
-            case MONTHS:
-                nextDepositDate = lastDepositDate.plusMonths(recurringEvery);
-            break;
-            case YEARS:
-                nextDepositDate = lastDepositDate.plusYears(recurringEvery);
-            break;
-            case INVALID:
+            case DAYS -> nextDepositDate = lastDepositDate.plusDays(recurringEvery);
+            case WEEKS -> nextDepositDate = lastDepositDate.plusWeeks(recurringEvery);
+            case MONTHS -> nextDepositDate = lastDepositDate.plusMonths(recurringEvery);
+            case YEARS -> nextDepositDate = lastDepositDate.plusYears(recurringEvery);
+            case INVALID, SEMI_MONTHLY -> {
                 // SEMI_MONTHLY is a loan repayment frequency and is never offered as a deposit recurrence, so the
                 // deposit date is left where it was, just like an unset frequency leaves it.
-            case SEMI_MONTHLY:
-            break;
-            case WHOLE_TERM:
-                LOG.error("TODO Implement calculateNextDepositDate for WHOLE_TERM");
-            break;
+            }
+            case WHOLE_TERM -> LOG.error("TODO Implement calculateNextDepositDate for WHOLE_TERM");
         }
         return nextDepositDate;
     }

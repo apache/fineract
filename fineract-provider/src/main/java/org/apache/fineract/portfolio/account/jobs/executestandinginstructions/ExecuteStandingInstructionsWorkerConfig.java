@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.account.data.DueStandingInstruction;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.service.StandingInstructionExecutionService;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.Step;
@@ -59,7 +59,7 @@ public class ExecuteStandingInstructionsWorkerConfig {
     @Autowired
     private PropertyService propertyService;
     @Autowired
-    private StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private StandingInstructionReadService standingInstructionReadService;
     @Autowired
     private StandingInstructionExecutionService standingInstructionExecutionService;
     @Autowired
@@ -99,13 +99,13 @@ public class ExecuteStandingInstructionsWorkerConfig {
     @StepScope
     public StandingInstructionItemReader standingInstructionItemReader() {
         return new StandingInstructionItemReader(propertyService.getChunkSize(ExecuteStandingInstructionsConstant.JOB_NAME),
-                standingInstructionReadPlatformService);
+                standingInstructionReadService);
     }
 
     @Bean
     @StepScope
     public StandingInstructionItemProcessor standingInstructionItemProcessor() {
-        return new StandingInstructionItemProcessor(standingInstructionReadPlatformService);
+        return new StandingInstructionItemProcessor(standingInstructionReadService);
     }
 
     @Bean

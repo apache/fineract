@@ -329,6 +329,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.ACCRUAL_ACTIVITY.getCode(), "Accrual Activity");
             case INTEREST_REFUND -> new LoanTransactionEnumData(LoanTransactionType.INTEREST_REFUND.getValue().longValue(),
                     LoanTransactionType.INTEREST_REFUND.getCode(), "Interest Refund");
+            case FEE_REFUND -> new LoanTransactionEnumData(LoanTransactionType.FEE_REFUND.getValue().longValue(),
+                    LoanTransactionType.FEE_REFUND.getCode(), "Fee Refund");
             case ACCRUAL_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ADJUSTMENT.getValue().longValue(),
                     LoanTransactionType.ACCRUAL_ADJUSTMENT.getCode(), "Accrual Adjustment");
             case CAPITALIZED_INCOME -> new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME.getValue().longValue(),
@@ -571,16 +573,14 @@ public final class LoanEnumerations {
     public static EnumOptionData preCloseInterestCalculationStrategy(final LoanPreCloseInterestCalculationStrategy type) {
         EnumOptionData optionData = null;
         switch (type) {
-            case TILL_PRE_CLOSURE_DATE:
+            case TILL_PRE_CLOSURE_DATE ->
                 optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue().longValue(),
                         LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getCode(), "Till Pre-Close Date");
-            break;
-            case TILL_REST_FREQUENCY_DATE:
+            case TILL_REST_FREQUENCY_DATE ->
                 optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue().longValue(),
                         LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getCode(), "Till Rest Frequency Date");
-            break;
-            case NONE:
-            break;
+            case NONE -> {
+            }
         }
         return optionData;
     }

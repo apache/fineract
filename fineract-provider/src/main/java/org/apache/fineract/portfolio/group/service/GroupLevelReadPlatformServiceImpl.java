@@ -46,7 +46,7 @@ public class GroupLevelReadPlatformServiceImpl implements GroupLevelReadPlatform
 
     private static final class GroupLevelDataMapper implements RowMapper<GroupLevelData> {
 
-        public String groupLevelSchema() {
+        private String groupLevelSchema() {
             return "gl.id as id, gl.level_name as levelName , gl.parent_id as parentLevelId , pgl.level_name as parentName , "
                     + "cgl.id as childLevelId,cgl.level_name as childLevelName,gl.super_parent as superParent ,"
                     + " gl.recursable as recursable , gl.can_have_clients as canHaveClients from m_group_level gl "

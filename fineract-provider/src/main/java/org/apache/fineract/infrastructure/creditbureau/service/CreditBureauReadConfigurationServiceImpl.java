@@ -45,7 +45,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
 
     private static final class CbConfigMapper implements RowMapper<CreditBureauConfigurationData> {
 
-        public String schema() {
+        private String schema() {
 
             return "cbconfig.id as configId,cbconfig.configkey,cbconfig.value as configValue,"
                     + "cbconfig.organisation_creditbureau_id as orgCBId,cbconfig.description as description from m_creditbureau_configuration cbconfig ";

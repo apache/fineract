@@ -36,6 +36,7 @@ import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlat
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -45,7 +46,6 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
-import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
+import org.apache.fineract.portfolio.savings.service.DepositAccountInterestCalculationService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountActivationService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -74,9 +75,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final SavingsAccountActivationService savingsAccountActivationService;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final AccountNumberGenerator accountNumberGenerator;
+    private final AccountNumberGeneratorService accountNumberGenerator;
     private final DepositAccountAssembler depositAccountAssembler;
     private final SavingsAccountDomainService savingsAccountDomainService;
+    private final DepositAccountInterestCalculationService depositAccountInterestCalculationService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
@@ -134,8 +136,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.savingsAccountRepository.saveAndFlush(account);
         }
         account.handleScheduleInstallments(deposit);
-        account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.updateMaturityDateAndAmount(account, mc, isPreMatureClosure,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         account.updateOverduePayments(DateUtils.getBusinessLocalDate());
         if (isAnyActivationChargesDue) {
             postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
@@ -204,15 +206,15 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
         }
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.postMaturityInterest(account, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth);
         account.setClosedOnDate(closedDate);
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             ExternalId externalId = this.externalIdFactory.create();
             FixedDepositAccount reinvestedDeposit = account.reInvest(account.getAccountBalance(), externalId);
-            this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
-            reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmountBeforeAccountActivation(reinvestedDeposit, mc,
+                    isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             this.savingsAccountRepository.saveAndFlush(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
@@ -226,8 +228,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final boolean isExceptionForBalanceCheck = false;
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
-                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null,
-                    toSavingsAccount, account, isAccountTransfer, isExceptionForBalanceCheck);
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, toSavingsAccount,
+                    account, isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
             postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
@@ -270,7 +272,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
         }
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.postMaturityInterest(account, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth);
         account.setClosedOnDate(closedDate);
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
@@ -283,9 +286,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             ExternalId externalId = this.externalIdFactory.create();
 
             FixedDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount, externalId);
-            this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
-            reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmountBeforeAccountActivation(reinvestedDeposit, mc,
+                    isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
 
             this.savingsAccountRepository.saveAndFlush(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
@@ -307,8 +309,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final boolean isExceptionForBalanceCheck = false;
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, null, fmt, null, null,
-                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null,
-                    toSavingsAccount, account, isAccountTransfer, isExceptionForBalanceCheck);
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, toSavingsAccount,
+                    account, isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
             account.updateClosedStatus();
@@ -357,7 +359,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
         }
-        account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, closedDate, postReversals);
+        this.depositAccountInterestCalculationService.postMaturityInterest(account, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth, closedDate, postReversals);
         final BigDecimal transactionAmount = account.getAccountBalance();
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
@@ -368,7 +371,6 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 reInvestAmount = account.getAccountBalance();
             }
             RecurringDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount);
-            depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             this.savingsAccountRepository.save(reinvestedDeposit);
             final CalendarInstance calendarInstance = getCalendarInstance(account, reinvestedDeposit);
             this.calendarInstanceRepository.save(calendarInstance);
@@ -379,8 +381,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             frequency = frequency == -1 ? 1 : frequency;
             reinvestedDeposit.generateSchedule(frequencyType, frequency, calendar);
             reinvestedDeposit.processAccountUponActivation(fmt, postReversals, relaxingDaysConfigForPivotDate);
-            reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+            this.depositAccountInterestCalculationService.updateMaturityDateAndAmount(reinvestedDeposit, mc, isPreMatureClosure,
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
 
@@ -396,8 +398,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final boolean isExceptionForBalanceCheck = false;
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, transactionAmount,
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
-                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null,
-                    toSavingsAccount, account, isRegularTransaction, isExceptionForBalanceCheck);
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, toSavingsAccount,
+                    account, isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
@@ -407,6 +409,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.close(user, command, changes);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
 
         this.savingsAccountRepository.save(account);
 
@@ -443,7 +447,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     private void autoGenerateAccountNumber(final SavingsAccount account) {
         if (account.isAccountNumberRequiresAutoGeneration()) {
             final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
-            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
+            account.updateAccountNo(this.accountNumberGenerator.generate(EntityAccountType.SAVINGS, account, accountNumberFormat));
         }
     }
 
@@ -470,8 +474,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         Long savingsTransactionId = null;
 
         // post interest
-        account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+        this.depositAccountInterestCalculationService.postPreMaturityInterest(account, closedDate, isPreMatureClosure,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
 
         final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
         DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
@@ -484,8 +488,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     DepositAccountType.SAVINGS_DEPOSIT);
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
-                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null,
-                    toSavingsAccount, account, isRegularTransaction, isExceptionForBalanceCheck);
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, toSavingsAccount,
+                    account, isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
@@ -495,6 +499,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.prematureClosure(user, command, changes);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
 
         this.savingsAccountRepository.save(account);
 
@@ -526,8 +532,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         Long savingsTransactionId = null;
         // post interest
-        account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postReversals);
+        this.depositAccountInterestCalculationService.postPreMaturityInterest(account, closedDate, isPreMatureClosure,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postReversals);
 
         final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
         DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
@@ -540,8 +546,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     DepositAccountType.SAVINGS_DEPOSIT);
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
-                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, ExternalId.empty(), null,
-                    toSavingsAccount, account, isRegularTransaction, isExceptionForBalanceCheck);
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, ExternalId.empty(), null, toSavingsAccount,
+                    account, isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
@@ -551,6 +557,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.prematureClosure(user, command, changes);
+        account.updateSavingsAccountSummary(
+                SavingsAccountTransactionSummaryWrapper.calculateSummaryTotals(account.getCurrency(), account.getTransactions()));
         this.savingsAccountRepository.save(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         return savingsTransactionId;

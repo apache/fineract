@@ -51,7 +51,7 @@ public class GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, null);
         final List<WorkingCapitalLoanBreachScheduleData> breachScheduleData = List
                 .of(new WorkingCapitalLoanBreachScheduleData(1L, loanId, 1, null, null, null, null, null, null, false, false, false));
@@ -83,7 +83,7 @@ public class GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId, "fields=id");
         final List<WorkingCapitalLoanBreachScheduleData> breachScheduleData = List
                 .of(new WorkingCapitalLoanBreachScheduleData(1L, loanId, 1, null, null, null, null, null, null, false, false, false));
@@ -117,10 +117,10 @@ public class GetWorkingCapitalLoanBreachScheduleByLoanIdCommandStrategyTest {
         if (queryParams != null) {
             relativeUrl = relativeUrl + "?" + queryParams;
         }
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
         return br;
     }

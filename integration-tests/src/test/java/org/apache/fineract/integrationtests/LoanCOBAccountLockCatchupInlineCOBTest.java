@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -194,7 +194,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest extends FeignLoanTestBase {
         // create client
         Long clientId = createClient();
 
-        ChargeRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
+        ChargeCreateRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
                 .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue());
         Long overdueFeeChargeId = chargesHelper.createCharge(overdueFeeCharge).getResourceId();
 

@@ -401,7 +401,7 @@ public class SearchReadServiceImpl implements SearchReadService {
 
         // TODO- build the query dynamically based on selected entity types, for
         // now adding query for only loan entity.
-        public String schema(final AdHocQuerySearchConditions searchConditions, final MapSqlParameterSource params) {
+        private String schema(final AdHocQuerySearchConditions searchConditions, final MapSqlParameterSource params) {
 
             final StringBuilder sql = new StringBuilder();
             sql.append(

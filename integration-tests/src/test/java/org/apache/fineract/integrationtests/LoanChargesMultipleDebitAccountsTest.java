@@ -30,9 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -86,9 +86,9 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(loanProductId);
 
             // Create charges with different amounts to test aggregation
-            PostChargesResponse charge1 = createCharge(100.0);
-            PostChargesResponse charge2 = createCharge(200.0);
-            PostChargesResponse charge3 = createCharge(150.0);
+            ChargeCreateResponse charge1 = createCharge(100.0);
+            ChargeCreateResponse charge2 = createCharge(200.0);
+            ChargeCreateResponse charge3 = createCharge(150.0);
             assertNotNull(charge1);
             assertNotNull(charge2);
             assertNotNull(charge3);
@@ -149,9 +149,9 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             Long loanProductId = createLoanProduct(loanProduct);
 
             // Create multiple charges that would map to same GL account type
-            PostChargesResponse charge1 = createCharge(75.0);
-            PostChargesResponse charge2 = createCharge(125.0);
-            PostChargesResponse charge3 = createCharge(50.0);
+            ChargeCreateResponse charge1 = createCharge(75.0);
+            ChargeCreateResponse charge2 = createCharge(125.0);
+            ChargeCreateResponse charge3 = createCharge(50.0);
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "15 January 2023", 5000.0, 2);
@@ -186,7 +186,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             PostLoanProductsRequest loanProduct = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             Long loanProductId = createLoanProduct(loanProduct);
 
-            PostChargesResponse charge = createCharge(300.0);
+            ChargeCreateResponse charge = createCharge(300.0);
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "10 January 2023", 8000.0, 3);
@@ -214,7 +214,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             PostLoanProductsRequest loanProduct = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             Long loanProductId = createLoanProduct(loanProduct);
 
-            PostChargesResponse charge = createCharge(500.0);
+            ChargeCreateResponse charge = createCharge(500.0);
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "20 January 2023", 12000.0, 4);
@@ -244,9 +244,9 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create three different charges to test individual GL account mapping
-            PostChargesResponse processingFeeCharge = createCharge(250.0);
-            PostChargesResponse penaltyCharge = createCharge(175.0);
-            PostChargesResponse documentationFeeCharge = createCharge(325.0);
+            ChargeCreateResponse processingFeeCharge = createCharge(250.0);
+            ChargeCreateResponse penaltyCharge = createCharge(175.0);
+            ChargeCreateResponse documentationFeeCharge = createCharge(325.0);
             assertNotNull(processingFeeCharge, "Processing fee charge should be created");
             assertNotNull(penaltyCharge, "Penalty charge should be created");
             assertNotNull(documentationFeeCharge, "Documentation fee charge should be created");
@@ -307,9 +307,9 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             Long loanProductId = createLoanProduct(loanProduct);
 
             // Create charges with specific amounts to test proportional distribution
-            PostChargesResponse charge1 = createCharge(400.0); // 40% of 1000
-            PostChargesResponse charge2 = createCharge(300.0); // 30% of 1000
-            PostChargesResponse charge3 = createCharge(300.0); // 30% of 1000
+            ChargeCreateResponse charge1 = createCharge(400.0); // 40% of 1000
+            ChargeCreateResponse charge2 = createCharge(300.0); // 30% of 1000
+            ChargeCreateResponse charge3 = createCharge(300.0); // 30% of 1000
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "10 February 2023", 20000.0, 6);
@@ -354,7 +354,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             PostLoanProductsRequest loanProduct = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             Long loanProductId = createLoanProduct(loanProduct);
 
-            PostChargesResponse charge = createCharge(500.0);
+            ChargeCreateResponse charge = createCharge(500.0);
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "15 February 2023", 10000.0, 3);
@@ -390,7 +390,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             PostLoanProductsRequest loanProduct = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             Long loanProductId = createLoanProduct(loanProduct);
 
-            PostChargesResponse charge = createCharge(300.0);
+            ChargeCreateResponse charge = createCharge(300.0);
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "20 February 2023", 8000.0, 2);
@@ -426,8 +426,8 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             Long loanProductId = createLoanProduct(loanProduct);
 
             // Create charges - use minimum valid amounts instead of zero
-            PostChargesResponse regularCharge = createCharge(200.0);
-            PostChargesResponse smallCharge = createCharge(0.01); // Minimum valid amount instead of zero
+            ChargeCreateResponse regularCharge = createCharge(200.0);
+            ChargeCreateResponse smallCharge = createCharge(0.01); // Minimum valid amount instead of zero
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "25 February 2023", 5000.0, 2);
@@ -462,9 +462,9 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             Long loanProductId = createLoanProduct(loanProduct);
 
             // Create different types of charges
-            PostChargesResponse flatFeeCharge = createCharge(150.0);
-            PostChargesResponse percentageCharge = createCharge(200.0);
-            PostChargesResponse penaltyCharge = createCharge(100.0);
+            ChargeCreateResponse flatFeeCharge = createCharge(150.0);
+            ChargeCreateResponse percentageCharge = createCharge(200.0);
+            ChargeCreateResponse penaltyCharge = createCharge(100.0);
 
             Long clientId = createClient();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "05 March 2023", 18000.0, 5);
@@ -512,8 +512,8 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create multiple charges with different IDs to test charge-specific GL account mapping
-            PostChargesResponse primaryCharge = createCharge(250.0);
-            PostChargesResponse secondaryCharge = createCharge(350.0);
+            ChargeCreateResponse primaryCharge = createCharge(250.0);
+            ChargeCreateResponse secondaryCharge = createCharge(350.0);
             assertNotNull(primaryCharge, "Primary charge should be created");
             assertNotNull(secondaryCharge, "Secondary charge should be created");
 
@@ -573,7 +573,7 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create charge that will test advanced accounting rules override
-            PostChargesResponse feeCharge = createCharge(400.0);
+            ChargeCreateResponse feeCharge = createCharge(400.0);
             assertNotNull(feeCharge, "Fee charge should be created");
 
             Long clientId = createClient();
@@ -645,8 +645,8 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create charges that will be removed to test accrual adjustment
-            PostChargesResponse feeCharge = createCharge(300.0);
-            PostChargesResponse penaltyCharge = createCharge(200.0);
+            ChargeCreateResponse feeCharge = createCharge(300.0);
+            ChargeCreateResponse penaltyCharge = createCharge(200.0);
             assertNotNull(feeCharge, "Fee charge should be created");
             assertNotNull(penaltyCharge, "Penalty charge should be created");
 
@@ -683,13 +683,6 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(postRemovalJournalEntries, "Journal entries should exist after charge removal and COB");
             assertNotNull(postRemovalJournalEntries.getPageItems(), "Journal entry items should exist");
 
-            // Validate that accrual adjustment entries were created
-            List<JournalEntryTransactionItem> accrualAdjustmentEntries = postRemovalJournalEntries.getPageItems().stream().filter(entry -> {
-                // Look for reversal entries that might indicate accrual adjustments
-                String transactionDetails = entry.getTransactionDetails() != null ? entry.getTransactionDetails().toString() : "";
-                return transactionDetails.contains("waive") || transactionDetails.contains("adjust");
-            }).toList();
-
             // Validate that charge removal processing uses correct GL accounts
             Map<Long, List<JournalEntryTransactionItem>> entriesByGLAccount = postRemovalJournalEntries.getPageItems().stream()
                     .collect(Collectors.groupingBy(entry -> entry.getGlAccountId()));
@@ -725,9 +718,9 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create multiple charges that could use different debit GL accounts
-            PostChargesResponse processingFeeCharge = createCharge(500.0);
-            PostChargesResponse serviceFeeCharge = createCharge(300.0);
-            PostChargesResponse lateFeeCharge = createCharge(150.0);
+            ChargeCreateResponse processingFeeCharge = createCharge(500.0);
+            ChargeCreateResponse serviceFeeCharge = createCharge(300.0);
+            ChargeCreateResponse lateFeeCharge = createCharge(150.0);
             assertNotNull(processingFeeCharge, "Processing fee charge should be created");
             assertNotNull(serviceFeeCharge, "Service fee charge should be created");
             assertNotNull(lateFeeCharge, "Late fee charge should be created");
@@ -765,13 +758,6 @@ public class LoanChargesMultipleDebitAccountsTest extends FeignLoanTestBase {
                     .collect(Collectors.groupingBy(entry -> entry.getGlAccountId()));
 
             assertTrue(debitEntriesByGLAccount.size() > 0, "Should have debit entries for multiple GL accounts");
-
-            // Test that charge ID resolution works correctly for multiple debit accounts
-            List<JournalEntryTransactionItem> chargeRelatedEntries = journalEntries.getPageItems().stream().filter(entry -> {
-                BigDecimal amount = BigDecimal.valueOf(entry.getAmount());
-                return amount.compareTo(BigDecimal.valueOf(500)) == 0 || amount.compareTo(BigDecimal.valueOf(300)) == 0
-                        || amount.compareTo(BigDecimal.valueOf(150)) == 0;
-            }).toList();
 
             // Note: Charge amounts might be aggregated or combined with other transactions
             // The key test is that GL account resolution works correctly

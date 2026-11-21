@@ -178,7 +178,6 @@ public class LoanProductTestBuilder {
     private boolean interestRecognitionOnDisbursementDate = false;
     private Boolean enableBuyDownFee = false;
     private Boolean merchantBuyDownFee = false;
-    private String buyDownFeeCalculationType;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -1191,7 +1190,6 @@ public class LoanProductTestBuilder {
         private final Long chargeOffExpenseAccountId;
         private final Long chargeOffFraudExpenseAccountId;
         private final Long incomeFromChargeOffPenaltyAccountId;
-        private final Long accountingRule;
 
         public Map<String, String> toMap() {
             Map<String, String> map = new HashMap<>();
@@ -1272,11 +1270,6 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withMerchantBuyDownFee(final Boolean merchantBuyDownFee) {
         this.merchantBuyDownFee = merchantBuyDownFee;
-        return this;
-    }
-
-    public LoanProductTestBuilder withBuyDownFeeCalculationType(final String buyDownFeeCalculationType) {
-        this.buyDownFeeCalculationType = buyDownFeeCalculationType;
         return this;
     }
 }

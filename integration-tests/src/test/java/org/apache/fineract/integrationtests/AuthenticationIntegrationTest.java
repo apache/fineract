@@ -72,7 +72,7 @@ public class AuthenticationIntegrationTest extends FeignLoanTestBase {
 
     @Test
     public void shouldAllowAccessForAuthenticatedUser() {
-        ApiResponse<PostLoansLoanIdResponse> response = ok(() -> fineractClient().loans().stateTransitionsWithHttpInfo(loanID,
+        ApiResponse<PostLoansLoanIdResponse> response = ok(() -> fineractClient().loans().handleCommandsLoanWithHttpInfo(loanID,
                 createLoanApprovalRequest(), APPROVE_COMMAND, Map.of()));
 
         assertEquals(200, response.getStatusCode());
@@ -82,7 +82,7 @@ public class AuthenticationIntegrationTest extends FeignLoanTestBase {
     @Test
     public void shouldReturnUnauthorizedForUnauthenticatedAccess() throws JsonProcessingException {
         FeignException.Unauthorized exception = assertThrows(FeignException.Unauthorized.class,
-                () -> fineractClient().loans().stateTransitions(loanID, createLoanApprovalRequest(), APPROVE_COMMAND, NO_CREDENTIALS));
+                () -> fineractClient().loans().handleCommandsLoan(loanID, createLoanApprovalRequest(), APPROVE_COMMAND, NO_CREDENTIALS));
 
         Map<String, Object> response = new ObjectMapper().readValue(exception.contentUTF8(), new TypeReference<>() {});
 

@@ -53,39 +53,17 @@ public enum LoanTermVariationType {
 
         LoanTermVariationType enumeration = LoanTermVariationType.INVALID;
         switch (value) {
-            case 1:
-                enumeration = LoanTermVariationType.EMI_AMOUNT;
-            break;
-            case 2:
-                enumeration = LoanTermVariationType.INTEREST_RATE;
-            break;
-            case 3:
-                enumeration = LoanTermVariationType.PRINCIPAL_AMOUNT;
-            break;
-            case 4:
-                enumeration = LoanTermVariationType.DUE_DATE;
-            break;
-            case 5:
-                enumeration = LoanTermVariationType.INSERT_INSTALLMENT;
-            break;
-            case 6:
-                enumeration = LoanTermVariationType.DELETE_INSTALLMENT;
-            break;
-            case 7:
-                enumeration = LoanTermVariationType.GRACE_ON_INTEREST;
-            break;
-            case 8:
-                enumeration = LoanTermVariationType.GRACE_ON_PRINCIPAL;
-            break;
-            case 9:
-                enumeration = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD;
-            break;
-            case 10:
-                enumeration = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT;
-            break;
-            case 11:
-                enumeration = LoanTermVariationType.INTEREST_PAUSE;
-            break;
+            case 1 -> enumeration = LoanTermVariationType.EMI_AMOUNT;
+            case 2 -> enumeration = LoanTermVariationType.INTEREST_RATE;
+            case 3 -> enumeration = LoanTermVariationType.PRINCIPAL_AMOUNT;
+            case 4 -> enumeration = LoanTermVariationType.DUE_DATE;
+            case 5 -> enumeration = LoanTermVariationType.INSERT_INSTALLMENT;
+            case 6 -> enumeration = LoanTermVariationType.DELETE_INSTALLMENT;
+            case 7 -> enumeration = LoanTermVariationType.GRACE_ON_INTEREST;
+            case 8 -> enumeration = LoanTermVariationType.GRACE_ON_PRINCIPAL;
+            case 9 -> enumeration = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD;
+            case 10 -> enumeration = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT;
+            case 11 -> enumeration = LoanTermVariationType.INTEREST_PAUSE;
         }
         return enumeration;
     }

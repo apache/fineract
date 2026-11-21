@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -37,9 +38,13 @@ import org.apache.fineract.portfolio.savings.domain.interest.SavingsAccountTrans
 /**
  * Builds the interest posting periods of a savings account and calculates the interest earned in each of them, from the
  * account's end of day balances. It doesn't change the account: the caller recalculates the daily balances before and
- * updates the account summary after.
+ * updates the account summary after. The {@link SavingsHelper} is injected here because the entity no longer carries
+ * it.
  */
+@RequiredArgsConstructor
 public class SavingsAccountInterestCalculator {
+
+    private final SavingsHelper savingsHelper;
 
     public List<PostingPeriod> calculatePostingPeriods(final SavingsAccount account, final MathContext mc,
             final LocalDate upToInterestCalculationDate, final boolean isInterestTransfer,
@@ -73,7 +78,7 @@ public class SavingsAccountInterestCalculator {
         if (postInterestOnDate != null) {
             postedAsOnDates.add(postInterestOnDate);
         }
-        final List<LocalDateInterval> postingPeriodIntervals = account.savingsHelper.determineInterestPostingPeriods(
+        final List<LocalDateInterval> postingPeriodIntervals = SavingsInterestCalculationUtil.determineInterestPostingPeriods(
                 account.getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType, financialYearBeginningMonth,
                 postedAsOnDates);
 
@@ -101,7 +106,7 @@ public class SavingsAccountInterestCalculator {
                 .fromInt(account.getInterestCalculationType());
         final BigDecimal interestRateAsFraction = account.getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
         final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(account, mc);
-        final Collection<Long> interestPostTransactions = account.savingsHelper.fetchPostInterestTransactionIds(account.getId());
+        final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(account.getId());
         final Money minBalanceForInterestCalculation = Money.of(currency, account.minBalanceForInterestCalculation());
         final Money minOverdraftForInterestCalculation = Money.of(currency, account.getMinOverdraftForInterestCalculation());
 
@@ -134,7 +139,7 @@ public class SavingsAccountInterestCalculator {
             allPostingPeriods.add(postingPeriod);
         }
 
-        account.savingsHelper.calculateInterestForAllPostingPeriods(currency, allPostingPeriods, account.getLockedInUntilDate(),
+        SavingsInterestCalculationUtil.calculateInterestForAllPostingPeriods(currency, allPostingPeriods, account.getLockedInUntilDate(),
                 account.isTransferInterestToOtherAccount());
 
         return allPostingPeriods;

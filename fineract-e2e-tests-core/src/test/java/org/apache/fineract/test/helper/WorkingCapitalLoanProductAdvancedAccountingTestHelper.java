@@ -30,12 +30,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsTemplateResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
@@ -209,11 +209,11 @@ public final class WorkingCapitalLoanProductAdvancedAccountingTestHelper {
 
     private static Long createChargeForAdvancedMappings(final FineractFeignClient fineractFeignClient, final boolean penalty,
             final double amount) {
-        final ChargeRequest request = new ChargeRequest().active(true).name(Utils.randomStringGenerator("WCLP_ADV_CHARGE_", 8))
+        final ChargeCreateRequest request = new ChargeCreateRequest().active(true).name(Utils.randomStringGenerator("WCLP_ADV_CHARGE_", 8))
                 .chargeAppliesTo(1).chargeCalculationType(ChargeCalculationType.FLAT.value)
                 .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.value).chargePaymentMode(ChargePaymentMode.REGULAR.value).penalty(penalty)
                 .amount(amount).currencyCode("USD").locale("en");
-        final PostChargesResponse response = ok(() -> fineractFeignClient.charges().createCharge(request));
+        final ChargeCreateResponse response = ok(() -> fineractFeignClient.charges().createCharge(request));
         return response.getResourceId();
     }
 

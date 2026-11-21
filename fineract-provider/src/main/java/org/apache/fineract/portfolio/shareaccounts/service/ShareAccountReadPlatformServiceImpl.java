@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.exceptions.ShareAccountNotFoundException;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.charge.util.ConvertChargeDataToSpecificChargeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -71,7 +71,7 @@ import org.springframework.jdbc.core.RowMapper;
 public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlatformService {
 
     private final ApplicationContext applicationContext;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
@@ -93,8 +93,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         if (productId != null) {
             final ShareProductData productData = (ShareProductData) service.retrieveOne(productId, false);
             final BigDecimal marketPrice = deriveMarketPrice(productData);
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveShareProductCharges(productId,
-                    clientOfficeId);
+            final Collection<ChargeData> productCharges = this.chargeReadService.retrieveShareProductCharges(productId, clientOfficeId);
             final Collection<ShareAccountChargeData> charges = convertChargesToShareAccountCharges(productCharges);
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                     .retrieveLockinPeriodFrequencyTypeOptions();
@@ -107,7 +106,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     productData.getNominalShares());
         } else {
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges(clientOfficeId);
+            final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSharesApplicableCharges(clientOfficeId);
             toReturn = new ShareAccountData(client.getId(), client.getDisplayName(), productOptions, chargeOptions);
         }
         return toReturn;
@@ -155,7 +154,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Long clientOfficeId = data.getClientId() != null
                     ? this.clientReadPlatformService.retrieveOne(data.getClientId()).getOfficeId()
                     : null;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges(clientOfficeId);
+            final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSharesApplicableCharges(clientOfficeId);
             data = ShareAccountData.template(data, productOptions, chargeOptions, clientSavingsAccounts, lockinPeriodFrequencyTypeOptions,
                     minimumActivePeriodFrequencyTypeOptions);
         }
@@ -359,7 +358,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         }
 
-        public String schema() {
+        private String schema() {
             return SHARE_ACCOUNT_SCHEMA;
         }
     }
@@ -454,7 +453,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     amount, chargeAmount, amountPaid, null);
         }
 
-        public String schema() {
+        private String schema() {
             return PURCHASED_SHARES_SCHEMA;
         }
     }
@@ -481,7 +480,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             return new ShareAccountDividendData(id, postedDate, shareAccountData, postedAmount, statusEnum, savingTransactionId);
         }
 
-        public String schema() {
+        private String schema() {
             return SHARE_ACCOUNT_DIVIDEND_SCHEMA;
         }
     }

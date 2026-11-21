@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.security.service;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Optional;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -93,7 +92,8 @@ public class TenantOidcConfigRepositoryJdbc implements TenantOidcConfigRepositor
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(conn -> {
-            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            // Named: PostgreSQL returns every column of the row as a generated key otherwise.
+            PreparedStatement ps = conn.prepareStatement(sql, new String[] { "id" });
             ps.setString(1, config.getTenantId());
             ps.setString(2, config.getProviderType().name());
             ps.setString(3, config.getIssuerUri());
@@ -103,7 +103,7 @@ public class TenantOidcConfigRepositoryJdbc implements TenantOidcConfigRepositor
             ps.setString(7, config.getUsernameClaim());
             ps.setString(8, config.getScopes());
             ps.setString(9, config.getPostLogoutRedirectUri());
-            ps.setBoolean(10, config.isEnabled());
+            ps.setInt(10, enabled(config));
             return ps;
         }, keyHolder);
 
@@ -121,10 +121,16 @@ public class TenantOidcConfigRepositoryJdbc implements TenantOidcConfigRepositor
                 """;
 
         jdbcTemplate.update(sql, config.getProviderType().name(), config.getIssuerUri(), config.getClientId(), config.getClientSecret(),
-                config.getJwksUri(), config.getUsernameClaim(), config.getScopes(), config.getPostLogoutRedirectUri(), config.isEnabled(),
+                config.getJwksUri(), config.getUsernameClaim(), config.getScopes(), config.getPostLogoutRedirectUri(), enabled(config),
                 config.getTenantId());
 
         return config;
+    }
+
+    // A number, as the reads compare it with 1: PostgreSQL makes the TINYINT(1) column a smallint and takes no boolean
+    // for it.
+    private static int enabled(TenantOidcConfig config) {
+        return config.isEnabled() ? 1 : 0;
     }
 
     @Override

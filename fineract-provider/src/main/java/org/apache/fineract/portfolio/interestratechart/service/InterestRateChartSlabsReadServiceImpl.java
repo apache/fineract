@@ -136,7 +136,7 @@ public class InterestRateChartSlabsReadServiceImpl implements InterestRateChartS
                             """;
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

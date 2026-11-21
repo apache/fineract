@@ -31,6 +31,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.jpa.CriteriaQueryFactory;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -74,7 +75,7 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.like(o.get("hierarchy"), hierarchyLikeValue));
 
-            String searchLikeValue = "%" + searchText.toLowerCase() + "%";
+            String searchLikeValue = "%" + searchText.toLowerCase(Locale.ROOT) + "%";
             predicates.add(cb.or(cb.like(cb.lower(r.get("accountNumber")), searchLikeValue),
                     cb.like(cb.lower(r.get("displayName")), searchLikeValue),
                     cb.like(cb.function("LOWER", String.class, r.get("externalId")), searchLikeValue),

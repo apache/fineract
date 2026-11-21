@@ -22,10 +22,15 @@ import static org.apache.fineract.commands.domain.CommandProcessingResultType.UN
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
@@ -50,12 +55,16 @@ import org.springframework.transaction.annotation.Transactional;
  * Command source persistence and transactional command execution helpers. The initial command source is persisted
  * separately for idempotency, while command execution and successful result persistence run in one transaction.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CommandSourceService {
 
     public static final String COMMAND_MASK_VALUE = "***";
     public static final String COMMAND_SANITIZE_ALL = "SANITIZE_ALL";
+    public static final String RECOVERABLE_ERROR_KEY_SUFFIX = "_RE";
+    // 40 + "_RE" + the 19 digits of the largest id = 62, so a hashed key always fits the column
+    static final int RECOVERABLE_KEY_HASH_LENGTH = 40;
 
     private final ConfigurationDomainService configurationDomainService;
     private final CommandSourceRepository commandSourceRepository;
@@ -68,12 +77,65 @@ public class CommandSourceService {
             CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
             return commandSourceRepository.saveAndFlush(initialCommandSource);
         } catch (JpaSystemException jse) {
-            final String message = (jse.getRootCause() != null) ? jse.getRootCause().getMessage() : null;
-            if (message != null && message.toUpperCase(Locale.ROOT).contains("UNIQUE_PORTFOLIO_COMMAND_SOURCE")) {
+            if (isIdempotencyKeyConflict(jse)) {
                 throw new IdempotentCommandProcessUnderProcessingException(wrapper, idempotencyKey, jse);
             }
             throw jse;
         }
+    }
+
+    /**
+     * Saves a command source that failed with a recoverable error under {@code <key>_RE<id>}, where {@code <id>} is the
+     * id of its own row. This frees the original idempotency key, so a retry with it executes the command again. When
+     * {@code <key>_RE<id>} does not fit the column, the key part is replaced by the first 40 hex characters of its
+     * SHA-256 hash, which always fits. When the row has no id yet, or a client already sent that exact key, the row is
+     * saved under its original key, as for any other failure.
+     */
+    @NonNull
+    public CommandSource saveRecoverableErrorResult(@NonNull CommandSource commandSource) {
+        String idempotencyKey = commandSource.getIdempotencyKey();
+        Long id = commandSource.getId();
+        if (id == null) {
+            log.debug("Command source with idempotency key {} has no id yet, storing the failure under the original key", idempotencyKey);
+            return commandSourceRepository.saveAndFlush(commandSource);
+        }
+        String renamedKey = renamedIdempotencyKey(idempotencyKey, id);
+        commandSource.setIdempotencyKey(renamedKey);
+        try {
+            return commandSourceRepository.saveAndFlush(commandSource);
+        } catch (JpaSystemException jse) {
+            commandSource.setIdempotencyKey(idempotencyKey);
+            if (!isIdempotencyKeyConflict(jse)) {
+                throw jse;
+            }
+            log.warn("Idempotency key {} is already taken, storing the failure under the original key {}", renamedKey, idempotencyKey);
+            return commandSourceRepository.saveAndFlush(commandSource);
+        } catch (RuntimeException e) {
+            commandSource.setIdempotencyKey(idempotencyKey);
+            throw e;
+        }
+    }
+
+    static String renamedIdempotencyKey(String idempotencyKey, long id) {
+        String suffix = RECOVERABLE_ERROR_KEY_SUFFIX + id;
+        if (idempotencyKey.length() + suffix.length() <= CommandSource.IDEMPOTENCY_KEY_LENGTH) {
+            return idempotencyKey + suffix;
+        }
+        return hashIdempotencyKey(idempotencyKey) + suffix;
+    }
+
+    private static String hashIdempotencyKey(String idempotencyKey) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(idempotencyKey.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest).substring(0, RECOVERABLE_KEY_HASH_LENGTH);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
+    }
+
+    private static boolean isIdempotencyKeyConflict(JpaSystemException jse) {
+        final String message = (jse.getRootCause() != null) ? jse.getRootCause().getMessage() : null;
+        return message != null && message.toUpperCase(Locale.ROOT).contains("UNIQUE_PORTFOLIO_COMMAND_SOURCE");
     }
 
     @Transactional

@@ -46,7 +46,7 @@ public class CreateWorkingCapitalLoanBreachActionCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId);
         final CommandProcessingResult processingResult = CommandProcessingResult.resourceResult(1L, null);
         final String serializedResponse = "{\"resourceId\":1}";
@@ -71,10 +71,10 @@ public class CreateWorkingCapitalLoanBreachActionCommandStrategyTest {
     /** Creates a batch sub-request for {@code POST working-capital-loans/{loanId}/breach-actions}. */
     private BatchRequest getBatchRequest(final Long loanId) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("v1/working-capital-loans/" + loanId + "/breach-actions");
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody(
                 "{\"action\":\"pause\",\"startDate\":\"05 March 2026\",\"endDate\":\"12 March 2026\",\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\"}");
         return br;

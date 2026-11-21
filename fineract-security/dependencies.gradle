@@ -63,17 +63,6 @@ dependencies {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
 
-    // OWASP ESAPI for security utilities
-    implementation('org.owasp.esapi:esapi') {
-        exclude group: 'org.slf4j'
-        exclude group: 'log4j'
-        exclude group: 'commons-logging'
-        exclude group: 'commons-collections'
-        exclude group: 'commons-lang'
-        exclude group: 'spotbugs-annotations'
-        exclude group: 'xml-apis'
-    }
-
     // Email support for OTP delivery
     implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'

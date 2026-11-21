@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartValidator;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartRepositoryWrapper;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlab;
@@ -79,7 +80,7 @@ public class InterestRateChartSlabAssembler {
         final InterestRateChartSlab newChartSlab = assembleChartSlabs(chart, elementObject, currencyCode, locale);
         // validate chart Slabs
         newChartSlab.slabFields().validateChartSlabPlatformRules(command, baseDataValidator, locale);
-        chart.validateChartSlabs(baseDataValidator);
+        InterestRateChartValidator.validateChartSlabs(chart, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         return newChartSlab;

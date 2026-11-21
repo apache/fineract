@@ -88,7 +88,7 @@ public class JournalEntryAggregationJobListenerTest {
 
         when(fineractProperties.getJob()).thenReturn(fineractJobProperties);
         when(fineractJobProperties.getJournalEntryAggregation()).thenReturn(fineractJournalEntryAggregationProperties);
-        when(fineractJobProperties.getJournalEntryAggregation().getExcludeRecentNDays()).thenReturn(lookBackDays);
+        when(fineractJournalEntryAggregationProperties.getExcludeRecentNDays()).thenReturn(lookBackDays);
         when(trackingRepository.findLatestAggregatedOnDate()).thenReturn(null);
 
         ExecutionContext executionContext = new ExecutionContext();
@@ -112,7 +112,7 @@ public class JournalEntryAggregationJobListenerTest {
 
         when(fineractProperties.getJob()).thenReturn(fineractJobProperties);
         when(fineractJobProperties.getJournalEntryAggregation()).thenReturn(fineractJournalEntryAggregationProperties);
-        when(fineractJobProperties.getJournalEntryAggregation().getExcludeRecentNDays()).thenReturn(lookBackDays);
+        when(fineractJournalEntryAggregationProperties.getExcludeRecentNDays()).thenReturn(lookBackDays);
         when(trackingRepository.findLatestAggregatedOnDate()).thenReturn(lastAggregatedOnDate);
 
         JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "test"), new JobParameters());

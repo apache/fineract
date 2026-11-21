@@ -647,7 +647,6 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
         when(delinquencyReadPlatformService.retrieveLoanDelinquencyActions(anyLong())).thenReturn(delinquencyActions);
         LoanDelinquencyAction backdatedPauseAction = Mockito.mock(LoanDelinquencyAction.class);
-        backdatedPauseAction.setId(1L);
 
         when(delinquencyActionParseAndValidator.validateAndParseUpdate(command, loanForProcessing, delinquencyActions,
                 DateUtils.getBusinessLocalDate())).thenReturn(backdatedPauseAction);
@@ -662,7 +661,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
 
         // when
-        underTest.createDelinquencyAction(loanForProcessing.getId(), command);
+        underTest.createDelinquencyAction(1L, command);
 
         // then
         // verify event is raised
@@ -698,7 +697,6 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
         when(delinquencyReadPlatformService.retrieveLoanDelinquencyActions(anyLong())).thenReturn(delinquencyActions);
         LoanDelinquencyAction backdatedPauseAction = Mockito.mock(LoanDelinquencyAction.class);
-        backdatedPauseAction.setId(1L);
 
         when(delinquencyActionParseAndValidator.validateAndParseUpdate(command, loanForProcessing, delinquencyActions,
                 DateUtils.getBusinessLocalDate())).thenReturn(backdatedPauseAction);
@@ -713,7 +711,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
 
         // when
-        underTest.createDelinquencyAction(loanForProcessing.getId(), command);
+        underTest.createDelinquencyAction(1L, command);
 
         // then
         // verify event is raised

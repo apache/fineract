@@ -244,14 +244,14 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                 .minimumAgeDays(1).maximumAgeDays(3).locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
         rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-        DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+        delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
         // Second Range
         delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
                 .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
         rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-        range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+        DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
         final String classificationExpected = range.getClassification();
         log.info("Expected Delinquency Range classification after Disbursement {}", classificationExpected);
 
@@ -298,14 +298,14 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                             .classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
             delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
                     .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
             final String classificationExpected = range.getClassification();
             log.info("Expected Delinquency Range classification after Disbursement {}", classificationExpected);
 
@@ -386,14 +386,14 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                             .classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
             delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
                     .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
             final String classificationExpected = range.getClassification();
             log.info("Expected Delinquency Range classification after Disbursement {}", classificationExpected);
 
@@ -482,7 +482,7 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                 .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
         rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-        range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+        delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
         PostDelinquencyBucketResponse delinquencyBucketResponse = delinquencyHelper
                 .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
@@ -655,14 +655,14 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                             .classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
             delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
                     .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
             final String classificationExpected = range.getClassification();
             log.info("Expected Delinquency Range classification {}", classificationExpected);
 
@@ -746,7 +746,7 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                     .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             PostDelinquencyBucketResponse delinquencyBucketResponse = delinquencyHelper
                     .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
@@ -826,14 +826,14 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                             .classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
             delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
                     .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             PostDelinquencyBucketResponse delinquencyBucketResponse = delinquencyHelper
                     .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
@@ -896,14 +896,14 @@ public class DelinquencyBucketsIntegrationTest extends FeignLoanTestBase {
                             .classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            DelinquencyRangeResponse range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             // Second Range
             delinquencyRangeResponse = delinquencyHelper.createRange(new DelinquencyRangeRequest().minimumAgeDays(4).maximumAgeDays(60)
                     .locale(LoanTestData.LOCALE).classification(Utils.randomStringGenerator("DLQ_R_", 10)));
             rangeIds.add(delinquencyRangeResponse.getResourceId());
 
-            range = delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
+            delinquencyHelper.getRange(delinquencyRangeResponse.getResourceId());
 
             PostDelinquencyBucketResponse delinquencyBucketResponse = delinquencyHelper
                     .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));

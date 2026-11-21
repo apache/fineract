@@ -438,6 +438,7 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.DOWN_PAYMENT,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INTEREST_PAYMENT_WAIVER,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INTEREST_REFUND,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.FEE_REFUND,
                     org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT
                 )
             """)

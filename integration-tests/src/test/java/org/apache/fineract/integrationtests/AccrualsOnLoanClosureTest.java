@@ -21,12 +21,9 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE;
 
 import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -38,8 +35,6 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
 
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
-
     private static final String startDate = "22 April 2025";
     private static final String disbursementDate = "22 April 2024";
     private static final String repaymentDate = "25 April 2024";
@@ -48,7 +43,7 @@ public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
     private static final Double chargeAmount = 20.0;
 
     private static Long loanId;
-    private static PostChargesResponse penaltyResponse;
+    private static ChargeCreateResponse penaltyResponse;
     private static final String penaltyCharge1AddedDate = "24 April 2024";
 
     @Test
@@ -60,9 +55,9 @@ public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
         Assertions.assertNotNull(loanId);
         disburseLoan(loanId, BigDecimal.valueOf(disbursementAmount), disbursementDate);
 
-        penaltyResponse = chargesHelper.createCharge(
-                new ChargeRequest().active(true).chargeTimeType(2).chargeAppliesTo(1).chargeCalculationType(1).penalty(true).amount(20.0)
-                        .currencyCode("USD").locale("en").chargePaymentMode(0).name(Utils.randomStringGenerator("PENALTY_", 6)));
+        penaltyResponse = chargesHelper.createCharge(new ChargeCreateRequest().active(true).chargeTimeType(2).chargeAppliesTo(1)
+                .chargeCalculationType(1).penalty(true).amount(20.0).currencyCode("USD").locale("en").chargePaymentMode(0)
+                .name(Utils.randomStringGenerator("PENALTY_", 6)));
         runAt(startDate, () -> {
             globalConfigurationHelper.updateGlobalConfiguration(CHARGE_ACCRUAL_DATE,
                     new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
@@ -73,7 +68,7 @@ public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
             addRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(repaymentDate)
                     .locale("en").transactionAmount(repaymentAmount));
 
-            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+            getLoanDetails(loanId);
 
             verifyRepaymentSchedule(loanId, //
                     installment(800.0, null, "22 April 2024"), //

@@ -1,0 +1,34 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+description = 'Fineract Integration Tests for OAuth2 with two-factor authentication'
+
+// The suites in this module run against an already-running Fineract instance that has OAuth2 and two-factor authentication
+// enabled. The build does not start one; bring it up with docker-compose-oauth2-twofactor-test.yml (see
+// fineract-doc/src/docs/en/chapters/testing/integration.adoc) before running the tests.
+apply from: 'dependencies.gradle'
+
+dependencies {
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.43.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:6.3.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+// NOTE: Gradle suggested these dependencies
+compileTestJava.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')
+spotbugsTest.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')

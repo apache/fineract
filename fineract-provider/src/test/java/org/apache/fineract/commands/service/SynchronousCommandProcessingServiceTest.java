@@ -30,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.resilience4j.retry.Retry;
@@ -39,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.apache.fineract.batch.exception.ErrorInfo;
@@ -53,10 +55,12 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
@@ -79,6 +83,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class SynchronousCommandProcessingServiceTest {
+
+    private static final String IDK = "idk";
+    private CommandWrapper commandWrapper;
+    private JsonCommand jsonCommand;
+    private AppUser appUser;
+    private NewCommandSourceHandler failingHandler;
 
     @Mock
     private PlatformSecurityContext context;
@@ -107,6 +117,9 @@ public class SynchronousCommandProcessingServiceTest {
 
     @Mock
     private RetryConfigurationAssembler retryConfigurationAssembler;
+
+    @Mock
+    private RecoverableErrorClassifier recoverableErrorClassifier;
 
     @Spy
     private FineractRequestContextHolder fineractRequestContextHolder;
@@ -154,8 +167,7 @@ public class SynchronousCommandProcessingServiceTest {
 
                     CommandProcessingResult result = handler.processCommand(command);
                     resultUpdater.accept(commandSource, result);
-                    CommandSource savedCommandSource = commandSourceService.saveResult(commandSource);
-                    return new CommandSourceService.CommandExecutionResult(result, savedCommandSource);
+                    return new CommandSourceService.CommandExecutionResult(result, commandSource);
                 });
     }
 
@@ -171,6 +183,7 @@ public class SynchronousCommandProcessingServiceTest {
         reset(commandSourceService);
         reset(retryConfigurationAssembler);
         ThreadLocalContextUtil.reset();
+        reset(recoverableErrorClassifier);
     }
 
     @Test
@@ -199,16 +212,14 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
-        assertEquals(CommandProcessingResultType.PROCESSED.getValue(), commandSource.getStatus());
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         assertEquals(commandProcessingResult, actualCommandProcessingResult);
         verify(commandSourceService, never()).generateErrorInfo(any());
-        verify(commandSourceService).saveResult(commandSource);
     }
 
     /**
@@ -258,7 +269,6 @@ public class SynchronousCommandProcessingServiceTest {
                 () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
 
         verify(commandSource, times(3)).getStatus();
-        assertEquals(CommandProcessingResultType.UNDER_PROCESSING.getValue(), commandSource.getStatus());
         verify(commandSourceService, times(0)).generateErrorInfo(any());
         verify(commandSourceService, times(0)).saveResult(commandSource);
     }
@@ -299,7 +309,6 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.UNDER_PROCESSING.getValue()) //
                 .thenReturn(CommandProcessingResultType.UNDER_PROCESSING.getValue()) //
                 // Is it possible???
@@ -314,7 +323,7 @@ public class SynchronousCommandProcessingServiceTest {
 
         verify(commandSource, times(3)).getStatus();
         verify(commandSourceService, times(0)).generateErrorInfo(any());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         assertEquals(actualCommandProcessingResult, commandProcessingResult);
     }
 
@@ -358,7 +367,6 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
 
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
@@ -378,9 +386,8 @@ public class SynchronousCommandProcessingServiceTest {
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
         verify(commandSource, times(2)).getStatus();
-        assertEquals(CommandProcessingResultType.UNDER_PROCESSING.getValue(), commandSource.getStatus());
         verify(commandSourceService, never()).generateErrorInfo(any());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         assertEquals(actualCommandProcessingResult, commandProcessingResult);
     }
 
@@ -408,15 +415,13 @@ public class SynchronousCommandProcessingServiceTest {
 
         AppUser appUser = Mockito.mock(AppUser.class);
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
 
         verify(commandSourceService).getCommandSource(commandId);
-        assertEquals(CommandProcessingResultType.PROCESSED.getValue(), commandSource.getStatus());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
 
         assertEquals(commandProcessingResult, actualCommandProcessingResult);
     }
@@ -424,8 +429,9 @@ public class SynchronousCommandProcessingServiceTest {
     @Test
     public void testExecuteCommandFails() {
         CommandWrapper commandWrapper = getCommandWrapper();
+        long commandId = 1L;
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
-        Long commandId = jsonCommand.commandId();
+        when(jsonCommand.commandId()).thenReturn(commandId);
 
         NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
         CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
@@ -584,7 +590,6 @@ public class SynchronousCommandProcessingServiceTest {
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
         when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, idempotencyKey)).thenReturn(commandSource);
-        when(commandSourceService.saveResult(commandSource)).thenReturn(commandSource);
 
         // When fetching the command source after failure, return the same mock
         when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
@@ -599,7 +604,7 @@ public class SynchronousCommandProcessingServiceTest {
         verify(commandSourceService, times(2)).processCommandAndSaveResult(any(NewCommandSourceHandler.class), any(JsonCommand.class),
                 any(CommandSource.class), any(AppUser.class), Mockito.anyBoolean(),
                 Mockito.<BiConsumer<CommandSource, CommandProcessingResult>>any());
-        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSource).setStatus(CommandProcessingResultType.PROCESSED);
         verify(commandSourceService, never()).generateErrorInfo(any());
 
         assertEquals(commandProcessingResult, result);
@@ -791,5 +796,134 @@ public class SynchronousCommandProcessingServiceTest {
 
         // The deferred path was not taken: no TransactionSynchronization should have been registered.
         assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+    }
+
+    @Test
+    public void recoverableFailure_savesErrorThroughRenamingSave() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenReturn(true);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        verify(recoverableErrorClassifier).isRecoverable(failure);
+        verify(commandSource).setResultStatusCode(400);
+        verify(commandSource).setStatus(CommandProcessingResultType.ERROR);
+        verify(commandSourceService).saveRecoverableErrorResult(commandSource);
+        verify(commandSourceService, never()).saveResult(commandSource);
+    }
+
+    @Test
+    public void nonRecoverableFailure_keepsKeyThroughPlainSave() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenReturn(false);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        verify(commandSource).setStatus(CommandProcessingResultType.ERROR);
+        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+        verify(commandSource, never()).setIdempotencyKey(anyString());
+    }
+
+    @Test
+    public void recoverableFailureInsideEnclosingTransaction_savesNothing() {
+        CommandSource commandSource = failingCommand(null);
+        activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(any())).thenReturn(true);
+        when(commandSourceService.getInitialCommandSource(commandWrapper, jsonCommand, appUser, IDK)).thenReturn(commandSource);
+
+        BatchRequestContextHolder.setIsEnclosingTransaction(true);
+        try {
+            assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+        } finally {
+            BatchRequestContextHolder.resetIsEnclosingTransaction();
+        }
+
+        verify(commandSourceService).getInitialCommandSource(commandWrapper, jsonCommand, appUser, IDK);
+        verify(commandSourceService, never()).saveInitial(any(), any(), any(), anyString());
+        verify(commandSourceService, never()).saveResult(any(CommandSource.class));
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+        verifyNoInteractions(recoverableErrorClassifier);
+    }
+
+    @Test
+    public void recoverableFailureWhileApprovingMakerRow_renamesMakerKey() {
+        long makerCommandId = 7L;
+        CommandSource commandSource = failingCommand(makerCommandId);
+        when(commandSourceService.getCommandSource(makerCommandId)).thenReturn(commandSource);
+        activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(any())).thenReturn(true);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> underTest.executeCommand(commandWrapper, jsonCommand, true));
+
+        verify(commandSourceService, never()).saveInitial(any(), any(), any(), any());
+        verify(commandSource).setStatus(CommandProcessingResultType.ERROR);
+        verify(commandSourceService).saveRecoverableErrorResult(commandSource);
+        verify(commandSourceService, never()).saveResult(any(CommandSource.class));
+    }
+
+    @Test
+    public void classifierFailure_fallsBackToPlainSaveAndKeepsOriginalError() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenThrow(new IllegalStateException("config lookup failed"));
+
+        PlatformApiDataValidationException thrown = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        assertEquals(failure, thrown);
+        verify(commandSourceService).saveResult(commandSource);
+        verify(commandSourceService, never()).saveRecoverableErrorResult(any());
+    }
+
+    @Test
+    public void renameFailure_fallsBackToPlainSaveAndKeepsOriginalError() {
+        CommandSource commandSource = failingCommand(null);
+        PlatformApiDataValidationException failure = activationInFuture();
+        when(recoverableErrorClassifier.isRecoverable(failure)).thenReturn(true);
+        when(commandSourceService.saveRecoverableErrorResult(commandSource)).thenThrow(new IllegalStateException("rename failed"));
+
+        PlatformApiDataValidationException thrown = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.executeCommand(commandWrapper, jsonCommand, false));
+
+        assertEquals(failure, thrown);
+        verify(commandSourceService).saveRecoverableErrorResult(commandSource);
+        verify(commandSourceService).saveResult(commandSource);
+    }
+
+    private CommandSource failingCommand(Long approvedCommandId) {
+        commandWrapper = getCommandWrapper();
+        jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(approvedCommandId);
+        failingHandler = Mockito.mock(NewCommandSourceHandler.class);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(failingHandler);
+        when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
+        when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(IDK);
+        when(commandSourceService.findCommandSource(commandWrapper, IDK)).thenReturn(null);
+
+        CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(1L);
+        when(commandSource.getIdempotencyKey()).thenReturn(IDK);
+        when(commandSourceService.getCommandSource(1L)).thenReturn(commandSource);
+
+        appUser = Mockito.mock(AppUser.class);
+        when(appUser.getId()).thenReturn(1L);
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+        when(commandSourceService.saveInitial(commandWrapper, jsonCommand, appUser, IDK)).thenReturn(commandSource);
+
+        ErrorInfo validationErrorInfo = mock(ErrorInfo.class);
+        when(validationErrorInfo.getMessage()).thenReturn("{\"httpStatusCode\":\"400\"}");
+        when(validationErrorInfo.getStatusCode()).thenReturn(400);
+        when(commandSourceService.generateErrorInfo(any())).thenReturn(validationErrorInfo);
+        return commandSource;
+    }
+
+    private PlatformApiDataValidationException activationInFuture() {
+        PlatformApiDataValidationException failure = new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(
+                "error.msg.clients.activationDate.in.the.future", "Activation date cannot be in the future.", "activationDate")));
+        when(failingHandler.processCommand(jsonCommand)).thenThrow(failure);
+        return failure;
     }
 }

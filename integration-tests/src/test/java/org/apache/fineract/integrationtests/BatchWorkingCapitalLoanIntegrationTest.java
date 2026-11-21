@@ -37,6 +37,7 @@ import org.apache.fineract.client.models.BatchRequest;
 import org.apache.fineract.client.models.BatchResponse;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansBreachActionRequest;
@@ -405,6 +406,84 @@ public class BatchWorkingCapitalLoanIntegrationTest {
         assertEquals(1, responses.size());
         assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(),
                 "Expected HTTP 200 for modify working capital loan by external id via batch");
+
+        createdLoanIds.add(loanId);
+        createdProductIds.add(productId);
+    }
+
+    /**
+     * Tests that a working capital loan can be marked as fraud via the Batch API by loan ID.
+     */
+    @Test
+    public void testMarkWorkingCapitalLoanAsFraudViaBatchApiByLoanId() {
+        final Long productId = createProduct();
+        final Long clientId = createClient();
+        final LocalDate today = Utils.getLocalDateOfTenant();
+
+        final Long loanId = submitAndTrack(new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withPrincipal(BigDecimal.valueOf(5000)) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .withSubmittedOnDate(today) //
+                .buildSubmitRequest());
+
+        // A loan can only be marked as fraud while active.
+        loanHelper.approveById(loanId, WorkingCapitalLoanApplicationTestBuilder.buildApproveRequest(today, BigDecimal.valueOf(5000), null));
+        loanHelper.disburseById(loanId, WorkingCapitalLoanDisbursementTestBuilder.buildDisburseRequest(today, BigDecimal.valueOf(5000)));
+
+        final String markAsFraudBody = new Gson().toJson(new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
+
+        final BatchRequest markAsFraudRequest = buildBatchRequest(1L, null, "v1/working-capital-loans/" + loanId + "/mark-as-fraud", "PUT",
+                markAsFraudBody);
+
+        final List<BatchResponse> responses = batchServiceHelper.handleBatch(markAsFraudRequest, false);
+
+        assertEquals(1, responses.size());
+        assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(),
+                "Expected HTTP 200 for mark working capital loan as fraud via batch");
+        assertEquals(Boolean.TRUE, loanHelper.retrieveById(loanId).getFraud());
+
+        createdLoanIds.add(loanId);
+        createdProductIds.add(productId);
+    }
+
+    /**
+     * Tests that a working capital loan can be marked as fraud via the Batch API by external ID.
+     */
+    @Test
+    public void testMarkWorkingCapitalLoanAsFraudViaBatchApiByExternalId() {
+        final Long productId = createProduct();
+        final Long clientId = createClient();
+        final String externalId = "wcl-batch-" + UUID.randomUUID().toString().substring(0, 8);
+        final LocalDate today = Utils.getLocalDateOfTenant();
+
+        final Long loanId = submitAndTrack(new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withExternalId(externalId) //
+                .withPrincipal(BigDecimal.valueOf(5000)) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)) //
+                .withSubmittedOnDate(today) //
+                .buildSubmitRequest());
+
+        // A loan can only be marked as fraud while active.
+        loanHelper.approveById(loanId, WorkingCapitalLoanApplicationTestBuilder.buildApproveRequest(today, BigDecimal.valueOf(5000), null));
+        loanHelper.disburseById(loanId, WorkingCapitalLoanDisbursementTestBuilder.buildDisburseRequest(today, BigDecimal.valueOf(5000)));
+
+        final String markAsFraudBody = new Gson().toJson(new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
+
+        final BatchRequest markAsFraudRequest = buildBatchRequest(1L, null,
+                "v1/working-capital-loans/external-id/" + externalId + "/mark-as-fraud", "PUT", markAsFraudBody);
+
+        final List<BatchResponse> responses = batchServiceHelper.handleBatch(markAsFraudRequest, false);
+
+        assertEquals(1, responses.size());
+        assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(),
+                "Expected HTTP 200 for mark working capital loan as fraud by external id via batch");
+        assertEquals(Boolean.TRUE, loanHelper.retrieveById(loanId).getFraud());
 
         createdLoanIds.add(loanId);
         createdProductIds.add(productId);

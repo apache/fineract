@@ -79,6 +79,13 @@ public final class AuditHelper {
                 .retrieveAuditEntries(new RetrieveAuditEntriesQueryParams().limit(limit).paged(true))));
     }
 
+    public static List<AuditData> getAuditDetailsByMaker(final String actionName, final String entityName, final Long makerId) {
+        // Call the API directly: the private getAuditDetails helper always forces sortOrder DESC.
+        return pageItems(ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().audits().retrieveAuditEntries(new RetrieveAuditEntriesQueryParams()
+                        .actionName(actionName).entityName(entityName).makerId(makerId).orderBy("id").sortOrder("ASC").paged(true))));
+    }
+
     private static List<AuditData> pageItems(final String response) {
         try {
             final JsonNode pageItemsNode = MAPPER.readTree(response).get("pageItems");

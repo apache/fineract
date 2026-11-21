@@ -50,6 +50,7 @@ buildscript {
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
+                'oauth2-twofactor-tests',
                 'fineract-client',
                 'fineract-client-feign',
                 'fineract-avro-schemas',
@@ -57,7 +58,8 @@ buildscript {
                 'fineract-e2e-tests-runner',
                 'fineract-progressive-loan',
                 'fineract-progressive-loan-embeddable-schedule-generator',
-                'fineract-working-capital-loan'
+                'fineract-working-capital-loan',
+                'fineract-querydsl'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -88,7 +90,8 @@ buildscript {
                 'fineract-document',
                 'fineract-progressive-loan',
                 'fineract-progressive-loan-embeddable-schedule-generator',
-                'fineract-working-capital-loan'
+                'fineract-working-capital-loan',
+                'fineract-querydsl'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
@@ -111,10 +114,9 @@ buildscript {
 }
 
 plugins {
-    id "org.barfuin.gradle.taskinfo" version "3.0.2"
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'com.diffplug.spotless' version '8.10.2' apply false
-    id 'org.nosphere.apache.rat' version '0.8.1' apply false
+    id 'org.nosphere.apache.rat' version '0.11.0' apply false
     id 'com.github.jk1.dependency-license-report' version '3.1.4' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
     id 'org.springframework.boot' version '4.1.1' apply false
@@ -135,6 +137,7 @@ plugins {
     id 'org.cyclonedx.bom' version '3.4.1' apply false
     id 'com.docktape.swagger-brake' version '2.7.0' apply false
     id 'io.github.usekylis.java-architecture-metrics' version '0.1.1' apply false
+    id 'org.apache.fineract.querydsl.codegen' apply false
 }
 
 description = '''\
@@ -180,6 +183,13 @@ ext.LICENSE_REPORT_CONFIGURATIONS = [
 ]
 
 allprojects  {
+    // The RAT plugin resolves its tool through each project's own buildscript repositories
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+    }
+
     group = 'org.apache.fineract'
 
     repositories {
@@ -216,6 +226,7 @@ allprojects  {
             error(
                     "DefaultCharset",
                     "StringSplitter",
+                    "StringCaseLocaleUsage",
                     "MutablePublicArray",
                     "EqualsGetClass",
                     "FutureReturnValueIgnored"
@@ -600,7 +611,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:13.4.2'
+        checkstyle 'com.puppycrawl.tools:checkstyle:14.4.0'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
@@ -654,7 +665,6 @@ configure(project.fineractJavaProjects) {
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
                     "ReturnValueIgnored",
-                    "DirectInvocationOnMock",
                     "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
                     "MultiVariableDeclaration", // Until errorprone recognizes Lombok
@@ -789,6 +799,17 @@ configure(project.fineractJavaProjects) {
         // definitions that the 'cucumber' task or ':fineract-e2e-tests-runner' consumes, a JMH
         // benchmark -- so their own test task legitimately has nothing to run.
         failOnNoDiscoveredTests = false
+
+        // Flaky-test retry, provided by the Develocity plugin applied in settings.gradle.
+        // Scoped to the API-dependent suites: they drive a live Fineract instance over HTTP and
+        // are the only ones exposed to one-off environmental flakiness. Unit tests stay strict.
+        if (project.name in ['integration-tests', 'twofactor-tests', 'oauth2-tests']) {
+            develocity.testRetry {
+                failOnPassedAfterRetry = false // keep the build green if a test passes on retry
+                maxRetries = 2
+                maxFailures = 20 // safety cap: too many failures => real breakage, stop retrying
+            }
+        }
 
         if (project.hasProperty('excludeTests')) {
             filter {

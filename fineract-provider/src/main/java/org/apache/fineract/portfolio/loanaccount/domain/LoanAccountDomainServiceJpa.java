@@ -30,7 +30,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -52,6 +51,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPreBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFeeRefundPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPostBusinessEvent;
@@ -104,6 +104,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanFeeRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
@@ -160,6 +161,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanTransactionService loanTransactionService;
     private final LoanAccountDomainServiceJpaHelper loanAccountDomainServiceJpaHelper;
     private final LoanJournalEntryPoster journalEntryPoster;
+    private final LoanFeeRefundService loanFeeRefundService;
 
     @Transactional
     @Override
@@ -807,7 +809,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public Pair<LoanTransaction, LoanTransaction> makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
+    public RefundTransactionResult makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
             final LoanTransactionType loanTransactionType, final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PaymentDetail paymentDetail, final ExternalId txnExternalId, final Boolean interestRefundCalculationOverride) {
         // Pre-processing business event
@@ -829,7 +831,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 () -> loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
                         .map(LoanSupportedInterestRefundTypes::getTransactionType)
                         .anyMatch(transactionType -> transactionType.equals(loanTransactionType)));
+        final boolean shouldCreateFeeRefundTransaction = loan.getSupportedFeeRefundTransactionTypes().contains(loanTransactionType);
         LoanTransaction interestRefundTransaction = null;
+        LoanTransaction feeRefundTransaction = null;
 
         if (shouldCreateInterestRefundTransaction) {
             interestRefundTransaction = createInterestRefundLoanTransaction(loan, refundTransaction);
@@ -838,6 +842,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         .linkToTransaction(interestRefundTransaction, refundTransaction, LoanTransactionRelationTypeEnum.RELATED));
             }
         }
+
+        if (shouldCreateFeeRefundTransaction) {
+            feeRefundTransaction = loanFeeRefundService.createFeeRefund(loan, refundTransaction);
+        }
+        final RefundTransactionResult refundResult = new RefundTransactionResult(refundTransaction, interestRefundTransaction,
+                feeRefundTransaction);
 
         final LoanRepaymentScheduleInstallment currentInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(transactionDate);
 
@@ -850,12 +860,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
             loan.getLoanTransactions().add(refundTransaction);
-            if (interestRefundTransaction != null) {
-                loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
-                        interestRefundTransaction,
+            for (final LoanTransaction derivedTransaction : refundResult.derivedTransactions()) {
+                loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), derivedTransaction,
                         new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), null, loan.getActiveLoanTermVariations()));
-                loan.addLoanTransaction(interestRefundTransaction);
+                loan.addLoanTransaction(derivedTransaction);
             }
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -864,18 +873,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
             loan.getLoanTransactions().add(refundTransaction);
-            if (interestRefundTransaction != null) {
-                loan.addLoanTransaction(interestRefundTransaction);
-            }
+            refundResult.derivedTransactions().forEach(loan::addLoanTransaction);
 
             reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
 
         // Store and flush newly created transaction to generate PK
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
-        if (interestRefundTransaction != null) {
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
-        }
+        refundResult.derivedTransactions().forEach(loanAccountService::saveLoanTransactionWithDataIntegrityViolationChecks);
 
         loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
 
@@ -892,7 +897,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             businessEventNotifierService
                     .notifyPostBusinessEvent(new LoanTransactionInterestRefundPostBusinessEvent(interestRefundTransaction));
         }
-        return Pair.of(refundTransaction, interestRefundTransaction);
+        if (feeRefundTransaction != null) {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionFeeRefundPostBusinessEvent(feeRefundTransaction));
+        }
+        return refundResult;
     }
 
     @Override

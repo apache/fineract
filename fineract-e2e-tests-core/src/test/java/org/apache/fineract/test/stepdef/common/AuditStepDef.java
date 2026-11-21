@@ -63,6 +63,7 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsRespon
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.PutPermissionsRequest;
 import org.apache.fineract.test.api.FineractClientConfiguration;
@@ -94,6 +95,7 @@ public class AuditStepDef extends AbstractStepDef {
     private final FineractClientConfiguration fineractClientConfiguration;
 
     private static final String LAST_AUDIT_ENTRY = "lastAuditEntry";
+    private static final String LAST_AUDIT_ENTRIES = "lastAuditEntries";
 
     @Then("The audit search for action {string} on entity {string} filtered by resourceId of the {string}th {string} transaction made on {string} returns {int} entries")
     public void auditSearchByResourceIdOfTransaction(String actionName, String entityName, String nthItemStr, String transactionType,
@@ -156,6 +158,14 @@ public class AuditStepDef extends AbstractStepDef {
         log.info("Adjusted working capital transaction ID {} saved as '{}'", transactionId, idKey);
     }
 
+    @Then("The audit search for action {string} on entity {string} filtered by resourceId of the created client returns {int} entries")
+    public void auditSearchByResourceIdOfCreatedClient(String actionName, String entityName, int expectedCount) {
+        Long resourceId = testContext().get(TestContextKey.CLIENT_IDEMPOTENT_FIRST_SUCCESS_CLIENT_ID);
+        assertThat(resourceId).as("No client was created successfully yet").isNotNull();
+        searchAudits(new RetrieveAuditEntriesQueryParams().actionName(actionName).entityName(entityName).resourceId(resourceId),
+                expectedCount);
+    }
+
     @Then("The audit search for action {string} on entity {string} filtered by {word} of {string} returns {int} entries")
     public void auditSearchByField(String actionName, String entityName, String field, String value, int expectedCount) {
         Long identifier = (Long) resolveExpectedValue(value);
@@ -215,6 +225,9 @@ public class AuditStepDef extends AbstractStepDef {
         if ("last adjusted transaction".equals(value)) {
             return testContext().<PostLoansLoanIdTransactionsResponse>get(TestContextKey.LOAN_ADJUST_TRANSACTION_RESPONSE).getResourceId();
         }
+        if ("created client".equals(value)) {
+            return testContext().<Long>get(TestContextKey.CLIENT_IDEMPOTENT_FIRST_SUCCESS_CLIENT_ID);
+        }
         if ("created loan".equals(value)) {
             return createdLoanId();
         }
@@ -229,6 +242,40 @@ public class AuditStepDef extends AbstractStepDef {
             return findTransactionId(transactionRef.group(1), transactionRef.group(2), transactionRef.group(3));
         }
         return value;
+    }
+
+    @Then("The audit search for action {string} on entity {string} filtered by maker of the created user returns {int} entries")
+    public void auditSearchByMakerOfCreatedUser(String actionName, String entityName, int expectedCount) {
+        PostUsersResponse createdUser = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
+        assertThat(createdUser).as("No user was created. Use 'Admin creates new user with ...' step first.").isNotNull();
+
+        List<AuditData> result = auditHelper.searchAudits(
+                new RetrieveAuditEntriesQueryParams().actionName(actionName).entityName(entityName).makerId(createdUser.getResourceId()));
+        log.info("Audit entries for action {} on entity {} by maker {}: {}", actionName, entityName, createdUser.getResourceId(),
+                result.stream().map(a -> a.getId() + "(resourceId=" + a.getResourceId() + ", " + a.getProcessingResult() + ")").toList());
+        assertThat(result).as("Audit entries returned").hasSize(expectedCount);
+        testContext().set(LAST_AUDIT_ENTRIES, result);
+        if (result.size() == 1) {
+            testContext().set(LAST_AUDIT_ENTRY, result.get(0));
+        }
+    }
+
+    /**
+     * Checks the {@code processingResult} of every audit entry returned by the previous multi-entry search. Rows are
+     * compared in call order (ascending audit id), so list expected values oldest first. The search itself is ordered
+     * descending, so entries are re-sorted here before comparison.
+     */
+    @Then("The returned audit entries have the following processing results in call order:")
+    public void auditEntriesProcessingResultsInCallOrder(DataTable table) {
+        List<AuditData> audits = testContext().get(LAST_AUDIT_ENTRIES);
+        assertThat(audits).as("No multi-entry audit search has run yet").isNotNull();
+
+        List<AuditData> ordered = audits.stream().sorted(java.util.Comparator.comparing(AuditData::getId)).toList();
+        List<String> expected = table.asList();
+        assertThat(ordered).as("Audit entries").hasSameSizeAs(expected);
+        for (int i = 0; i < expected.size(); i++) {
+            assertThat(ordered.get(i).getProcessingResult()).as("processingResult of audit entry #%d", i + 1).isEqualTo(expected.get(i));
+        }
     }
 
     @Given("Maker-checker is {word} for permission {string}")

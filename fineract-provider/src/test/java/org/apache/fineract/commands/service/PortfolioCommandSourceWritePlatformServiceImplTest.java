@@ -55,6 +55,11 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
 
     private static final Long LOAN_ID = 7L;
     private static final Integer AWAITING_APPROVAL = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
+    private static final String WC_ADJUST_BY_DELTA = "ADJUSTBYDELTA";
+    private static final String WC_TRANSACTION = "WORKINGCAPITALLOANTRANSACTION";
+    private static final String WC_ADJUST_BY_DELTA_PERMISSION = WC_ADJUST_BY_DELTA + "_" + WC_TRANSACTION;
+    private static final String WC_TRANSACTION_EXTERNAL_ID = "WC123";
+    private static final String WC_DELTA_JSON = "{\"transactionAmount\":-5,\"externalId\":\"WC123\"}";
 
     @Mock
     private PlatformSecurityContext context;
@@ -79,6 +84,8 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
         when(context.authenticatedUser(any(CommandWrapper.class))).thenReturn(user);
         when(user.getId()).thenReturn(99L);
         when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                any(), any(), any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndLoanIdAndTransactionIdAndCommandAsJsonAndStatusOrderByIdDesc(
                 any(), any(), any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 
@@ -200,6 +207,49 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
     }
 
     @Test
+    void makerSubmittingTheSameAdjustmentByTransactionExternalIdTwiceIsRejected() {
+        givenMaker(WC_ADJUST_BY_DELTA_PERMISSION);
+        givenPendingByTransaction(WC_ADJUST_BY_DELTA, WC_TRANSACTION, LOAN_ID, WC_TRANSACTION_EXTERNAL_ID, WC_DELTA_JSON,
+                new CommandSource());
+
+        assertThrows(MakerCheckerDuplicatePendingSubmissionException.class,
+                () -> underTest.logCommandSource(wcAdjustByDelta(WC_TRANSACTION_EXTERNAL_ID)));
+
+        verify(processAndLogCommandService, never()).executeCommand(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void makerCanQueueTheSameAdjustmentAgainstAnotherTransactionExternalId() {
+        givenMaker(WC_ADJUST_BY_DELTA_PERMISSION);
+        givenPendingByTransaction(WC_ADJUST_BY_DELTA, WC_TRANSACTION, LOAN_ID, WC_TRANSACTION_EXTERNAL_ID, WC_DELTA_JSON,
+                new CommandSource());
+
+        underTest.logCommandSource(wcAdjustByDelta("WC456"));
+
+        verify(commandSourceRepository).findFirstByActionNameAndEntityNameAndLoanIdAndTransactionIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                WC_ADJUST_BY_DELTA, WC_TRANSACTION, LOAN_ID, "WC456", WC_DELTA_JSON, AWAITING_APPROVAL);
+        verify(processAndLogCommandService).executeCommand(any(), any(), eq(false));
+    }
+
+    @Test
+    void checkerOnlyUserApprovesTheIdenticalAdjustmentPendingByTransactionExternalId() {
+        givenCheckerOnly(WC_ADJUST_BY_DELTA_PERMISSION);
+        CommandSource pendingCommand = mock(CommandSource.class);
+        when(pendingCommand.getId()).thenReturn(56L);
+        when(pendingCommand.isAwaitingApproval()).thenReturn(true);
+        when(pendingCommand.getCommandAsJson()).thenReturn(WC_DELTA_JSON);
+        givenPendingByTransaction(WC_ADJUST_BY_DELTA, WC_TRANSACTION, LOAN_ID, WC_TRANSACTION_EXTERNAL_ID, WC_DELTA_JSON, pendingCommand);
+        when(commandSourceRepository.findById(56L)).thenReturn(Optional.of(pendingCommand));
+        when(context.authenticatedUser()).thenReturn(user);
+        when(configurationService.isSameMakerCheckerEnabled()).thenReturn(true);
+
+        underTest.logCommandSource(wcAdjustByDelta(WC_TRANSACTION_EXTERNAL_ID));
+
+        verify(processAndLogCommandService).executeCommand(any(), any(), eq(true));
+        verify(user, never()).validateHasPermissionTo(WC_ADJUST_BY_DELTA_PERMISSION);
+    }
+
+    @Test
     void taskWithoutMakerCheckerIsNotLookedUp() {
         when(user.hasNotPermissionForAnyOf("DISBURSE_LOAN")).thenReturn(false);
         when(user.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", "DISBURSE_LOAN_CHECKER")).thenReturn(true);
@@ -227,6 +277,17 @@ class PortfolioCommandSourceWritePlatformServiceImplTest {
             final String json, final CommandSource pendingCommand) {
         when(commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
                 actionName, entityName, resourceId, subResourceId, json, AWAITING_APPROVAL)).thenReturn(Optional.of(pendingCommand));
+    }
+
+    private void givenPendingByTransaction(final String actionName, final String entityName, final Long loanId,
+            final String transactionId, final String json, final CommandSource pendingCommand) {
+        when(commandSourceRepository.findFirstByActionNameAndEntityNameAndLoanIdAndTransactionIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                actionName, entityName, loanId, transactionId, json, AWAITING_APPROVAL)).thenReturn(Optional.of(pendingCommand));
+    }
+
+    private static CommandWrapper wcAdjustByDelta(final String transactionExternalId) {
+        return new CommandWrapperBuilder().adjustByDeltaWorkingCapitalLoanTransaction(LOAN_ID, transactionExternalId)
+                .withJson(WC_DELTA_JSON).build();
     }
 
     private static CommandWrapper disburse() {

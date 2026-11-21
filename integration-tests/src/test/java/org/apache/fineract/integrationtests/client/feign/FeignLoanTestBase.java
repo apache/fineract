@@ -49,7 +49,8 @@ import org.apache.fineract.client.models.BatchRequest;
 import org.apache.fineract.client.models.BatchResponse;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
@@ -70,7 +71,6 @@ import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
 import org.apache.fineract.client.models.LoanCapitalizedIncomeData;
 import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.LoanScheduleData;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
@@ -475,11 +475,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.addLoanCharge(loanId, request);
     }
 
-    protected PostChargesResponse createCharge(Double amount) {
+    protected ChargeCreateResponse createCharge(Double amount) {
         return chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount));
     }
 
-    protected PostChargesResponse createCharge(Double amount, String currencyCode) {
+    protected ChargeCreateResponse createCharge(Double amount, String currencyCode) {
         return chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount, currencyCode));
     }
 
@@ -1760,7 +1760,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected Long addCharge(Long loanId, boolean isPenalty, double amount, String dueDate) {
-        ChargeRequest chargeRequest = ChargeRequestBuilders.loanSpecifiedDueDateFee(amount);
+        ChargeCreateRequest chargeRequest = ChargeRequestBuilders.loanSpecifiedDueDateFee(amount);
         if (isPenalty) {
             chargeRequest.penalty(true);
         }

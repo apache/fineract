@@ -450,4 +450,29 @@ NOTE: All the default serializers are having `Ordered.LOWEST_PRECEDENCE`.
 |`false`
 |Whether the external event sending is enabled or disabled.
 
+|`fineract.events.external.thread-pool-core-pool-size`
+|`FINERACT_EVENT_TASK_EXECUTOR_CORE_POOL_SIZE`
+|`2`
+|Core size of the thread pool that marks published events as sent in the database. Separate from the JMS producer pool below.
+
+|`fineract.events.external.thread-pool-max-pool-size`
+|`FINERACT_EVENT_TASK_EXECUTOR_MAX_POOL_SIZE`
+|`25`
+|Maximum size of the thread pool that marks published events as sent.
+
+|`fineract.events.external.thread-pool-queue-capacity`
+|`FINERACT_EVENT_TASK_EXECUTOR_QUEUE_CAPACITY`
+|`500`
+|Queue capacity of the thread pool that marks published events as sent.
+
+|`fineract.events.external.producer.jms.thread-pool-task-executor-core-pool-size`
+|`FINERACT_EXTERNAL_EVENTS_PRODUCER_JMS_TASK_EXECUTOR_CORE_POOL_SIZE`
+|`10`
+|Core size of the thread pool that sends events to the JMS broker. Used only when the JMS producer is enabled. Earlier versions sized this pool with `FINERACT_EVENT_TASK_EXECUTOR_CORE_POOL_SIZE`.
+
+|`fineract.events.external.producer.jms.thread-pool-task-executor-max-pool-size`
+|`FINERACT_EXTERNAL_EVENTS_PRODUCER_JMS_TASK_EXECUTOR_MAX_POOL_SIZE`
+|`100`
+|Maximum size of the thread pool that sends events to the JMS broker. Earlier versions sized this pool with `FINERACT_EVENT_TASK_EXECUTOR_MAX_POOL_SIZE`.
+
 |===

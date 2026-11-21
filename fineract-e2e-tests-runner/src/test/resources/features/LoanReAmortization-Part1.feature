@@ -3250,3 +3250,26 @@ Feature: LoanReAmortization - Part1
     When Loan Pay-off is made on "15 March 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+
+  @AdvancedPaymentAllocation
+  Scenario: Verify that re-amortization and undoing the re-amortization refresh the overdue amount of the loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "500" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "500" EUR transaction amount
+    When Admin sets the business date to "25 January 2024"
+    When Admin runs inline COB job for Loan
+#   --- the installment due on 16 January 2024 is overdue ---
+    Then Loan has 125 total overdue amount
+    When Admin creates a Loan re-amortization transaction on current business date
+#   --- its principal is moved to the installments due on 31 January and 15 February 2024, nothing is overdue ---
+    Then Loan has 0 total overdue amount
+    When Admin sets the business date to "26 January 2024"
+    When Admin undo Loan re-amortization transaction on current business date
+    Then Loan has 125 total overdue amount
+    When Loan Pay-off is made on "26 January 2024"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

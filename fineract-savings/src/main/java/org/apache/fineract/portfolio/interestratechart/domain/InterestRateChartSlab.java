@@ -26,7 +26,6 @@ import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveA
 import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.incentiveTypeparamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.deleteParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_RESOURCE_NAME;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -39,18 +38,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 
@@ -76,15 +71,6 @@ public class InterestRateChartSlab extends AbstractPersistableCustom<Long> {
         return new InterestRateChartSlab(slabFields, interestRateChart);
     }
 
-    public void update(JsonCommand command, final Map<String, Object> actualChanges, final Locale locale) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(INTERESTRATE_CHART_SLAB_RESOURCE_NAME);
-        this.update(command, actualChanges, baseDataValidator, locale);
-        this.interestRateChart.validateChartSlabs(baseDataValidator);
-        this.throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
     public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
             final Locale locale) {
         this.slabFields.update(command, actualChanges, baseDataValidator, locale);
@@ -102,12 +88,6 @@ public class InterestRateChartSlab extends AbstractPersistableCustom<Long> {
 
     public void setInterestRateChart(InterestRateChart interestRateChart) {
         this.interestRateChart = interestRateChart;
-    }
-
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
     }
 
     public InterestRateChartSlabFields slabFields() {

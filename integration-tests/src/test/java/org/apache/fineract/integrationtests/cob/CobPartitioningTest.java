@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.COBPartition;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -162,7 +162,7 @@ public class CobPartitioningTest extends FeignLoanTestBase {
     }
 
     private Long createLoanProduct() {
-        ChargeRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
+        ChargeCreateRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
                 .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue());
         Long overdueFeeChargeId = chargesHelper.createCharge(overdueFeeCharge).getResourceId();
 

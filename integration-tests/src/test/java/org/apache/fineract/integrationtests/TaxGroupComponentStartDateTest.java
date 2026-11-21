@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetTaxesGroupResponse;
 import org.apache.fineract.client.models.GetTaxesGroupTaxAssociations;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
@@ -193,7 +193,7 @@ public class TaxGroupComponentStartDateTest {
     }
 
     private void linkToCharge(final Long taxGroupId) {
-        new FeignChargesHelper(fineractClient).createCharge(new ChargeRequest().penalty(false).amount(10.0)
+        new FeignChargesHelper(fineractClient).createCharge(new ChargeCreateRequest().penalty(false).amount(10.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(Utils.LOCALE).active(true)

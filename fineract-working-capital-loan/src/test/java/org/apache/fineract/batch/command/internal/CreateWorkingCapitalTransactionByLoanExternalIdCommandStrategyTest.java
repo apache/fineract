@@ -86,10 +86,10 @@ public class CreateWorkingCapitalTransactionByLoanExternalIdCommandStrategyTest 
      */
     private BatchRequest getBatchRequest(final String loanExternalId, final String command) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("v1/working-capital-loans/external-id/" + loanExternalId + "/transactions?command=" + command);
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{\"transactionDate\":\"01 January 2026\",\"transactionAmount\":500,\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\"}");
         return br;
     }

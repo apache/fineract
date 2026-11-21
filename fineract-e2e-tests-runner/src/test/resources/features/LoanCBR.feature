@@ -1982,7 +1982,8 @@ Feature: Credit Balance Refund
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+    Then Loan Repayment schedule periods do not overlap
     When Admin sets the business date to "14 October 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "14 October 2025" with 46.89 EUR transaction amount
@@ -1993,7 +1994,7 @@ Feature: Credit Balance Refund
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
     When Admin sets the business date to "13 November 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "13 November 2025" with 46.89 EUR transaction amount
@@ -2004,7 +2005,7 @@ Feature: Credit Balance Refund
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
     When Admin sets the business date to "21 November 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "21 November 2025" with 46.89 EUR transaction amount
@@ -2015,7 +2016,7 @@ Feature: Credit Balance Refund
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
     When Admin sets the business date to "21 December 2025"
     And Admin runs inline COB job for Loan
     And Admin sets the business date to "21 January 2026"
@@ -2036,14 +2037,14 @@ Feature: Credit Balance Refund
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
     When Admin sets the business date to "21 May 2026"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
     When Admin does charge-off the loan on "21 May 2026"
     And Customer makes "AUTOPAY" repayment on "21 May 2026" with 46.89 EUR transaction amount
     And Admin sets the business date to "27 May 2026"
@@ -2055,7 +2056,7 @@ Feature: Credit Balance Refund
       | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
-      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+      | 2  | 0    | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
     And Loan Transactions tab has the following data:
       | Transaction date   | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 29 August 2025     | Disbursement           | 65.98  | 0.0       | 0.0      | 0.0  | 0.0       | 65.98        | false    | false    |

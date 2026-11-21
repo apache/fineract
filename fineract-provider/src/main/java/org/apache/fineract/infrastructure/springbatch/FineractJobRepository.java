@@ -174,7 +174,7 @@ public final class FineractJobRepository {
          * Rewrites {@code target} in place instead of replacing the instance on the step execution.
          * <p>
          * Batch hands the context out during {@code beforeStep} and components keep the reference - {@code
-         * AbstractItemProcessor} stores it for the whole step - so swapping the object would leave them reading the
+         * AbstractCOBItemWriter} stores it for the whole step - so swapping the object would leave them reading the
          * pre-rollback one while the step execution carries another. Restoring through the same instance keeps every
          * holder in agreement.
          */

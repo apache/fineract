@@ -30,7 +30,6 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -168,9 +167,8 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay down payment installment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(125.00));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 March 2023").locale("en").transactionAmount(125.00));
 
             loanDetails = getLoanDetails(loanId);
 
@@ -410,9 +408,8 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay downpayment insatllment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(125.00));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 March 2023").locale("en").transactionAmount(125.00));
 
             loanDetails = getLoanDetails(loanId);
 
@@ -641,9 +638,8 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay downpayment insatllment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(125.00));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 March 2023").locale("en").transactionAmount(125.00));
 
             loanDetails = getLoanDetails(loanId);
 
@@ -692,9 +688,8 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             updateBusinessDate(businessDate.toString());
 
             // make 2nd repayment on 7 April to pay installment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 April 2023").locale("en")
-                            .transactionAmount(125.00));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 April 2023").locale("en").transactionAmount(125.00));
 
             loanDetails = getLoanDetails(loanId);
 
@@ -1018,9 +1013,8 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay installment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(166.67));
+            makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
+                    .transactionDate("7 March 2023").locale("en").transactionAmount(166.67));
 
             loanDetails = getLoanDetails(loanId);
 

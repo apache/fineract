@@ -26,17 +26,18 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.AddressCreateResponse;
 import org.apache.fineract.client.models.AddressData;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsPageItemsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
-import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PutClientsClientIdRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -222,7 +223,7 @@ public class ClientTest extends FeignIntegrationTest {
         ClientAddressRequest request = new ClientAddressRequest().street(street).townVillage(townVillage).countyDistrict(countyDistrict)
                 .addressLine1(addressLine1).postalCode(postalCode).city(city).countryId(countryId).stateProvinceId(stateId)
                 .isActive(addressIsActive);
-        PostClientClientIdAddressesResponse response = clientHelper.createClientAddress(clientId, addressTypeId, request);
+        AddressCreateResponse response = clientHelper.createClientAddress(clientId, addressTypeId, request);
         // then
         assertThat(response.getResourceId()).isNotNull();
         List<AddressData> clientAddresses = clientHelper.getClientAddresses(clientId);
@@ -248,6 +249,99 @@ public class ClientTest extends FeignIntegrationTest {
         assertThat(updatedAddressResponse.getStreet()).isEqualTo(updatedStreet);
         assertThat(updatedAddressResponse.getTownVillage()).isEqualTo(updatedTownVillage);
         assertThat(updatedAddressResponse.getCountyDistrict()).isEqualTo(updatedCountyDistrict);
+    }
+
+    @Test
+    public void testClientAddressCreationRejectsMissingAddressType() {
+        enableAddress();
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+
+        CallFailedRuntimeException error = clientHelper.createClientAddressExpectingError(clientId, null,
+                new ClientAddressRequest().city("Budapest"));
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        assertEquals("org.apache.fineract.portfolio.address.create.assertion.address-type-id-required",
+                FeignErrors.errorGlobalisationCode(error));
+        assertThat(clientHelper.getClientAddresses(clientId)).isEmpty();
+    }
+
+    @Test
+    public void testClientAddressCreationRejectsPostalCodeLongerThanTheColumn() {
+        enableAddress();
+        final Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+
+        CallFailedRuntimeException error = clientHelper.createClientAddressExpectingError(clientId, addressTypeId,
+                new ClientAddressRequest().city("Budapest").postalCode("12345678901"));
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        assertEquals("org.apache.fineract.portfolio.address.create.assertion.postal-code-max-length",
+                FeignErrors.errorGlobalisationCode(error));
+        assertThat(clientHelper.getClientAddresses(clientId)).isEmpty();
+    }
+
+    @Test
+    public void testClientAddressCreationRejectsFieldDisabledByFieldConfiguration() {
+        // latitude is disabled in the default ADDRESS field configuration
+        enableAddress();
+        final Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+
+        CallFailedRuntimeException error = clientHelper.createClientAddressExpectingError(clientId, addressTypeId,
+                new ClientAddressRequest().city("Budapest").latitude(new BigDecimal("47.4979")));
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        FeignErrors.ReportedError reportedError = FeignErrors.firstError(error);
+        assertEquals("error.msg.parameter.unsupported", reportedError.userMessageGlobalisationCode());
+        assertEquals("latitude", reportedError.parameterName());
+        assertThat(clientHelper.getClientAddresses(clientId)).isEmpty();
+    }
+
+    @Test
+    public void testClientAddressUpdateRejectsFieldDisabledByFieldConfiguration() {
+        // latitude is disabled in the default ADDRESS field configuration
+        enableAddress();
+        final Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
+        final Long clientId = clientHelper.createClient(ClientRequestBuilders.defaultClient()).getClientId();
+        clientHelper.createClientAddress(clientId, addressTypeId, new ClientAddressRequest().city("Budapest"));
+        final Long addressId = clientHelper.getClientAddresses(clientId).get(0).getAddressId();
+
+        CallFailedRuntimeException error = clientHelper.updateClientAddressExpectingError(clientId,
+                new ClientAddressRequest().addressId(addressId).city("Szeged").latitude(new BigDecimal("47.4979")));
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        FeignErrors.ReportedError reportedError = FeignErrors.firstError(error);
+        assertEquals("error.msg.parameter.unsupported", reportedError.userMessageGlobalisationCode());
+        assertEquals("latitude", reportedError.parameterName());
+        assertThat(clientHelper.getClientAddresses(clientId).get(0).getCity()).isEqualTo("Budapest");
+    }
+
+    @Test
+    public void testClientCreationRejectsAddressWithoutAddressType() {
+        enableAddress();
+        PostClientsRequest request = ClientRequestBuilders.defaultClient()
+                .address(List.of(new ClientAddressRequest().city("Budapest").isActive(true)));
+
+        CallFailedRuntimeException error = clientHelper.createClientExpectingError(request);
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        assertEquals("org.apache.fineract.portfolio.address.create.assertion.address-type-id-required",
+                FeignErrors.errorGlobalisationCode(error));
+    }
+
+    @Test
+    public void testClientCreationRejectsAddressWithFieldDisabledByFieldConfiguration() {
+        enableAddress();
+        final Long addressTypeId = codeHelper.createCodeValue(ADDRESS_TYPE_CODE, Utils.randomStringGenerator("Residential address", 4), 0);
+        PostClientsRequest request = ClientRequestBuilders.defaultClient().address(
+                List.of(new ClientAddressRequest().addressTypeId(addressTypeId).city("Budapest").longitude(new BigDecimal("19.0402"))));
+
+        CallFailedRuntimeException error = clientHelper.createClientExpectingError(request);
+
+        assertEquals(BAD_REQUEST, error.getStatus());
+        FeignErrors.ReportedError reportedError = FeignErrors.firstError(error);
+        assertEquals("error.msg.parameter.unsupported", reportedError.userMessageGlobalisationCode());
+        assertEquals("longitude", reportedError.parameterName());
     }
 
     private void enableAddress() {

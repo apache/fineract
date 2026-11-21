@@ -48,6 +48,7 @@ public class AccountingBridgeLoanTransactionDTO {
     private Long paymentTypeId;
     private List<LoanChargePaidByDTO> loanChargesPaid = new ArrayList<>();
     private BigDecimal principalPaid;
+    private BigDecimal interestPaid;
     private BigDecimal feePaid;
     private BigDecimal penaltyPaid;
     private LoanChargeDTO loanChargeDTO;

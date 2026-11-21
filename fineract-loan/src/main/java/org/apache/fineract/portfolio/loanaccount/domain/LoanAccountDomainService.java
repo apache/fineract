@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
@@ -88,9 +87,9 @@ public interface LoanAccountDomainService {
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
             ExternalId externalId, PaymentDetail paymentDetail);
 
-    Pair<LoanTransaction, LoanTransaction> makeRefund(Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO,
-            LoanTransactionType loanTransactionType, LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail,
-            ExternalId txnExternalId, Boolean interestRefundCalculationOverride);
+    RefundTransactionResult makeRefund(Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO, LoanTransactionType loanTransactionType,
+            LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail, ExternalId txnExternalId,
+            Boolean interestRefundCalculationOverride);
 
     void updateAndSavePostDatedChecksForIndividualAccount(Loan loan, LoanTransaction transaction);
 

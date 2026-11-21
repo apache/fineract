@@ -46,9 +46,9 @@ public class UpdateDatatableEntryOneToManyCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long datatableEntryId = Long.valueOf(RandomStringUtils.randomNumeric(3));
-        final String datatableName = RandomStringUtils.randomAlphabetic(10);
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
+        final Long datatableEntryId = Long.valueOf(RandomStringUtils.secure().nextNumeric(3));
+        final String datatableName = RandomStringUtils.secure().nextAlphabetic(10);
         final BatchRequest request = getBatchRequest(datatableName, loanId, datatableEntryId);
         final String responseBody = "{\"resourceId\":193}";
 
@@ -81,7 +81,7 @@ public class UpdateDatatableEntryOneToManyCommandStrategyTest {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("datatables/%s/%s/%s", datatableName, loanId, datatableEntryId);
 
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.PUT);
         br.setBody("{\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\",\"enabled\":true,\"amount\":500.10}");

@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 import org.apache.fineract.cob.conditions.BatchManagerCondition;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -51,11 +51,11 @@ public class ExecuteStandingInstructionsManagerConfig {
     @Autowired
     private DirectChannel outboundRequests;
     @Autowired
-    private StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private StandingInstructionReadService standingInstructionReadService;
 
     @Bean
     public StandingInstructionPartitioner standingInstructionPartitioner() {
-        return new StandingInstructionPartitioner(propertyService, standingInstructionReadPlatformService);
+        return new StandingInstructionPartitioner(propertyService, standingInstructionReadService);
     }
 
     @Bean

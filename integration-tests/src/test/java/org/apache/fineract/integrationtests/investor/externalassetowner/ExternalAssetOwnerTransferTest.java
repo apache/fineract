@@ -19,33 +19,41 @@
 package org.apache.fineract.integrationtests.investor.externalassetowner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalAssetOwnerHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignMakerCheckerHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 
@@ -54,12 +62,16 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
 
     protected static final String DATE_FORMAT_ISO = "yyyy-MM-dd";
     protected static final String LOAN_COB_JOB = "Loan COB";
+    protected static final String BUYBACK_COMMAND = "buyback";
+    protected static final String INTERMEDIARY_SALE_COMMAND = "intermediarySale";
     protected static final String PENALTY_DUE_DATE = "02 March 2020";
     protected static final Double LOAN_PRINCIPAL = 15000.0;
     protected static final Integer LOAN_REPAYMENTS = 4;
     protected static final BigDecimal LOAN_INTEREST_RATE = BigDecimal.valueOf(2);
 
     protected static final FeignExternalAssetOwnerHelper EXTERNAL_ASSET_OWNER_HELPER = new FeignExternalAssetOwnerHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
+    protected static final FeignMakerCheckerHelper MAKER_CHECKER_HELPER = new FeignMakerCheckerHelper(
             FineractFeignClientHelper.getFineractFeignClient());
 
     /** The GL account the ASSET_TRANSFER financial activity is mapped to; every sale and buyback books against it. */
@@ -98,6 +110,28 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
                         .ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
+    }
+
+    protected PostInitiateTransferResponse createBuybackTransfer(Long loanId, String settlementDate) {
+        return createBuybackTransfer(loanId, settlementDate, UUID.randomUUID().toString());
+    }
+
+    protected PostInitiateTransferResponse createBuybackTransfer(Long loanId, String settlementDate, String transferExternalId) {
+        PostInitiateTransferResponse buybackResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanId, BUYBACK_COMMAND,
+                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat(DATE_FORMAT_ISO).locale(LoanTestData.LOCALE)
+                        .transferExternalId(transferExternalId));
+        assertEquals(transferExternalId, buybackResponse.getResourceExternalId());
+        return buybackResponse;
+    }
+
+    protected PostInitiateTransferResponse createIntermediarySaleTransfer(Long loanId, String settlementDate, String ownerExternalId) {
+        String transferExternalId = UUID.randomUUID().toString();
+        PostInitiateTransferResponse intermediarySaleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanId,
+                INTERMEDIARY_SALE_COMMAND,
+                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat(DATE_FORMAT_ISO).locale(LoanTestData.LOCALE)
+                        .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
+        assertEquals(transferExternalId, intermediarySaleResponse.getResourceExternalId());
+        return intermediarySaleResponse;
     }
 
     protected void addPenaltyForLoan(Long loanId, String amount) {
@@ -207,6 +241,96 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
         assertEquals(loanId, transferResponse.getSubResourceId());
         assertNotNull(transferResponse.getSubResourceExternalId());
         assertNull(transferResponse.getChanges());
+    }
+
+    /**
+     * A progressive buy down fee product with periodic accrual accounting, booking everything against the given
+     * accounts.
+     */
+    protected PostLoanProductsRequest buyDownFeeProduct(String namePrefix, Account assetAccount, Account incomeAccount,
+            Account expenseAccount, Account liabilityAccount) {
+        return withPeriodicAccrualAccounting(new PostLoanProductsRequest() //
+                .name(Utils.uniqueRandomStringGenerator(namePrefix, 6)) //
+                .shortName(Utils.uniqueRandomStringGenerator("", 4)) //
+                .currencyCode("USD") //
+                .digitsAfterDecimal(2) //
+                .principal(1000.0) //
+                .numberOfRepayments(6) //
+                .repaymentEvery(1) //
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS_L) //
+                .interestRatePerPeriod(10.0) //
+                .interestRateFrequencyType(LoanTestData.InterestRateFrequencyType.YEARS) //
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS) //
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE) //
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY) //
+                .daysInMonthType(30) //
+                .daysInYearType(360) //
+                .isInterestRecalculationEnabled(false) //
+                .transactionProcessingStrategyCode("advanced-payment-allocation-strategy") //
+                .paymentAllocation(List.of(createDefaultPaymentAllocation("NEXT_INSTALLMENT"))) //
+                .loanScheduleType("PROGRESSIVE") //
+                .loanScheduleProcessingType("HORIZONTAL") //
+                .enableBuyDownFee(true) //
+                .merchantBuyDownFee(true) //
+                .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT) //
+                .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION) //
+                .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.FEE) //
+                .locale(LoanTestData.LOCALE) //
+                .dateFormat(LoanTestData.DATETIME_PATTERN), assetAccount, incomeAccount, expenseAccount, liabilityAccount) //
+                .buyDownExpenseAccountId(expenseAccount.getAccountID().longValue()) //
+                .incomeFromBuyDownAccountId(incomeAccount.getAccountID().longValue()) //
+                .deferredIncomeLiabilityAccountId(liabilityAccount.getAccountID().longValue());
+    }
+
+    /** Neither the journal entries nor the event of the loan transaction may name an external asset owner. */
+    protected void assertUntaggedOnBothSurfaces(Long loanTransactionId) {
+        List<JournalEntryTransactionItem> entries = journalEntriesOf(loanTransactionId);
+        assertFalse(entries.isEmpty(), "expected journal entries for loan transaction " + loanTransactionId);
+        entries.forEach(entry -> assertNull(entry.getExternalAssetOwner(),
+                "journal entry of loan transaction " + loanTransactionId + " must not be attributed to any owner"));
+        assertEventOwner(loanTransactionId, null);
+    }
+
+    protected void assertTaggedOnBothSurfaces(Long loanTransactionId, String ownerExternalId) {
+        assertJournalEntriesTagged(loanTransactionId, ownerExternalId);
+        assertEventOwner(loanTransactionId, ownerExternalId);
+    }
+
+    protected void assertJournalEntriesTagged(Long loanTransactionId, String ownerExternalId) {
+        List<JournalEntryTransactionItem> entries = journalEntriesOf(loanTransactionId);
+        assertFalse(entries.isEmpty(), "expected journal entries for loan transaction " + loanTransactionId);
+        entries.forEach(entry -> assertEquals(ownerExternalId, entry.getExternalAssetOwner(),
+                "journal entry of loan transaction " + loanTransactionId + " must be attributed to the owner"));
+    }
+
+    protected List<JournalEntryTransactionItem> journalEntriesOf(Long loanTransactionId) {
+        List<JournalEntryTransactionItem> items = journalHelper.getJournalEntriesByTransactionId("L" + loanTransactionId).getPageItems();
+        return items == null ? List.of() : items;
+    }
+
+    /**
+     * External events are flushed as the surrounding transaction commits, so the event may not be readable the instant
+     * the API call returns.
+     */
+    protected void assertEventOwner(Long loanTransactionId, String expectedOwnerExternalId) {
+        Awaitility.await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).untilAsserted(() -> {
+            List<Map<String, Object>> payloads = externalEventHelper.getAllExternalEvents().stream().map(ExternalEventResponse::getPayLoad)
+                    .filter(payload -> isTransactionPayload(payload, loanTransactionId)).toList();
+            assertFalse(payloads.isEmpty(), "expected an external event for loan transaction " + loanTransactionId);
+            payloads.forEach(payload -> assertEquals(expectedOwnerExternalId, payload.get("externalOwnerId"),
+                    "event of loan transaction " + loanTransactionId + " carries the wrong externalOwnerId"));
+        });
+    }
+
+    /**
+     * A loan transaction payload, identified by id. externalOwnerId is not required to be present: the serialised
+     * record omits it when it is null.
+     */
+    protected boolean isTransactionPayload(Map<String, Object> payload, Long loanTransactionId) {
+        if (payload == null || payload.get("id") == null || payload.get("loanId") == null) {
+            return false;
+        }
+        return loanTransactionId.equals(Long.valueOf(String.valueOf(payload.get("id"))));
     }
 
     @RequiredArgsConstructor

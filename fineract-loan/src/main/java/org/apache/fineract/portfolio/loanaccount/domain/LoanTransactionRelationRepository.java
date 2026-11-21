@@ -44,4 +44,14 @@ public interface LoanTransactionRelationRepository
             """)
     List<LoanTransaction> findNonReversedInterestRefundsRelatedTo(LoanTransaction toTransaction);
 
+    @Query("""
+            SELECT ltr.fromTransaction
+            FROM LoanTransactionRelation ltr
+            WHERE ltr.toTransaction = :toTransaction
+              AND ltr.relationType = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.RELATED
+              AND ltr.fromTransaction.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.FEE_REFUND
+              AND ltr.fromTransaction.reversed = false
+            """)
+    List<LoanTransaction> findNonReversedFeeRefundsRelatedTo(LoanTransaction toTransaction);
+
 }

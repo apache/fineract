@@ -31,7 +31,6 @@ public class SpringBatchPropertyServiceDefinitions implements En {
     private PropertyService propertyService;
     private int partitionSize;
     private int chunkSize;
-    private int retryLimit;
 
     public SpringBatchPropertyServiceDefinitions() {
         Given("Property Service is initialized", () -> {
@@ -46,20 +45,12 @@ public class SpringBatchPropertyServiceDefinitions implements En {
             chunkSize = propertyService.getChunkSize(jobName);
         });
 
-        When("retry limit is fetched for {string}", (String jobName) -> {
-            retryLimit = propertyService.getRetryLimit(jobName);
-        });
-
         Then("partition size is {int}", (Integer value) -> {
             assertThat(partitionSize).isEqualTo(value);
         });
 
         Then("chunk size is {int}", (Integer value) -> {
             assertThat(chunkSize).isEqualTo(value);
-        });
-
-        Then("retry limit is {int}", (Integer value) -> {
-            assertThat(retryLimit).isEqualTo(value);
         });
     }
 }

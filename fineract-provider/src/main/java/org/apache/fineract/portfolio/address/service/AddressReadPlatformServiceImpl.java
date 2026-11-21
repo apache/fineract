@@ -45,7 +45,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     private static final class AddFieldsMapper implements RowMapper<AddressData> {
 
-        public String schema() {
+        private String schema() {
             return "addr.id as id,client.id as client_id,addr.street as street,addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,"
                     + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
                     + "addr.state_province_id as state_province_id, addr.country_id as country_id,addr.postal_code as postal_code,addr.latitude as latitude,"
@@ -100,7 +100,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     private static final class AddMapper implements RowMapper<AddressData> {
 
-        public String schema() {
+        private String schema() {
             return "cv2.code_value as addressType,ca.client_id as client_id,addr.id as id,ca.address_type_id as addresstyp,ca.is_active as is_active,addr.street as street,addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,"
                     + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
                     + "addr.state_province_id as state_province_id,cv.code_value as state_name, addr.country_id as country_id,c.code_value as country_name,addr.postal_code as postal_code,addr.latitude as latitude,"

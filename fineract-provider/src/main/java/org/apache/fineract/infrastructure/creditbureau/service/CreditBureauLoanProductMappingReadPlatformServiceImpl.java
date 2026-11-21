@@ -42,7 +42,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
 
     private static final class CreditBureauLoanProductMapper implements RowMapper<CreditBureauLoanProductMappingData> {
 
-        public String schema() {
+        private String schema() {
             return "cblp.id as mappingId, cblp.organisation_creditbureau_id as orgcbId,"
                     + "orgcb.alias as alias,concat( cb.product,' - ' ,cb.name,' - ',cb.country) as creditbureau,"
                     + "cblp.loan_product_id as lpId,lp.name as loan_product_name,cblp.is_creditcheck_mandatory as crCheck,cblp.skip_creditcheck_in_failure as skipcheck,"
@@ -72,7 +72,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
 
     private static final class LoanProductMapper implements RowMapper<CreditBureauLoanProductMappingData> {
 
-        public String schema() {
+        private String schema() {
             return "lp.name as loan_product_name,lp.id as loanid from m_product_loan lp";
         }
 

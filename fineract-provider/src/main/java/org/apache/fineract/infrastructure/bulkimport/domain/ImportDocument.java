@@ -29,7 +29,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
@@ -74,7 +73,7 @@ public final class ImportDocument extends AbstractPersistableCustom<Long> {
         final Boolean completed = Boolean.FALSE;
         final Integer successCount = 0;
         final Integer failureCount = 0;
-        final LocalDateTime endTime = DateUtils.getLocalDateTimeOfTenant();
+        final LocalDateTime endTime = null;
 
         return new ImportDocument(documentId, importTime, endTime, completed, entityType, createdBy, totalRecords, successCount,
                 failureCount);

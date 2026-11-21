@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.codes.service;
 
+import static org.apache.fineract.query.QMCode.mCode;
+
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -38,16 +41,19 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final SQLQueryFactory queryFactory;
 
     @Autowired
-    public CodeReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
+    public CodeReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
+            final SQLQueryFactory queryFactory) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
+        this.queryFactory = queryFactory;
     }
 
     private static final class CodeMapper implements RowMapper<CodeData> {
 
-        public String schema() {
+        private String schema() {
             return " c.id as id, c.code_name as code_name, c.is_system_defined as systemDefined from m_code c ";
         }
 
@@ -67,10 +73,14 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     public Collection<CodeData> retrieveAllCodes() {
         this.context.authenticatedUser();
 
-        final CodeMapper rm = new CodeMapper();
-        final String sql = "select " + rm.schema() + " order by c.code_name";
-
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+        return this.queryFactory.select(mCode.id, mCode.codeName, mCode.isSystemDefined) //
+                .from(mCode) //
+                .orderBy(mCode.codeName.asc()) //
+                .fetch() //
+                .stream() //
+                .map(row -> CodeData.instance(row.get(mCode.id).longValue(), row.get(mCode.codeName),
+                        Boolean.TRUE.equals(row.get(mCode.isSystemDefined)))) //
+                .toList();
     }
 
     @Override

@@ -93,7 +93,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             return ProvisioningCriteriaData.toLookup(criteriaId, criteriaName, createdBy);
         }
 
-        public String schema() {
+        private String schema() {
             return "mpc.id as id, mpc.criteria_name as criteriaName, appu.username as username from m_provisioning_criteria as mpc LEFT JOIN m_appuser appu on mpc.createdby_id=appu.id";
         }
     }
@@ -152,7 +152,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
                     .setExpenseAccount(expenseAccount).setExpenseCode(expenseAccountCode).setExpenseName(expenseAccountName);
         }
 
-        public String schema() {
+        private String schema() {
             return PROVISIONING_CRITERIA_DEFINITION_SCHEMA;
         }
     }
@@ -170,7 +170,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             return rs.getString("criteriaName");
         }
 
-        public String schema() {
+        private String schema() {
             return " pc.criteria_name as criteriaName";
         }
     }

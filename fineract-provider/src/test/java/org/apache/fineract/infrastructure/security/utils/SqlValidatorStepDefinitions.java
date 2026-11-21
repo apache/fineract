@@ -52,7 +52,7 @@ public class SqlValidatorStepDefinitions implements En {
 
         When("Validating the partial statement", () -> {
             if (fuzzy != null && fuzzy > 0) {
-                String whitespaces = RandomStringUtils.random(fuzzy, '\n', '\r', '\t', ' ');
+                String whitespaces = RandomStringUtils.secure().next(fuzzy, '\n', '\r', '\t', ' ');
                 statement = statement.replaceAll(" ", whitespaces);
             }
 

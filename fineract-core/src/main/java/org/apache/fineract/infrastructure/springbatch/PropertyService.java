@@ -24,8 +24,6 @@ public interface PropertyService {
 
     Integer getChunkSize(String jobName);
 
-    Integer getRetryLimit(String jobName);
-
     /**
      * Maximum number of skipped items tolerated per step execution (per partition). Configured independently of chunk
      * size; falls back to {@code chunkSize + 1} when not set.

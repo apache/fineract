@@ -127,7 +127,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
 
     private static final class ReportMailingJobMapper implements RowMapper<ReportMailingJobData> {
 
-        public String reportMailingJobSchema() {
+        private String reportMailingJobSchema() {
             return "rmj.id, rmj.name, rmj.description, rmj.start_datetime as startDateTime, rmj.recurrence, rmj.created_date as createdOnDate, "
                     + "cbu.username as createdByUsername, cbu.firstname as createdByFirstname, cbu.lastname as createdByLastname, "
                     + "rmj.lastmodified_date as updatedOnDate, "

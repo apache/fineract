@@ -56,7 +56,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             this.schema = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
 

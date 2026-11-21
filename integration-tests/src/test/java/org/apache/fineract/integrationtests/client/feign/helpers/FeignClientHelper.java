@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.AddressCreateResponse;
 import org.apache.fineract.client.models.AddressData;
+import org.apache.fineract.client.models.AddressUpdateResponse;
+import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.ClientAuditFieldsData;
 import org.apache.fineract.client.models.ClientIdentifierRequest;
@@ -42,7 +45,6 @@ import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
-import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdChanges;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
@@ -51,7 +53,6 @@ import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsClientIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PutClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PutClientsClientIdIdentifiersIdentifierIdResponse;
 import org.apache.fineract.client.models.PutClientsClientIdRequest;
 import org.apache.fineract.client.models.PutClientsClientIdResponse;
@@ -59,6 +60,7 @@ import org.apache.fineract.client.models.SortOrder;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.IdempotencyHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignClientHelper {
@@ -106,6 +108,11 @@ public class FeignClientHelper {
 
     public PostClientsResponse createClient(PostClientsRequest request) {
         return ok(() -> fineractClient.clients().createClient(request));
+    }
+
+    public ApiResponse<PostClientsResponse> createClientWithIdempotencyKey(PostClientsRequest request, String idempotencyKey) {
+        return ok(() -> fineractClient.clients().createClientWithHttpInfo(request,
+                Map.of(IdempotencyHelper.IDEMPOTENCY_KEY_HEADER, idempotencyKey)));
     }
 
     public PostClientsResponse createClientPending() {
@@ -291,12 +298,20 @@ public class FeignClientHelper {
         return ok(() -> fineractClient.clients().deleteClientByExternalId(externalId));
     }
 
-    public PostClientClientIdAddressesResponse createClientAddress(Long clientId, Long addressTypeId, ClientAddressRequest request) {
+    public AddressCreateResponse createClientAddress(Long clientId, Long addressTypeId, ClientAddressRequest request) {
         return ok(() -> fineractClient.clientsAddress().createClientAddress(clientId, request, addressTypeId));
     }
 
-    public PutClientClientIdAddressesResponse updateClientAddress(Long clientId, ClientAddressRequest request) {
+    public CallFailedRuntimeException createClientAddressExpectingError(Long clientId, Long addressTypeId, ClientAddressRequest request) {
+        return fail(() -> fineractClient.clientsAddress().createClientAddress(clientId, request, addressTypeId));
+    }
+
+    public AddressUpdateResponse updateClientAddress(Long clientId, ClientAddressRequest request) {
         return ok(() -> fineractClient.clientsAddress().updateClientAddress(clientId, request));
+    }
+
+    public CallFailedRuntimeException updateClientAddressExpectingError(Long clientId, ClientAddressRequest request) {
+        return fail(() -> fineractClient.clientsAddress().updateClientAddress(clientId, request));
     }
 
     public List<AddressData> getClientAddresses(Long clientId) {

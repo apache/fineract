@@ -42,7 +42,7 @@ public class CreditBureauReadPlatformServiceImpl implements CreditBureauReadPlat
 
     private static final class CBMapper implements RowMapper<CreditBureauData> {
 
-        public String schema() {
+        private String schema() {
             return "cb.id as creditBureauID,cb.name as creditBureauName,cb.product as creditBureauProduct,"
                     + "cb.country as country,concat(cb.product,' - ',cb.name,' - ',cb.country) as cbSummary,cb.implementation_key as implementationKey from m_creditbureau cb";
         }

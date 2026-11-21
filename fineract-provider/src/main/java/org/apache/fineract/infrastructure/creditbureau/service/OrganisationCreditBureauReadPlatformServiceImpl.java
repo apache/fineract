@@ -42,7 +42,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
 
     private static final class OrganisationCreditBureauMapper implements RowMapper<OrganisationCreditBureauData> {
 
-        public String schema() {
+        private String schema() {
             return "ocb.id as orgCbId,ocb.alias as orgCbAlias,cb.name as creditbureauName,cb.product as creditbureauProduct,cb.country as creditbureauCountry,"
                     + "concat(cb.product,' - ',cb.name,' - ',cb.country) as CreditBureauSummary,"
                     + "ocb.creditbureau_id as cbid,ocb.is_active  as isActive"

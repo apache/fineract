@@ -19,8 +19,6 @@
 package org.apache.fineract.investor.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
 import org.apache.fineract.investor.data.attribute.ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.stereotype.Service;
@@ -29,20 +27,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ExcludedTransactionTypesServiceImpl implements ExcludedTransactionTypesService {
 
-    private final ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+    private final ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
 
     @Override
-    public boolean isExcluded(final Long loanProductId, final LoanTransactionType transactionType) {
-        // Guard before touching the read service: its cache key dereferences the loan product id, and an unresolvable
-        // transaction type can never be configured as excluded.
-        if (loanProductId == null || transactionType == null || LoanTransactionType.INVALID.equals(transactionType)) {
+    public boolean isExcluded(final Long loanId, final Long loanProductId, final LoanTransactionType transactionType) {
+        // an unresolvable transaction type can never be configured as excluded
+        if (transactionType == null || LoanTransactionType.INVALID.equals(transactionType)) {
             return false;
         }
-        Page<ExternalTransferLoanProductAttributesData> attributesDataPage = externalAssetOwnerLoanProductAttributesReadService
-                .retrieveAllLoanProductAttributesByLoanProductId(loanProductId,
-                        ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY);
-        String attributeValue = attributesDataPage.getPageItems().stream().findFirst()
-                .map(ExternalTransferLoanProductAttributesData::getAttributeValue).orElse(null);
+        String attributeValue = externalAssetOwnerLoanAttributesReadService
+                .resolveAttributeValue(loanId, loanProductId, ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY)
+                .orElse(null);
         return ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.containsType(attributeValue, transactionType);
     }
 }

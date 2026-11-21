@@ -46,6 +46,8 @@ dependencyManagement {
         mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
         mavenBom 'org.glassfish.jersey:jersey-bom:4.0.2'
         mavenBom 'org.springframework.modulith:spring-modulith-bom:2.1.1'
+        mavenBom 'io.github.openfeign.querydsl:querydsl-bom:7.7'
+        mavenBom 'com.infobip:infobip-spring-data-bom:11.0.2'
     }
 
     dependencies {
@@ -205,7 +207,6 @@ dependencyManagement {
             exclude 'pull-parser:pull-parser'
         }
 
-        dependency 'org.owasp.esapi:esapi:2.7.0.0'
         dependency 'org.awaitility:awaitility:4.3.0'
 
         dependencySet(group: 'org.apache.poi', version: '6.0.0') {

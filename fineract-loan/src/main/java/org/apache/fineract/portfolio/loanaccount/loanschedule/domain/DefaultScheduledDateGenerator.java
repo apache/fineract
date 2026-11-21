@@ -39,7 +39,6 @@ import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -51,46 +50,54 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         final Money zeroAmount = Money.zero(loanApplicationTerms.getCurrency(), mc);
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
         final ArrayList<LoanScheduleModelRepaymentPeriod> repaymentPeriods = new ArrayList<>(numberOfRepayments);
+        // a fixed length loan matures on this date whatever the working days and holidays are
+        final LocalDate fixedLengthMaturityDate = loanApplicationTerms.getFixedLength() != null
+                ? loanApplicationTerms.calculateMaxDateForFixedLength()
+                : null;
         LocalDate lastRepaymentDate = scheduleStartDate;
+        LocalDate lastAdjustedRepaymentDate = scheduleStartDate;
         LocalDate nextRepaymentDate;
         boolean isFirstRepayment = true;
         for (int repaymentPeriodNumber = 1; repaymentPeriodNumber <= numberOfRepayments; repaymentPeriodNumber++) {
             nextRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
-
-            if (repaymentPeriodNumber == numberOfRepayments) { // last period
-                if (loanApplicationTerms.getFixedLength() != null
-                        && loanApplicationTerms.calculateMaxDateForFixedLength().compareTo(nextRepaymentDate) != 0) {
-                    nextRepaymentDate = loanApplicationTerms.calculateMaxDateForFixedLength();
-                }
-                nextRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
+            // skip due dates the previous adjusted due date has already passed; the first repayment date is kept as
+            // given, like for cumulative loans, even when it falls on the schedule start date
+            while (!isFirstRepayment && !nextRepaymentDate.isAfter(lastAdjustedRepaymentDate)) {
+                nextRepaymentDate = generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, false);
             }
-            nextRepaymentDate = applyLoanTermVariations(loanApplicationTerms, nextRepaymentDate);
-            repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastRepaymentDate, nextRepaymentDate,
-                    zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
+
+            final LocalDate adjustedRepaymentDate;
+            if (fixedLengthMaturityDate == null) {
+                adjustedRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO)
+                        .getChangedScheduleDate();
+            } else if (repaymentPeriodNumber == numberOfRepayments) {
+                nextRepaymentDate = fixedLengthMaturityDate;
+                adjustedRepaymentDate = fixedLengthMaturityDate;
+            } else {
+                final LocalDate followingRepaymentDate = repaymentPeriodNumber + 1 == numberOfRepayments ? fixedLengthMaturityDate
+                        : generateNextRepaymentDate(nextRepaymentDate, loanApplicationTerms, false);
+                adjustedRepaymentDate = adjustRepaymentDateBefore(nextRepaymentDate, followingRepaymentDate, loanApplicationTerms,
+                        holidayDetailDTO);
+            }
+            repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastAdjustedRepaymentDate,
+                    adjustedRepaymentDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
             lastRepaymentDate = nextRepaymentDate;
+            lastAdjustedRepaymentDate = adjustedRepaymentDate;
             isFirstRepayment = false;
         }
         return repaymentPeriods;
     }
 
-    private LocalDate applyLoanTermVariations(final LoanApplicationTerms loanApplicationTerms, final LocalDate scheduledDueDate) {
-        LocalDate modifiedScheduledDueDate = scheduledDueDate;
-
-        if (LoanScheduleType.PROGRESSIVE.equals(loanApplicationTerms.getLoanScheduleType())) {
-            return modifiedScheduledDueDate;
-        }
-
-        // due date changes should be applied only for that dueDate
-        if (loanApplicationTerms.getLoanTermVariations() != null) {
-            if (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(scheduledDueDate)) {
-                LoanTermVariationsData loanTermVariationsData = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
-                if (DateUtils.isEqual(modifiedScheduledDueDate, loanTermVariationsData.getTermVariationApplicableFrom())) {
-                    modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
-                    loanApplicationTerms.updateVariationDays(DateUtils.getDifferenceInDays(scheduledDueDate, modifiedScheduledDueDate));
-                }
-            }
-        }
-        return modifiedScheduledDueDate;
+    /**
+     * Moves the due date off a non-working day or holiday only when the moved date is still before the following due
+     * date, and otherwise keeps it where it is. On a fixed length loan this keeps every due date before the maturity
+     * date.
+     */
+    private LocalDate adjustRepaymentDateBefore(final LocalDate repaymentDate, final LocalDate followingRepaymentDate,
+            final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
+        final LocalDate adjustedRepaymentDate = adjustRepaymentDate(repaymentDate, loanApplicationTerms, holidayDetailDTO)
+                .getChangedScheduleDate();
+        return adjustedRepaymentDate.isBefore(followingRepaymentDate) ? adjustedRepaymentDate : repaymentDate;
     }
 
     @Override
@@ -308,27 +315,19 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     public LocalDate getRepaymentPeriodDate(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate) {
         LocalDate dueRepaymentPeriodDate = startDate;
         switch (frequency) {
-            case DAYS:
-                dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
-            break;
-            case WEEKS:
-                dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
-            break;
-            case MONTHS:
-                dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
-            break;
-            case YEARS:
-                dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
-            break;
-            case SEMI_MONTHLY:
+            case DAYS -> dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
+            case WEEKS -> dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
+            case MONTHS -> dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
+            case YEARS -> dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
+            case SEMI_MONTHLY ->
                 // A semi-monthly due date depends on the configured day of the month, which this method does not
                 // receive. Callers must go through generateNextRepaymentDate, which has the loan terms at hand.
                 throw new UnsupportedOperationException("A semi-monthly repayment date cannot be derived from a period length");
-            case INVALID:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
-            break;
+            case INVALID -> {
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
+            }
         }
         return dueRepaymentPeriodDate;
     }
@@ -351,42 +350,41 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             final LocalDate date) {
         boolean isScheduledDate = false;
         switch (frequency) {
-            case DAYS:
+            case DAYS -> {
                 int diff = DateUtils.getExactDifferenceInDays(startDate, date);
                 isScheduledDate = (diff % repaidEvery) == 0;
-            break;
-            case WEEKS:
+            }
+            case WEEKS -> {
                 int weekDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.WEEKS);
                 isScheduledDate = (weekDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusWeeks(weekDiff);
                     isScheduledDate = DateUtils.isEqual(modifiedDate, date);
                 }
-            break;
-            case MONTHS:
+            }
+            case MONTHS -> {
                 int monthDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.MONTHS);
                 isScheduledDate = (monthDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusMonths(monthDiff);
                     isScheduledDate = DateUtils.isEqual(modifiedDate, date);
                 }
-            break;
-            case YEARS:
+            }
+            case YEARS -> {
                 int yearDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.YEARS);
                 isScheduledDate = (yearDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusYears(yearDiff);
                     isScheduledDate = DateUtils.isEqual(modifiedDate, date);
                 }
-            break;
-            case INVALID:
+            }
+            case INVALID, SEMI_MONTHLY -> {
                 // This is only asked of a standing instruction recurrence, and SEMI_MONTHLY is not offered as one, so
                 // no date falls in such a schedule.
-            case SEMI_MONTHLY:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
-            break;
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
+            }
         }
         return isScheduledDate;
     }
@@ -399,13 +397,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         LocalDate idealDisbursementDate = null;
 
         switch (repaymentPeriodFrequencyType) {
-            case DAYS:
-                idealDisbursementDate = firstRepaymentDate.minusDays(repaidEvery);
-            break;
-            case WEEKS:
-                idealDisbursementDate = firstRepaymentDate.minusWeeks(repaidEvery);
-            break;
-            case MONTHS:
+            case DAYS -> idealDisbursementDate = firstRepaymentDate.minusDays(repaidEvery);
+            case WEEKS -> idealDisbursementDate = firstRepaymentDate.minusWeeks(repaidEvery);
+            case MONTHS -> {
                 if (loanCalendar == null) {
                     idealDisbursementDate = idealDisbursementDateForMonthlyRepayments(repaidEvery, firstRepaymentDate,
                             loanApplicationTerms);
@@ -416,18 +410,15 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                             holidayDetailDTO.getWorkingDays(), loanApplicationTerms.isSkipRepaymentOnFirstDayofMonth(),
                             loanApplicationTerms.getNumberOfdays());
                 }
-            break;
-            case YEARS:
-                idealDisbursementDate = firstRepaymentDate.minusYears(repaidEvery);
-            break;
-            case SEMI_MONTHLY:
+            }
+            case YEARS -> idealDisbursementDate = firstRepaymentDate.minusYears(repaidEvery);
+            case SEMI_MONTHLY ->
                 idealDisbursementDate = SemiMonthlyScheduleDates.previous(firstRepaymentDate, loanApplicationTerms.semiMonthlyDueDays());
-            break;
-            case INVALID:
-            break;
-            case WHOLE_TERM:
-            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
-            break;
+            case INVALID -> {
+            }
+            case WHOLE_TERM -> {
+                // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
+            }
         }
 
         return idealDisbursementDate;

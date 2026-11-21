@@ -23,7 +23,9 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -55,6 +57,7 @@ public class SavingsTransactionImportHandler implements ImportHandler {
     public static final String INTERESTED_POSTED_AS_ON = "interestedPostedAsOn";
     public static final String WITHDRAWAL = "Withdrawal";
     public static final String DEPOSIT = "Deposit";
+    static final String PAYMENT_TYPE_MANDATORY = "Payment Type is mandatory";
     private static final Logger LOG = LoggerFactory.getLogger(SavingsTransactionImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -65,11 +68,13 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, savingsTransactions, dateFormat, locale);
+        Map<Integer, String> rowErrors = new HashMap<>();
+        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat, rowErrors);
+        return importEntity(workbook, savingsTransactions, dateFormat, locale, rowErrors);
     }
 
-    private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final Map<Integer, String> rowErrors) {
         List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
@@ -78,14 +83,14 @@ public class SavingsTransactionImportHandler implements ImportHandler {
             Row row;
             row = savingsTransactionSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL)) {
-                savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
+                savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat, rowErrors));
             }
         }
         return savingsTransactions;
     }
 
     private SavingsAccountTransactionData readSavingsTransaction(final Workbook workbook, final Row row, Long savingsAccountId,
-            final String locale, final String dateFormat) {
+            final String locale, final String dateFormat, final Map<Integer, String> rowErrors) {
         Long savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row);
 
         if (savingsAccountIdCheck != null) {
@@ -102,8 +107,17 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
         LocalDate transactionDate = ImportHandlerUtils.readAsDate(TransactionConstants.TRANSACTION_DATE_COL, row);
         String paymentType = ImportHandlerUtils.readAsString(TransactionConstants.PAYMENT_TYPE_COL, row);
-        Long paymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
-                paymentType);
+        Long paymentTypeId = null;
+        if (paymentType == null) {
+            rowErrors.putIfAbsent(row.getRowNum(), PAYMENT_TYPE_MANDATORY);
+        } else {
+            paymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
+                    paymentType);
+            if (paymentTypeId == null || paymentTypeId <= 0) {
+                paymentTypeId = null;
+                rowErrors.putIfAbsent(row.getRowNum(), "Payment Type '" + paymentType + "' not found");
+            }
+        }
         String accountNumber = ImportHandlerUtils.readAsString(TransactionConstants.ACCOUNT_NO_COL, row);
         String checkNumber = ImportHandlerUtils.readAsString(TransactionConstants.CHECK_NO_COL, row);
         String routingCode = ImportHandlerUtils.readAsString(TransactionConstants.ROUTING_CODE_COL, row);
@@ -116,7 +130,7 @@ public class SavingsTransactionImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<SavingsAccountTransactionData> savingsTransactions,
-            final String dateFormat, final String locale) {
+            final String dateFormat, final String locale, final Map<Integer, String> rowErrors) {
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -127,6 +141,10 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
         for (SavingsAccountTransactionData transaction : savingsTransactions) {
             try {
+                final String rowError = rowErrors.get(transaction.getRowIndex());
+                if (rowError != null) {
+                    throw new IllegalArgumentException(rowError);
+                }
                 JsonObject savingsTransactionJsonob = gsonBuilder.create().toJsonTree(transaction).getAsJsonObject();
                 savingsTransactionJsonob.remove(TRANSACTION_TYPE);
                 savingsTransactionJsonob.remove(REVERSED);

@@ -24,17 +24,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.DatatableEntry;
 import org.apache.fineract.client.models.GetEntityDatatableChecksResponse;
+import org.apache.fineract.client.models.GroupCreateRequest;
 import org.apache.fineract.client.models.PostClientsDatatable;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostEntityDatatableChecksTemplateResponse;
-import org.apache.fineract.client.models.PostGroupsDatatable;
-import org.apache.fineract.client.models.PostGroupsRequest;
 import org.apache.fineract.client.models.PostLoansDataTable;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansRequestCollateralData;
@@ -199,8 +200,9 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         assertNotNull(entityDatatableCheckId, "ERROR IN CREATING THE ENTITY DATATABLE CHECK");
 
         // creating group with datatables
-        final Long groupId = groupHelper.createGroup(pendingGroupRequest().datatables(List
-                .of(new PostGroupsDatatable().registeredTableName(registeredTableName).data(FeignDatatableHelper.testDatatableEntry()))))
+        final Long groupId = groupHelper
+                .createGroup(pendingGroupRequest().datatables(List
+                        .of(new DatatableEntry().registeredTableName(registeredTableName).data(FeignDatatableHelper.testDatatableEntry()))))
                 .getGroupId();
         assertEquals(groupId, groupHelper.retrieveGroup(groupId).getId());
 
@@ -372,7 +374,7 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         // creating new loan application with error
         PostLoansRequest loanRequest = loanApplication(clientID, loanProductID, 5);
         CallFailedRuntimeException loanError = fail(
-                () -> fineractClient().loans().calculateLoanScheduleOrSubmitLoanApplication(loanRequest, (String) null));
+                () -> fineractClient().loans().calculateOrSubmitLoanApplication(loanRequest, (String) null));
         assertEquals(403, loanError.getStatus());
         assertEquals("error.msg.entry.required.in.datatable.[" + registeredTableName + "]",
                 FeignErrors.firstError(loanError).userMessageGlobalisationCode());
@@ -389,10 +391,10 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
     @Test
     public void createClientWithDatatableUsingEntitySubtype() {
         // creating datatable for client entity person subentity
-        final String datatableNamePerson = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase()
-                .toLowerCase();
-        final String datatableNameEntity = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase()
-                .toLowerCase();
+        final String datatableNamePerson = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase(Locale.ROOT)
+                .toLowerCase(Locale.ROOT);
+        final String datatableNameEntity = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase(Locale.ROOT)
+                .toLowerCase(Locale.ROOT);
 
         String itsAString = "itsastring";
         final List<PostColumnHeaderData> datatableColumnsList = List
@@ -446,8 +448,8 @@ public class EntityDatatableChecksIntegrationTest extends FeignLoanTestBase {
         return datatableName;
     }
 
-    private static PostGroupsRequest pendingGroupRequest() {
-        return new PostGroupsRequest().officeId(1L).name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))
+    private static GroupCreateRequest pendingGroupRequest() {
+        return new GroupCreateRequest().officeId(1L).name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))
                 .externalId(UUID.randomUUID().toString()).dateFormat("dd MMMM yyyy").locale("en").active(false)
                 .submittedOnDate("04 March 2011");
     }

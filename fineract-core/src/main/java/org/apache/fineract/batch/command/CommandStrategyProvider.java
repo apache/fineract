@@ -334,6 +334,11 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/delinquency-range-schedule" + OPTIONAL_QUERY_PARAM_REGEX)
                 .method(GET).build(), "getWorkingCapitalLoanDelinquencyRangeScheduleByLoanIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/working-capital-loans\\/" + NUMBER_REGEX + "\\/mark-as-fraud").method(PUT).build(),
+                "markWorkingCapitalLoanAsFraudCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/working-capital-loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/mark-as-fraud")
+                .method(PUT).build(), "markWorkingCapitalLoanAsFraudByExternalIdCommandStrategy");
         // Breach, delinquency and near breach actions name the action in the body rather than in a command query
         // parameter, so each pair registers the bare path - one form for the loan id, one for the loan external id.
         commandStrategies.put(

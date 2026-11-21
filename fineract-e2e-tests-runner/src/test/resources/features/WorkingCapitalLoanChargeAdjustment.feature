@@ -305,8 +305,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
     And Admin reverts the last charge adjustment on working capital loan
     Then Reverting an already reversed charge adjustment on working capital loan results an error with the following data:
-      | httpCode | errorMessage                                              |
-      | 400      | Failed data validation due to: transaction.already.undone |
+      | httpCode | errorMessage                                 |
+      | 403      | error.msg.wc.loan.transaction.already.undone |
 
   @TestRailId:C85545
   Scenario: Verify Working Capital charge adjustment undo - UC1: undo of charge adjustment on active loan restores fee balances

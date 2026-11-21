@@ -82,8 +82,6 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignLoanHelper {
 
-    private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
-
     private final FineractFeignClient fineractClient;
     private final LoanProductTemplateApi loanProductTemplateApi;
 
@@ -155,6 +153,10 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanProducts().createLoanProduct(request));
     }
 
+    public CallFailedRuntimeException createLoanProductExpectingError(PostLoanProductsRequest request) {
+        return fail(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
     @SuppressWarnings("unchecked")
     private <T> T extractErrorAttribute(CallFailedRuntimeException exception, String jsonAttributeToGetBack) {
         if (!(exception.getCause() instanceof org.apache.fineract.client.feign.FeignException feignException)) {
@@ -191,6 +193,10 @@ public class FeignLoanHelper {
 
     public PutLoanProductsProductIdResponse updateLoanProduct(Long productId, PutLoanProductsProductIdRequest request) {
         return ok(() -> fineractClient.loanProducts().updateLoanProduct(productId, request));
+    }
+
+    public CallFailedRuntimeException updateLoanProductExpectingError(Long productId, PutLoanProductsProductIdRequest request) {
+        return fail(() -> fineractClient.loanProducts().updateLoanProduct(productId, request));
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProductByExternalId(String externalProductId) {

@@ -49,7 +49,7 @@ public class DeleteWorkingCapitalLoanApplicationCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long loanId = Long.valueOf(RandomStringUtils.secure().nextNumeric(4));
         final BatchRequest request = getBatchRequest(loanId);
         final CommandProcessingResult processingResult = CommandProcessingResult.resourceResult(loanId, null);
         final String serializedResponse = "{\"resourceId\":" + loanId + "}";
@@ -79,10 +79,10 @@ public class DeleteWorkingCapitalLoanApplicationCommandStrategyTest {
      */
     private BatchRequest getBatchRequest(final Long loanId) {
         final BatchRequest br = new BatchRequest();
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl("v1/working-capital-loans/" + loanId);
         br.setMethod(HttpMethod.DELETE);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
         return br;
     }

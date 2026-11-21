@@ -18,18 +18,31 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
+import com.google.common.base.Splitter;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractSecurityProperties.FineractSecurityOidcFederationProperties.OidcIssuerProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.FineractOidcUser;
+import org.apache.fineract.infrastructure.security.data.OidcTokenRoles;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.ClaimAccessor;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,6 +56,7 @@ public class FineractOidcUserService {
 
     private final OidcAppUserResolutionService resolutionService;
     private final FineractProperties fineractProperties;
+    private final TenantOidcConfigService tenantOidcConfigService;
 
     /**
      * Resolves the Fineract AppUser for a Bearer JWT from an external IdP. Used by
@@ -55,7 +69,7 @@ public class FineractOidcUserService {
 
         log.debug("Resolving Fineract user for OIDC subject '{}' (username claim: '{}')", jwt.getSubject(), username);
 
-        return resolutionService.resolveOrCreate(username, email, firstName, lastName, Set.of());
+        return resolveOrCreate(username, email, firstName, lastName, extractRoles(jwt));
     }
 
     /**
@@ -63,9 +77,7 @@ public class FineractOidcUserService {
      * Used by the OAuth2 login redirect flow.
      */
     public FineractOidcUser processOidcUser(OidcUser oidcUser, String tenantId) {
-        String usernameClaim = fineractProperties.getSecurity().getOidcFederation().getUsernameClaim();
-
-        String username = oidcUser.getClaimAsString(usernameClaim);
+        String username = oidcUser.getClaimAsString(usernameClaim(oidcUser));
         if (username == null) {
             username = oidcUser.getSubject();
         }
@@ -76,7 +88,7 @@ public class FineractOidcUserService {
 
         log.debug("Processing OIDC user '{}' for tenant '{}'", username, tenantId);
 
-        AppUser appUser = resolutionService.resolveOrCreate(username, email, firstName, lastName, Set.of());
+        AppUser appUser = resolveOrCreate(username, email, firstName, lastName, extractRoles(oidcUser));
 
         Collection<? extends GrantedAuthority> authorities = appUser.getAuthorities();
         OidcIdToken idToken = oidcUser.getIdToken();
@@ -86,12 +98,102 @@ public class FineractOidcUserService {
     }
 
     /**
-     * Extracts the username from a JWT using the configured claim, falling back to {@code sub}.
+     * Parallel requests of one user may all find that the user is to be created, or its roles to be changed. One of
+     * them writes; the others fail on the same rows and find, on a second try, what the first one wrote. A second
+     * failure is not handled here: like any other failure of the resolution it leaves the request unauthenticated.
+     */
+    private AppUser resolveOrCreate(String username, String email, String firstName, String lastName, OidcTokenRoles roles) {
+        try {
+            return resolutionService.resolveOrCreate(username, email, firstName, lastName, roles);
+        } catch (JpaSystemException | DataIntegrityViolationException e) {
+            log.debug("Resolving OIDC user '{}' again after a concurrent write", username, e);
+            return resolutionService.resolveOrCreate(username, email, firstName, lastName, roles);
+        }
+    }
+
+    /**
+     * Extracts the username from a JWT using the username claim, falling back to {@code sub}.
      */
     public String extractUsername(Jwt jwt) {
-        String claimName = fineractProperties.getSecurity().getOidcFederation().getUsernameClaim();
-        String username = jwt.getClaimAsString(claimName);
+        String username = jwt.getClaimAsString(usernameClaim(jwt));
         return username != null ? username : jwt.getSubject();
+    }
+
+    /**
+     * The {@code usernameClaim} of the issuer's entry in {@code issuers[]}, or else the global {@code username-claim}.
+     * The entry's claim does not apply to an issuer with a per-tenant configuration, which is the one in use then.
+     */
+    private String usernameClaim(ClaimAccessor token) {
+        String issuer = token.getClaimAsString(JwtClaimNames.ISS);
+        OidcIssuerProperties config = issuerEntry(issuer);
+        if (config != null && config.getUsernameClaim() != null && !config.getUsernameClaim().isBlank()
+                && tenantOidcConfigService.findByIssuerUri(issuer).isEmpty()) {
+            return config.getUsernameClaim();
+        }
+        return fineractProperties.getSecurity().getOidcFederation().getUsernameClaim();
+    }
+
+    /**
+     * Reads what the token says about its user's roles. Only an issuer whose entry in {@code issuers[]} has a
+     * {@code rolesClaim} says anything, and only in a token that carries that claim: a list of strings, or a
+     * comma-separated string. A dotted claim name reaches into nested claims when no claim has that literal name, e.g.
+     * {@code realm_access.roles}. In every other case the token leaves the user's roles as they are. So does every
+     * token of an issuer that has a per-tenant configuration, which is the one in use then, and every token outside the
+     * tenant of the issuer's entry: an entry without {@code tenantId} decides no roles. Nor does an issuer whose tokens
+     * are not checked for an audience, since any of its tokens, made for whatever client, would do.
+     */
+    public OidcTokenRoles extractRoles(ClaimAccessor token) {
+        String issuer = token.getClaimAsString(JwtClaimNames.ISS);
+        OidcIssuerProperties config = issuerEntry(issuer);
+        FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        if (config == null || config.getRolesClaim() == null || config.getRolesClaim().isBlank() || tenant == null
+                || !tenant.getTenantIdentifier().equals(config.getTenantId()) || !hasAudience(config)
+                || tenantOidcConfigService.findByIssuerUri(issuer).isPresent()) {
+            return OidcTokenRoles.undecided();
+        }
+        String claimName = config.getRolesClaim();
+        Object value = token.getClaim(claimName);
+        if (value == null && claimName.contains(".")) {
+            value = token.getClaims();
+            for (String part : Splitter.on('.').split(claimName)) {
+                value = value instanceof Map<?, ?> map ? map.get(part) : null;
+            }
+        }
+        Collection<?> names = value instanceof Collection<?> collection ? collection
+                : value instanceof String string ? Splitter.on(',').splitToList(string) : null;
+        if (names == null) {
+            return OidcTokenRoles.undecided();
+        }
+        Set<String> roles = new LinkedHashSet<>();
+        for (Object name : names) {
+            if (!(name instanceof String string)) {
+                return OidcTokenRoles.undecided();
+            }
+            if (!string.isBlank()) {
+                roles.add(string.trim());
+            }
+        }
+        Set<String> managedRoles = new LinkedHashSet<>();
+        if (config.getManagedRoles() != null) {
+            for (String name : config.getManagedRoles()) {
+                if (name != null && !name.isBlank()) {
+                    managedRoles.add(name.trim().toLowerCase(Locale.ROOT));
+                }
+            }
+        }
+        return OidcTokenRoles.of(issuer, roles, managedRoles);
+    }
+
+    private OidcIssuerProperties issuerEntry(String issuer) {
+        List<OidcIssuerProperties> issuers = fineractProperties.getSecurity().getOidcFederation().getIssuers();
+        return issuer == null || issuers == null ? null
+                : issuers.stream().filter(candidate -> issuer.equals(candidate.getIssuerUri())).findFirst().orElse(null);
+    }
+
+    private boolean hasAudience(OidcIssuerProperties config) {
+        String audience = config.getAudience() != null && !config.getAudience().isBlank() ? config.getAudience()
+                : fineractProperties.getSecurity().getOidcFederation().getAudience();
+        return audience != null && !audience.isBlank();
     }
 
     /**

@@ -18,37 +18,42 @@
  */
 package org.apache.fineract.cob.workingcapitalloan;
 
-import java.util.List;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.cob.writer.AbstractCOBItemWriter;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.springframework.batch.infrastructure.item.Chunk;
-import org.springframework.batch.infrastructure.item.data.RepositoryItemWriter;
-import org.springframework.data.repository.CrudRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
 
-@Slf4j
-public abstract class AbstractWorkingCapitalLoanCOBWorkerItemWriter extends RepositoryItemWriter<WorkingCapitalLoan> {
+public abstract class AbstractWorkingCapitalLoanCOBWorkerItemWriter extends AbstractCOBItemWriter<WorkingCapitalLoan> {
 
-    private final LockingService loanLockingService;
+    private final WorkingCapitalLoanModelProcessingService modelProcessingService;
 
-    public AbstractWorkingCapitalLoanCOBWorkerItemWriter(LockingService loanLockingService,
-            CrudRepository<WorkingCapitalLoan, Long> repository) {
-        super(repository);
-        this.loanLockingService = loanLockingService;
+    protected AbstractWorkingCapitalLoanCOBWorkerItemWriter(COBBusinessStepService cobBusinessStepService,
+            WorkingCapitalLoanModelProcessingService modelProcessingService, LockingService loanLockingService,
+            WorkingCapitalLoanRepository repository) {
+        super(cobBusinessStepService, loanLockingService, repository);
+        this.modelProcessingService = modelProcessingService;
+    }
+
+    /**
+     * Brings a model written by an older version of the calculation up to date before any business step reads it.
+     *
+     * <p>
+     * Ahead of the steps rather than as one of them: the steps read the schedule to decide what to post, so one running
+     * against a model that has silently lost part of itself would post against the wrong figures. This is the same
+     * place the progressive term-loan writer rebuilds, for the same reason.
+     */
+    @Override
+    protected WorkingCapitalLoan beforeBusinessSteps(WorkingCapitalLoan loan) {
+        if (modelProcessingService.requiresModelRecalculation(loan.getId())) {
+            modelProcessingService.recalculateModelAndSave(loan.getId());
+        }
+        return loan;
     }
 
     @Override
-    public void write(@NonNull Chunk<? extends WorkingCapitalLoan> items) throws Exception {
-        if (!items.isEmpty()) {
-            super.write(items);
-            List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
-            loanLockingService.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
-        }
+    protected void setLastRun(WorkingCapitalLoan processedLoan) {
+        processedLoan.setLastClosedBusinessDate(getBusinessDate());
     }
-
-    protected abstract LockOwner getLockOwner();
-
 }

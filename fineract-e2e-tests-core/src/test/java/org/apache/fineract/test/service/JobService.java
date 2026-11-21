@@ -30,9 +30,9 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.apache.fineract.test.data.job.Job;
 import org.apache.fineract.test.data.job.JobResolver;
 import org.apache.fineract.test.messaging.config.JobPollingProperties;
@@ -60,7 +60,7 @@ public class JobService {
     private void execute(Long jobId) {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("command", "executeJob");
-        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new ExecuteJobRequest(), queryParams));
+        executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, new JobExecuteRequest(), queryParams));
     }
 
     public void executeAndWait(final Job job) {

@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -98,25 +99,24 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
     @Test
     public void validateCreateReadDeleteDatatable() throws ParseException {
         // Fetch / Create tst code
-        String tst_tst_tst = "TST_TST_TST".toLowerCase();
+        String tst_tst_tst = "TST_TST_TST".toLowerCase(Locale.ROOT);
         Long createdCodeId = retrieveCodeId(tst_tst_tst);
         Integer createdCodeValueId;
-        Integer createdCodeValueIdSecond;
         if (createdCodeId == null) {
             createdCodeId = codeHelper.createCode(tst_tst_tst);
 
             createdCodeValueId = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 1).intValue();
-            createdCodeValueIdSecond = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2).intValue();
+            codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2);
         } else {
             List<GetCodeValuesDataResponse> codeValuesForCode = codeHelper.retrieveAllCodeValues(createdCodeId);
             createdCodeValueId = codeValuesForCode.get(0).getId().intValue();
-            createdCodeValueIdSecond = codeValuesForCode.get(1).getId().intValue();
         }
 
         // creating datatable for client entity
         final PostDataTablesRequest columnMap = new PostDataTablesRequest();
         final List<PostColumnHeaderData> datatableColumnsList = new ArrayList<>();
-        columnMap.datatableName(Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase().toLowerCase());
+        columnMap.datatableName(
+                Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT).toLowerCase(Locale.ROOT));
         columnMap.entitySubType("PERSON");
         columnMap.multiRow(false);
         String itsABoolean = "itsaboolean";
@@ -201,7 +201,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         datatableEntryMap.put(itsAJson, '{' + json);
 
         String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-        errorResponse = createDatatableEntryExpectingError(datatableName, clientID, datatabelEntryRequestJsonString);
+        createDatatableEntryExpectingError(datatableName, clientID, datatabelEntryRequestJsonString);
 
         // add valid json
         datatableEntryMap.put(itsAJson, json);
@@ -672,16 +672,14 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         String tst_tst_tst = "tst_tst_tst";
         Long createdCodeId = retrieveCodeId(tst_tst_tst);
         Integer createdCodeValueId;
-        Integer createdCodeValueIdSecond;
         if (createdCodeId == null) {
             createdCodeId = codeHelper.createCode(tst_tst_tst);
 
             createdCodeValueId = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 1).intValue();
-            createdCodeValueIdSecond = codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2).intValue();
+            codeHelper.createCodeValue(createdCodeId, Utils.randomStringGenerator("cv_", 8), 2);
         } else {
             List<GetCodeValuesDataResponse> codeValuesForCode = codeHelper.retrieveAllCodeValues(createdCodeId);
             createdCodeValueId = codeValuesForCode.get(0).getId().intValue();
-            createdCodeValueIdSecond = codeValuesForCode.get(1).getId().intValue();
         }
 
         // creating datatable for client entity
@@ -803,8 +801,6 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
 
         // Update datatable entry
 
-        Boolean previousBoolean = (Boolean) datatableEntryMap.get("itsABoolean");
-
         datatableEntryMap.put("itsABoolean", null);
         datatableEntryMap.put("itsADate", null);
         datatableEntryMap.put("itsADatetime", null);
@@ -920,7 +916,6 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         LOG.info("Creating datatable entry: {}", datatableEntryRequestJsonString);
 
-        final boolean genericResultSet = true;
         Long datatableEntryResponse = createDatatableEntry(datatableName, clientId, datatableEntryRequestJsonString);
         assertNotNull(datatableEntryResponse, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
         assertEquals(clientId.longValue(), datatableEntryResponse);
@@ -976,7 +971,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         addDatatableColumn(datatableColumnsList, spacedColumn, "String", false, 20, null);
 
         final PostDataTablesRequest columnMap = new PostDataTablesRequest();
-        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
         columnMap.datatableName(datatableName);
         columnMap.apptableName(CLIENT_APP_TABLE_NAME);
         columnMap.entitySubType(CLIENT_PERSON_SUBTYPE_NAME);
@@ -1035,7 +1030,7 @@ public class DatatableIntegrationTest extends FeignLoanTestBase {
         addDatatableColumn(datatableColumnsList, spacedColumn, "String", false, 20, null);
 
         final PostDataTablesRequest columnMap = new PostDataTablesRequest();
-        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase();
+        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase(Locale.ROOT);
         columnMap.datatableName(datatableName);
         columnMap.apptableName(CLIENT_APP_TABLE_NAME);
         columnMap.entitySubType(CLIENT_PERSON_SUBTYPE_NAME);

@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.security.config;
 
 import com.nimbusds.jwt.JWTParser;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +36,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtAudienceValidator;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtTypeValidator;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
@@ -64,6 +71,9 @@ public class DynamicJwtIssuerAuthenticationManagerResolver implements Authentica
     private final FineractProperties fineractProperties;
 
     private final BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
+
+    // RFC 9068 section 4: "at+jwt" or "application/at+jwt"
+    private static final List<String> ACCEPTED_TOKEN_TYPES = List.of("JWT", "at+jwt", "application/at+jwt");
 
     // issuerUri → AuthenticationManager (cached after first build)
     private final ConcurrentHashMap<String, AuthenticationManager> managerCache = new ConcurrentHashMap<>();
@@ -100,23 +110,43 @@ public class DynamicJwtIssuerAuthenticationManagerResolver implements Authentica
     }
 
     private AuthenticationManager buildFromDbConfig(TenantOidcConfig config) {
-        NimbusJwtDecoder decoder = config.getJwksUri() != null && !config.getJwksUri().isBlank()
-                ? NimbusJwtDecoder.withJwkSetUri(config.getJwksUri()).build()
-                : NimbusJwtDecoder.withIssuerLocation(config.getIssuerUri()).build();
+        return authenticationManagerFor(config.getIssuerUri(), config.getJwksUri(), defaultAudience());
+    }
+
+    private AuthenticationManager buildFromYamlIssuer(OidcIssuerProperties issuerProps) {
+        String audience = issuerProps.getAudience() != null && !issuerProps.getAudience().isBlank() ? issuerProps.getAudience()
+                : defaultAudience();
+        return authenticationManagerFor(issuerProps.getIssuerUri(), issuerProps.getJwksUri(), audience);
+    }
+
+    private String defaultAudience() {
+        return fineractProperties.getSecurity().getOidcFederation().getAudience();
+    }
+
+    private AuthenticationManager authenticationManagerFor(String issuerUri, String jwksUri, String audience) {
+        NimbusJwtDecoder decoder = jwksUri != null && !jwksUri.isBlank() ? NimbusJwtDecoder.withJwkSetUri(jwksUri).build()
+                : NimbusJwtDecoder.withIssuerLocation(issuerUri).build();
+        decoder.setJwtValidator(tokenValidator(issuerUri, audience));
 
         JwtAuthenticationProvider provider = new JwtAuthenticationProvider(decoder);
         provider.setJwtAuthenticationConverter(jwtConverter);
         return provider::authenticate;
     }
 
-    private AuthenticationManager buildFromYamlIssuer(OidcIssuerProperties issuerProps) {
-        NimbusJwtDecoder decoder = issuerProps.getJwksUri() != null && !issuerProps.getJwksUri().isBlank()
-                ? NimbusJwtDecoder.withJwkSetUri(issuerProps.getJwksUri()).build()
-                : NimbusJwtDecoder.withIssuerLocation(issuerProps.getIssuerUri()).build();
-
-        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(decoder);
-        provider.setJwtAuthenticationConverter(jwtConverter);
-        return provider::authenticate;
+    /**
+     * Spring Security's default validators with two changes: besides {@code JWT} (or no type at all) the JOSE header's
+     * {@code typ} may be {@code at+jwt} or {@code application/at+jwt}, the type of an RFC 9068 access token; and with
+     * an audience configured, the token must name it in its {@code aud} claim, so that a token issued for another
+     * service is refused.
+     */
+    static OAuth2TokenValidator<Jwt> tokenValidator(String issuerUri, String audience) {
+        JwtTypeValidator typeValidator = new JwtTypeValidator(ACCEPTED_TOKEN_TYPES);
+        typeValidator.setAllowEmpty(true);
+        List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>(List.of(new JwtIssuerValidator(issuerUri), typeValidator));
+        if (audience != null && !audience.isBlank()) {
+            validators.add(new JwtAudienceValidator(audience));
+        }
+        return JwtValidators.createDefaultWithValidators(validators);
     }
 
     private String extractIssuerUnchecked(HttpServletRequest request) {

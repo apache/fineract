@@ -37,21 +37,11 @@ public enum ShareAccountStatusType {
 
         ShareAccountStatusType enumeration = ShareAccountStatusType.INVALID;
         switch (type) {
-            case 100:
-                enumeration = ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
-            break;
-            case 200:
-                enumeration = ShareAccountStatusType.APPROVED;
-            break;
-            case 300:
-                enumeration = ShareAccountStatusType.ACTIVE;
-            break;
-            case 500:
-                enumeration = ShareAccountStatusType.REJECTED;
-            break;
-            case 600:
-                enumeration = ShareAccountStatusType.CLOSED;
-            break;
+            case 100 -> enumeration = ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
+            case 200 -> enumeration = ShareAccountStatusType.APPROVED;
+            case 300 -> enumeration = ShareAccountStatusType.ACTIVE;
+            case 500 -> enumeration = ShareAccountStatusType.REJECTED;
+            case 600 -> enumeration = ShareAccountStatusType.CLOSED;
         }
         return enumeration;
     }

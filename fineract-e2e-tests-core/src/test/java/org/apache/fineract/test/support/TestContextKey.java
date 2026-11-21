@@ -87,10 +87,19 @@ public abstract class TestContextKey {
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION = "loanProductCreateResponseLP2DownPaymentAutoAdvancedPaymentAllocation";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF = "loanProductCreateResponseLP2DownPaymentAutoAdvPmtAllocNoMultiplesOf";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES = "loanProductCreateResponseLP2DownPaymentAutoAdvPmtAllocExpectedTranches";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_EXPECTED_TRANCHES_FEE_REFUND = "loanProductCreateResponseLP2DownPaymentAutoAdvPmtAllocExpectedTranchesFeeRefund";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_FEE_REFUND_ALLOCATION_RULE = "loanProductCreateResponseLP2DownPaymentAutoAdvPmtAllocFeeRefundAllocationRule";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_ACCELERATE_MATURITY_FEE_REFUND = "loanProductCreateResponseLP2DownPaymentAutoAdvPymntInterestRecalculationAccelerateMaturityFeeRefund";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_CUSTOM_PAYMENT_ALLOCATION = "loanProductCreateResponseLP2DownPaymentAutoAdvancedCustomPaymentAllocation";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyEmi36030InterestRecalculationDailyMultidisbursalCapitalizedIncomeAdjCustomAlloc";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_REPAYMENT_ALLOCATION_PAYMENT_START_SUBMITTED = "loanProductCreateResponseLP2DownPaymentAutoAdvancedPaymentAllocationPaymentStartSubmitted";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION = "loanProductCreateResponseLP2DownPaymentAdvancedPaymentAllocation";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND = "loanProductCreateResponseLP2DownPaymentAutoAdvancedPaymentAllocationFeeRefund";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND = "loanProductCreateResponseLP2DownPaymentAdvancedPaymentAllocationFeeRefund";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_MIR = "loanProductCreateResponseLP2DownPaymentAutoAdvancedPaymentAllocationFeeRefundMir";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_PAYOUT = "loanProductCreateResponseLP2DownPaymentAutoAdvancedPaymentAllocationFeeRefundPayout";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND = "loanProductCreateResponseLP2DownPaymentAutoAdvPymntInterestRecalculationInterestRefundFeeRefund";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND_CASH_ACCOUNTING = "loanProductCreateResponseLP2DownPaymentAutoAdvPymntInterestRecalculationInterestRefundFeeRefundCashAccounting";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT = "loanProductCreateResponseLP2DownPayment";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST = "loanProductCreateResponseLP2DownPaymentInterest";
     public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_INTEREST_AUTO = "loanProductCreateResponseLP2DownPaymentInterestAuto";
@@ -284,6 +293,7 @@ public abstract class TestContextKey {
     public static final String EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_TEMPLATE = "externalAssetOwnerLoanProductAttributeTemplate";
     public static final String EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LAST_RESPONSE = "externalAssetOwnerLoanProductAttributeLastResponse";
     public static final String EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE_LOAN_PRODUCT_ID = "externalAssetOwnerLoanProductAttributeLoanProductId";
+    public static final String EXTERNAL_ASSET_OWNER_LOAN_ATTRIBUTES_COPIED_FROM_TRANSFER_ID = "externalAssetOwnerLoanAttributesCopiedFromTransferId";
     public static final String TRANSACTION_EVENT = "transactionEvent";
     public static final String LOAN_WRITE_OFF_RESPONSE = "loanWriteOffResponse";
     public static final String LOAN_DELINQUENCY_ACTION_RESPONSE = "loanDelinquencyActionResponse";
@@ -428,4 +438,14 @@ public abstract class TestContextKey {
     public static final String WORKING_CAPITAL_LOAN_GET_TRANSACTIONS_RESPONSE = "workingCapitalLoanGetTransactionsResponse";
     public static final String WORKING_CAPITAL_LOAN_ADJUST_BY_DELTA_TRANSACTION_RESPONSE = "workingCapitalLoanAdjustByDeltaTransactionResponse";
     public static final String WORKING_CAPITAL_LOAN_OUTCOME_PREFIX = "workingCapitalLoanOutcome_";
+    public static final String CLIENT_IDEMPOTENT_REQUEST = "clientIdempotentRequest";
+    public static final String CLIENT_IDEMPOTENT_REQUEST_SECOND = "clientIdempotentRequestSecond";
+    public static final String CLIENT_IDEMPOTENT_KEY = "clientIdempotentKey";
+    public static final String CLIENT_IDEMPOTENT_KEY_SECOND = "clientIdempotentKeySecond";
+    public static final String CLIENT_IDEMPOTENT_LAST_ATTEMPT = "clientIdempotentLastAttempt";
+    public static final String CLIENT_IDEMPOTENT_LAST_REQUEST_IS_SECOND = "clientIdempotentLastRequestIsSecond";
+    public static final String CLIENT_IDEMPOTENT_FIRST_FAILURE_BODY = "clientIdempotentFirstFailureBody";
+    public static final String CLIENT_IDEMPOTENT_FIRST_SUCCESS_CLIENT_ID = "clientIdempotentFirstSuccessClientId";
+    public static final String CLIENT_IDEMPOTENT_SECOND_SUCCESS_CLIENT_ID = "clientIdempotentSecondSuccessClientId";
+    public static final String CLIENT_IDEMPOTENT_CONCURRENT_ATTEMPTS = "clientIdempotentConcurrentAttempts";
 }

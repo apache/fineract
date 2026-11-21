@@ -23,9 +23,9 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest;
@@ -44,11 +44,11 @@ public class FeignSavingsChargeHelper {
         this.fineractClient = fineractClient;
     }
 
-    public PostChargesResponse createWithdrawalFeeCharge() {
+    public ChargeCreateResponse createWithdrawalFeeCharge() {
         return createCharge(SavingsRequestBuilders.savingsWithdrawalFeeCharge());
     }
 
-    public PostChargesResponse createCharge(ChargeRequest request) {
+    public ChargeCreateResponse createCharge(ChargeCreateRequest request) {
         return ok(() -> fineractClient.charges().createCharge(request));
     }
 

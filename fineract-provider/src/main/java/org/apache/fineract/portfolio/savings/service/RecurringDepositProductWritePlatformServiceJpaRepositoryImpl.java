@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.interestratechart.service.InterestRateChart
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.DepositProductDataValidator;
+import org.apache.fineract.portfolio.savings.data.SavingsProductValidator;
 import org.apache.fineract.portfolio.savings.domain.DepositProductAssembler;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
@@ -104,6 +105,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             this.fromApiJsonDataValidator.validateProductDatesForUpdate(command.json(), RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME,
                     product.getStartDate(), product.getCloseDate());
             final Map<String, Object> changes = product.update(command);
+            SavingsProductValidator.validateLockinDetails(product);
 
             if (changes.containsKey(chargesParamName)) {
                 final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command,

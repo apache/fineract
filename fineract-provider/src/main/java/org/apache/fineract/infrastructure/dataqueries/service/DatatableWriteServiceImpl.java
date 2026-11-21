@@ -231,7 +231,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             EntityTables entityTable = datatableUtil.resolveEntity(entityName);
             final boolean isConstraintApproach = this.configurationDomainService.isConstraintApproachEnabledForDatatables();
             final String fkColumnName = datatableUtil.getFKField(entityTable);
-            final String dataTableNameAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
+            final String dataTableNameAlias = datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_");
             final String fkName = dataTableNameAlias + "_" + fkColumnName;
             StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("CREATE TABLE ").append(sqlGenerator.escape(datatableName)).append(" (");
@@ -303,7 +303,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(RESOURCE_DATATABLE);
 
-            if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
+            if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("duplicate column name")) {
                 baseDataValidator.reset().parameter(API_FIELD_NAME).failWithCode("duplicate.column.name");
             } else if ((realCause.getMessage().contains("Table") || realCause.getMessage().contains("relation"))
                     && realCause.getMessage().contains("already exists")) {
@@ -354,8 +354,8 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 if (entityTable != oldEntityTable) {
                     final String oldFKName = datatableUtil.getFKField(oldEntityTable);
                     final String newFKName = datatableUtil.getFKField(entityTable);
-                    final String oldConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + oldFKName;
-                    final String newConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + newFKName;
+                    final String oldConstraintName = datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_") + "_" + oldFKName;
+                    final String newConstraintName = datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_") + "_" + newFKName;
                     StringBuilder sqlBuilder = new StringBuilder();
 
                     String fullOldFk = "fk_" + oldFKName;
@@ -430,7 +430,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                         throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.mandatory.column.cannot.be.added",
                                 "Non empty datatable mandatory columns can not be added.");
                     }
-                    parseDatatableColumnForAdd(columnAsJson, sqlBuilder, datatableName.toLowerCase().replaceAll("\\s", "_"),
+                    parseDatatableColumnForAdd(columnAsJson, sqlBuilder, datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_"),
                             constrainBuilder, codeMappings, isConstraintApproach);
                 }
 
@@ -489,7 +489,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                     // "invalid use of null value" SQL exception message
                     // throw a 503 HTTP error -
                     // PlatformServiceUnavailableException
-                    if (e.getMessage().toLowerCase().contains("invalid use of null value")) {
+                    if (e.getMessage().toLowerCase(Locale.ROOT).contains("invalid use of null value")) {
                         throw new PlatformServiceUnavailableException("error.msg.datatable.column.update.not.allowed",
                                 "One of the data table columns contains null values", e);
                     }
@@ -503,11 +503,11 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(RESOURCE_DATATABLE);
 
-            if (realCause.getMessage().toLowerCase().contains("unknown column")) {
+            if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("unknown column")) {
                 baseDataValidator.reset().parameter(API_FIELD_NAME).failWithCode(DOES_NOT_EXIST);
-            } else if (realCause.getMessage().toLowerCase().contains("can't drop")) {
+            } else if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("can't drop")) {
                 baseDataValidator.reset().parameter(API_FIELD_NAME).failWithCode(DOES_NOT_EXIST);
-            } else if (realCause.getMessage().toLowerCase().contains("duplicate column")) {
+            } else if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("duplicate column")) {
                 baseDataValidator.reset().parameter(API_FIELD_NAME).failWithCode("column.already.exists");
             }
             baseDataValidator.throwValidationErrors();
@@ -515,7 +515,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             Throwable realCause = ExceptionUtils.getRootCause(ee.getCause());
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(RESOURCE_DATATABLE);
-            if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
+            if (realCause.getMessage().toLowerCase(Locale.ROOT).contains("duplicate column name")) {
                 baseDataValidator.reset().parameter(API_FIELD_NAME).failWithCode("duplicate.column.name");
             } else if ((realCause.getMessage().contains("Table") || realCause.getMessage().contains("relation"))
                     && realCause.getMessage().contains("already exists")) {
@@ -540,7 +540,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             String[] sqlArray;
             if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
                 final String deleteColumnCodeSql = "delete from x_table_column_code_mappings where column_alias_name like'"
-                        + datatableName.toLowerCase().replaceAll("\\s", "_") + "_%'";
+                        + datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_") + "_%'";
                 sqlArray = new String[2];
                 sqlArray[1] = deleteColumnCodeSql;
             } else {
@@ -698,7 +698,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             final StringBuilder constrainBuilder, final String dataTableNameAlias, final Map<String, Long> codeMappings,
             final boolean isConstraintApproach) {
         String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
-        final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase() : null;
+        final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase(Locale.ROOT) : null;
         final Integer length = column.has(API_FIELD_LENGTH) ? column.get(API_FIELD_LENGTH).getAsInt() : null;
         final boolean mandatory = column.has(API_FIELD_MANDATORY) && column.get(API_FIELD_MANDATORY).getAsBoolean();
         final boolean unique = column.has(API_FIELD_UNIQUE) && column.get(API_FIELD_UNIQUE).getAsBoolean();
@@ -760,7 +760,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final boolean isConstraintApproach) {
 
         String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
-        final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase() : null;
+        final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase(Locale.ROOT) : null;
         final Integer length = column.has(API_FIELD_LENGTH) ? column.get(API_FIELD_LENGTH).getAsInt() : null;
         final boolean mandatory = column.has(API_FIELD_MANDATORY) && column.get(API_FIELD_MANDATORY).getAsBoolean();
         final boolean unique = column.has(API_FIELD_UNIQUE) && column.get(API_FIELD_UNIQUE).getAsBoolean();
@@ -813,7 +813,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         final String after = column.has(API_FIELD_AFTER) ? column.get(API_FIELD_AFTER).getAsString() : null;
         final String code = column.has(API_FIELD_CODE) ? column.get(API_FIELD_CODE).getAsString() : null;
         final String newCode = column.has(API_FIELD_NEWCODE) ? column.get(API_FIELD_NEWCODE).getAsString() : null;
-        final String dataTableNameAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
+        final String dataTableNameAlias = datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_");
         if (isConstraintApproach) {
             if (StringUtils.isBlank(newName)) {
                 newName = oldName;
@@ -902,7 +902,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
 
     private void parseDatatableColumnForDrop(final JsonObject column, StringBuilder sqlBuilder, final String datatableName,
             final StringBuilder constrainBuilder, final List<String> codeMappings) {
-        final String datatableAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
+        final String datatableAlias = datatableName.toLowerCase(Locale.ROOT).replaceAll("\\s", "_");
         final String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
         if (name == null) {
             throw new GeneralPlatformDomainRuleException("error.msg.missing.datatable.column.name",

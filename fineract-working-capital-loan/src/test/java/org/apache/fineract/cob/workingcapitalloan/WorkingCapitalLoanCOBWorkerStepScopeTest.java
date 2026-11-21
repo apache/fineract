@@ -32,21 +32,20 @@ import org.springframework.batch.core.step.Step;
 import org.springframework.context.annotation.Bean;
 
 /**
- * Pins the WC COB worker reader, processor and writer to step scope.
+ * Pins the WC COB worker reader and writer to step scope.
  * <p>
- * All three keep per-partition state in instance fields: the reader its queue of loan ids, the processor the step's
- * execution context and business date. With a single shared instance, two partitions running at the same time on one
- * instance (more eligible loans than the partition size in one tenant, or several tenants running WC COB at once)
- * overwrite each other's queue; one of them reads nothing, finishes COMPLETED and leaves its loan one COB day behind
- * with a stale {@code LOAN_COB_CHUNK_PROCESSING} lock. LOAN_COB has always declared these components as
- * {@code @StepScope} beans; this test fails if WC COB drifts back to building them inline.
+ * Both keep per-partition state in instance fields: the reader its queue of loan ids, the writer the step's execution
+ * context and business date. With a single shared instance, two partitions running at the same time on one instance
+ * (more eligible loans than the partition size in one tenant, or several tenants running WC COB at once) overwrite each
+ * other's queue; one of them reads nothing, finishes COMPLETED and leaves its loan one COB day behind with a stale
+ * {@code LOAN_COB_CHUNK_PROCESSING} lock. LOAN_COB has always declared these components as {@code @StepScope} beans;
+ * this test fails if WC COB drifts back to building them inline.
  */
 public class WorkingCapitalLoanCOBWorkerStepScopeTest {
 
     private static Stream<Arguments> perPartitionComponents() {
         return Stream.of(//
                 Arguments.of(WorkingCapitalLoanCOBWorkerItemReader.class), //
-                Arguments.of(WorkingCapitalLoanCOBWorkerItemProcessor.class), //
                 Arguments.of(WorkingCapitalLoanCOBWorkerItemWriter.class));
     }
 
@@ -69,10 +68,8 @@ public class WorkingCapitalLoanCOBWorkerStepScopeTest {
         Stream<Method> stepFactories = Arrays.stream(WorkingCapitalLoanCOBWorkerConfiguration.class.getDeclaredMethods())
                 .filter(method -> method.getReturnType().equals(Step.class));
 
-        assertThat(stepFactories).as("the worker step must take the reader, processor and writer as injected step-scoped beans")
-                .singleElement()
+        assertThat(stepFactories).as("the worker step must take the reader and writer as injected step-scoped beans").singleElement()
                 .satisfies(method -> assertThat(method.getParameterTypes()).containsExactlyInAnyOrder(
-                        WorkingCapitalLoanCOBWorkerItemReader.class, WorkingCapitalLoanCOBWorkerItemProcessor.class,
-                        WorkingCapitalLoanCOBWorkerItemWriter.class));
+                        WorkingCapitalLoanCOBWorkerItemReader.class, WorkingCapitalLoanCOBWorkerItemWriter.class));
     }
 }

@@ -96,7 +96,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
         private EmailCampaignMapper() {}
 
-        public String schema() {
+        private String schema() {
             return EMAIL_CAMPAIGN_SCHEMA;
         }
 
@@ -156,7 +156,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
         private BusinessRuleMapper() {}
 
-        public String schema() {
+        private String schema() {
             return BUSINESS_RULE_SCHEMA;
         }
 

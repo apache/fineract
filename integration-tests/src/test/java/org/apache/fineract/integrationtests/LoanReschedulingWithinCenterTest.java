@@ -113,7 +113,6 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         today.add(Calendar.DAY_OF_MONTH, -14);
         final String disbursalDate = dateFormat.format(today.getTime());
-        final String recalculationRestFrequencyDate = "01 January 2012";
         final boolean isMultiTrancheLoan = false;
 
         Long collateralId = createCollateralProduct();
@@ -127,11 +126,11 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         Long loanProductId = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
-                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0",
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, isMultiTrancheLoan);
 
         Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursalDate,
-                recalculationRestFrequencyDate, LoanProductTestBuilder.RBI_INDIA_STRATEGY, collaterals);
+                LoanProductTestBuilder.RBI_INDIA_STRATEGY, collaterals);
 
         assertNotNull(loanId);
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
@@ -185,13 +184,12 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         final String approveDate = dateFormat.format(today.getTime());
         final String expectedDisbursementDate = dateFormat.format(today.getTime());
         final String disbursementDate = dateFormat.format(today.getTime());
-        final String recalculationRestFrequencyDate = "01 January 2012";
         final boolean isMultiTrancheLoan = true;
 
         Long loanProductId = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
-                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0",
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, isMultiTrancheLoan);
 
         Calendar secondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -212,7 +210,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         collaterals.add(collateral(clientCollateralId, BigDecimal.valueOf(1)));
 
         Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
-                recalculationRestFrequencyDate, LoanProductTestBuilder.RBI_INDIA_STRATEGY, createTranches, collaterals);
+                LoanProductTestBuilder.RBI_INDIA_STRATEGY, createTranches, collaterals);
 
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
@@ -305,8 +303,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
     private Long createLoanProductWithInterestRecalculation(final String repaymentStrategy,
             final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
             final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy,
-            final boolean isMultiTrancheLoan) {
+            final String preCloseInterestCalculationStrategy, final boolean isMultiTrancheLoan) {
         final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("10000.00")
                 .withNumberOfRepayments("12").withRepaymentAfterEvery("2").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
                 .withInterestRateFrequencyTypeAsMonths().withTranches(isMultiTrancheLoan)
@@ -321,14 +318,14 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
     }
 
     private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,
-            final Long loanProductId, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
+            final Long loanProductId, final String disbursementDate, final String repaymentStrategy,
             List<PostLoansRequestCollateralData> collaterals) {
         return applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
-                restStartDate, repaymentStrategy, null, collaterals);
+                repaymentStrategy, null, collaterals);
     }
 
     private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,
-            final Long loanProductId, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
+            final Long loanProductId, final String disbursementDate, final String repaymentStrategy,
             List<PostLoansDisbursementData> tranches, List<PostLoansRequestCollateralData> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return applyForLoan(new PostLoansRequest()//

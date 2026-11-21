@@ -41,12 +41,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CreditBureauTest extends FeignIntegrationTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CreditBureauTest.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String LOCAL_EXTERNAL_HOST = "localhost";

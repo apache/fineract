@@ -27,7 +27,6 @@ import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostOfficesResponse;
@@ -252,7 +251,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         PostClientsRequest request3 = ClientRequestBuilders.defaultClient();
         clientHelper.createClient(request3);
         // when
-        PageClientSearchData result = clientHelper.searchClients(client2DisplayName.toLowerCase());
+        PageClientSearchData result = clientHelper.searchClients(client2DisplayName.toLowerCase(Locale.ROOT));
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getDisplayName()).isEqualTo(client2DisplayName);
@@ -306,8 +305,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         final Long documentType = 1L;
         PostClientsClientIdIdentifiersRequest identifierRequest = clientIdentifier(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
-        PostClientsClientIdIdentifiersResponse clientIdentifierResponse = clientHelper.createClientIdentifier(clientResponse.getClientId(),
-                identifierRequest);
+        clientHelper.createClientIdentifier(clientResponse.getClientId(), identifierRequest);
 
         PostClientsRequest request2 = ClientRequestBuilders.defaultClient();
         clientHelper.createClient(request2);
@@ -338,7 +336,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         PostClientsRequest request3 = ClientRequestBuilders.defaultClient();
         clientHelper.createClient(request3);
         // when
-        PageClientSearchData result = clientHelper.searchClients(documentKey.toLowerCase());
+        PageClientSearchData result = clientHelper.searchClients(documentKey.toLowerCase(Locale.ROOT));
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getMobileNo()).isEqualTo(request1.getMobileNo());

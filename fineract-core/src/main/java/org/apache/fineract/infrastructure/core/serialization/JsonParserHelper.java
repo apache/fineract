@@ -847,7 +847,7 @@ public class JsonParserHelper {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final List<String> allowedLanguages = Arrays.asList(Locale.getISOLanguages());
-        if (!allowedLanguages.contains(languageCode.toLowerCase())) {
+        if (!allowedLanguages.contains(languageCode.toLowerCase(Locale.ROOT))) {
             final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
                     "The parameter `locale` has an invalid language value " + languageCode + " .", "locale", languageCode);
             dataValidationErrors.add(error);
@@ -867,7 +867,7 @@ public class JsonParserHelper {
                     dataValidationErrors);
         }
 
-        return Locale.of(languageCode.toLowerCase(), courntryCode.toUpperCase(Locale.ROOT), variantCode);
+        return Locale.of(languageCode.toLowerCase(Locale.ROOT), courntryCode.toUpperCase(Locale.ROOT), variantCode);
     }
 
     private Locale extractLocaleValue(final JsonObject object) {

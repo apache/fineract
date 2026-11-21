@@ -22,11 +22,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -38,17 +35,11 @@ public class Fund extends AbstractPersistableCustom<Long> {
     @Column(name = "name")
     private String name;
 
+    @Getter
     @Column(name = "external_id", length = 100)
     private String externalId;
 
-    public static Fund fromJson(final JsonCommand command) {
-
-        final String firstnameParamName = "name";
-        final String name = command.stringValueOfParameterNamed(firstnameParamName);
-
-        final String lastnameParamName = "externalId";
-        final String externalId = command.stringValueOfParameterNamed(lastnameParamName);
-
+    public static Fund createNew(final String name, final String externalId) {
         return new Fund(name, externalId);
     }
 
@@ -61,24 +52,11 @@ public class Fund extends AbstractPersistableCustom<Long> {
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public void updateName(final String name) {
+        this.name = StringUtils.defaultIfEmpty(name, null);
+    }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String externalIdParamName = "externalId";
-        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
-            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
-            actualChanges.put(externalIdParamName, newValue);
-            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        return actualChanges;
+    public void updateExternalId(final String externalId) {
+        this.externalId = StringUtils.defaultIfEmpty(externalId, null);
     }
 }

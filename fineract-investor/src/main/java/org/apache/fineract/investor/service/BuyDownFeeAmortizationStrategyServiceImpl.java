@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BuyDownFeeAmortizationStrategyServiceImpl implements BuyDownFeeAmortizationStrategyService {
 
-    private final ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+    private final ExternalAssetOwnerLoanAttributesReadService externalAssetOwnerLoanAttributesReadService;
     private final ExternalAssetOwnerTransferRepository externalAssetOwnerTransferRepository;
 
     @Override
@@ -42,7 +42,8 @@ public class BuyDownFeeAmortizationStrategyServiceImpl implements BuyDownFeeAmor
         if (externalAssetOwnerTransferRepository.findActiveByLoanId(loan.getId()).isEmpty()) {
             return false;
         }
-        return externalAssetOwnerLoanProductAttributesReadService.getAttributeValue(loan.productId(), IMMEDIATE.getAttributeKey())
+        return externalAssetOwnerLoanAttributesReadService
+                .resolveAttributeValue(loan.getId(), loan.productId(), IMMEDIATE.getAttributeKey())
                 .map(value -> IMMEDIATE.getAttributeValue().equalsIgnoreCase(value)).orElse(false);
     }
 }

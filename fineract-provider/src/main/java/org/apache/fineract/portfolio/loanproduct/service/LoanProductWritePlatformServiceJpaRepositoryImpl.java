@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedFeeRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductCannotBeModifiedDueToNonClosedLoansException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductDateException;
@@ -154,6 +156,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanProduct.getId(), command);
+            this.fromApiJsonDeserializer.validateChargeAmortization(loanProduct);
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
@@ -295,13 +298,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             if (changes.containsKey(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME)) {
                 enableBuyDownFee = (boolean) changes.get(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME);
             }
+            final boolean enableChargeAmortization = product.getLoanProductRelatedDetail().isEnableChargeAmortization();
 
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey("accountingRule");
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
                     .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingRule(),
-                            enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee);
+                            enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee, enableChargeAmortization);
             changes.putAll(accountingMappingChanges);
+            this.fromApiJsonDeserializer.validateChargeAmortization(product);
 
             if (changes.containsKey(LoanProductConstants.RATES_PARAM_NAME)) {
                 final List<Rate> productRates = assembleListOfProductRates(command);
@@ -319,6 +324,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     supportedInterestRefundTypes.add(LoanSupportedInterestRefundTypes.valueOf(value.getAsString()));
                 });
                 product.getLoanProductRelatedDetail().setSupportedInterestRefundTypes(supportedInterestRefundTypes);
+            }
+
+            if (command.parameterExists(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES)) {
+                final JsonArray supportedTransactionsForFeeRefund = command
+                        .arrayOfParameterNamed(LoanProductConstants.SUPPORTED_FEE_REFUND_TYPES);
+                final List<LoanSupportedFeeRefundTypes> supportedFeeRefundTypes = new ArrayList<>();
+                supportedTransactionsForFeeRefund.iterator()
+                        .forEachRemaining(value -> supportedFeeRefundTypes.add(LoanSupportedFeeRefundTypes.valueOf(value.getAsString())));
+                product.getLoanProductRelatedDetail().setSupportedFeeRefundTypes(supportedFeeRefundTypes);
             }
 
             if (command.parameterExists(LoanProductConstants.CHARGE_OFF_BEHAVIOUR)) {
@@ -458,7 +472,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     }
 
     private static boolean containsDuplicateShortnameErrorForMySQL(Throwable realCause) {
-        return (realCause.getMessage().contains("short_name") && realCause.getMessage().toLowerCase().contains("duplicate"));
+        return (realCause.getMessage().contains("short_name") && realCause.getMessage().toLowerCase(Locale.ROOT).contains("duplicate"));
     }
 
     private void validateInputDates(final JsonCommand command) {

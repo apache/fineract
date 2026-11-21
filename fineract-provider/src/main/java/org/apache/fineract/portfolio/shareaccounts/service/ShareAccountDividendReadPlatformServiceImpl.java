@@ -114,7 +114,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
             sql = sb.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.sql;
         }
 

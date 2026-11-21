@@ -391,7 +391,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             this.schema = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
 
@@ -509,7 +509,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private static final class ParentGroupsMapper implements RowMapper<GroupGeneralData> {
 
-        public String parentGroupsSchema() {
+        private String parentGroupsSchema() {
             return "gp.id As groupId , gp.account_no as accountNo, gp.display_name As groupName from m_client cl JOIN m_group_client gc ON cl.id = gc.client_id "
                     + "JOIN m_group gp ON gp.id = gc.group_id WHERE cl.id  = ?";
         }
@@ -540,7 +540,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             this.schema = builder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
 
@@ -571,7 +571,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
 
-        public String clientLookupByIdentifierSchema() {
+        private String clientLookupByIdentifierSchema() {
             return "c.id as id, c.account_no as accountNo, c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, "
                     + "c.fullname as fullname, c.display_name as displayName," + "c.office_id as officeId, o.name as officeName "
                     + " from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
@@ -673,7 +673,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             this.schema = builder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schema;
         }
 

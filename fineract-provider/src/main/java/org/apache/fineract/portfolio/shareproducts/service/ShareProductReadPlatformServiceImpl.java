@@ -42,7 +42,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.products.exception.ProductNotFoundException;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
@@ -58,7 +58,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
 
     private final JdbcTemplate jdbcTemplate;
     private final CurrencyReadPlatformService currencyReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
@@ -92,7 +92,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             final String sql1 = "select " + marketRowMapper.schema() + " where marketData.product_id = ?";
             final Collection<ShareProductMarketPriceData> shareMarketCollection = this.jdbcTemplate.query(sql1, marketRowMapper, // NOSONAR
                     new Object[] { productId });
-            final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveShareProductCharges(productId);
+            final Collection<ChargeData> charges = this.chargeReadService.retrieveShareProductCharges(productId);
             ShareProductRowMapper mapper = new ShareProductRowMapper(shareMarketCollection, charges);
             final String sql = "select " + mapper.schema() + " where shareproduct.id = ?";
             ShareProductData data = (ShareProductData) this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId }); // NOSONAR
@@ -109,7 +109,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             }
 
             if (includeTemplate) {
-                Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
+                Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSharesApplicableCharges();
                 final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
                 final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                         .retrieveLockinPeriodFrequencyTypeOptions();
@@ -128,7 +128,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
 
     @Override
     public ProductData retrieveTemplate() {
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
+        Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSharesApplicableCharges();
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                 .retrieveLockinPeriodFrequencyTypeOptions();
@@ -164,7 +164,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             return ShareProductData.generic(id, name, shortName, totalShares);
         }
 
-        public String schema() {
+        private String schema() {
             return "shareproduct.id, shareproduct.name, shareproduct.short_name, shareproduct.total_shares from m_share_product shareproduct";
         }
     }
@@ -181,7 +181,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             return new ShareProductMarketPriceData(id, fromLocalDate, shareValue);
         }
 
-        public String schema() {
+        private String schema() {
             return "marketData.id, marketData.from_date, marketData.share_value from m_share_product_market_price marketData";
         }
     }
@@ -266,7 +266,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
                     minimumActivePeriodType, accountingRuleType);
         }
 
-        public String schema() {
+        private String schema() {
             return this.buff.toString();
         }
     }

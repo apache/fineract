@@ -135,10 +135,7 @@ public class SavingsAccountTransactionDataValidator {
         final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParamName, element);
         baseDataValidator.reset().parameter(externalIdParamName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
 
-        final Integer paymentType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
-        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentType).notNull();
-
-        validatePaymentTypeDetails(baseDataValidator, element);
+        validatePaymentTypeDetails(baseDataValidator, element, true);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -211,14 +208,15 @@ public class SavingsAccountTransactionDataValidator {
                     .failWithCodeNoParameterAddedToErrorCode("account.is.in.blocked.state");
         }
 
-        validatePaymentTypeDetails(baseDataValidator, element);
+        validatePaymentTypeDetails(baseDataValidator, element, false);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validatePaymentTypeDetails(final DataValidatorBuilder baseDataValidator, JsonElement element) {
+    private void validatePaymentTypeDetails(final DataValidatorBuilder baseDataValidator, JsonElement element,
+            final boolean paymentTypeRequired) {
         // Validate all string payment detail fields for max length
-        boolean checkPaymentTypeDetails = false;
+        boolean checkPaymentTypeDetails = paymentTypeRequired;
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
         final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
@@ -231,8 +229,8 @@ public class SavingsAccountTransactionDataValidator {
                 checkPaymentTypeDetails = true;
             }
         }
-        if (checkPaymentTypeDetails) {
-            baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).notBlank().integerGreaterThanZero();
+        if (checkPaymentTypeDetails && paymentTypeId == null) {
+            baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).notBlank();
         }
 
     }

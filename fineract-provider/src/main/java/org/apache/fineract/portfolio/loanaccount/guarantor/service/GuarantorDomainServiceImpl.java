@@ -48,7 +48,6 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
-import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -70,6 +69,7 @@ import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransact
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSummaryWrapper;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.springframework.stereotype.Service;
 
@@ -233,7 +233,6 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         final Long chargeId = null;
         final Integer loanInstallmentNumber = null;
         final Integer transferType = AccountTransferType.LOAN_REPAYMENT.getValue();
-        final AccountTransferDetails accountTransferDetails = null;
         final String noteText = null;
 
         Long loanId = loan.getId();
@@ -255,8 +254,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         ExternalId externalId = externalIdFactory.create();
                         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
                                 toAccountType, fromAccountId, toAccountId, description, locale, fmt, paymentDetail, fromTransferType,
-                                toTransferType, chargeId, loanInstallmentNumber, transferType, accountTransferDetails, noteText, externalId,
-                                null, null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
+                                toTransferType, chargeId, loanInstallmentNumber, transferType, noteText, externalId, null, null,
+                                fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                         transferAmount(accountTransferDTO);
                     } finally {
                         releaseLoanIds.remove(loanId);
@@ -333,8 +332,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                                     transactions.add(transaction);
                                 }
                             }
-                            this.savingsAccountAssembler.setHelpers(savingsAccount);
-                            savingsAccount.updateSavingsAccountSummary(transactions);
+                            savingsAccount.updateSavingsAccountSummary(SavingsAccountTransactionSummaryWrapper
+                                    .calculateSummaryTotals(savingsAccount.getCurrency(), transactions));
                         }
                         savingsAccount.holdFunds(guarantorFundingDetails.getAmount());
                         totalGuarantee = totalGuarantee.add(guarantorFundingDetails.getAmount());
@@ -348,7 +347,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
                             insufficientBalanceIds.add(savingsAccount.getId());
                         }
-                        savingsAccount.updateSavingsAccountSummary(savingsAccount.getTransactions());
+                        savingsAccount.updateSavingsAccountSummary(SavingsAccountTransactionSummaryWrapper
+                                .calculateSummaryTotals(savingsAccount.getCurrency(), savingsAccount.getTransactions()));
                     }
                 }
             }

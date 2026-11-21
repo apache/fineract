@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -133,7 +134,7 @@ public enum EntityTables {
     }
 
     public static EntityTables fromEntityName(String name) {
-        return name == null ? null : BY_ENTITY_NAME.get(name.toLowerCase());
+        return name == null ? null : BY_ENTITY_NAME.get(name.toLowerCase(Locale.ROOT));
     }
 
     public static String getForeignKeyColumnNameOnDatatable(String name) {

@@ -30,12 +30,12 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.CurrencyConfigurationData;
 import org.apache.fineract.client.models.CurrencyUpdateRequest;
 import org.apache.fineract.client.models.GetClientsChargesPageItems;
 import org.apache.fineract.client.models.GetClientsClientIdChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -57,7 +57,7 @@ public class ClientChargeRoundingTest extends FeignLoanTestBase {
 
     @Test
     public void shouldRoundUsdClientChargeTo_TwoDecimalPlaces() {
-        PostChargesResponse chargesResponse = createFlatClientCharge(19.876, "USD");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(19.876, "USD");
 
         applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.876"));
 
@@ -71,7 +71,7 @@ public class ClientChargeRoundingTest extends FeignLoanTestBase {
 
     @Test
     public void shouldRoundJpyClientChargeTo_ZeroDecimalPlaces() {
-        PostChargesResponse chargesResponse = createFlatClientCharge(19.8, "JPY");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(19.8, "JPY");
 
         applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.8"));
 
@@ -85,7 +85,7 @@ public class ClientChargeRoundingTest extends FeignLoanTestBase {
 
     @Test
     public void shouldRoundUpJpyClientCharge_whenValueIsAboveHalfTo_ZeroDecimalPlaces() {
-        PostChargesResponse chargesResponse = createFlatClientCharge(0.55, "JPY");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(0.55, "JPY");
 
         applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("0.55"));
 
@@ -99,7 +99,7 @@ public class ClientChargeRoundingTest extends FeignLoanTestBase {
 
     @Test
     public void shouldFailToAddJpyClientCharge_whenRoundedToZero() {
-        PostChargesResponse chargesResponse = createFlatClientCharge(0.5, "JPY");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(0.5, "JPY");
 
         CallFailedRuntimeException exception = applyChargeToClientExpectingError(clientId, chargesResponse.getResourceId(),
                 new BigDecimal("0.5"));
@@ -113,9 +113,9 @@ public class ClientChargeRoundingTest extends FeignLoanTestBase {
     // HELPERS
     // -----------------------------
 
-    private PostChargesResponse createFlatClientCharge(double amount, String currencyCode) {
+    private ChargeCreateResponse createFlatClientCharge(double amount, String currencyCode) {
         String uniqueChargeName = "Client Charge Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(3) // CLIENT
+        return chargesHelper.createCharge(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(3) // CLIENT
                 .chargeTimeType(2).chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode(currencyCode).locale("en").active(true).penalty(false));
     }

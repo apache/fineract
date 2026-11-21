@@ -48,6 +48,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
+import org.apache.fineract.portfolio.savings.domain.SavingsInterestCalculationUtil;
 import org.apache.fineract.portfolio.savings.domain.interest.CompoundInterestValues;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.savings.domain.interest.SavingsAccountTransactionDetailsForPostingPeriod;
@@ -70,6 +71,19 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
     @Override
     public void addAccrualEntries(LocalDate tillDate) throws JobExecutionException {
         final List<SavingsAccrualData> savingsAccrualData = savingsAccountReadPlatformService.retrievePeriodicAccrualData(tillDate, null);
+        processAccrualData(savingsAccrualData, tillDate);
+    }
+
+    @Transactional
+    @Override
+    public void addAccrualEntries(SavingsAccount savingsAccount, LocalDate tillDate) throws JobExecutionException {
+        final List<SavingsAccrualData> savingsAccrualData = savingsAccountReadPlatformService.retrievePeriodicAccrualData(tillDate,
+                savingsAccount);
+        processAccrualData(savingsAccrualData, tillDate);
+    }
+
+    private void processAccrualData(final List<SavingsAccrualData> savingsAccrualData, final LocalDate tillDate)
+            throws JobExecutionException {
         final Integer financialYearBeginningMonth = configurationDomainService.retrieveFinancialYearBeginningMonth();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -120,8 +134,8 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(savingsAccount.getInterestCalculationDaysInYearType());
 
-        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(fromDate, tillDate,
-                postingPeriodType, financialYearBeginningMonth, postedAsOnTransactionDates);
+        final List<LocalDateInterval> postingPeriodIntervals = SavingsInterestCalculationUtil.determineInterestPostingPeriods(fromDate,
+                tillDate, postingPeriodType, financialYearBeginningMonth, postedAsOnTransactionDates);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
         final MonetaryCurrency currency = savingsAccount.getCurrency();

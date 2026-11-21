@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Locale;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetDataTablesResponse;
@@ -77,7 +78,7 @@ public class FeignDatatableRenameToReservedColumnTest extends FeignIntegrationTe
 
     private String createClientDatatable() {
         PostDataTablesRequest request = new PostDataTablesRequest()//
-                .datatableName(Utils.uniqueRandomStringGenerator("dt_client_rename_", 5).toLowerCase())//
+                .datatableName(Utils.uniqueRandomStringGenerator("dt_client_rename_", 5).toLowerCase(Locale.ROOT))//
                 .apptableName(CLIENT_APP_TABLE_NAME)//
                 .entitySubType("PERSON")//
                 .multiRow(false)//

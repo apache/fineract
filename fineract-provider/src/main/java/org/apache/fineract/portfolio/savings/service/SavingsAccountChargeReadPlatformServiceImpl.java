@@ -71,7 +71,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
     private static final class SavingsAccountChargeMapper implements RowMapper<SavingsAccountChargeData> {
 
-        public String schema() {
+        private String schema() {
             return "sc.id as id, c.id as chargeId, sc.savings_account_id as accountId, c.name as name, " + "sc.amount as amountDue, "
                     + "sc.amount_paid_derived as amountPaid, " + "sc.amount_waived_derived as amountWaived, "
                     + "sc.amount_writtenoff_derived as amountWrittenOff, " + "sc.amount_outstanding_derived as amountOutstanding, "
@@ -254,7 +254,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             this.schemaSql = sqlBuilder.toString();
         }
 
-        public String schema() {
+        private String schema() {
             return this.schemaSql;
         }
 

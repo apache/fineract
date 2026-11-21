@@ -110,6 +110,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.AbstractLoanTra
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanDisbursalTransactionEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanRefundPostBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionFeeRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionGoodwillCreditPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionInterestPaymentWaiverPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionInterestRefundPostEvent;
@@ -498,6 +499,7 @@ public class EventCheckHelper {
             case REFUND_BY_CASH -> LoanRefundPostBusinessEvent.class;
             case INTEREST_PAYMENT_WAIVER -> LoanTransactionInterestPaymentWaiverPostEvent.class;
             case INTEREST_REFUND -> LoanTransactionInterestRefundPostEvent.class;
+            case FEE_REFUND -> LoanTransactionFeeRefundPostEvent.class;
             default -> throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
         };
         return transactionEventCheck(loanId, transactionId, eventClass, externalOwnerId);
@@ -588,6 +590,17 @@ public class EventCheckHelper {
                 .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
                 .extractingBigDecimal(data -> data.getNewTransactionDetail().getTransactionAmount()).isEqualTo(newAmount)//
                 .extractingData(data -> data.getNewTransactionDetail().getReversed()).isEqualTo(false);
+    }
+
+    public void workingCapitalLoanAdjustTransactionExternalIdMoveEventCheck(final Long loanId, final Long reversedTransactionId,
+            final Long newTransactionId, final String externalId) {
+        waitForTransactionCommit();
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, reversedTransactionId)//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(data -> data.getTransactionToAdjust().getExternalId()).isEqualTo(null)//
+                .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
+                .extractingData(data -> data.getNewTransactionDetail().getExternalId()).isEqualTo(externalId);
     }
 
     private record ExpectedTransferAmounts(BigDecimal totalOutstanding, BigDecimal principal, BigDecimal fee, BigDecimal penalty,
