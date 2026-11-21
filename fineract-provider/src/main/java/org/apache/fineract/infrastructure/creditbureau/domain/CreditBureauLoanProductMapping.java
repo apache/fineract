@@ -28,7 +28,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
@@ -60,31 +59,11 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Lo
     @JoinColumn(name = "loan_product_id")
     private LoanProduct loanProduct;
 
-    public static CreditBureauLoanProductMapping fromJson(final JsonCommand command, OrganisationCreditBureau organisation_creditbureau,
-            LoanProduct loanProduct) {
-        Boolean isCreditCheckMandatory = false;
-        Boolean skipCreditCheckInFailure = false;
-        Integer stalePeriod = -1;
-        Boolean isActive = false;
-        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory") != null) {
-            isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");
-        }
-
-        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure") != null) {
-            skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");
-        }
-
-        if (command.integerValueOfParameterNamed("stalePeriod") != null) {
-            stalePeriod = command.integerValueOfParameterNamed("stalePeriod");
-        }
-
-        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isActive")) {
-            isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
-        }
-
-        return new CreditBureauLoanProductMapping().setCreditCheckMandatory(isCreditCheckMandatory)
-                .setSkipCreditCheckInFailure(skipCreditCheckInFailure).setStalePeriod(stalePeriod).setActive(isActive)
+    public static CreditBureauLoanProductMapping createNew(final boolean creditCheckMandatory, final boolean skipCreditCheckInFailure,
+            final int stalePeriod, final boolean active, final OrganisationCreditBureau organisation_creditbureau,
+            final LoanProduct loanProduct) {
+        return new CreditBureauLoanProductMapping().setCreditCheckMandatory(creditCheckMandatory)
+                .setSkipCreditCheckInFailure(skipCreditCheckInFailure).setStalePeriod(stalePeriod).setActive(active)
                 .setOrganisation_creditbureau(organisation_creditbureau).setLoanProduct(loanProduct);
-
     }
 }

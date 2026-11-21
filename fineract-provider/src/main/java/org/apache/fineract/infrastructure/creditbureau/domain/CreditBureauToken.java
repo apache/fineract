@@ -23,13 +23,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,18 +59,8 @@ public class CreditBureauToken extends AbstractPersistableCustom<Long> {
     @Column(name = "expiry_date")
     private LocalDate expires;
 
-    public static CreditBureauToken fromJson(final JsonCommand command) {
-        final String userName = command.stringValueOfParameterNamed("userName");
-        final String accessToken = command.stringValueOfParameterNamed("access_token");
-        final String tokenType = command.stringValueOfParameterNamed("token_type");
-        final String expiresIn = command.stringValueOfParameterNamed("expires_in");
-        final String issued = command.stringValueOfParameterNamed(".issued");
-        final String expiry = command.stringValueOfParameterNamed(".expires");
-
-        DateTimeFormatter dateformat = new DateTimeFormatterBuilder().appendPattern("EEE, dd MMM yyyy kk:mm:ss zzz").toFormatter();
-
-        LocalDate expires = LocalDate.parse(expiry, dateformat);
-
+    public static CreditBureauToken createNew(final String userName, final String accessToken, final String tokenType,
+            final String expiresIn, final String issued, final LocalDate expires) {
         return new CreditBureauToken().setUserName(userName).setAccessToken(accessToken).setTokenType(tokenType).setExpiresIn(expiresIn)
                 .setIssued(issued).setExpires(expires);
     }

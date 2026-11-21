@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -434,7 +436,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImpl implements 
 
             this.fromApiJsonDeserializer.validateForCreate(apicommand.json());
 
-            final CreditBureauToken generatedtoken = CreditBureauToken.fromJson(apicommand);
+            final CreditBureauToken generatedtoken = buildToken(apicommand);
 
             final CreditBureauToken credittoken = this.tokenRepositoryWrapper.getToken();
             if (credittoken != null) {
@@ -448,6 +450,21 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImpl implements 
         }
 
         return creditBureauToken;
+    }
+
+    static CreditBureauToken buildToken(final JsonCommand command) {
+        final String userName = command.stringValueOfParameterNamed("userName");
+        final String accessToken = command.stringValueOfParameterNamed("access_token");
+        final String tokenType = command.stringValueOfParameterNamed("token_type");
+        final String expiresIn = command.stringValueOfParameterNamed("expires_in");
+        final String issued = command.stringValueOfParameterNamed(".issued");
+        final String expiry = command.stringValueOfParameterNamed(".expires");
+
+        final DateTimeFormatter dateformat = new DateTimeFormatterBuilder().appendPattern("EEE, dd MMM yyyy kk:mm:ss zzz").toFormatter();
+
+        final LocalDate expires = LocalDate.parse(expiry, dateformat);
+
+        return CreditBureauToken.createNew(userName, accessToken, tokenType, expiresIn, issued, expires);
     }
 
     public String getCreditBureauConfiguration(Integer creditBureauId, String configurationParameterName) {

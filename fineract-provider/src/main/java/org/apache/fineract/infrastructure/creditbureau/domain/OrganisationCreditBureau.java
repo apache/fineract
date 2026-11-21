@@ -27,7 +27,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -56,13 +55,6 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom<Long> {
 
     public OrganisationCreditBureau() {
 
-    }
-
-    public static OrganisationCreditBureau fromJson(final JsonCommand command, CreditBureau creditbureau) {
-        final String alias = command.stringValueOfParameterNamed("alias");
-        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
-
-        return new OrganisationCreditBureau(alias, creditbureau, isActive, null);
     }
 
     public String getAlias() {
