@@ -24,9 +24,11 @@ import static org.apache.fineract.infrastructure.configuration.api.GlobalConfigu
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
@@ -106,7 +108,9 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
                     range.setDelinquentDays(rangeDelinquentDays);
                     Optional<DelinquencyRange> delinquencyRangeByDays = findDelinquencyRangeByDays(
                             loan.getLoanProductRelatedDetails().getDelinquencyBucket(), (int) rangeDelinquentDays);
-                    delinquencyRangeChanged |= applyDelinquencyTagForRange(loan, range, delinquencyRangeByDays.orElse(null), businessDate);
+                    delinquencyRangeChanged |= delinquencyRangeByDays
+                            .map(currentRange -> applyReachedDelinquencyTags(loan, range, currentRange, businessDate))
+                            .orElseGet(() -> applyDelinquencyTagForRange(loan, range, null, businessDate));
                 } else {
                     range.setDelinquentAmount(BigDecimal.ZERO);
                     range.setDelinquentDays(0L);
@@ -167,9 +171,90 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
     }
 
     /**
+     * Tags the period with every range it has passed through since its classification was last known, each on the day
+     * the period entered that range ({@code toDate + minimumAgeDays}). An evaluation that comes late - the first COB
+     * long after disbursement, or an instant classification after days without COB - therefore leaves the same tag
+     * history a daily COB would have. Days already known are never re-dated: see
+     * {@link #resolveClassificationKnownUntil}.
+     * <p>
+     * Ranges may have gaps ({@code max + 1 < next.min}): daily COB lifts the tag on {@code toDate + maximumAgeDays + 1}
+     * and leaves the gap days untagged. The replay does the same, so the tag chain breaks across the gap and
+     * {@code delinquentDate} starts at the current range's entry - not at the earlier range.
+     */
+    private boolean applyReachedDelinquencyTags(final WorkingCapitalLoan loan, final WorkingCapitalLoanDelinquencyRangeSchedule range,
+            final DelinquencyRange currentRange, final LocalDate businessDate) {
+        final LocalDate knownUntil = resolveClassificationKnownUntil(loan, range, businessDate);
+        final List<DelinquencyRange> reachedRanges = loan.getLoanProductRelatedDetails().getDelinquencyBucket().getRanges().stream()
+                .filter(dr -> dr.getMinimumAgeDays() <= currentRange.getMinimumAgeDays())
+                .sorted(Comparator.comparing(DelinquencyRange::getMinimumAgeDays)).toList();
+
+        boolean tagHistoryChanged = false;
+        for (int i = 0; i < reachedRanges.size(); i++) {
+            final DelinquencyRange delinquencyRange = reachedRanges.get(i);
+            final boolean isCurrentRange = i == reachedRanges.size() - 1;
+            final LocalDate entryDate = rangeEntryDate(range, delinquencyRange);
+            final LocalDate lastDayInRange = rangeLastDayInRange(range, delinquencyRange);
+            final LocalDate exitDate = lastDayInRange == null ? null : lastDayInRange.plusDays(1);
+
+            // Non-current range the period had already left by knownUntil: daily COB would not touch it again.
+            if (!isCurrentRange && lastDayInRange != null && lastDayInRange.isBefore(laterDate(entryDate, knownUntil))) {
+                continue;
+            }
+
+            final LocalDate tagDate = laterDate(entryDate, knownUntil);
+            if (!isCurrentRange && exitDate != null && !tagDate.isBefore(exitDate)) {
+                continue;
+            }
+            tagHistoryChanged |= applyDelinquencyTagForRange(loan, range, delinquencyRange, tagDate);
+
+            // Gap before the next range: lift on the day after this range ends, as daily COB does on that day.
+            if (!isCurrentRange && exitDate != null) {
+                final LocalDate nextEntryDate = rangeEntryDate(range, reachedRanges.get(i + 1));
+                if (!exitDate.equals(nextEntryDate)) {
+                    tagHistoryChanged |= applyDelinquencyTagForRange(loan, range, null, exitDate);
+                }
+            }
+        }
+        return tagHistoryChanged;
+    }
+
+    /**
+     * The last day the period's classification is already known: its last tag change, or the day the last COB
+     * classified the loan as of ({@code lastClosedBusinessDate + 1}), whichever is later. No range can be entered
+     * before {@code toDate + 1}, so the period end serves as the floor.
+     */
+    private LocalDate resolveClassificationKnownUntil(final WorkingCapitalLoan loan, final WorkingCapitalLoanDelinquencyRangeSchedule range,
+            final LocalDate businessDate) {
+        final LocalDate lastClassifiedByCob = loan.getLastClosedBusinessDate() == null ? null
+                : loan.getLastClosedBusinessDate().plusDays(1);
+        final LocalDate knownUntil = Stream
+                .of(range.getToDate(), delinquencyRangeScheduleTagHistoryRepository.findLatestTagChangeDate(range), lastClassifiedByCob)
+                .filter(Objects::nonNull).max(Comparator.naturalOrder()).orElseThrow();
+        return DateUtils.min(knownUntil, businessDate);
+    }
+
+    private static LocalDate rangeEntryDate(final WorkingCapitalLoanDelinquencyRangeSchedule range,
+            final DelinquencyRange delinquencyRange) {
+        return range.getToDate().plusDays(delinquencyRange.getMinimumAgeDays());
+    }
+
+    /**
+     * Last calendar day the period still belongs to the range ({@code toDate + maximumAgeDays}), or {@code null} when
+     * the range is open-ended.
+     */
+    private static LocalDate rangeLastDayInRange(final WorkingCapitalLoanDelinquencyRangeSchedule range,
+            final DelinquencyRange delinquencyRange) {
+        return delinquencyRange.getMaximumAgeDays() == null ? null : range.getToDate().plusDays(delinquencyRange.getMaximumAgeDays());
+    }
+
+    private static LocalDate laterDate(final LocalDate first, final LocalDate second) {
+        return first.isAfter(second) ? first : second;
+    }
+
+    /**
      * Keeps at most one active delinquency tag on the range schedule period: every active tag of another range is
-     * lifted on the business date, and a tag for the current range is added on the same date unless one is already
-     * active. The active tag carries the period's delinquent amount.
+     * lifted on the given date, and a tag for the current range is added on the same date unless one is already active.
+     * The active tag carries the period's delinquent amount.
      * <p>
      * Contract: an escalation lifts the previous tag on the same date the new tag is added. The read side derives a
      * period's delinquency start by walking this chain of lifted tags, so it relies on that date equality.
