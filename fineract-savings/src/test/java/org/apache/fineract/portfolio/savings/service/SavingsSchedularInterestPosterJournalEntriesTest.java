@@ -191,7 +191,7 @@ class SavingsSchedularInterestPosterJournalEntriesTest {
             final String overdraftAmount, final Long debitAccountId, final Long creditAccountId) {
         final SavingsAccountTransactionData transaction = SavingsAccountTransactionData.create(null,
                 SavingsEnumerations.transactionType(type), null, SAVINGS_ACCOUNT_ID, null, POSTING_DATE, CURRENCY, new BigDecimal(amount),
-                null, null, false, POSTING_DATE, false, null, POSTING_DATE);
+                null, null, false, POSTING_DATE, false, null, POSTING_DATE, false);
         if (overdraftAmount != null) {
             transaction.updateOverdraftAmount(new BigDecimal(overdraftAmount));
         }
