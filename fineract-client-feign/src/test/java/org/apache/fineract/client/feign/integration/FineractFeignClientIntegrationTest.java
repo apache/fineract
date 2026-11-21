@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.fineract.client.feign.FeignException;
 import org.apache.fineract.client.feign.FineractFeignClientConfig;
+import org.apache.fineract.client.feign.services.ClientApi;
+import org.apache.fineract.client.feign.services.ClientApi.RetrieveAllClientsQueryParams;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -193,6 +195,17 @@ class FineractFeignClientIntegrationTest {
         TestResponse response = client.getTest(Map.of(AUTHORIZATION, "Bearer test-token"));
 
         assertThat(response.getMessage()).isEqualTo("bearer");
+    }
+
+    @Test
+    void testGeneratedQueryMapsEncodeRawAndPreEncodedValues() {
+        wireMockServer.stubFor(get(urlEqualTo("/v1/clients?externalId=a%2Bb%20c")).willReturn(
+                aResponse().withStatus(200).withHeader(CONTENT_TYPE, APPLICATION_JSON).withBody("{\"totalFilteredRecords\":0}")));
+
+        ClientApi client = config.createClient(ClientApi.class);
+
+        assertThat(client.retrieveAllClients(new RetrieveAllClientsQueryParams().externalId("a+b c")).getTotalFilteredRecords()).isZero();
+        assertThat(client.retrieveAllClients(Map.of("externalId", "a%2Bb%20c")).getTotalFilteredRecords()).isZero();
     }
 
     @Test
