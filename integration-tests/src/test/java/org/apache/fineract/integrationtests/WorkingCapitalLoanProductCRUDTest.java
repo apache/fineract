@@ -643,7 +643,7 @@ public class WorkingCapitalLoanProductCRUDTest {
 
         // Given
         final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = "TW" + UUID.randomUUID().toString().substring(0, 2);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("TW", 2);
         PostWorkingCapitalLoanProductsRequest requestFail1 = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withNearBreachId(nearBreachId).build();
 
