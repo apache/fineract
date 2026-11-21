@@ -21,10 +21,8 @@ package org.apache.fineract.infrastructure.jobs.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
-import java.util.Date;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Getter;
@@ -60,8 +58,7 @@ public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
     private String cronExpression;
 
     @Column(name = "create_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createTime;
+    private Instant createTime;
 
     @Column(name = "task_priority")
     private Short taskPriority;
@@ -70,12 +67,10 @@ public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
     private String groupName;
 
     @Column(name = "previous_run_start_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date previousRunStartTime;
+    private Instant previousRunStartTime;
 
     @Column(name = "next_run_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date nextRunTime;
+    private Instant nextRunTime;
 
     @Column(name = "job_key")
     private String jobKey;

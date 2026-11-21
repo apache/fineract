@@ -23,9 +23,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,12 +46,10 @@ public class ScheduledJobRunHistory extends AbstractPersistableCustom<Long> {
     private Long version;
 
     @Column(name = "start_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startTime;
+    private Instant startTime;
 
     @Column(name = "end_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date endTime;
+    private Instant endTime;
 
     @Column(name = "status")
     private String status;
@@ -67,8 +63,8 @@ public class ScheduledJobRunHistory extends AbstractPersistableCustom<Long> {
     @Column(name = "error_log")
     private String errorLog;
 
-    public ScheduledJobRunHistory(final ScheduledJobDetail scheduledJobDetail, final Long version, final Date startTime, final Date endTime,
-            final String status, final String errorMessage, final String triggerType, final String errorLog) {
+    public ScheduledJobRunHistory(final ScheduledJobDetail scheduledJobDetail, final Long version, final Instant startTime,
+            final Instant endTime, final String status, final String errorMessage, final String triggerType, final String errorLog) {
         this.scheduledJobDetail = scheduledJobDetail;
         this.version = version;
         this.startTime = startTime;
