@@ -194,7 +194,7 @@ final class MissedRunsFixture implements AutoCloseable {
         job.setSchedulerGroup((short) schedulerGroup);
         job.setNodeId(0);
         job.setActiveSchedular(true);
-        job.setNextRunTime(nextRunTime);
+        job.setNextRunTime(nextRunTime.toInstant());
         jobs.add(job);
         return job;
     }

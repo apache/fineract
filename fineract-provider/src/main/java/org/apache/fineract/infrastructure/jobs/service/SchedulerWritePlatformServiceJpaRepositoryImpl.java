@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import io.github.resilience4j.retry.annotation.Retry;
-import java.util.Date;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -137,7 +137,7 @@ public class SchedulerWritePlatformServiceJpaRepositoryImpl implements Scheduler
         boolean isStopExecution = false;
         final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
         if (scheduledJobDetail.isCurrentlyRunning() || (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON)
-                && scheduledJobDetail.getNextRunTime().after(new Date()))) {
+                && scheduledJobDetail.getNextRunTime().isAfter(Instant.now()))) {
             isStopExecution = true;
         }
         final SchedulerDetail schedulerDetail = scheduledJobReadService.retrieveSchedulerDetail();
