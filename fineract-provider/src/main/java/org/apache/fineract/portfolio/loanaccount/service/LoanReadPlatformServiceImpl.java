@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +54,6 @@ import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
-import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -604,13 +602,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             return list;
         }
 
-        Optional<Charge> optPenaltyCharge = loan.getLoanProduct().getCharges().stream()
-                .filter((e) -> ChargeTimeType.OVERDUE_INSTALLMENT.getValue().equals(e.getChargeTimeType()) && e.isLoanCharge()).findFirst();
+        final Charge penaltyCharge = loan.getLoanProduct().getOverdueInstallmentCharge();
 
-        if (optPenaltyCharge.isEmpty()) {
+        if (penaltyCharge == null) {
             return list;
         }
-        final Charge penaltyCharge = optPenaltyCharge.get();
+        final BigDecimal overdueChargeAmount = loan.getOverdueChargeAmountOrDefault(penaltyCharge);
+        final Integer overdueChargeCalculationType = loan.getOverdueChargeCalculationTypeOrDefault(penaltyCharge);
 
         final Long penaltyWaitPeriod = configurationDomainService.retrievePenaltyWaitPeriod();
         final boolean backdatePenalties = configurationDomainService.isBackdatePenaltiesEnabled();
@@ -629,10 +627,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 }
 
                 list.add(new OverdueLoanScheduleData(loan.getId(), penaltyCharge.getId(),
-                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), penaltyCharge.getAmount(),
+                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), overdueChargeAmount,
                         DateUtils.DEFAULT_DATE_FORMAT, Locale.ENGLISH.toLanguageTag(),
                         installment.getPrincipalOutstanding(loan.getCurrency()).getAmount(),
-                        installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber()));
+                        installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber(),
+                        overdueChargeCalculationType));
             }
         }
         return list;
