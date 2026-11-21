@@ -24,8 +24,9 @@ import java.util.Map;
 import org.apache.fineract.accounting.journalentry.data.AccountingBridgeDataDTO;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.client.contract.ClientJournalEntryWriteService;
 
-public interface JournalEntryWritePlatformService {
+public interface JournalEntryWritePlatformService extends ClientJournalEntryWriteService {
 
     CommandProcessingResult createJournalEntry(JsonCommand command);
 
@@ -34,8 +35,6 @@ public interface JournalEntryWritePlatformService {
     void createJournalEntriesForLoan(AccountingBridgeDataDTO accountingBridgeData);
 
     void createJournalEntriesForSavings(Map<String, Object> accountingBridgeData);
-
-    void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData);
 
     CommandProcessingResult defineOpeningBalance(JsonCommand command);
 

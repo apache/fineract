@@ -35,6 +35,7 @@ import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
+import org.apache.fineract.portfolio.client.contract.ClientObligeeReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -55,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformService {
+public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformService, ClientObligeeReadService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuarantorReadPlatformServiceImpl.class);
 

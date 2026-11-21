@@ -23,19 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.validator.PhoneNumberValidationService;
-import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
-import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +48,7 @@ class ClientDataValidatorTest {
     private ConfigurationReadPlatformService configurationReadPlatformService;
 
     @Mock
-    private EntityDatatableChecksRepository entityDatatableChecksRepository;
+    private ClientDatatableChecksReadService clientDatatableChecksReadService;
 
     @Mock
     private PhoneNumberValidationService phoneNumberValidationService;
@@ -65,7 +61,7 @@ class ClientDataValidatorTest {
         when(configurationReadPlatformService.retrieveGlobalConfiguration(anyString()))
                 .thenReturn(new GlobalConfigurationPropertyData().setEnabled(false));
         when(phoneNumberValidationService.getRegex()).thenReturn("^\\+?[0-9]{7,15}$");
-        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService, entityDatatableChecksRepository,
+        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService, clientDatatableChecksReadService,
                 phoneNumberValidationService);
     }
 
@@ -219,8 +215,7 @@ class ClientDataValidatorTest {
 
     @Test
     void validateForCreate_withEmptyDatatables_whenNoneRequiredForLegalForm_doesNotThrow() {
-        when(entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(anyString(), any(), anyString()))
-                .thenReturn(Collections.emptyList());
+        when(clientDatatableChecksReadService.hasDatatableChecks(anyString(), any(), anyString())).thenReturn(false);
         String json = """
                 {
                   "officeId": 1,
@@ -239,9 +234,7 @@ class ClientDataValidatorTest {
 
     @Test
     void validateForCreate_withEmptyDatatables_whenRequiredForLegalForm_throwsPlatformApiDataValidationException() {
-        EntityDatatableChecks requiredCheck = mock(EntityDatatableChecks.class);
-        when(entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(anyString(), any(), anyString()))
-                .thenReturn(List.of(requiredCheck));
+        when(clientDatatableChecksReadService.hasDatatableChecks(anyString(), any(), anyString())).thenReturn(true);
         String json = """
                 {
                   "officeId": 1,
