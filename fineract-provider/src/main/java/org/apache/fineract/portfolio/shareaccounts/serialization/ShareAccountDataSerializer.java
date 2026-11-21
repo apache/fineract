@@ -579,6 +579,9 @@ public class ShareAccountDataSerializer {
         if (!account.status().equals(ShareAccountStatusType.APPROVED.getValue())) {
             baseDataValidator.failWithCodeNoParameterAddedToErrorCode("is.not.in.approved.status");
         }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         account.undoApprove();
         updateTotalChargeDerivedForUndoApproval(account);
         actualChanges.put(ShareAccountApiConstants.charges_paramname, Boolean.TRUE);
@@ -616,6 +619,14 @@ public class ShareAccountDataSerializer {
     @SuppressWarnings("unused")
     public Map<String, Object> validateAndReject(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
+        if (!account.status().equals(ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue())) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("is.not.pending.for.approval");
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         AppUser rejectedUser = this.platformSecurityContext.authenticatedUser();
         LocalDate rejectedDate = DateUtils.getBusinessLocalDate();
         account.reject(rejectedDate, rejectedUser);
