@@ -313,6 +313,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     account, isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
             account.updateClosedStatus();
             account.updateOnAccountClosureStatus(onClosureType);
         } else {
@@ -325,8 +326,6 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         // account.close(user, command, changes);
 
         this.savingsAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         return savingsTransactionId;
     }
