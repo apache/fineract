@@ -71,7 +71,7 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
         for (LoanProductData product : products) {
             Row row = productSheet.createRow(rowIndex++);
             writeLong(ID_COL, row, product.getId());
-            writeString(NAME_COL, row, product.getName().trim().replaceAll("[ )(]", "_"));
+            writeString(NAME_COL, row, sanitizeName(product.getName().replaceAll("[ ]", "_")));
             if (product.getFundName() != null) {
                 writeString(FUND_NAME_COL, row, product.getFundName());
             }
