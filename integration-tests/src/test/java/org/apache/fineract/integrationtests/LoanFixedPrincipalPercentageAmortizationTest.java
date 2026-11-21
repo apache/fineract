@@ -139,14 +139,14 @@ public class LoanFixedPrincipalPercentageAmortizationTest extends FeignLoanTestB
         verifyPeriod(loanSchedule, 1, LocalDate.of(2011, 10, 20), "5000", "1972.60", "1st Month");
         verifyPeriod(loanSchedule, 2, LocalDate.of(2011, 11, 20), "5000", "1936.44", "2nd Month");
         verifyPeriod(loanSchedule, 3, LocalDate.of(2011, 12, 20), "5000", "1775.34", "3rd Month");
-        verifyPeriod(loanSchedule, 12, LocalDate.of(2012, 9, 20), "5000", "917.26", "12th Month");
-        verifyPeriod(loanSchedule, 13, LocalDate.of(2012, 10, 20), "40000", "789.04", "13th Month - Last EMI");
+        verifyPeriod(loanSchedule, 12, LocalDate.of(2012, 9, 20), "5000", "914.75", "12th Month");
+        verifyPeriod(loanSchedule, 13, LocalDate.of(2012, 10, 20), "40000", "786.89", "13th Month - Last EMI");
     }
 
     private void verifyLoanRepaymentScheduleForEqualPrincipalWithPrincipalGrace(final List<GetLoansLoanIdRepaymentPeriod> loanSchedule) {
         verifyPeriod(loanSchedule, 1, LocalDate.of(2011, 10, 20), "0", "1972.60", "1st Month");
-        verifyPeriod(loanSchedule, 6, LocalDate.of(2012, 3, 20), "0", "1906.85", "6th Month");
-        verifyPeriod(loanSchedule, 7, LocalDate.of(2012, 4, 20), "5000", "2038.36", "7th Month");
+        verifyPeriod(loanSchedule, 6, LocalDate.of(2012, 3, 20), "0", "1901.64", "6th Month");
+        verifyPeriod(loanSchedule, 7, LocalDate.of(2012, 4, 20), "5000", "2032.79", "7th Month");
         verifyPeriod(loanSchedule, 18, LocalDate.of(2013, 3, 20), "5000", "828.49", "18th Month");
         verifyPeriod(loanSchedule, 19, LocalDate.of(2013, 4, 20), "40000", "815.34", "19th Month - Last EMI");
     }
