@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.meeting.domain.MeetingRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,8 +59,10 @@ public class CalendarConfiguration {
     public CalendarWritePlatformService calendarWritePlatformService(CalendarRepository calendarRepository,
             CalendarHistoryRepository calendarHistoryRepository, CalendarInstanceRepository calendarInstanceRepository,
             LoanWritePlatformService loanWritePlatformService, ConfigurationDomainService configurationDomainService,
-            GroupRepositoryWrapper groupRepository, LoanRepositoryWrapper loanRepositoryWrapper, ClientRepositoryWrapper clientRepository) {
+            GroupRepositoryWrapper groupRepository, LoanRepositoryWrapper loanRepositoryWrapper, ClientRepositoryWrapper clientRepository,
+            MeetingRepository meetingRepository) {
         return new CalendarWritePlatformServiceJpaRepositoryImpl(calendarRepository, calendarHistoryRepository, calendarInstanceRepository,
-                loanWritePlatformService, configurationDomainService, groupRepository, loanRepositoryWrapper, clientRepository);
+                loanWritePlatformService, configurationDomainService, groupRepository, loanRepositoryWrapper, clientRepository,
+                meetingRepository);
     }
 }
