@@ -80,6 +80,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.MonthEndDueDateStrategy;
 import org.apache.fineract.portfolio.common.domain.MonthlyDueDateResolver;
@@ -573,6 +574,15 @@ public class LoanScheduleAssembler {
                     .extractBooleanNamed(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element);
         }
 
+        DaysInYearCustomStrategyType daysInYearCustomStrategy = loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy();
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearCustomStrategyParameterName, element)) {
+            daysInYearCustomStrategy = this.fromApiJsonHelper.enumValueOfParameterNamed(
+                    LoanApiConstants.daysInYearCustomStrategyParameterName, element, DaysInYearCustomStrategyType.class);
+        } else if (!DaysInYearType.ACTUAL.equals(daysInYearType)) {
+            // The strategy inherited from the product only applies to ACTUAL days in year
+            daysInYearCustomStrategy = null;
+        }
+
         boolean allowFullTermForTranche = loanProduct.isAllowFullTermForTranche();
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element)) {
             allowFullTermForTranche = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.ALLOW_FULL_TERM_FOR_TRANCHE, element);
@@ -603,8 +613,7 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes(),
                 loanProduct.getLoanProductRelatedDetail().getSupportedFeeRefundTypes(),
                 loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour(), interestRecognitionOnDisbursementDate,
-                loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy(),
-                loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),
+                daysInYearCustomStrategy, loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeCalculationType(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeType(),
@@ -1508,6 +1517,15 @@ public class LoanScheduleAssembler {
             changes.put(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, newValue);
             changes.put("locale", localeAsInput);
             loanProductRelatedDetail.setDaysInYearType(newValue);
+        }
+
+        if (command.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)) {
+            relatedDetailUpdateUtil.updateDaysInYearCustomStrategy(loanProductRelatedDetail, command, changes);
+        } else if (loanProductRelatedDetail.getDaysInYearCustomStrategy() != null
+                && !DaysInYearType.ACTUAL.equals(loanProductRelatedDetail.fetchDaysInYearType())) {
+            // The strategy kept from before only applies to ACTUAL days in year
+            changes.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, null);
+            loanProductRelatedDetail.setDaysInYearCustomStrategy(null);
         }
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,

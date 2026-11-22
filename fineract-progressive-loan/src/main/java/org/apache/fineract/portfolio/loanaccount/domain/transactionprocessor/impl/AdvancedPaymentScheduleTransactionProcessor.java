@@ -4472,15 +4472,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .repaymentPeriodFrequencyType(loanTransaction.getLoanReAgeParameter().getFrequencyType())
                 .interestRatePerPeriod(interestRate)
                 .interestRatePeriodFrequencyType(loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType())
-                .annualNominalInterestRate(interestRate).daysInMonthType(loan.getLoanProduct().fetchDaysInMonthType())
-                .daysInYearType(loan.getLoanProduct().fetchDaysInYearType()).inArrearsTolerance(Money.zero(currency, mc))
+                .annualNominalInterestRate(interestRate).daysInMonthType(loan.getLoanProductRelatedDetail().fetchDaysInMonthType())
+                .daysInYearType(loan.getLoanProductRelatedDetail().fetchDaysInYearType()).inArrearsTolerance(Money.zero(currency, mc))
                 .isDownPaymentEnabled(false).downPaymentPercentage(ZERO).seedDate(reAgingStartDate)
-                .interestRecognitionOnDisbursementDate(
-                        loan.getLoanProduct().getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
-                .daysInYearCustomStrategy(loan.getLoanProduct().getLoanProductRelatedDetail().getDaysInYearCustomStrategy())
+                .interestRecognitionOnDisbursementDate(loan.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate())
+                .daysInYearCustomStrategy(loan.getLoanProductRelatedDetail().getDaysInYearCustomStrategy())
                 .interestMethod(loan.getLoanProductRelatedDetail().getInterestMethod())
-                .allowPartialPeriodInterestCalculation(
-                        loan.getLoanProduct().getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation())
+                .allowPartialPeriodInterestCalculation(loan.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation())
                 .monthEndDueDateStrategy(LoanConfigurationDetailsMapper.monthEndDueDateStrategy(loan, loanMeetingCalendarService)).mc(mc)
                 .build();
 
