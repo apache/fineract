@@ -24,16 +24,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.codes.CodeConstants.CodevalueJSONinputParams;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -70,59 +66,20 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
                 .setDescription(description).setActive(isActive).setMandatory(mandatory);
     }
 
-    public static CodeValue fromJson(final Code code, final JsonCommand command) {
-
-        final String label = command.stringValueOfParameterNamed(CodevalueJSONinputParams.NAME.getValue());
-        Integer position = command.integerValueSansLocaleOfParameterNamed(CodevalueJSONinputParams.POSITION.getValue());
-        String description = command.stringValueOfParameterNamed(CodevalueJSONinputParams.DESCRIPTION.getValue());
-        Boolean isActiveObj = command.booleanObjectValueOfParameterNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue());
-        boolean isActive = true;
-        if (isActiveObj != null) {
-            isActive = isActiveObj;
-        }
-        if (position == null) {
-            position = 0;
-        }
-
-        Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(CodevalueJSONinputParams.IS_MANDATORY.getValue());
-
-        return new CodeValue().setCode(code).setLabel(StringUtils.defaultIfEmpty(label, null)).setPosition(position)
-                .setDescription(description).setActive(isActive).setMandatory(mandatory);
+    public void updateLabel(final String label) {
+        this.label = StringUtils.defaultIfEmpty(label, null);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public void updateDescription(final String description) {
+        this.description = StringUtils.defaultIfEmpty(description, null);
+    }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
+    public void updatePosition(final int position) {
+        this.position = position;
+    }
 
-        final String labelParamName = CodevalueJSONinputParams.NAME.getValue();
-        if (command.isChangeInStringParameterNamed(labelParamName, this.label)) {
-            final String newValue = command.stringValueOfParameterNamed(labelParamName);
-            actualChanges.put(labelParamName, newValue);
-            this.label = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String decriptionParamName = CodevalueJSONinputParams.DESCRIPTION.getValue();
-        if (command.isChangeInStringParameterNamed(decriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(decriptionParamName);
-            actualChanges.put(decriptionParamName, newValue);
-            this.description = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String positionParamName = CodevalueJSONinputParams.POSITION.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(positionParamName, this.position)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(positionParamName);
-            actualChanges.put(positionParamName, newValue);
-            this.position = newValue;
-        }
-
-        final String isActiveParamName = CodevalueJSONinputParams.IS_ACTIVE.getValue();
-        if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
-            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
-            actualChanges.put(isActiveParamName, newValue);
-            this.isActive = newValue;
-        }
-
-        return actualChanges;
+    public void updateActive(final boolean active) {
+        this.isActive = active;
     }
 
     public CodeValueData toData() {

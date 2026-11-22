@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.codes.service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.codes.CodeConstants.CodevalueJSONinputParams;
 import org.apache.fineract.infrastructure.codes.domain.Code;
 import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -76,7 +78,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
             final Long codeId = command.entityId();
             final Code code = this.codeRepository.findById(codeId).orElseThrow(() -> new CodeNotFoundException(codeId));
-            final CodeValue codeValue = CodeValue.fromJson(code, command);
+            final CodeValue codeValue = newCodeValue(code, command);
             this.codeValueRepository.saveAndFlush(codeValue);
 
             return new CommandProcessingResultBuilder() //
@@ -91,6 +93,50 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withCommandId(command.commandId()) //
                     .build();
         }
+    }
+
+    private static CodeValue newCodeValue(final Code code, final JsonCommand command) {
+        final String label = command.stringValueOfParameterNamed(CodevalueJSONinputParams.NAME.getValue());
+        final Integer position = command.integerValueSansLocaleOfParameterNamed(CodevalueJSONinputParams.POSITION.getValue());
+        final String description = command.stringValueOfParameterNamed(CodevalueJSONinputParams.DESCRIPTION.getValue());
+        final Boolean isActive = command.booleanObjectValueOfParameterNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue());
+        final boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(CodevalueJSONinputParams.IS_MANDATORY.getValue());
+
+        return CodeValue.createNew(code, label, position == null ? 0 : position, description, isActive == null || isActive, mandatory);
+    }
+
+    private static Map<String, Object> applyChanges(final CodeValue codeValue, final JsonCommand command) {
+        final Map<String, Object> changes = new LinkedHashMap<>(2);
+
+        final String labelParamName = CodevalueJSONinputParams.NAME.getValue();
+        if (command.isChangeInStringParameterNamed(labelParamName, codeValue.getLabel())) {
+            final String newValue = command.stringValueOfParameterNamed(labelParamName);
+            changes.put(labelParamName, newValue);
+            codeValue.updateLabel(newValue);
+        }
+
+        final String descriptionParamName = CodevalueJSONinputParams.DESCRIPTION.getValue();
+        if (command.isChangeInStringParameterNamed(descriptionParamName, codeValue.getDescription())) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            changes.put(descriptionParamName, newValue);
+            codeValue.updateDescription(newValue);
+        }
+
+        final String positionParamName = CodevalueJSONinputParams.POSITION.getValue();
+        if (command.isChangeInIntegerSansLocaleParameterNamed(positionParamName, codeValue.getPosition())) {
+            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(positionParamName);
+            changes.put(positionParamName, newValue);
+            codeValue.updatePosition(newValue);
+        }
+
+        final String isActiveParamName = CodevalueJSONinputParams.IS_ACTIVE.getValue();
+        if (command.isChangeInBooleanParameterNamed(isActiveParamName, codeValue.isActive())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
+            changes.put(isActiveParamName, newValue);
+            codeValue.updateActive(newValue);
+        }
+
+        return changes;
     }
 
     /*
@@ -120,7 +166,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final CodeValue codeValue = this.codeValueRepositoryWrapper.findOneWithNotFoundDetection(codeValueId);
-            final Map<String, Object> changes = codeValue.update(command);
+            final Map<String, Object> changes = applyChanges(codeValue, command);
 
             if (!changes.isEmpty()) {
                 this.codeValueRepository.saveAndFlush(codeValue);

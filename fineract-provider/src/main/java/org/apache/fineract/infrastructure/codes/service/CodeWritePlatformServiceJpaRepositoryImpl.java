@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.codes.service;
 
 import jakarta.persistence.PersistenceException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.Code;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
+    private static final String NAME_PARAM_NAME = "name";
 
     private final PlatformSecurityContext context;
     private final CodeRepository codeRepository;
@@ -68,7 +70,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Code code = Code.fromJson(command);
+            final Code code = Code.createNew(command.stringValueOfParameterNamed(NAME_PARAM_NAME));
             this.codeRepository.saveAndFlush(code);
 
             return new CommandProcessingResultBuilder() //
@@ -96,7 +98,16 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Code code = retrieveCodeBy(codeId);
-            final Map<String, Object> changes = code.update(command);
+            if (code.isSystemDefined()) {
+                throw new SystemDefinedCodeCannotBeChangedException();
+            }
+
+            final Map<String, Object> changes = new LinkedHashMap<>(1);
+            if (command.isChangeInStringParameterNamed(NAME_PARAM_NAME, code.getName())) {
+                final String newValue = command.stringValueOfParameterNamed(NAME_PARAM_NAME);
+                changes.put(NAME_PARAM_NAME, newValue);
+                code.updateName(newValue);
+            }
 
             if (!changes.isEmpty()) {
                 this.codeRepository.saveAndFlush(code);
