@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.service;
 
+import static org.apache.fineract.query.QCAccountNumberFormat.cAccountNumberFormat;
+
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -48,6 +51,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberFormatReadPlatformServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
 
     // data mapper
     private final AccountNumberFormatMapper accountNumberFormatMapper = new AccountNumberFormatMapper();
@@ -71,20 +75,31 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             final Integer accountTypeEnum = rs.getInt("accountTypeEnum");
             final Integer prefixTypeEnum = JdbcSupport.getInteger(rs, "prefixTypeEnum");
             final String prefixCharacter = rs.getString("prefixCharacter");
-
-            final EnumOptionData accountNumberType = AccountNumberFormatEnumerations.entityAccountType(accountTypeEnum);
-            EnumOptionData prefixType = null;
-            if (prefixTypeEnum != null) {
-                prefixType = AccountNumberFormatEnumerations.accountNumberPrefixType(prefixTypeEnum);
-            }
-            return new AccountNumberFormatData(id, accountNumberType, prefixType, prefixCharacter);
+            return toData(id, accountTypeEnum, prefixTypeEnum, prefixCharacter);
         }
+    }
+
+    private static AccountNumberFormatData toData(final Long id, final Integer accountTypeEnum, final Integer prefixTypeEnum,
+            final String prefixCharacter) {
+        final EnumOptionData accountNumberType = AccountNumberFormatEnumerations.entityAccountType(accountTypeEnum);
+        EnumOptionData prefixType = null;
+        if (prefixTypeEnum != null) {
+            prefixType = AccountNumberFormatEnumerations.accountNumberPrefixType(prefixTypeEnum);
+        }
+        return new AccountNumberFormatData(id, accountNumberType, prefixType, prefixCharacter);
     }
 
     @Override
     public List<AccountNumberFormatData> getAllAccountNumberFormats() {
-        String sql = "select " + this.accountNumberFormatMapper.schema();
-        return this.jdbcTemplate.query(sql, this.accountNumberFormatMapper); // NOSONAR
+        return this.queryFactory
+                .select(cAccountNumberFormat.id, cAccountNumberFormat.accountTypeEnum, cAccountNumberFormat.prefixTypeEnum,
+                        cAccountNumberFormat.prefixCharacter) //
+                .from(cAccountNumberFormat) //
+                .fetch() //
+                .stream() //
+                .map(row -> toData(row.get(cAccountNumberFormat.id), row.get(cAccountNumberFormat.accountTypeEnum),
+                        row.get(cAccountNumberFormat.prefixTypeEnum), row.get(cAccountNumberFormat.prefixCharacter))) //
+                .toList();
     }
 
     @Override
