@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -32,7 +33,11 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarData;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -586,5 +591,43 @@ public final class ImportHandlerUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Turns a meeting read from an import sheet into the request that creates it. The frequency is only sent for a
+     * repeating meeting, and the start date is written with the sheet's date format and locale so the write service
+     * parses it back to the same date.
+     */
+    public static CalendarCreateRequest toCalendarCreateRequest(final CalendarData meeting, final CalendarEntityType entityType,
+            final Long entityId, final String dateFormat) {
+        final Locale locale = StringUtils.isBlank(meeting.getLocale()) ? null : JsonParserHelper.localeFromString(meeting.getLocale());
+        return CalendarCreateRequest.builder() //
+                .entityType(entityType.name()) //
+                .entityId(entityId) //
+                .title(meeting.getTitle()) //
+                .description(meeting.getDescription()) //
+                .startDate(DateUtils.format(meeting.getStartDate(), dateFormat, locale)) //
+                .typeId(meeting.getTypeId() == null ? null : Integer.valueOf(meeting.getTypeId())) //
+                .repeating(meeting.isRepeating()) //
+                .frequency(meeting.isRepeating() ? enumOptionId(meeting.getFrequency()) : null) //
+                .interval(meeting.getInterval()) //
+                .repeatsOnDay(enumOptionId(meeting.getRepeatsOnDay())) //
+                .dateFormat(dateFormat) //
+                .locale(meeting.getLocale()) //
+                .build();
+    }
+
+    /**
+     * The sheet readers build these options as {@code new EnumOptionData(null, null, "2")}, so the number is in the
+     * value, not the id (the legacy JSON path sent the value too).
+     */
+    private static Integer enumOptionId(final EnumOptionData option) {
+        if (option == null) {
+            return null;
+        }
+        if (option.getId() != null) {
+            return option.getId().intValue();
+        }
+        return StringUtils.isNumeric(option.getValue()) ? Integer.valueOf(option.getValue()) : null;
     }
 }

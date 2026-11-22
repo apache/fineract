@@ -24,6 +24,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarData;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -276,5 +280,26 @@ class ImportHandlerUtilsTest {
             LocalDate actualStrDate = ImportHandlerUtils.readAsDate(1, row, "dd/MM/yyyy", "en");
             assertThat(actualStrDate).isEqualTo(expectedDate);
         }
+    }
+
+    @Test
+    void toCalendarCreateRequestReadsTheMeetingAsTheSheetReadersBuildIt() {
+        // the group and center sheet readers put the frequency and weekday numbers in the value, not the id
+        final CalendarData meeting = CalendarData.importInstanceWithRepeatsOnDay(LocalDate.of(2024, 3, 4), true,
+                new EnumOptionData(null, null, "2"), 2, new EnumOptionData(null, null, "1"), 5, "en", "dd MMMM yyyy");
+        meeting.setTitle("group_7_CollectionMeeting");
+
+        final CalendarCreateRequest request = ImportHandlerUtils.toCalendarCreateRequest(meeting, CalendarEntityType.GROUPS, 7L,
+                "dd MMMM yyyy");
+
+        assertThat(request.getEntityType()).isEqualTo("GROUPS");
+        assertThat(request.getEntityId()).isEqualTo(7L);
+        assertThat(request.getTitle()).isEqualTo("group_7_CollectionMeeting");
+        assertThat(request.getStartDate()).isEqualTo("04 March 2024");
+        assertThat(request.getTypeId()).isEqualTo(1);
+        assertThat(request.getRepeating()).isTrue();
+        assertThat(request.getFrequency()).isEqualTo(2);
+        assertThat(request.getInterval()).isEqualTo(2);
+        assertThat(request.getRepeatsOnDay()).isEqualTo(1);
     }
 }
