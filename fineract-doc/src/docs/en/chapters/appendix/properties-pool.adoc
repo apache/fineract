@@ -49,6 +49,16 @@ Allow additional capacity for other database activity and verify sizing under re
 |20000
 |The maximum time in milliseconds that hikari will wait for a connection to be established.
 
+|spring.datasource.hikari.maxLifetime
+|FINERACT_HIKARI_MAX_LIFETIME
+|1800000
+|The maximum lifetime in milliseconds of a connection in the pool; older connections are closed and replaced once they are not in use. Applies to the tenant store and to the tenant connection pools.
+
+|spring.datasource.hikari.keepaliveTime
+|FINERACT_HIKARI_KEEPALIVE_TIME
+|120000
+|How often in milliseconds an idle connection is tested to keep it alive (0 disables it). Must be less than maxLifetime. Applies to the tenant store and to the tenant connection pools.
+
 |spring.datasource.hikari.connectionTestquery
 |FINERACT_HIKARI_TEST_QUERY
 |SELECT 1

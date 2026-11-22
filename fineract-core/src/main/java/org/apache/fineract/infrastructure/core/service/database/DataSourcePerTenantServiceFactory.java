@@ -94,6 +94,10 @@ public class DataSourcePerTenantServiceFactory {
         config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
         config.setAutoCommit(hikariConfig.isAutoCommit());
         config.setLeakDetectionThreshold(getLeakDetectionThreshold());
+        // Taken from the tenant store pool so that connections are recycled (e.g. after a database failover) and kept
+        // alive within the limits of load balancers and managed databases, not only after HikariCP's defaults
+        config.setMaxLifetime(hikariConfig.getMaxLifetime());
+        config.setKeepaliveTime(hikariConfig.getKeepaliveTime());
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
         config.setRegisterMbeans(true);
