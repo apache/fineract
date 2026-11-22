@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Getter;
@@ -193,21 +194,26 @@ public class DataValidatorBuilder {
     public DataValidatorBuilder notNull() {
         if (this.value == null && !this.ignoreNullValue) {
 
-            String realParameterName = this.parameter;
-            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
-                    .append(this.parameter);
-            if (this.arrayIndex != null && StringUtils.isNotBlank(this.arrayPart)) {
-                validationErrorCode.append(".").append(this.arrayPart);
-                realParameterName = this.parameter + '[' + this.arrayIndex + "][" + this.arrayPart + ']';
-            }
-
-            validationErrorCode.append(".cannot.be.blank");
+            final String realParameterName = mandatoryParameterName();
             String defaultEnglishMessage = "The parameter `" + realParameterName + "` is mandatory.";
-            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage,
-                    realParameterName, this.arrayIndex);
+            final ApiParameterError error = ApiParameterError.parameterError(mandatoryErrorCode(), defaultEnglishMessage, realParameterName,
+                    this.arrayIndex);
             this.dataValidationErrors.add(error);
         }
         return this;
+    }
+
+    private boolean isArrayElement() {
+        return this.arrayIndex != null && StringUtils.isNotBlank(this.arrayPart);
+    }
+
+    private String mandatoryParameterName() {
+        return isArrayElement() ? this.parameter + '[' + this.arrayIndex + "][" + this.arrayPart + ']' : this.parameter;
+    }
+
+    private String mandatoryErrorCode() {
+        return "validation.msg." + this.resource + "." + this.parameter + (isArrayElement() ? "." + this.arrayPart : "")
+                + ".cannot.be.blank";
     }
 
     public DataValidatorBuilder notBlank() {
@@ -216,18 +222,10 @@ public class DataValidatorBuilder {
         }
 
         if (this.value == null || StringUtils.isBlank(this.value.toString())) {
-            String realParameterName = this.parameter;
-            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
-                    .append(this.parameter);
-            if (this.arrayIndex != null && StringUtils.isNotBlank(this.arrayPart)) {
-                validationErrorCode.append(".").append(this.arrayPart);
-                realParameterName = this.parameter + '[' + this.arrayIndex + "][" + this.arrayPart + ']';
-            }
-
-            validationErrorCode.append(".cannot.be.blank");
+            final String realParameterName = mandatoryParameterName();
             String defaultEnglishMessage = "The parameter `" + realParameterName + "` is mandatory.";
-            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage,
-                    realParameterName, this.arrayIndex);
+            final ApiParameterError error = ApiParameterError.parameterError(mandatoryErrorCode(), defaultEnglishMessage, realParameterName,
+                    this.arrayIndex);
             this.dataValidationErrors.add(error);
         }
         return this;
@@ -943,7 +941,12 @@ public class DataValidatorBuilder {
     }
 
     private DataValidatorBuilder validateStringFor(final String validInputs) {
-        if (this.value == null && this.ignoreNullValue) {
+        if (this.value == null) {
+            // A null that was not marked optional is a missing mandatory value. Report it, unless notNull() or
+            // notBlank() earlier in the chain already did, so that the parameter gets one error and not two.
+            if (!this.ignoreNullValue && !isMandatoryErrorReported()) {
+                notNull();
+            }
             return this;
         }
         final Iterable<String> inputs = Splitter.onPattern(VALID_INPUT_SEPARATOR).split(validInputs);
@@ -962,6 +965,13 @@ public class DataValidatorBuilder {
             this.dataValidationErrors.add(error);
         }
         return this;
+    }
+
+    private boolean isMandatoryErrorReported() {
+        final String code = mandatoryErrorCode();
+        final String parameterName = mandatoryParameterName();
+        return this.dataValidationErrors.stream().anyMatch(
+                error -> code.equals(error.getUserMessageGlobalisationCode()) && Objects.equals(parameterName, error.getParameterName()));
     }
 
     public DataValidatorBuilder validateForBooleanValue() {
