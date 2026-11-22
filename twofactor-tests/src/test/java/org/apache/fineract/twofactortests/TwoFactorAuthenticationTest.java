@@ -45,6 +45,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.GetTwoFactorConfigurationResponse;
 import org.apache.fineract.client.models.GetTwoFactorDeliveryMethodsResponse;
+import org.apache.fineract.client.models.HookCreateRequest;
 import org.apache.fineract.client.models.PostAuthenticationRequest;
 import org.apache.fineract.client.models.PostAuthenticationResponse;
 import org.apache.fineract.client.models.PostTwoFactorInvalidateRequest;
@@ -101,6 +102,13 @@ public class TwoFactorAuthenticationTest {
     }
 
     @Test
+    public void testAccessWithoutTwofactorToRoutesWithPermissionRule() {
+        // routes authorized by a request matcher rule must require two-factor authentication like every other route
+        assertThrows(FeignException.Forbidden.class, () -> fineractClient.hooks().retrieveAllHooks(basicAuthentication));
+        assertThrows(FeignException.Forbidden.class, () -> fineractClient.hooks().createHook(new HookCreateRequest(), basicAuthentication));
+    }
+
+    @Test
     public void testCheckTwofactorEnabled() {
         assertTrue(login().getIsTwoFactorAuthenticationRequired());
     }
@@ -133,6 +141,7 @@ public class TwoFactorAuthenticationTest {
         Map<String, String> twoFactorAuthentication = withTwoFactorToken(tfaToken);
 
         expect200(() -> fineractClient.offices().retrieveOneOfficeWithHttpInfo(1L, twoFactorAuthentication));
+        expect200(() -> fineractClient.hooks().retrieveAllHooksWithHttpInfo(twoFactorAuthentication));
         assertEquals(retrieveConfiguration(twoFactorAuthentication).getOtpTokenLiveTime(), tokenRequest.getTokenLiveTimeInSec());
 
         assertEquals(tfaToken, invalidate(tfaToken, twoFactorAuthentication));

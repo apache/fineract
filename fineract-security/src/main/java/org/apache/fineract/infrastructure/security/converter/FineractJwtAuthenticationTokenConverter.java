@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.security.converter;
 
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.data.FineractJwtAuthenticationToken;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
@@ -31,7 +32,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 @RequiredArgsConstructor
 public class FineractJwtAuthenticationTokenConverter implements Converter<Jwt, FineractJwtAuthenticationToken> {
@@ -43,7 +43,8 @@ public class FineractJwtAuthenticationTokenConverter implements Converter<Jwt, F
     public FineractJwtAuthenticationToken convert(@NonNull Jwt jwt) {
         try {
             UserDetails user = userDetailsService.loadUserByUsername(jwt.getSubject());
-            Collection<GrantedAuthority> authorities = new JwtGrantedAuthoritiesConverter().convert(jwt);
+            // authorize with the user's current permissions rather than the scopes captured when the token was issued
+            Collection<GrantedAuthority> authorities = List.copyOf(user.getAuthorities());
             return new FineractJwtAuthenticationToken(jwt, authorities, user);
         } catch (UsernameNotFoundException ex) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN), ex);

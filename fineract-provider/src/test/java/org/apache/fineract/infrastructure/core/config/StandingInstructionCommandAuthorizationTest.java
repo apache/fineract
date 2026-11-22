@@ -33,8 +33,8 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 /**
  * The standing instruction PUT endpoint serves both {@code command=update} and {@code command=delete}. A single
  * {@code hasAnyAuthority(UPDATE, DELETE)} matcher would let either permission perform both operations, so
- * {@link SecurityConfig} authorizes it per command. These tests run against the manager {@link SecurityConfig} wires up
- * for that endpoint.
+ * {@link ApiAuthorizationRules} authorizes it per command. These tests run against the manager
+ * {@link ApiAuthorizationRules} wires up for that endpoint.
  */
 class StandingInstructionCommandAuthorizationTest {
 
@@ -48,7 +48,7 @@ class StandingInstructionCommandAuthorizationTest {
         final Supplier<Authentication> authentication = () -> new UsernamePasswordAuthenticationToken("user", "password",
                 AuthorityUtils.createAuthorityList(authorities));
 
-        final AuthorizationResult result = SecurityConfig.standingInstructionUpdateOrDeleteAuthorization().authorize(authentication,
+        final AuthorizationResult result = ApiAuthorizationRules.standingInstructionUpdateOrDeleteAuthorization().authorize(authentication,
                 new RequestAuthorizationContext(request));
         return result != null && result.isGranted();
     }
