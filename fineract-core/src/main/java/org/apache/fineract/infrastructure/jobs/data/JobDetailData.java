@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.data;
 
-import java.util.Date;
+import java.time.Instant;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -38,7 +38,7 @@ public class JobDetailData {
     private String shortName;
 
     @SuppressWarnings("unused")
-    private Date nextRunTime;
+    private Instant nextRunTime;
 
     @SuppressWarnings("unused")
     private String initializingError;
@@ -54,8 +54,8 @@ public class JobDetailData {
     @SuppressWarnings("unused")
     private JobDetailHistoryData lastRunHistory;
 
-    public JobDetailData(Long jobId, String displayName, String shortName, Date nextRunTime, String initializingError,
-            String cronExpression, boolean active, boolean currentlyRunning, Long version, Date jobRunStartTime, Date jobRunEndTime,
+    public JobDetailData(Long jobId, String displayName, String shortName, Instant nextRunTime, String initializingError,
+            String cronExpression, boolean active, boolean currentlyRunning, Long version, Instant jobRunStartTime, Instant jobRunEndTime,
             String status, String jobRunErrorMessage, String triggerType, String jobRunErrorLog) {
         this.jobId = jobId;
         this.displayName = displayName;

@@ -25,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +53,7 @@ class JobSchedulerServiceImplTest {
             await().atMost(TIMEOUT).untilAsserted(() -> assertThat(fixture.executionCount(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY))
                     .isEqualTo(missedDailyRuns(DAYS_DOWN)));
             assertThat(businessDate.get()).isEqualTo(start.plusDays(missedDailyRuns(DAYS_DOWN)));
-            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(new Date()));
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(job.getNextRunTime()).isAfter(Instant.now()));
             assertThat(job.isCurrentlyRunning()).isFalse();
         }
     }
@@ -67,7 +67,7 @@ class JobSchedulerServiceImplTest {
 
             fixture.boot();
 
-            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(ageing.getNextRunTime()).isAfter(new Date()));
+            await().atMost(TIMEOUT).untilAsserted(() -> assertThat(ageing.getNextRunTime()).isAfter(Instant.now()));
             // give a (wrong) second replay time to show up
             await().during(Duration.ofSeconds(1)).atMost(TIMEOUT)
                     .untilAsserted(() -> assertThat(fixture.executionCount(JobName.UPDATE_LOAN_ARREARS_AGEING)).isEqualTo(1));
@@ -85,7 +85,7 @@ class JobSchedulerServiceImplTest {
 
             await().during(Duration.ofSeconds(2)).atMost(TIMEOUT)
                     .untilAsserted(() -> assertThat(fixture.executionCount(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY)).isZero());
-            assertThat(job.getNextRunTime()).isAfter(new Date());
+            assertThat(job.getNextRunTime()).isAfter(Instant.now());
         }
     }
 

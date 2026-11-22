@@ -18,7 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -96,16 +97,17 @@ public class SchedulerJobListener implements JobListener {
                 triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
             }
             if (SchedulerServiceConstants.TRIGGER_TYPE_CRON.equals(triggerType) && trigger.getNextFireTime() != null
-                    && trigger.getNextFireTime().after(scheduledJobDetails.getNextRunTime())) {
-                scheduledJobDetails.setNextRunTime(trigger.getNextFireTime());
+                    && trigger.getNextFireTime().toInstant().isAfter(scheduledJobDetails.getNextRunTime())) {
+                scheduledJobDetails.setNextRunTime(trigger.getNextFireTime().toInstant());
             }
 
-            scheduledJobDetails.setPreviousRunStartTime(context.getFireTime());
+            scheduledJobDetails.setPreviousRunStartTime(context.getFireTime().toInstant());
             scheduledJobDetails.setCurrentlyRunning(false);
 
             final ScheduledJobRunHistory runHistory = new ScheduledJobRunHistory().setScheduledJobDetail(scheduledJobDetails)
-                    .setVersion(version).setStartTime(context.getFireTime()).setEndTime(new Date()).setStatus(status)
-                    .setErrorMessage(errorMessage).setTriggerType(triggerType).setErrorLog(errorLog);
+                    .setVersion(version).setStartTime(context.getFireTime().toInstant())
+                    .setEndTime(Instant.now().truncatedTo(ChronoUnit.MILLIS)).setStatus(status).setErrorMessage(errorMessage)
+                    .setTriggerType(triggerType).setErrorLog(errorLog);
 
             this.schedulerService.saveOrUpdate(scheduledJobDetails, runHistory);
         } finally {
