@@ -24,7 +24,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @AllArgsConstructor
@@ -48,19 +47,6 @@ public class EntityDatatableChecks extends AbstractPersistableCustom<Long> {
 
     @Column(name = "product_id", nullable = true)
     private Long productId;
-
-    public static EntityDatatableChecks fromJson(final JsonCommand command) {
-        final String entity = command.stringValueOfParameterNamed("entity");
-        final Integer status = command.integerValueSansLocaleOfParameterNamed("status");
-        final String datatableName = command.stringValueOfParameterNamed("datatableName");
-
-        boolean systemDefined = command.booleanPrimitiveValueOfParameterNamed("systemDefined");
-        Long productId = null;
-        if (command.parameterExists("productId")) {
-            productId = command.longValueOfParameterNamed("productId");
-        }
-        return new EntityDatatableChecks(entity, datatableName, status, systemDefined, productId);
-    }
 
     public boolean isSystemDefined() {
         return this.systemDefined;

@@ -123,7 +123,8 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 }
             }
 
-            final EntityDatatableChecks check = EntityDatatableChecks.fromJson(command);
+            final boolean systemDefined = command.booleanPrimitiveValueOfParameterNamed("systemDefined");
+            final EntityDatatableChecks check = new EntityDatatableChecks(entity, datatableName, status, systemDefined, productId);
 
             this.entityDatatableChecksRepository.saveAndFlush(check);
 
