@@ -34,8 +34,7 @@ import org.apache.fineract.integrationtests.ConfigProperties;
 
 public final class FeignRawHttpHelper {
 
-    private static final String AUTH_HEADER = "Basic " + Base64.getEncoder()
-            .encodeToString((ConfigProperties.Backend.USERNAME + ":" + ConfigProperties.Backend.PASSWORD).getBytes(StandardCharsets.UTF_8));
+    private static final String AUTH_HEADER = basicAuth(ConfigProperties.Backend.USERNAME, ConfigProperties.Backend.PASSWORD);
 
     private FeignRawHttpHelper() {}
 
@@ -49,6 +48,14 @@ public final class FeignRawHttpHelper {
 
     public static String get(String path) {
         return execute("GET", path, null);
+    }
+
+    public static String post(String path, String jsonBody, String username, String password) {
+        return execute("POST", path, jsonBody, basicAuth(username, password));
+    }
+
+    private static String basicAuth(String username, String password) {
+        return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
     }
 
     private static String apiV1BaseUrl() {
@@ -68,6 +75,10 @@ public final class FeignRawHttpHelper {
     }
 
     private static String execute(String method, String path, String jsonBody) {
+        return execute(method, path, jsonBody, AUTH_HEADER);
+    }
+
+    private static String execute(String method, String path, String jsonBody, String authHeader) {
         try {
             URI uri = URI.create(apiV1BaseUrl() + path);
             HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
@@ -78,7 +89,7 @@ public final class FeignRawHttpHelper {
 
             conn.setRequestMethod(method);
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", AUTH_HEADER);
+            conn.setRequestProperty("Authorization", authHeader);
             conn.setRequestProperty("Fineract-Platform-TenantId", ConfigProperties.Backend.TENANT);
             if (jsonBody != null) {
                 conn.setDoOutput(true);

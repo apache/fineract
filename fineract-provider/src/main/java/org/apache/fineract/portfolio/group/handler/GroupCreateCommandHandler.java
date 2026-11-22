@@ -25,6 +25,7 @@ import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupCreateCommandHandler implements CommandHandler<GroupCreateRequest, GroupCreateResponse> {
 
     private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
+    private final GroupMakerCheckerGuard makerCheckerGuard;
 
     @Retry(name = "commandGroupCreate", fallbackMethod = "fallback")
     @Override
     @Transactional
     public GroupCreateResponse handle(Command<GroupCreateRequest> command) {
+        makerCheckerGuard.rejectIfMakerCheckerEnabled("CREATE_GROUP");
         return groupingTypesWritePlatformService.createGroup(command.getPayload());
     }
 

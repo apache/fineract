@@ -25,6 +25,7 @@ import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
 import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupUpdateCommandHandler implements CommandHandler<GroupUpdateRequest, GroupUpdateResponse> {
 
     private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
+    private final GroupMakerCheckerGuard makerCheckerGuard;
 
     @Retry(name = "commandGroupUpdate", fallbackMethod = "fallback")
     @Override
     @Transactional
     public GroupUpdateResponse handle(Command<GroupUpdateRequest> command) {
+        makerCheckerGuard.rejectIfMakerCheckerEnabled("UPDATE_GROUP");
         return groupingTypesWritePlatformService.updateGroup(command.getPayload());
     }
 

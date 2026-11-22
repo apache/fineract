@@ -20,10 +20,12 @@ package org.apache.fineract.portfolio.transfer.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupTransferClientsRequest;
 
 public interface TransferWritePlatformService {
 
-    CommandProcessingResult transferClientsBetweenGroups(Long sourceGroupId, JsonCommand jsonCommand);
+    GroupCommandResponse transferClientsBetweenGroups(GroupTransferClientsRequest request);
 
     CommandProcessingResult proposeClientTransfer(Long clientId, JsonCommand jsonCommand);
 

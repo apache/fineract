@@ -44,8 +44,6 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRoleRepositoryWrapper;
-import org.apache.fineract.portfolio.group.serialization.GroupRolesDataValidator;
-import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.group.service.GroupLevelReadPlatformService;
@@ -87,10 +85,10 @@ public class GroupConfiguration {
     public GroupingTypesWritePlatformService groupingTypesWritePlatformService(PlatformSecurityContext context,
             GroupRepositoryWrapper groupRepository, ClientRepositoryWrapper clientRepositoryWrapper,
             OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepositoryWrapper staffRepository, NoteRepository noteRepository,
-            GroupLevelRepository groupLevelRepository, GroupingTypesDataValidator fromApiJsonDeserializer,
-            LoanRepositoryWrapper loanRepositoryWrapper, CodeValueRepositoryWrapper codeValueRepository,
-            CommandProcessingService commandProcessingService, CalendarInstanceRepository calendarInstanceRepository,
-            ConfigurationDomainService configurationDomainService, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+            GroupLevelRepository groupLevelRepository, LoanRepositoryWrapper loanRepositoryWrapper,
+            CodeValueRepositoryWrapper codeValueRepository, CommandProcessingService commandProcessingService,
+            CalendarInstanceRepository calendarInstanceRepository, ConfigurationDomainService configurationDomainService,
+            SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, AccountNumberGenerator accountNumberGenerator,
             EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             BusinessEventNotifierService businessEventNotifierService, LoanOfficerService loanOfficerService,
@@ -98,10 +96,10 @@ public class GroupConfiguration {
 
     ) {
         return new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, clientRepositoryWrapper,
-                officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository, fromApiJsonDeserializer,
-                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
-                configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
-                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory
+                officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository, loanRepositoryWrapper, codeValueRepository,
+                commandProcessingService, calendarInstanceRepository, configurationDomainService, savingsAccountRepositoryWrapper,
+                accountNumberFormatRepository, accountNumberGenerator, entityDatatableChecksWritePlatformService,
+                businessEventNotifierService, loanOfficerService, externalIdFactory
 
         );
     }
@@ -134,10 +132,9 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(GroupRolesWritePlatformService.class)
     public GroupRolesWritePlatformService groupRolesWritePlatformService(PlatformSecurityContext context,
-            GroupRepositoryWrapper groupRepository, GroupRolesDataValidator fromApiJsonDeserializer,
-            CodeValueRepositoryWrapper codeValueRepository, ClientRepositoryWrapper clientRepository,
-            GroupRoleRepositoryWrapper groupRoleRepository) {
-        return new GroupRolesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, fromApiJsonDeserializer, codeValueRepository,
-                clientRepository, groupRoleRepository);
+            GroupRepositoryWrapper groupRepository, CodeValueRepositoryWrapper codeValueRepository,
+            ClientRepositoryWrapper clientRepository, GroupRoleRepositoryWrapper groupRoleRepository) {
+        return new GroupRolesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, codeValueRepository, clientRepository,
+                groupRoleRepository);
     }
 }

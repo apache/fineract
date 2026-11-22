@@ -18,15 +18,16 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.group.data.GroupAssignRoleRequest;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupUnassignRoleRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRoleRequest;
 
 public interface GroupRolesWritePlatformService {
 
-    CommandProcessingResult createRole(JsonCommand command);
+    GroupCommandResponse assignRole(GroupAssignRoleRequest request);
 
-    CommandProcessingResult updateRole(JsonCommand command);
+    GroupCommandResponse updateRole(GroupUpdateRoleRequest request);
 
-    CommandProcessingResult deleteRole(Long ruleId);
-
+    GroupCommandResponse unassignRole(GroupUnassignRoleRequest request);
 }

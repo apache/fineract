@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -25,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.fineract.portfolio.group.domain.GroupTypes;
 
 @Builder
 @Data
@@ -37,4 +39,9 @@ public class GroupDeleteRequest implements Serializable {
 
     @NotNull(message = "{org.apache.fineract.portfolio.group.delete.assertion.group-id-required}")
     private Long groupId;
+
+    /** Group or center, taken from the endpoint that was called; never read from the request body. */
+    @JsonIgnore
+    @Builder.Default
+    private GroupTypes groupingType = GroupTypes.GROUP;
 }

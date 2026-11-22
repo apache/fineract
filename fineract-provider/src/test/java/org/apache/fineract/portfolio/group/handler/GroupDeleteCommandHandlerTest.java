@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import org.apache.fineract.portfolio.group.command.GroupDeleteCommand;
 import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
 import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,9 @@ class GroupDeleteCommandHandlerTest {
 
     @Mock
     private GroupingTypesWritePlatformService groupingTypesWritePlatformService;
+
+    @Mock
+    private GroupMakerCheckerGuard makerCheckerGuard;
 
     @InjectMocks
     private GroupDeleteCommandHandler underTest;

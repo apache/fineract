@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.transfer.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +47,9 @@ import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.ClientTransferDetails;
 import org.apache.fineract.portfolio.client.domain.ClientTransferDetailsRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientHasBeenClosedException;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupTransferClientItem;
+import org.apache.fineract.portfolio.group.data.GroupTransferClientsRequest;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -91,22 +92,19 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     @Override
     @Transactional
-    public CommandProcessingResult transferClientsBetweenGroups(final Long sourceGroupId, final JsonCommand jsonCommand) {
-        this.transfersDataValidator.validateForClientsTransferBetweenGroups(jsonCommand.json());
-
+    public GroupCommandResponse transferClientsBetweenGroups(final GroupTransferClientsRequest request) {
+        final Long sourceGroupId = request.getGroupId();
         final Group sourceGroup = this.groupRepository.findOneWithNotFoundDetection(sourceGroupId);
-        final Long destinationGroupId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationGroupIdParamName);
+        final Long destinationGroupId = request.getDestinationGroupId();
         final Group destinationGroup = this.groupRepository.findOneWithNotFoundDetection(destinationGroupId);
-        final Long staffId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.newStaffIdParamName);
-        final Boolean inheritDestinationGroupLoanOfficer = jsonCommand
-                .booleanObjectValueOfParameterNamed(TransferApiConstants.inheritDestinationGroupLoanOfficer);
         Staff staff = null;
         final Office sourceOffice = sourceGroup.getOffice();
-        if (staffId != null) {
-            staff = this.staffRepositoryWrapper.findByOfficeHierarchyWithNotFoundDetection(staffId, sourceOffice.getHierarchy());
+        if (request.getStaffId() != null) {
+            staff = this.staffRepositoryWrapper.findByOfficeHierarchyWithNotFoundDetection(request.getStaffId(),
+                    sourceOffice.getHierarchy());
         }
 
-        final List<Client> clients = assembleListOfClients(jsonCommand);
+        final List<Client> clients = assembleListOfClients(request.getClients());
 
         if (sourceGroupId.equals(destinationGroupId)) {
             throw new TransferNotSupportedException(TransferNotSupportedReason.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId,
@@ -120,12 +118,10 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         for (final Client client : clients) {
-            transferClientBetweenGroups(sourceGroup, client, destinationGroup, inheritDestinationGroupLoanOfficer, staff);
+            transferClientBetweenGroups(sourceGroup, client, destinationGroup, request.getInheritDestinationGroupLoanOfficer(), staff);
         }
 
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(sourceGroupId) //
-                .build();
+        return GroupCommandResponse.builder().resourceId(sourceGroupId).build();
     }
 
     /****
@@ -461,21 +457,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                         transferEventType.getValue(), DateUtils.getBusinessLocalDate(), this.context.authenticatedUser().getId()));
     }
 
-    private List<Client> assembleListOfClients(final JsonCommand command) {
-
+    private List<Client> assembleListOfClients(final List<GroupTransferClientItem> requestedClients) {
         final List<Client> clients = new ArrayList<>();
-
-        if (command.parameterExists(TransferApiConstants.clients)) {
-            final JsonArray clientsArray = command.arrayOfParameterNamed(TransferApiConstants.clients);
-            if (clientsArray != null) {
-                for (int i = 0; i < clientsArray.size(); i++) {
-
-                    final JsonObject jsonObject = clientsArray.get(i).getAsJsonObject();
-                    if (jsonObject.has(TransferApiConstants.idParamName)) {
-                        final Long id = jsonObject.get(TransferApiConstants.idParamName).getAsLong();
-                        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(id);
-                        clients.add(client);
-                    }
+        if (requestedClients != null) {
+            for (final GroupTransferClientItem item : requestedClients) {
+                if (item != null && item.getId() != null) {
+                    clients.add(this.clientRepositoryWrapper.findOneWithNotFoundDetection(item.getId()));
                 }
             }
         }

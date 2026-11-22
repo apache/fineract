@@ -22,14 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +36,6 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumb
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -51,6 +48,7 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.group.data.CenterUpdateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
@@ -59,9 +57,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
-import org.apache.fineract.portfolio.group.exception.GroupLevelNotFoundException;
 import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransitionException;
-import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -104,8 +100,6 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private GroupLevelRepository groupLevelRepository;
     @Mock
-    private GroupingTypesDataValidator fromApiJsonDeserializer;
-    @Mock
     private LoanRepositoryWrapper loanRepositoryWrapper;
     @Mock
     private CodeValueRepositoryWrapper codeValueRepository;
@@ -136,38 +130,34 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
     private Office office;
     @Mock
     private GroupLevel groupLevel;
-    @Mock
-    private JsonCommand command;
 
     @Test
-    void updateCenterThrowsGroupLevelNotFoundExceptionWhenGroupLevelMissing() {
+    void updateCenterRejectsActivationDateBeforeSubmittedOnDateWithCenterErrorCode() {
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
-                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
                 entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
 
-        Long groupId = 1L;
-        Long groupLevelId = 2L;
-
-        when(groupRepository.findOneWithNotFoundDetection(groupId)).thenReturn(group);
-        when(group.officeId()).thenReturn(10L);
+        when(groupRepository.findOneWithNotFoundDetection(1L)).thenReturn(group);
         when(group.getOffice()).thenReturn(office);
         when(office.getHierarchy()).thenReturn(".");
+        when(office.getOpeningLocalDate()).thenReturn(LocalDate.of(1990, 1, 1));
         when(group.getGroupLevel()).thenReturn(groupLevel);
-        when(groupLevel.getId()).thenReturn(groupLevelId);
-        when(command.localDateValueOfParameterNamed(anyString())).thenReturn(null);
-        when(group.update(any(JsonCommand.class))).thenReturn(Collections.emptyMap());
-        when(groupLevelRepository.findById(groupLevelId)).thenReturn(Optional.empty());
 
-        assertThrows(GroupLevelNotFoundException.class, () -> service.updateCenter(groupId, command));
+        CenterUpdateRequest request = CenterUpdateRequest.builder().centerId(1L).name("Center A").submittedOnDate("04 March 2011")
+                .activationDate("01 January 2011").dateFormat("dd MMMM yyyy").build();
+
+        GeneralPlatformDomainRuleException exception = assertThrows(GeneralPlatformDomainRuleException.class,
+                () -> service.updateCenter(request));
+        assertThat(exception.getGlobalisationMessageCode()).isEqualTo("error.msg.center.activation.date.before.submitted.date");
     }
 
     @Test
     void updateGroupThrowsWhenActivationDateBeforeOfficeOpeningDate() {
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
-                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
                 entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
 
@@ -188,7 +178,7 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
     void updateGroupThrowsWhenActivationDateBeforeSubmittedOnDate() {
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
-                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
                 entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
 
@@ -208,7 +198,7 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
     void updateGroupIgnoresCenterIdWhenGroupIsSuperParent() {
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
-                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
                 entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
 
@@ -238,7 +228,7 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
         ExternalIdFactory externalIdFactory = new ExternalIdFactory(configurationDomainService);
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
-                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
                 entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
 
@@ -270,7 +260,7 @@ class GroupingTypesWritePlatformServiceJpaRepositoryImplTest {
         ExternalIdFactory externalIdFactory = new ExternalIdFactory(configurationDomainService);
         GroupingTypesWritePlatformServiceJpaRepositoryImpl service = new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context,
                 groupRepository, clientRepositoryWrapper, officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository,
-                fromApiJsonDeserializer, loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
+                loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
                 entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService, externalIdFactory);
 

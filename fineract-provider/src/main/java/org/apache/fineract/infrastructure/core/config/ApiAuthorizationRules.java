@@ -19,13 +19,20 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
+import org.apache.fineract.portfolio.group.api.CenterCommand;
+import org.apache.fineract.portfolio.group.api.GroupCommand;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.authorization.AuthorizationManagers;
+import org.springframework.security.authorization.SingleResultAuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -40,6 +47,12 @@ public final class ApiAuthorizationRules {
     private static final String ALL_FUNCTIONS = "ALL_FUNCTIONS";
     private static final String ALL_FUNCTIONS_READ = "ALL_FUNCTIONS_READ";
     private static final String ALL_FUNCTIONS_WRITE = "ALL_FUNCTIONS_WRITE";
+
+    /**
+     * The id of a group or center in {@code POST /groups/{id}} and {@code POST /centers/{id}}. {@code uploadtemplate}
+     * is the bulk import upload, which is authorized per row by its import handler.
+     */
+    private static final String GROUPING_ID = "{id:(?!uploadtemplate$).+}";
 
     /**
      * The rules in the order they are applied; the first rule that matches a request decides.
@@ -196,6 +209,12 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.POST, "/api/*/groups", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUP"),
             rule(HttpMethod.PUT, "/api/*/groups/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUP"),
             rule(HttpMethod.DELETE, "/api/*/groups/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUP"),
+            commandRule("/api/*/groups/" + GROUPING_ID, groupCommandPermissions()),
+            // center
+            rule(HttpMethod.POST, "/api/*/centers", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CENTER"),
+            rule(HttpMethod.PUT, "/api/*/centers/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CENTER"),
+            rule(HttpMethod.DELETE, "/api/*/centers/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CENTER"),
+            commandRule("/api/*/centers/" + GROUPING_ID, centerCommandPermissions()),
             // scheduler job - read; GET /jobs/* also covers GET /jobs/names of the business step configuration
             rule(HttpMethod.GET, "/api/*/jobs", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER"),
             rule(HttpMethod.GET, "/api/*/jobs/*", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER"),
@@ -324,6 +343,54 @@ public final class ApiAuthorizationRules {
                         AuthorityAuthorizationManager.hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_STANDINGINSTRUCTION")),
                 AuthorityAuthorizationManager.hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION",
                         "DELETE_STANDINGINSTRUCTION"));
+    }
+
+    /**
+     * The {@code ?command=} values of {@code POST /groups/{id}} with their task permission, taken from
+     * {@link GroupCommand} so that the rule and the resource serve the same commands.
+     */
+    static Map<String, String> groupCommandPermissions() {
+        return commandPermissions(GroupCommand.values(), GroupCommand::getValue, GroupCommand::getPermission);
+    }
+
+    /**
+     * The {@code ?command=} values of {@code POST /centers/{id}} with their task permission, taken from
+     * {@link CenterCommand}.
+     */
+    static Map<String, String> centerCommandPermissions() {
+        return commandPermissions(CenterCommand.values(), CenterCommand::getValue, CenterCommand::getPermission);
+    }
+
+    /**
+     * Authorizes each command against its own task permission. A command without one only reads and needs no more than
+     * the base requirement of the filter chain; an unrecognised command needs any of the permissions and is then
+     * rejected by the resource as an unrecognized query parameter.
+     */
+    static AuthorizationManager<RequestAuthorizationContext> commandAuthorization(Map<String, String> permissionByCommand) {
+        final Map<String, AuthorizationManager<RequestAuthorizationContext>> byCommand = new LinkedHashMap<>();
+        permissionByCommand
+                .forEach((command, permission) -> byCommand.put(command, permission == null ? SingleResultAuthorizationManager.permitAll()
+                        : AuthorityAuthorizationManager.hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, permission)));
+        return new CommandParameterAuthorizationManager(byCommand,
+                AuthorityAuthorizationManager.hasAnyAuthority(commandAuthorities(permissionByCommand)));
+    }
+
+    private static <T> Map<String, String> commandPermissions(T[] commands, Function<T, String> value, Function<T, String> permission) {
+        // a LinkedHashMap, since a read-only command has no permission
+        final Map<String, String> permissionByCommand = new LinkedHashMap<>();
+        for (T command : commands) {
+            permissionByCommand.put(value.apply(command), permission.apply(command));
+        }
+        return permissionByCommand;
+    }
+
+    private static Rule commandRule(String pattern, Map<String, String> permissionByCommand) {
+        return rule(HttpMethod.POST, pattern, commandAuthorization(permissionByCommand), commandAuthorities(permissionByCommand));
+    }
+
+    private static String[] commandAuthorities(Map<String, String> permissionByCommand) {
+        return Stream.concat(Stream.of(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE), permissionByCommand.values().stream().filter(Objects::nonNull))
+                .toArray(String[]::new);
     }
 
     private static Rule rule(HttpMethod method, String pattern, String... authorities) {

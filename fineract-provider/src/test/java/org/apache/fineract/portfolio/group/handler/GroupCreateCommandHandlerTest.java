@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,9 @@ class GroupCreateCommandHandlerTest {
 
     @Mock
     private GroupingTypesWritePlatformService groupingTypesWritePlatformService;
+
+    @Mock
+    private GroupMakerCheckerGuard makerCheckerGuard;
 
     @InjectMocks
     private GroupCreateCommandHandler underTest;

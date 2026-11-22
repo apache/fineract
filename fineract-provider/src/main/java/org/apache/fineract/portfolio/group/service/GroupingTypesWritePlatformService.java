@@ -18,16 +18,22 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.group.data.CenterAssociateGroupsRequest;
+import org.apache.fineract.portfolio.group.data.CenterCreateRequest;
+import org.apache.fineract.portfolio.group.data.CenterDisassociateGroupsRequest;
+import org.apache.fineract.portfolio.group.data.CenterUpdateRequest;
 import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
 import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
 import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
 import org.apache.fineract.portfolio.group.data.GroupAssignStaffResponse;
+import org.apache.fineract.portfolio.group.data.GroupAssociateClientsRequest;
+import org.apache.fineract.portfolio.group.data.GroupCloseRequest;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
 import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
+import org.apache.fineract.portfolio.group.data.GroupDisassociateClientsRequest;
 import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
 import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
 import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
@@ -41,25 +47,26 @@ public interface GroupingTypesWritePlatformService {
 
     GroupUnassignStaffResponse unassignGroupStaff(GroupUnassignStaffRequest request);
 
-    CommandProcessingResult associateClientsToGroup(Long groupId, JsonCommand command);
+    GroupCommandResponse associateClientsToGroup(GroupAssociateClientsRequest request);
 
-    CommandProcessingResult disassociateClientsFromGroup(Long groupId, JsonCommand command);
+    GroupCommandResponse disassociateClientsFromGroup(GroupDisassociateClientsRequest request);
 
-    CommandProcessingResult createCenter(JsonCommand command);
+    GroupCreateResponse createCenter(CenterCreateRequest request);
 
-    CommandProcessingResult updateCenter(Long entityId, JsonCommand command);
+    GroupUpdateResponse updateCenter(CenterUpdateRequest request);
 
     GroupCreateResponse createGroup(GroupCreateRequest request);
 
-    CommandProcessingResult closeCenter(Long centerId, JsonCommand command);
+    GroupCommandResponse associateGroupsToCenter(CenterAssociateGroupsRequest request);
 
-    CommandProcessingResult associateGroupsToCenter(Long centerId, JsonCommand command);
-
-    CommandProcessingResult disassociateGroupsToCenter(Long centerId, JsonCommand command);
+    GroupCommandResponse disassociateGroupsFromCenter(CenterDisassociateGroupsRequest request);
 
     GroupUpdateResponse updateGroup(GroupUpdateRequest request);
 
     GroupDeleteResponse deleteGroup(GroupDeleteRequest request);
 
-    CommandProcessingResult closeGroup(Long groupId, JsonCommand command);
+    /**
+     * Closes a group or a center, as {@link GroupCloseRequest#getGroupingType()} says.
+     */
+    GroupCommandResponse close(GroupCloseRequest request);
 }
