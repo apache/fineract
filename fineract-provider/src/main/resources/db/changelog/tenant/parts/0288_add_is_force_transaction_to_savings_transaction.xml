@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet author="fineract" id="FINERACT-2797">
+        <comment>
+            FINERACT-2797: persist whether a savings account transaction was created through the
+            "Force Withdrawal" command (FINERACT-2471), so future balance re-validations can
+            recognize a historical negative-balance excursion as legitimately authorized, instead
+            of relying solely on the caller context of a later, unrelated transaction.
+        </comment>
+        <addColumn tableName="m_savings_account_transaction">
+            <column name="is_force_transaction" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="FINERACT-2797-2">
+        <comment>
+            Backfill is_force_transaction=true for pre-existing force-withdrawal transactions,
+            identified via the audit trail (m_portfolio_command_source) since the flag did not
+            exist at the time those transactions were originally created. The command returns the
+            withdrawal id as its resource id: rows that have result_ids_written hold it in
+            result_resource_id, older rows hold it in resource_id (they were overwritten with the
+            result), and rows that kept the submitted ids but have no result yet hold the savings
+            account id there, so they are skipped.
+        </comment>
+        <sql>
+            UPDATE m_savings_account_transaction
+            SET is_force_transaction = true
+            WHERE is_force_transaction = false
+              AND transaction_type_enum = 2
+              AND EXISTS (SELECT 1
+                          FROM m_portfolio_command_source cs
+                          WHERE cs.action_name = 'FORCE_WITHDRAWAL'
+                            AND cs.entity_name = 'SAVINGSACCOUNT'
+                            AND cs.savings_account_id = m_savings_account_transaction.savings_account_id
+                            AND m_savings_account_transaction.id = CASE
+                                WHEN cs.result_ids_written = true THEN cs.result_resource_id
+                                WHEN cs.submitted_ids_kept = true THEN NULL
+                                ELSE cs.resource_id
+                            END);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="FINERACT-2797-3-postgresql" context="postgresql">
+        <comment>
+            Backfill the copies of forced withdrawals. When a balance recalculation (interest posting,
+            back-dated transaction) changed the overdraft amount of a forced withdrawal, it reversed
+            the withdrawal and inserted a copy with a new id, which the audit trail does not know.
+            The copy keeps the account, type, date and amount of the reversed original, and is
+            inserted after it.
+        </comment>
+        <sql>
+            UPDATE m_savings_account_transaction copy_tx
+            SET is_force_transaction = true
+            FROM m_savings_account_transaction forced_tx
+            WHERE copy_tx.savings_account_id = forced_tx.savings_account_id
+              AND copy_tx.transaction_type_enum = forced_tx.transaction_type_enum
+              AND copy_tx.transaction_date = forced_tx.transaction_date
+              AND copy_tx.amount = forced_tx.amount
+              AND copy_tx.id &gt; forced_tx.id
+              AND forced_tx.is_force_transaction = true
+              AND forced_tx.is_reversed = true
+              AND forced_tx.is_reversal = false
+              AND copy_tx.is_force_transaction = false
+              AND copy_tx.is_reversal = false;
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="FINERACT-2797-3-mysql" context="mysql">
+        <comment>
+            Same backfill as the PostgreSQL changeset above, written as a multi-table update because
+            MySQL cannot select from the table it updates in a subquery.
+        </comment>
+        <sql>
+            UPDATE m_savings_account_transaction copy_tx
+            JOIN m_savings_account_transaction forced_tx
+              ON copy_tx.savings_account_id = forced_tx.savings_account_id
+             AND copy_tx.transaction_type_enum = forced_tx.transaction_type_enum
+             AND copy_tx.transaction_date = forced_tx.transaction_date
+             AND copy_tx.amount = forced_tx.amount
+             AND copy_tx.id &gt; forced_tx.id
+            SET copy_tx.is_force_transaction = true
+            WHERE forced_tx.is_force_transaction = true
+              AND forced_tx.is_reversed = true
+              AND forced_tx.is_reversal = false
+              AND copy_tx.is_force_transaction = false
+              AND copy_tx.is_reversal = false;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

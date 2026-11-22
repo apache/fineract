@@ -112,6 +112,7 @@ public class SavingsAccountTransactionData implements Serializable {
     private transient Long modifiedId;
     private transient String refNo;
     private Boolean isOverdraft;
+    private transient boolean forceTransaction;
 
     private Long accountCredit;
     private Long accountDebit;
@@ -300,11 +301,13 @@ public class SavingsAccountTransactionData implements Serializable {
     }
 
     public static SavingsAccountTransactionData copyTransaction(SavingsAccountTransactionData accountTransaction) {
-        return createImport(accountTransaction.getTransactionType(), accountTransaction.getPaymentDetailData(),
-                accountTransaction.getSavingsAccountId(), null, accountTransaction.getExternalId(), accountTransaction.getTransactionDate(),
-                accountTransaction.getAmount(), accountTransaction.isReversed(), accountTransaction.getSubmittedOnDate(),
-                accountTransaction.isManualTransaction(), accountTransaction.getLienTransaction(), false)
-                .withTransactionTime(accountTransaction.getTransactionTime());
+        final SavingsAccountTransactionData copy = createImport(accountTransaction.getTransactionType(),
+                accountTransaction.getPaymentDetailData(), accountTransaction.getSavingsAccountId(), null,
+                accountTransaction.getExternalId(), accountTransaction.getTransactionDate(), accountTransaction.getAmount(),
+                accountTransaction.isReversed(), accountTransaction.getSubmittedOnDate(), accountTransaction.isManualTransaction(),
+                accountTransaction.getLienTransaction(), false).withTransactionTime(accountTransaction.getTransactionTime());
+        copy.forceTransaction = accountTransaction.forceTransaction;
+        return copy;
     }
 
     public static SavingsAccountTransactionData importInstance(BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId,
@@ -438,6 +441,10 @@ public class SavingsAccountTransactionData implements Serializable {
 
     public boolean isDividendPayoutAndNotReversed() {
         return this.transactionType.isDividendPayout() && isNotReversed();
+    }
+
+    public void setForceTransaction(final boolean forceTransaction) {
+        this.forceTransaction = forceTransaction;
     }
 
     public void setRefNo(final String uuid) {

@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
@@ -479,6 +480,31 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
                 "The job must post only the interest of the days after the manual posting");
         assertEquals(LocalDate.of(2019, Month.APRIL, 1).minusDays(postingDayOffset), interestPostings.get(1).getDate(),
                 "Date of the posting by the job");
+    }
+
+    @Test
+    public void testForceFlagSurvivesInterestPostingJobReplacement() {
+        businessDateHelper.runAt("2022-04-13", () -> {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
+                    new PutGlobalConfigurationsRequest().value(1000L).enabled(true));
+
+            final String forcedWithdrawalDate = "12 April 2022";
+            final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+
+            deposit(savingsId, "100", START_DATE);
+            final PostSavingsAccountTransactionsResponse forced = savingsTransactionHelper.forceWithdraw(savingsId, "110",
+                    forcedWithdrawalDate);
+            deposit(savingsId, "60", forcedWithdrawalDate);
+
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+
+            final boolean originalWasReplaced = savingsTransactionHelper.getTransactions(savingsId).stream()
+                    .anyMatch(t -> forced.getResourceId().equals(t.getId()) && Boolean.TRUE.equals(t.getReversed()));
+            assertTrue(originalWasReplaced, "The job did not replace the forced withdrawal, so this test does not exercise the copy");
+
+            final PostSavingsAccountTransactionsResponse regular = savingsTransactionHelper.withdraw(savingsId, "3", "13 April 2022");
+            assertNotNull(regular.getResourceId(), "Regular withdrawal failed after the job replaced the forced withdrawal");
+        });
     }
 
     private long countActiveTransactionsOn(final Long savingsId, final LocalDate date) {
