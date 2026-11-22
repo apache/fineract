@@ -42,7 +42,7 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
  * Immutable data object representing a loan transaction.
  */
 @Getter
-@Builder(builderClassName = "Builder")
+@Builder
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class LoanTransactionData implements Serializable {
 
