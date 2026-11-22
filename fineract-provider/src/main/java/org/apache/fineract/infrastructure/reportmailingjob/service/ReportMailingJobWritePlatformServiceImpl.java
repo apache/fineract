@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.reportmailingjob.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -31,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepositoryWrapper;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
+import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailAttachmentFileFormat;
 import org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJob;
 import org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJobRepository;
 import org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJobRepositoryWrapper;
@@ -84,7 +87,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
             // create an instance of ReportMailingJob class from the JsonCommand
             // object
-            final ReportMailingJob reportMailingJob = ReportMailingJob.newInstance(jsonCommand, stretchyReport, appUser);
+            final ReportMailingJob reportMailingJob = newReportMailingJob(jsonCommand, stretchyReport, appUser);
 
             // save entity
             this.reportMailingJobRepository.saveAndFlush(reportMailingJob);
@@ -112,7 +115,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             final ReportMailingJob reportMailingJob = this.reportMailingJobRepositoryWrapper
                     .findOneThrowExceptionIfNotFound(reportMailingJobId);
 
-            final Map<String, Object> changes = reportMailingJob.update(jsonCommand);
+            final Map<String, Object> changes = applyChanges(reportMailingJob, jsonCommand);
 
             // get the recurrence rule string
             final String recurrence = reportMailingJob.getRecurrence();
@@ -212,6 +215,142 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
         return new CommandProcessingResultBuilder() //
                 .withEntityId(reportMailingJobId) //
                 .build();
+    }
+
+    private static ReportMailingJob newReportMailingJob(final JsonCommand jsonCommand, final Report stretchyReport,
+            final AppUser runAsUser) {
+        final String name = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.NAME_PARAM_NAME);
+        final String description = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.DESCRIPTION_PARAM_NAME);
+        final String recurrence = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.RECURRENCE_PARAM_NAME);
+        final boolean isActive = jsonCommand.booleanPrimitiveValueOfParameterNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME);
+        final String emailRecipients = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME);
+        final String emailSubject = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME);
+        final String emailMessage = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME);
+        final String stretchyReportParamMap = jsonCommand
+                .stringValueOfParameterNamed(ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME);
+        final Integer emailAttachmentFileFormatId = jsonCommand
+                .integerValueOfParameterNamed(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME);
+        final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
+                .newInstance(emailAttachmentFileFormatId);
+        LocalDateTime startDateTime = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+
+        if (jsonCommand.hasParameter(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME)) {
+            final String startDateTimeString = jsonCommand
+                    .stringValueOfParameterNamed(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME);
+
+            if (startDateTimeString != null) {
+                final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(jsonCommand.dateFormat())
+                        .withLocale(jsonCommand.extractLocale());
+                startDateTime = LocalDateTime.parse(startDateTimeString, dateTimeFormatter);
+            }
+        }
+
+        // on create, the next run is the start date time
+        return ReportMailingJob
+                .newInstance(name, description, startDateTime, recurrence, emailRecipients, emailSubject, emailMessage,
+                        emailAttachmentFileFormat, stretchyReport, stretchyReportParamMap, isActive, runAsUser)
+                .setNextRunDateTime(startDateTime);
+    }
+
+    private static Map<String, Object> applyChanges(final ReportMailingJob reportMailingJob, final JsonCommand jsonCommand) {
+        final Map<String, Object> changes = new LinkedHashMap<>();
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.NAME_PARAM_NAME, reportMailingJob.getName())) {
+            final String name = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.NAME_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.NAME_PARAM_NAME, name);
+            reportMailingJob.setName(name);
+        }
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.DESCRIPTION_PARAM_NAME,
+                reportMailingJob.getDescription())) {
+            final String description = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.DESCRIPTION_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.DESCRIPTION_PARAM_NAME, description);
+            reportMailingJob.setDescription(description);
+        }
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.RECURRENCE_PARAM_NAME, reportMailingJob.getRecurrence())) {
+            final String recurrence = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.RECURRENCE_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.RECURRENCE_PARAM_NAME, recurrence);
+            reportMailingJob.setRecurrence(recurrence);
+        }
+
+        if (jsonCommand.isChangeInBooleanParameterNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, reportMailingJob.isActive())) {
+            final boolean isActive = jsonCommand.booleanPrimitiveValueOfParameterNamed(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.IS_ACTIVE_PARAM_NAME, isActive);
+            reportMailingJob.setActive(isActive);
+        }
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME,
+                reportMailingJob.getEmailRecipients())) {
+            final String emailRecipients = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.EMAIL_RECIPIENTS_PARAM_NAME, emailRecipients);
+            reportMailingJob.setEmailRecipients(emailRecipients);
+        }
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME,
+                reportMailingJob.getEmailSubject())) {
+            final String emailSubject = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.EMAIL_SUBJECT_PARAM_NAME, emailSubject);
+            reportMailingJob.setEmailSubject(emailSubject);
+        }
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME,
+                reportMailingJob.getEmailMessage())) {
+            final String emailMessage = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.EMAIL_MESSAGE_PARAM_NAME, emailMessage);
+            reportMailingJob.setEmailMessage(emailMessage);
+        }
+
+        if (jsonCommand.isChangeInStringParameterNamed(ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME,
+                reportMailingJob.getStretchyReportParamMap())) {
+            final String stretchyReportParamMap = jsonCommand
+                    .stringValueOfParameterNamed(ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.STRETCHY_REPORT_PARAM_MAP_PARAM_NAME, stretchyReportParamMap);
+            reportMailingJob.setStretchyReportParamMap(stretchyReportParamMap);
+        }
+
+        final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
+                .newInstance(reportMailingJob.getEmailAttachmentFileFormat());
+
+        if (jsonCommand.isChangeInIntegerParameterNamed(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME,
+                emailAttachmentFileFormat.getId())) {
+            final Integer emailAttachmentFileFormatId = jsonCommand
+                    .integerValueOfParameterNamed(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, emailAttachmentFileFormatId);
+
+            final ReportMailingJobEmailAttachmentFileFormat newEmailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
+                    .newInstance(emailAttachmentFileFormatId);
+            reportMailingJob.setEmailAttachmentFileFormat(newEmailAttachmentFileFormat.getValue());
+        }
+
+        final String newStartDateTimeString = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME);
+
+        if (!StringUtils.isEmpty(newStartDateTimeString)) {
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(jsonCommand.dateFormat())
+                    .withLocale(jsonCommand.extractLocale());
+            final LocalDateTime newStartDateTime = LocalDateTime.parse(newStartDateTimeString, dateTimeFormatter);
+            final LocalDateTime oldStartDateTime = reportMailingJob.getStartDateTime();
+
+            if ((oldStartDateTime != null) && !newStartDateTime.equals(oldStartDateTime)) {
+                changes.put(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME, newStartDateTimeString);
+                reportMailingJob.setStartDateTime(newStartDateTime);
+            }
+        }
+
+        Long currentStretchyReportId = null;
+
+        if (reportMailingJob.getStretchyReport() != null) {
+            currentStretchyReportId = reportMailingJob.getStretchyReport().getId();
+        }
+
+        // the new stretchy report is only reported here, and applied by the caller
+        if (jsonCommand.isChangeInLongParameterNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME, currentStretchyReportId)) {
+            final Long updatedStretchyReportId = jsonCommand
+                    .longValueOfParameterNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME);
+            changes.put(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME, updatedStretchyReportId);
+        }
+
+        return changes;
     }
 
     /**
