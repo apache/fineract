@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+// tag::annotation[]
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PhoneNumberValidator.class)
@@ -36,3 +37,4 @@ public @interface ValidPhoneNumber {
 
     Class<? extends Payload>[] payload() default {};
 }
+// end::annotation[]

@@ -20,4 +20,6 @@ include::idempotency.adoc[leveloffset=+1]
 
 include::observability.adoc[leveloffset=+1]
 
+include::validation.adoc[leveloffset=+1]
+
 include::refactoring.adoc[leveloffset=+1]

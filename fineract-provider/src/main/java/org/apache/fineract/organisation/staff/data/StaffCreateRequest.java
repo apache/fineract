@@ -41,9 +41,11 @@ public class StaffCreateRequest implements Serializable {
     // @Min(value = 1, message = "{org.apache.fineract.organisation.staff.office-id.min}")
     @NotNull(message = "{org.apache.fineract.organisation.staff.office-id.not-null}")
     private Long officeId;
+    // tag::firstname[]
     @Length(max = 50, message = "{org.apache.fineract.organisation.staff.firstname.max}")
     @NotNull(message = "{org.apache.fineract.organisation.staff.firstname.not-null}")
     private String firstname;
+    // end::firstname[]
     @Length(max = 50, message = "{org.apache.fineract.organisation.staff.lastname.max}")
     @NotNull(message = "{org.apache.fineract.organisation.staff.lastname.not-null}")
     private String lastname;
@@ -54,10 +56,12 @@ public class StaffCreateRequest implements Serializable {
     private String externalId;
     @Length(max = 254, message = "{org.apache.fineract.organisation.staff.email.max}")
     private String emailAddress;
+    // tag::mobileNo[]
     @Length(max = 50, message = "{org.apache.fineract.organisation.staff.mobile-no.max}")
     // @NotBlank(message = "{org.apache.fineract.organisation.staff.mobile-no.not-blank}")
     @ValidPhoneNumber(message = "{org.apache.fineract.organisation.staff.mobile-no.invalid}")
     private String mobileNo;
+    // end::mobileNo[]
     @Builder.Default
     @JsonProperty("isActive")
     private Boolean isActive = true;

@@ -23,6 +23,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+// tag::validator[]
 @Component
 @RequiredArgsConstructor
 public class PhoneNumberValidator implements ConstraintValidator<ValidPhoneNumber, String> {
@@ -34,3 +35,4 @@ public class PhoneNumberValidator implements ConstraintValidator<ValidPhoneNumbe
         return phoneNumberValidationService.isValid(value);
     }
 }
+// end::validator[]
