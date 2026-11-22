@@ -49,6 +49,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.jspecify.annotations.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -157,6 +158,14 @@ public class CommandSourceService {
     }
 
     public CommandSource getCommandSource(Long commandSourceId) {
+        return commandSourceRepository.findById(commandSourceId).orElseThrow(() -> new CommandNotFoundException(commandSourceId));
+    }
+
+    /**
+     * Retrieves the latest command source state using an independent transaction.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    public CommandSource getCommandSourceInNewTransaction(Long commandSourceId) {
         return commandSourceRepository.findById(commandSourceId).orElseThrow(() -> new CommandNotFoundException(commandSourceId));
     }
 
