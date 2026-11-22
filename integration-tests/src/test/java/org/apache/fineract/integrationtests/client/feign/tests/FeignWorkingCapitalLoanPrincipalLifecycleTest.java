@@ -40,6 +40,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelp
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -435,7 +436,7 @@ public class FeignWorkingCapitalLoanPrincipalLifecycleTest extends FeignIntegrat
      */
     private Long createProduct() {
         final String uniqueName = "WCL Principal " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
         return productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                         .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())

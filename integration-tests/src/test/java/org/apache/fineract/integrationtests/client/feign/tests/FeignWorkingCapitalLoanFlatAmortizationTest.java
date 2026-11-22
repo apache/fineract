@@ -52,6 +52,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelp
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
@@ -672,7 +673,7 @@ public class FeignWorkingCapitalLoanFlatAmortizationTest extends FeignIntegratio
     private WorkingCapitalLoanProductTestBuilder productBuilder(final String amortizationType) {
         return new WorkingCapitalLoanProductTestBuilder()
                 .withName("WCL " + amortizationType + " " + UUID.randomUUID().toString().substring(0, 8))
-                .withShortName(UUID.randomUUID().toString().replace("-", "").substring(0, 4)).withAmortizationType(amortizationType)
+                .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withAmortizationType(amortizationType)
                 .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
