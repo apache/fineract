@@ -171,17 +171,36 @@ public class DepositTermDetail {
     public boolean isValidInMultiplesOfPeriod(final Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequencyType) {
 
         boolean isValidInMultiplesOfPeriod = true;
-        final Integer depositPeriodInDays = this.convertToSafeDays(depositPeriod, depositPeriodFrequencyType);
         if (this.inMultiplesOfDepositTerm() != null) {
-            final Integer inMultiplesOfInDays = this.convertToSafeDays(this.inMultiplesOfDepositTerm(),
-                    SavingsPeriodFrequencyType.fromInt(this.inMultiplesOfDepositTermType()));
-            final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
-            if (inMultiplesOfInDays != 0) {
-                isValidInMultiplesOfPeriod = ((depositPeriodInDays - minDepositInDays) % inMultiplesOfInDays == 0);
+            final SavingsPeriodFrequencyType inMultiplesOfType = SavingsPeriodFrequencyType.fromInt(this.inMultiplesOfDepositTermType());
+            final SavingsPeriodFrequencyType minDepositType = SavingsPeriodFrequencyType.fromInt(minDepositTermType);
+            final Integer depositPeriodInUnits;
+            final Integer inMultiplesOfInUnits;
+            final Integer minDepositInUnits;
+            // 30 and 365 day approximations don't divide each other, so compare month/year terms in months
+            if (isMonthsOrYears(depositPeriodFrequencyType) && isMonthsOrYears(inMultiplesOfType) && isMonthsOrYears(minDepositType)) {
+                depositPeriodInUnits = convertToMonths(depositPeriod, depositPeriodFrequencyType);
+                inMultiplesOfInUnits = convertToMonths(this.inMultiplesOfDepositTerm(), inMultiplesOfType);
+                minDepositInUnits = convertToMonths(minDepositTerm, minDepositType);
+            } else {
+                depositPeriodInUnits = this.convertToSafeDays(depositPeriod, depositPeriodFrequencyType);
+                inMultiplesOfInUnits = this.convertToSafeDays(this.inMultiplesOfDepositTerm(), inMultiplesOfType);
+                minDepositInUnits = this.convertToSafeDays(minDepositTerm, minDepositType);
+            }
+            if (inMultiplesOfInUnits != 0) {
+                isValidInMultiplesOfPeriod = ((depositPeriodInUnits - minDepositInUnits) % inMultiplesOfInUnits == 0);
             }
         }
 
         return isValidInMultiplesOfPeriod;
+    }
+
+    private static boolean isMonthsOrYears(final SavingsPeriodFrequencyType periodFrequencyType) {
+        return periodFrequencyType == SavingsPeriodFrequencyType.MONTHS || periodFrequencyType == SavingsPeriodFrequencyType.YEARS;
+    }
+
+    private static Integer convertToMonths(final Integer period, final SavingsPeriodFrequencyType periodFrequencyType) {
+        return periodFrequencyType == SavingsPeriodFrequencyType.YEARS ? period * 12 : period;
     }
 
     private boolean isEqualOrGreaterThanMin(LocalDate depositStartDate, LocalDate depositEndDate) {
