@@ -26,6 +26,7 @@ import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
 import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +37,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupUnassignStaffCommandHandler implements CommandHandler<GroupUnassignStaffRequest, GroupUnassignStaffResponse> {
 
     private final GroupingTypesWritePlatformService writePlatformService;
+    private final GroupMakerCheckerGuard makerCheckerGuard;
 
     @Retry(name = "commandGroupUnassignStaff", fallbackMethod = "fallback")
     @Override
     @Transactional
     public GroupUnassignStaffResponse handle(Command<GroupUnassignStaffRequest> command) {
+        makerCheckerGuard.rejectIfMakerCheckerEnabled("UNASSIGNSTAFF_GROUP");
         return writePlatformService.unassignGroupStaff(command.getPayload());
     }
 

@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.fineract.portfolio.group.domain.GroupTypes;
 
 @Data
 @Builder
@@ -39,6 +40,11 @@ public class GroupActivateRequest implements Serializable {
 
     @JsonIgnore
     private Long groupId;
+
+    /** Group or center, taken from the endpoint that was called; never read from the request body. */
+    @JsonIgnore
+    @Builder.Default
+    private GroupTypes groupingType = GroupTypes.GROUP;
 
     @NotNull
     private String activationDate;

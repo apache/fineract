@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,12 +42,6 @@ import org.springframework.stereotype.Component;
 public final class TransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
-                    TransferApiConstants.destinationGroupIdParamName, TransferApiConstants.clients,
-                    TransferApiConstants.inheritDestinationGroupLoanOfficer, TransferApiConstants.newStaffIdParamName,
-                    TransferApiConstants.transferActiveLoans));
-
     private static final Set<String> PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
                     TransferApiConstants.destinationOfficeIdParamName, TransferApiConstants.transferActiveLoans, TransferApiConstants.note,
@@ -75,41 +68,6 @@ public final class TransfersDataValidator {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-    }
-
-    public void validateForClientsTransferBetweenGroups(final String json) {
-
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
-
-        final Long destinationGroupId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.destinationGroupIdParamName, element);
-        baseDataValidator.reset().parameter(TransferApiConstants.destinationGroupIdParamName).value(destinationGroupId).notNull()
-                .integerGreaterThanZero();
-
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
-            final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.inheritDestinationGroupLoanOfficer, element)) {
-            final Boolean inheritDestinationGroupLoanOfficer = this.fromApiJsonHelper
-                    .extractBooleanNamed(TransferApiConstants.inheritDestinationGroupLoanOfficer, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.inheritDestinationGroupLoanOfficer)
-                    .value(inheritDestinationGroupLoanOfficer).notNull();
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateForProposeClientTransfer(final String json) {

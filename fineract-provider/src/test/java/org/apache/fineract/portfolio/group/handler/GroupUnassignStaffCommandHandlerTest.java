@@ -27,6 +27,7 @@ import java.util.HashMap;
 import org.apache.fineract.portfolio.group.command.GroupUnassignStaffCommand;
 import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
 import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,9 @@ class GroupUnassignStaffCommandHandlerTest {
 
     @Mock
     private GroupingTypesWritePlatformService service;
+
+    @Mock
+    private GroupMakerCheckerGuard makerCheckerGuard;
 
     @InjectMocks
     private GroupUnassignStaffCommandHandler handler;

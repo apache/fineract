@@ -25,6 +25,7 @@ import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
 import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
+import org.apache.fineract.portfolio.group.service.GroupMakerCheckerGuard;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupDeleteCommandHandler implements CommandHandler<GroupDeleteRequest, GroupDeleteResponse> {
 
     private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
+    private final GroupMakerCheckerGuard makerCheckerGuard;
 
     @Retry(name = "commandGroupDelete", fallbackMethod = "fallback")
     @Override
     @Transactional
     public GroupDeleteResponse handle(Command<GroupDeleteRequest> command) {
+        makerCheckerGuard.rejectIfMakerCheckerEnabled("DELETE", command.getPayload().getGroupingType());
         return groupingTypesWritePlatformService.deleteGroup(command.getPayload());
     }
 

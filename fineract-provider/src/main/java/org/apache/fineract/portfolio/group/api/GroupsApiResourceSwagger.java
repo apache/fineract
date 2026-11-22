@@ -139,6 +139,8 @@ final class GroupsApiResourceSwagger {
 
             @Schema(example = "4")
             public Long id;
+            @Schema(example = "000000004")
+            public String accountNo;
             @Schema(example = "AnotherGroup")
             public String name;
             @Schema(example = "000-1A")

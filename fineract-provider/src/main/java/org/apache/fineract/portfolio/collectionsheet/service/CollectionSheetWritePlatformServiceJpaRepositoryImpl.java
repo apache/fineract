@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.TransactionBoundApplicationEventPublisher;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
@@ -36,6 +37,9 @@ import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulk
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.collectionsheet.serialization.CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.group.data.GroupCommandResponse;
+import org.apache.fineract.portfolio.group.data.GroupSaveCollectionSheetRequest;
+import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -60,6 +64,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private final DepositAccountWritePlatformService accountWritePlatformService;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final TransactionBoundApplicationEventPublisher eventPublisher;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Override
     public CommandProcessingResult updateCollectionSheet(final JsonCommand command) {
@@ -92,6 +97,29 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
                 .with(changes) //
                 .with(changes) //
                 .build();
+    }
+
+    @Override
+    public GroupCommandResponse saveCollectionSheet(final GroupSaveCollectionSheetRequest request) {
+        final Long groupId = request.getGroupId();
+        final CommandProcessingResult result = updateCollectionSheet(toLegacyCommand(request));
+        return GroupCommandResponse.builder().resourceId(groupId).groupId(groupId).changes(result.getChanges()).build();
+    }
+
+    /**
+     * Bridges the typed request to the {@link JsonCommand} that {@link #updateCollectionSheet(JsonCommand)} and its
+     * validator and deserializers still read. The entity name and URL match what the legacy GROUP / CENTER
+     * SAVECOLLECTIONSHEET commands carried, so event listeners see the same command as before.
+     *
+     * TODO: remove this bridge once the {@code /collectionsheet} endpoint and
+     * {@link #updateCollectionSheet(JsonCommand)} are migrated to typed requests.
+     */
+    private JsonCommand toLegacyCommand(final GroupSaveCollectionSheetRequest request) {
+        final Long groupId = request.getGroupId();
+        final boolean center = request.getGroupingType() == GroupTypes.CENTER;
+        final String json = fromApiJsonHelper.toJson(request);
+        return JsonCommand.from(json, fromApiJsonHelper.parse(json), fromApiJsonHelper, center ? "CENTER" : "GROUP", groupId, null, groupId,
+                null, null, null, null, (center ? "/centers/" : "/groups/") + groupId, null, null, null, null, null);
     }
 
     @Override
