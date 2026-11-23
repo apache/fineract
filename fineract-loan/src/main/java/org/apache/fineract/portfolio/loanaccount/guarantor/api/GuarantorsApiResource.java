@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.api;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -191,11 +192,11 @@ public class GuarantorsApiResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Upload guarantor template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String postGuarantorTemplate(@FormDataParam("file") InputStream uploadedInputStream,
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(mediaType = "*/*", schema = @Schema(type = "string")))
+    public Long postGuarantorTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat, @PathParam("loanId") final Long loanId) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.GUARANTORS.toString(),
-                uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.apiJsonSerializerService.serialize(importDocumentId);
+        return this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.GUARANTORS.toString(), uploadedInputStream, fileDetail,
+                locale, dateFormat);
     }
 }
