@@ -4521,6 +4521,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         reprocessInstallments(installments);
     }
 
+    // Identity on purpose: charges move only when the matching source is another installment instance than the target
+    @SuppressWarnings("ReferenceEquality")
     private void moveRelatedChargesToInstallment(Set<LoanCharge> charges, LoanRepaymentScheduleInstallment target,
             List<LoanRepaymentScheduleInstallment> sources, MonetaryCurrency currency) {
         int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(sources);

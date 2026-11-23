@@ -37,6 +37,8 @@ public class COBAccountFailedException extends BusinessStepException {
     }
 
     /** The innermost {@code COBAccountFailedException} in the cause chain of {@code failure}, if any. */
+    // Identity on purpose: stops at an exception that is its own cause
+    @SuppressWarnings("ReferenceEquality")
     public static Optional<COBAccountFailedException> find(Throwable failure) {
         COBAccountFailedException found = null;
         for (Throwable current = failure; current != null && current != current.getCause(); current = current.getCause()) {

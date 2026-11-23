@@ -61,8 +61,9 @@ class WorkingCapitalLoanDelinquencyClassificationServiceImplTest {
     private final WorkingCapitalLoan loan = mock(WorkingCapitalLoan.class, RETURNS_DEEP_STUBS);
     private WorkingCapitalLoanDelinquencyClassificationServiceImpl service;
 
+    // Identity on purpose: the saveAll stub stores each tag instance once
     @BeforeEach
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "ReferenceEquality" })
     void setUp() {
         when(tagHistoryRepository.findByRangeScheduleAndLiftedOnDateOrderByAddedOnDateAsc(any(), isNull()))
                 .thenAnswer(invocation -> tagHistory.stream().filter(tag -> tag.getLiftedOnDate() == null)

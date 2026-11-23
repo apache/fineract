@@ -250,6 +250,8 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
                         failure);
     }
 
+    // Identity on purpose: an exception cannot be added as suppressed to itself
+    @SuppressWarnings("ReferenceEquality")
     private void markResidualLocksWithError(Map<Long, AccountLockAttempt> lockAttempts, String jobName, Throwable failure) {
         try {
             requiresNewTransactionTemplate.executeWithoutResult(status -> {

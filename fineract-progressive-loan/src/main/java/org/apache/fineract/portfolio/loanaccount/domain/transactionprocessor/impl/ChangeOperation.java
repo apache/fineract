@@ -119,6 +119,9 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
      * Compares by the anchor transactions (a down payment fee stands for its down payment transaction, anything else
      * for itself); a fee goes right before its own down payment, fees of the same down payment by id.
      */
+    // Identity on purpose: a key other than the operation itself means the operation is a fee anchored to its down
+    // payment
+    @SuppressWarnings("ReferenceEquality")
     private int compareByDownPaymentAnchor(final ChangeOperation o, final ChangeOperation thisKey, final ChangeOperation otherKey) {
         if (!thisKey.isSameTransactionAs(otherKey)) {
             return thisKey.compareTo(otherKey);
