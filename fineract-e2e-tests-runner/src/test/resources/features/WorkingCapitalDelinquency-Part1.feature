@@ -1284,7 +1284,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-02-07  |              | D00            | 1              | 30             |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "07 February 2026"
 
   @TestRailId:C106841
@@ -1309,7 +1309,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-02-01  |              | D00            | 1              | 30             |
+      | 1            | 2026-01-31  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 February 2026"
 
   @TestRailId:C106842
@@ -1540,7 +1540,7 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-02-13  |              | D00            | 1              | 30             |
+      | 1            | 2026-02-03  |              | D00            | 1              | 30             |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "13 February 2026"
 
   @TestRailId:C115296
@@ -1587,7 +1587,8 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | null                  | 269.99           | 58             |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 1            | 2026-04-01  |              | D30            | 31             | 60             |
+      | 1            | 2026-03-05  |              | D30            | 31             | 60             |
+      | 1            | 2026-02-03  | 2026-03-05   | D00            | 1              | 30             |
     And Working capital loan details has the following field values:
       | delinquent.delinquentAmount   | 269.99     |
       | delinquent.pastDueDays        | 58         |
@@ -1687,6 +1688,7 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     # Period 2 expires without COB; the repayment cures period 1 and instant classification marks period 2 delinquent while it is still unevaluated (minPaymentCriteriaMet NULL)
+    # Period 2 is tagged on the day it became past due (toDate + 1), not on the day the repayment noticed it
     When Admin sets the business date to "10 March 2026"
     And Customer makes repayment on "10 March 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
@@ -1695,12 +1697,12 @@ Feature: Working Capital Delinquency
       | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | null                  | 270.0            | 6              |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 2            | 2026-03-10  |              | D00            | 1              | 30             |
+      | 2            | 2026-03-05  |              | D00            | 1              | 30             |
       | 1            | 2026-02-03  | 2026-03-10   | D00            | 1              | 30             |
     And Working capital loan details has the following field values:
       | delinquent.delinquentAmount   | 270.0      |
-      | delinquent.delinquentDate     | 2026-03-10 |
-      | delinquent.delinquentDays     | 1          |
+      | delinquent.delinquentDate     | 2026-03-05 |
+      | delinquent.delinquentDays     | 6          |
       | delinquent.pastDueDays        | 6          |
       | delinquencyStartDate          | 2026-02-03 |
       | delinquencyEffectiveStartDate | null       |

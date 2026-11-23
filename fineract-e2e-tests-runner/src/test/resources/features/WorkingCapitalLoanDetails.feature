@@ -600,8 +600,8 @@ Feature: Working Capital Loan Details
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 3            | 2026-10-07  |              | D00            | 1              | 30             |
-      | 2            | 2026-10-07  |              | D00            | 1              | 30             |
-      | 1            | 2026-10-07  |              | D00            | 1              | 30             |
+      | 2            | 2026-09-27  |              | D00            | 1              | 30             |
+      | 1            | 2026-09-17  |              | D00            | 1              | 30             |
 # --- undo the repayment, then the disbursal --- #
     When Customer undo "1"th "Repayment" transaction made on "10 September 2026" on Working Capital loan
     Then Admin successfully undo Working Capital disbursal
