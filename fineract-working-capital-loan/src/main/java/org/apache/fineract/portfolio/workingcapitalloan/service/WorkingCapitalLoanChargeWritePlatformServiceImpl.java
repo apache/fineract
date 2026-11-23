@@ -525,6 +525,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
             noteRepository.save(WorkingCapitalLoanNote.create(loan, noteText));
             changes.put(WorkingCapitalLoanChargeConstants.noteParamName, noteText);
         }
+        if (loan.getLoanStatus() != oldStatus) {
+            // A waiver that closes the loan takes it out of the COB scope, so it is classified on the new status now.
+            delinquencyClassification = delinquencyClassification.combine(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        }
         delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         businessEventNotifierService

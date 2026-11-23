@@ -38,8 +38,9 @@ import org.junit.jupiter.api.Test;
 /**
  * A Working Capital transaction that changes the loan status classifies delinquency once, after the status change and
  * the save, so the tags match the loan the command leaves behind: a closing transaction lifts the tag, an undo that
- * reopens the loan tags it again, and a credit balance refund or a charge that changes the status classifies the loan
- * even though it moves no principal.
+ * reopens the loan tags it again, and a transaction that leaves the delinquency alone adds no tag history. With instant
+ * classification off a repayment is left to the COB, unless it closes or overpays the loan, which the COB no longer
+ * processes.
  *
  * <p>
  * Common setup: 15 DAYS bucket, 3% minimum payment, ranges R1 [1-30], R2 [31-60], principal 9000 disbursed 2026-01-01
@@ -102,13 +103,12 @@ public class FeignWorkingCapitalLoanDelinquencyAfterStatusChangeTest extends Fei
     }
 
     /**
-     * The repayment path classifies only when instant classification is on. The COB does not pick up a closed loan, so
-     * the tag stays active until a later transaction classifies the loan again (see the credit balance refund and the
-     * charge below).
+     * The COB does not process a closed loan, so a repayment that closes the loan classifies it even with instant
+     * classification off; otherwise the tag would stay active on the closed loan.
      */
     @Test
-    @DisplayName("with instant classification off, a closing repayment does not classify, so the tag stays active")
-    void repaymentClosingTheLoan_withInstantClassificationOff_leavesTheTagActive() {
+    @DisplayName("with instant classification off, a closing repayment still lifts the tag")
+    void repaymentClosingTheLoan_withInstantClassificationOff_stillLiftsTheTag() {
         runAt(DISBURSEMENT_DATE_ISO, () -> {
             final Long loanId = delinquentLoan();
 
@@ -116,7 +116,42 @@ public class FeignWorkingCapitalLoanDelinquencyAfterStatusChangeTest extends Fei
 
             assertStatus(loanId, STATUS_CLOSED_OBLIGATIONS_MET);
             validateTagHistory(getDelinquencyTagHistory(loanId), //
+                    tag(1, TRANSACTION_DATE_ISO, TRANSACTION_DATE_ISO, r1));
+            validateOneActiveTagPerPeriod(getDelinquencyTagHistory(loanId));
+        });
+    }
+
+    @Test
+    @DisplayName("with instant classification off, an overpaying repayment still lifts the tag")
+    void repaymentOverpayingTheLoan_withInstantClassificationOff_stillLiftsTheTag() {
+        runAt(DISBURSEMENT_DATE_ISO, () -> {
+            final Long loanId = delinquentLoan();
+
+            repayWithInstantClassificationOff(loanId, PRINCIPAL.add(OVERPAYMENT));
+
+            assertStatus(loanId, STATUS_OVERPAID);
+            validateTagHistory(getDelinquencyTagHistory(loanId), //
+                    tag(1, TRANSACTION_DATE_ISO, TRANSACTION_DATE_ISO, r1));
+            validateOneActiveTagPerPeriod(getDelinquencyTagHistory(loanId));
+        });
+    }
+
+    @Test
+    @DisplayName("with instant classification off, a repayment that leaves the loan active leaves the tag to the COB")
+    void partialRepayment_withInstantClassificationOff_leavesTheTagToTheCob() {
+        runAt(DISBURSEMENT_DATE_ISO, () -> {
+            final Long loanId = delinquentLoan();
+
+            repayWithInstantClassificationOff(loanId, BigDecimal.valueOf(270));
+
+            assertStatus(loanId, STATUS_ACTIVE);
+            validateTagHistory(getDelinquencyTagHistory(loanId), //
                     tag(1, TRANSACTION_DATE_ISO, null, r1));
+
+            advanceBusinessDateWithCob(loanId, TRANSACTION_DATE_ISO, "2026-01-17");
+
+            validateTagHistory(getDelinquencyTagHistory(loanId), //
+                    tag(1, TRANSACTION_DATE_ISO, "2026-01-17", r1));
         });
     }
 
@@ -159,14 +194,12 @@ public class FeignWorkingCapitalLoanDelinquencyAfterStatusChangeTest extends Fei
     }
 
     @Test
-    @DisplayName("a credit balance refund that closes an overpaid loan classifies it and lifts the tag the repayment left")
-    void creditBalanceRefundClosingAnOverpaidLoan_liftsTheTagTheRepaymentLeft() {
+    @DisplayName("a credit balance refund that closes an overpaid loan adds no tag history")
+    void creditBalanceRefundClosingAnOverpaidLoan_addsNoTagHistory() {
         runAt(DISBURSEMENT_DATE_ISO, () -> {
             final Long loanId = delinquentLoan();
-            repayWithInstantClassificationOff(loanId, PRINCIPAL.add(OVERPAYMENT));
+            makeWcRepayment(loanId, PRINCIPAL.add(OVERPAYMENT), TRANSACTION_DATE);
             assertStatus(loanId, STATUS_OVERPAID);
-            validateTagHistory(getDelinquencyTagHistory(loanId), //
-                    tag(1, TRANSACTION_DATE_ISO, null, r1));
 
             wcLoanHelper.creditBalanceRefund(loanId, WorkingCapitalLoanRequestBuilders.creditBalanceRefund(OVERPAYMENT, TRANSACTION_DATE));
 
@@ -178,14 +211,12 @@ public class FeignWorkingCapitalLoanDelinquencyAfterStatusChangeTest extends Fei
     }
 
     @Test
-    @DisplayName("a charge that reopens a closed loan classifies it and lifts the tag of the period the repayment settled")
-    void chargeReopeningAClosedLoan_liftsTheTagOfTheSettledPeriod() {
+    @DisplayName("a charge that reopens a closed loan adds no tag for the period the repayment settled")
+    void chargeReopeningAClosedLoan_addsNoTagForTheSettledPeriod() {
         runAt(DISBURSEMENT_DATE_ISO, () -> {
             final Long loanId = delinquentLoan();
-            repayWithInstantClassificationOff(loanId, PRINCIPAL);
+            makeWcRepayment(loanId, PRINCIPAL, TRANSACTION_DATE);
             assertStatus(loanId, STATUS_CLOSED_OBLIGATIONS_MET);
-            validateTagHistory(getDelinquencyTagHistory(loanId), //
-                    tag(1, TRANSACTION_DATE_ISO, null, r1));
 
             final double chargeAmount = 100;
             final Long chargeDefinitionId = wcLoanHelper
@@ -211,7 +242,7 @@ public class FeignWorkingCapitalLoanDelinquencyAfterStatusChangeTest extends Fei
     }
 
     /**
-     * Repays with instant classification off, so the repayment updates the schedule but leaves the active tag in place.
+     * Repays with instant classification off: the repayment classifies only if it takes the loan out of the COB scope.
      */
     private void repayWithInstantClassificationOff(final Long loanId, final BigDecimal amount) {
         setConfigurationEnabled(GlobalConfigurationConstants.ENABLE_INSTANT_DELINQUENCY_CALCULATION, false);

@@ -238,9 +238,20 @@ class WorkingCapitalLoanChargeDelinquencyClassificationOrderTest {
 
         chargeWritePlatformService.waiveLoanCharge(LOAN_ID, LOAN_CHARGE_ID, command);
 
-        // Without a replay the delinquency schedule is untouched, so the step classifies nothing - but it runs in its
-        // place, after the closing and the save.
-        assertClassifiedOnceAfterTransitionAndSave(WorkingCapitalLoanDelinquencyClassificationMode.NONE);
+        // Without a replay the delinquency schedule is untouched, but the closed loan leaves the COB scope, so it is
+        // classified now, after the closing and the save.
+        assertClassifiedOnceAfterTransitionAndSave(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        verify(delinquencyRangeScheduleService, never()).reprocessSchedulePeriods(any());
+    }
+
+    @Test
+    void chargeWaiverThatLeavesTheLoanActiveOwesNoClassification() {
+        status.set(LoanStatus.ACTIVE);
+
+        chargeWritePlatformService.waiveLoanCharge(LOAN_ID, LOAN_CHARGE_ID, command);
+
+        verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(loan,
+                WorkingCapitalLoanDelinquencyClassificationMode.NONE);
         verify(delinquencyRangeScheduleService, never()).reprocessSchedulePeriods(any());
     }
 

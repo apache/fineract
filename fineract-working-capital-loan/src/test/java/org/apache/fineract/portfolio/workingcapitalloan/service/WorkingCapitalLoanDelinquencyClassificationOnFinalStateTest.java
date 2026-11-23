@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
@@ -46,6 +47,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -55,7 +57,8 @@ import org.mockito.quality.Strictness;
 /**
  * The classification step at the end of a Working Capital loan command classifies as of the business date, and goes
  * through {@code classifyDelinquency}, so an extension that overrides it sees every command's classification. Only the
- * in-place repayment path depends on the instant delinquency calculation setting.
+ * in-place repayment path depends on the instant delinquency calculation setting, and only while the loan stays in the
+ * COB scope.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -119,12 +122,24 @@ class WorkingCapitalLoanDelinquencyClassificationOnFinalStateTest {
     }
 
     @Test
-    void instantDoesNotClassifyWhenTheInstantSettingIsOff() {
+    void instantDoesNotClassifyAnActiveLoanWhenTheInstantSettingIsOff() {
         when(instantDelinquencyCalculation.isEnabled()).thenReturn(false);
+        when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
 
         classificationService.classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.INSTANT);
 
         verify(classificationService, never()).classifyDelinquency(any(), any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = LoanStatus.class, names = { "CLOSED_OBLIGATIONS_MET", "OVERPAID" })
+    void instantClassifiesALoanLeftOutOfTheCobScopeWhenTheInstantSettingIsOff(final LoanStatus finalStatus) {
+        when(instantDelinquencyCalculation.isEnabled()).thenReturn(false);
+        when(loan.getLoanStatus()).thenReturn(finalStatus);
+
+        classificationService.classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.INSTANT);
+
+        verify(classificationService).classifyDelinquency(loan, BUSINESS_DATE);
     }
 
     @Test

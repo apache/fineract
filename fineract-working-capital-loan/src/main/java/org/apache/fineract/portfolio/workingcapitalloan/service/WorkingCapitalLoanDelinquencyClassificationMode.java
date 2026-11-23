@@ -27,7 +27,10 @@ public enum WorkingCapitalLoanDelinquencyClassificationMode {
 
     /** Nothing changed that needs classifying. */
     NONE,
-    /** Classify only when {@code ENABLE_INSTANT_DELINQUENCY_CALCULATION} is on. */
+    /**
+     * Classify when {@code ENABLE_INSTANT_DELINQUENCY_CALCULATION} is on, or when the command leaves the loan closed or
+     * overpaid: the COB does not process such a loan, so it would not catch up on the classification.
+     */
     INSTANT,
     /** Classify regardless of the instant delinquency calculation setting. */
     ALWAYS;
