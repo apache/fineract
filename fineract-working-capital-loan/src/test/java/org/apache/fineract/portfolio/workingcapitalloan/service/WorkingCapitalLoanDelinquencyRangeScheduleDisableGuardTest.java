@@ -35,7 +35,6 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -103,38 +102,6 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
     }
 
     @Test
-    void repaymentUndoWhileDisabledDoesNotTouchTheSchedule() {
-        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
-        final WorkingCapitalLoanDelinquencyRangeSchedule paidPeriod = fullyPaidPastPeriod(1, today.minusDays(35), today.minusDays(6));
-        when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
-                .thenReturn(Optional.empty());
-        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today)).thenReturn(List.of(paidPeriod));
-
-        rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
-
-        assertThat(paidPeriod.getPaidAmount()).isEqualByComparingTo(new BigDecimal("100"));
-        assertThat(paidPeriod.getOutstandingAmount()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(paidPeriod.getMinPaymentCriteriaMet()).isTrue();
-        verifyNoInteractions(rangeScheduleRepository);
-        verify(classificationService, never()).instantClassifyDelinquency(any(), any());
-    }
-
-    @Test
-    void repaymentUndoWhileEnabledWritesDelinquencyData() {
-        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
-        final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
-        when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
-                .thenReturn(Optional.empty());
-        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
-
-        rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
-
-        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
-        assertThat(pastPeriod.getDelinquentAmount()).isEqualByComparingTo(pastPeriod.getOutstandingAmount());
-        assertThat(pastPeriod.getDelinquentDays()).isEqualTo(DateUtils.getDifferenceInDays(pastPeriod.getToDate(), today));
-    }
-
-    @Test
     void repaymentWhileDisabledDoesNotTouchTheSchedule() {
         when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
         final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
@@ -145,7 +112,7 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
                 .thenReturn(Optional.empty());
 
-        rangeScheduleService.applyRepayment(loan, today, new BigDecimal("100"));
+        assertThat(rangeScheduleService.applyRepaymentToPeriods(loan, today, new BigDecimal("100"))).isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.NONE);
 
         assertThat(pastPeriod.getPaidAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(pastPeriod.getOutstandingAmount()).isEqualByComparingTo(new BigDecimal("100"));
@@ -165,9 +132,10 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
                 .thenReturn(Optional.empty());
 
-        rangeScheduleService.applyRepayment(loan, today, new BigDecimal("100"));
+        assertThat(rangeScheduleService.applyRepaymentToPeriods(loan, today, new BigDecimal("100"))).isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.INSTANT);
 
         assertThat(pastPeriod.getPaidAmount()).isEqualByComparingTo(new BigDecimal("100"));
+        verify(classificationService, never()).instantClassifyDelinquency(any(), any());
         assertThat(pastPeriod.getMinPaymentCriteriaMet()).isTrue();
         assertThat(pastPeriod.getDelinquentAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(pastPeriod.getDelinquentDays()).isZero();
@@ -198,7 +166,7 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
     void reprocessWhileDisabledDoesNothing() {
         when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
 
-        rangeScheduleService.reprocessDelinquencySchedule(loan);
+        assertThat(rangeScheduleService.reprocessSchedulePeriods(loan)).isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.NONE);
 
         verifyNoInteractions(rangeScheduleRepository, transactionRepository);
         verify(classificationService, never()).classifyDelinquency(any(), any());
@@ -212,58 +180,68 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         when(rangeScheduleRepository.findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(LOAN_ID, today))
                 .thenReturn(List.of(pastPeriod));
 
-        rangeScheduleService.reprocessDelinquencySchedule(loan);
+        assertThat(rangeScheduleService.reprocessSchedulePeriods(loan)).isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
 
         assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
         verify(transactionRepository).fetchTransactionDateAndAmount(anyLong(), any());
-        verify(classificationService).classifyDelinquency(loan, today);
+        verify(classificationService, never()).classifyDelinquency(any(), any());
     }
 
     @Test
-    void valueDatedRepaymentClassifiesDelinquencyAsOfBusinessDate() {
+    void valueDatedRepaymentLeavesTheInstantClassificationToTheCommand() {
         final LocalDate valueDate = today.minusDays(27);
 
-        rangeScheduleService.applyRepayment(loan, valueDate, new BigDecimal("100"));
+        // The command classifies as of the business date once the loan is saved, never as of the value date.
+        assertThat(rangeScheduleService.applyRepaymentToPeriods(loan, valueDate, new BigDecimal("100")))
+                .isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.INSTANT);
 
-        verify(classificationService).instantClassifyDelinquency(loan, today);
-        verify(classificationService, never()).instantClassifyDelinquency(loan, valueDate);
+        verify(classificationService, never()).instantClassifyDelinquency(any(), any());
+        verify(classificationService, never()).classifyDelinquency(any(), any());
     }
 
     @Test
-    void repaymentUndoUnpaysNewestPastPeriodFirst() {
+    void reprocessIfAnyEndedRebuildsTheScheduleWhenTheLatestPeriodHasEnded() {
         when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
-        // Two fully-paid past periods; the repository returns them ordered by period number ascending (oldest first).
-        final WorkingCapitalLoanDelinquencyRangeSchedule olderPeriod = fullyPaidPastPeriod(1, today.minusDays(66), today.minusDays(36));
-        final WorkingCapitalLoanDelinquencyRangeSchedule newerPeriod = fullyPaidPastPeriod(2, today.minusDays(35), today.minusDays(6));
-        when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
-                .thenReturn(Optional.empty());
-        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today))
-                .thenReturn(List.of(olderPeriod, newerPeriod));
+        // A disbursement backdated past the end of its starting period.
+        final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
+        when(rangeScheduleRepository.findTopByLoanIdOrderByPeriodNumberDesc(LOAN_ID)).thenReturn(Optional.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(LOAN_ID, today))
+                .thenReturn(List.of(pastPeriod));
 
-        // The undo only covers a single period's payment.
-        rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
+        assertThat(rangeScheduleService.reprocessSchedulePeriodsIfAnyEnded(loan))
+                .isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
 
-        // It must reverse the most recent payment first: the newer period is unpaid, the older one is left untouched.
-        assertThat(newerPeriod.getPaidAmount()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(newerPeriod.getOutstandingAmount()).isEqualByComparingTo(new BigDecimal("100"));
-        assertThat(newerPeriod.getMinPaymentCriteriaMet()).isFalse();
-        assertThat(olderPeriod.getPaidAmount()).isEqualByComparingTo(new BigDecimal("100"));
-        assertThat(olderPeriod.getOutstandingAmount()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(olderPeriod.getMinPaymentCriteriaMet()).isTrue();
+        // Evaluated as the COB would, but classification is left to the command.
+        assertThat(pastPeriod.getMinPaymentCriteriaMet()).isFalse();
+        verify(transactionRepository).fetchTransactionDateAndAmount(anyLong(), any());
+        verify(classificationService, never()).classifyDelinquency(any(), any());
     }
 
-    private WorkingCapitalLoanDelinquencyRangeSchedule fullyPaidPastPeriod(final int periodNumber, final LocalDate fromDate,
-            final LocalDate toDate) {
-        final WorkingCapitalLoanDelinquencyRangeSchedule period = new WorkingCapitalLoanDelinquencyRangeSchedule();
-        period.setLoan(loan);
-        period.setPeriodNumber(periodNumber);
-        period.setFromDate(fromDate);
-        period.setToDate(toDate);
-        period.setExpectedAmount(new BigDecimal("100"));
-        period.setPaidAmount(new BigDecimal("100"));
-        period.setOutstandingAmount(BigDecimal.ZERO);
-        period.setMinPaymentCriteriaMet(true);
-        return period;
+    @Test
+    void reprocessIfAnyEndedLeavesTheScheduleAloneWhileNoPeriodHasEnded() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(false);
+        final WorkingCapitalLoanDelinquencyRangeSchedule currentPeriod = pastOpenPeriod();
+        currentPeriod.setFromDate(today);
+        // A period ending on the business date has not ended yet: the COB of that day evaluates it.
+        currentPeriod.setToDate(today);
+        when(rangeScheduleRepository.findTopByLoanIdOrderByPeriodNumberDesc(LOAN_ID)).thenReturn(Optional.of(currentPeriod));
+
+        assertThat(rangeScheduleService.reprocessSchedulePeriodsIfAnyEnded(loan))
+                .isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.NONE);
+
+        assertThat(currentPeriod.getMinPaymentCriteriaMet()).isNull();
+        verifyNoInteractions(transactionRepository);
+    }
+
+    @Test
+    void reprocessIfAnyEndedDoesNothingWithoutASchedule() {
+        when(rangeScheduleRepository.findTopByLoanIdOrderByPeriodNumberDesc(LOAN_ID)).thenReturn(Optional.empty());
+
+        assertThat(rangeScheduleService.reprocessSchedulePeriodsIfAnyEnded(loan))
+                .isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.NONE);
+
+        verifyNoInteractions(transactionRepository);
     }
 
     private WorkingCapitalLoanDelinquencyRangeSchedule pastOpenPeriod() {

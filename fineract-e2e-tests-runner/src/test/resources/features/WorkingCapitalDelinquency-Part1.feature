@@ -1077,7 +1077,7 @@ Feature: Working Capital Delinquency
 
   @TestRailId:C106713
   Scenario: Verify WC Loan account modify with delinquency override while delinquency override is disallowed on WCLP is failed - UC4
-    When Admin sets the business date to "01 January 2027"
+    When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates WC Delinquency Bucket With Values:
       | frequency | frequencyType | minimumPaymentType | minimumPayment |
@@ -1580,17 +1580,21 @@ Feature: Working Capital Delinquency
       | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-    # Partial repayment 50 days backdated: does not meet the minimum, triggers instant classification while minPaymentCriteriaMet stays NULL
+    # The disbursement is backdated past the end of periods 1 and 2: it generates and evaluates them as the COB would
+    # Partial repayment 50 days backdated: does not meet the minimum of period 1, which stays missed
     And Customer makes repayment on "10 February 2026" with 0.01 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | null                  | 269.99           | 58             |
+      | 1            | 2026-01-01 | 2026-02-02 | 270.0          | 0.01       | 269.99            | false                 | 269.99           | 58             |
+      | 2            | 2026-02-03 | 2026-03-04 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 28             |
+      | 3            | 2026-03-05 | 2026-04-03 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
+      | 2            | 2026-03-05  |              | D00            | 1              | 30             |
       | 1            | 2026-03-05  |              | D30            | 31             | 60             |
       | 1            | 2026-02-03  | 2026-03-05   | D00            | 1              | 30             |
     And Working capital loan details has the following field values:
-      | delinquent.delinquentAmount   | 269.99     |
+      | delinquent.delinquentAmount   | 539.99     |
       | delinquent.pastDueDays        | 58         |
       | delinquencyStartDate          | 2026-01-01 |
       | delinquencyEffectiveStartDate | 2026-01-04 |

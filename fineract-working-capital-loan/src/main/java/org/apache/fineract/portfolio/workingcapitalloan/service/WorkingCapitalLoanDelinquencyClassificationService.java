@@ -30,6 +30,18 @@ public interface WorkingCapitalLoanDelinquencyClassificationService {
 
     void classifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate);
 
+    /**
+     * The classification step at the end of a Working Capital loan command. It runs after the status transition and
+     * after the loan has been saved and flushed, so {@link #classifyDelinquency(WorkingCapitalLoan, LocalDate)} sees
+     * the final loan state, and it runs at most once per command. Classifies as of the business date.
+     *
+     * @param loan
+     *            the loan the command changed
+     * @param mode
+     *            the classification the command's delinquency range schedule updates asked for
+     */
+    void classifyDelinquencyOnFinalState(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyClassificationMode mode);
+
     boolean applyDelinquencyTagForRange(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyRangeSchedule range,
             DelinquencyRange currentRange, LocalDate businessDate);
 

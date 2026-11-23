@@ -143,6 +143,8 @@ class WorkingCapitalLoanAdjustTransactionExternalIdTest {
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     @Mock
+    private WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
+    @Mock
     private WorkingCapitalLoanBreachScheduleService breachScheduleService;
     @Mock
     private WorkingCapitalLoanTransactionProcessor transactionProcessor;
@@ -180,6 +182,9 @@ class WorkingCapitalLoanAdjustTransactionExternalIdTest {
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
         when(loan.getOffice()).thenReturn(office);
         when(loan.getId()).thenReturn(LOAN_ID);
+        // Every undo of a repayment-like transaction rebuilds the delinquency schedule and owes a classification.
+        when(delinquencyRangeScheduleService.reprocessSchedulePeriods(loan))
+                .thenReturn(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
         when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loan.getBalance()).thenReturn(balance);
         when(balance.getPrincipalPaid()).thenReturn(ORIGINAL_AMOUNT);

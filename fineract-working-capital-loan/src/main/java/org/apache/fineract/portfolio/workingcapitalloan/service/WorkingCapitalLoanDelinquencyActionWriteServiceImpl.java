@@ -73,6 +73,8 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
         final WorkingCapitalLoanDelinquencyAction saved = actionRepository.saveAndFlush(action);
         log.debug("Created WC loan delinquency action {} for loan {}", action.getAction(), workingCapitalLoanId);
 
+        WorkingCapitalLoanDelinquencyClassificationMode classification = WorkingCapitalLoanDelinquencyClassificationMode.NONE;
+
         if (DelinquencyAction.ENABLE.equals(action.getAction())) {
             // Mirror breach action management: close the open disable at the day before the enable date so the loan
             // stops being considered disabled from the enable date on.
@@ -89,29 +91,30 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
                 rangeScheduleService.generateInitialPeriod(workingCapitalLoan);
             }
             rangeScheduleService.recalculateBaseExpectedAmount(workingCapitalLoan);
-            rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+            classification = rangeScheduleService.reprocessSchedulePeriods(workingCapitalLoan);
         } else if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, action.getStartDate(), action.getEndDate());
             if (!action.getStartDate().isAfter(DateUtils.getBusinessLocalDate())) {
-                rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+                classification = rangeScheduleService.reprocessSchedulePeriods(workingCapitalLoan);
             }
         } else if (DelinquencyAction.RESCHEDULE.equals(action.getAction())) {
             rangeScheduleService.rescheduleMinimumPayment(workingCapitalLoan, action);
-            rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+            classification = rangeScheduleService.reprocessSchedulePeriods(workingCapitalLoan);
         } else if (DelinquencyAction.RESUME.equals(action.getAction())) {
             final WorkingCapitalLoanDelinquencyAction activePause = validator.findActivePauseForResume(existing,
                     DateUtils.getBusinessLocalDate());
-            rangeScheduleService.resumeActivePause(workingCapitalLoan, activePause, action);
+            classification = rangeScheduleService.resumeActivePause(workingCapitalLoan, activePause, action);
         } else if (DelinquencyAction.RESET.equals(action.getAction())) {
             rangeScheduleService.resetPeriods(workingCapitalLoan, action);
         } else if (DelinquencyAction.UNDO_RESET.equals(action.getAction())) {
             List<WorkingCapitalLoanDelinquencyAction> byWorkingCapitalLoanIdOrderById = actionRepository
                     .findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
             rangeScheduleService.undoResetPeriods(workingCapitalLoan, action, byWorkingCapitalLoanIdOrderById);
-            rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+            classification = rangeScheduleService.reprocessSchedulePeriods(workingCapitalLoan);
         } else if (DelinquencyAction.DISABLE.equals(action.getAction())) {
             classificationService.liftDelinquencyClassification(workingCapitalLoan, action.getStartDate());
         }
+        classificationService.classifyDelinquencyOnFinalState(workingCapitalLoan, classification);
 
         businessEventNotifierService.notifyPostBusinessEvent(delinquencyActionEvent(action.getAction(), workingCapitalLoan));
 

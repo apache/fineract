@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -126,16 +128,39 @@ class WorkingCapitalLoanDelinquencyDisableWriteServiceTest {
         final WorkingCapitalLoanDelinquencyAction activeDisable = disableAction(today.minusDays(10), null);
         when(validator.validateAndParse(any(), any(), anyList())).thenReturn(enableRow);
         when(validator.findActiveDisable(anyList())).thenReturn(activeDisable);
+        when(rangeScheduleService.reprocessSchedulePeriods(loan)).thenReturn(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
 
         writeService.createDelinquencyAction(LOAN_ID, command);
 
         // Mirror breach: the disable is closed at the day before the enable date, not the enable date itself.
         assertThat(activeDisable.getEndDate()).isEqualTo(today.minusDays(1));
         verify(actionRepository).saveAndFlush(enableRow);
-        // Mirror breach: enable closes the disable and reprocesses the schedule (which re-evaluates and reclassifies
-        // internally). It must NOT shift periods as a pause.
-        verify(rangeScheduleService).reprocessDelinquencySchedule(loan);
+        // Mirror breach: enable closes the disable, reprocesses the schedule (which re-evaluates it) and reclassifies.
+        // It must NOT shift periods as a pause.
+        final InOrder order = inOrder(rangeScheduleService, classificationService);
+        order.verify(rangeScheduleService).reprocessSchedulePeriods(loan);
+        order.verify(classificationService).classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
         verify(rangeScheduleService, never()).extendPeriodsForPause(any(), any(), any());
+    }
+
+    @Test
+    void resumeClassifiesOnceAtTheEndWithTheModeTheResumeReturns() {
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final WorkingCapitalLoanDelinquencyAction resume = action(DelinquencyAction.RESUME, today, null);
+        final WorkingCapitalLoanDelinquencyAction activePause = action(DelinquencyAction.PAUSE, today.minusDays(5), today.plusDays(5));
+        when(validator.validateAndParse(any(), any(), anyList())).thenReturn(resume);
+        when(validator.findActivePauseForResume(anyList(), any())).thenReturn(activePause);
+        when(rangeScheduleService.resumeActivePause(loan, activePause, resume))
+                .thenReturn(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+
+        writeService.createDelinquencyAction(LOAN_ID, command);
+
+        final InOrder order = inOrder(rangeScheduleService, classificationService, businessEventNotifierService);
+        order.verify(rangeScheduleService).resumeActivePause(loan, activePause, resume);
+        order.verify(classificationService).classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        order.verify(businessEventNotifierService).notifyPostBusinessEvent(any());
+        verify(classificationService).classifyDelinquencyOnFinalState(any(), any());
+        verify(classificationService, never()).classifyDelinquency(any(), any());
     }
 
     private WorkingCapitalLoanDelinquencyAction disableAction(final LocalDate startDate, final LocalDate endDate) {

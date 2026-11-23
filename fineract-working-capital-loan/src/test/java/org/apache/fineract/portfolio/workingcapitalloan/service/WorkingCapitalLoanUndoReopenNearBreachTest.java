@@ -133,6 +133,8 @@ class WorkingCapitalLoanUndoReopenNearBreachTest {
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     @Mock
+    private WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
+    @Mock
     private WorkingCapitalLoanBreachScheduleService breachScheduleService;
     @Mock
     private WorkingCapitalLoanTransactionProcessor transactionProcessor;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -112,12 +113,14 @@ class WorkingCapitalLoanDelinquencyReprocessClassificationTest {
                 .thenReturn(List.of(new TransactionDateAndAmountHolder(today.minusDays(20), new BigDecimal("3")),
                         new TransactionDateAndAmountHolder(today.minusDays(1), BigDecimal.ONE)));
 
-        rangeScheduleService.reprocessDelinquencySchedule(loan);
+        final WorkingCapitalLoanDelinquencyClassificationMode classification = rangeScheduleService.reprocessSchedulePeriods(loan);
 
-        // The replay must not classify on the synthetic per-period dates (would lift tags with a wrong/future date).
+        // The replay must not classify on the synthetic per-period dates (would lift tags with a wrong/future date),
+        // nor at its end: the command classifies once, after the status transition and the loan save, with the real
+        // business date.
         verify(classificationService, never()).instantClassifyDelinquency(any(), any());
-        // Classification happens once, at the end, with the real business date.
-        verify(classificationService).classifyDelinquency(loan, today);
+        verify(classificationService, never()).classifyDelinquency(any(), any());
+        assertThat(classification).isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
     }
 
     private WorkingCapitalLoanDelinquencyRangeSchedule period(final int periodNumber, final LocalDate fromDate, final LocalDate toDate) {

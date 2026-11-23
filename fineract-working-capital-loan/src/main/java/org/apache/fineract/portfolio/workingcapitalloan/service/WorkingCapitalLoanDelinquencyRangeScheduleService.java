@@ -41,9 +41,17 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
      */
     void deleteScheduleAndActions(Long loanId);
 
-    void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
-
-    void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate businessDate, BigDecimal amount);
+    /**
+     * Applies a repayment to the delinquency range schedule periods in place. Does not classify delinquency: the caller
+     * passes the returned mode to
+     * {@link WorkingCapitalLoanDelinquencyClassificationService#classifyDelinquencyOnFinalState} once the loan status
+     * has been changed and the loan saved.
+     *
+     * @return {@link WorkingCapitalLoanDelinquencyClassificationMode#INSTANT}, or
+     *         {@link WorkingCapitalLoanDelinquencyClassificationMode#NONE} while delinquency is disabled
+     */
+    WorkingCapitalLoanDelinquencyClassificationMode applyRepaymentToPeriods(WorkingCapitalLoan loan, LocalDate transactionDate,
+            BigDecimal amount);
 
     boolean evaluateExpiredPeriods(WorkingCapitalLoan loan, LocalDate businessDate);
 
@@ -52,9 +60,8 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
     /**
      * Shifts the boundaries of every period overlapping or following {@code pauseStart} by the inclusive length of the
      * pause, including periods that have already been evaluated (minPaymentCriteriaMet != null) so a backdated pause
-     * can also reach into a period that was previously closed.
-     * {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)} is expected to be invoked afterwards to re-derive their
-     * evaluation.
+     * can also reach into a period that was previously closed. {@link #reprocessSchedulePeriods(WorkingCapitalLoan)} is
+     * expected to be invoked afterwards to re-derive their evaluation, followed by the classification it returns.
      */
     void extendPeriodsForPause(WorkingCapitalLoan loan, LocalDate pauseStart, LocalDate pauseEnd);
 
@@ -64,23 +71,53 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
      * therefore be saved before this is called. When {@code action} carries a frequency group, the current open period
      * is also re-dated: its toDate is recalculated from its fromDate and the new frequency, extended by the recorded
      * pauses that overlap the period. Amounts, the remaining-balance cap and expired-period evaluation are left to
-     * {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)}, which the caller must invoke afterwards.
+     * {@link #reprocessSchedulePeriods(WorkingCapitalLoan)}, which the caller must invoke afterwards, followed by the
+     * classification it returns.
      */
     void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction action);
 
     void recalculateBaseExpectedAmount(WorkingCapitalLoan loan);
 
-    void resumeActivePause(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction activePause,
-            WorkingCapitalLoanDelinquencyAction resumeAction);
+    /**
+     * Ends the active pause at the resume date, shortens the periods it had extended and evaluates the periods that
+     * have ended as a result. Does not classify delinquency: the caller passes the returned mode to
+     * {@link WorkingCapitalLoanDelinquencyClassificationService#classifyDelinquencyOnFinalState}.
+     *
+     * @return {@link WorkingCapitalLoanDelinquencyClassificationMode#ALWAYS}, or
+     *         {@link WorkingCapitalLoanDelinquencyClassificationMode#NONE} while delinquency is disabled
+     */
+    WorkingCapitalLoanDelinquencyClassificationMode resumeActivePause(WorkingCapitalLoan loan,
+            WorkingCapitalLoanDelinquencyAction activePause, WorkingCapitalLoanDelinquencyAction resumeAction);
 
     /**
      * Rebuilds paid amounts and evaluation for all periods by replaying the principal portions of the repayment type
-     * transactions in chronological order.
+     * transactions in chronological order. Does not classify delinquency: the caller passes the returned mode to
+     * {@link WorkingCapitalLoanDelinquencyClassificationService#classifyDelinquencyOnFinalState} once the loan status
+     * has been changed and the loan saved.
+     *
+     * @return {@link WorkingCapitalLoanDelinquencyClassificationMode#ALWAYS}, or
+     *         {@link WorkingCapitalLoanDelinquencyClassificationMode#NONE} while delinquency is disabled
      */
-    void reprocessDelinquencySchedule(WorkingCapitalLoan loan);
+    WorkingCapitalLoanDelinquencyClassificationMode reprocessSchedulePeriods(WorkingCapitalLoan loan);
+
+    /**
+     * Brings a freshly generated schedule up to the business date. A disbursement backdated past the end of its
+     * starting period leaves periods that have already ended: they are generated and evaluated here, through
+     * {@link #reprocessSchedulePeriods(WorkingCapitalLoan)}, instead of at the next COB. Does nothing while no period
+     * has ended before the business date. Does not classify delinquency.
+     *
+     * @return {@link WorkingCapitalLoanDelinquencyClassificationMode#ALWAYS} when the schedule was rebuilt, otherwise
+     *         {@link WorkingCapitalLoanDelinquencyClassificationMode#NONE}
+     */
+    WorkingCapitalLoanDelinquencyClassificationMode reprocessSchedulePeriodsIfAnyEnded(WorkingCapitalLoan loan);
 
     void resetPeriods(WorkingCapitalLoan workingCapitalLoan, WorkingCapitalLoanDelinquencyAction action);
 
+    /**
+     * Clears the reset flag of the periods the undone reset had cut. Amounts and expired-period evaluation are left to
+     * {@link #reprocessSchedulePeriods(WorkingCapitalLoan)}, which the caller must invoke afterwards, followed by the
+     * classification it returns.
+     */
     void undoResetPeriods(WorkingCapitalLoan workingCapitalLoan, WorkingCapitalLoanDelinquencyAction action,
             List<WorkingCapitalLoanDelinquencyAction> byWorkingCapitalLoanIdOrderById);
 }

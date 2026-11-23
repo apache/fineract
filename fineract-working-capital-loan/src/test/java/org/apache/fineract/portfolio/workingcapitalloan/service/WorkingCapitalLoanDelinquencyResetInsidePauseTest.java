@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -256,12 +257,34 @@ class WorkingCapitalLoanDelinquencyResetInsidePauseTest {
         when(rangeScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(period2, period3));
         when(actionRepository.findByWorkingCapitalLoanIdOrderById(LOAN_ID)).thenReturn(List.of(pause, resume));
 
-        rangeScheduleService.resumeActivePause(loan, pause, resume);
+        // The resume leaves the classification to the command, which runs it once at its end.
+        assertThat(rangeScheduleService.resumeActivePause(loan, pause, resume))
+                .isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
 
         assertThat(period2.getFromDate()).isEqualTo(LocalDate.of(2026, 1, 7));
         assertThat(period2.getToDate()).isEqualTo(LocalDate.of(2026, 1, 15));
         assertThat(period3.getFromDate()).isEqualTo(LocalDate.of(2026, 1, 16));
         assertThat(period3.getToDate()).isEqualTo(LocalDate.of(2026, 1, 21));
+        verify(classificationService, never()).classifyDelinquency(any(), any());
+    }
+
+    @Test
+    void resumeActivePause_whileDelinquencyIsDisabled_movesThePeriodsButOwesNoClassification() {
+        when(classificationService.isDelinquencyDisabled(loan)).thenReturn(true);
+        final WorkingCapitalLoanDelinquencyRangeSchedule period2 = period(2, LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 17));
+        final WorkingCapitalLoanDelinquencyAction pause = pause(LocalDate.of(2026, 1, 11), LocalDate.of(2026, 1, 15));
+        final WorkingCapitalLoanDelinquencyAction resume = new WorkingCapitalLoanDelinquencyAction();
+        resume.setAction(DelinquencyAction.RESUME);
+        resume.setStartDate(LocalDate.of(2026, 1, 13));
+        when(rangeScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(period2));
+        when(actionRepository.findByWorkingCapitalLoanIdOrderById(LOAN_ID)).thenReturn(List.of(pause, resume));
+
+        assertThat(rangeScheduleService.resumeActivePause(loan, pause, resume))
+                .isEqualTo(WorkingCapitalLoanDelinquencyClassificationMode.NONE);
+
+        assertThat(period2.getToDate()).isEqualTo(LocalDate.of(2026, 1, 15));
+        verify(rangeScheduleRepository, never()).findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(any(), any());
+        verify(classificationService, never()).classifyDelinquency(any(), any());
     }
 
     private WorkingCapitalLoanDelinquencyRangeSchedule period(final int periodNumber, final LocalDate fromDate, final LocalDate toDate) {
