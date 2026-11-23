@@ -558,22 +558,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void resetDerivedComponents() {
-        this.principalCompleted = null;
-        this.principalWrittenOff = null;
-        this.interestPaid = null;
-        this.interestWaived = null;
-        this.interestWrittenOff = null;
-        this.feeChargesPaid = null;
+        resetPaidComponents();
         this.feeChargesWaived = null;
-        this.feeChargesWrittenOff = null;
-        this.penaltyChargesPaid = null;
         this.penaltyChargesWaived = null;
-        this.penaltyChargesWrittenOff = null;
-        this.totalPaidInAdvance = null;
-        this.totalPaidLate = null;
-
-        this.obligationsMet = false;
-        this.obligationsMetOnDate = null;
         if (this.creditedPrincipal != null) {
             setPrincipal(this.principal != null ? this.principal.subtract(this.creditedPrincipal) : null);
             this.creditedPrincipal = null;
@@ -590,6 +577,27 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             setPenaltyCharges(this.penaltyCharges != null ? this.penaltyCharges.subtract(this.creditedPenalty) : null);
             this.creditedPenalty = null;
         }
+    }
+
+    /**
+     * Resets the amounts that a replay of the transactions builds again. Charge waivers and credits (chargebacks) are
+     * kept, as they are not replayed.
+     */
+    public void resetPaidComponents() {
+        this.principalCompleted = null;
+        this.principalWrittenOff = null;
+        this.interestPaid = null;
+        this.interestWaived = null;
+        this.interestWrittenOff = null;
+        this.feeChargesPaid = null;
+        this.feeChargesWrittenOff = null;
+        this.penaltyChargesPaid = null;
+        this.penaltyChargesWrittenOff = null;
+        this.totalPaidInAdvance = null;
+        this.totalPaidLate = null;
+
+        this.obligationsMet = false;
+        this.obligationsMetOnDate = null;
     }
 
     public void resetAccrualComponents() {
