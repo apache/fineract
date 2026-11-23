@@ -121,6 +121,15 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
         }
     }
 
+    @Override
+    public void classifyDelinquencyOnFinalState(final WorkingCapitalLoan loan, final WorkingCapitalLoanDelinquencyClassificationMode mode) {
+        switch (mode) {
+            case ALWAYS -> classifyDelinquency(loan, DateUtils.getBusinessLocalDate());
+            case INSTANT -> instantClassifyDelinquency(loan, DateUtils.getBusinessLocalDate());
+            case NONE -> log.debug("Skipping... No delinquency classification is needed for Working Capital Loan {}.", loan.getId());
+        }
+    }
+
     /**
      * Returns true while the loan has an active Delinquency Disable action (one that has not yet been reversed by an
      * enable). While disabled, delinquency is neither evaluated nor updated; the enable recalculates everything.
