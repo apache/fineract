@@ -25,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +37,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestChargeData;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.StringEnumOptionData;
 import org.apache.fineract.test.factory.LoanChargeRequestFactory;
@@ -61,6 +64,36 @@ public class LoanChargeAmortizationStepDef extends AbstractStepDef {
     public void createLoanWithAmortizedCharge() {
         createLoan();
         addCharge(LoanRequestFactory.DATE_SUBMIT_STRING);
+    }
+
+    @When("Admin creates a new Loan with charge amortization product on {string}")
+    public void createLoanWithChargeAmortizationProductOn(final String submittedOnDate) {
+        final PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+        final PostLoansRequest loansRequest = loanRequestFactory.defaultProgressiveLoansRequest(clientResponse.getClientId())
+                .productId(createdProductId()).submittedOnDate(submittedOnDate).expectedDisbursementDate(submittedOnDate);
+        final PostLoansResponse response = ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(loansRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+    }
+
+    @When("Admin creates a new Loan with charge amortization product and the amortized charge in the loan application")
+    public void createLoanWithAmortizedChargeInApplication() {
+        createLoanWithChargeInApplication();
+    }
+
+    @Then("Creating a new Loan with charge amortization product and the amortized charge in the loan application results an error:")
+    public void createLoanWithAmortizedChargeInApplicationFails(final DataTable table) {
+        final Map<String, String> data = table.asMaps().getFirst();
+        final CallFailedRuntimeException failure = fail(
+                () -> fineractClient.loans().calculateOrSubmitLoanApplication(loanRequestWithChargeInApplication(), Map.of()));
+        assertThat(failure.getStatus()).as("HTTP status code, response: " + failure.getMessage())
+                .isEqualTo(Integer.parseInt(data.get("httpCode")));
+        assertThat(failure.getMessage()).as("Error message should contain: " + data.get("errorMessage").trim())
+                .contains(data.get("errorMessage").trim());
+    }
+
+    @When("Admin adds the amortized charge to the loan on {string}")
+    public void addAmortizedChargeToLoanOn(final String dueDate) {
+        addCharge(dueDate);
     }
 
     @Then("Adding the amortized charge to a new Loan with the charge amortization product results an error:")
@@ -101,6 +134,20 @@ public class LoanChargeAmortizationStepDef extends AbstractStepDef {
                 .productId(createdProductId());
         final PostLoansResponse response = ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(loansRequest, Map.of()));
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+    }
+
+    private void createLoanWithChargeInApplication() {
+        final PostLoansResponse response = ok(
+                () -> fineractClient.loans().calculateOrSubmitLoanApplication(loanRequestWithChargeInApplication(), Map.of()));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+    }
+
+    private PostLoansRequest loanRequestWithChargeInApplication() {
+        final PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+        final PostLoansRequestChargeData charge = new PostLoansRequestChargeData().chargeId(createdChargeId()).amount(BigDecimal.TEN)
+                .dueDate(LoanRequestFactory.DATE_SUBMIT_STRING);
+        return loanRequestFactory.defaultProgressiveLoansRequest(clientResponse.getClientId()).productId(createdProductId())
+                .charges(List.of(charge));
     }
 
     private void addCharge(final String dueDate) {
