@@ -30,6 +30,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.NoteCreateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Test;
@@ -78,6 +79,44 @@ public class FeignProgressiveLoanModelRebuildAfterReAgeTest extends FeignLoanTes
             executeInlineCOB(loanId);
 
             assertFalse(fetchModel(loanId).isEmpty());
+            assertSameSchedule(before, getLoanDetails(loanId));
+        });
+    }
+
+    /**
+     * A re-aged loan with interest recalculation that is a non performing asset. The schedule regeneration that replays
+     * over a fresh schedule used to leave the schedule of a non performing loan as it was stored, re-aged installments
+     * included, and the rebuilt model came out different from the lost one.
+     */
+    @Test
+    void modelOfReAgedNonPerformingLoanIsRebuiltBeforeWriteRequest() {
+        runAt("01 January 2026", () -> {
+            Long clientId = createClient("01 January 2026");
+            Long productId = createLoanProduct(customizeProduct(create4IProgressive(), p -> p//
+                    .numberOfRepayments(4)//
+                    .interestRatePerPeriod(12.0)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(false)//
+                    .maxTrancheCount(null)//
+                    .outstandingLoanBalance(null)//
+                    .overdueDaysForNPA(1)));
+            Long loanId = applyForLoan(LoanRequestBuilders.applyProgressiveLoan(clientId, productId, "01 January 2026", 1000.0, 4, 12.0));
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2026"));
+            disburseLoan(loanId, LoanRequestBuilders.disburseLoan(1000.0, "01 January 2026"));
+
+            updateBusinessDate("15 March 2026");
+            schedulerHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+            schedulerHelper.executeAndAwaitJob("Update Non Performing Assets");
+            reAge(loanId, reAge("01 April 2026", LoanTestData.RepaymentFrequencyType.MONTHS_STRING, 1, 6));
+            assertTrue(getLoanDetails(loanId).getIsNPA(), "the loan should be a non performing asset");
+
+            GetLoansLoanIdResponse before = getLoanDetails(loanId);
+            Map<String, Object> modelBefore = fetchModel(loanId);
+            deleteModel(loanId);
+
+            ok(() -> fineractClient().notes().addNewNote("loans", loanId, new NoteCreateRequest().note("model rebuild")));
+
+            assertEquals(modelBefore, fetchModel(loanId), "The rebuilt model should match the one that was lost");
             assertSameSchedule(before, getLoanDetails(loanId));
         });
     }

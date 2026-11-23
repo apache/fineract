@@ -71,9 +71,15 @@ public class LoanScheduleService {
      * Replaying over the installments as they are stored is not enough once a transaction such as a re-age has reshaped
      * them, because the replay drops the installments that such transactions created and expects the regular ones to be
      * there.
+     *
+     * <p>
+     * The interest recalculation variant leaves the schedule of a non performing loan as it is (see
+     * {@link LoanTransactionProcessingService#getRecalculatedSchedule}), so a progressive loan that is a non performing
+     * asset is regenerated from its terms the way a charged-off one is.
      */
     public void regenerateScheduleForReprocessing(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
-        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()
+                && !(loan.isNpa() && loan.isProgressiveSchedule())) {
             regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         } else {
             regenerateRepaymentSchedule(loan, generatorDTO);
