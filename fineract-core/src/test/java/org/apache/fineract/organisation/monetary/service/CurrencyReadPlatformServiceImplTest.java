@@ -49,9 +49,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Runs the QueryDSL queries of {@link CurrencyReadPlatformServiceImpl#retrieveCurrency(String)} and
- * {@link CurrencyReadPlatformServiceImpl#retrieveAllPlatformCurrencies()} through a real {@link SQLQueryFactory} on top
- * of a mocked JDBC connection, so that the generated SQL, the bound parameters and the result mapping are all verified.
+ * Runs the QueryDSL queries of {@link CurrencyReadPlatformServiceImpl#retrieveCurrency(String)},
+ * {@link CurrencyReadPlatformServiceImpl#retrieveAllPlatformCurrencies()} and
+ * {@link CurrencyReadPlatformServiceImpl#retrieveAllowedCurrencies()} through a real {@link SQLQueryFactory} on top of
+ * a mocked JDBC connection, so that the generated SQL, the bound parameters and the result mapping are all verified.
  */
 class CurrencyReadPlatformServiceImplTest {
 
@@ -68,6 +69,13 @@ class CurrencyReadPlatformServiceImplTest {
             m_currency.display_symbol, m_currency.internationalized_name_code
             from m_currency m_currency
             order by m_currency.name asc""";
+
+    private static final String EXPECTED_ALLOWED_CURRENCIES_SQL = """
+            select m_organisation_currency.code, m_organisation_currency.name, m_organisation_currency.decimal_places, \
+            m_organisation_currency.currency_multiplesof, m_organisation_currency.display_symbol, \
+            m_organisation_currency.internationalized_name_code
+            from m_organisation_currency m_organisation_currency
+            order by m_organisation_currency.name asc""";
 
     private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
     private final Connection connection = mock(Connection.class);
@@ -167,6 +175,42 @@ class CurrencyReadPlatformServiceImplTest {
         currencies.removeAll(List.of(new CurrencyData("EUR", "Euro", 2, 0, "€", "currency.EUR")));
 
         assertEquals(List.of(new CurrencyData("USD", "US Dollar", 2, 5, "$", "currency.USD")), currencies);
+    }
+
+    @Test
+    void retrieveAllowedCurrenciesMapsAllRowsOnPostgreSQL() throws SQLException {
+        CurrencyReadPlatformService service = service(PostgreSQLTemplates.builder().build(),
+                new Object[] { "EUR", "Euro", 2, 0, "€", "currency.EUR" }, new Object[] { "JPY", "Japanese Yen", 0, null, null, null },
+                new Object[] { "USD", "US Dollar", 2, 5, "$", "currency.USD" });
+
+        List<CurrencyData> currencies = service.retrieveAllowedCurrencies();
+
+        assertEquals(List.of(new CurrencyData("EUR", "Euro", 2, 0, "€", "currency.EUR"),
+                new CurrencyData("JPY", "Japanese Yen", 0, null, null, null),
+                new CurrencyData("USD", "US Dollar", 2, 5, "$", "currency.USD")), currencies);
+        assertEquals(EXPECTED_ALLOWED_CURRENCIES_SQL, executedSql);
+        verifyNoParametersBound();
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveAllowedCurrenciesMapsAllRowsOnMySQL() throws SQLException {
+        CurrencyReadPlatformService service = service(MySQLTemplates.builder().build(),
+                new Object[] { "USD", "US Dollar", 2, 5, "$", "currency.USD" });
+
+        List<CurrencyData> currencies = service.retrieveAllowedCurrencies();
+
+        assertEquals(List.of(new CurrencyData("USD", "US Dollar", 2, 5, "$", "currency.USD")), currencies);
+        assertEquals(EXPECTED_ALLOWED_CURRENCIES_SQL, executedSql);
+        verifyNoParametersBound();
+    }
+
+    @Test
+    void retrieveAllowedCurrenciesReturnsEmptyListWhenNoCurrencyIsAllowed() throws SQLException {
+        CurrencyReadPlatformService service = service(PostgreSQLTemplates.builder().build());
+
+        assertTrue(service.retrieveAllowedCurrencies().isEmpty());
+        assertEquals(EXPECTED_ALLOWED_CURRENCIES_SQL, executedSql);
     }
 
     private void verifyNoParametersBound() throws SQLException {
