@@ -250,133 +250,52 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
     }
 
     @Test
-    public void testBackdatedDepositReversesAccrualsFromItsDateWithPivotDateConfiguration() {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
-            final AccrualAccounts accounts = createDistinctAccrualAccounts();
-            final Long savingsProductId = savingsProductHelper.createSavingsProduct(withMappings(accrualProduct(INTEREST_RATE), accounts))
-                    .getResourceId();
-            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
-
-            // Create the initial deposit and generate accruals.
-            deposit(savingsAccountId, AMOUNT, startDateString());
-            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
-
-            final List<SavingsAccountTransactionData> accrualsBeforeDeposit = savingsTransactionHelper
-                    .getAccrualTransactions(savingsAccountId);
-
-            assertFalse(accrualsBeforeDeposit.isEmpty(), "No accrual transactions were found.");
-
-            // The backdated deposit will be made on 7 August 2021.
-            final LocalDate backdatedDepositDate = TODAY.minusDays(5);
-
-            // Verify that initial accruals exist on both sides of the date boundary.
-            boolean foundEarlierAccrualBeforeDeposit = false;
-            boolean foundLaterAccrualBeforeDeposit = false;
-
-            for (SavingsAccountTransactionData accrual : accrualsBeforeDeposit) {
-                if (accrual.getDate().isBefore(backdatedDepositDate)) {
-                    foundEarlierAccrualBeforeDeposit = true;
-                } else {
-                    foundLaterAccrualBeforeDeposit = true;
-                }
-            }
-
-            assertTrue(foundEarlierAccrualBeforeDeposit, "Initial accruals do not contain dates before the backdated deposit.");
-            assertTrue(foundLaterAccrualBeforeDeposit, "Initial accruals do not contain dates on or after the backdated deposit.");
-
-            // Enable pivot-date configuration with a five-day backdating window.
-            try {
-                // Make a deposit dated 7 August 2021.
-                globalConfigurationHelper.updateGlobalConfiguration(
-                        GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
-                        new PutGlobalConfigurationsRequest().enabled(false));
-
-                globalConfigurationHelper.updateGlobalConfiguration(
-                        GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING_DATE_FOR_DAYS,
-                        new PutGlobalConfigurationsRequest().enabled(true).value(5L));
-
-                deposit(savingsAccountId, AMOUNT, DATE_FORMATTER.format(backdatedDepositDate));
-            } finally {
-                // Restore the default global configuration.
-                globalConfigurationHelper.updateGlobalConfiguration(
-                        GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
-                        new PutGlobalConfigurationsRequest().enabled(true));
-
-                globalConfigurationHelper.updateGlobalConfiguration(
-                        GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING_DATE_FOR_DAYS,
-                        new PutGlobalConfigurationsRequest().enabled(false).value(0L));
-            }
-
-            // Fetch accruals again to inspect their reversal status and journal entries.
-            final List<SavingsAccountTransactionData> accrualsAfterDeposit = savingsTransactionHelper
-                    .getAccrualTransactions(savingsAccountId);
-
-            boolean foundEarlierAccrual = false;
-            boolean foundAccrualToReverse = false;
-
-            for (SavingsAccountTransactionData accrual : accrualsAfterDeposit) {
-                final List<JournalEntryTransactionItem> entries = journalEntriesOf(accrual);
-
-                if (accrual.getDate().isBefore(backdatedDepositDate)) {
-                    foundEarlierAccrual = true;
-
-                    assertFalse(accrual.getReversed(),
-                            "Accrual before the backdated deposit date was incorrectly reversed: " + accrual.getDate());
-
-                    assertHasEntry(entries, CREDIT, accounts.interestPayable(),
-                            "Original accrual entry missing for " + accrual.getDate() + ".");
-                } else {
-                    foundAccrualToReverse = true;
-
-                    assertTrue(accrual.getReversed(),
-                            "Accrual on or after the backdated deposit date was not reversed: " + accrual.getDate());
-
-                    assertHasEntry(entries, CREDIT, accounts.interestPayable(),
-                            "Original accrual entry missing for " + accrual.getDate() + ".");
-
-                    assertHasEntry(entries, DEBIT, accounts.interestPayable(), "Reversal entry missing for " + accrual.getDate() + ".");
-                }
-            }
-
-            assertTrue(foundEarlierAccrual, "No accruals were found before the backdated deposit date.");
-
-            assertTrue(foundAccrualToReverse, "No accruals were found on or after the backdated deposit date.");
-        });
+    public void testBackdatedDepositReversesAndReaccruesWithPivotDateConfiguration() {
+        verifyBackdatedTransactionWithPivotDateConfiguration((savingsAccountId, date) -> deposit(savingsAccountId, AMOUNT, date),
+                new BigDecimal("5.4795"));
     }
 
     @Test
-    public void testBackdatedWithdrawalReversesAccrualsFromItsDateWithPivotDateConfiguration() {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+    public void testBackdatedWithdrawalReversesAndReaccruesWithPivotDateConfiguration() {
+        verifyBackdatedTransactionWithPivotDateConfiguration((savingsAccountId, date) -> withdraw(savingsAccountId, "2000", date),
+                new BigDecimal("2.1918"));
+    }
+
+    private void verifyBackdatedTransactionWithPivotDateConfiguration(final BiConsumer<Long, String> backdatedTransaction,
+            final BigDecimal expectedDailyAccrual) {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
             final Long savingsProductId = savingsProductHelper.createSavingsProduct(withMappings(accrualProduct(INTEREST_RATE), accounts))
                     .getResourceId();
             final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
 
-            // Deposit money and generate accruals.
             deposit(savingsAccountId, AMOUNT, startDateString());
+
+            // Generate accruals and post interest before making the backdated transaction.
             schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
 
-            final List<SavingsAccountTransactionData> accrualsBeforeWithdrawal = savingsTransactionHelper
-                    .getAccrualTransactions(savingsAccountId);
+            final LocalDate interestPostingDate = interestPostingOf(savingsAccountId).getDate();
+            final LocalDate backdatedTransactionDate = interestPostingDate.minusDays(4);
+            final String transactionDate = DATE_FORMATTER.format(backdatedTransactionDate);
 
-            assertFalse(accrualsBeforeWithdrawal.isEmpty(), "No accrual transactions were found.");
+            final List<SavingsAccountTransactionData> accrualsBefore = savingsTransactionHelper.getAccrualTransactions(savingsAccountId);
 
-            // The backdated withdrawal will be made on 7 August 2021.
-            final LocalDate backdatedWithdrawalDate = TODAY.minusDays(5);
+            assertFalse(accrualsBefore.isEmpty(), "No accrual transactions were found.");
 
-            boolean foundEarlierAccrualBeforeWithdrawal = false;
-            boolean foundLaterAccrualBeforeWithdrawal = false;
+            boolean foundEarlierAccrual = false;
+            boolean foundLaterAccrual = false;
 
-            for (SavingsAccountTransactionData accrual : accrualsBeforeWithdrawal) {
-                if (accrual.getDate().isBefore(backdatedWithdrawalDate)) {
-                    foundEarlierAccrualBeforeWithdrawal = true;
+            for (SavingsAccountTransactionData accrual : accrualsBefore) {
+                if (accrual.getDate().isBefore(backdatedTransactionDate)) {
+                    foundEarlierAccrual = true;
                 } else {
-                    foundLaterAccrualBeforeWithdrawal = true;
+                    foundLaterAccrual = true;
                 }
             }
 
-            assertTrue(foundEarlierAccrualBeforeWithdrawal, "Initial accruals do not contain dates before the withdrawal.");
-            assertTrue(foundLaterAccrualBeforeWithdrawal, "Initial accruals do not contain dates on or after the withdrawal.");
+            assertTrue(foundEarlierAccrual, "No accruals were found before the backdated transaction date.");
+            assertTrue(foundLaterAccrual, "No accruals were found on or after the backdated transaction date.");
 
             try {
                 globalConfigurationHelper.updateGlobalConfiguration(
@@ -387,8 +306,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
                         GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING_DATE_FOR_DAYS,
                         new PutGlobalConfigurationsRequest().enabled(true).value(5L));
 
-                // Withdraw money on 7 August 2021.
-                withdraw(savingsAccountId, "2000", DATE_FORMATTER.format(backdatedWithdrawalDate));
+                backdatedTransaction.accept(savingsAccountId, transactionDate);
             } finally {
                 globalConfigurationHelper.updateGlobalConfiguration(
                         GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
@@ -399,27 +317,25 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
                         new PutGlobalConfigurationsRequest().enabled(false).value(0L));
             }
 
-            final List<SavingsAccountTransactionData> accrualsAfterWithdrawal = savingsTransactionHelper
+            final List<SavingsAccountTransactionData> accrualsAfterReversal = savingsTransactionHelper
                     .getAccrualTransactions(savingsAccountId);
 
-            boolean foundEarlierAccrual = false;
-            boolean foundAccrualToReverse = false;
+            boolean foundUnreversedEarlierAccrual = false;
+            boolean foundReversedLaterAccrual = false;
 
-            for (SavingsAccountTransactionData accrual : accrualsAfterWithdrawal) {
+            for (SavingsAccountTransactionData accrual : accrualsAfterReversal) {
                 final List<JournalEntryTransactionItem> entries = journalEntriesOf(accrual);
 
-                if (accrual.getDate().isBefore(backdatedWithdrawalDate)) {
-                    foundEarlierAccrual = true;
+                if (accrual.getDate().isBefore(backdatedTransactionDate)) {
+                    foundUnreversedEarlierAccrual = true;
 
-                    assertFalse(accrual.getReversed(),
-                            "Accrual before the backdated withdrawal date was incorrectly reversed: " + accrual.getDate());
-
-                    assertHasEntry(entries, CREDIT, accounts.interestPayable(), "Original accrual entry missing for " + accrual.getDate());
+                    assertFalse(Boolean.TRUE.equals(accrual.getReversed()),
+                            "Accrual before the backdated transaction date was incorrectly reversed: " + accrual.getDate());
                 } else {
-                    foundAccrualToReverse = true;
+                    foundReversedLaterAccrual = true;
 
-                    assertTrue(accrual.getReversed(),
-                            "Accrual on or after the backdated withdrawal date was not reversed: " + accrual.getDate());
+                    assertTrue(Boolean.TRUE.equals(accrual.getReversed()),
+                            "Accrual on or after the backdated transaction date was not reversed: " + accrual.getDate());
 
                     assertHasEntry(entries, CREDIT, accounts.interestPayable(), "Original accrual entry missing for " + accrual.getDate());
 
@@ -427,8 +343,25 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
                 }
             }
 
-            assertTrue(foundEarlierAccrual, "No accruals were found before the backdated withdrawal date.");
-            assertTrue(foundAccrualToReverse, "No accruals were found on or after the backdated withdrawal date.");
+            assertTrue(foundUnreversedEarlierAccrual, "No unreversed accruals were found before the transaction date.");
+            assertTrue(foundReversedLaterAccrual, "No reversed accruals were found on or after the transaction date.");
+
+            // Recalculate accruals using the updated savings balance.
+            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
+
+            final List<SavingsAccountTransactionData> accrualsAfterReaccrual = savingsTransactionHelper
+                    .getAccrualTransactions(savingsAccountId);
+
+            final List<SavingsAccountTransactionData> newAccruals = accrualsAfterReaccrual.stream()
+                    .filter(accrual -> !Boolean.TRUE.equals(accrual.getReversed()))
+                    .filter(accrual -> !accrual.getDate().isBefore(backdatedTransactionDate)).toList();
+
+            assertFalse(newAccruals.isEmpty(), "No new unreversed accruals were generated on or after the backdated transaction date.");
+
+            for (SavingsAccountTransactionData accrual : newAccruals) {
+                SavingsTestValidators.verifyAmount(expectedDailyAccrual, accrual.getAmount(),
+                        "Verifying recalculated accrual of " + accrual.getDate());
+            }
         });
     }
 

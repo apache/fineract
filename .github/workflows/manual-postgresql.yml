@@ -1,0 +1,14 @@
+name: Manual PostgreSQL Integration Tests
+
+on:
+  push:
+    branches:
+      - FINERACT-3206-dependent
+
+jobs:
+  postgresql:
+    uses: apache/fineract/.github/workflows/build-postgresql.yml@develop
+    with:
+      upload_artifacts: true
+    secrets:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
