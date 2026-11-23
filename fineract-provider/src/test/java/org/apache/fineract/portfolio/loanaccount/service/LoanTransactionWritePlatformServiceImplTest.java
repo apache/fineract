@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -149,7 +148,7 @@ class LoanTransactionWritePlatformServiceImplTest {
     void makeGLIMLoanRepayment_parentNotFound_throwsException() {
         Long loanId = 10L;
         JsonCommand command = mock(JsonCommand.class);
-        when(glimRepository.findById(loanId)).thenReturn(Optional.empty());
+        when(glimRepository.existsById(loanId)).thenReturn(false);
 
         assertThrows(Exception.class, () -> underTest.makeGLIMLoanRepayment(loanId, command));
     }
