@@ -53,9 +53,11 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -454,6 +456,12 @@ public class ClientsApiResource {
         sqlValidator.validate(sortOrder);
         sqlValidator.validate(externalId);
         sqlValidator.validate(hierarchy);
+        if (offset != null && offset < 0) {
+            final List<ApiParameterError> dataValidationErrors = List.of(ApiParameterError.parameterError(
+                    "validation.msg.pagination.offset.must.not.be.negative", "The parameter `offset` must not be negative.", "offset",
+                    offset));
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
                 .name(displayName).hierarchy(hierarchy).firstname(firstname).lastname(lastname).status(status).orphansOnly(orphansOnly)
                 .offset(offset).orderBy(orderBy).sortOrder(sortOrder).legalForm(legalForm).staffId(staffId).build();
