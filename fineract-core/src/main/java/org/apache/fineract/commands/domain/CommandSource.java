@@ -75,7 +75,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "savings_account_id")
     private Long savingsId;
 
-    @Column(name = "api_get_url", length = 100)
+    @Column(name = "api_get_url", length = 255)
     private String resourceGetUrl;
 
     @Column(name = "resource_id")
