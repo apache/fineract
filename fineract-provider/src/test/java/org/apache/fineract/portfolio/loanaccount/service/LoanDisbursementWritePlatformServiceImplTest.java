@@ -192,6 +192,8 @@ public class LoanDisbursementWritePlatformServiceImplTest {
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DateUtils.parseLocalDate("2025-05-20"))));
         ReflectionTestUtils.setField(loanDisbursementWritePlatformService, "loanWriteServiceHelper",
                 new LoanWriteServiceHelper(context, loanRepositoryWrapper, null, null));
+        ReflectionTestUtils.setField(loanDisbursementWritePlatformService, "loanCounterService",
+                new LoanCounterServiceImpl(loanRepositoryWrapper));
         lenient().when(loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(any(Loan.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
     }
