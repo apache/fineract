@@ -245,7 +245,8 @@ public class LoanReAgingValidator {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.reAge");
 
-        final Locale locale = reAgePreviewRequest.getLocale() != null ? Locale.forLanguageTag(reAgePreviewRequest.getLocale())
+        final Locale locale = reAgePreviewRequest.getLocale() != null
+                ? Locale.forLanguageTag(reAgePreviewRequest.getLocale().replace('_', '-'))
                 : Locale.getDefault();
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,
                 reAgePreviewRequest.getDateFormat(), locale);
@@ -265,7 +266,8 @@ public class LoanReAgingValidator {
 
     private void validateReAgeOutstandingBalance(final Loan loan, final ReAgePreviewRequest reAgePreviewRequest) {
         final LocalDate businessDate = getBusinessLocalDate();
-        Locale locale = reAgePreviewRequest.getLocale() != null ? Locale.forLanguageTag(reAgePreviewRequest.getLocale())
+        Locale locale = reAgePreviewRequest.getLocale() != null
+                ? Locale.forLanguageTag(reAgePreviewRequest.getLocale().replace('_', '-'))
                 : Locale.getDefault();
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,
                 reAgePreviewRequest.getDateFormat(), locale);
