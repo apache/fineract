@@ -1,7 +1,8 @@
 @ChargeAmortizationFeature
 Feature: Charge amortization - deferred charge transaction types and events
 
-  Scenario: Excluded transaction types filter accepts deferred charge types without hiding existing transactions
+  @TestRailId:C127976
+  Scenario: Verify charge amortization transaction types - UC1: Excluded transaction types filter accepts deferred charge types without hiding existing transactions
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -26,11 +27,13 @@ Feature: Charge amortization - deferred charge transaction types and events
     Then Loan has 0.0 overpaid amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  Scenario: External asset owner excluded transaction types template and attribute accept deferred charge types
+  @TestRailId:C127977
+  Scenario: Verify charge amortization transaction types - UC2: External asset owner excluded transaction types template and attribute accept deferred charge types
     Then External asset owner loan product attributes template attribute "EXCLUDED_TRANSACTION_TYPES" has multiValue "true", contains "DEFERRED_CHARGE,DEFERRED_CHARGE_AMORTIZATION,DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT" and does not contain "INVALID,DEFERRED,IMMEDIATE"
     When Admin creates a new loan product for external asset owner loan product attributes
     When Admin creates external asset owner loan product attribute "EXCLUDED_TRANSACTION_TYPES" with value "DEFERRED_CHARGE,DEFERRED_CHARGE_AMORTIZATION,DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT" for the new loan product
     Then External asset owner loan product attribute "EXCLUDED_TRANSACTION_TYPES" of the new loan product has value "DEFERRED_CHARGE,DEFERRED_CHARGE_AMORTIZATION,DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT"
 
-  Scenario: External event configuration contains deferred charge business events
+  @TestRailId:C127978
+  Scenario: Verify charge amortization business events - UC3: External event configuration contains deferred charge business events
     Then External event configuration contains the following event types: "LoanDeferredChargeTransactionCreatedBusinessEvent, LoanDeferredChargeAmortizationTransactionCreatedBusinessEvent, LoanDeferredChargeAmortizationAdjustmentTransactionCreatedBusinessEvent"
