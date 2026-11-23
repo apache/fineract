@@ -76,7 +76,7 @@ public class LocalDateValidator implements ConstraintValidator<LocalDate, Object
         var formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().appendPattern(format.replace("y", "u"))
                 .optionalStart().appendPattern(" HH:mm:ss").optionalEnd().parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-                .toFormatter(Locale.forLanguageTag(locale)).withResolverStyle(ResolverStyle.STRICT);
+                .toFormatter(Locale.forLanguageTag(locale.replace('_', '-'))).withResolverStyle(ResolverStyle.STRICT);
 
         parse(date, formatter);
     }
