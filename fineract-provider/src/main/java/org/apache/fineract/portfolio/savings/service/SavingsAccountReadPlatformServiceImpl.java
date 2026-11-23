@@ -18,21 +18,14 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE_DB_FIELD;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -44,13 +37,9 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
-import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
-import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -63,41 +52,32 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     // mappers
-    private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
-    protected SavingsAccountTransactionsMapper transactionsMapper;
-    private final SavingsAccountTransactionsForBatchMapper savingsAccountTransactionsForBatchMapper;
     private final SavingAccountMapper savingAccountMapper;
-    private final SavingAccountMapperForInterestPosting savingAccountMapperForInterestPosting;
-    private final TaxGroupMapperForInterestPosting taxGroupMapperForInterestPosting;
     // private final SavingsAccountAnnualFeeMapper annualFeeMapper;
 
     // pagination
     private final PaginationHelper paginationHelper;
 
     private final ColumnValidator columnValidator;
-    private final SavingsAccountAssembler savingAccountAssembler;
 
     private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
-    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final SavingsAccountTransactionReadService savingsAccountTransactionReadService;
+    private final SavingsAccountInterestPostingReadService savingsAccountInterestPostingReadService;
 
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper, ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
+            PaginationHelper paginationHelper, ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator,
+            SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+            SavingsAccountTransactionReadService savingsAccountTransactionReadService,
+            SavingsAccountInterestPostingReadService savingsAccountInterestPostingReadService) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.sqlGenerator = sqlGenerator;
         this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
-        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
-        this.transactionTemplateMapper = new SavingsAccountTransactionTemplateMapper();
-        this.transactionsMapper = new SavingsAccountTransactionsMapper();
-        this.savingsAccountTransactionsForBatchMapper = new SavingsAccountTransactionsForBatchMapper();
         this.savingAccountMapper = new SavingAccountMapper();
         this.columnValidator = columnValidator;
         this.paginationHelper = paginationHelper;
-        this.savingAccountMapperForInterestPosting = new SavingAccountMapperForInterestPosting();
-        this.taxGroupMapperForInterestPosting = new TaxGroupMapperForInterestPosting();
-        this.savingAccountAssembler = savingAccountAssembler;
+        this.savingsAccountTransactionReadService = savingsAccountTransactionReadService;
+        this.savingsAccountInterestPostingReadService = savingsAccountInterestPostingReadService;
     }
 
     @Override
@@ -200,115 +180,36 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public List<SavingsAccountTransactionData> retrieveAllTransactionData(final List<String> refNo) throws DataAccessException {
-        String inSql = String.join(",", Collections.nCopies(refNo.size(), "?"));
-        String sql = "select " + this.savingsAccountTransactionsForBatchMapper.schema() + " where tr.ref_no in (%s)";
-        Object[] params = new Object[refNo.size()];
-        int i = 0;
-        for (String element : refNo) {
-            params[i] = element;
-            i++;
-        }
-        return this.jdbcTemplate.query(String.format(sql, inSql), this.savingsAccountTransactionsForBatchMapper, params);
+    public SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId, DepositAccountType depositAccountType) {
+        return savingsAccountTransactionReadService.retrieveDepositTransactionTemplate(savingsId, depositAccountType);
     }
 
     @Override
-    public List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(final boolean backdatedTxnsAllowedTill, final int pageSize,
-            final Integer status, final Long maxSavingsId) {
-        LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
-        String sql = "select " + this.savingAccountMapperForInterestPosting.schema()
-                + "join (select a.id from m_savings_account a where a.id > ? and a.status_enum = ? limit ?) b on b.id = sa.id ";
-        if (backdatedTxnsAllowedTill) {
-            sql = sql
-                    + "where (CASE WHEN sa.interest_posted_till_date is not null THEN tr.transaction_date >= sa.interest_posted_till_date ELSE tr.transaction_date >= sa.activatedon_date END) ";
-        }
-
-        sql = sql + " and (sa.interest_posted_till_date is null or sa.interest_posted_till_date <= ? ) ";
-        // #audit backward compatibility
-        sql = sql + " order by sa.id, tr.transaction_date, tr." + CREATED_DATE_DB_FIELD + ", tr.created_date, tr.id";
-
-        List<SavingsAccountData> savingsAccountDataList = this.jdbcTemplate.query(sql, this.savingAccountMapperForInterestPosting, // NOSONAR
-                new Object[] { maxSavingsId, status, pageSize, yesterday });
-        loadTaxGroupsForInterestPosting(savingsAccountDataList);
-        for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
-            this.savingAccountAssembler.assembleSavings(savingsAccountData);
-        }
-        return savingsAccountDataList;
-    }
-
-    // The tax groups are loaded once per page instead of being joined into the transaction query above:
-    // that join multiplied every transaction row by the group's mappings and component histories. There are
-    // only a handful of tax groups in the whole system, so a second query for the distinct ids of the page
-    // is far cheaper.
-    private void loadTaxGroupsForInterestPosting(final List<SavingsAccountData> savingsAccountDataList) {
-        final Set<Long> taxGroupIds = new HashSet<>();
-        for (final SavingsAccountData savingsAccountData : savingsAccountDataList) {
-            if (savingsAccountData.getTaxGroup() != null && savingsAccountData.getTaxGroup().getId() != null) {
-                taxGroupIds.add(savingsAccountData.getTaxGroup().getId());
-            }
-        }
-        if (taxGroupIds.isEmpty()) {
-            return;
-        }
-        final Map<Long, TaxGroupData> taxGroupsById = retrieveTaxGroupsForInterestPosting(taxGroupIds);
-        for (final SavingsAccountData savingsAccountData : savingsAccountDataList) {
-            if (savingsAccountData.getTaxGroup() != null) {
-                final TaxGroupData taxGroup = taxGroupsById.get(savingsAccountData.getTaxGroup().getId());
-                if (taxGroup != null) {
-                    savingsAccountData.setTaxGroup(taxGroup);
-                }
-            }
-        }
-    }
-
-    private Map<Long, TaxGroupData> retrieveTaxGroupsForInterestPosting(final Set<Long> taxGroupIds) {
-        final StringBuilder inSqlBuilder = new StringBuilder();
-        for (int i = 0; i < taxGroupIds.size(); i++) {
-            if (i > 0) {
-                inSqlBuilder.append(", ");
-            }
-            inSqlBuilder.append("?");
-        }
-        final String sql = "select " + this.taxGroupMapperForInterestPosting.schema() + " where tg.id in (" + inSqlBuilder
-                + ") order by tg.id, tgm.id, tgch.id";
-        return this.jdbcTemplate.query(sql, this.taxGroupMapperForInterestPosting, taxGroupIds.toArray());
+    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType) {
+        return savingsAccountTransactionReadService.retrieveAllTransactions(savingsId, depositAccountType);
     }
 
     @Override
-    public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId,
-            final DepositAccountType depositAccountType) {
-
-        try {
-            final String sql = "select " + this.transactionTemplateMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ?";
-
-            return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper, // NOSONAR
-                    new Object[] { savingsId, depositAccountType.getValue() });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(savingsId, e);
-        }
-    }
-
-    @Override
-    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType) {
-        // #audit backward compatibility
-        final String sql = "select " + this.transactionsMapper.schema()
-                + " where sa.id = ? and sa.deposit_type_enum = ? order by tr.transaction_date DESC," + " tr." + CREATED_DATE_DB_FIELD
-                + " DESC, tr.created_date DESC, tr.id DESC";
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue() }); // NOSONAR
-    }
-
-    @Override
-    public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
+    public SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId,
             DepositAccountType depositAccountType) {
+        return savingsAccountTransactionReadService.retrieveSavingsTransaction(savingsId, transactionId, depositAccountType);
+    }
 
-        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ? and tr.id= ?";
+    @Override
+    public List<SavingsAccountTransactionData> retrieveAllTransactionData(List<String> refNo) {
+        return savingsAccountTransactionReadService.retrieveAllTransactionData(refNo);
+    }
 
-        try {
-            return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper, // NOSONAR
-                    new Object[] { savingsId, depositAccountType.getValue(), transactionId });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId, e);
-        }
+    @Override
+    public Long retrieveSavingsTransactionIdByExternalId(ExternalId externalId) {
+        return savingsAccountTransactionReadService.retrieveSavingsTransactionIdByExternalId(externalId);
+    }
+
+    @Override
+    public List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(boolean backdatedTxnsAllowedTill, int pageSize, Integer status,
+            Long maxSavingsId) {
+        return savingsAccountInterestPostingReadService.retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, status,
+                maxSavingsId);
     }
 
     /*
@@ -465,11 +366,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<>();
         }
-    }
-
-    @Override
-    public Long retrieveSavingsTransactionIdByExternalId(final ExternalId externalId) {
-        return savingsAccountTransactionRepository.findIdByExternalId(externalId);
     }
 
     @Override

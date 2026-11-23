@@ -18,150 +18,116 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.junit.jupiter.api.AfterEach;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class SavingsAccountReadPlatformServiceImplTest {
 
-    private static final Pattern PRODUCT_MAPPING_JOIN = Pattern.compile("acc_product_mapping (\\w+) on (.+?)(?= left join | join |$)");
+    private static final Long SAVINGS_ID = 1L;
+    private static final Long TRANSACTION_ID = 2L;
 
-    private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+    @Mock
+    private SavingsAccountTransactionReadService savingsAccountTransactionReadService;
 
-    @AfterEach
-    void tearDown() {
-        ThreadLocalContextUtil.reset();
+    @Mock
+    private SavingsAccountInterestPostingReadService savingsAccountInterestPostingReadService;
+
+    private SavingsAccountReadPlatformServiceImpl savingsAccountReadPlatformService;
+
+    @BeforeEach
+    void setUp() {
+        savingsAccountReadPlatformService = new SavingsAccountReadPlatformServiceImpl(null, null, null, null, null, null,
+                savingsAccountTransactionReadService, savingsAccountInterestPostingReadService);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void retrieveAllSavingsDataForInterestPosting_onlyJoinsSavingsProductMappings() {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 31))));
-        when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), any(Object[].class))).thenReturn(List.of());
+    void retrieveDepositTransactionTemplate_shouldDelegateToSavingsAccountTransactionReadService() {
+        final SavingsAccountTransactionData expectedResult = mock(SavingsAccountTransactionData.class);
+        when(savingsAccountTransactionReadService.retrieveDepositTransactionTemplate(SAVINGS_ID, DepositAccountType.SAVINGS_DEPOSIT))
+                .thenReturn(expectedResult);
 
-        new SavingsAccountReadPlatformServiceImpl(null, jdbcTemplate, null, null, null, null, null, null)
-                .retrieveAllSavingsDataForInterestPosting(false, 10, 300, 0L);
+        final SavingsAccountTransactionData actualResult = savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(SAVINGS_ID,
+                DepositAccountType.SAVINGS_DEPOSIT);
 
-        final ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sql.capture(), any(ResultSetExtractor.class), any(Object[].class));
-
-        // acc_product_mapping holds loan mappings too, and loan and savings product ids overlap
-        final List<String> aliases = new ArrayList<>();
-        final Matcher join = PRODUCT_MAPPING_JOIN.matcher(sql.getValue());
-        while (join.find()) {
-            aliases.add(join.group(1));
-            assertThat(join.group(2)).as("acc_product_mapping join %s", join.group(1)).contains(join.group(1) + ".product_type = 2");
-        }
-        assertThat(aliases).contains("apm", "apm1", "apm2", "apm3", "apm4", "apm5", "apm6");
+        assertEquals(expectedResult, actualResult);
+        verify(savingsAccountTransactionReadService).retrieveDepositTransactionTemplate(SAVINGS_ID, DepositAccountType.SAVINGS_DEPOSIT);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void retrieveAllSavingsDataForInterestPosting_doesNotJoinTaxGroupMappingsIntoTheTransactionQuery() {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 31))));
-        when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), any(Object[].class))).thenReturn(List.of());
+    void retrieveAllTransactions_shouldDelegateToSavingsAccountTransactionReadService() {
+        final Collection<SavingsAccountTransactionData> expectedResult = List.of(mock(SavingsAccountTransactionData.class));
+        when(savingsAccountTransactionReadService.retrieveAllTransactions(SAVINGS_ID, DepositAccountType.SAVINGS_DEPOSIT))
+                .thenReturn(expectedResult);
 
-        new SavingsAccountReadPlatformServiceImpl(null, jdbcTemplate, null, null, null, null, null, null)
-                .retrieveAllSavingsDataForInterestPosting(false, 10, 300, 0L);
+        final Collection<SavingsAccountTransactionData> actualResult = savingsAccountReadPlatformService.retrieveAllTransactions(SAVINGS_ID,
+                DepositAccountType.SAVINGS_DEPOSIT);
 
-        final ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sql.capture(), any(ResultSetExtractor.class), any(Object[].class));
-
-        // the mappings, components and component histories of the tax group are loaded by a separate
-        // query (see the test below): joining them into this query multiplied every transaction row of
-        // the account by mappings x component histories. Only the tax group id is read here, plus the
-        // savings reference mapping the withhold tax journal entries fall back to. The savings reference
-        // join is restricted to the core mapping, like findCoreProductToFinAccountMapping: the payment
-        // channel to fund source mappings share financial account type 1 and would multiply every row.
-        assertThat(sql.getValue()).doesNotContain("m_tax_group_mappings", "m_tax_component_history", "taxGroupMappingId",
-                "taxGroupComponentId", "taxGroupComponentHistoryId");
-        assertThat(sql.getValue()).contains("tg.id as taxGroupId", "apm6.gl_account_id as glAccountIdForSavingsReference",
-                "apm6.payment_type is null", "apm6.charge_id is null");
+        assertEquals(expectedResult, actualResult);
+        verify(savingsAccountTransactionReadService).retrieveAllTransactions(SAVINGS_ID, DepositAccountType.SAVINGS_DEPOSIT);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void retrieveAllSavingsDataForInterestPosting_loadsTaxGroupsSeparatelyAndSetsThemOnTheAccounts() {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 31))));
-        final TaxGroupData loadedTaxGroup = new TaxGroupData(5L, "Withholding tax", List.of(), null, null, null);
-        final SavingsAccountData firstAccount = accountWithTaxGroup(5L);
-        final SavingsAccountData secondAccount = accountWithTaxGroup(5L);
-        final SavingsAccountData accountWithoutTaxGroup = mock(SavingsAccountData.class);
+    void retrieveSavingsTransaction_shouldDelegateToSavingsAccountTransactionReadService() {
+        final SavingsAccountTransactionData expectedResult = mock(SavingsAccountTransactionData.class);
+        when(savingsAccountTransactionReadService.retrieveSavingsTransaction(SAVINGS_ID, TRANSACTION_ID,
+                DepositAccountType.SAVINGS_DEPOSIT)).thenReturn(expectedResult);
 
-        when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), any(Object[].class)))
-                .thenReturn(List.of(firstAccount, secondAccount, accountWithoutTaxGroup));
-        when(jdbcTemplate.query(argThat(sql -> sql != null && sql.contains("from m_tax_group tg")), any(ResultSetExtractor.class),
-                any(Object[].class))).thenReturn(Map.of(5L, loadedTaxGroup));
+        final SavingsAccountTransactionData actualResult = savingsAccountReadPlatformService.retrieveSavingsTransaction(SAVINGS_ID,
+                TRANSACTION_ID, DepositAccountType.SAVINGS_DEPOSIT);
 
-        final List<SavingsAccountData> accounts = new SavingsAccountReadPlatformServiceImpl(null, jdbcTemplate,
-                mock(SavingsAccountAssembler.class), null, null, null, null, null)
-                .retrieveAllSavingsDataForInterestPosting(false, 10, 300, 0L);
-
-        assertThat(accounts).hasSize(3);
-        // both accounts carry the same tax group, so the page loads it once and the same loaded instance
-        // is set on both; the account without a tax group is left alone
-        verify(firstAccount).setTaxGroup(loadedTaxGroup);
-        verify(secondAccount).setTaxGroup(loadedTaxGroup);
-        verify(accountWithoutTaxGroup, never()).setTaxGroup(any());
-
-        final ArgumentCaptor<Object[]> taxGroupParams = ArgumentCaptor.forClass(Object[].class);
-        verify(jdbcTemplate, times(1)).query(argThat(sql -> sql != null && sql.contains("from m_tax_group tg")),
-                any(ResultSetExtractor.class), taxGroupParams.capture());
-        assertThat(taxGroupParams.getValue()).containsExactly(5L);
-
-        // the separate query is the one that joins the mappings, their components and the component
-        // histories, so the loaded tax group is complete
-        final ArgumentCaptor<String> taxGroupSql = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate, times(2)).query(taxGroupSql.capture(), any(ResultSetExtractor.class), any(Object[].class));
-        final String taxGroupQuery = taxGroupSql.getAllValues().stream().filter(sql -> sql.contains("from m_tax_group tg")).findFirst()
-                .orElseThrow();
-        assertThat(taxGroupQuery).contains("left join m_tax_group_mappings tgm on tgm.tax_group_id = tg.id",
-                "left join m_tax_component tgcomp on tgcomp.id = tgm.tax_component_id",
-                "left join m_tax_component_history tgch on tgch.tax_component_id = tgcomp.id", "tgm.id as taxGroupMappingId",
-                "tgcomp.id as taxGroupComponentId", "tgch.id as taxGroupComponentHistoryId");
+        assertEquals(expectedResult, actualResult);
+        verify(savingsAccountTransactionReadService).retrieveSavingsTransaction(SAVINGS_ID, TRANSACTION_ID,
+                DepositAccountType.SAVINGS_DEPOSIT);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void retrieveAllSavingsDataForInterestPosting_skipsTheTaxGroupLoadWhenNoAccountHasATaxGroup() {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 31))));
-        final SavingsAccountData account = mock(SavingsAccountData.class);
-        when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), any(Object[].class))).thenReturn(List.of(account));
+    void retrieveAllTransactionData_shouldDelegateToSavingsAccountTransactionReadService() {
+        final List<String> refNo = List.of("ref-1");
+        final List<SavingsAccountTransactionData> expectedResult = List.of(mock(SavingsAccountTransactionData.class));
+        when(savingsAccountTransactionReadService.retrieveAllTransactionData(refNo)).thenReturn(expectedResult);
 
-        new SavingsAccountReadPlatformServiceImpl(null, jdbcTemplate, mock(SavingsAccountAssembler.class), null, null, null, null, null)
-                .retrieveAllSavingsDataForInterestPosting(false, 10, 300, 0L);
+        final List<SavingsAccountTransactionData> actualResult = savingsAccountReadPlatformService.retrieveAllTransactionData(refNo);
 
-        verify(jdbcTemplate, times(1)).query(anyString(), any(ResultSetExtractor.class), any(Object[].class));
-        verify(account, never()).setTaxGroup(any());
+        assertEquals(expectedResult, actualResult);
+        verify(savingsAccountTransactionReadService).retrieveAllTransactionData(refNo);
     }
 
-    private static SavingsAccountData accountWithTaxGroup(final Long taxGroupId) {
-        final SavingsAccountData account = mock(SavingsAccountData.class);
-        when(account.getTaxGroup()).thenReturn(TaxGroupData.lookup(taxGroupId, null));
-        return account;
+    @Test
+    void retrieveSavingsTransactionIdByExternalId_shouldDelegateToSavingsAccountTransactionReadService() {
+        final ExternalId externalId = new ExternalId("ext-1");
+        when(savingsAccountTransactionReadService.retrieveSavingsTransactionIdByExternalId(externalId)).thenReturn(TRANSACTION_ID);
+
+        final Long actualResult = savingsAccountReadPlatformService.retrieveSavingsTransactionIdByExternalId(externalId);
+
+        assertEquals(TRANSACTION_ID, actualResult);
+        verify(savingsAccountTransactionReadService).retrieveSavingsTransactionIdByExternalId(externalId);
+    }
+
+    @Test
+    void retrieveAllSavingsDataForInterestPosting_shouldDelegateToSavingsAccountInterestPostingReadService() {
+        final List<SavingsAccountData> expectedResult = List.of(mock(SavingsAccountData.class));
+        when(savingsAccountInterestPostingReadService.retrieveAllSavingsDataForInterestPosting(false, 10, 300, 0L))
+                .thenReturn(expectedResult);
+
+        final List<SavingsAccountData> actualResult = savingsAccountReadPlatformService.retrieveAllSavingsDataForInterestPosting(false, 10,
+                300, 0L);
+
+        assertEquals(expectedResult, actualResult);
+        verify(savingsAccountInterestPostingReadService).retrieveAllSavingsDataForInterestPosting(false, 10, 300, 0L);
     }
 }
