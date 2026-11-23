@@ -75,10 +75,12 @@ import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -515,6 +517,12 @@ public class LoansApiResource {
         sqlValidator.validate(sortOrder);
         sqlValidator.validate(accountNo);
         sqlValidator.validate(externalId);
+        if (offset != null && offset < 0) {
+            final List<ApiParameterError> dataValidationErrors = List.of(ApiParameterError.parameterError(
+                    "validation.msg.pagination.offset.must.not.be.negative", "The parameter `offset` must not be negative.", "offset",
+                    offset));
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         final SearchParameters searchParameters = SearchParameters.builder().accountNo(accountNo).sortOrder(sortOrder)
                 .externalId(externalId).offset(offset).limit(limit).orderBy(orderBy).status(status).clientId(clientId).build();
 
