@@ -121,12 +121,12 @@ class ReportWritePlatformServiceImplTest {
 
         final Report saved = savedReport();
         assertEquals("Client list", saved.getReportName());
-        assertEquals("Table", field(saved, "reportType"));
-        assertNull(field(saved, "reportSubType"));
-        assertEquals("Client", field(saved, "reportCategory"));
-        assertEquals("All clients", field(saved, "description"));
-        assertTrue((Boolean) field(saved, "useReport"));
-        assertEquals("select 1", field(saved, "reportSql"));
+        assertEquals("Table", saved.getReportType());
+        assertNull(saved.getReportSubType());
+        assertEquals("Client", saved.getReportCategory());
+        assertEquals("All clients", saved.getDescription());
+        assertTrue(saved.isUseReport());
+        assertEquals("select 1", saved.getReportSql());
         assertFalse(saved.isCoreReport());
     }
 
@@ -138,9 +138,9 @@ class ReportWritePlatformServiceImplTest {
 
         final Report saved = savedReport();
         // missing text values are stored as null, not as an empty string
-        assertNull(field(saved, "reportCategory"));
-        assertNull(field(saved, "description"));
-        assertFalse((Boolean) field(saved, "useReport"));
+        assertNull(saved.getReportCategory());
+        assertNull(saved.getDescription());
+        assertFalse(saved.isUseReport());
     }
 
     @Test
@@ -166,9 +166,9 @@ class ReportWritePlatformServiceImplTest {
         assertEquals(Map.of("reportName", "Active clients", "description", "Active clients", "useReport", true, "reportSql", "select 2"),
                 result.getChanges());
         assertEquals("Active clients", report.getReportName());
-        assertEquals("Active clients", field(report, "description"));
-        assertTrue((Boolean) field(report, "useReport"));
-        assertEquals("select 2", field(report, "reportSql"));
+        assertEquals("Active clients", report.getDescription());
+        assertTrue(report.isUseReport());
+        assertEquals("select 2", report.getReportSql());
         verify(reportRepository).saveAndFlush(report);
     }
 
@@ -182,7 +182,7 @@ class ReportWritePlatformServiceImplTest {
 
         // the change set reports the value as sent, while the report stores an empty value as null
         assertEquals(Map.of("description", ""), result.getChanges());
-        assertNull(field(report, "description"));
+        assertNull(report.getDescription());
         verify(reportRepository).saveAndFlush(report);
     }
 
@@ -293,10 +293,6 @@ class ReportWritePlatformServiceImplTest {
         final ArgumentCaptor<Report> captor = ArgumentCaptor.forClass(Report.class);
         verify(reportRepository).saveAndFlush(captor.capture());
         return captor.getValue();
-    }
-
-    private static Object field(final Report report, final String name) {
-        return ReflectionTestUtils.getField(report, name);
     }
 
     private JsonCommand command(final String json) {
