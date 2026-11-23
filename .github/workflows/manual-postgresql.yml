@@ -5,9 +5,12 @@ on:
     branches:
       - FINERACT-3206-dependent
 
+permissions:
+  contents: read
+
 jobs:
   postgresql:
-    uses: apache/fineract/.github/workflows/build-postgresql.yml@develop
+    uses: apache/fineract/.github/workflows/build-postgresql.yml@8fde9c013300ce97bfd8afcf922f4b844de29a23
     with:
       upload_artifacts: true
     secrets:
