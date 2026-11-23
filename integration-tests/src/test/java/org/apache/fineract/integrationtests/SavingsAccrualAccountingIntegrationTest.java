@@ -306,7 +306,11 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
                         GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING_DATE_FOR_DAYS,
                         new PutGlobalConfigurationsRequest().enabled(true).value(5L));
 
-                backdatedTransaction.accept(savingsAccountId, transactionDate);
+                try {
+                    backdatedTransaction.accept(savingsAccountId, transactionDate);
+                } catch (final feign.FeignException exception) {
+                    throw new AssertionError("Backdated transaction failed: " + exception.contentUTF8(), exception);
+                }
             } finally {
                 globalConfigurationHelper.updateGlobalConfiguration(
                         GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
