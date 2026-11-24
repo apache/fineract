@@ -18,18 +18,25 @@
  */
 package org.apache.fineract.adhocquery.service;
 
+import static org.apache.fineract.query.QMAdhoc.mAdhoc;
+
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.apache.fineract.query.QMAppuser;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
@@ -37,6 +44,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AdHocMapper adHocRowMapper;
+    private final SQLQueryFactory queryFactory;
 
     @Override
     public List<AdHocData> retrieveAllAdHocQuery() {
@@ -53,13 +61,39 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdHocData retrieveOne(final Long id) {
-        try {
-            final String sql = "select " + this.adHocRowMapper.schema() + " where r.id=?";
-            return this.jdbcTemplate.queryForObject(sql, this.adHocRowMapper, new Object[] { id }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new AdHocNotFoundException(id, e);
+        final QMAppuser createdBy = new QMAppuser("cb");
+
+        final Tuple row = this.queryFactory
+                .select(mAdhoc.id, mAdhoc.name, mAdhoc.query, mAdhoc.tableName, mAdhoc.tableFields, mAdhoc.isActive, mAdhoc.email,
+                        mAdhoc.reportRunFrequencyCode, mAdhoc.reportRunEvery, mAdhoc.lastRun, mAdhoc.createdDate, mAdhoc.createdbyId,
+                        createdBy.username, mAdhoc.lastmodifiedbyId, mAdhoc.lastmodifiedDate) //
+                .from(mAdhoc) //
+                .leftJoin(createdBy).on(createdBy.id.eq(mAdhoc.createdbyId)) //
+                .where(mAdhoc.id.eq(id)) //
+                .fetchOne();
+
+        if (row == null) {
+            throw new AdHocNotFoundException(id);
         }
+
+        return new AdHocData().setId(row.get(mAdhoc.id)).setName(row.get(mAdhoc.name)).setQuery(row.get(mAdhoc.query))
+                .setTableName(row.get(mAdhoc.tableName)).setTableFields(row.get(mAdhoc.tableFields)).setEmail(row.get(mAdhoc.email))
+                .setActive(Boolean.TRUE.equals(row.get(mAdhoc.isActive))).setCreatedOn(toZonedDateTime(row.get(mAdhoc.createdDate)))
+                .setCreatedById(row.get(mAdhoc.createdbyId)).setUpdatedById(row.get(mAdhoc.lastmodifiedbyId))
+                .setUpdatedOn(toZonedDateTime(row.get(mAdhoc.lastmodifiedDate))).setCreatedBy(row.get(createdBy.username))
+                .setReportRunFrequencies(AdHocData.template().getReportRunFrequencies())
+                .setReportRunFrequency(toLong(row.get(mAdhoc.reportRunFrequencyCode)))
+                .setReportRunEvery(toLong(row.get(mAdhoc.reportRunEvery))).setLastRun(toZonedDateTime(row.get(mAdhoc.lastRun)));
+    }
+
+    private static ZonedDateTime toZonedDateTime(final Timestamp timestamp) {
+        return timestamp == null ? null : ZonedDateTime.of(timestamp.toLocalDateTime(), DateUtils.getDateTimeZoneOfTenant());
+    }
+
+    private static Long toLong(final Integer value) {
+        return value == null ? null : value.longValue();
     }
 
     public static final class AdHocMapper implements RowMapper<AdHocData> {

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.adhocquery.starter;
 
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.fineract.adhocquery.domain.AdHocRepository;
 import org.apache.fineract.adhocquery.service.AdHocDataValidator;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
@@ -43,8 +44,8 @@ public class AdhocQueryConfiguration {
     @Bean
     @ConditionalOnMissingBean(AdHocReadPlatformService.class)
     public AdHocReadPlatformService adHocReadPlatformService(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
-            AdHocReadPlatformServiceImpl.AdHocMapper adHocRowMapper) {
-        return new AdHocReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, adHocRowMapper) {
+            AdHocReadPlatformServiceImpl.AdHocMapper adHocRowMapper, SQLQueryFactory queryFactory) {
+        return new AdHocReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, adHocRowMapper, queryFactory) {
 
         };
     }
