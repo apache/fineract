@@ -206,8 +206,7 @@ class ProjectedAmortizationScheduleInvariantTest {
             ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
             ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, DISBURSEMENT)));
-            loan.generator().get();
-            return true;
+            return loan.generator().get() != null;
         } catch (final IllegalArgumentException | IllegalStateException | ArithmeticException e) {
             return false;
         } finally {

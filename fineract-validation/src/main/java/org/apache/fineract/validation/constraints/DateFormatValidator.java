@@ -41,6 +41,7 @@ public class DateFormatValidator implements ConstraintValidator<DateFormat, Stri
      *            the candidate pattern string
      * @return {@code true} if the pattern is valid, {@code false} otherwise
      */
+    @SuppressWarnings("ReturnValueIgnored") // Parsing the pattern is the validation
     public static boolean isValidPattern(String pattern) {
         if (StringUtils.isBlank(pattern)) {
             return true;

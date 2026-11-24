@@ -148,8 +148,6 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
                 paramList.add(NoteType.SHARE_ACCOUNT.getValue());
                 conditionSql = " n.share_account_id = ? and note_type_enum = ? ";
             break;
-            default:
-            break;
         }
 
         return conditionSql;
