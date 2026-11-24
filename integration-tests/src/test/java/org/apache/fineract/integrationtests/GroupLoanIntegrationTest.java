@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonElement;
@@ -29,6 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -108,6 +110,25 @@ public class GroupLoanIntegrationTest extends FeignLoanTestBase {
 
         glimHelper.rejectGlim(glimId, REJECT_DATE);
         assertEquals(LOAN_STATUS_REJECTED, loanStatus(childLoanId).getId(), "GLIM account should be rejected");
+    }
+
+    @Test
+    public void checkGlimParentWithoutTotalLoanIsRejected() {
+        final Long clientId = createClient();
+        currentGroupId = groupHelper.createActiveGroup().getResourceId();
+        groupHelper.associateClient(currentGroupId, clientId);
+        final Long loanProductId = createLoanProduct(loanProductRequest());
+
+        // A GLIM parent without totalLoan used to fail with a generic 403 data-integrity error when the
+        // glim_accounts insert hit the NOT NULL principal_amount column; it must now fail fast with a 400
+        // validation error naming totalLoan.
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> glimHelper.applyGlim(loanApplication(loanProductId)//
+                        .groupId(currentGroupId)//
+                        .clientId(clientId)//
+                        .loanType("glim")//
+                        .isParentAccount(true)));
+        assertEquals(400, exception.getStatus());
     }
 
     @Test

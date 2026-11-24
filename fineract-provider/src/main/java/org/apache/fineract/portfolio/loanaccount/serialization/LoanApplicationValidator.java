@@ -346,6 +346,25 @@ public final class LoanApplicationValidator {
                     }
 
                 }
+
+                if (loanType.isGLIMAccount()) {
+                    // A GLIM parent creates its glim_accounts row with totalLoan as the principal amount, which
+                    // is NOT NULL. Without it the insert fails and the caller gets a generic 403
+                    // (error.msg.unknown.data.integrity.issue) instead of a validation error. Children joining
+                    // an existing GLIM account do not create that row, so they are not required to send
+                    // totalLoan; neither is a parent that supplies its own account number, since the GLIM
+                    // account is only created on the auto-generated account-number path.
+                    final Boolean isParentAccount = this.fromApiJsonHelper
+                            .extractBooleanNamed(LoanApiConstants.parentAccountParamName, element);
+                    final String accountNo = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.accountNoParameterName,
+                            element);
+                    if (isParentAccount != null && StringUtils.isBlank(accountNo)) {
+                        final BigDecimal totalLoan = this.fromApiJsonHelper
+                                .extractBigDecimalWithLocaleNamed(LoanApiConstants.totalLoanParamName, element);
+                        baseDataValidator.reset().parameter(LoanApiConstants.totalLoanParamName).value(totalLoan).notNull()
+                                .positiveAmount();
+                    }
+                }
             }
 
             boolean isEqualAmortization = false;
