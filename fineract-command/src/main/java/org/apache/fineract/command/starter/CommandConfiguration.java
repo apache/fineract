@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.command.starter;
 
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_CHECK_BASE_PACKAGE;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_CORE_BASE_PACKAGE;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_HOOK_BASE_PACKAGE;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_IMPLEMENTATION_BASE_PACKAGE;
@@ -32,4 +33,5 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(COMMAND_CORE_BASE_PACKAGE)
 @ComponentScan(COMMAND_HOOK_BASE_PACKAGE)
 @ComponentScan(COMMAND_IMPLEMENTATION_BASE_PACKAGE)
+@ComponentScan(COMMAND_CHECK_BASE_PACKAGE)
 class CommandConfiguration {}

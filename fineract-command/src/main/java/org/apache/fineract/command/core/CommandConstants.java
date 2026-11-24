@@ -30,6 +30,7 @@ public final class CommandConstants {
     public static final String COMMAND_BASE_PACKAGE = "org.apache.fineract.command";
     public static final String COMMAND_CORE_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".core";
     public static final String COMMAND_HOOK_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".hook";
+    public static final String COMMAND_CHECK_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".check";
     public static final String COMMAND_IMPLEMENTATION_BASE_PACKAGE = COMMAND_BASE_PACKAGE + ".implementation";
     public static final String COMMAND_JSON_CLASS_ATTRIBUTE = "@class";
     public static final String COMMAND_HTTP_HEADER_REQUEST_ID = "x-fineract-request-id";
