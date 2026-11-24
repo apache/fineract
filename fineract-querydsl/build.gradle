@@ -20,6 +20,7 @@ description = 'Fineract QueryDSL'
 
 apply plugin: 'java'
 apply plugin: 'java-library'
+apply plugin: 'java-test-fixtures'
 apply plugin: 'eclipse'
 apply plugin: 'org.apache.fineract.querydsl.codegen'
 
@@ -44,6 +45,15 @@ querydslCodegen {
     changelogIncludes = ['db/changelog/querydsl-changelog-master.xml', 'db/changelog/tenant/**']
     contextRuns = ['postgresql']
     changelogParameters = ['fineract.tenant.rounding-mode': '6']
+}
+
+def changelogRoots = querydslCodegen.resourceRoots
+def changelogIncludes = querydslCodegen.changelogIncludes
+tasks.named('processTestFixturesResources') {
+    from(changelogRoots) {
+        into 'querydsl-test-fixtures'
+        include(changelogIncludes.get())
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

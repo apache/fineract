@@ -27,22 +27,24 @@
          Mirrors the tenant_db includes of fineract-provider's db.changelog-master.xml, in the same order;
          the tenant store (and its customChange tasks) is intentionally left out. -->
 
-    <property name="current_date" value="CURRENT_DATE"/>
+    <property name="current_date" value="CURRENT_DATE" context="postgresql"/>
+    <property name="current_date" value="CURDATE()" context="mysql"/>
     <property name="current_datetime" value="NOW()"/>
-    <property name="uuid" value="uuid_generate_v4()"/>
+    <property name="uuid" value="uuid_generate_v4()" context="postgresql"/>
+    <property name="uuid" value="uuid()" context="mysql"/>
     <property name="fineract.tenant.rounding-mode" value="6"/>
 
-    <include file="db/changelog/tenant/parts/0001_initial_schema.xml"/>
-    <include file="db/changelog/tenant/parts/0002_initial_data.xml"/>
-    <include file="db/changelog/tenant/changelog-tenant.xml"/>
+    <include file="tenant/parts/0001_initial_schema.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/parts/0002_initial_data.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/changelog-tenant.xml" relativeToChangelogFile="true"/>
 
-    <include file="db/changelog/tenant/module/loan/module-changelog-master.xml"/>
-    <include file="db/changelog/tenant/module/investor/module-changelog-master.xml"/>
-    <include file="db/changelog/tenant/module/savings/parts/module-changelog-master.xml"/>
-    <include file="db/changelog/tenant/module/progressiveloan/module-changelog-master.xml"/>
-    <include file="db/changelog/tenant/module/command/module-changelog-master.xml"/>
-    <include file="db/changelog/tenant/module/workingcapitalloan/module-changelog-master.xml"/>
-    <include file="db/changelog/tenant/module/loanorigination/module-changelog-master.xml"/>
+    <include file="tenant/module/loan/module-changelog-master.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/module/investor/module-changelog-master.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/module/savings/parts/module-changelog-master.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/module/progressiveloan/module-changelog-master.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/module/command/module-changelog-master.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/module/workingcapitalloan/module-changelog-master.xml" relativeToChangelogFile="true"/>
+    <include file="tenant/module/loanorigination/module-changelog-master.xml" relativeToChangelogFile="true"/>
 
-    <include file="db/changelog/tenant/final-changelog-tenant.xml"/>
+    <include file="tenant/final-changelog-tenant.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
