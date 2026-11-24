@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -39,18 +40,23 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.closure.command.GLClosureCreateCommand;
+import org.apache.fineract.accounting.closure.command.GLClosureDeleteCommand;
+import org.apache.fineract.accounting.closure.command.GLClosureUpdateCommand;
+import org.apache.fineract.accounting.closure.data.GLClosureCreateRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureCreateResponse;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
-import org.apache.fineract.accounting.closure.data.request.GLClosureRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureDeleteRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureDeleteResponse;
+import org.apache.fineract.accounting.closure.data.GLClosureUpdateRequest;
+import org.apache.fineract.accounting.closure.data.GLClosureUpdateResponse;
 import org.apache.fineract.accounting.closure.service.GLClosureReadPlatformService;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -75,10 +81,9 @@ public class GLClosuresApiResource {
 
     private final PlatformSecurityContext context;
     private final GLClosureReadPlatformService glClosureReadPlatformService;
-    private final DefaultToApiJsonSerializer<GLClosureData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -119,7 +124,6 @@ public class GLClosuresApiResource {
         return glClosureData;
     }
 
-    // NOTE: proposal slight changes @Aleks
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -127,11 +131,12 @@ public class GLClosuresApiResource {
             + "officeId,closingDate")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresRequest.class, description = "Request Body")))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresResponse.class)))
-    public CommandProcessingResult createGLClosure(@Parameter(hidden = true) GLClosureRequest glClosureRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGLClosure()
-                .withJson(apiJsonSerializerService.serialize(glClosureRequest)).build();
+    public GLClosureCreateResponse createGLClosure(@Valid GLClosureCreateRequest request) {
+        final var command = new GLClosureCreateCommand();
+        command.setPayload(request);
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final Supplier<GLClosureCreateResponse> response = dispatcher.dispatch(command);
+        return response.get();
     }
 
     @PUT
@@ -141,11 +146,15 @@ public class GLClosuresApiResource {
     @Operation(summary = "Update an Accounting closure", operationId = "updateGLClosure", description = "Once an accounting closure is created, only the comments associated with it may be edited")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresResponse.class)))
-    public CommandProcessingResult updateGLClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
-            @Parameter(hidden = true) GLClosureRequest glClosureRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGLClosure(glClosureId)
-                .withJson(apiJsonSerializerService.serialize(glClosureRequest)).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public GLClosureUpdateResponse updateGLClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
+            @Valid final GLClosureUpdateRequest request) {
+        request.setId(glClosureId);
+
+        final var command = new GLClosureUpdateCommand();
+        command.setPayload(request);
+
+        final Supplier<GLClosureUpdateResponse> response = dispatcher.dispatch(command);
+        return response.get();
     }
 
     @DELETE
@@ -153,9 +162,12 @@ public class GLClosuresApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete an accounting closure", operationId = "deleteGLClosure", description = "Note: Only the latest accounting closure associated with a branch may be deleted.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.DeleteGlClosuresResponse.class)))
-    public CommandProcessingResult deleteGLClosure(
+    public GLClosureDeleteResponse deleteGLClosure(
             @PathParam("glClosureId") @Parameter(description = "glclosureId") final Long glClosureId) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGLClosure(glClosureId).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final var command = new GLClosureDeleteCommand();
+        command.setPayload(GLClosureDeleteRequest.builder().id(glClosureId).build());
+
+        final Supplier<GLClosureDeleteResponse> response = dispatcher.dispatch(command);
+        return response.get();
     }
 }

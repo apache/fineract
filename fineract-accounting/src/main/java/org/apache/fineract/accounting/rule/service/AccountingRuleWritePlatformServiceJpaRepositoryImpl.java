@@ -28,7 +28,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
@@ -90,7 +89,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             // check office is valid
-            final Long officeId = command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue());
+            final Long officeId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.OFFICE_ID.getValue());
             Office office = null;
             if (officeId != null) {
                 office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
