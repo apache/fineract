@@ -17,6 +17,10 @@
  * under the License.
  */
 dependencies {
+    testFixturesApi project(':fineract-testcontainers-support')
+    testFixturesApi 'org.springframework.boot:spring-boot-test'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-liquibase'
+
     api(
             'org.springframework.boot:spring-boot-starter-data-jdbc',
             'io.github.openfeign.querydsl:querydsl-sql-spring',
