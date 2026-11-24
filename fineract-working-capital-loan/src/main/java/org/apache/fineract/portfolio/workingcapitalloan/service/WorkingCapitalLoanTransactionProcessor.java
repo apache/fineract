@@ -64,8 +64,19 @@ public class WorkingCapitalLoanTransactionProcessor {
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
-    public void processRepaymentLikeTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
-            final LocalDate transactionDate, final BigDecimal transactionAmount) {
+    /**
+     * Books a repayment-like transaction: allocation, balance, amortization schedule, delinquency range schedule,
+     * journal entries, breach schedule and the status transition with what depends on it.
+     * <p>
+     * Delinquency is not classified here. The caller saves the loan and then passes the returned mode to
+     * {@link WorkingCapitalLoanDelinquencyClassificationService#classifyDelinquencyOnFinalState}, so classification
+     * sees the status this transaction leaves the loan in.
+     *
+     * @return the delinquency classification the transaction owes: {@code ALWAYS} when the delinquency range schedule
+     *         was rebuilt, {@code INSTANT} when the repayment was applied to it in place
+     */
+    public WorkingCapitalLoanDelinquencyClassificationMode processRepaymentLikeTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction transaction, final LocalDate transactionDate, final BigDecimal transactionAmount) {
         final Long loanId = loan.getId();
         final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
         final boolean backdated = !isLastMonetaryAction(transaction);
@@ -85,6 +96,7 @@ public class WorkingCapitalLoanTransactionProcessor {
         final boolean reprocessRebuildsEverything = backdated
                 && (!charges.isEmpty() || isLoanOverpaidWithCurrentTransaction || affectsChargeOffSnapshot);
 
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification;
         if (reprocessRebuildsEverything) {
             if (charges.isEmpty()) {
                 transactionReprocessingService.reprocessChargeFreeSuffix(loan, transactionDate, null);
@@ -93,7 +105,7 @@ public class WorkingCapitalLoanTransactionProcessor {
             }
             // A changed chronological order can redistribute principal across days in ways an incremental apply can't
             // express, so the delinquency schedule needs a full rebuild too.
-            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+            delinquencyClassification = delinquencyRangeScheduleService.reprocessSchedulePeriods(loan);
             // Reprocessing rebuilt this transaction's allocation from scratch, linked it back onto the transaction and
             // posted its journal entries.
             requireReplayedAllocation(loan, transaction);
@@ -117,9 +129,10 @@ public class WorkingCapitalLoanTransactionProcessor {
                 // is principal-only regardless of sequence and the incremental apply above is already the final answer
                 // - no allocation replay is needed. Delinquency is date-driven rather than allocation-driven, though,
                 // so inserting a payment into an earlier period still requires rebuilding that schedule.
-                delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+                delinquencyClassification = delinquencyRangeScheduleService.reprocessSchedulePeriods(loan);
             } else {
-                delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
+                delinquencyClassification = delinquencyRangeScheduleService.applyRepaymentToPeriods(loan, transactionDate,
+                        transactionAmount);
             }
 
             accountingProcessor.postJournalEntries(loan, transaction, allocation,
@@ -127,12 +140,14 @@ public class WorkingCapitalLoanTransactionProcessor {
         }
 
         completeRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
+        return delinquencyClassification;
     }
 
     /**
      * Books the remaining effects of a repayment-like transaction that a replay has already allocated and posted - an
      * adjustment's replacement booked into the undo's replay. The allocation, schedule, delinquency and journal entries
-     * came from that replay; what it does not cover runs here.
+     * came from that replay; what it does not cover runs here. The replay's delinquency classification is owed by the
+     * undo that ran it, so this owes none of its own.
      */
     public void completeReplayedRepaymentLikeTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
             final LocalDate transactionDate, final BigDecimal transactionAmount) {

@@ -83,6 +83,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
+    private final WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     @Transactional
@@ -137,13 +138,15 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         // The zeroed balance has to be pushed through the delinquency schedule: its periods are capped to what the
         // customer can still owe, so a written-off loan classifies as not delinquent and its active tags are lifted.
         // Nothing else would do it - a CLOSED_WRITTEN_OFF loan is out of COB scope, so the tag would stay frozen.
-        this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = this.delinquencyRangeScheduleService
+                .reprocessSchedulePeriods(loan);
 
         this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
 
         // Same final discount-fee amortization charge-off already posts: recognize any remaining deferred income on
         // the write-off date (CLOSED_WRITTEN_OFF loans are out of COB, so otherwise it would stay parked forever).
         this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, writeOffTransaction);
+        this.delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);
@@ -207,10 +210,12 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
 
         // The restored balance re-derives the delinquency the loan had before the write-off: the schedule replays the
         // repayment history and reclassifies against the outstanding that is back on the books.
-        this.delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = this.delinquencyRangeScheduleService
+                .reprocessSchedulePeriods(loan);
         this.breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
 
         this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
+        this.delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));

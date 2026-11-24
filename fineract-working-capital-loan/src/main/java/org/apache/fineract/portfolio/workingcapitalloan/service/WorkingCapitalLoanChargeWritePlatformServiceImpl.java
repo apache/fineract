@@ -119,6 +119,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
     private final WorkingCapitalLoanAllocationRequestFactory allocationRequestFactory;
     private final WorkingCapitalLoanPaymentAllocationProcessor allocationProcessor;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
+    private final WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
     private final ProjectedAmortizationScheduleRepositoryWrapper scheduleRepositoryWrapper;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
@@ -178,6 +179,11 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         // overpaid or closed again after overpayment settlement, so COB will never see it — accelerate any pending
         // accrual here (no-op while the loan is still active; idempotent if real-time already posted).
         chargeAccrualService.accrueOnClosure(loan, ThreadLocalContextUtil.getBusinessDate());
+        // A charge that reopens or closes a matured loan changes its status, so the delinquency is classified on the
+        // new status. A charge that leaves the status alone is classified by the COB, as before.
+        if (loan.getLoanStatus() != statusBeforeCharge) {
+            delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        }
 
         businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAddChargeBusinessEvent(loanCharge));
         notifyBalanceChanged(loan);
@@ -393,7 +399,8 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         final LoanStatus oldStatus = loan.getLoanStatus();
         // The processor owns the whole tail of a repayment-like transaction, journal entries included, so there is no
         // posting to do here.
-        transactionProcessor.processRepaymentLikeTransaction(loan, adjustmentTx, transactionDate, amount);
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = transactionProcessor
+                .processRepaymentLikeTransaction(loan, adjustmentTx, transactionDate, amount);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanChargeConstants.noteParamName);
         if (StringUtils.isNotBlank(noteText)) {
@@ -401,10 +408,11 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
             changes.put(WorkingCapitalLoanChargeConstants.noteParamName, noteText);
         }
 
+        workingCapitalLoanRepository.saveAndFlush(loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
+
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent(adjustmentTx, loan.getId()));
-
-        workingCapitalLoanRepository.saveAndFlush(loan);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
@@ -493,9 +501,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         // borrower no longer owed as of that date. Replaying restates the charge-off's snapshot and everything routed
         // off it - the same gate a backdated repayment passes in processRepaymentLikeTransaction. The delinquency
         // periods are re-derived from the replayed history with it, the pairing that gate and the generic undo make.
+        WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = WorkingCapitalLoanDelinquencyClassificationMode.NONE;
         if (transactionFinder.isBeforeActiveChargeOff(loan, waiverTx)) {
             transactionReprocessingService.reprocessTransactions(loan);
-            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+            delinquencyClassification = delinquencyRangeScheduleService.reprocessSchedulePeriods(loan);
         }
 
         final LoanStatus oldStatus = loan.getLoanStatus();
@@ -516,6 +525,11 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
             noteRepository.save(WorkingCapitalLoanNote.create(loan, noteText));
             changes.put(WorkingCapitalLoanChargeConstants.noteParamName, noteText);
         }
+        if (loan.getLoanStatus() != oldStatus) {
+            // A waiver that closes the loan takes it out of the COB scope, so it is classified on the new status now.
+            delinquencyClassification = delinquencyClassification.combine(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        }
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanChargeWaiverTransactionBusinessEvent(waiverTx, loan.getId()));

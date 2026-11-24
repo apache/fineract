@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
@@ -123,6 +124,28 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
             delinquencyRangeScheduleTagHistoryRepository.flush();
             businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent(loan));
         }
+    }
+
+    @Override
+    public void classifyDelinquencyOnFinalState(final WorkingCapitalLoan loan, final WorkingCapitalLoanDelinquencyClassificationMode mode) {
+        switch (mode) {
+            case ALWAYS -> classifyDelinquency(loan, DateUtils.getBusinessLocalDate());
+            case INSTANT -> {
+                if (leftOutOfCobScope(loan)) {
+                    // The COB does not process a closed or overpaid loan, so leaving the classification to it
+                    // would keep the loan's tags as they were until a later transaction classifies it again.
+                    classifyDelinquency(loan, DateUtils.getBusinessLocalDate());
+                } else {
+                    instantClassifyDelinquency(loan, DateUtils.getBusinessLocalDate());
+                }
+            }
+            case NONE -> log.debug("Skipping... No delinquency classification is needed for Working Capital Loan {}.", loan.getId());
+        }
+    }
+
+    private boolean leftOutOfCobScope(final WorkingCapitalLoan loan) {
+        final LoanStatus status = loan.getLoanStatus();
+        return status != null && (status.isClosedObligationsMet() || status.isOverpaid());
     }
 
     /**

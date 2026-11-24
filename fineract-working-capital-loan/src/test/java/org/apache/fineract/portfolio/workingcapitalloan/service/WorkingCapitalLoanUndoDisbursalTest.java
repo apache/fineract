@@ -100,6 +100,8 @@ public class WorkingCapitalLoanUndoDisbursalTest {
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     @Mock
+    private WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
+    @Mock
     private WorkingCapitalLoanBreachScheduleService breachScheduleService;
     @Mock
     private WorkingCapitalLoanChargeRepository chargeRepository;

@@ -144,6 +144,8 @@ class WorkingCapitalLoanAdjustByDeltaReplayTest {
     @Mock
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     @Mock
+    private WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
+    @Mock
     private WorkingCapitalLoanBreachScheduleService breachScheduleService;
     @Mock
     private WorkingCapitalLoanTransactionProcessor transactionProcessor;
@@ -181,6 +183,9 @@ class WorkingCapitalLoanAdjustByDeltaReplayTest {
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
         when(loan.getOffice()).thenReturn(office);
         when(loan.getId()).thenReturn(LOAN_ID);
+        // Every undo of a repayment-like transaction rebuilds the delinquency schedule and owes a classification.
+        when(delinquencyRangeScheduleService.reprocessSchedulePeriods(loan))
+                .thenReturn(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
         when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loan.getBalance()).thenReturn(balance);
         when(balance.getPrincipalPaid()).thenReturn(ORIGINAL_AMOUNT);
@@ -270,6 +275,46 @@ class WorkingCapitalLoanAdjustByDeltaReplayTest {
         verify(transactionProcessor, never()).completeReplayedRepaymentLikeTransaction(any(), any(), any(), any());
         verify(transactionReprocessingService, never()).reprocessTransactions(any());
         verify(transactionReprocessingService, never()).reprocessChargeFreeSuffix(any(), any(), any());
+    }
+
+    @Test
+    void replayedAdjustClassifiesDelinquencyOnceAfterTheReplacementIsBookedAndTheLoanSaved() {
+        givenDelta("40.00");
+        givenLaterTransactionsExist();
+
+        writePlatformService.adjustByDeltaTransaction(LOAN_ID, TRANSACTION_ID, command);
+
+        // The undo's replay owes the classification; the replacement it booked adds none, and classification waits for
+        // the status the replacement leaves the loan in.
+        final InOrder order = inOrder(transactionProcessor, loanRepository, delinquencyClassificationService,
+                adjustTransactionEventPublisher);
+        order.verify(transactionProcessor).completeReplayedRepaymentLikeTransaction(eq(loan), any(), any(), any());
+        order.verify(loanRepository).saveAndFlush(loan);
+        order.verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(loan,
+                WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        order.verify(adjustTransactionEventPublisher).publishAdjustment(eq(LOAN_ID), eq(original), any());
+        verify(delinquencyClassificationService, times(1)).classifyDelinquencyOnFinalState(any(), any());
+    }
+
+    @Test
+    void inPlaceAdjustClassifiesDelinquencyOnceForTheUndoAndTheReplacementTogether() {
+        givenDelta("40.00");
+        when(transactionProcessor.isLastMonetaryAction(original)).thenReturn(true);
+        when(transactionProcessor.processRepaymentLikeTransaction(eq(loan), any(), any(), any()))
+                .thenReturn(WorkingCapitalLoanDelinquencyClassificationMode.INSTANT);
+
+        writePlatformService.adjustByDeltaTransaction(LOAN_ID, TRANSACTION_ID, command);
+
+        // The undo rebuilt the schedule (ALWAYS) and the replacement was applied in place (INSTANT): one
+        // classification, the stronger of the two, after the replacement's status transition and the loan save.
+        final InOrder order = inOrder(transactionProcessor, loanRepository, delinquencyClassificationService,
+                adjustTransactionEventPublisher);
+        order.verify(transactionProcessor).processRepaymentLikeTransaction(eq(loan), any(), any(), any());
+        order.verify(loanRepository).saveAndFlush(loan);
+        order.verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(loan,
+                WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        order.verify(adjustTransactionEventPublisher).publishAdjustment(eq(LOAN_ID), eq(original), any());
+        verify(delinquencyClassificationService, times(1)).classifyDelinquencyOnFinalState(any(), any());
     }
 
     @Test

@@ -21,6 +21,9 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,6 +75,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -126,6 +130,8 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
     private WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     @Mock
     private WorkingCapitalLoanBreachScheduleService breachScheduleService;
+    @Mock
+    private WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
 
     @Mock
     private WorkingCapitalLoan loan;
@@ -157,6 +163,8 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
         // Accounting off: this test is about the events and the delinquency reprocess, not the ledger.
         when(loanProduct.getAccountingRule()).thenReturn(WorkingCapitalAccountingRuleType.NONE);
         when(command.localDateValueOfParameterNamed(any())).thenReturn(businessDate);
+        when(delinquencyRangeScheduleService.reprocessSchedulePeriods(loan))
+                .thenReturn(WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
     }
 
     @AfterEach
@@ -172,7 +180,15 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
 
         writeOffService.writeOff(LOAN_ID, command);
 
-        verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
+        // Classified once, after the transition to CLOSED_WRITTEN_OFF and the loan save, before any event.
+        final InOrder order = inOrder(writeOffDomainService, loanRepository, delinquencyRangeScheduleService,
+                delinquencyClassificationService, businessEventNotifierService);
+        order.verify(writeOffDomainService).writeOff(eq(loan), eq(businessDate), any(), any(), any());
+        order.verify(loanRepository).saveAndFlush(loan);
+        order.verify(delinquencyRangeScheduleService).reprocessSchedulePeriods(loan);
+        order.verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        order.verify(businessEventNotifierService, atLeastOnce()).notifyPostBusinessEvent(any());
+        verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(any(), any());
         verify(discountFeeAmortizationService).processFinalDiscountFeeAmortization(any(), any());
         final List<BusinessEvent<?>> events = publishedEvents(3);
         assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanWriteOffTransactionBusinessEvent.class);
@@ -188,7 +204,15 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
 
         writeOffService.undoWriteOff(LOAN_ID, command);
 
-        verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
+        // Classified once, after the reopening to ACTIVE and the loan save, before any event.
+        final InOrder order = inOrder(writeOffDomainService, loanRepository, delinquencyRangeScheduleService,
+                delinquencyClassificationService, businessEventNotifierService);
+        order.verify(writeOffDomainService).undoWriteOff(eq(loan), any());
+        order.verify(loanRepository).saveAndFlush(loan);
+        order.verify(delinquencyRangeScheduleService).reprocessSchedulePeriods(loan);
+        order.verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        order.verify(businessEventNotifierService, atLeastOnce()).notifyPostBusinessEvent(any());
+        verify(delinquencyClassificationService).classifyDelinquencyOnFinalState(any(), any());
         verify(breachScheduleService).rederiveNearBreachIfReopened(loan, LoanStatus.CLOSED_WRITTEN_OFF);
         verify(discountFeeAmortizationService).undoFinalDiscountFeeAmortization(any(), any());
         final List<BusinessEvent<?>> events = publishedEvents(3);

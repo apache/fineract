@@ -98,8 +98,6 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateLessThanEqualAndMinPaymentCriteriaMetIsNull(Long loanId,
             LocalDate businessDate);
 
-    List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(Long loanId, LocalDate toDate);
-
     /**
      * Still-open past periods that already carry a positive classified {@code delinquentDays} value, earliest first.
      * Includes {@code minPaymentCriteriaMet IS NULL} because instant classification can populate delinquent days before
