@@ -55,7 +55,7 @@
     <changeSet author="fineract" id="wcl-0006-2">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan"/>
-            <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_disbursed_by"/>
+            <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan" foreignKeyName="FK_m_wc_loan_disbursed_by"/>
         </preConditions>
         <dropForeignKeyConstraint baseTableName="m_wc_loan" constraintName="FK_m_wc_loan_disbursed_by"/>
     </changeSet>

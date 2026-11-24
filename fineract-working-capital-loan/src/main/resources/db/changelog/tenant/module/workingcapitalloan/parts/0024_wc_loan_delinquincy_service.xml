@@ -115,7 +115,7 @@
     <changeSet id="1774944259572-2" author="fineract">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_DELINQUENCY_RANGE"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_range_delinquency_tag" foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_DELINQUENCY_RANGE"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="delinquency_range_id" baseTableName="m_wc_loan_range_delinquency_tag"
@@ -125,7 +125,7 @@
     <changeSet id="1774944259572-3" author="fineract">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_LOAN"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_range_delinquency_tag" foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_LOAN"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_wc_loan_range_delinquency_tag"
@@ -135,7 +135,7 @@
     <changeSet id="1774944259572-4" author="fineract">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_RANGE"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_range_delinquency_tag" foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_RANGE"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="range_id" baseTableName="m_wc_loan_range_delinquency_tag"

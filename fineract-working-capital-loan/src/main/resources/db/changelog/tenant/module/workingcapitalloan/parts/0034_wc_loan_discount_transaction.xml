@@ -109,6 +109,7 @@
         <preConditions onFail="MARK_RAN">
             <not>
                 <foreignKeyConstraintExists
+                        foreignKeyTableName="m_wc_loan_transaction_relation"
                         foreignKeyName="FK_M_WC_LOAN_TRANSACTION_RELATION_ON_FROM_LOAN_TRANSACTION"/>
             </not>
         </preConditions>
@@ -122,7 +123,7 @@
                author="soma">
         <preConditions onFail="MARK_RAN">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_TRANSACTION_RELATION_ON_TO_LOAN_TRANSACTION"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_transaction_relation" foreignKeyName="FK_M_WC_LOAN_TRANSACTION_RELATION_ON_TO_LOAN_TRANSACTION"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="to_loan_transaction_id"
