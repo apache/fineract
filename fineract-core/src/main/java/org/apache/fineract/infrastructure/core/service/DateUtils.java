@@ -403,7 +403,7 @@ public final class DateUtils {
     }
 
     public static LocalDate toLocalDate(String local, String date, String dateFormat) {
-        Locale locale = Locale.forLanguageTag(local);
+        Locale locale = Locale.forLanguageTag(local.replace('_', '-'));
         String patternISO = dateFormat.replace("y", "u");
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().appendPattern(patternISO)
                 .optionalStart().appendPattern(" HH:mm:ss").optionalEnd().parseDefaulting(ChronoField.HOUR_OF_DAY, 0)

@@ -296,7 +296,8 @@ public class LoanReAgingService {
 
     private LoanTransaction createReAgeTransactionFromPreviewRequest(final Loan loan, final ReAgePreviewRequest reAgePreviewRequest) {
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-        final Locale locale = reAgePreviewRequest.getLocale() != null ? Locale.forLanguageTag(reAgePreviewRequest.getLocale())
+        final Locale locale = reAgePreviewRequest.getLocale() != null
+                ? Locale.forLanguageTag(reAgePreviewRequest.getLocale().replace('_', '-'))
                 : Locale.getDefault();
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,
                 reAgePreviewRequest.getDateFormat(), locale);
@@ -319,7 +320,8 @@ public class LoanReAgingService {
     private LoanReAgeParameter createReAgeParameterFromPreviewRequest(final LoanTransaction reAgeTransaction,
             final ReAgePreviewRequest reAgePreviewRequest) {
         final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.valueOf(reAgePreviewRequest.getFrequencyType());
-        final Locale locale = Optional.ofNullable(reAgePreviewRequest.getLocale()).map(Locale::forLanguageTag).orElse(Locale.getDefault());
+        final Locale locale = Optional.ofNullable(reAgePreviewRequest.getLocale())
+                .map(tag -> Locale.forLanguageTag(tag.replace('_', '-'))).orElse(Locale.getDefault());
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,
                 reAgePreviewRequest.getDateFormat(), locale);
         final Integer numberOfInstallments = reAgePreviewRequest.getNumberOfInstallments();

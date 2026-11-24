@@ -112,6 +112,20 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void toLocalDate_underscoreRegionalLocale_parsesLocalizedMonthName() {
+        assertEquals(LocalDate.of(2026, 3, 15), DateUtils.toLocalDate("fr_FR", "15 mars 2026", "dd MMMM yyyy"));
+        assertEquals(LocalDate.of(2026, 3, 15), DateUtils.toLocalDate("de_DE", "15 März 2026", "dd MMMM yyyy"));
+        assertEquals(LocalDate.of(2026, 3, 15), DateUtils.toLocalDate("es_ES", "15 marzo 2026", "dd MMMM yyyy"));
+    }
+
+    @Test
+    public void toLocalDate_hyphenRegionalLocale_parsesLocalizedMonthName() {
+        assertEquals(LocalDate.of(2026, 3, 15), DateUtils.toLocalDate("fr-FR", "15 mars 2026", "dd MMMM yyyy"));
+        assertEquals(LocalDate.of(2026, 3, 15), DateUtils.toLocalDate("de-DE", "15 März 2026", "dd MMMM yyyy"));
+        assertEquals(LocalDate.of(2026, 3, 15), DateUtils.toLocalDate("es-ES", "15 marzo 2026", "dd MMMM yyyy"));
+    }
+
+    @Test
     public void offsetTimeParameterPreservesPositiveOffset() {
         final JsonCommand command = commandFromJson("""
                 {"transactionTime":"14:30:00+05:30"}

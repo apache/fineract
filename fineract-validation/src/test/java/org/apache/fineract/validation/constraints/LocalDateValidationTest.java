@@ -97,6 +97,15 @@ class LocalDateValidationTest {
         assertThat(errors).isEmpty();
     }
 
+    @Test
+    void validUnderscoreRegionalLocale() {
+        var request = LocalDateModel.builder().format("dd MMMM yyyy").date("15 mars 2026").locale("fr_FR").build();
+
+        var errors = validator.validate(request);
+
+        assertThat(errors).isEmpty();
+    }
+
     @Builder
     @Data
     @NoArgsConstructor
