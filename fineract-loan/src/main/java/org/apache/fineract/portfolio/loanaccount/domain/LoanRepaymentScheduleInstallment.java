@@ -356,8 +356,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         final long daysInInstallment = ChronoUnit.DAYS.between(getFromDate(), getDueDate());
         final long daysTillDate = ChronoUnit.DAYS.between(getFromDate(), date);
         final MathContext mc = MoneyHelper.getMathContext();
-        final Money prorated = Money.of(currency, interestCharged.getAmount().divide(BigDecimal.valueOf(daysInInstallment), mc)
-                .multiply(BigDecimal.valueOf(daysTillDate), mc), mc);
+        // Multiply first, as the product is exact: dividing first rounds the quotient, which can move a half cent to
+        // the wrong side
+        final Money prorated = Money.of(currency,
+                interestCharged.getAmount().multiply(BigDecimal.valueOf(daysTillDate)).divide(BigDecimal.valueOf(daysInInstallment), mc),
+                mc);
         final Money interestSettled = interestCharged.minus(getInterestOutstanding(currency));
         return prorated.isGreaterThan(interestSettled) ? prorated : interestSettled;
     }

@@ -30,11 +30,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 
 class LoanRepaymentScheduleInstallmentTest {
@@ -190,6 +193,20 @@ class LoanRepaymentScheduleInstallmentTest {
         // Test that value is properly rounded
         final BigDecimal expected = new BigDecimal("123456789.123457");
         assertEquals(expected, installment.getPrincipal());
+    }
+
+    // Dividing first rounds the quotient to 19 digits: 14 of 28 days of 10.21 give 5.105000000000000001, which
+    // rounds to 5.11 instead of 5.10, and 10.23 gives 5.114999999999999999, which rounds to 5.11 instead of 5.12
+    @ParameterizedTest
+    @CsvSource({ "10.21, 5.10", "10.23, 5.12" })
+    void testInterestChargedProratedTillRoundsTheExactProration(final String interest, final String expected) {
+        final MonetaryCurrency currency = new MonetaryCurrency("USD", 2, null);
+        final LocalDate fromDate = LocalDate.of(2026, 1, 1);
+        final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(mock(Loan.class), 1, fromDate,
+                fromDate.plusDays(28), BigDecimal.valueOf(1000), new BigDecimal(interest), BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, false, false);
+
+        assertEquals(new BigDecimal(expected), installment.getInterestChargedProratedTill(fromDate.plusDays(14), currency).getAmount());
     }
 
     private void testBigDecimalSetter(final Consumer<BigDecimal> setter, final Supplier<BigDecimal> getter) {
