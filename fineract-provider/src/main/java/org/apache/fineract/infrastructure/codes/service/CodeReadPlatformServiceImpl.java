@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.codes.service;
 
 import static org.apache.fineract.query.QMCode.mCode;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -85,16 +86,19 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
     @Override
     public CodeData retrieveCode(final Long codeId) {
-        try {
-            this.context.authenticatedUser();
+        this.context.authenticatedUser();
 
-            final CodeMapper rm = new CodeMapper();
-            final String sql = "select " + rm.schema() + " where c.id = ?";
+        final Tuple row = this.queryFactory.select(mCode.id, mCode.codeName, mCode.isSystemDefined) //
+                .from(mCode) //
+                .where(mCode.id.eq(codeId.intValue())) //
+                .fetchOne();
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeId }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new CodeNotFoundException(codeId, e);
+        if (row == null) {
+            throw new CodeNotFoundException(codeId);
         }
+
+        return CodeData.instance(row.get(mCode.id).longValue(), row.get(mCode.codeName),
+                Boolean.TRUE.equals(row.get(mCode.isSystemDefined)));
     }
 
     @Override
