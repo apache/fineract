@@ -77,6 +77,7 @@ import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountAssemblerService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SavingsAccountAssembler {
+public class SavingsAccountAssembler implements SavingsAccountAssemblerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
     private final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper;
@@ -339,6 +340,7 @@ public class SavingsAccountAssembler {
         this.savingsAccountRepository.lockInIdOrder(savingsIds);
     }
 
+    @Override
     public SavingsAccount assembleFrom(final Long savingsId, final boolean backdatedTxnsAllowedTill) {
         SavingsAccount account = this.savingsAccountRepository.findSavingsWithNotFoundDetection(savingsId, backdatedTxnsAllowedTill);
         return loadTransactionsToSavingsAccount(account, backdatedTxnsAllowedTill);
