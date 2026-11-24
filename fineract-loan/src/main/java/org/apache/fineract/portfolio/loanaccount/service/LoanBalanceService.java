@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
@@ -342,8 +343,8 @@ public class LoanBalanceService {
         Money feeAccountedForCurrentPeriod = Money.zero(loan.getCurrency());
         int totalPeriodDays = DateUtils.getExactDifferenceInDays(installment.getFromDate(), installment.getDueDate());
         int tillDays = DateUtils.getExactDifferenceInDays(installment.getFromDate(), paymentDate);
-        Money interestForCurrentPeriod = Money.of(loan.getCurrency(), BigDecimal.valueOf(
-                calculateInterestForDays(totalPeriodDays, installment.getInterestCharged(loan.getCurrency()).getAmount(), tillDays)));
+        Money interestForCurrentPeriod = Money.of(loan.getCurrency(),
+                calculateInterestForDays(totalPeriodDays, installment.getInterestCharged(loan.getCurrency()).getAmount(), tillDays));
         Money interestAccountedForCurrentPeriod = installment.getInterestWaived(loan.getCurrency())
                 .plus(installment.getInterestPaid(loan.getCurrency()));
         for (LoanCharge loanCharge : loan.getLoanCharges()) {
@@ -383,11 +384,11 @@ public class LoanBalanceService {
         return balances;
     }
 
-    private double calculateInterestForDays(final int daysInPeriod, final BigDecimal interest, final int days) {
-        if (interest.doubleValue() == 0) {
-            return 0;
+    private BigDecimal calculateInterestForDays(final int daysInPeriod, final BigDecimal interest, final int days) {
+        if (interest.signum() == 0) {
+            return BigDecimal.ZERO;
         }
-        return interest.doubleValue() / daysInPeriod * days;
+        return interest.multiply(BigDecimal.valueOf(days)).divide(BigDecimal.valueOf(daysInPeriod), MoneyHelper.getMathContext());
     }
 
 }

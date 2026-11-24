@@ -26,12 +26,14 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -90,6 +92,46 @@ class LoanBalanceServiceTest {
         Money totalRecovered = service.calculateTotalRecoveredPayments(loan);
 
         assertThat(totalRecovered.isZero()).isTrue();
+    }
+
+    @Test
+    void incomeForOverlappingPeriodProratesInterestByElapsedDays() {
+        // 3.00 over 30 days, 10 days elapsed: 1.00, no rounding involved.
+        Loan loan = loanWithInstallment(installment(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31), "3.00"));
+
+        Money[] income = service.retrieveIncomeForOverlappingPeriod(loan, LocalDate.of(2026, 1, 11));
+
+        assertThat(income[0].getAmount()).isEqualByComparingTo("1.00");
+    }
+
+    @Test
+    void incomeForOverlappingPeriodRoundsTheExactProratedInterest() {
+        // 1.83 over 30 days, 5 days elapsed: 1.83 * 5 / 30 = 0.305 exactly, which is 0.30 with HALF_EVEN.
+        Loan loan = loanWithInstallment(installment(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31), "1.83"));
+
+        Money[] income = service.retrieveIncomeForOverlappingPeriod(loan, LocalDate.of(2026, 1, 6));
+
+        assertThat(income[0].getAmount()).isEqualByComparingTo("0.30");
+    }
+
+    private static Loan loanWithInstallment(LoanRepaymentScheduleInstallment installment) {
+        Loan loan = mock(Loan.class);
+        when(loan.getCurrency()).thenReturn(USD);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(installment));
+        return loan;
+    }
+
+    private static LoanRepaymentScheduleInstallment installment(LocalDate fromDate, LocalDate dueDate, String interestCharged) {
+        Money interest = Money.of(USD, new BigDecimal(interestCharged));
+        Money zero = Money.zero(USD);
+        LoanRepaymentScheduleInstallment installment = mock(LoanRepaymentScheduleInstallment.class);
+        when(installment.getInstallmentNumber()).thenReturn(1);
+        when(installment.getFromDate()).thenReturn(fromDate);
+        when(installment.getDueDate()).thenReturn(dueDate);
+        when(installment.getInterestCharged(USD)).thenReturn(interest);
+        when(installment.getInterestWaived(USD)).thenReturn(zero);
+        when(installment.getInterestPaid(USD)).thenReturn(zero);
+        return installment;
     }
 
     private static Loan loanWith(LoanTransaction... transactions) {
