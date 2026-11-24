@@ -52,6 +52,13 @@ public class PaginationParametersDataValidator {
                     parameters.getSortOrder(), sortOrderValues.toString());
             dataValidationErrors.add(error);
         }
+
+        if (parameters.hasOffset() && parameters.getOffset() < 0) {
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "validation.msg.pagination.offset.must.not.be.negative", "The parameter `offset` must not be negative.",
+                    "offset", parameters.getOffset());
+            dataValidationErrors.add(error);
+        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
