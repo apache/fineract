@@ -69,6 +69,7 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
+    testImplementation testFixtures(project(':fineract-querydsl'))
     testImplementation( 'io.github.classgraph:classgraph' )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
