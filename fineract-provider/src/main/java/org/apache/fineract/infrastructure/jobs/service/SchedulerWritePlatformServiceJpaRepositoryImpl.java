@@ -23,10 +23,10 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailDataValidator;
 import org.apache.fineract.infrastructure.jobs.data.JobUpdateRequest;
 import org.apache.fineract.infrastructure.jobs.data.JobUpdateResponse;
@@ -85,15 +85,15 @@ public class SchedulerWritePlatformServiceJpaRepositoryImpl implements Scheduler
         Map<String, Object> changes = new LinkedHashMap<>();
 
         if (request.getDisplayName() != null && !request.getDisplayName().trim().equals(job.getJobDisplayName())) {
-            job.setJobDisplayName(StringUtils.defaultIfEmpty(request.getDisplayName().trim(), null));
+            job.updateDisplayName(request.getDisplayName().trim());
             changes.put("displayName", request.getDisplayName().trim());
         }
         if (request.getCronExpression() != null && !request.getCronExpression().trim().equals(job.getCronExpression())) {
-            job.setCronExpression(StringUtils.defaultIfEmpty(request.getCronExpression().trim(), null));
+            job.updateCronExpression(request.getCronExpression().trim());
             changes.put("cronExpression", request.getCronExpression().trim());
         }
         if (request.getActive() != null && request.getActive() != job.isActiveSchedular()) {
-            job.setActiveSchedular(request.getActive());
+            job.updateActive(request.getActive());
             changes.put("active", request.getActive());
         }
 
@@ -112,7 +112,7 @@ public class SchedulerWritePlatformServiceJpaRepositoryImpl implements Scheduler
         if (scheduledJobDetail == null) {
             throw new JobNotFoundException(String.valueOf(jobId));
         }
-        final Map<String, Object> changes = scheduledJobDetail.update(command);
+        final Map<String, Object> changes = applyChanges(scheduledJobDetail, toJobUpdateRequest(jobId, command));
         if (!changes.isEmpty()) {
             this.scheduledJobDetailsRepository.saveAndFlush(scheduledJobDetail);
         }
@@ -121,6 +121,46 @@ public class SchedulerWritePlatformServiceJpaRepositoryImpl implements Scheduler
                 .withEntityId(jobId) //
                 .with(changes) //
                 .build();
+    }
+
+    private static JobUpdateRequest toJobUpdateRequest(final Long jobId, final JsonCommand command) {
+        final String displayName = command.parameterExists(SchedulerJobApiConstants.displayNameParamName)
+                ? command.stringValueOfParameterNamed(SchedulerJobApiConstants.displayNameParamName)
+                : null;
+        final String cronExpression = command.parameterExists(SchedulerJobApiConstants.cronExpressionParamName)
+                ? command.stringValueOfParameterNamed(SchedulerJobApiConstants.cronExpressionParamName)
+                : null;
+        final Boolean active = command.parameterExists(SchedulerJobApiConstants.jobActiveStatusParamName)
+                ? command.booleanPrimitiveValueOfParameterNamed(SchedulerJobApiConstants.jobActiveStatusParamName)
+                : null;
+        return JobUpdateRequest.builder().jobId(jobId).displayName(displayName).cronExpression(cronExpression).active(active).build();
+    }
+
+    /**
+     * Applies the update of {@code PUT /jobs/short-name/{shortName}}. Unlike
+     * {@link #updateJobDetail(JobUpdateRequest)}, it compares the value as sent, before trimming it, as the former
+     * {@code ScheduledJobDetail.update(JsonCommand)} did.
+     */
+    private static Map<String, Object> applyChanges(final ScheduledJobDetail job, final JobUpdateRequest request) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+
+        if (request.getDisplayName() != null && !request.getDisplayName().equals(job.getJobDisplayName())) {
+            final String newValue = request.getDisplayName().trim();
+            actualChanges.put(SchedulerJobApiConstants.displayNameParamName, newValue);
+            job.updateDisplayName(newValue);
+        }
+        if (request.getCronExpression() != null && !request.getCronExpression().equals(job.getCronExpression())) {
+            final String newValue = request.getCronExpression().trim();
+            actualChanges.put(SchedulerJobApiConstants.cronExpressionParamName, newValue);
+            job.updateCronExpression(newValue);
+        }
+        if (request.getActive() != null && request.getActive() != job.isActiveSchedular()) {
+            final boolean newValue = request.getActive();
+            actualChanges.put(SchedulerJobApiConstants.jobActiveStatusParamName, newValue);
+            job.updateActive(newValue);
+        }
+
+        return actualChanges;
     }
 
     // Annotation/aspect order matters here: the resilience4j @Retry aspect (default order
