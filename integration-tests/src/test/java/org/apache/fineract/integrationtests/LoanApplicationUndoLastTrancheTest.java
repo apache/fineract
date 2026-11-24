@@ -131,6 +131,53 @@ public class LoanApplicationUndoLastTrancheTest extends FeignLoanTestBase {
     }
 
     @Test
+    public void loanApplicationUndoLastTrancheWithSameDayRepaymentShallFail() {
+        LocalDate transactionDate = LocalDate.of(2014, 3, 1);
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+
+        final Double proposedAmount = 1000.0;
+
+        final Long clientId = createClient("01 January 2014");
+
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                .withDisallowExpectedDisbursements(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).buildRequest(null));
+
+        final Long loanId = applyForLoanApplicationWithTranches(clientId, loanProductId, proposedAmount, 0.0, List.of());
+
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(proposedAmount, operationDate));
+        validateLoanStatus(getLoanDetails(loanId), "loanStatusType.approved");
+
+        loanHelper.disburseLoan(operationDate, loanId, "500");
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        validateLoanStatus(loanDetails, "loanStatusType.active");
+        evaluateLoanDisbursementDetails(loanDetails, 1, 500.00);
+
+        transactionDate = transactionDate.plusDays(2);
+        operationDate = Utils.dateFormatter.format(transactionDate);
+        loanHelper.disburseLoan(operationDate, loanId, "500");
+        loanDetails = getLoanDetails(loanId);
+        validateLoanStatus(loanDetails, "loanStatusType.active");
+        evaluateLoanDisbursementDetails(loanDetails, 2, 1000.00);
+
+        // repayment on the same day as the last tranche
+        assertNotNull(makeLoanRepayment(loanId, LoanRequestBuilders.repayLoan(500.00, operationDate)));
+
+        loanDetails = getLoanDetails(loanId);
+        validateLoanStatus(loanDetails, "loanStatusType.active");
+        evaluateLoanDisbursementDetails(loanDetails, 2, 1000.00);
+        validateLoanTotalOutstandingBalance(loanDetails, 500.00);
+
+        // undoing the last tranche must be refused, as it is for a repayment on a later day
+        verifyUndoLastDisbursalShallFail(loanId, "error.msg.cannot.undo.last.disbursal.after.repayments or waivers");
+
+        // the loan is unchanged: the repayment still counts
+        loanDetails = getLoanDetails(loanId);
+        validateLoanStatus(loanDetails, "loanStatusType.active");
+        evaluateLoanDisbursementDetails(loanDetails, 2, 1000.00);
+        validateLoanTotalOutstandingBalance(loanDetails, 500.00);
+    }
+
+    @Test
     public void loanApplicationUndoLastTrancheWithSameDate() {
         final Double proposedAmount = 5000.0;
         final String approveDate = "01 March 2014";

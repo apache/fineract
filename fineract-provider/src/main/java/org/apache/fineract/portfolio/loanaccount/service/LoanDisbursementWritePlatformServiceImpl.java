@@ -1251,9 +1251,16 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
         loanTransactions = loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan);
         Collections.reverse(loanTransactions);
         for (final LoanTransaction previousTransaction : loanTransactions) {
-            if (DateUtils.isBefore(lastTransactionDate, previousTransaction.getTransactionDate())
+            // A repayment dated after the last tranche blocks the undo, but a repayment dated the same day slipped
+            // through and was then silently reversed with the tranche. Block same-day ordinary repayments too.
+            // Only isRepayment() is blocked same-day: a down payment is recorded on the tranche date as part of
+            // the disbursal itself and must keep being undone with it, and the other same-day repayment-like
+            // transactions are not reversed by the undo below, so they need no guard.
+            if ((DateUtils.isBefore(lastTransactionDate, previousTransaction.getTransactionDate())
                     && (previousTransaction.isRepaymentLikeType() || previousTransaction.isWaiver()
-                            || previousTransaction.isChargePayment())) {
+                            || previousTransaction.isChargePayment()))
+                    || (DateUtils.isEqual(previousTransaction.getTransactionDate(), lastTransactionDate)
+                            && previousTransaction.isRepayment())) {
                 throw new UndoLastTrancheDisbursementException(previousTransaction.getId());
             }
             if (previousTransaction.getId().compareTo(lastDisbursalTransaction.getId()) < 0) {
