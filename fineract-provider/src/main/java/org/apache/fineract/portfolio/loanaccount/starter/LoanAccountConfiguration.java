@@ -388,7 +388,7 @@ public class LoanAccountConfiguration {
             LoanChargeApiJsonValidator loanChargeApiJsonValidator, LoanAssembler loanAssembler,
             BusinessEventNotifierService businessEventNotifierService,
             AccountTransfersWritePlatformService accountTransfersWritePlatformService, LoanAccountDomainService loanAccountDomainService,
-            LoanWritePlatformService loanWritePlatformService, LoanUtilService loanUtilService,
+            LoanTransactionWritePlatformService loanTransactionWritePlatformService, LoanUtilService loanUtilService,
             LoanLifecycleStateMachine loanLifecycleStateMachine,
             AccountAssociationsReadPlatformService accountAssociationsReadPlatformService, FromJsonHelper fromApiJsonHelper,
             ExternalIdFactory externalIdFactory, AccountTransferDetailRepository accountTransferDetailRepository,
@@ -398,7 +398,7 @@ public class LoanAccountConfiguration {
             LoanAccountService loanAccountService, LoanJournalEntryPoster loanJournalEntryPoster,
             LoanChargeWriteHelper loanChargeWriteHelper) {
         return new LoanChargePaymentWritePlatformService(loanChargeApiJsonValidator, loanAssembler, businessEventNotifierService,
-                accountTransfersWritePlatformService, loanAccountDomainService, loanWritePlatformService, loanUtilService,
+                accountTransfersWritePlatformService, loanAccountDomainService, loanTransactionWritePlatformService, loanUtilService,
                 loanLifecycleStateMachine, accountAssociationsReadPlatformService, fromApiJsonHelper, externalIdFactory,
                 accountTransferDetailRepository, paymentDetailWritePlatformService, noteRepository, loanDownPaymentTransactionValidator,
                 loanChargeValidator, loanScheduleService, reprocessLoanTransactionsService, loanAccountService, loanJournalEntryPoster,
@@ -571,15 +571,14 @@ public class LoanAccountConfiguration {
             LoanAccountDomainService loanAccountDomainService, LoanAssembler loanAssembler,
             PaymentDetailWritePlatformService paymentDetailWritePlatformService, HolidayRepositoryWrapper holidayRepository,
             ConfigurationDomainService configurationDomainService, WorkingDaysRepositoryWrapper workingDaysRepository,
-            LoanTransactionWritePlatformService loanTransactionWritePlatformService,
             LoanDisbursementWritePlatformService loanDisbursementWritePlatformService,
             LoanClosureWritePlatformService loanClosureWritePlatformService,
             LoanTransferWritePlatformService loanTransferWritePlatformService,
             LoanScheduleMaintenanceWritePlatformService loanScheduleMaintenanceWritePlatformService) {
         return new LoanWritePlatformServiceJpaRepositoryImpl(loanTransactionValidator, loanAccountDomainService, loanAssembler,
                 paymentDetailWritePlatformService, holidayRepository, configurationDomainService, workingDaysRepository,
-                loanTransactionWritePlatformService, loanDisbursementWritePlatformService, loanClosureWritePlatformService,
-                loanTransferWritePlatformService, loanScheduleMaintenanceWritePlatformService);
+                loanDisbursementWritePlatformService, loanClosureWritePlatformService, loanTransferWritePlatformService,
+                loanScheduleMaintenanceWritePlatformService);
     }
 
     @Bean

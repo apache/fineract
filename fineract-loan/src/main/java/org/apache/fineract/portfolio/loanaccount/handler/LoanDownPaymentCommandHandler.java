@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionWritePlatformService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "DOWNPAYMENT")
 public class LoanDownPaymentCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+    private final LoanTransactionWritePlatformService writePlatformService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
 
     @Override

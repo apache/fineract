@@ -23,7 +23,7 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,11 +32,11 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "MANUAL_INTEREST_REFUND_TRANSACTION")
 public class ManualInterestRefundCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService loanWritePlatformService;
+    private final LoanTransactionWritePlatformService loanTransactionWritePlatformService;
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return loanWritePlatformService.makeManualInterestRefund(command.getLoanId(), command.entityId(), command);
+        return loanTransactionWritePlatformService.makeManualInterestRefund(command.getLoanId(), command.entityId(), command);
     }
 }

@@ -88,7 +88,7 @@ public class LoanChargePaymentWritePlatformService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final LoanAccountDomainService loanAccountDomainService;
-    private final LoanWritePlatformService loanWritePlatformService;
+    private final LoanTransactionWritePlatformService loanTransactionWritePlatformService;
     private final LoanUtilService loanUtilService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
@@ -278,7 +278,7 @@ public class LoanChargePaymentWritePlatformService {
         }
         // chargeRefundChargeType only included as a parameter for accounting reason - in order to identify whether fee
         // or penalty GL account is relevant
-        CommandProcessingResult result = loanWritePlatformService.makeLoanRepaymentWithChargeRefundChargeType(
+        CommandProcessingResult result = loanTransactionWritePlatformService.makeLoanRepaymentWithChargeRefundChargeType(
                 LoanTransactionType.CHARGE_REFUND, repaymentJsonCommand.getLoanId(), repaymentJsonCommand, isRecoveryRepayment,
                 chargeRefundChargeType);
 
