@@ -62,12 +62,22 @@ public class LoanScheduleService {
     }
 
     public void regenerateScheduleWithReprocessingTransactions(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
+        regenerateScheduleForReprocessing(loan, generatorDTO);
+        reprocessLoanTransactionsService.reprocessTransactions(loan);
+    }
+
+    /**
+     * Regenerates the repayment schedule from the loan terms, as the base that the transactions are then replayed over.
+     * Replaying over the installments as they are stored is not enough once a transaction such as a re-age has reshaped
+     * them, because the replay drops the installments that such transactions created and expects the regular ones to be
+     * there.
+     */
+    public void regenerateScheduleForReprocessing(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
             regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         } else {
             regenerateRepaymentSchedule(loan, generatorDTO);
         }
-        reprocessLoanTransactionsService.reprocessTransactions(loan);
     }
 
     public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO,
