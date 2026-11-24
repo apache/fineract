@@ -32,6 +32,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import java.util.List;
+import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.query.QCExternalService;
 import org.apache.fineract.query.QCExternalServiceProperties;
@@ -106,6 +107,51 @@ class ExternalServicesPropertiesReadPlatformServiceTest {
         givenRows(row("HOST", "smtp.example.com"));
 
         assertEquals("smtp.example.com", service.getSMTPCredentials().getHost());
+    }
+
+    @Test
+    void getS3CredentialsMapsEveryProperty() {
+        givenRows(row("s3_access_key", "my-access-key"), row("s3_bucket_name", "my-bucket"), row("s3_secret_key", "my-secret-key"));
+
+        S3CredentialsData result = service.getS3Credentials();
+
+        assertEquals("my-access-key", result.getAccessKey());
+        assertEquals("my-bucket", result.getBucketName());
+        assertEquals("my-secret-key", result.getSecretKey());
+    }
+
+    @Test
+    void getS3CredentialsReadsOnlyTheS3ServiceProperties() {
+        SQLQuery<Tuple> query = givenRows();
+
+        service.getS3Credentials();
+
+        verify(query).from(ESP);
+        verify(query).innerJoin(ES);
+        verify(query).on(ESP.externalServiceId.eq(ES.id));
+        verify(query).where(ES.name.eq(ExternalServicesConstants.S3_SERVICE_NAME));
+    }
+
+    @Test
+    void getS3CredentialsUsesDefaultsWhenNoRows() {
+        givenRows();
+
+        S3CredentialsData result = service.getS3Credentials();
+
+        assertNull(result.getAccessKey());
+        assertNull(result.getBucketName());
+        assertNull(result.getSecretKey());
+    }
+
+    @Test
+    void getS3CredentialsMatchesNamesIgnoringCase() {
+        givenRows(row("S3_ACCESS_KEY", "my-access-key"), row("S3_BUCKET_NAME", "my-bucket"), row("S3_SECRET_KEY", "my-secret-key"));
+
+        S3CredentialsData result = service.getS3Credentials();
+
+        assertEquals("my-access-key", result.getAccessKey());
+        assertEquals("my-bucket", result.getBucketName());
+        assertEquals("my-secret-key", result.getSecretKey());
     }
 
     @SuppressWarnings("unchecked")
