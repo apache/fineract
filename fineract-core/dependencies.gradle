@@ -108,6 +108,7 @@ dependencies {
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
     testImplementation( 'io.github.classgraph:classgraph')
+    testImplementation(testFixtures(project(':fineract-querydsl')))
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

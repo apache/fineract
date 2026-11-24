@@ -56,6 +56,7 @@ buildCache {
 
 rootProject.name='fineract'
 include ':fineract-core'
+include ':fineract-testcontainers-support'
 include ':fineract-security'
 include ':fineract-cob'
 include ':fineract-validation'
