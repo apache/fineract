@@ -123,6 +123,26 @@ public class SystemCodeTest extends FeignIntegrationTest {
                 "Verify not found error code");
     }
 
+    @Test
+    public void testRetrieveNonExistingCodeByName() {
+        final CallFailedRuntimeException error = fail(() -> fineractClient().codes().retrieveOneCodeByName("Non existing code name"));
+
+        assertEquals(404, error.getStatus(), "Verify non-existing code name returns 404");
+        assertEquals("error.msg.code.not.found", FeignErrors.firstError(error).userMessageGlobalisationCode(),
+                "Verify not found error code");
+    }
+
+    @Test
+    public void testRetrieveSystemDefinedCodeByName() {
+        final GetCodesResponse systemDefinedCode = ok(() -> fineractClient().codes().retrieveAllCodes()).stream()
+                .filter(code -> Boolean.TRUE.equals(code.getSystemDefined())).findFirst().orElseThrow();
+
+        final GetCodesResponse codeByName = ok(() -> fineractClient().codes().retrieveOneCodeByName(systemDefinedCode.getName()));
+
+        assertEquals(systemDefinedCode.getId(), codeByName.getId(), "Verify code retrieved by name");
+        assertEquals(Boolean.TRUE, codeByName.getSystemDefined(), "Verify system-defined flag of code retrieved by name");
+    }
+
     // @Ignore
     @Test
     public void testUpdateDeleteSystemDefinedCode() {
