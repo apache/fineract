@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.portfolio.client.service.search.domain;
 
+import java.util.List;
 import lombok.Data;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
 
 @Data
 public class ClientTextSearch {
 
     private String text;
+    /** Only clients in one of these statuses are returned; omitted or empty means no status filter. */
+    private List<ClientStatus> status;
 }
