@@ -21,6 +21,7 @@ package org.apache.fineract.useradministration.service;
 import jakarta.persistence.PersistenceException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
+    private static final String NAME_PARAM_NAME = "name";
+    private static final String DESCRIPTION_PARAM_NAME = "description";
+
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -65,7 +69,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
             this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Role entity = Role.fromJson(command);
+            final Role entity = new Role(command.stringValueOfParameterNamed(NAME_PARAM_NAME),
+                    command.stringValueOfParameterNamed(DESCRIPTION_PARAM_NAME));
             this.roleRepository.saveAndFlush(entity);
 
             return new CommandProcessingResultBuilder() //
@@ -84,6 +89,24 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                     .withCommandId(command.commandId()) //
                     .build();
         }
+    }
+
+    private static Map<String, Object> applyChanges(final Role role, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        if (command.isChangeInStringParameterNamed(NAME_PARAM_NAME, role.getName())) {
+            final String newValue = command.stringValueOfParameterNamed(NAME_PARAM_NAME);
+            actualChanges.put(NAME_PARAM_NAME, newValue);
+            role.updateName(newValue);
+        }
+
+        if (command.isChangeInStringParameterNamed(DESCRIPTION_PARAM_NAME, role.getDescription())) {
+            final String newValue = command.stringValueOfParameterNamed(DESCRIPTION_PARAM_NAME);
+            actualChanges.put(DESCRIPTION_PARAM_NAME, newValue);
+            role.updateDescription(newValue);
+        }
+
+        return actualChanges;
     }
 
     /*
@@ -112,7 +135,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
 
             String previousRoleName = role.getName();
-            final Map<String, Object> changes = role.update(command);
+            final Map<String, Object> changes = applyChanges(role, command);
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
             }

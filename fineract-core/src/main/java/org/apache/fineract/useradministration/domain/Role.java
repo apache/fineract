@@ -29,10 +29,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.data.RoleData;
 
@@ -53,12 +50,6 @@ public class Role extends AbstractPersistableCustom<Long> implements Serializabl
     @JoinTable(name = "m_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new HashSet<>();
 
-    public static Role fromJson(final JsonCommand command) {
-        final String name = command.stringValueOfParameterNamed("name");
-        final String description = command.stringValueOfParameterNamed("description");
-        return new Role(name, description);
-    }
-
     protected Role() {
         //
     }
@@ -69,25 +60,12 @@ public class Role extends AbstractPersistableCustom<Long> implements Serializabl
         this.disabled = false;
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public void updateName(final String name) {
+        this.name = name;
+    }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
-        }
-
-        final String descriptionParamName = "description";
-        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, newValue);
-            this.description = newValue;
-        }
-
-        return actualChanges;
+    public void updateDescription(final String description) {
+        this.description = description;
     }
 
     public boolean updatePermission(final Permission permission, final boolean isSelected) {
@@ -130,6 +108,10 @@ public class Role extends AbstractPersistableCustom<Long> implements Serializabl
 
     public String getName() {
         return this.name;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     public void disableRole() {
