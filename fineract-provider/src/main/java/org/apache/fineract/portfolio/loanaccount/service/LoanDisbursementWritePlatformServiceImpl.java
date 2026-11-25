@@ -1248,12 +1248,17 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
         final LoanTransaction lastDisbursalTransaction = loanTransactions.getLast();
         final LocalDate lastTransactionDate = lastDisbursalTransaction.getTransactionDate();
 
+        // Without down payment, a repayment on the day of the last tranche cannot be its manual down payment, so it
+        // blocks the undo like a repayment on a later day instead of being reversed with the tranche
+        final boolean isDownPaymentEnabled = loan.getLoanRepaymentScheduleDetail().isEnableDownPayment();
         loanTransactions = loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan);
         Collections.reverse(loanTransactions);
         for (final LoanTransaction previousTransaction : loanTransactions) {
-            if (DateUtils.isBefore(lastTransactionDate, previousTransaction.getTransactionDate())
-                    && (previousTransaction.isRepaymentLikeType() || previousTransaction.isWaiver()
-                            || previousTransaction.isChargePayment())) {
+            final boolean isAfterLastDisbursal = DateUtils.isBefore(lastTransactionDate, previousTransaction.getTransactionDate())
+                    || (!isDownPaymentEnabled && DateUtils.isEqual(lastTransactionDate, previousTransaction.getTransactionDate())
+                            && previousTransaction.getId().compareTo(lastDisbursalTransaction.getId()) > 0);
+            if (isAfterLastDisbursal && (previousTransaction.isRepaymentLikeType() || previousTransaction.isWaiver()
+                    || previousTransaction.isChargePayment())) {
                 throw new UndoLastTrancheDisbursementException(previousTransaction.getId());
             }
             if (previousTransaction.getId().compareTo(lastDisbursalTransaction.getId()) < 0) {

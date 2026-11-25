@@ -25,7 +25,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
@@ -72,6 +74,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -82,6 +85,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService.DownPaymentFeesPreparation;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotActiveException;
@@ -178,6 +184,12 @@ public class LoanDisbursementWritePlatformServiceImplTest {
 
     @Mock
     private LoanAccountService loanAccountService;
+
+    @Mock
+    private LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
+
+    @Mock
+    private LoanChargeValidator loanChargeValidator;
 
     @InjectMocks
     private LoanDisbursementWritePlatformServiceImpl loanDisbursementWritePlatformService;
@@ -688,6 +700,82 @@ public class LoanDisbursementWritePlatformServiceImplTest {
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getOfficeId()).thenReturn(3L);
         when(loan.getGroupId()).thenReturn(null);
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void undoLastLoanDisbursal_withRepaymentOnTheDayOfTheLastTranche_shouldBeRejected() {
+        final LocalDate lastTrancheDate = LocalDate.of(2025, 5, 10);
+        givenLoanWithTwoTranches(false, transaction(3L, LoanTransactionType.REPAYMENT, lastTrancheDate));
+
+        assertThrows(UndoLastTrancheDisbursementException.class,
+                () -> loanDisbursementWritePlatformService.undoLastLoanDisbursal(LOAN_ID, mock(JsonCommand.class)));
+        verify(loanBalanceService, never()).updateLoanToLastDisbursalState(any(), any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void undoLastLoanDisbursal_withRepaymentAfterTheDayOfTheLastTranche_shouldBeRejected() {
+        final LocalDate lastTrancheDate = LocalDate.of(2025, 5, 10);
+        givenLoanWithTwoTranches(false, transaction(3L, LoanTransactionType.REPAYMENT, lastTrancheDate.plusDays(1)));
+
+        assertThrows(UndoLastTrancheDisbursementException.class,
+                () -> loanDisbursementWritePlatformService.undoLastLoanDisbursal(LOAN_ID, mock(JsonCommand.class)));
+        verify(loanBalanceService, never()).updateLoanToLastDisbursalState(any(), any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void undoLastLoanDisbursal_withChargesPaidAtTheLastTranche_shouldUndoTheTranche() {
+        final LocalDate lastTrancheDate = LocalDate.of(2025, 5, 10);
+        final Loan loan = givenLoanWithTwoTranches(false, transaction(3L, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, lastTrancheDate));
+
+        loanDisbursementWritePlatformService.undoLastLoanDisbursal(LOAN_ID, mock(JsonCommand.class));
+
+        verify(loanBalanceService).updateLoanToLastDisbursalState(eq(loan), any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void undoLastLoanDisbursal_withDownPaymentEnabledAndManualDownPaymentOfTheLastTranche_shouldUndoTheTranche() {
+        final LocalDate lastTrancheDate = LocalDate.of(2025, 5, 10);
+        final Loan loan = givenLoanWithTwoTranches(true, transaction(3L, LoanTransactionType.REPAYMENT, lastTrancheDate));
+
+        loanDisbursementWritePlatformService.undoLastLoanDisbursal(LOAN_ID, mock(JsonCommand.class));
+
+        verify(loanBalanceService).updateLoanToLastDisbursalState(eq(loan), any());
+    }
+
+    private Loan givenLoanWithTwoTranches(final boolean isDownPaymentEnabled, final LoanTransaction transactionAfterLastTranche) {
+        final LocalDate lastTrancheDate = LocalDate.of(2025, 5, 10);
+        final Loan loan = mock(Loan.class);
+        final LoanProductRelatedDetail loanRepaymentScheduleDetail = mock(LoanProductRelatedDetail.class);
+        final LoanDisbursementDetails firstTrancheDetails = mock(LoanDisbursementDetails.class);
+        final LoanDisbursementDetails lastTrancheDetails = mock(LoanDisbursementDetails.class);
+        when(firstTrancheDetails.actualDisbursementDate()).thenReturn(lastTrancheDate.minusDays(5));
+        when(lastTrancheDetails.actualDisbursementDate()).thenReturn(lastTrancheDate);
+        final LoanTransaction firstTranche = transaction(1L, LoanTransactionType.DISBURSEMENT, lastTrancheDate.minusDays(5));
+        final LoanTransaction lastTranche = transaction(2L, LoanTransactionType.DISBURSEMENT, lastTrancheDate);
+
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
+        when(loan.isMultiDisburmentLoan()).thenReturn(true);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanRepaymentScheduleDetail);
+        when(loanRepaymentScheduleDetail.isEnableDownPayment()).thenReturn(isDownPaymentEnabled);
+        when(loan.getDisbursementDetails()).thenReturn(List.of(firstTrancheDetails, lastTrancheDetails));
+        when(loan.retrieveListOfTransactionsByType(LoanTransactionType.DISBURSEMENT))
+                .thenReturn(new ArrayList<>(List.of(firstTranche, lastTranche)));
+        when(loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan))
+                .thenReturn(new ArrayList<>(List.of(firstTranche, lastTranche, transactionAfterLastTranche)));
+        return loan;
+    }
+
+    private static LoanTransaction transaction(final Long id, final LoanTransactionType type, final LocalDate date) {
+        final LoanTransaction transaction = mock(LoanTransaction.class, CALLS_REAL_METHODS);
+        doReturn(id).when(transaction).getId();
+        doReturn(type).when(transaction).getTypeOf();
+        doReturn(date).when(transaction).getTransactionDate();
+        doReturn(false).when(transaction).isReversed();
+        return transaction;
     }
 
     private static final class DisbursementFixture {
