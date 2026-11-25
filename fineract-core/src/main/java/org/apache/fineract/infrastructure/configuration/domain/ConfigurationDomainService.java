@@ -206,5 +206,7 @@ public interface ConfigurationDomainService {
 
     Long retrievePayoffSchedulePreviewMaxTermPeriods();
 
+    boolean isLoanLossProvisioningJobAutoPostEnabled();
+
     Set<String> getIdempotencyRecoverableErrorCodes();
 }

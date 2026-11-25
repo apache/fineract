@@ -101,5 +101,7 @@ public final class GlobalConfigurationConstants {
     public static final String PAYOFF_SCHEDULE_PREVIEW_MAX_TERM_PERIODS = "payoff-schedule-preview-max-term-periods";
     public static final String IDEMPOTENCY_RECOVERABLE_ERROR_CODES = "idempotency-recoverable-error-codes";
 
+    public static final String LOAN_LOSS_PROVISIONING_JOB_AUTO_POST = "loan-loss-provisioning-job-auto-post";
+
     private GlobalConfigurationConstants() {}
 }

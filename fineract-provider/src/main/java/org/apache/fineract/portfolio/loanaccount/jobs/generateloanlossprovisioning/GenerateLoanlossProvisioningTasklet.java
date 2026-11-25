@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.accounting.provisioning.exception.ProvisioningEntryAlreadyCreatedException;
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
@@ -39,11 +40,12 @@ public class GenerateLoanlossProvisioningTasklet implements Tasklet {
 
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         LocalDate currentDate = DateUtils.getBusinessLocalDate();
-        boolean addJournalEntries = true;
+        boolean addJournalEntries = this.configurationDomainService.isLoanLossProvisioningJobAutoPostEnabled();
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = provisioningCriteriaReadPlatformService
                     .retrieveAllProvisioningCriterias();

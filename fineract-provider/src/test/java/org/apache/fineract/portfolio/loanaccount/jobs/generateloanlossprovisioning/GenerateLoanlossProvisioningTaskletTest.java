@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.fineract.accounting.provisioning.exception.ProvisioningEntryAlreadyCreatedException;
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesWritePlatformService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
@@ -59,12 +60,15 @@ class GenerateLoanlossProvisioningTaskletTest {
     private ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     @Mock
     private ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
+    @Mock
+    private ConfigurationDomainService configurationDomainService;
 
     @InjectMocks
     private GenerateLoanlossProvisioningTasklet underTest;
 
     @BeforeEach
     public void setUp() {
+        given(configurationDomainService.isLoanLossProvisioningJobAutoPostEnabled()).willReturn(true);
         ThreadLocalContextUtil.setBusinessDates(
                 new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE, BusinessDateType.COB_DATE, BUSINESS_DATE)));
     }
