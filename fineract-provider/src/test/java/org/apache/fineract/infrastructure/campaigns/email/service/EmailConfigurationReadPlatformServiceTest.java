@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
@@ -34,21 +35,18 @@ import com.querydsl.sql.SQLQueryFactory;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationNotFoundException;
 import org.apache.fineract.query.QScheduledEmailConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class EmailConfigurationReadPlatformServiceTest {
 
     private static final QScheduledEmailConfiguration CNF = new QScheduledEmailConfiguration("cnf");
-
-    @Mock
-    private JdbcTemplate jdbcTemplate;
 
     @Mock
     private SQLQueryFactory queryFactory;
@@ -57,7 +55,7 @@ class EmailConfigurationReadPlatformServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new EmailConfigurationReadPlatformServiceImpl(jdbcTemplate, queryFactory);
+        service = new EmailConfigurationReadPlatformServiceImpl(queryFactory);
     }
 
     @Test
@@ -113,11 +111,62 @@ class EmailConfigurationReadPlatformServiceTest {
         assertEquals("val", data.getValue());
     }
 
+    @Test
+    void retrieveOneReturnsExpectedData() {
+        givenSingleRow(row(1, "SMTP_SERVER", "smtp.example.com"));
+
+        EmailConfigurationData result = service.retrieveOne("SMTP_SERVER");
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("SMTP_SERVER", result.getName());
+        assertEquals("smtp.example.com", result.getValue());
+    }
+
+    @Test
+    void retrieveOneBuildsExpectedQuery() {
+        SQLQuery<Tuple> query = givenSingleRow(row(1, "SMTP_SERVER", "smtp.example.com"));
+
+        service.retrieveOne("SMTP_SERVER");
+
+        verify(queryFactory).select(CNF.id, CNF.name, CNF.value);
+        verify(query).from(CNF);
+        verify(query).where(CNF.name.eq("SMTP_SERVER"));
+        verify(query).fetchOne();
+    }
+
+    @Test
+    void retrieveOneThrowsExceptionWhenNotFound() {
+        givenSingleRow(null);
+
+        assertThrows(EmailConfigurationNotFoundException.class, () -> service.retrieveOne("NON_EXISTENT"));
+    }
+
+    @Test
+    void retrieveOneHandlesNullIdSafely() {
+        givenSingleRow(row(null, "SMTP_SERVER", "smtp.example.com"));
+
+        EmailConfigurationData result = service.retrieveOne("SMTP_SERVER");
+
+        assertNotNull(result);
+        assertNull(result.getId());
+        assertEquals("SMTP_SERVER", result.getName());
+        assertEquals("smtp.example.com", result.getValue());
+    }
+
     @SuppressWarnings("unchecked")
     private SQLQuery<Tuple> givenRows(Tuple... rows) {
         SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
         when(queryFactory.select(CNF.id, CNF.name, CNF.value)).thenReturn(query);
         when(query.fetch()).thenReturn(List.of(rows));
+        return query;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SQLQuery<Tuple> givenSingleRow(Tuple row) {
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(CNF.id, CNF.name, CNF.value)).thenReturn(query);
+        when(query.fetchOne()).thenReturn(row);
         return query;
     }
 
