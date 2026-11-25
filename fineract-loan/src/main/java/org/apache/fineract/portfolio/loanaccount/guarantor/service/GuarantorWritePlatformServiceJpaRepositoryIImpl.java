@@ -54,7 +54,7 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.exception.GuarantorNo
 import org.apache.fineract.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.serialization.GuarantorCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountAssemblerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +76,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     private final GuarantorRepository guarantorRepository;
     private final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
-    private final SavingsAccountAssembler savingsAccountAssembler;
+    private final SavingsAccountAssemblerService savingsAccountAssembler;
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final GuarantorDomainService guarantorDomainService;
 
@@ -85,7 +85,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final GuarantorRepository guarantorRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
             final StaffRepositoryWrapper staffRepositoryWrapper, final GroupRepositoryWrapper groupRepositoryWrapper,
             final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final SavingsAccountAssemblerService savingsAccountAssembler,
             final AccountAssociationsRepository accountAssociationsRepository, final GuarantorDomainService guarantorDomainService) {
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
