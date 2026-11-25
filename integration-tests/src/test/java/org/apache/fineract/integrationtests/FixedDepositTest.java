@@ -310,6 +310,62 @@ public class FixedDepositTest extends FeignDepositTestBase {
         BigDecimal maturityAmount = fixedDepositHelper.getAccount(fixedDepositAccountId).getMaturityAmount();
         journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, maturityAmount));
         journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE, debit(liabilityAccount, maturityAmount));
+        journalEntryHelper.checkExactJournalEntriesForAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, maturityAmount));
+    }
+
+    @Test
+    public void testFixedDepositAccountPrematureClosureDoesNotDuplicateJournalEntries() {
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
+
+        DateTimeFormatter dateFormat = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter(Locale.US);
+        LocalDate openedOn = Utils.getLocalDateOfTenant().minusDays(133);
+        final String VALID_FROM = dateFormat.format(openedOn.minusMonths(3));
+        final String VALID_TO = dateFormat.format(openedOn.plusYears(10));
+        final String OPENED_ON_DATE = dateFormat.format(openedOn);
+        final String CLOSED_ON_DATE = dateFormat.format(Utils.getLocalDateOfTenant());
+
+        Long clientId = clientHelper.createClient();
+        Assertions.assertNotNull(clientId);
+
+        Long fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, CASH_BASED, assetAccount, liabilityAccount,
+                incomeAccount, expenseAccount);
+        Assertions.assertNotNull(fixedDepositProductId);
+
+        Long fixedDepositAccountId = applyForFixedDepositApplication(clientId, fixedDepositProductId, OPENED_ON_DATE, WHOLE_TERM,
+                DepositTestData.DEPOSIT_AMOUNT, 12);
+        Assertions.assertNotNull(fixedDepositAccountId);
+
+        fixedDepositHelper.approve(fixedDepositAccountId, OPENED_ON_DATE);
+        fixedDepositHelper.activate(fixedDepositAccountId, OPENED_ON_DATE);
+        DepositTestValidators.verifyFixedDepositIsActive(statusOf(fixedDepositAccountId));
+
+        BigDecimal depositAmount = fixedDepositHelper.getSummary(fixedDepositAccountId).getTotalDeposits();
+
+        fixedDepositHelper.calculatePrematureAmount(fixedDepositAccountId, CLOSED_ON_DATE);
+
+        Long prematureClosureTransactionId = fixedDepositHelper
+                .prematureClose(fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null).getResourceId();
+        Assertions.assertNotNull(prematureClosureTransactionId);
+        DepositTestValidators.verifyFixedDepositAccountIsPrematureClosed(statusOf(fixedDepositAccountId));
+
+        BigDecimal interestPosted = fixedDepositHelper.getSummary(fixedDepositAccountId).getTotalInterestPosted();
+        BigDecimal payoutAmount = fixedDepositHelper.getAccount(fixedDepositAccountId).getMaturityAmount();
+        assertWithinThreshold(depositAmount.add(interestPosted), payoutAmount, "Payout must equal deposit + interest posted");
+
+        // the closing transaction id must carry exactly one debit and one credit leg, not two of each
+        assertEquals(2, journalEntryHelper.getJournalEntriesByTransactionId("S" + prematureClosureTransactionId).getPageItems().size(),
+                "The closing transaction id must not carry a duplicated payout entry");
+
+        // the deposit control (liability) GL must net to zero -- interest credited, then debited away by the payout
+        // -- once the account is closed, not left with a dangling debit from a duplicate post
+        journalEntryHelper.checkExactJournalEntriesForAccount(liabilityAccount, CLOSED_ON_DATE, credit(liabilityAccount, interestPosted),
+                debit(liabilityAccount, payoutAmount));
+
+        // the cash (asset) GL must show exactly one payout credit, not the fund source understated twice
+        journalEntryHelper.checkExactJournalEntriesForAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, payoutAmount));
     }
 
     @Test
@@ -1287,6 +1343,9 @@ public class FixedDepositTest extends FeignDepositTestBase {
             Assertions.assertEquals(0, maturityAmount.compareTo(reinvestedDeposit.getSummary().getAccountBalance()),
                     "The new deposit must hold the maturity amount " + maturityAmount + ", but holds "
                             + reinvestedDeposit.getSummary().getAccountBalance());
+
+            journalEntryHelper.checkExactJournalEntriesForAccount(assetAccount, VALID_TO, credit(assetAccount, maturityAmount),
+                    debit(assetAccount, maturityAmount));
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));

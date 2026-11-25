@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -291,8 +292,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
             this.savingsAccountRepository.saveAndFlush(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
-            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, reInvestAmount, paymentDetail,
-                    false, isRegularTransaction);
+            final SavingsAccountTransaction withdrawal = handleClosureWithdrawal(account, fmt, closedDate, reInvestAmount, paymentDetail,
+                    isRegularTransaction, existingTransactionIds, existingReversedTransactionIds);
             savingsTransactionId = withdrawal.getId();
 
             if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST) {
@@ -316,8 +317,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             account.updateClosedStatus();
             account.updateOnAccountClosureStatus(onClosureType);
         } else {
-            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
-                    paymentDetail, false, isRegularTransaction);
+            final SavingsAccountTransaction withdrawal = handleClosureWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, isRegularTransaction, existingTransactionIds, existingReversedTransactionIds);
             savingsTransactionId = withdrawal.getId();
         }
 
@@ -386,8 +387,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.savingsAccountRepository.save(reinvestedDeposit);
             autoGenerateAccountNumber(reinvestedDeposit);
 
-            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
-                    paymentDetail, false, isRegularTransaction);
+            final SavingsAccountTransaction withdrawal = handleClosureWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, isRegularTransaction, existingTransactionIds, existingReversedTransactionIds);
             savingsTransactionId = withdrawal.getId();
 
         } else if (onClosureType == DepositAccountOnClosureType.TRANSFER_TO_SAVINGS) {
@@ -403,8 +404,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
-            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
-                    paymentDetail, false, isRegularTransaction);
+            final SavingsAccountTransaction withdrawal = handleClosureWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, isRegularTransaction, existingTransactionIds, existingReversedTransactionIds);
             savingsTransactionId = withdrawal.getId();
         }
 
@@ -493,8 +494,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
-            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
-                    paymentDetail, false, isRegularTransaction);
+            final SavingsAccountTransaction withdrawal = handleClosureWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, isRegularTransaction, existingTransactionIds, existingReversedTransactionIds);
             savingsTransactionId = withdrawal.getId();
         }
 
@@ -551,8 +552,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
-            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
-                    paymentDetail, false, isRegularTransaction);
+            final SavingsAccountTransaction withdrawal = handleClosureWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, isRegularTransaction, existingTransactionIds, existingReversedTransactionIds);
             savingsTransactionId = withdrawal.getId();
         }
 
@@ -562,6 +563,22 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         this.savingsAccountRepository.save(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         return savingsTransactionId;
+    }
+
+    private SavingsAccountTransaction handleClosureWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
+            final LocalDate closedDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+            final boolean isRegularTransaction, final Set<Long> existingTransactionIds, final Set<Long> existingReversedTransactionIds) {
+        // flushed first, so that the transactions posted so far are identified by the same ids here and in the
+        // withdrawal, which skips what it finds under an id of its own snapshot: an unflushed transaction has none
+        this.savingsAccountRepository.saveAndFlush(account);
+        final Collection<Long> idsBeforeWithdrawal = account.findExistingTransactionIds();
+        final Collection<Long> reversedIdsBeforeWithdrawal = account.findExistingReversedTransactionIds();
+        final SavingsAccountTransaction withdrawal = handleWithdrawal(account, fmt, closedDate, transactionAmount, paymentDetail, false,
+                isRegularTransaction);
+        account.findExistingTransactionIds().stream().filter(id -> !idsBeforeWithdrawal.contains(id)).forEach(existingTransactionIds::add);
+        account.findExistingReversedTransactionIds().stream().filter(id -> !reversedIdsBeforeWithdrawal.contains(id))
+                .forEach(existingReversedTransactionIds::add);
+        return withdrawal;
     }
 
     private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
