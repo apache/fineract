@@ -84,7 +84,7 @@ class JournalEntryReadPlatformServiceImplTest {
         final ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
         when(paginationHelper.fetchPage(eq(jdbcTemplate), sqlCaptor.capture(), argsCaptor.capture(), any())).thenReturn(null);
 
-        service.retrieveAll(SearchParameters.builder().hierarchy(HIERARCHY).build(), null, null, null, null, null, null, null, null,
+        service.retrieveAll(SearchParameters.builder().hierarchy(HIERARCHY).build(), null, null, null, null, null, null, null, null, null,
                 new JournalEntryAssociationParametersData());
 
         assertTrue(sqlCaptor.getValue().contains("office.hierarchy like ?"),
@@ -98,7 +98,7 @@ class JournalEntryReadPlatformServiceImplTest {
         final ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
         when(paginationHelper.fetchPage(eq(jdbcTemplate), sqlCaptor.capture(), any(), any())).thenReturn(null);
 
-        service.retrieveAll(SearchParameters.builder().build(), null, null, null, null, null, null, null, null,
+        service.retrieveAll(SearchParameters.builder().build(), null, null, null, null, null, null, null, null, null,
                 new JournalEntryAssociationParametersData());
 
         assertFalse(sqlCaptor.getValue().contains("office.hierarchy"), "callers without a hierarchy must stay unscoped");
