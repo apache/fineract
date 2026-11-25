@@ -130,6 +130,8 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPla
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestCalculationService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestCalculationServiceImpl;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestPostingReadService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestPostingReadServiceImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestPostingService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestPostingServiceImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountPostInterestService;
@@ -138,6 +140,8 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformS
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountTemplateReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountTemplateReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountTransactionReadService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountTransactionReadServiceImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
@@ -452,11 +456,26 @@ public class SavingsConfiguration {
     @Bean
     @ConditionalOnMissingBean(SavingsAccountReadPlatformService.class)
     public SavingsAccountReadPlatformService savingsAccountReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
-            SavingsAccountAssembler savingAccountAssembler, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
             SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper, ColumnValidator columnValidator,
+            SavingsAccountTransactionReadService savingsAccountTransactionReadService,
+            SavingsAccountInterestPostingReadService savingsAccountInterestPostingReadService) {
+        return new SavingsAccountReadPlatformServiceImpl(context, jdbcTemplate, paginationHelper, columnValidator, sqlGenerator,
+                savingsAccountRepositoryWrapper, savingsAccountTransactionReadService, savingsAccountInterestPostingReadService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SavingsAccountTransactionReadService.class)
+    public SavingsAccountTransactionReadService savingsAccountTransactionReadService(JdbcTemplate jdbcTemplate,
             SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
-        return new SavingsAccountReadPlatformServiceImpl(context, jdbcTemplate, savingAccountAssembler, paginationHelper, columnValidator,
-                sqlGenerator, savingsAccountRepositoryWrapper, savingsAccountTransactionRepository);
+        return new SavingsAccountTransactionReadServiceImpl(jdbcTemplate, savingsAccountTransactionRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SavingsAccountInterestPostingReadService.class)
+    public SavingsAccountInterestPostingReadService savingsAccountInterestPostingReadService(JdbcTemplate jdbcTemplate,
+            SavingsAccountAssembler savingAccountAssembler) {
+        return new SavingsAccountInterestPostingReadServiceImpl(jdbcTemplate, savingAccountAssembler);
     }
 
     @Bean
