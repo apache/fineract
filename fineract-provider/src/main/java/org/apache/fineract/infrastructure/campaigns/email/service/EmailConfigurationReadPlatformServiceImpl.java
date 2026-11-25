@@ -18,29 +18,39 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.query.QScheduledEmailConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigurationReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
     private final EmailConfigurationRowMapper emailConfigurationRowMapper;
+    private final QScheduledEmailConfiguration cnf = new QScheduledEmailConfiguration("cnf");
 
     @Autowired
-    public EmailConfigurationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+    public EmailConfigurationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final SQLQueryFactory queryFactory) {
         this.jdbcTemplate = jdbcTemplate;
+        this.queryFactory = queryFactory;
         this.emailConfigurationRowMapper = new EmailConfigurationRowMapper();
     }
 
@@ -72,9 +82,15 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
 
     @Override
     public Collection<EmailConfigurationData> retrieveAll() {
-        final String sql = "select " + this.emailConfigurationRowMapper.schema();
-
-        return this.jdbcTemplate.query(sql, this.emailConfigurationRowMapper); // NOSONAR
+        List<Tuple> rows = queryFactory.select(cnf.id, cnf.name, cnf.value).from(cnf).fetch();
+        List<EmailConfigurationData> emailConfigurationData = new ArrayList<>(rows.size());
+        for (Tuple row : rows) {
+            Integer id = row.get(cnf.id);
+            String name = row.get(cnf.name);
+            String value = row.get(cnf.value);
+            emailConfigurationData.add(EmailConfigurationData.instance(id != null ? id.longValue() : null, name, value));
+        }
+        return emailConfigurationData;
     }
 
     @Override
