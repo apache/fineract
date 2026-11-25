@@ -367,7 +367,8 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             final Money transactionAmount, final PaymentDetail paymentDetail, final LocalDate transactionDate,
             final ExternalId txnExternalId) {
         return switch (transactionToAdjust.getTypeOf()) {
-            case WAIVE_INTEREST -> buildInterestWaiverReplacement(loan, transactionAmount, transactionDate, txnExternalId);
+            case WAIVE_INTEREST ->
+                buildInterestWaiverReplacement(loan, transactionToAdjust, transactionAmount, transactionDate, txnExternalId);
             case CHARGE_ADJUSTMENT -> buildChargeAdjustmentReplacement(loan, transactionToAdjust, transactionAmount, paymentDetail,
                     transactionDate, txnExternalId);
             default -> LoanTransaction.repaymentType(transactionToAdjust.getTypeOf(), loan.getOffice(), transactionAmount, paymentDetail,
@@ -375,12 +376,14 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         };
     }
 
-    private LoanTransaction buildInterestWaiverReplacement(final Loan loan, final Money transactionAmount, final LocalDate transactionDate,
-            final ExternalId txnExternalId) {
+    private LoanTransaction buildInterestWaiverReplacement(final Loan loan, final LoanTransaction transactionToAdjust,
+            final Money transactionAmount, final LocalDate transactionDate, final ExternalId txnExternalId) {
         Money unrecognizedIncome = transactionAmount.zero();
         Money interestComponent = transactionAmount;
         if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-            Money receivableInterest = loanBalanceService.getReceivableInterest(loan, transactionDate);
+            // The waiver being replaced is reversed only after this replacement is built: leave it out, or its interest
+            // would be netted against the receivable a second time.
+            Money receivableInterest = loanBalanceService.getReceivableInterest(loan, transactionDate, transactionToAdjust);
             if (transactionAmount.isGreaterThan(receivableInterest)) {
                 interestComponent = receivableInterest;
                 unrecognizedIncome = transactionAmount.minus(receivableInterest);
