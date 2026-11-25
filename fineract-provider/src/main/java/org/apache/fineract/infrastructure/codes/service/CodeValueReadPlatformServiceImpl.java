@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.codes.service;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -28,8 +30,9 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.query.QMCode;
+import org.apache.fineract.query.QMCodeValue;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -41,9 +44,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
     private final PlatformSecurityContext context;
     private final CodeValueRepository codeValueRepository;
     private final CodeValueMapper codeValueMapper;
+
+    private final QMCode code = new QMCode("c");
+    private final QMCodeValue cv = new QMCodeValue("cv");
 
     private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
 
@@ -94,17 +101,25 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     @Cacheable(value = "code_values", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#codeValueId+'cv_by_id')")
     public CodeValueData retrieveCodeValue(final Long codeValueId) {
 
-        try {
-            this.context.authenticatedUser();
+        this.context.authenticatedUser();
+        CodeValueData codeValueData = new CodeValueData();
 
-            final CodeValueDataMapper rm = new CodeValueDataMapper();
-            final String sql = "select " + rm.schema() + " where cv.id = ? order by position";
+        // returns null if nothing found does not throw.
+        Tuple result = queryFactory.select(cv.id, cv.codeValue, cv.codeDescription, cv.orderPosition, cv.isActive, cv.isMandatory).from(cv)
+                .innerJoin(code).on(cv.codeId.eq(code.id)).where(cv.id.eq(codeValueId.intValue())).fetchOne();
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new CodeValueNotFoundException(codeValueId, e);
+        if (result == null) {
+            throw new CodeValueNotFoundException(codeValueId);
         }
 
+        codeValueData.setId(result.get(cv.id).longValue());
+        codeValueData.setName(result.get(cv.codeValue));
+        codeValueData.setDescription(result.get(cv.codeDescription));
+        codeValueData.setPosition(result.get(cv.orderPosition));
+        codeValueData.setActive(result.get(cv.isActive));
+        codeValueData.setMandatory(result.get(cv.isMandatory));
+
+        return codeValueData;
     }
 
     @Override
