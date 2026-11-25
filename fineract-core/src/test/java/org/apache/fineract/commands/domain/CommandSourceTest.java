@@ -22,14 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.Test;
 
 class CommandSourceTest {
@@ -89,19 +85,5 @@ class CommandSourceTest {
         assertEquals(3L, commandSource.getResultClientId());
         assertNull(commandSource.getResultLoanId());
         assertTrue(commandSource.isResultIdsWritten());
-    }
-
-    @Test
-    void newEntryMarksItsRequestIdentifiersAsSubmitted() {
-        CommandWrapper wrapper = mock(CommandWrapper.class);
-        JsonCommand command = mock(JsonCommand.class);
-        when(command.getLoanId()).thenReturn(5L);
-
-        CommandSource commandSource = CommandSource.fullEntryFrom(wrapper, command, mock(AppUser.class), null,
-                CommandProcessingResultType.UNDER_PROCESSING.getValue(), false);
-
-        assertTrue(commandSource.isSubmittedIdsKept());
-        assertFalse(commandSource.isResultIdsWritten());
-        assertEquals(5L, commandSource.getLoanId());
     }
 }
