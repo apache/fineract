@@ -50,7 +50,7 @@
             <tableExists tableName="m_wc_loan"/>
             <columnExists tableName="m_wc_loan" columnName="charge_off_reason_cv_id"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_charge_off_reason"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan" foreignKeyName="FK_m_wc_loan_charge_off_reason"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="charge_off_reason_cv_id" baseTableName="m_wc_loan"
