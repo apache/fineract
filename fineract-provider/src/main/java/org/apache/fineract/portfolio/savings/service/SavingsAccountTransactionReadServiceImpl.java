@@ -40,7 +40,7 @@ public class SavingsAccountTransactionReadServiceImpl implements SavingsAccountT
     private final JdbcTemplate jdbcTemplate;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper = new SavingsAccountTransactionTemplateMapper();
-    protected SavingsAccountTransactionsMapper transactionsMapper = new SavingsAccountTransactionsMapper();
+    private final SavingsAccountTransactionsMapper transactionsMapper = new SavingsAccountTransactionsMapper();
     private final SavingsAccountTransactionsForBatchMapper savingsAccountTransactionsForBatchMapper = new SavingsAccountTransactionsForBatchMapper();
 
     @Override
