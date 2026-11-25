@@ -23,12 +23,14 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.persistence.FlushModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -36,17 +38,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
+import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForSavings;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -61,6 +68,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -86,6 +94,8 @@ class AccountingProcessorHelperImplTest {
     private ChargeRepositoryWrapper chargeRepositoryWrapper;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private FlushModeHandler flushModeHandler;
 
     @InjectMocks
     private AccountingProcessorHelperImpl helper;
@@ -134,6 +144,47 @@ class AccountingProcessorHelperImplTest {
         helper.createJournalEntriesForReversedSavingsTransaction("200", LocalDate.of(2021, 8, 31));
 
         verify(glJournalEntryRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void savingsEntriesAreBookedWithoutAFlushPerEntryOrPerMappingLookup() {
+        final Office office = mock(Office.class);
+        final GLAccount interestReceivable = mock(GLAccount.class);
+        final GLAccount interestIncome = mock(GLAccount.class);
+        final AtomicBoolean underCommitFlushMode = new AtomicBoolean();
+        when(flushModeHandler.withFlushMode(eq(FlushModeType.COMMIT), ArgumentMatchers.<Supplier<GLAccount>>any()))
+                .thenAnswer(invocation -> {
+                    underCommitFlushMode.set(true);
+                    try {
+                        return invocation.<Supplier<?>>getArgument(1).get();
+                    } finally {
+                        underCommitFlushMode.set(false);
+                    }
+                });
+        final int receivable = AccrualAccountsForSavings.INTEREST_RECEIVABLE.getValue();
+        final int income = AccrualAccountsForSavings.INCOME_FROM_INTEREST.getValue();
+        when(accountMappingRepository.findCoreProductToFinAccountMapping(2L, PortfolioProductType.SAVING.getValue(), receivable))
+                .thenAnswer(invocation -> mappingTo(interestReceivable, underCommitFlushMode.get()));
+        when(accountMappingRepository.findCoreProductToFinAccountMapping(2L, PortfolioProductType.SAVING.getValue(), income))
+                .thenAnswer(invocation -> mappingTo(interestIncome, underCommitFlushMode.get()));
+
+        helper.createCashBasedJournalEntriesAndReversalsForSavings(office, "USD", receivable, income, 2L, null, 1L, "300",
+                LocalDate.of(2021, 8, 31), BigDecimal.TEN, false);
+
+        final ArgumentCaptor<JournalEntry> entries = ArgumentCaptor.forClass(JournalEntry.class);
+        verify(glJournalEntryRepository, times(2)).save(entries.capture());
+        verify(glJournalEntryRepository, never()).saveAndFlush(any());
+        assertThat(entries.getAllValues())
+                .extracting(JournalEntry::getGlAccount, JournalEntry::isDebitEntry, JournalEntry::getTransactionId)
+                .containsExactly(tuple(interestReceivable, true, "S300"), tuple(interestIncome, false, "S300"));
+    }
+
+    private static ProductToGLAccountMapping mappingTo(final GLAccount glAccount, final boolean underCommitFlushMode) {
+        // a lookup in the default AUTO flush mode would flush the persistence context before it reads the mapping
+        assertTrue(underCommitFlushMode, "GL account mapping was read in a flush mode that flushes before the query");
+        final ProductToGLAccountMapping mapping = mock(ProductToGLAccountMapping.class);
+        when(mapping.getGlAccount()).thenReturn(glAccount);
+        return mapping;
     }
 
     @Test

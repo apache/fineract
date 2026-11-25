@@ -458,6 +458,9 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
             final AccountingProcessorForSavings accountingProcessorForSavings = this.accountingProcessorForSavingsFactory
                     .determineProcessor(savingsDTO);
             accountingProcessorForSavings.createJournalEntriesForSavings(savingsDTO);
+            // the processors persist savings entries without flushing each one; flush them together, so they are in
+            // the database when this returns, as they were when every entry was flushed on its own
+            this.glJournalEntryRepository.flush();
         }
     }
 
