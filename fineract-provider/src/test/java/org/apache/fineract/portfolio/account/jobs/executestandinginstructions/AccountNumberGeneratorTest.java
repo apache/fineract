@@ -148,6 +148,70 @@ public class AccountNumberGeneratorTest {
     }
 
     @Test
+    public void testLoanShortNamePrefix_defaultLength_keepsFullShortName() {
+        String accountNumber = generator.generate(loanWithShortName(77L, "L8X421AB"), shortNamePrefixFormat(201));
+        assertThat(accountNumber).isEqualTo("L8X421AB000000077");
+    }
+
+    @Test
+    public void testLoanShortNamePrefix_customLengthWithinLimit_keepsFullShortName() {
+        enableCustomAccountNumberLength(14L);
+
+        String accountNumber = generator.generate(loanWithShortName(77L, "C421"), shortNamePrefixFormat(201));
+        assertThat(accountNumber).isEqualTo("C42100000000000077");
+    }
+
+    @Test
+    public void testLoanShortNamePrefix_customLengthOverLimit_trimsShortNameToFitAccountNo() {
+        enableCustomAccountNumberLength(14L);
+
+        String accountNumber = generator.generate(loanWithShortName(77L, "L8X421AB"), shortNamePrefixFormat(201));
+        assertThat(accountNumber).isEqualTo("L8X42100000000000077").hasSize(20);
+    }
+
+    @Test
+    public void testSavingsShortNamePrefix_customLengthOverLimit_trimsShortNameToFitAccountNo() {
+        enableCustomAccountNumberLength(16L);
+        SavingsAccount savings = mock(SavingsAccount.class);
+        Office office = mock(Office.class);
+        SavingsProduct product = mock(SavingsProduct.class);
+        when(savings.getId()).thenReturn(456L);
+        when(savings.office()).thenReturn(office);
+        when(office.getName()).thenReturn("Branch01");
+        when(savings.savingsProduct()).thenReturn(product);
+        when(product.getShortName()).thenReturn("S8X421AB");
+
+        String accountNumber = generator.generate(savings, shortNamePrefixFormat(301));
+        assertThat(accountNumber).isEqualTo("S8X40000000000000456").hasSize(20);
+    }
+
+    private void enableCustomAccountNumberLength(Long length) {
+        GlobalConfigurationPropertyData accountLengthConfig = mock(GlobalConfigurationPropertyData.class);
+        when(accountLengthConfig.isEnabled()).thenReturn(true);
+        when(accountLengthConfig.getValue()).thenReturn(length);
+        when(configService.retrieveGlobalConfiguration(GlobalConfigurationConstants.CUSTOM_ACCOUNT_NUMBER_LENGTH))
+                .thenReturn(accountLengthConfig);
+    }
+
+    private static Loan loanWithShortName(Long id, String shortName) {
+        Loan loan = mock(Loan.class);
+        Office office = mock(Office.class);
+        LoanProduct product = mock(LoanProduct.class);
+        when(loan.getId()).thenReturn(id);
+        when(loan.getOffice()).thenReturn(office);
+        when(office.getName()).thenReturn("LoanBranch");
+        when(loan.loanProduct()).thenReturn(product);
+        when(product.getShortName()).thenReturn(shortName);
+        return loan;
+    }
+
+    private static AccountNumberFormat shortNamePrefixFormat(int prefixType) {
+        AccountNumberFormat format = mock(AccountNumberFormat.class);
+        when(format.getPrefixEnum()).thenReturn(prefixType);
+        return format;
+    }
+
+    @Test
     public void testCheckAccountNumberConflict_nullEntityType_returnsFalse() {
         Map<String, String> props = new HashMap<>();
         boolean result = generator.checkAccountNumberConflict(props, null, "12345");
