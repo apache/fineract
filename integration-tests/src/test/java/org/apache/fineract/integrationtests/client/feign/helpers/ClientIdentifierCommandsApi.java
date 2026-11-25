@@ -22,18 +22,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import org.apache.fineract.client.models.PutClientsClientIdIdentifiersIdentifierIdResponse;
+import org.apache.fineract.client.models.ClientIdentifierUpdateResponse;
 
 /**
- * Clearing a client identifier's issuance and expiry dates needs a body that carries explicit JSON {@code null}s:
- * {@code ClientIdentifierCommandFromApiJsonDeserializer} records whether each date key is <em>present</em>, and
- * {@code ClientIdentifierCommand.validateForUpdate} rejects an update in which no parameter is, with
- * {@code validation.msg.clientIdentifier.no.parameters.for.update}.
+ * Clearing a client identifier's issuance and expiry dates with explicit JSON {@code null}s, as API clients of the
+ * legacy endpoint did. {@code ClientIdentifierUpdateRequest} tells an explicit {@code null} (clear the date) apart from
+ * a field that was not sent (leave it unchanged).
  *
  * <p>
- * The generated {@code ClientIdentifierRequest} cannot express that here: the mapper's global {@code NON_NULL} drops a
- * null property, so {@code .issuanceDate(null).expiryDate(null)} reaches the server as <code>{}</code>. Declaring the
- * dates {@code nullable} in the spec would model them as {@code JsonNullable<String>}; the spec does not do that yet.
+ * The generated {@code ClientIdentifierUpdateRequest} cannot express that here: the mapper's global {@code NON_NULL}
+ * drops a null property, so {@code .issuanceDate(null).expiryDate(null)} reaches the server as <code>{}</code>.
+ * Declaring the dates {@code nullable} in the spec would model them as {@code JsonNullable<String>}; the spec does not
+ * do that yet.
  *
  * <p>
  * Same situation, same answer as {@link LoanProductCommandsApi}: the call stays typed end to end and binds the response
@@ -43,8 +43,8 @@ import org.apache.fineract.client.models.PutClientsClientIdIdentifiersIdentifier
 public interface ClientIdentifierCommandsApi {
 
     @RequestLine("PUT /v1/clients/{clientId}/identifiers/{identifierId}")
-    PutClientsClientIdIdentifiersIdentifierIdResponse clearIdentifierDates(@Param("clientId") Long clientId,
-            @Param("identifierId") Long identifierId, ClearIdentifierDatesRequest request);
+    ClientIdentifierUpdateResponse clearIdentifierDates(@Param("clientId") Long clientId, @Param("identifierId") Long identifierId,
+            ClearIdentifierDatesRequest request);
 
     /**
      * Body for {@link #clearIdentifierDates}: serialises to <code>{"issuanceDate":null,"expiryDate":null}</code>. The
