@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.domain;
 
-import com.google.gson.JsonArray;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,17 +28,13 @@ import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
@@ -73,41 +68,6 @@ public final class Report extends AbstractPersistableCustom<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
 
-    public static Report fromJson(final JsonCommand command, final Collection<String> reportTypes) {
-
-        String reportName = null;
-        String reportType = null;
-        String reportSubType = null;
-        String reportCategory = null;
-        String description = null;
-        boolean useReport = false;
-        String reportSql = null;
-
-        if (command.parameterExists("reportName")) {
-            reportName = command.stringValueOfParameterNamed("reportName");
-        }
-        if (command.parameterExists("reportType")) {
-            reportType = command.stringValueOfParameterNamed("reportType");
-        }
-        if (command.parameterExists("reportSubType")) {
-            reportSubType = command.stringValueOfParameterNamed("reportSubType");
-        }
-        if (command.parameterExists("reportCategory")) {
-            reportCategory = command.stringValueOfParameterNamed("reportCategory");
-        }
-        if (command.parameterExists("description")) {
-            description = command.stringValueOfParameterNamed("description");
-        }
-        if (command.parameterExists("useReport")) {
-            useReport = command.booleanPrimitiveValueOfParameterNamed("useReport");
-        }
-        if (command.parameterExists("reportSql")) {
-            reportSql = command.stringValueOfParameterNamed("reportSql");
-        }
-
-        return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql, reportTypes);
-    }
-
     Report() {
         //
     }
@@ -125,75 +85,32 @@ public final class Report extends AbstractPersistableCustom<Long> {
         validate(reportTypes);
     }
 
-    public Map<String, Object> update(final JsonCommand command, final Collection<String> reportTypes) {
+    public void updateReportName(final String reportName) {
+        this.reportName = StringUtils.defaultIfEmpty(reportName, null);
+    }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(8);
+    public void updateReportType(final String reportType) {
+        this.reportType = StringUtils.defaultIfEmpty(reportType, null);
+    }
 
-        String paramName = "reportName";
-        if (command.isChangeInStringParameterNamed(paramName, this.reportName)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.reportName = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        paramName = "reportType";
-        if (command.isChangeInStringParameterNamed(paramName, this.reportType)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.reportType = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        paramName = "reportSubType";
-        if (command.isChangeInStringParameterNamed(paramName, this.reportSubType)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.reportSubType = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        paramName = "reportCategory";
-        if (command.isChangeInStringParameterNamed(paramName, this.reportCategory)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.reportCategory = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        paramName = "description";
-        if (command.isChangeInStringParameterNamed(paramName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.description = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        paramName = "useReport";
-        if (command.isChangeInBooleanParameterNamed(paramName, this.useReport)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.useReport = newValue;
-        }
-        paramName = "reportSql";
-        if (command.isChangeInStringParameterNamed(paramName, this.reportSql)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.reportSql = StringUtils.defaultIfEmpty(newValue, null);
-        }
+    public void updateReportSubType(final String reportSubType) {
+        this.reportSubType = StringUtils.defaultIfEmpty(reportSubType, null);
+    }
 
-        final String reportParametersParamName = "reportParameters";
-        if (command.hasParameter(reportParametersParamName)) {
-            final JsonArray jsonArray = command.arrayOfParameterNamed(reportParametersParamName);
-            if (jsonArray != null) {
-                actualChanges.put(reportParametersParamName, command.jsonFragment(reportParametersParamName));
-            }
-        }
+    public void updateReportCategory(final String reportCategory) {
+        this.reportCategory = StringUtils.defaultIfEmpty(reportCategory, null);
+    }
 
-        validate(reportTypes);
+    public void updateDescription(final String description) {
+        this.description = StringUtils.defaultIfEmpty(description, null);
+    }
 
-        if (!actualChanges.isEmpty()) {
-            if (isCoreReport()) {
-                for (final String key : actualChanges.keySet()) {
-                    if (!key.equals("useReport")) {
-                        throw new PlatformDataIntegrityException("error.msg.only.use.report.can.be.updated.for.core.report",
-                                "Only the Use Report field can be updated for Core Reports", key);
-                    }
-                }
-            }
-        }
+    public void updateUseReport(final boolean useReport) {
+        this.useReport = useReport;
+    }
 
-        return actualChanges;
+    public void updateReportSql(final String reportSql) {
+        this.reportSql = StringUtils.defaultIfEmpty(reportSql, null);
     }
 
     public boolean isCoreReport() {
@@ -211,7 +128,7 @@ public final class Report extends AbstractPersistableCustom<Long> {
         return reportParameterUsage;
     }
 
-    private void validate(final Collection<String> reportTypes) {
+    public void validate(final Collection<String> reportTypes) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("report");
@@ -255,6 +172,30 @@ public final class Report extends AbstractPersistableCustom<Long> {
 
     public String getReportName() {
         return this.reportName;
+    }
+
+    public String getReportType() {
+        return this.reportType;
+    }
+
+    public String getReportSubType() {
+        return this.reportSubType;
+    }
+
+    public String getReportCategory() {
+        return this.reportCategory;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public boolean isUseReport() {
+        return this.useReport;
+    }
+
+    public String getReportSql() {
+        return this.reportSql;
     }
 
     public boolean update(final Set<ReportParameterUsage> newReportParameterUsages) {
