@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.infrastructure.configuration.service;
 
+import static org.apache.fineract.query.QCConfiguration.cConfiguration;
+import static org.apache.fineract.query.QXRegisteredTable.xRegisteredTable;
+
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationAllowedValues;
@@ -31,26 +35,23 @@ import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurati
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper;
-    private final RowMapper<GlobalConfigurationPropertyData> rm;
+    private final SQLQueryFactory queryFactory;
 
     @Autowired
-    public ConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper) {
+    public ConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context,
+            final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper, final SQLQueryFactory queryFactory) {
         this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
         this.configurationRepositoryWrapper = configurationRepositoryWrapper;
-
-        this.rm = new GlobalConfigurationRowMapper();
+        this.queryFactory = queryFactory;
     }
 
     @Override
@@ -58,17 +59,17 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
 
-        String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description,c.string_value, c.is_trap_door FROM c_configuration c ";
+        SQLQuery<Tuple> query = queryFactory.select(cConfiguration.id, cConfiguration.name, cConfiguration.enabled, cConfiguration.value,
+                cConfiguration.dateValue, cConfiguration.description, cConfiguration.stringValue, cConfiguration.isTrapDoor)
+                .from(cConfiguration);
 
         if (survey) {
-            sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
-            sql += " WHERE x_registered_table.category = ?";
-
+            query.join(xRegisteredTable).on(xRegisteredTable.registeredTableName.eq(cConfiguration.name))
+                    .where(xRegisteredTable.category.eq(DataTableApiConstant.CATEGORY_PPI));
         }
 
-        sql += "  order by c.id";
-        final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm,
-                survey ? new Object[] { DataTableApiConstant.CATEGORY_PPI } : new Object[] {});
+        final List<GlobalConfigurationPropertyData> globalConfiguration = query.orderBy(cConfiguration.id.asc()).fetch().stream()
+                .map(this::toData).toList();
 
         return new GlobalConfigurationData().setGlobalConfiguration(globalConfiguration);
     }
@@ -91,25 +92,14 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         return globalConfigurationProperty.toData();
     }
 
-    private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
-
-        @Override
-        public GlobalConfigurationPropertyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
-
-            final String name = rs.getString("name");
-            final boolean enabled = rs.getBoolean("enabled");
-            final Long value = rs.getLong("value");
-            final Date dateValue = rs.getDate("date_value");
-            final String stringValue = rs.getString("string_value");
-            final String description = rs.getString("description");
-            final Long id = rs.getLong("id");
-            final boolean isTrapDoor = rs.getBoolean("is_trap_door");
-            final LocalDate localDate = dateValue != null ? dateValue.toLocalDate() : null;
-            return GlobalConfigurationAllowedValues.withAllowedValues(
-                    new GlobalConfigurationPropertyData().setName(name).setEnabled(enabled).setValue(value).setDateValue(localDate)
-                            .setStringValue(stringValue).setId(id).setDescription(description).setTrapDoor(isTrapDoor));
-        }
+    private GlobalConfigurationPropertyData toData(final Tuple row) {
+        final Integer value = row.get(cConfiguration.value);
+        final Date dateValue = row.get(cConfiguration.dateValue);
+        return GlobalConfigurationAllowedValues.withAllowedValues(new GlobalConfigurationPropertyData()
+                .setName(row.get(cConfiguration.name)).setEnabled(Boolean.TRUE.equals(row.get(cConfiguration.enabled)))
+                .setValue(value != null ? value.longValue() : 0L).setDateValue(dateValue != null ? dateValue.toLocalDate() : null)
+                .setStringValue(row.get(cConfiguration.stringValue)).setId(Objects.requireNonNullElse(row.get(cConfiguration.id), 0L))
+                .setDescription(row.get(cConfiguration.description)).setTrapDoor(Boolean.TRUE.equals(row.get(cConfiguration.isTrapDoor))));
     }
 
 }
