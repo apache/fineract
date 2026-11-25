@@ -84,7 +84,7 @@ class WorkingCapitalLoanDataValidatorAdjustByDeltaTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, transactionRepository, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, transactionRepository, null, null, null, null, null);
 
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         lenient().when(loan.getFirstActualDisbursementDate()).thenReturn(LocalDate.of(2026, 1, 1));

@@ -4925,12 +4925,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         validateRepaymentResponse(response, transactionAmount, transactionDate, loanId);
     }
 
-    @Then("Customer fails to make credit balance refund on {string} with {double} EUR transaction amount backdated outcomes with error message")
-    public void creditBalanceRefundWCLoanFailureBackdated(final String transactionDate, final double transactionAmount) {
-        String errorMessage = ErrorMessageHelper.creditBalanceRefundBackdatedForbiddenFailure();
-        creditBalanceRefundWCLoanFailure(transactionDate, transactionAmount, 400, errorMessage);
-    }
-
     @Then("Customer makes {string} transaction on {string} with {double} transaction amount on Working Capital loan with the following payment details:")
     public void makeWorkingCapitalLoanTransactionLikeWithPaymentDetails(final String transactionTypeInput, final String transactionDate,
             final double transactionAmount, final DataTable table) {

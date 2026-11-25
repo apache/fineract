@@ -89,7 +89,7 @@ class WorkingCapitalLoanDataValidatorRecoveryPaymentTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null, null);
 
         // A loan written off for 100, with nothing recovered yet.
         balance = WorkingCapitalLoanBalance.createFor(loan);

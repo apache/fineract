@@ -81,7 +81,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
 
         final FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
-        validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null, null, rateChangeRepository);
+        validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null, null, rateChangeRepository, null);
 
         // Default: active loan, current rate = 10, product min = 1, max = 95. The mocked loan reports no maturity
         // date, so the effective-date-past-maturity check has nothing to compare against and stands aside. With no rate

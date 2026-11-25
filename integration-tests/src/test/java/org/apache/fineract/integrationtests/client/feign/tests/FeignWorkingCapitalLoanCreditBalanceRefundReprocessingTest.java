@@ -275,11 +275,12 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
     }
 
     /**
-     * Negative — a CBR whose transaction date is before the business date (backdated) must be rejected. The over-refund
-     * state only ever arises retroactively via reprocessing, never from a direct backdated CBR.
+     * Backdated CBR. A CBR may be dated before the business date, but not before the last repayment: one dated before
+     * the overpaying repayment is rejected, one dated between that repayment and the business date is accepted and
+     * reduces the overpayment like any other CBR.
      */
     @Test
-    void backdatedCbr_isRejected() {
+    void backdatedCbr_isRejectedBeforeLastRepaymentAndAcceptedAfterIt() {
         businessDateHelper.runAt("2026-01-01", () -> {
             Long clientId = clientHelper.createClient("01 January 2026");
             Long loanId = createAndDisburseLoanOnDate(clientId, BigDecimal.valueOf(50), "01 January 2026");
@@ -289,14 +290,24 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundReprocessingTest extends 
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(100), "10 January 2026"));
             assertStatus(loanId, STATUS_OVERPAID);
 
-            // Advance business date, then attempt a CBR dated before it (backdated).
+            // Advance the business date, then attempt a CBR dated before the overpaying repayment.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-15");
             CallFailedRuntimeException ex = wcLoanHelper.creditBalanceRefundExpectingFailure(loanId,
-                    WorkingCapitalLoanRequestBuilders.creditBalanceRefund(BigDecimal.valueOf(25), "10 January 2026"));
+                    WorkingCapitalLoanRequestBuilders.creditBalanceRefund(BigDecimal.valueOf(25), "05 January 2026"));
 
-            assertEquals(400, ex.getStatus(), "backdated CBR must be rejected with a validation error");
-            assertTrue(ex.getMessage() != null && ex.getMessage().contains("backdated"),
-                    "rejection must be the backdated-CBR validation error, was: " + ex.getMessage());
+            assertEquals(400, ex.getStatus(), "CBR before the last repayment must be rejected with a validation error");
+            assertTrue(ex.getMessage() != null && ex.getMessage().contains("cannot.be.before.last.repayment.or.refund.date"),
+                    "rejection must be the last-repayment date floor, was: " + ex.getMessage());
+            assertStatus(loanId, STATUS_OVERPAID);
+
+            // Backdated, but after the last repayment: accepted.
+            wcLoanHelper.creditBalanceRefund(loanId,
+                    WorkingCapitalLoanRequestBuilders.creditBalanceRefund(BigDecimal.valueOf(25), "12 January 2026"));
+
+            GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
+            assertStatusCode(loan, STATUS_OVERPAID);
+            assertEqualBigDecimal(BigDecimal.valueOf(25), requireBalance(loan).getOverpaymentAmount(),
+                    "overpayment after backdated partial CBR (50 - 25)");
         });
     }
 

@@ -41,6 +41,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,6 +73,10 @@ class WorkingCapitalLoanDataValidatorAmountScaleTest {
     private WorkingCapitalLoanProduct product;
     @Mock
     private WorkingCapitalLoanTransaction transaction;
+    @Mock
+    private WorkingCapitalLoanTransactionFinder transactionFinder;
+    @Mock
+    private WorkingCapitalLoanChargeRepository chargeRepository;
 
     @BeforeEach
     void setUp() {
@@ -78,7 +84,8 @@ class WorkingCapitalLoanDataValidatorAmountScaleTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null,
+                chargeRepository);
 
         lenient().when(loan.getCurrency()).thenReturn(new MonetaryCurrency("USD", 2, null));
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);

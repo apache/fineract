@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionAlreadyUndoneException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
@@ -78,6 +79,7 @@ public class WorkingCapitalLoanDataValidator {
     private final CodeValueRepository codeValueRepository;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
     private final WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
+    private final WorkingCapitalLoanChargeRepository chargeRepository;
 
     // Per requirement: only principal, discount, approved date, expected disbursement date, and notes
     private static final Set<String> APPROVAL_SUPPORTED_PARAMETERS = new HashSet<>(
@@ -1202,17 +1204,51 @@ public class WorkingCapitalLoanDataValidator {
                 element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate).notNull();
         if (transactionDate != null) {
+            // A credit balance refund can be backdated, with the same date rules as on a term/progressive loan: not
+            // into the future, not before the disbursement, not before the last repayment-like, refund or credit
+            // balance refund transaction, and not before the charge-off date of a charged-off loan. A full refund
+            // closes the loan on its own date, so it also cannot be dated before the last charge accrual (income
+            // already recognized after that date would be left behind the closure), nor before the last charge was
+            // added (the loan would close before an obligation it has). The charge date matters on its own: a product
+            // with no accounting posts no accrual.
             if (DateUtils.isDateInTheFuture(transactionDate)) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.a.future.date");
             }
-            final LocalDate businessDate = DateUtils.getBusinessLocalDate();
             if (DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.before.disbursal.date");
-            } else if (DateUtils.isBefore(transactionDate, businessDate)) {
-                throw new PlatformApiDataValidationException("validation.msg.wc.loan.credit.balance.refund.backdated.not.allowed",
-                        "Backdated credit balance refund is not allowed", WorkingCapitalLoanConstants.transactionDateParamName);
+            } else {
+                final LocalDate lastRepaymentOrRefundDate = this.transactionFinder.findLastRepaymentOrRefundDate(loan).orElse(null);
+                if (lastRepaymentOrRefundDate != null && DateUtils.isBefore(transactionDate, lastRepaymentOrRefundDate)) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                            .failWithCodeAndMessage("cannot.be.before.last.repayment.or.refund.date",
+                                    "The credit balance refund date cannot be before the last repayment or refund date: "
+                                            + lastRepaymentOrRefundDate,
+                                    lastRepaymentOrRefundDate);
+                }
+                final LocalDate lastAccrualDate = this.transactionFinder.findLastAccrualDate(loan).orElse(null);
+                if (lastAccrualDate != null && DateUtils.isBefore(transactionDate, lastAccrualDate)) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                            .failWithCodeAndMessage("cannot.be.before.last.accrual.date",
+                                    "The credit balance refund date cannot be before the last accrual date: " + lastAccrualDate,
+                                    lastAccrualDate);
+                }
+                final LocalDate lastChargeSubmittedOnDate = this.chargeRepository.findLatestSubmittedOnDateOfActiveCharges(loan.getId())
+                        .orElse(null);
+                if (lastChargeSubmittedOnDate != null && DateUtils.isBefore(transactionDate, lastChargeSubmittedOnDate)) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                            .failWithCodeAndMessage("cannot.be.before.last.charge.submitted.date",
+                                    "The credit balance refund date cannot be before the date the last charge was added: "
+                                            + lastChargeSubmittedOnDate,
+                                    lastChargeSubmittedOnDate);
+                }
+                if (loan.isChargedOff() && DateUtils.isBefore(transactionDate, loan.getChargedOffOnDate())) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                            .failWithCodeAndMessage("cannot.be.before.charge.off.date",
+                                    "The credit balance refund date cannot be before the charge-off date: " + loan.getChargedOffOnDate(),
+                                    loan.getChargedOffOnDate());
+                }
             }
         }
 

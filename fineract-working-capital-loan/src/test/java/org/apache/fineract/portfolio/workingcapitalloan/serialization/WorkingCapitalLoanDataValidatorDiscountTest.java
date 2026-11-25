@@ -56,7 +56,7 @@ public class WorkingCapitalLoanDataValidatorDiscountTest {
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, null, null, null, null, null);
     }
 
     @AfterEach

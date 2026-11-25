@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -39,6 +40,13 @@ public interface WorkingCapitalLoanChargeRepository
     Long findIdByExternalId(ExternalId externalId);
 
     List<WorkingCapitalLoanCharge> findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(Long loanId);
+
+    /**
+     * Returns the latest date an active charge was added to the loan, if it has any. A charge is added on the business
+     * date it is created on, so this is the last day the loan's obligations changed through a charge.
+     */
+    @Query("select max(lc.submittedOnDate) from WorkingCapitalLoanCharge lc where lc.loan.id = :loanId and lc.active = true")
+    Optional<LocalDate> findLatestSubmittedOnDateOfActiveCharges(@Param("loanId") Long loanId);
 
     @Query("""
             select new org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData(

@@ -83,7 +83,7 @@ class WorkingCapitalLoanDataValidatorWriteOffDateTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null, null);
         lenient().when(loan.isOpen()).thenReturn(true);
         lenient().when(transactionFinder.getLastUserTransactionDate(loan)).thenReturn(Optional.of(LAST_REPAYMENT_DATE));
     }
