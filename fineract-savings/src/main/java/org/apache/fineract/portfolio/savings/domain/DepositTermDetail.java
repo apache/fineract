@@ -133,8 +133,13 @@ public class DepositTermDetail {
 
     public boolean isMinDepositTermGreaterThanMaxDepositTerm() {
         if (this.minDepositTerm != null && this.maxDepositTerm != null) {
-            final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
-            final Integer maxDepositInDays = this.convertToSafeDays(maxDepositTerm, SavingsPeriodFrequencyType.fromInt(maxDepositTermType));
+            final SavingsPeriodFrequencyType minDepositType = SavingsPeriodFrequencyType.fromInt(minDepositTermType);
+            final SavingsPeriodFrequencyType maxDepositType = SavingsPeriodFrequencyType.fromInt(maxDepositTermType);
+            if (isMonthsOrYears(minDepositType) && isMonthsOrYears(maxDepositType)) {
+                return convertToMonths(minDepositTerm, minDepositType) > convertToMonths(maxDepositTerm, maxDepositType);
+            }
+            final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, minDepositType);
+            final Integer maxDepositInDays = this.convertToSafeDays(maxDepositTerm, maxDepositType);
             return minDepositInDays.compareTo(maxDepositInDays) > 0;
         }
         return false;

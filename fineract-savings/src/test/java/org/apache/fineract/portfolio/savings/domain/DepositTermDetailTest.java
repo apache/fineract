@@ -46,6 +46,16 @@ class DepositTermDetailTest {
     }
 
     @Test
+    void minimumInYearsEqualToMaximumInMonths() {
+        assertFalse(DepositTermDetail.createFrom(1, 12, SavingsPeriodFrequencyType.YEARS, SavingsPeriodFrequencyType.MONTHS, null, null)
+                .isMinDepositTermGreaterThanMaxDepositTerm());
+        assertFalse(DepositTermDetail.createFrom(2, 24, SavingsPeriodFrequencyType.YEARS, SavingsPeriodFrequencyType.MONTHS, null, null)
+                .isMinDepositTermGreaterThanMaxDepositTerm());
+        assertTrue(DepositTermDetail.createFrom(2, 18, SavingsPeriodFrequencyType.YEARS, SavingsPeriodFrequencyType.MONTHS, null, null)
+                .isMinDepositTermGreaterThanMaxDepositTerm());
+    }
+
+    @Test
     void weeklyMultipleAfterMinimumInDays() {
         DepositTermDetail term = DepositTermDetail.createFrom(7, 70, SavingsPeriodFrequencyType.DAYS, SavingsPeriodFrequencyType.DAYS, 1,
                 SavingsPeriodFrequencyType.WEEKS);
