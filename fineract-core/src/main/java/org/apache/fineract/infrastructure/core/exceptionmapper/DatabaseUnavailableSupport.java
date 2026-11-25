@@ -57,6 +57,8 @@ public final class DatabaseUnavailableSupport {
      * Walks the cause chain (some layers wrap the exception) and returns the first "database is not available"
      * exception, or null if there is none.
      */
+    // Identity on purpose: stops at an exception that is its own cause
+    @SuppressWarnings("ReferenceEquality")
     public static Throwable findDatabaseUnavailable(final Throwable t) {
         Throwable current = t;
         for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
@@ -75,6 +77,8 @@ public final class DatabaseUnavailableSupport {
         return ApiGlobalErrorResponse.serviceUnavailable(MESSAGE_CODE, MESSAGE);
     }
 
+    // Identity on purpose: stops at an exception that is its own cause
+    @SuppressWarnings("ReferenceEquality")
     public static String rootCauseMessage(final Throwable t) {
         Throwable root = t;
         while (root.getCause() != null && root.getCause() != root) {

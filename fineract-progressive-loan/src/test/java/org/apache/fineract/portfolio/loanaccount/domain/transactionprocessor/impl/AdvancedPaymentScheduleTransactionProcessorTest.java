@@ -1482,6 +1482,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
                 Mockito.argThat(amount -> BigDecimal.TEN.compareTo(amount.getAmount()) == 0), Mockito.eq(2), Mockito.any());
     }
 
+    // Identity on purpose: picks the mapping that is not the very one on the past installment
+    @SuppressWarnings("ReferenceEquality")
     @Test
     public void accelerateMaturityWithClosedCurrentMovesMappingToCurrentInstallment() {
         final LoanRepaymentScheduleInstallment past = accelerateInstallment(1, JAN_15.minusDays(44), JAN_15.minusDays(14));

@@ -172,6 +172,7 @@ public class ProgressiveLoanInterestScheduleModel {
      * Repayment and interest periods compare by value, but an overdue correction belongs to one period instance. Plain
      * JDK identity check: the embeddable schedule generator jar does not ship Guava.
      */
+    @SuppressWarnings("ReferenceEquality")
     private static boolean isSameInstance(final Object first, final Object second) {
         return first == second;
     }

@@ -1570,6 +1570,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
     }
 
+    // Identity on purpose: the charge must point at the very account instance the caller holds
+    @SuppressWarnings("ReferenceEquality")
     private void assertBelongsTo(final SavingsAccount account, final SavingsAccountCharge charge) {
         // payCharge(..) works on charge.savingsAccount(): it has to be the very instance the caller holds, otherwise
         // the

@@ -62,6 +62,8 @@ public class FineractApplicationLifecycleLogger {
                 ========================================================================""", baseUrl, createHealthUrl(baseUrl, serverPort));
     }
 
+    // Identity on purpose: only the application's own context, not a child context that closes
+    @SuppressWarnings("ReferenceEquality")
     @EventListener
     public void onApplicationClosing(ContextClosedEvent event) {
         // Child contexts (for example the one behind a dedicated management port) propagate their close event to the

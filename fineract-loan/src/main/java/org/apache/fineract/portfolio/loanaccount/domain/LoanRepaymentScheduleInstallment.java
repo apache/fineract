@@ -1189,6 +1189,8 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         setReAged(false);
     }
 
+    // Identity on purpose: copying an installment onto itself is a no-op
+    @SuppressWarnings("ReferenceEquality")
     public void copyFrom(final LoanRepaymentScheduleInstallment installment) {
         if (installment == this || nonNullAndEqual(getId(), installment.getId())) {
             return;
