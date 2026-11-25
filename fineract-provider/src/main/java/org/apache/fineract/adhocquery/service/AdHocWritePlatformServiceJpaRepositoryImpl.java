@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.adhocquery.service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.adhocquery.api.AdHocJsonInputParams;
 import org.apache.fineract.adhocquery.domain.AdHoc;
 import org.apache.fineract.adhocquery.domain.AdHocRepository;
@@ -59,7 +61,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
 
             sqlValidator.validate("adhoc", commandQuery);
 
-            final AdHoc entity = AdHoc.fromJson(command);
+            final AdHoc entity = newAdHoc(command);
             this.adHocRepository.saveAndFlush(entity);
 
             return new CommandProcessingResultBuilder() //
@@ -73,6 +75,77 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
                     .withCommandId(command.commandId()) //
                     .build();
         }
+    }
+
+    private static AdHoc newAdHoc(final JsonCommand command) {
+        final String name = command.stringValueOfParameterNamed(AdHocJsonInputParams.NAME.getValue());
+
+        final String query = command.stringValueOfParameterNamed(AdHocJsonInputParams.QUERY.getValue());
+        final String tableName = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLENAME.getValue());
+        final String tableFields = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLEFIELDS.getValue());
+        final String email = command.stringValueOfParameterNamed(AdHocJsonInputParams.EMAIL.getValue());
+        final Long reportRunFrequency = command.longValueOfParameterNamed(AdHocJsonInputParams.REPORT_RUN_FREQUENCY.getValue());
+        final Long reportRunEvery = command.longValueOfParameterNamed(AdHocJsonInputParams.REPORT_RUN_EVERY.getValue());
+        final boolean active = command.booleanPrimitiveValueOfParameterNamed(AdHocJsonInputParams.ACTIVE.getValue());
+        return new AdHoc().setName(StringUtils.defaultIfEmpty(name, null)).setQuery(StringUtils.defaultIfEmpty(query, null))
+                .setTableName(StringUtils.defaultIfEmpty(tableName, null)).setTableFields(StringUtils.defaultIfEmpty(tableFields, null))
+                .setEmail(StringUtils.defaultIfEmpty(email, null)).setReportRunFrequency(reportRunFrequency)
+                .setReportRunEvery(reportRunEvery).setActive(active);
+    }
+
+    private static Map<String, Object> applyChanges(final AdHoc adHoc, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, adHoc.getName())) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            adHoc.setName(newValue);
+        }
+
+        final String descriptionParamName = "query";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, adHoc.getQuery())) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            adHoc.setQuery(newValue);
+        }
+        final String tableName = "tableName";
+        if (command.isChangeInStringParameterNamed(tableName, adHoc.getTableName())) {
+            final String newValue = command.stringValueOfParameterNamed(tableName);
+            actualChanges.put(tableName, newValue);
+            adHoc.setTableName(newValue);
+        }
+        final String tableField = "tableFields";
+        if (command.isChangeInStringParameterNamed(tableField, adHoc.getTableFields())) {
+            final String newValue = command.stringValueOfParameterNamed(tableField);
+            actualChanges.put(tableField, newValue);
+            adHoc.setTableFields(newValue);
+        }
+        final String email = "email";
+        if (command.isChangeInStringParameterNamed(email, adHoc.getEmail())) {
+            final String newValue = command.stringValueOfParameterNamed(email);
+            actualChanges.put(email, newValue);
+            adHoc.setEmail(newValue);
+        }
+        final String reportRunFrequency = "reportRunFrequency";
+        if (command.isChangeInLongParameterNamed(reportRunFrequency, adHoc.getReportRunFrequency())) {
+            final Long newValue = command.longValueOfParameterNamed(reportRunFrequency);
+            actualChanges.put(reportRunFrequency, newValue);
+            adHoc.setReportRunFrequency(newValue);
+        }
+        final String reportRunEvery = "reportRunEvery";
+        if (command.isChangeInLongParameterNamed(reportRunEvery, adHoc.getReportRunEvery())) {
+            final Long newValue = command.longValueOfParameterNamed(reportRunEvery);
+            actualChanges.put(reportRunEvery, newValue);
+            adHoc.setReportRunEvery(newValue);
+        }
+        final String paramisActive = AdHocJsonInputParams.ACTIVE.getValue();
+        if (command.isChangeInBooleanParameterNamed(paramisActive, adHoc.isActive())) {
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramisActive);
+            actualChanges.put(paramisActive, newValue);
+            adHoc.setActive(Boolean.TRUE.equals(newValue));
+        }
+        return actualChanges;
     }
 
     /*
@@ -100,7 +173,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
 
             final AdHoc adHoc = this.adHocRepository.findById(adHocId).orElseThrow(() -> new AdHocNotFoundException(adHocId));
 
-            final Map<String, Object> changes = adHoc.update(command);
+            final Map<String, Object> changes = applyChanges(adHoc, command);
             if (!changes.isEmpty()) {
                 this.adHocRepository.saveAndFlush(adHoc);
             }

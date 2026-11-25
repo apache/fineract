@@ -21,16 +21,11 @@ package org.apache.fineract.infrastructure.survey.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.survey.api.LikelihoodApiConstants;
-import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 
 @Entity
 @Table(name = "ppi_likelihoods_ppi")
@@ -48,29 +43,4 @@ public final class Likelihood extends AbstractPersistableCustom<Long> {
 
     @Column(name = "enabled", nullable = false)
     private Long enabled;
-
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final boolean enabled = command.booleanPrimitiveValueOfParameterNamed(LikelihoodApiConstants.ACTIVE);
-
-        Long changeToValue = null;
-
-        if (enabled) {
-            changeToValue = LikelihoodStatus.ENABLED;
-        } else {
-            changeToValue = LikelihoodStatus.DISABLED;
-        }
-
-        if (!changeToValue.equals(this.enabled)) {
-            actualChanges.put(LikelihoodApiConstants.ACTIVE, enabled);
-            this.enabled = changeToValue;
-        }
-
-        return actualChanges;
-    }
-
-    public boolean isActivateCommand(final JsonCommand command) {
-        return command.booleanPrimitiveValueOfParameterNamed(LikelihoodApiConstants.ACTIVE);
-    }
 }
