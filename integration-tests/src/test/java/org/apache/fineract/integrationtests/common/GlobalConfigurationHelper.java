@@ -632,6 +632,13 @@ public final class GlobalConfigurationHelper {
         idempotencyRecoverableErrorCodes.put("string_value", IDEMPOTENCY_RECOVERABLE_ERROR_CODES_DEFAULT);
         defaults.add(idempotencyRecoverableErrorCodes);
 
+        HashMap<String, Object> loanLossProvisioningJobAutoPost = new HashMap<>();
+        loanLossProvisioningJobAutoPost.put("name", GlobalConfigurationConstants.LOAN_LOSS_PROVISIONING_JOB_AUTO_POST);
+        loanLossProvisioningJobAutoPost.put("value", 0L);
+        loanLossProvisioningJobAutoPost.put("enabled", true);
+        loanLossProvisioningJobAutoPost.put("trapDoor", false);
+        defaults.add(loanLossProvisioningJobAutoPost);
+
         return defaults;
     }
 }

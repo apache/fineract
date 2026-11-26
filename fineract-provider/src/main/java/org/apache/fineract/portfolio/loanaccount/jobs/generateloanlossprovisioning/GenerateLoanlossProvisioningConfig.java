@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.jobs.generateloanlossprovisioning;
 
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
 import org.springframework.batch.core.job.Job;
@@ -42,6 +43,8 @@ public class GenerateLoanlossProvisioningConfig {
     private ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     @Autowired
     private ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
+    @Autowired
+    private ConfigurationDomainService configurationDomainService;
 
     @Bean
     protected Step generateLoanlossProvisioningStep() {
@@ -57,6 +60,7 @@ public class GenerateLoanlossProvisioningConfig {
 
     @Bean
     public GenerateLoanlossProvisioningTasklet generateLoanlossProvisioningTasklet() {
-        return new GenerateLoanlossProvisioningTasklet(provisioningCriteriaReadPlatformService, provisioningEntriesWritePlatformService);
+        return new GenerateLoanlossProvisioningTasklet(provisioningCriteriaReadPlatformService, provisioningEntriesWritePlatformService,
+                configurationDomainService);
     }
 }

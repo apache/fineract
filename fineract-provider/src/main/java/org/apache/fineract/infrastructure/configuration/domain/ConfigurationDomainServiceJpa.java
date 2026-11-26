@@ -587,6 +587,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public boolean isLoanLossProvisioningJobAutoPostEnabled() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.LOAN_LOSS_PROVISIONING_JOB_AUTO_POST).isEnabled();
+    }
+
+    @Override
     public boolean isBlockTransactionsOnClosedOverpaidLoansEnabled() {
         return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.BLOCK_TRANSACTIONS_ON_CLOSED_OVERPAID_LOANS).isEnabled();
     }
