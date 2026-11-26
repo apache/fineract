@@ -62,6 +62,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.DownPaymentFees;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
@@ -618,16 +619,7 @@ public class LoanTemplateReadPlatformServiceImpl implements LoanTemplateReadPlat
     @Override
     public LoanTransactionData retrieveManualInterestRefundTemplate(final Long loanId, final Long targetTransactionId) {
         final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        final LoanTransaction targetTxn = loan.getLoanTransaction(txn -> txn.getId() != null && txn.getId().equals(targetTransactionId));
-        if (targetTxn == null) {
-            throw new LoanTransactionNotFoundException(targetTransactionId);
-        }
-        if (!(targetTxn.isMerchantIssuedRefund() || targetTxn.isPayoutRefund())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.not.refund.type", "Only for refund transactions");
-        }
-        if (targetTxn.isReversed()) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.reversed", "Refund transaction is reversed");
-        }
+        final LoanTransaction targetTxn = retrieveTargetRefund(loan, targetTransactionId);
         final boolean alreadyExists = loan.getLoanTransactions().stream().anyMatch(txn -> txn.isInterestRefund() && !txn
                 .getLoanTransactionRelations(rel -> rel.getToTransaction() != null && rel.getToTransaction().equals(targetTxn)).isEmpty());
         if (alreadyExists) {
@@ -649,6 +641,40 @@ public class LoanTemplateReadPlatformServiceImpl implements LoanTemplateReadPlat
         return LoanTransactionData.builder().transactionType(LoanTransactionType.INTEREST_REFUND.name()).type(transactionType)
                 .date(targetTxn.getTransactionDate()).amount(interestRefundAmount).paymentTypeOptions(paymentTypeOptions)
                 .currency(loan.getCurrency().toData()).build();
+    }
+
+    @Override
+    public LoanTransactionData retrieveManualFeeRefundTemplate(final Long loanId, final Long targetTransactionId) {
+        final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final LoanTransaction targetTxn = retrieveTargetRefund(loan, targetTransactionId);
+        final boolean alreadyExists = loan.getLoanTransactions().stream().anyMatch(txn -> txn.isFeeRefund() && txn.isNotReversed() && !txn
+                .getLoanTransactionRelations(rel -> rel.getToTransaction() != null && rel.getToTransaction().equals(targetTxn)).isEmpty());
+        if (alreadyExists) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.fee.refund.already.exists",
+                    "Fee Refund already exists for this refund");
+        }
+
+        final BigDecimal feeRefundAmount = DownPaymentFees.refundAmount(loan, targetTxn);
+        final Collection<PaymentTypeData> paymentTypeOptions = paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.FEE_REFUND);
+
+        return LoanTransactionData.builder().transactionType(LoanTransactionType.FEE_REFUND.name()).type(transactionType)
+                .date(targetTxn.getTransactionDate()).amount(feeRefundAmount).paymentTypeOptions(paymentTypeOptions)
+                .currency(loan.getCurrency().toData()).build();
+    }
+
+    private LoanTransaction retrieveTargetRefund(final Loan loan, final Long targetTransactionId) {
+        final LoanTransaction targetTxn = loan.getLoanTransaction(txn -> txn.getId() != null && txn.getId().equals(targetTransactionId));
+        if (targetTxn == null) {
+            throw new LoanTransactionNotFoundException(targetTransactionId);
+        }
+        if (!(targetTxn.isMerchantIssuedRefund() || targetTxn.isPayoutRefund())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.not.refund.type", "Only for refund transactions");
+        }
+        if (targetTxn.isReversed()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.reversed", "Refund transaction is reversed");
+        }
+        return targetTxn;
     }
 
     private LoanTransaction deriveDefaultInterestWaiverTransaction(final Loan loan) {

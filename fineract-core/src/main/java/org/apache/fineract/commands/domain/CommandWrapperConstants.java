@@ -153,6 +153,7 @@ public final class CommandWrapperConstants {
     public static final String ACTION_BUYDOWNFEE = "BUYDOWNFEE";
     public static final String ACTION_UPDATE_APPROVED_AMOUNT = "UPDATE_APPROVED_AMOUNT";
     public static final String ACTION_MANUAL_INTEREST_REFUND_TRANSACTION = "MANUAL_INTEREST_REFUND_TRANSACTION";
+    public static final String ACTION_MANUAL_FEE_REFUND_TRANSACTION = "MANUAL_FEE_REFUND_TRANSACTION";
     public static final String ACTION_ATTACH = "ATTACH";
     public static final String ACTION_DETACH = "DETACH";
     public static final String ACTION_FORCE_WITHDRAWAL = "FORCE_WITHDRAWAL";

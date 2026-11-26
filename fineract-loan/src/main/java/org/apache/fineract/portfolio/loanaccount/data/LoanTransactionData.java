@@ -117,6 +117,7 @@ public class LoanTransactionData implements Serializable {
     private Collection<CodeValueData> chargeOffReasonOptions;
     private Collection<CodeValueData> classificationOptions;
     private CodeValueData classification;
+    private Boolean feeRefundCalculation;
 
     private Collection<CodeValueData> reAgeReasonOptions;
     private Collection<PeriodFrequencyType> periodFrequencyOptions;

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionFeeRefundPreBusinessEvent;
@@ -32,6 +33,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,10 +52,19 @@ public class LoanFeeRefundService {
         if (MathUtil.isZero(feeRefundAmount)) {
             return null;
         }
-        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionFeeRefundPreBusinessEvent(loan));
-        final LoanTransaction feeRefund = LoanTransaction.feeRefund(loan, feeRefundAmount, refund.getDateOf(), externalIdFactory.create());
-        feeRefund.getLoanTransactionRelations()
-                .add(LoanTransactionRelation.linkToTransaction(feeRefund, refund, LoanTransactionRelationTypeEnum.RELATED));
+        return feeRefund(loan, refund, feeRefundAmount, null, externalIdFactory.create());
+    }
+
+    /**
+     * Manual Fee refund of the refund, dated as the refund and linked to it. A refund posted with feeRefundCalculation
+     * false loses that decision, so from now on its Fee refund is handled as an automatic one.
+     */
+    public LoanTransaction createManualFeeRefund(final Loan loan, final LoanTransaction refund, final BigDecimal amount,
+            final PaymentDetail paymentDetail, final ExternalId externalId) {
+        final LoanTransaction feeRefund = feeRefund(loan, refund, amount, paymentDetail, externalId);
+        if (Boolean.FALSE.equals(refund.getFeeRefundCalculation())) {
+            refund.setFeeRefundCalculation(null);
+        }
         return feeRefund;
     }
 
@@ -67,5 +78,14 @@ public class LoanFeeRefundService {
                 .map(refund -> createFeeRefund(loan, refund)).filter(Objects::nonNull).toList();
         feeRefunds.forEach(loan::addLoanTransaction);
         return feeRefunds;
+    }
+
+    private LoanTransaction feeRefund(final Loan loan, final LoanTransaction refund, final BigDecimal amount,
+            final PaymentDetail paymentDetail, final ExternalId externalId) {
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionFeeRefundPreBusinessEvent(loan));
+        final LoanTransaction feeRefund = LoanTransaction.feeRefund(loan, amount, refund.getDateOf(), paymentDetail, externalId);
+        feeRefund.getLoanTransactionRelations()
+                .add(LoanTransactionRelation.linkToTransaction(feeRefund, refund, LoanTransactionRelationTypeEnum.RELATED));
+        return feeRefund;
     }
 }

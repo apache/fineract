@@ -226,6 +226,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
+    public LoanTransactionData retrieveManualFeeRefundTemplate(final Long loanId, final Long targetTransactionId) {
+        return loanTemplateReadPlatformService.retrieveManualFeeRefundTemplate(loanId, targetTransactionId);
+    }
+
+    @Override
     public LoanTransactionData retrieveLoanReAgeTemplate(Long loanId) {
         return loanTemplateReadPlatformService.retrieveLoanReAgeTemplate(loanId);
     }

@@ -232,6 +232,17 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     }
 
     @Test
+    public void makeManualFeeRefund_shouldDelegateToLoanTransactionWritePlatformService() {
+        CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
+        when(loanTransactionWritePlatformService.makeManualFeeRefund(LOAN_ID, 2L, command)).thenReturn(expectedResult);
+
+        CommandProcessingResult actualResult = loanWritePlatformService.makeManualFeeRefund(LOAN_ID, 2L, command);
+
+        assertEquals(expectedResult, actualResult);
+        verify(loanTransactionWritePlatformService).makeManualFeeRefund(LOAN_ID, 2L, command);
+    }
+
+    @Test
     public void writeOff_shouldDelegateToLoanClosureWritePlatformService() {
         CommandProcessingResult expectedResult = mock(CommandProcessingResult.class);
         when(loanClosureWritePlatformService.writeOff(LOAN_ID, command)).thenReturn(expectedResult);

@@ -156,6 +156,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @JoinColumn(name = "classification_cv_id")
     private CodeValue classification;
 
+    // Fee refund decision of a Merchant issued refund / Payout refund: null follows the loan's supportedFeeRefundTypes
+    @Setter
+    @Column(name = "fee_refund_calculation")
+    private Boolean feeRefundCalculation;
+
     protected LoanTransaction() {}
 
     public static LoanTransaction incomePosting(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
@@ -214,6 +219,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public static LoanTransaction feeRefund(final Loan loan, final BigDecimal amount, final LocalDate date, final ExternalId externalId) {
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.FEE_REFUND, null, amount, date, externalId);
+    }
+
+    public static LoanTransaction feeRefund(final Loan loan, final BigDecimal amount, final LocalDate date,
+            final PaymentDetail paymentDetail, final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.FEE_REFUND, paymentDetail, amount, date, externalId);
     }
 
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
@@ -332,6 +342,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
             newTransaction.setLoanReAmortizationParameter(loanTransaction.getLoanReAmortizationParameter().getCopy(newTransaction));
         }
         newTransaction.setClassification(loanTransaction.getClassification());
+        newTransaction.setFeeRefundCalculation(loanTransaction.getFeeRefundCalculation());
         return newTransaction;
     }
 

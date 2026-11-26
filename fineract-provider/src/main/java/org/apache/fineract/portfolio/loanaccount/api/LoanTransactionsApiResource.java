@@ -100,6 +100,7 @@ public class LoanTransactionsApiResource {
     public static final String UNDO_REAMORTIZE = "undoReAmortize";
     public static final String CAPITALIZED_INCOME = "capitalizedIncome";
     public static final String INTEREST_REFUND_COMMAND_VALUE = "interest-refund";
+    public static final String FEE_REFUND_COMMAND_VALUE = "fee-refund";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME, "classification",
             "numberOfFutureInstallments", "numberOfPastInstallments", "nextInstallmentDueDate", "calculatedStartDate"));
@@ -131,7 +132,7 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=foreclosure" + "\n" + "loans/1/transactions/template?command=interestPaymentWaiver"
             + "\n" + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)"
             + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n"
-            + "loans/1/transactions/template?command=interest-refund")
+            + "loans/1/transactions/template?command=interest-refund" + "\n" + "loans/1/transactions/template?command=fee-refund")
     @AlternativeOperationId("retrieveTransactionTemplate")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
@@ -162,7 +163,7 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=foreclosure" + "\n" + "loans/1/transactions/template?command=interestPaymentWaiver"
             + "\n" + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)"
             + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n"
-            + "loans/1/transactions/template?command=interest-refund")
+            + "loans/1/transactions/template?command=interest-refund" + "\n" + "loans/1/transactions/template?command=fee-refund")
     @AlternativeOperationId("retrieveTransactionTemplate_1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
@@ -730,6 +731,8 @@ public class LoanTransactionsApiResource {
                     LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT, transactionId);
         } else if (CommandParameterUtil.is(commandParam, INTEREST_REFUND_COMMAND_VALUE)) {
             transactionData = this.loanReadPlatformService.retrieveManualInterestRefundTemplate(resolvedLoanId, transactionId);
+        } else if (CommandParameterUtil.is(commandParam, FEE_REFUND_COMMAND_VALUE)) {
+            transactionData = this.loanReadPlatformService.retrieveManualFeeRefundTemplate(resolvedLoanId, transactionId);
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.REAGE_COMMAND)) {
             transactionData = this.loanReadPlatformService.retrieveLoanReAgeTemplate(resolvedLoanId);
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.REAMORTIZATION_COMMAND)) {
@@ -763,6 +766,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.buyDownFeeAdjustment(resolvedLoanId, resolvedTransactionId).build();
         } else if (CommandParameterUtil.is(commandParam, INTEREST_REFUND_COMMAND_VALUE)) {
             commandRequest = builder.manualInterestRefund(resolvedLoanId, resolvedTransactionId).build();
+        } else if (CommandParameterUtil.is(commandParam, FEE_REFUND_COMMAND_VALUE)) {
+            commandRequest = builder.manualFeeRefund(resolvedLoanId, resolvedTransactionId).build();
         } else { // Default to adjust the Loan Transaction
             commandRequest = builder.adjustTransaction(resolvedLoanId, resolvedTransactionId).build();
         }

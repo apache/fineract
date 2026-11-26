@@ -287,6 +287,8 @@ public final class LoanTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "[2012, 5, 18]")
         public LocalDate reversedOnDate;
+        @Schema(description = "Fee Refund decision of a Merchant Issued Refund or Payout Refund. Null when the loan product config is used.", example = "false")
+        public Boolean feeRefundCalculation;
         @Schema(example = "1000.00")
         public Double netDisbursalAmount;
         @Schema(example = "240.00")
@@ -405,6 +407,8 @@ public final class LoanTransactionsApiResourceSwagger {
         // command=reAge END
         @Schema(description = "Optional. Controls whether Interest Refund transaction should be created for this refund. If not provided, loan product config is used.", example = "false")
         public Boolean interestRefundCalculation;
+        @Schema(description = "Optional. Controls whether Fee Refund transaction should be created for this refund. If not provided, loan product config is used.", example = "false")
+        public Boolean feeRefundCalculation;
         @Schema(example = "1")
         public Long classificationId;
     }

@@ -58,6 +58,8 @@ public interface LoanTemplateReadPlatformService {
 
     LoanTransactionData retrieveManualInterestRefundTemplate(Long loanId, Long targetTransactionId);
 
+    LoanTransactionData retrieveManualFeeRefundTemplate(Long loanId, Long targetTransactionId);
+
     LoanTransactionData retrieveLoanReAgeTemplate(Long loanId);
 
     LoanTransactionData retrieveLoanReAmortizationTemplate(Long loanId);

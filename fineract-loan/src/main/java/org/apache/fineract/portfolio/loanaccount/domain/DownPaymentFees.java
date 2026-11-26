@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -100,13 +101,31 @@ public final class DownPaymentFees {
     }
 
     /**
+     * Whether the refund gets a Fee refund: the decision stored on the refund (feeRefundCalculation), otherwise the
+     * loan's supportedFeeRefundTypes.
+     */
+    public static boolean isFeeRefundEnabled(final Loan loan, final LoanTransaction refund) {
+        return Objects.requireNonNullElseGet(refund.getFeeRefundCalculation(),
+                () -> loan.getSupportedFeeRefundTransactionTypes().contains(refund.getTypeOf()));
+    }
+
+    /**
+     * Whether the refund can have a Fee refund at all: its type is in the loan's supportedFeeRefundTypes or the Fee
+     * refund was forced (feeRefundCalculation true).
+     */
+    public static boolean isFeeRefundSupported(final Loan loan, final LoanTransaction refund) {
+        return Boolean.TRUE.equals(refund.getFeeRefundCalculation())
+                || loan.getSupportedFeeRefundTransactionTypes().contains(refund.getTypeOf());
+    }
+
+    /**
      * Fee refund of a refund, in date order: the Fee refunds of the earlier refunds are calculated first, the same way,
-     * and use up the cap. Every refund of a supported type counts, whether or not its Fee refund exists yet, because a
-     * missing one is created on the next replay. The amount depends only on the refunds, disbursements and fees of the
-     * loan, not on the order the refunds were entered or on the state of a replay.
+     * and use up the cap. Every refund that gets a Fee refund counts, whether or not its Fee refund exists yet, because
+     * a missing one is created on the next replay. The amount depends only on the refunds, disbursements and fees of
+     * the loan, not on the order the refunds were entered or on the state of a replay.
      */
     public static BigDecimal refundAmount(final Loan loan, final LoanTransaction refund) {
-        final List<LoanTransaction> earlierRefunds = supportedRefunds(loan).stream()
+        final List<LoanTransaction> earlierRefunds = eligibleRefunds(loan).stream()
                 .filter(earlier -> LoanTransactionComparator.INSTANCE.compare(earlier, refund) < 0).toList();
         BigDecimal alreadyRefunded = BigDecimal.ZERO;
         for (final LoanTransaction earlier : earlierRefunds) {
@@ -116,20 +135,19 @@ public final class DownPaymentFees {
     }
 
     /**
-     * Refunds of a supported type without a non-reversed Fee refund: the Fee refund was not created or was reversed at
+     * Refunds that get a Fee refund but have no non-reversed one: the Fee refund was not created or was reversed at
      * zero because the cap was used up.
      */
     public static List<LoanTransaction> refundsWithoutFeeRefund(final Loan loan) {
         final List<LoanTransaction> refundsWithFeeRefund = loan.getLoanTransactions().stream()
                 .filter(transaction -> transaction.isNotReversed() && transaction.isFeeRefund()).map(DownPaymentFees::relatedRefund)
                 .toList();
-        return supportedRefunds(loan).stream().filter(refund -> !refundsWithFeeRefund.contains(refund)).toList();
+        return eligibleRefunds(loan).stream().filter(refund -> !refundsWithFeeRefund.contains(refund)).toList();
     }
 
-    private static List<LoanTransaction> supportedRefunds(final Loan loan) {
-        final List<LoanTransactionType> supportedTypes = loan.getSupportedFeeRefundTransactionTypes();
+    private static List<LoanTransaction> eligibleRefunds(final Loan loan) {
         return loan.getLoanTransactions().stream()
-                .filter(transaction -> transaction.isNotReversed() && supportedTypes.contains(transaction.getTypeOf()))
+                .filter(transaction -> transaction.isNotReversed() && isFeeRefundEnabled(loan, transaction))
                 .sorted(LoanTransactionComparator.INSTANCE).toList();
     }
 
