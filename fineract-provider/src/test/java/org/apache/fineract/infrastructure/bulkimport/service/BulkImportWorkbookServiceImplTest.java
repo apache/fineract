@@ -37,12 +37,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import org.apache.fineract.infrastructure.bulkimport.constants.LoanRepaymentConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.mapping.ImportDocumentMapper;
 import org.apache.fineract.infrastructure.bulkimport.populator.CenterSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
@@ -449,6 +451,68 @@ class BulkImportWorkbookServiceImplTest {
         }
 
         assertThat(uploadedDocument(GlobalEntityType.SAVINGS_TRANSACTIONS, workbook).getTotalRecords()).isEqualTo(17);
+    }
+
+    @Test
+    void zeroByteFileIsRejectedAsEmpty() {
+        assertRejected(upload("offices.xls", new byte[0]), "error.msg.bulk.import.file.is.empty", "The file is empty.");
+    }
+
+    @Test
+    void templateWithoutDataRowsIsRejected() throws IOException {
+        final Workbook workbook = new HSSFWorkbook();
+        sheet(workbook, TemplatePopulateImportConstants.OFFICE_SHEET_NAME, 0, "Office Name*");
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> uploadWorkbook(GlobalEntityType.OFFICES, workbook));
+
+        assertThat(exception.getErrors()).singleElement().satisfies(error -> {
+            assertThat(error.getUserMessageGlobalisationCode()).isEqualTo("error.msg.bulk.import.file.has.no.data.rows");
+            assertThat(error.getDefaultUserMessage()).isEqualTo("The file contains no data rows.");
+            assertThat(error.getParameterName()).isEqualTo("file");
+        });
+        assertNothingCreated();
+    }
+
+    @Test
+    void loanRepaymentRowWithAnEmptyOfficeNameIsNotTakenForAnEmptyFile() throws IOException {
+        final Workbook workbook = new HSSFWorkbook();
+        final Sheet sheet = sheet(workbook, TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME, LoanRepaymentConstants.AMOUNT_COL,
+                "Amount Repaid*");
+        dataRows(sheet, LoanRepaymentConstants.AMOUNT_COL, 1);
+
+        assertThat(sheet.getRow(1).getCell(LoanRepaymentConstants.OFFICE_NAME_COL)).isNull();
+        assertThat(uploadedDocument(GlobalEntityType.LOAN_TRANSACTIONS, workbook).getTotalRecords()).isEqualTo(1);
+    }
+
+    @Test
+    void loanRepaymentRowWithoutAnAmountCountsAsNoDataRows() throws IOException {
+        final Workbook workbook = new HSSFWorkbook();
+        final Sheet sheet = sheet(workbook, TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME, LoanRepaymentConstants.AMOUNT_COL,
+                "Amount Repaid*");
+        dataRows(sheet, LoanRepaymentConstants.OFFICE_NAME_COL, 1);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> uploadWorkbook(GlobalEntityType.LOAN_TRANSACTIONS, workbook));
+
+        assertThat(exception.getErrors()).singleElement().satisfies(
+                error -> assertThat(error.getUserMessageGlobalisationCode()).isEqualTo("error.msg.bulk.import.file.has.no.data.rows"));
+        assertNothingCreated();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realTemplates")
+    void everyRealTemplateDownloadedAndUploadedUnchangedIsRejectedAsHavingNoDataRows(final GlobalEntityType entityType,
+            final Supplier<WorkbookPopulator> populator) throws IOException {
+        final Workbook workbook = new HSSFWorkbook();
+        populator.get().populate(workbook, DATE_FORMAT);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> uploadWorkbook(entityType, workbook));
+
+        assertThat(exception.getErrors()).singleElement().satisfies(
+                error -> assertThat(error.getUserMessageGlobalisationCode()).isEqualTo("error.msg.bulk.import.file.has.no.data.rows"));
+        assertNothingCreated();
     }
 
     @Test

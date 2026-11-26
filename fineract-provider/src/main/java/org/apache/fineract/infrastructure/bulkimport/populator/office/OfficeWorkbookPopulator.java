@@ -76,7 +76,7 @@ public class OfficeWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(OfficeConstants.PARENT_OFFICE_NAME_COL, rowHeader, "Parent Office*");
         writeString(OfficeConstants.PARENT_OFFICE_ID_COL, rowHeader, "Parent OfficeId*");
         writeString(OfficeConstants.OPENED_ON_COL, rowHeader, "Opened On Date*");
-        writeString(OfficeConstants.EXTERNAL_ID_COL, rowHeader, "External Id*");
+        writeString(OfficeConstants.EXTERNAL_ID_COL, rowHeader, "External Id");
         writeString(OfficeConstants.LOOKUP_OFFICE_COL, rowHeader, "Lookup Offices");
         writeString(OfficeConstants.LOOKUP_OFFICE_ID_COL, rowHeader, "Lookup OfficeId*");
     }

@@ -31,6 +31,8 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.GuarantorConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
@@ -67,7 +69,7 @@ public class GuarantorImportHandler implements ImportHandler {
     private List<GuarantorData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
         List<GuarantorData> guarantors = new ArrayList<>();
         Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addGuarantorSheet, GuarantorConstants.LOAN_ACCOUNT_NO_COL);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.GUARANTORS).countRows(addGuarantorSheet);
         Long loanAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;

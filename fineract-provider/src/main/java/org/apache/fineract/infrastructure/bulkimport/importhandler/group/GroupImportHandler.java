@@ -30,6 +30,8 @@ import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.GroupConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -82,7 +84,7 @@ public class GroupImportHandler implements ImportHandler {
     private void readExcelFile(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
             final List<String> statuses, final String locale, final String dateFormat) {
         Sheet groupsSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(groupsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.GROUPS).countRows(groupsSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = groupsSheet.getRow(rowIndex);

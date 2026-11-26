@@ -32,8 +32,11 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.MandatoryColumn;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.SavingsAccountTransactionEnumValueSerialiser;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -77,7 +80,7 @@ public class SavingsTransactionImportHandler implements ImportHandler {
             final Map<Integer, String> rowErrors) {
         List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.SAVINGS_TRANSACTIONS).countRows(savingsTransactionSheet);
         Long savingsAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
@@ -91,6 +94,14 @@ public class SavingsTransactionImportHandler implements ImportHandler {
 
     private SavingsAccountTransactionData readSavingsTransaction(final Workbook workbook, final Row row, Long savingsAccountId,
             final String locale, final String dateFormat, final Map<Integer, String> rowErrors) {
+        final String missingColumns = ImportHandlerUtils.missingColumnsError(row,
+                new MandatoryColumn(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, "Account No."),
+                new MandatoryColumn(TransactionConstants.TRANSACTION_TYPE_COL, "Transaction Type"),
+                new MandatoryColumn(TransactionConstants.AMOUNT_COL, "Amount"),
+                new MandatoryColumn(TransactionConstants.TRANSACTION_DATE_COL, "Date"));
+        if (missingColumns != null) {
+            rowErrors.putIfAbsent(row.getRowNum(), missingColumns);
+        }
         Long savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row);
 
         if (savingsAccountIdCheck != null) {

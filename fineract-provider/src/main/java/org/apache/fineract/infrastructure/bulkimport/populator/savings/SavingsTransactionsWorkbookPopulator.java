@@ -271,7 +271,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
         worksheet.setColumnWidth(TransactionConstants.LOOKUP_PRODUCT_COL, 3000);
         worksheet.setColumnWidth(TransactionConstants.LOOKUP_OPENING_BALANCE_COL, 3700);
         worksheet.setColumnWidth(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, 3500);
-        writeString(TransactionConstants.OFFICE_NAME_COL, rowHeader, "Office Name*");
+        writeString(TransactionConstants.OFFICE_NAME_COL, rowHeader, "Office Name");
         writeString(TransactionConstants.CLIENT_NAME_COL, rowHeader, "Client Name*");
         writeString(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, rowHeader, "Account No.*");
         writeString(TransactionConstants.PRODUCT_COL, rowHeader, "Product Name");
