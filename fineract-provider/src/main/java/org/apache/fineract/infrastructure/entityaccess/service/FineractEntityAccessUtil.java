@@ -120,6 +120,7 @@ public class FineractEntityAccessUtil implements FineractEntityVisibilityService
         return entities.stream().filter(entity -> access.isVisible(idExtractor.apply(entity))).collect(Collectors.toList());
     }
 
+    @Override
     public boolean isVisibleToOffice_ifGlobalConfigEnabled(final FineractEntityAccessType accessType, final Long officeId,
             final Long entityId) {
         return !filterVisibleToOffice_ifGlobalConfigEnabled(accessType, officeId, List.of(entityId), Function.identity()).isEmpty();

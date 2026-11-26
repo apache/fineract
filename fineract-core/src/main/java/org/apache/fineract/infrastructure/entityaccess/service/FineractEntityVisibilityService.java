@@ -27,4 +27,6 @@ public interface FineractEntityVisibilityService {
 
     <T> List<T> filterVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType accessType, Long officeId, Collection<T> entities,
             Function<T, Long> idExtractor);
+
+    boolean isVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType accessType, Long officeId, Long entityId);
 }
