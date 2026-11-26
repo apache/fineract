@@ -161,6 +161,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementWritePl
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentFeeEventNotifier;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanIdentifierResolverService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanIdentifierResolverServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanMaximumAmountCalculator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
@@ -433,6 +435,13 @@ public class LoanAccountConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(LoanIdentifierResolverService.class)
+    public LoanIdentifierResolverService loanIdentifierResolverService(LoanRepositoryWrapper loanRepositoryWrapper,
+            LoanTransactionRepository loanTransactionRepository, JdbcTemplate jdbcTemplate) {
+        return new LoanIdentifierResolverServiceImpl(loanRepositoryWrapper, loanTransactionRepository, jdbcTemplate);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(LoanReadPlatformService.class)
     public LoanReadPlatformServiceImpl loanReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
             LoanRepositoryWrapper loanRepositoryWrapper, LoanProductReadPlatformService loanProductReadPlatformService,
@@ -445,13 +454,13 @@ public class LoanAccountConfiguration {
             LoanTransactionRelationReadService loanTransactionRelationReadService, LoanTransactionMapper loanTransactionMapper,
             LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
             LoanRepaymentScheduleService loanRepaymentScheduleService, LoanAccountDataReadService loanAccountDataReadService,
-            LoanTemplateReadPlatformService loanTemplateReadPlatformService) {
+            LoanTemplateReadPlatformService loanTemplateReadPlatformService, LoanIdentifierResolverService loanIdentifierResolverService) {
         return new LoanReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, loanProductReadPlatformService,
                 clientReadPlatformService, groupReadPlatformService, calendarReadPlatformService, staffReadPlatformService,
                 paginationHelper, floatingRatesReadPlatformService, configurationDomainService, columnValidator, sqlGenerator,
                 delinquencyReadPlatformService, loanTransactionRepository, loanChargePaidByReadService, loanTransactionRelationReadService,
                 loanTransactionMapper, loanCapitalizedIncomeBalanceRepository, loanRepaymentScheduleService, loanAccountDataReadService,
-                loanTemplateReadPlatformService);
+                loanTemplateReadPlatformService, loanIdentifierResolverService);
     }
 
     @Bean
