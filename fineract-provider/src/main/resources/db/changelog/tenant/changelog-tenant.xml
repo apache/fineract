@@ -309,4 +309,5 @@
     <include file="parts/0287_add_permissions_for_api_authorization_rules.xml" relativeToChangelogFile="true" />
     <include file="parts/0288_add_is_force_transaction_to_savings_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0289_widen_command_source_api_get_url.xml" relativeToChangelogFile="true" />
+    <include file="parts/0290_add_deferred_charge_transaction_types.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

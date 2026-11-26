@@ -227,7 +227,8 @@ public class LoanChargeBackStepDef extends AbstractStepDef {
                 .setCapitalizedIncomeAmortization(false).setCapitalizedIncomeAdjustment(false)
                 .setCapitalizedIncomeAmortizationAdjustment(false).setContractTermination(false).setBuyDownFee(false)
                 .setBuyDownFeeAdjustment(false).setBuyDownFeeAmortization(false).setBuyDownFeeAmortizationAdjustment(false)
-                .setLoanWithdrawal(false).build();
+                .setLoanWithdrawal(false).setDeferredCharge(false).setDeferredChargeAmortization(false)
+                .setDeferredChargeAmortizationAdjustment(false).build();
 
         // verify payload for loanId, transactionId, transactionType, amount
         eventAssertion.assertEvent(LoanChargebackTransactionEvent.class, transactionId).extractingData(LoanTransactionDataV1::getLoanId)
