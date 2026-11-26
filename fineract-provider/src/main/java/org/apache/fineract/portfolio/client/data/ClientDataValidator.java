@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -929,5 +930,31 @@ public final class ClientDataValidator {
         }
         final LegalForm legalForm = LegalForm.fromInt(legalFormId);
         return legalForm != null ? legalForm.getLabel().toUpperCase(Locale.ROOT) : null;
+    }
+
+    public void validateClientBeforeCreating(final LocalDate dateOfBirth,
+                                             final LocalDate incorpValidityTill, final CodeValue constitution) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        if (incorpValidityTill != null && dateOfBirth != null
+                && DateUtils.isAfter(dateOfBirth, incorpValidityTill)) {
+            dataValidationErrors.add(ApiParameterError.parameterError(
+                    "error.msg.clients.incorpValidityTill.after.incorp.date",
+                    "incorpvaliditytill date cannot be after the incorporation date",
+                    ClientApiConstants.incorpValidityTillParamName,
+                    incorpValidityTill));
+        }
+
+        if (constitution == null) {
+            dataValidationErrors.add(ApiParameterError.parameterError(
+                    "error.msg.clients.constitutionid.is.null",
+                    "Constitution ID may not be null",
+                    ClientApiConstants.constitutionIdParamName));
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }
