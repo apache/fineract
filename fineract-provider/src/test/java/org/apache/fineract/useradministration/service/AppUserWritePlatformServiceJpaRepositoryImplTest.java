@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -130,7 +129,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void changeUserPasswordThrowsWhenPasswordPreviouslyUsed() {
         when(user.getId()).thenReturn(USER_ID);
-        when(user.getEncodedPassword(command, platformPasswordEncoder)).thenReturn("encoded");
+        stubEncodedPassword("encoded");
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(2);
 
         AppUserPreviousPassword previousPassword = mock(AppUserPreviousPassword.class);
@@ -150,8 +149,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
         when(user.getOffice()).thenReturn(office);
         when(user.getId()).thenReturn(USER_ID);
         when(user.getPassword()).thenReturn("currentEncoded");
-        when(user.getEncodedPassword(command, platformPasswordEncoder)).thenReturn("newEncoded");
-        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of("password", "new"));
+        stubEncodedPassword("newEncoded");
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(2);
         when(appUserPreviewPasswordRepository.findByUserId(eq(USER_ID), any(PageRequest.class))).thenReturn(List.of());
 
@@ -184,7 +182,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
         stubRawPasswordCommand(RAW_PASSWORD);
         when(user.getId()).thenReturn(USER_ID);
         when(user.getPassword()).thenReturn(PASSWORD_ENCODER.encode(OTHER_RAW_PASSWORD));
-        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of("password", true));
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(3);
 
         AppUserPreviousPassword previousPassword = mock(AppUserPreviousPassword.class);
@@ -204,7 +201,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
         stubRawPasswordCommand(RAW_PASSWORD);
         when(user.getId()).thenReturn(USER_ID);
         when(user.getPassword()).thenReturn(PASSWORD_ENCODER.encode(OTHER_RAW_PASSWORD));
-        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of("password", true));
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(3);
 
         String legacyHashWithoutPrefix = "5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a";
@@ -222,7 +218,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void changeUserPasswordThrowsWhenPasswordIsTheCurrentOne() {
         when(command.hasParameter(AppUserConstants.PASSWORD)).thenReturn(true);
-        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of());
 
         assertThrows(PasswordMustBeDifferentException.class, () -> underTest.changeUserPassword(USER_ID, command));
 
@@ -252,7 +247,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     @Test
     void changeUserPasswordChangesNothingWhenPasswordIsMissing() {
         stubOffice();
-        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of());
 
         CommandProcessingResult result = underTest.changeUserPassword(USER_ID, command);
 
@@ -265,9 +259,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     void changeUserPasswordAllowsReuseWhenReuseCheckDisabled() {
         stubOffice();
         String currentPassword = PASSWORD_ENCODER.encode(RAW_PASSWORD);
-        when(user.getEncodedPassword(command, platformPasswordEncoder)).thenReturn(PASSWORD_ENCODER.encode(RAW_PASSWORD));
+        stubEncodedPassword(PASSWORD_ENCODER.encode(RAW_PASSWORD));
         when(user.getPassword()).thenReturn(currentPassword);
-        when(user.changePassword(command, platformPasswordEncoder)).thenReturn(Map.of("password", true));
         when(configurationDomainService.getPasswordReuseRestrictionCount()).thenReturn(null);
 
         CommandProcessingResult result = underTest.changeUserPassword(USER_ID, command);
@@ -282,7 +275,18 @@ public class AppUserWritePlatformServiceJpaRepositoryImplTest {
     private void stubRawPasswordCommand(String rawPassword) {
         String encodedPassword = PASSWORD_ENCODER.encode(rawPassword);
         when(command.stringValueOfParameterNamedAllowingNull(AppUserConstants.PASSWORD)).thenReturn(rawPassword);
-        when(user.getEncodedPassword(command, platformPasswordEncoder)).thenReturn(encodedPassword);
+        stubEncodedPassword(encodedPassword);
+    }
+
+    /**
+     * Stubs the request so that it holds a password that differs from the current one, encoded as {@code encoded}.
+     */
+    private void stubEncodedPassword(String encoded) {
+        when(command.hasParameter(AppUserConstants.PASSWORD)).thenReturn(true);
+        when(command.isChangeInPasswordParameterNamed(eq(AppUserConstants.PASSWORD), nullable(String.class), eq(platformPasswordEncoder)))
+                .thenReturn(true);
+        when(command.passwordValueOfParameterNamed(eq(AppUserConstants.PASSWORD), eq(platformPasswordEncoder), nullable(Long.class)))
+                .thenReturn(encoded);
     }
 
     private void stubOffice() {
