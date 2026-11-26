@@ -20,20 +20,13 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQueryFactory;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationNotFoundException;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.query.QScheduledEmailConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,43 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigurationReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final SQLQueryFactory queryFactory;
-    private final EmailConfigurationRowMapper emailConfigurationRowMapper;
     private final QScheduledEmailConfiguration cnf = new QScheduledEmailConfiguration("cnf");
-
-    @Autowired
-    public EmailConfigurationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final SQLQueryFactory queryFactory) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.queryFactory = queryFactory;
-        this.emailConfigurationRowMapper = new EmailConfigurationRowMapper();
-    }
-
-    private static final class EmailConfigurationRowMapper implements RowMapper<EmailConfigurationData> {
-
-        private static final String EMAIL_CONFIGURATION_SCHEMA = """
-                cnf.id as id,
-                cnf.name as name,
-                cnf.value as value
-                from scheduled_email_configuration cnf\s""";
-
-        EmailConfigurationRowMapper() {}
-
-        private String schema() {
-            return EMAIL_CONFIGURATION_SCHEMA;
-        }
-
-        @Override
-        public EmailConfigurationData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String name = rs.getString("name");
-            final String value = rs.getString("value");
-
-            return EmailConfigurationData.instance(id, name, value);
-        }
-
-    }
 
     @Override
     public Collection<EmailConfigurationData> retrieveAll() {
@@ -95,16 +53,16 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
 
     @Override
     public EmailConfigurationData retrieveOne(String name) {
-        try {
-            final String sql = "select " + this.emailConfigurationRowMapper.schema() + " where cnf.name = ?";
+        Tuple row = queryFactory.select(cnf.id, cnf.name, cnf.value).from(cnf).where(cnf.name.eq(name)).fetchOne();
 
-            return this.jdbcTemplate.queryForObject(sql, this.emailConfigurationRowMapper, new Object[] { name }); // NOSONAR
+        if (row == null) {
+            throw new EmailConfigurationNotFoundException(name);
         }
 
-        catch (final EmptyResultDataAccessException e) {
-
-            throw new EmailConfigurationNotFoundException(name, e);
-        }
+        Integer id = row.get(cnf.id);
+        String configName = row.get(cnf.name);
+        String value = row.get(cnf.value);
+        return EmailConfigurationData.instance(id != null ? id.longValue() : null, configName, value);
     }
 
 }
