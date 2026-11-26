@@ -29,7 +29,6 @@ import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.Tuple;
@@ -57,19 +56,14 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageSta
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.query.QScheduledEmailMessagesOutbound;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -79,118 +73,143 @@ class EmailReadPlatformServiceImplTest {
     private static final NumberPath<Long> EXTERNAL_ID = Expressions.numberPath(Long.class, EMO, "external_id");
 
     @Mock
-    private JdbcTemplate jdbcTemplate;
-
-    @Mock
-    private DatabaseTypeResolver databaseTypeResolver; // Mock ONLY the resolver
-
-    @Mock
     private SQLQueryFactory queryFactory;
 
     private EmailReadPlatformServiceImpl emailReadPlatformService;
 
     @BeforeEach
     void setUp() {
-        // Use the REAL DatabaseSpecificSQLGenerator, not a mock
-        // Pass null for RoutingDataSource as it's not needed for limit()
-        DatabaseSpecificSQLGenerator sqlGenerator = new DatabaseSpecificSQLGenerator(databaseTypeResolver, null);
-        emailReadPlatformService = new EmailReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, queryFactory);
+        emailReadPlatformService = new EmailReadPlatformServiceImpl(queryFactory);
     }
 
     @Test
-    void testRetrieveAllPendingWithMySQL() {
-        // Given
+    void testRetrieveAllPendingWithLimit() {
         SearchParameters searchParameters = SearchParameters.builder().limit(10).build();
+        Date submittedDate = Date.valueOf(LocalDate.of(2026, 11, 26));
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(
+                List.of(row(1L, 10L, 20L, 30L, "Pending Campaign", 100, "user@example.com", submittedDate, "Subject", "Message", null)));
 
-        // Simulate MySQL environment
-        when(databaseTypeResolver.isMySQL()).thenReturn(true);
-        // isPostgreSQL not checked if isMySQL is true
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllPending(searchParameters);
 
-        // When
-        emailReadPlatformService.retrieveAllPending(searchParameters);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        EmailData data = result.iterator().next();
+        assertEquals(1L, data.getId());
+        assertEquals(100L, data.getStatus().getId());
+        assertEquals("user@example.com", data.getEmailAddress());
 
-        // Then
-        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sqlCaptor.capture(), any(RowMapper.class), any(Object[].class));
-
-        String executedSql = sqlCaptor.getValue();
-        // Verify MySQL specific syntax (LIMIT 10)
-        assertTrue(executedSql.contains("LIMIT 0,10"), "SQL should contain MySQL LIMIT clause: " + executedSql);
+        verify(queryFactory).select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.PENDING.getValue()));
+        verify(query).limit(10L);
+        verify(query).fetch();
     }
 
     @Test
-    void testRetrieveAllSentWithPostgres() {
-        // Given
+    void testRetrieveAllSentWithLimit() {
         SearchParameters searchParameters = SearchParameters.builder().limit(5).build();
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
 
-        // Simulate Postgres environment
-        when(databaseTypeResolver.isMySQL()).thenReturn(false);
-        when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllSent(searchParameters);
 
-        // When
-        emailReadPlatformService.retrieveAllSent(searchParameters);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
 
-        // Then
-        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sqlCaptor.capture(), any(RowMapper.class), any(Object[].class));
-
-        String executedSql = sqlCaptor.getValue();
-        // Verify Postgres specific syntax (LIMIT 5)
-        assertTrue(executedSql.contains("LIMIT 5 OFFSET 0"), "SQL should contain Postgres LIMIT clause: " + executedSql);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.SENT.getValue()));
+        verify(query).limit(5L);
+        verify(query).fetch();
     }
 
     @Test
     void testRetrieveAllPendingWithoutLimit() {
-        // Given - limit 0 means unlimited (getLimit() returns null)
         SearchParameters searchParameters = SearchParameters.builder().limit(0).build();
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
 
-        // When
-        emailReadPlatformService.retrieveAllPending(searchParameters);
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllPending(searchParameters);
 
-        // Then
-        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sqlCaptor.capture(), any(RowMapper.class), any(Object[].class));
-
-        String executedSql = sqlCaptor.getValue();
-        // Verify NO LIMIT clause
-        assertTrue(!executedSql.contains("LIMIT"), "SQL should NOT contain LIMIT when limit is null");
+        assertNotNull(result);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.PENDING.getValue()));
+        verify(query, never()).limit(any(Long.class));
+        verify(query).fetch();
     }
 
     @Test
     void testRetrieveWithLimitOne() {
-        // Given
         SearchParameters searchParameters = SearchParameters.builder().limit(1).build();
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
 
-        // Simulate MySQL environment
-        when(databaseTypeResolver.isMySQL()).thenReturn(true);
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllPending(searchParameters);
 
-        // When
-        emailReadPlatformService.retrieveAllPending(searchParameters);
-
-        // Then
-        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sqlCaptor.capture(), any(RowMapper.class), any(Object[].class));
-
-        String executedSql = sqlCaptor.getValue();
-        // Verify MySQL specific syntax (LIMIT 1)
-        assertTrue(executedSql.contains("LIMIT 0,1"), "SQL should contain MySQL LIMIT 1 clause");
+        assertNotNull(result);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.PENDING.getValue()));
+        verify(query).limit(1L);
+        verify(query).fetch();
     }
 
     @Test
     void testRetrieveWithNegativeLimit() {
-        // Given
         SearchParameters searchParameters = SearchParameters.builder().limit(-5).build();
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
 
-        // When
-        emailReadPlatformService.retrieveAllPending(searchParameters);
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllPending(searchParameters);
 
-        // Then
-        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).query(sqlCaptor.capture(), any(RowMapper.class), any(Object[].class));
+        assertNotNull(result);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.PENDING.getValue()));
+        verify(query, never()).limit(any(Long.class));
+        verify(query).fetch();
+    }
 
-        String executedSql = sqlCaptor.getValue();
-        // Verify NO LIMIT clause for negative values (as they are invalid for SQL limit)
-        assertTrue(!executedSql.contains("LIMIT"), "SQL should NOT contain LIMIT when limit is negative");
+    @Test
+    void testRetrieveAllDeliveredWithLimit() {
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
+
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllDelivered(15);
+
+        assertNotNull(result);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.DELIVERED.getValue()));
+        verify(query).limit(15L);
+        verify(query).fetch();
+    }
+
+    @Test
+    void testRetrieveAllFailed() {
+        SearchParameters searchParameters = SearchParameters.builder().limit(25).build();
+        SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
+
+        Collection<EmailData> result = emailReadPlatformService.retrieveAllFailed(searchParameters);
+
+        assertNotNull(result);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.FAILED.getValue()));
+        verify(query).limit(25L);
+        verify(query).fetch();
     }
 
     @Test
@@ -454,7 +473,6 @@ class EmailReadPlatformServiceImplTest {
         assertEquals(expectedFullRow(), service.retrieveOne(11L));
         assertEquals(EXPECTED_RETRIEVE_ONE_SQL, executedSql);
         verify(statement).setLong(1, 11L);
-        verifyNoInteractions(jdbcTemplate);
     }
 
     @Test
@@ -507,8 +525,7 @@ class EmailReadPlatformServiceImplTest {
         });
         when(statement.executeQuery()).thenReturn(resultSet);
 
-        return new EmailReadPlatformServiceImpl(jdbcTemplate, null,
-                new SQLQueryFactory(new Configuration(templates), () -> connection));
+        return new EmailReadPlatformServiceImpl(new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
     /**

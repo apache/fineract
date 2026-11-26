@@ -25,8 +25,6 @@ import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,13 +35,9 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageEnu
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageStatusType;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.query.QScheduledEmailMessagesOutbound;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,58 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final EmailMapper emailRowMapper = new EmailMapper();
     private final SQLQueryFactory queryFactory;
     private final QScheduledEmailMessagesOutbound emo = new QScheduledEmailMessagesOutbound("emo");
     private final NumberPath<Long> externalId = Expressions.numberPath(Long.class, emo, "external_id");
-
-    private static final class EmailMapper implements RowMapper<EmailData> {
-
-        private static final String EMAIL_SCHEMA = """
-                 emo.id as id,
-                emo.group_id as groupId,
-                emo.client_id as clientId,
-                emo.staff_id as staffId,
-                emo.campaign_name as campaignName,
-                emo.status_enum as statusId,
-                emo.email_address as emailAddress,
-                emo.submittedon_date as sentDate,
-                emo.email_subject as emailSubject,
-                emo.message as message,
-                emo.error_message as errorMessage
-                from scheduled_email_messages_outbound emo\s""";
-
-        EmailMapper() {}
-
-        private String schema() {
-            return EMAIL_SCHEMA;
-        }
-
-        @Override
-        public EmailData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Long groupId = JdbcSupport.getLong(rs, "groupId");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final Long staffId = JdbcSupport.getLong(rs, "staffId");
-
-            final String emailAddress = rs.getString("emailAddress");
-            final String emailSubject = rs.getString("emailSubject");
-            final String message = rs.getString("message");
-            final String campaignName = rs.getString("campaignName");
-
-            final Integer statusId = JdbcSupport.getInteger(rs, "statusId");
-            final LocalDate sentDate = JdbcSupport.getLocalDate(rs, "sentDate");
-            final String errorMessage = rs.getString("errorMessage");
-
-            final EnumOptionData status = EmailMessageEnumerations.status(statusId);
-
-            return EmailData.instance(id, groupId, clientId, staffId, status, emailAddress, emailSubject, message, null, null, null, null,
-                    null, campaignName, sentDate, errorMessage);
-        }
-    }
 
     @Override
     public Collection<EmailData> retrieveAll() {
@@ -208,14 +153,18 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     }
 
     private Collection<EmailData> retrieveEmailByStatus(final Integer status, final Integer limit) {
-        StringBuilder sql = new StringBuilder("select " + this.emailRowMapper.schema() + " where emo.status_enum = ?");
-        List<Object> args = new ArrayList<>();
-        args.add(status);
-
+        final SQLQuery<Tuple> query = queryFactory.select(emo.id, emo.groupId, emo.clientId, emo.staffId, emo.campaignName, emo.statusEnum,
+                emo.emailAddress, emo.submittedonDate, emo.emailSubject, emo.message, emo.errorMessage).from(emo)
+                .where(emo.statusEnum.eq(status));
         if (limit != null && limit > 0) {
-            sql.append(" ").append(sqlGenerator.limit(limit));
+            query.limit(limit);
         }
 
-        return this.jdbcTemplate.query(sql.toString(), this.emailRowMapper, args.toArray());
+        final List<Tuple> rows = query.fetch();
+        final List<EmailData> result = new ArrayList<>(rows.size());
+        for (Tuple row : rows) {
+            result.add(mapRow(row));
+        }
+        return result;
     }
 }
