@@ -21,22 +21,37 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.sql.Configuration;
+import com.querydsl.sql.MySQLTemplates;
+import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.SQLTemplates;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageEnumerations;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageStatusType;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -47,7 +62,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -259,5 +276,110 @@ class EmailReadPlatformServiceImplTest {
         return Projections.tuple(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
                 EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage).newInstance(id, groupId, clientId, staffId,
                         campaignName, statusEnum, emailAddress, submittedonDate, emailSubject, message, errorMessage);
+    }
+
+    private static final String EXPECTED_RETRIEVE_ONE_SQL = """
+            select emo.id, emo.group_id, \
+            emo.client_id, emo.staff_id, \
+            emo.campaign_name, emo.status_enum, \
+            emo.email_address, emo.submittedon_date, \
+            emo.email_subject, emo.message, \
+            emo.error_message
+            from scheduled_email_messages_outbound emo
+            where emo.id = ?
+            limit ?""";
+
+    private final Connection connection = mock(Connection.class);
+    private final PreparedStatement statement = mock(PreparedStatement.class);
+    private String executedSql;
+
+    @Test
+    void retrieveOneMapsAllFieldsOnPostgreSQL() throws SQLException {
+        EmailReadPlatformService service = retrieveOneService(PostgreSQLTemplates.builder().build(), fullRow());
+
+        assertEquals(expectedFullRow(), service.retrieveOne(11L));
+        assertEquals(EXPECTED_RETRIEVE_ONE_SQL, executedSql);
+        verify(statement).setLong(1, 11L);
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveOneMapsAllFieldsOnMySQL() throws SQLException {
+        EmailReadPlatformService service = retrieveOneService(MySQLTemplates.builder().build(), fullRow());
+
+        assertEquals(expectedFullRow(), service.retrieveOne(11L));
+        assertEquals(EXPECTED_RETRIEVE_ONE_SQL, executedSql);
+        verify(statement).setLong(1, 11L);
+    }
+
+    @Test
+    void retrieveOneKeepsNullableColumnsNull() throws SQLException {
+        EmailReadPlatformService service = retrieveOneService(PostgreSQLTemplates.builder().build(), new Object[] { 12L, null, null, null,
+                null, EmailMessageStatusType.PENDING.getValue(), "a@example.org", null, null, null, null });
+
+        EmailData email = service.retrieveOne(12L);
+
+        assertEquals(EmailData.instance(12L, null, null, null, EmailMessageEnumerations.status(EmailMessageStatusType.PENDING.getValue()),
+                "a@example.org", null, null, null, null, null, null, null, null, null, null), email);
+    }
+
+    @Test
+    void retrieveOneThrowsEmailNotFoundWhenIdDoesNotExist() throws SQLException {
+        EmailReadPlatformService service = retrieveOneService(PostgreSQLTemplates.builder().build());
+
+        EmailNotFoundException exception = assertThrows(EmailNotFoundException.class, () -> service.retrieveOne(404L));
+
+        assertEquals("error.msg.email.identifier.not.found", exception.getGlobalisationMessageCode());
+        assertEquals("Email with identifier `404` does not exist", exception.getDefaultUserMessage());
+        verify(statement).setLong(1, 404L);
+    }
+
+    private static Object[] fullRow() {
+        return new Object[] { 11L, 3L, 5L, 7L, "Welcome campaign", EmailMessageStatusType.SENT.getValue(), "client@example.org",
+                Date.valueOf(LocalDate.of(2026, 11, 20)), "Welcome", "Hello there", "none" };
+    }
+
+    private static EmailData expectedFullRow() {
+        return EmailData.instance(11L, 3L, 5L, 7L, EmailMessageEnumerations.status(EmailMessageStatusType.SENT.getValue()),
+                "client@example.org", "Welcome", "Hello there", null, null, null, null, null, "Welcome campaign",
+                LocalDate.of(2026, 11, 20), "none");
+    }
+
+    private EmailReadPlatformService retrieveOneService(SQLTemplates templates, Object[]... rows) throws SQLException {
+        ResultSet resultSet = resultSet(rows);
+        when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
+            executedSql = invocation.getArgument(0);
+            return statement;
+        });
+        when(statement.executeQuery()).thenReturn(resultSet);
+
+        return new EmailReadPlatformServiceImpl(jdbcTemplate, null, paginationHelper,
+                new SQLQueryFactory(new Configuration(templates), () -> connection));
+    }
+
+    /**
+     * A {@link ResultSet} that serves the given rows by column index, including {@link ResultSet#wasNull()}.
+     */
+    private static ResultSet resultSet(Object[]... rows) {
+        AtomicInteger current = new AtomicInteger(-1);
+        AtomicInteger lastColumn = new AtomicInteger();
+
+        Answer<Object> answer = invocation -> {
+            String method = invocation.getMethod().getName();
+            if ("next".equals(method)) {
+                return current.incrementAndGet() < rows.length;
+            }
+            if ("wasNull".equals(method)) {
+                return rows[current.get()][lastColumn.get() - 1] == null;
+            }
+            if (method.startsWith("get") && invocation.getArguments().length > 0 && invocation.getArgument(0) instanceof Integer column) {
+                lastColumn.set(column);
+                Object value = rows[current.get()][column - 1];
+                return value == null ? Mockito.RETURNS_DEFAULTS.answer(invocation) : value;
+            }
+            return Mockito.RETURNS_DEFAULTS.answer(invocation);
+        };
+
+        return mock(ResultSet.class, answer);
     }
 }
