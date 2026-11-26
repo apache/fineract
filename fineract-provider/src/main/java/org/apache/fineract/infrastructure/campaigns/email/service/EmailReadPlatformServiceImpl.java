@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.query.QScheduledEmailMessagesOutbound;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -140,13 +139,16 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EmailData retrieveOne(final Long resourceId) {
-        try {
-            final String sql = "select " + this.emailRowMapper.schema() + " where emo.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.emailRowMapper, new Object[] { resourceId }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new EmailNotFoundException(resourceId, e);
+        final Tuple row = queryFactory
+                .select(emo.id, emo.groupId, emo.clientId, emo.staffId, emo.campaignName, emo.statusEnum, emo.emailAddress,
+                        emo.submittedonDate, emo.emailSubject, emo.message, emo.errorMessage)
+                .from(emo).where(emo.id.eq(resourceId)).fetchOne();
+        if (row == null) {
+            throw new EmailNotFoundException(resourceId);
         }
+        return mapRow(row);
     }
 
     @Override
