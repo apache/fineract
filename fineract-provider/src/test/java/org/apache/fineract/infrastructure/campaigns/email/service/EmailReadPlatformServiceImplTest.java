@@ -27,12 +27,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.MySQLTemplates;
 import com.querydsl.sql.PostgreSQLTemplates;
@@ -73,6 +76,7 @@ import org.springframework.jdbc.core.RowMapper;
 class EmailReadPlatformServiceImplTest {
 
     private static final QScheduledEmailMessagesOutbound EMO = new QScheduledEmailMessagesOutbound("emo");
+    private static final NumberPath<Long> EXTERNAL_ID = Expressions.numberPath(Long.class, EMO, "external_id");
 
     @Mock
     private JdbcTemplate jdbcTemplate;
@@ -260,6 +264,80 @@ class EmailReadPlatformServiceImplTest {
         assertNull(data.getEmailSubject());
         assertNull(data.getEmailMessage());
         assertNull(data.getErrorMessage());
+    }
+
+    @Test
+    void testRetrieveExternalIdsOfAllSentWithLimit() {
+        SQLQuery<Long> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EXTERNAL_ID)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of(101L, 102L, 103L));
+
+        List<Long> result = emailReadPlatformService.retrieveExternalIdsOfAllSent(5);
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertEquals(List.of(101L, 102L, 103L), result);
+
+        verify(queryFactory).select(EXTERNAL_ID);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.SENT.getValue()));
+        verify(query).limit(5L);
+        verify(query).fetch();
+    }
+
+    @Test
+    void testRetrieveExternalIdsOfAllSentWithoutLimit() {
+        SQLQuery<Long> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EXTERNAL_ID)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of(101L));
+
+        List<Long> result = emailReadPlatformService.retrieveExternalIdsOfAllSent(0);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(101L, result.get(0));
+
+        verify(queryFactory).select(EXTERNAL_ID);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.SENT.getValue()));
+        verify(query, never()).limit(any(Long.class));
+        verify(query).fetch();
+    }
+
+    @Test
+    void testRetrieveExternalIdsOfAllSentHandlesNullLimit() {
+        SQLQuery<Long> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EXTERNAL_ID)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of(101L));
+
+        List<Long> result = emailReadPlatformService.retrieveExternalIdsOfAllSent(null);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        verify(queryFactory).select(EXTERNAL_ID);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.SENT.getValue()));
+        verify(query, never()).limit(any(Long.class));
+        verify(query).fetch();
+    }
+
+    @Test
+    void testRetrieveExternalIdsOfAllSentEmpty() {
+        SQLQuery<Long> query = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EXTERNAL_ID)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of());
+
+        List<Long> result = emailReadPlatformService.retrieveExternalIdsOfAllSent(10);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(queryFactory).select(EXTERNAL_ID);
+        verify(query).from(EMO);
+        verify(query).where(EMO.statusEnum.eq(EmailMessageStatusType.SENT.getValue()));
+        verify(query).limit(10L);
+        verify(query).fetch();
     }
 
     @SuppressWarnings("unchecked")

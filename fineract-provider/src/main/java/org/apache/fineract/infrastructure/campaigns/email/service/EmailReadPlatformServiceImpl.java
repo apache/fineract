@@ -19,6 +19,9 @@
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -56,6 +59,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     private final PaginationHelper paginationHelper;
     private final SQLQueryFactory queryFactory;
     private final QScheduledEmailMessagesOutbound emo = new QScheduledEmailMessagesOutbound("emo");
+    private final NumberPath<Long> externalId = Expressions.numberPath(Long.class, emo, "external_id");
 
     private static final class EmailMapper implements RowMapper<EmailData> {
 
@@ -77,10 +81,6 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
         private String schema() {
             return EMAIL_SCHEMA;
-        }
-
-        private String tableName() {
-            return "scheduled_email_messages_outbound";
         }
 
         @Override
@@ -163,10 +163,11 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " " + sqlGenerator.limit(limit) : "";
-        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum =? " + sqlPlusLimit;
-
-        return this.jdbcTemplate.queryForList(sql, Long.class, EmailMessageStatusType.SENT.getValue()); // NOSONAR
+        SQLQuery<Long> query = queryFactory.select(externalId).from(emo).where(emo.statusEnum.eq(EmailMessageStatusType.SENT.getValue()));
+        if (limit != null && limit > 0) {
+            query.limit(limit);
+        }
+        return query.fetch();
     }
 
     @Override
