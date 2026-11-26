@@ -220,10 +220,7 @@ class GLAccountListIntegrationTest extends FeignIntegrationTest {
         final EnumOptionData rootUsage = root.getUsage();
         assertNotNull(rootUsage);
         assertEquals(HEADER, rootUsage.getId());
-        final CodeValueData rootTag = root.getTagId();
-        assertNotNull(rootTag);
-        assertEquals(0L, rootTag.getId());
-        assertNull(rootTag.getName());
+        assertNull(root.getTagId());
     }
 
     @Test

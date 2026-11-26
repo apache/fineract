@@ -107,6 +107,11 @@ public class FeignAccountHelper {
                 .filter(account -> name.equals(account.getName())).toList();
     }
 
+    public List<GetGLAccountsResponse> searchGLAccounts(String searchParam) {
+        return ok(() -> fineractClient.generalLedgerAccount()
+                .retrieveAllAccounts(new RetrieveAllAccountsQueryParams().searchParam(searchParam)));
+    }
+
     public GetGLAccountsResponse createEquityAccountWithExactName(String name) {
         PostGLAccountsRequest request = new PostGLAccountsRequest()//
                 .name(name)//
