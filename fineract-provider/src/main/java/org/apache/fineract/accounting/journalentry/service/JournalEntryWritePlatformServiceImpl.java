@@ -250,7 +250,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
         int validCreditsNo = 0;
         int validDebitsNo = 0;
 
-        if (credits != null && credits.length > 0) {
+        if (accountingRule.getAccountToCredit() == null && credits != null && credits.length > 0) {
             allowedCreditGLAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(accountingRule.getId(),
                     JournalEntryType.CREDIT.getValue());
             for (final GLAccountDataForLookup accountDataForLookup : allowedCreditGLAccounts) {
@@ -265,7 +265,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
             }
         }
 
-        if (debits != null && debits.length > 0) {
+        if (accountingRule.getAccountToDebit() == null && debits != null && debits.length > 0) {
             allowedDebitGLAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(accountingRule.getId(),
                     JournalEntryType.DEBIT.getValue());
             for (final GLAccountDataForLookup accountDataForLookup : allowedDebitGLAccounts) {
