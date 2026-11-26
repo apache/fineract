@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import static org.eclipse.persistence.config.QueryHints.BATCH;
+import static org.eclipse.persistence.config.QueryHints.BATCH_TYPE;
+
+import jakarta.persistence.QueryHint;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificationExecutor<Loan> {
@@ -180,13 +185,36 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses, @Param("loanTypes") Collection<AccountType> loanTypes);
 
+    // Each association the Apply Holidays To Loans job reads is read for all the loans in one more query, the first
+    // time it is used on one of them.
+    @QueryHints({ @QueryHint(name = BATCH, value = "loan.client"), @QueryHint(name = BATCH, value = "loan.repaymentScheduleInstallments"),
+            @QueryHint(name = BATCH, value = "loan.disbursementDetails"), @QueryHint(name = BATCH, value = "loan.loanTermVariations"),
+            @QueryHint(name = BATCH, value = "loan.loanInterestRecalculationDetails"), @QueryHint(name = BATCH_TYPE, value = "EXISTS") })
     @Query("select loan from Loan loan where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
+    // Each association the Apply Holidays To Loans job reads is read for all the loans in one more query, the first
+    // time it is used on one of them.
+    @QueryHints({ @QueryHint(name = BATCH, value = "loan.client"), @QueryHint(name = BATCH, value = "loan.repaymentScheduleInstallments"),
+            @QueryHint(name = BATCH, value = "loan.disbursementDetails"), @QueryHint(name = BATCH, value = "loan.loanTermVariations"),
+            @QueryHint(name = BATCH, value = "loan.loanInterestRecalculationDetails"), @QueryHint(name = BATCH_TYPE, value = "EXISTS") })
     @Query("select loan from Loan loan where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+
+    // Each association the COB business steps read is read for all the loans in one more query, the first time it is
+    // used on one of them.
+    @QueryHints({ @QueryHint(name = BATCH, value = "loan.client"), @QueryHint(name = BATCH, value = "loan.repaymentScheduleInstallments"),
+            @QueryHint(name = BATCH, value = "loan.repaymentScheduleInstallments.loanTransactionToRepaymentScheduleMappings"),
+            @QueryHint(name = BATCH, value = "loan.repaymentScheduleInstallments.installmentCharges"),
+            @QueryHint(name = BATCH, value = "loan.loanTransactions"), @QueryHint(name = BATCH, value = "loan.charges"),
+            @QueryHint(name = BATCH, value = "loan.trancheCharges"), @QueryHint(name = BATCH, value = "loan.collateral"),
+            @QueryHint(name = BATCH, value = "loan.loanCollateralManagements"), @QueryHint(name = BATCH, value = "loan.loanOfficerHistory"),
+            @QueryHint(name = BATCH, value = "loan.disbursementDetails"), @QueryHint(name = BATCH, value = "loan.loanTermVariations"),
+            @QueryHint(name = BATCH, value = "loan.loanInterestRecalculationDetails"), @QueryHint(name = BATCH_TYPE, value = "EXISTS") })
+    @Query("select loan from Loan loan where loan.id IN :loanIds")
+    List<Loan> findByIdInWithAssociations(@Param("loanIds") Collection<Long> loanIds);
 
     /*** FIXME: Add more appropriate names for the query ***/
     @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_CLIENT)

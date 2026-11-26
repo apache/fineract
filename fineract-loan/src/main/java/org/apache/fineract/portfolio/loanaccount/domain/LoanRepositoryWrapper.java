@@ -225,28 +225,14 @@ public class LoanRepositoryWrapper {
         return loans;
     }
 
-    // Repayments Schedule
     public List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
-        List<Loan> loans = this.repository.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses);
-        if (loans != null && !loans.isEmpty()) {
-            for (Loan loan : loans) {
-                loan.initializeRepaymentSchedule();
-            }
-        }
-        return loans;
+        return this.repository.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses);
     }
 
-    // Repayments Schedule
     public List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
-        List<Loan> loans = this.repository.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses);
-        if (loans != null && !loans.isEmpty()) {
-            for (Loan loan : loans) {
-                loan.initializeRepaymentSchedule();
-            }
-        }
-        return loans;
+        return this.repository.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses);
     }
 
     public List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") LoanStatus loanStatus) {

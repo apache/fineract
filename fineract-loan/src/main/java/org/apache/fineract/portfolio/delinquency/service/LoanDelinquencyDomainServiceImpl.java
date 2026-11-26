@@ -98,7 +98,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                             installment.getDueDate());
                     firstNotYetDueInstallment = true;
                     final CollectionData nonOverDueInstallmentDelinquentData = calculateDelinquencyDataForNonOverdueInstallment(loan,
-                            installment);
+                            installment, chargebackTransactions);
                     outstandingAmount = outstandingAmount.add(nonOverDueInstallmentDelinquentData.getDelinquentAmount());
                     delinquentPrincipal = delinquentPrincipal.add(nonOverDueInstallmentDelinquentData.getDelinquentPrincipal());
                     delinquentInterest = delinquentInterest.add(nonOverDueInstallmentDelinquentData.getDelinquentInterest());
@@ -232,7 +232,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         } else {
             // checking non overdue installment for chargeback transactions before installment due date and before
             // business date
-            final CollectionData nonOverDueInstallmentDelinquentData = calculateDelinquencyDataForNonOverdueInstallment(loan, installment);
+            final CollectionData nonOverDueInstallmentDelinquentData = calculateDelinquencyDataForNonOverdueInstallment(loan, installment,
+                    chargebackTransactions);
             outstandingAmount = outstandingAmount.add(nonOverDueInstallmentDelinquentData.getDelinquentAmount());
             overdueSinceDate = nonOverDueInstallmentDelinquentData.getDelinquentDate();
         }
@@ -304,7 +305,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
     }
 
     private CollectionData calculateDelinquencyDataForNonOverdueInstallment(final Loan loan,
-            final LoanRepaymentScheduleInstallment installment) {
+            final LoanRepaymentScheduleInstallment installment, final List<LoanTransaction> chargebackTransactions) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         final MonetaryCurrency loanCurrency = loan.getCurrency();
 
@@ -316,8 +317,6 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         BigDecimal delinquentFee = BigDecimal.ZERO;
         BigDecimal delinquentPenalty = BigDecimal.ZERO;
 
-        List<LoanTransaction> chargebackTransactions = loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null,
-                LoanTransactionType.CHARGEBACK);
         BigDecimal amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
         for (LoanTransaction loanTransaction : chargebackTransactions) {
 

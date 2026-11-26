@@ -36,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -506,8 +507,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         final List<LoanRepaymentScheduleInstallment> installments = isFinal ? loan.getRepaymentScheduleInstallments()
                 : getInstallmentsToAccrue(loan, interestCalculationTillDate, periodic, chargeOnDueDate);
         final AccrualPeriodsData accrualPeriods = AccrualPeriodsData.create(installments, firstInstallmentNumber, currency);
+        final InterestTransactionTotals interestTotals = new InterestTransactionTotals(loan);
         for (LoanRepaymentScheduleInstallment installment : installments) {
-            addInterestAccrual(loan, interestCalculationTillDate, scheduleGenerator, installment, accrualPeriods);
+            addInterestAccrual(loan, interestCalculationTillDate, scheduleGenerator, installment, accrualPeriods, interestTotals);
             addChargeAccrual(loan, tillDate, chargeOnDueDate, realTimeChargeAccrual, installment, accrualPeriods);
         }
         return accrualPeriods;
@@ -530,7 +532,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     private void addInterestAccrual(@NonNull final Loan loan, @NonNull final LocalDate tillDate,
             final LoanScheduleGenerator scheduleGenerator, @NonNull final LoanRepaymentScheduleInstallment installment,
-            @NonNull final AccrualPeriodsData accrualPeriods) {
+            @NonNull final AccrualPeriodsData accrualPeriods, @NonNull final InterestTransactionTotals interestTotals) {
         // No interest, no need for calculations
         if (!loan.isInterestBearing()) {
             return;
@@ -567,8 +569,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         Money transactionWaived = null;
         if (!MathUtil.isEmpty(interest)) {
             transactionWaived = MathUtil.toMoney(calcInterestTransactionWaivedAmount(installment, tillDate), currency);
-            Money unrecognizedWaived = MathUtil.toMoney(calcInterestUnrecognizedWaivedAmount(installment, accrualPeriods, tillDate),
-                    currency);
+            Money unrecognizedWaived = MathUtil
+                    .toMoney(calcInterestUnrecognizedWaivedAmount(installment, accrualPeriods, tillDate, interestTotals), currency);
             // unrecognized maximum is the waived portion which is not covered by waiver transactions
             unrecognizedWaived = MathUtil.min(unrecognizedWaived,
                     MathUtil.minusToZero(installment.getInterestWaived(currency), transactionWaived), false);
@@ -578,7 +580,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             accruable = MathUtil.minusToZero(period.getInterestAmount(), waived);
         }
         period.setInterestAccruable(accruable);
-        final Money transactionAccrued = MathUtil.toMoney(calcInterestAccruedAmount(installment, accrualPeriods, tillDate), currency);
+        final Money transactionAccrued = MathUtil.toMoney(calcInterestAccruedAmount(installment, accrualPeriods, tillDate, interestTotals),
+                currency);
         period.setTransactionAccrued(transactionAccrued);
         final Money accrued = MathUtil.minusToZero(transactionAccrued, transactionWaived);
         period.setInterestAccrued(accrued);
@@ -596,12 +599,11 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     @NonNull
     private BigDecimal calcInterestUnrecognizedWaivedAmount(@NonNull LoanRepaymentScheduleInstallment installment,
-            @NonNull AccrualPeriodsData accrualPeriods, @NonNull LocalDate tillDate) {
+            @NonNull AccrualPeriodsData accrualPeriods, @NonNull LocalDate tillDate, @NonNull InterestTransactionTotals interestTotals) {
         // unrecognized amount of the transaction is not mapped to installments
         LocalDate dueDate = installment.getDueDate();
         LocalDate toDate = DateUtils.isBefore(dueDate, tillDate) ? dueDate : tillDate;
-        Loan loan = installment.getLoan();
-        BigDecimal totalUnrecognized = loanTransactionRepository.findTotalUnrecognizedIncomeFromInterestWaiverByLoanAndDate(loan, toDate);
+        BigDecimal totalUnrecognized = interestTotals.unrecognizedIncomeFromWaiversTill(toDate);
         // total unrecognized amount from previous periods
         BigDecimal prevUnrecognized = accrualPeriods.getPeriods().stream()
                 .filter(p -> p.getInstallmentNumber() < installment.getInstallmentNumber())
@@ -612,10 +614,10 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     @NonNull
     private BigDecimal calcInterestAccruedAmount(@NonNull LoanRepaymentScheduleInstallment installment,
-            @NonNull AccrualPeriodsData accrualPeriods, @NonNull LocalDate tillDate) {
+            @NonNull AccrualPeriodsData accrualPeriods, @NonNull LocalDate tillDate, @NonNull InterestTransactionTotals interestTotals) {
         Loan loan = installment.getLoan();
         if (isProgressiveAccrual(loan)) {
-            BigDecimal totalAccrued = loanTransactionRepository.findTotalInterestAccruedAmount(loan);
+            BigDecimal totalAccrued = interestTotals.interestAccrued();
             BigDecimal prevAccrued = accrualPeriods.getPeriods().stream()
                     .filter(p -> p.getInstallmentNumber() < installment.getInstallmentNumber())
                     .map(p -> MathUtil.toBigDecimal(p.getTransactionAccrued())).reduce(BigDecimal.ZERO, MathUtil::add);
@@ -1486,5 +1488,33 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     public boolean isProgressiveAccrual(@NonNull Loan loan) {
         return loan.isProgressiveSchedule();
+    }
+
+    /**
+     * The totals of the loan's interest transactions that the accrual of each installment reads. The accrual
+     * calculation writes no transaction, so they are the same for every installment, and each is read once per
+     * calculation, the first time an installment needs it, instead of once per installment.
+     */
+    @RequiredArgsConstructor
+    private final class InterestTransactionTotals {
+
+        private final Loan loan;
+        private BigDecimal interestAccrued;
+        private List<LoanTransaction> interestWaivers;
+
+        private BigDecimal interestAccrued() {
+            if (interestAccrued == null) {
+                interestAccrued = loanTransactionRepository.findTotalInterestAccruedAmount(loan);
+            }
+            return interestAccrued;
+        }
+
+        private BigDecimal unrecognizedIncomeFromWaiversTill(LocalDate toDate) {
+            if (interestWaivers == null) {
+                interestWaivers = loanTransactionRepository.findNonReversedInterestWaiversByLoan(loan);
+            }
+            return interestWaivers.stream().filter(waiver -> !DateUtils.isAfter(waiver.getTransactionDate(), toDate))
+                    .map(LoanTransaction::getUnrecognizedIncomePortion).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
     }
 }

@@ -660,7 +660,7 @@ public class LoanAccrualsProcessingServiceImplTest {
         when(loan.fetchRepaymentScheduleInstallment(any())).thenAnswer(invocation -> installments.stream()
                 .filter(installment -> installment.getInstallmentNumber().equals(invocation.getArgument(0))).findFirst().orElse(null));
         when(loanTransactionRepository.findTotalInterestAccruedAmount(loan)).thenReturn(BigDecimal.ZERO);
-        when(loanTransactionRepository.findTotalUnrecognizedIncomeFromInterestWaiverByLoanAndDate(any(), any())).thenReturn(BigDecimal.ZERO);
+        when(loanTransactionRepository.findNonReversedInterestWaiversByLoan(any())).thenReturn(List.of());
         when(loanTransactionRepository.findChargeUnrecognizedWaivedAmount(any(), any())).thenReturn(BigDecimal.ZERO);
         when(loanTransactionRepository.save(any(LoanTransaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(loanTransactionRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));

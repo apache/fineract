@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.cob.loan;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.inOrder;
@@ -40,6 +42,7 @@ import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.exceptions.BusinessStepException;
+import org.apache.fineract.cob.exceptions.COBAccountFailedException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
@@ -88,6 +91,10 @@ class LoanItemWriterTest {
         verify(processed1).setLastClosedBusinessDate(BUSINESS_DATE);
         verify(processed2).setLastClosedBusinessDate(BUSINESS_DATE);
         InOrder inOrder = inOrder(loanRepository, lockingService);
+        // The chunk's loans and their schedules are fetched together before any loan is loaded for its steps.
+        inOrder.verify(loanRepository).findByIdInWithAssociations(List.of(1L, 2L));
+        inOrder.verify(loanRepository).findById(1L);
+        inOrder.verify(loanRepository).findById(2L);
         inOrder.verify(loanRepository).flush();
         inOrder.verify(lockingService).deleteByLoanIdInAndLockOwner(List.of(1L, 2L), LockOwner.LOAN_COB_CHUNK_PROCESSING);
         // The loans are managed by the chunk transaction: flushing writes them, a save would only merge them again.
@@ -118,6 +125,19 @@ class LoanItemWriterTest {
 
         assertThrows(BusinessStepException.class, () -> writer.write(new Chunk<>(1L)));
 
+        verifyNoInteractions(cobBusinessStepService, lockingService);
+    }
+
+    @Test
+    void aFailingPrefetchOfAOneLoanChunkFailsThatLoan() {
+        LoanItemWriter writer = stepScopedWriter();
+        RuntimeException failure = new IllegalStateException("prefetch failed");
+        when(loanRepository.findByIdInWithAssociations(List.of(1L))).thenThrow(failure);
+
+        COBAccountFailedException thrown = assertThrows(COBAccountFailedException.class, () -> writer.write(new Chunk<>(1L)));
+
+        assertEquals(1L, thrown.getAccountId());
+        assertSame(failure, thrown.getCause());
         verifyNoInteractions(cobBusinessStepService, lockingService);
     }
 
