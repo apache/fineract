@@ -19,7 +19,10 @@
 package org.apache.fineract.useradministration.service;
 
 import jakarta.persistence.PersistenceException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +42,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -62,6 +66,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
@@ -108,7 +114,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 linkedStaff = null;
             }
 
-            AppUser appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, command);
+            AppUser appUser = newAppUser(userOffice, linkedStaff, allRoles, command);
             if (this.configurationDomainService.isForcePasswordResetOnFirstLoginEnabled()) {
                 appUser.updatePasswordResetRequired(true);
             }
@@ -150,7 +156,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     this.context.authenticatedUser(new CommandWrapperBuilder().changeUserPassword(userId).build()));
             final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
-            final Map<String, Object> changes = userToUpdate.changePassword(command, this.platformPasswordEncoder);
+            final Map<String, Object> changes = new LinkedHashMap<>(1);
+            applyPasswordChange(userToUpdate, command, changes);
             if (changes.isEmpty() && command.hasParameter(AppUserConstants.PASSWORD)) {
                 throw new PasswordMustBeDifferentException();
             }
@@ -188,7 +195,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
 
-            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
+            final Map<String, Object> changes = applyChanges(userToUpdate, command);
 
             if (changes.containsKey("officeId")) {
                 final Long officeId = (Long) changes.get("officeId");
@@ -257,7 +264,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
      * detected on that path.
      */
     private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
-        final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
+        final String passWordEncodedValue = getEncodedPassword(user, command);
 
         AppUserPreviousPassword currentPasswordToSaveAsPreview = null;
 
@@ -287,6 +294,181 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         }
 
         return currentPasswordToSaveAsPreview;
+    }
+
+    private static AppUser newAppUser(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
+            final JsonCommand command) {
+        final String username = command.stringValueOfParameterNamed("username");
+        String password = command.stringValueOfParameterNamed("password");
+        final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
+
+        if (sendPasswordToEmail) {
+            password = new RandomPasswordGenerator(13).generate();
+        }
+
+        boolean passwordNeverExpire = false;
+
+        if (command.parameterExists(AppUserConstants.PASSWORD_NEVER_EXPIRES)) {
+            passwordNeverExpire = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.PASSWORD_NEVER_EXPIRES);
+        }
+
+        final boolean userEnabled = true;
+        final boolean userAccountNonExpired = true;
+        final boolean userCredentialsNonExpired = true;
+        final boolean userAccountNonLocked = true;
+        final boolean cannotChangePassword = false;
+        boolean loginRetryLimitEnabled = false;
+        if (command.parameterExists(AppUserConstants.IS_LOGIN_RETRIES_ENABLED)) {
+            loginRetryLimitEnabled = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_LOGIN_RETRIES_ENABLED);
+        }
+
+        final Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("DUMMY_ROLE_NOT_USED_OR_PERSISTED_TO_AVOID_EXCEPTION"));
+
+        final User user = new User(username, password, userEnabled, userAccountNonExpired, userCredentialsNonExpired, userAccountNonLocked,
+                authorities);
+
+        final String email = command.stringValueOfParameterNamed("email");
+        final String firstname = command.stringValueOfParameterNamed("firstname");
+        final String lastname = command.stringValueOfParameterNamed("lastname");
+
+        final AppUser appUser = new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire,
+                cannotChangePassword);
+        // the entity never enables login retries for the system user
+        appUser.updateLoginRetryLimitEnabled(loginRetryLimitEnabled);
+        if (command.parameterExists(AppUserConstants.IS_PASSWORD_RESET_ALLOWED)) {
+            appUser.updatePasswordResetAllowed(command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED));
+        }
+        return appUser;
+    }
+
+    /**
+     * Applies the changes of {@code PUT /users/{userId}}, in the order of the former {@code AppUser.update}. The
+     * office, staff and roles are only reported here; {@link #updateUser} looks them up and applies them.
+     */
+    private Map<String, Object> applyChanges(final AppUser user, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        // unencoded password provided
+        applyPasswordChange(user, command, actualChanges);
+        final String officeIdParamName = "officeId";
+        if (command.isChangeInLongParameterNamed(officeIdParamName, user.getOffice().getId())) {
+            final Long newValue = command.longValueOfParameterNamed(officeIdParamName);
+            actualChanges.put(officeIdParamName, newValue);
+        }
+
+        final String staffIdParamName = "staffId";
+        if (command.hasParameter(staffIdParamName)
+                && (user.getStaff() == null || command.isChangeInLongParameterNamed(staffIdParamName, user.getStaff().getId()))) {
+            final Long newValue = command.longValueOfParameterNamed(staffIdParamName);
+            actualChanges.put(staffIdParamName, newValue);
+        }
+
+        final String rolesParamName = "roles";
+        if (command.isChangeInArrayParameterNamed(rolesParamName, getRolesAsIdStringArray(user))) {
+            final String[] newValue = command.arrayValueOfParameterNamed(rolesParamName);
+            actualChanges.put(rolesParamName, newValue);
+        }
+
+        final String usernameParamName = "username";
+        if (command.isChangeInStringParameterNamed(usernameParamName, user.getUsername())) {
+            final String newValue = command.stringValueOfParameterNamed(usernameParamName);
+            user.updateUsername(newValue);
+            actualChanges.put(usernameParamName, newValue);
+        }
+
+        final String firstnameParamName = "firstname";
+        if (command.isChangeInStringParameterNamed(firstnameParamName, user.getFirstname())) {
+            final String newValue = command.stringValueOfParameterNamed(firstnameParamName);
+            actualChanges.put(firstnameParamName, newValue);
+            user.updateFirstname(newValue);
+        }
+
+        final String lastnameParamName = "lastname";
+        if (command.isChangeInStringParameterNamed(lastnameParamName, user.getLastname())) {
+            final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
+            actualChanges.put(lastnameParamName, newValue);
+            user.updateLastname(newValue);
+        }
+
+        final String emailParamName = "email";
+        if (command.isChangeInStringParameterNamed(emailParamName, user.getEmail())) {
+            final String newValue = command.stringValueOfParameterNamed(emailParamName);
+            actualChanges.put(emailParamName, newValue);
+            user.updateEmail(newValue);
+        }
+
+        final String passwordNeverExpire = "passwordNeverExpires";
+
+        if (command.hasParameter(passwordNeverExpire)
+                && command.isChangeInBooleanParameterNamed(passwordNeverExpire, user.getPasswordNeverExpires())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(passwordNeverExpire);
+            actualChanges.put(passwordNeverExpire, newValue);
+            user.updatePasswordNeverExpires(newValue);
+        }
+
+        if (command.hasParameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED)) {
+            final boolean previousValue = user.isLoginRetryLimitEnabled();
+            final boolean requestedValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_LOGIN_RETRIES_ENABLED);
+            // only touch the entity on a change: disabling also resets the failed attempts and the lock
+            if (requestedValue != previousValue) {
+                // the entity never enables login retries for the system user
+                user.updateLoginRetryLimitEnabled(requestedValue);
+                if (user.isLoginRetryLimitEnabled() != previousValue) {
+                    actualChanges.put(AppUserConstants.IS_LOGIN_RETRIES_ENABLED, user.isLoginRetryLimitEnabled());
+                }
+            }
+        }
+
+        if (command.hasParameter(AppUserConstants.IS_PASSWORD_RESET_ALLOWED)
+                && command.isChangeInBooleanParameterNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED, user.isPasswordResetAllowed())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED);
+            actualChanges.put(AppUserConstants.IS_PASSWORD_RESET_ALLOWED, newValue);
+            user.updatePasswordResetAllowed(newValue);
+        }
+        return actualChanges;
+    }
+
+    private void applyPasswordChange(final AppUser user, final JsonCommand command, final Map<String, Object> actualChanges) {
+        final String passwordParamName = AppUserConstants.PASSWORD;
+        if (command.hasParameter(passwordParamName)
+                && command.isChangeInPasswordParameterNamed(passwordParamName, user.getPassword(), this.platformPasswordEncoder)) {
+            final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, this.platformPasswordEncoder,
+                    user.getId());
+            actualChanges.put(passwordParamName, true);
+            user.updatePassword(passwordEncodedValue);
+        }
+    }
+
+    private String getEncodedPassword(final AppUser user, final JsonCommand command) {
+        final String passwordParamName = "password";
+        final String passwordEncodedParamName = "passwordEncoded";
+        String passwordEncodedValue = null;
+
+        if (command.hasParameter(passwordParamName)) {
+            if (command.isChangeInPasswordParameterNamed(passwordParamName, user.getPassword(), this.platformPasswordEncoder)) {
+
+                passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, this.platformPasswordEncoder, user.getId());
+
+            }
+        } else if (command.hasParameter(passwordEncodedParamName)
+                && command.isChangeInStringParameterNamed(passwordEncodedParamName, user.getPassword())) {
+
+            passwordEncodedValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
+
+        }
+
+        return passwordEncodedValue;
+    }
+
+    private static String[] getRolesAsIdStringArray(final AppUser user) {
+        final List<String> roleIds = new ArrayList<>();
+
+        for (final Role role : user.getRoles()) {
+            roleIds.add(role.getId().toString());
+        }
+
+        return roleIds.toArray(new String[0]);
     }
 
     private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
