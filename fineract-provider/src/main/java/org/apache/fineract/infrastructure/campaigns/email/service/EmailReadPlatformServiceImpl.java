@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -37,9 +38,7 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageSta
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.query.QScheduledEmailMessagesOutbound;
@@ -56,7 +55,6 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final EmailMapper emailRowMapper = new EmailMapper();
-    private final PaginationHelper paginationHelper;
     private final SQLQueryFactory queryFactory;
     private final QScheduledEmailMessagesOutbound emo = new QScheduledEmailMessagesOutbound("emo");
     private final NumberPath<Long> externalId = Expressions.numberPath(Long.class, emo, "external_id");
@@ -183,25 +181,30 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     @Override
     public Page<EmailData> retrieveEmailByStatus(final Integer limit, final Integer status, final LocalDate dateFrom,
             final LocalDate dateTo) {
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.emailRowMapper.schema());
+        final BooleanBuilder where = new BooleanBuilder();
         if (status != null) {
-            sqlBuilder.append(" where emo.status_enum= ? ");
+            where.and(emo.statusEnum.eq(status));
         }
-        String fromDateString = null;
-        String toDateString = null;
         if (dateFrom != null && dateTo != null) {
-            fromDateString = DateUtils.DEFAULT_DATE_FORMATTER.format(dateFrom);
-            toDateString = DateUtils.DEFAULT_DATE_FORMATTER.format(dateTo);
-            sqlBuilder.append(" and emo.submittedon_date >= ? and emo.submittedon_date <= ? ");
+            where.and(emo.submittedonDate.goe(Date.valueOf(dateFrom)));
+            where.and(emo.submittedonDate.loe(Date.valueOf(dateTo)));
         }
-        final String sqlPlusLimit = (limit > 0) ? " " + sqlGenerator.limit(limit) : "";
-        if (!sqlPlusLimit.isEmpty()) {
-            sqlBuilder.append(sqlPlusLimit);
+
+        final Long totalFilteredRecords = queryFactory.select(emo.id.count()).from(emo).where(where).fetchOne();
+
+        final SQLQuery<Tuple> query = queryFactory.select(emo.id, emo.groupId, emo.clientId, emo.staffId, emo.campaignName, emo.statusEnum,
+                emo.emailAddress, emo.submittedonDate, emo.emailSubject, emo.message, emo.errorMessage).from(emo).where(where);
+        if (limit != null && limit > 0) {
+            query.limit(limit);
         }
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(),
-                new Object[] { status, fromDateString, toDateString }, this.emailRowMapper);
+
+        final List<Tuple> rows = query.fetch();
+        final List<EmailData> items = new ArrayList<>(rows.size());
+        for (Tuple row : rows) {
+            items.add(mapRow(row));
+        }
+
+        return new Page<>(items, Math.toIntExact(totalFilteredRecords != null ? totalFilteredRecords : 0));
     }
 
     private Collection<EmailData> retrieveEmailByStatus(final Integer status, final Integer limit) {

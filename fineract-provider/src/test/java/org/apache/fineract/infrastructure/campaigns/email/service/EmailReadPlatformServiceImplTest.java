@@ -55,7 +55,7 @@ import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageEnumerations;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageStatusType;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
-import org.apache.fineract.infrastructure.core.service.PaginationHelper;
+import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
@@ -85,9 +85,6 @@ class EmailReadPlatformServiceImplTest {
     private DatabaseTypeResolver databaseTypeResolver; // Mock ONLY the resolver
 
     @Mock
-    private PaginationHelper paginationHelper;
-
-    @Mock
     private SQLQueryFactory queryFactory;
 
     private EmailReadPlatformServiceImpl emailReadPlatformService;
@@ -97,7 +94,7 @@ class EmailReadPlatformServiceImplTest {
         // Use the REAL DatabaseSpecificSQLGenerator, not a mock
         // Pass null for RoutingDataSource as it's not needed for limit()
         DatabaseSpecificSQLGenerator sqlGenerator = new DatabaseSpecificSQLGenerator(databaseTypeResolver, null);
-        emailReadPlatformService = new EmailReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, paginationHelper, queryFactory);
+        emailReadPlatformService = new EmailReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, queryFactory);
     }
 
     @Test
@@ -340,6 +337,85 @@ class EmailReadPlatformServiceImplTest {
         verify(query).fetch();
     }
 
+    @Test
+    void testRetrieveEmailByStatusWithAllFilters() {
+        Date submittedDate = Date.valueOf(LocalDate.of(2026, 11, 26));
+        SQLQuery<Long> countQuery = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id.count())).thenReturn(countQuery);
+        when(countQuery.fetchOne()).thenReturn(1L);
+
+        SQLQuery<Tuple> selectQuery = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(selectQuery);
+        when(selectQuery.fetch()).thenReturn(List
+                .of(row(1L, 10L, 20L, 30L, "Welcome Campaign", 100, "user@example.com", submittedDate, "Welcome", "Hello World", null)));
+
+        Page<EmailData> page = emailReadPlatformService.retrieveEmailByStatus(10, 100, LocalDate.of(2026, 11, 1),
+                LocalDate.of(2026, 11, 30));
+
+        assertNotNull(page);
+        assertEquals(1, page.getTotalFilteredRecords());
+        assertEquals(1, page.getPageItems().size());
+
+        EmailData data = page.getPageItems().get(0);
+        assertEquals(1L, data.getId());
+        assertEquals("user@example.com", data.getEmailAddress());
+
+        verify(queryFactory).select(EMO.id.count());
+        verify(countQuery).from(EMO);
+        verify(countQuery).where(any(com.querydsl.core.types.Predicate.class));
+        verify(countQuery).fetchOne();
+
+        verify(queryFactory).select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage);
+        verify(selectQuery).from(EMO);
+        verify(selectQuery).where(any(com.querydsl.core.types.Predicate.class));
+        verify(selectQuery).limit(10L);
+        verify(selectQuery).fetch();
+    }
+
+    @Test
+    void testRetrieveEmailByStatusWithoutFilters() {
+        SQLQuery<Long> countQuery = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id.count())).thenReturn(countQuery);
+        when(countQuery.fetchOne()).thenReturn(0L);
+
+        SQLQuery<Tuple> selectQuery = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(selectQuery);
+        when(selectQuery.fetch()).thenReturn(List.of());
+
+        Page<EmailData> page = emailReadPlatformService.retrieveEmailByStatus(null, null, null, null);
+
+        assertNotNull(page);
+        assertEquals(0, page.getTotalFilteredRecords());
+        assertTrue(page.getPageItems().isEmpty());
+
+        verify(selectQuery, never()).limit(any(Long.class));
+    }
+
+    @Test
+    void testRetrieveEmailByStatusWithOnlyStatusFilter() {
+        SQLQuery<Long> countQuery = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id.count())).thenReturn(countQuery);
+        when(countQuery.fetchOne()).thenReturn(2L);
+
+        Date submittedDate = Date.valueOf(LocalDate.of(2026, 11, 26));
+        SQLQuery<Tuple> selectQuery = mock(SQLQuery.class, RETURNS_SELF);
+        when(queryFactory.select(EMO.id, EMO.groupId, EMO.clientId, EMO.staffId, EMO.campaignName, EMO.statusEnum, EMO.emailAddress,
+                EMO.submittedonDate, EMO.emailSubject, EMO.message, EMO.errorMessage)).thenReturn(selectQuery);
+        when(selectQuery.fetch()).thenReturn(
+                List.of(row(1L, 10L, 20L, 30L, "Campaign 1", 200, "user1@example.com", submittedDate, "Subject 1", "Body 1", null),
+                        row(2L, 10L, 20L, 30L, "Campaign 2", 200, "user2@example.com", submittedDate, "Subject 2", "Body 2", null)));
+
+        Page<EmailData> page = emailReadPlatformService.retrieveEmailByStatus(20, 200, null, null);
+
+        assertNotNull(page);
+        assertEquals(2, page.getTotalFilteredRecords());
+        assertEquals(2, page.getPageItems().size());
+        verify(selectQuery).limit(20L);
+    }
+
     @SuppressWarnings("unchecked")
     private SQLQuery<Tuple> givenRows(Tuple... rows) {
         SQLQuery<Tuple> query = mock(SQLQuery.class, RETURNS_SELF);
@@ -431,7 +507,7 @@ class EmailReadPlatformServiceImplTest {
         });
         when(statement.executeQuery()).thenReturn(resultSet);
 
-        return new EmailReadPlatformServiceImpl(jdbcTemplate, null, paginationHelper,
+        return new EmailReadPlatformServiceImpl(jdbcTemplate, null,
                 new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
