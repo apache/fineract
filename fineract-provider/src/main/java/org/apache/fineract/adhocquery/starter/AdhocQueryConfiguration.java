@@ -43,10 +43,9 @@ public class AdhocQueryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AdHocReadPlatformService.class)
-    public AdHocReadPlatformService adHocReadPlatformService(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
+    public AdHocReadPlatformService adHocReadPlatformService(JdbcTemplate jdbcTemplate,
             AdHocReadPlatformServiceImpl.AdHocMapper adHocRowMapper, SQLQueryFactory queryFactory) {
-        return new AdHocReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, adHocRowMapper, queryFactory) {
-
+        return new AdHocReadPlatformServiceImpl(jdbcTemplate, adHocRowMapper, queryFactory) {
         };
     }
 

@@ -29,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
+import org.apache.fineract.adhocquery.domain.AdHocProjection;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -42,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AdHocMapper adHocRowMapper;
     private final SQLQueryFactory queryFactory;
 
@@ -73,10 +73,12 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AdHocData> retrieveAllActiveAdHocQuery() {
-        final String sql = "select " + adHocRowMapper.schema() + " where r." + sqlGenerator.escape("is_active") + " = true order by r.id";
+        final QMAppuser creatingUser = new QMAppuser("cb");
 
-        return jdbcTemplate.query(sql, adHocRowMapper); // NOSONAR
+        return queryFactory.select(new AdHocProjection(creatingUser)).from(mAdhoc).leftJoin(creatingUser)
+                .on(creatingUser.id.eq(mAdhoc.createdbyId)).where(mAdhoc.isActive.isTrue()).orderBy(mAdhoc.id.asc()).fetch();
     }
 
     @Override
