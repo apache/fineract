@@ -42,6 +42,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
@@ -56,9 +57,9 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Runs the QueryDSL query of {@link AdHocReadPlatformServiceImpl#retrieveOne(Long)} through a real
- * {@link SQLQueryFactory} on top of a mocked JDBC connection, so that the generated SQL, the bound parameter and the
- * result mapping are all verified.
+ * Runs the QueryDSL queries of {@link AdHocReadPlatformServiceImpl#retrieveAllAdHocQuery()} and
+ * {@link AdHocReadPlatformServiceImpl#retrieveOne(Long)} through a real {@link SQLQueryFactory} on top of a mocked JDBC
+ * connection, verifying generated SQL, bound parameters and result mapping.
  */
 class AdHocReadPlatformServiceImplTest {
 
@@ -71,6 +72,15 @@ class AdHocReadPlatformServiceImplTest {
             on cb.id = m_adhoc.createdby_id
             where m_adhoc.id = ?
             limit ?""";
+
+    private static final String EXPECTED_ALL_SQL = """
+            select m_adhoc.id, m_adhoc.name, m_adhoc.query, m_adhoc.table_name, m_adhoc.table_fields, m_adhoc.is_active, m_adhoc.email, \
+            m_adhoc.report_run_frequency_code, m_adhoc.report_run_every, m_adhoc.last_run, m_adhoc.created_date, m_adhoc.createdby_id, \
+            cb.username, m_adhoc.lastmodifiedby_id, m_adhoc.lastmodified_date
+            from m_adhoc m_adhoc
+            left join m_appuser cb
+            on cb.id = m_adhoc.createdby_id
+            order by m_adhoc.id asc""";
 
     private static final ZoneId TENANT_ZONE = ZoneId.of("Asia/Kolkata");
 
@@ -203,5 +213,67 @@ class AdHocReadPlatformServiceImplTest {
         };
 
         return mock(ResultSet.class, answer);
+    }
+
+    @Test
+    void retrieveAllMapsAllFieldsOnPostgreSQL() throws SQLException {
+        AdHocReadPlatformService service = service(PostgreSQLTemplates.builder().build(), fullRow());
+
+        List<AdHocData> result = service.retrieveAllAdHocQuery();
+
+        assertEquals(1, result.size());
+        assertFullRow(result.get(0));
+        assertEquals(EXPECTED_ALL_SQL, executedSql);
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveAllMapsAllFieldsOnMySQL() throws SQLException {
+        AdHocReadPlatformService service = service(MySQLTemplates.builder().build(), fullRow());
+
+        List<AdHocData> result = service.retrieveAllAdHocQuery();
+
+        assertEquals(1, result.size());
+        assertFullRow(result.get(0));
+        assertEquals(EXPECTED_ALL_SQL, executedSql);
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveAllReturnsEmptyListWhenNoRows() throws SQLException {
+        AdHocReadPlatformService service = service(PostgreSQLTemplates.builder().build());
+
+        List<AdHocData> result = service.retrieveAllAdHocQuery();
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveAllKeepsInactiveRecordsAndNullableFields() throws SQLException {
+        Object[] inactiveRow = { 3L, "minimal", "select 1", "m_temp", "a", false, null, null, null, null, null, 1L, "mifos", 2L, null };
+
+        AdHocReadPlatformService service = service(PostgreSQLTemplates.builder().build(), inactiveRow, fullRow());
+
+        List<AdHocData> result = service.retrieveAllAdHocQuery();
+
+        assertEquals(2, result.size());
+
+        AdHocData inactive = result.get(0);
+        assertEquals(3L, inactive.getId());
+        assertEquals("minimal", inactive.getName());
+        assertFalse(inactive.isActive());
+        assertNull(inactive.getEmail());
+        assertNull(inactive.getReportRunFrequency());
+        assertNull(inactive.getReportRunEvery());
+        assertNull(inactive.getLastRun());
+        assertNull(inactive.getCreatedOn());
+        assertNull(inactive.getUpdatedOn());
+        assertEquals("mifos", inactive.getCreatedBy());
+        assertEquals(AdHocData.template().getReportRunFrequencies(), inactive.getReportRunFrequencies());
+
+        assertFullRow(result.get(1));
+        assertEquals(EXPECTED_ALL_SQL, executedSql);
+        verifyNoInteractions(jdbcTemplate);
     }
 }

@@ -46,11 +46,30 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     private final AdHocMapper adHocRowMapper;
     private final SQLQueryFactory queryFactory;
 
-    @Override
-    public List<AdHocData> retrieveAllAdHocQuery() {
-        final String sql = "select " + this.adHocRowMapper.schema() + " order by r.id";
+    private static AdHocData toAdHocData(final Tuple row, final QMAppuser createdBy) {
 
-        return this.jdbcTemplate.query(sql, this.adHocRowMapper); // NOSONAR
+        return new AdHocData().setId(row.get(mAdhoc.id)).setName(row.get(mAdhoc.name)).setQuery(row.get(mAdhoc.query))
+                .setTableName(row.get(mAdhoc.tableName)).setTableFields(row.get(mAdhoc.tableFields)).setEmail(row.get(mAdhoc.email))
+                .setActive(Boolean.TRUE.equals(row.get(mAdhoc.isActive))).setCreatedOn(toZonedDateTime(row.get(mAdhoc.createdDate)))
+                .setCreatedById(row.get(mAdhoc.createdbyId)).setUpdatedById(row.get(mAdhoc.lastmodifiedbyId))
+                .setUpdatedOn(toZonedDateTime(row.get(mAdhoc.lastmodifiedDate))).setCreatedBy(row.get(createdBy.username))
+                .setReportRunFrequencies(AdHocData.template().getReportRunFrequencies())
+                .setReportRunFrequency(toLong(row.get(mAdhoc.reportRunFrequencyCode)))
+                .setReportRunEvery(toLong(row.get(mAdhoc.reportRunEvery))).setLastRun(toZonedDateTime(row.get(mAdhoc.lastRun)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdHocData> retrieveAllAdHocQuery() {
+        final QMAppuser createdBy = new QMAppuser("cb");
+
+        final List<Tuple> rows = this.queryFactory
+                .select(mAdhoc.id, mAdhoc.name, mAdhoc.query, mAdhoc.tableName, mAdhoc.tableFields, mAdhoc.isActive, mAdhoc.email,
+                        mAdhoc.reportRunFrequencyCode, mAdhoc.reportRunEvery, mAdhoc.lastRun, mAdhoc.createdDate, mAdhoc.createdbyId,
+                        createdBy.username, mAdhoc.lastmodifiedbyId, mAdhoc.lastmodifiedDate)
+                .from(mAdhoc).leftJoin(createdBy).on(createdBy.id.eq(mAdhoc.createdbyId)).orderBy(mAdhoc.id.asc()).fetch();
+
+        return rows.stream().map(row -> toAdHocData(row, createdBy)).toList();
     }
 
     @Override
@@ -78,14 +97,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
             throw new AdHocNotFoundException(id);
         }
 
-        return new AdHocData().setId(row.get(mAdhoc.id)).setName(row.get(mAdhoc.name)).setQuery(row.get(mAdhoc.query))
-                .setTableName(row.get(mAdhoc.tableName)).setTableFields(row.get(mAdhoc.tableFields)).setEmail(row.get(mAdhoc.email))
-                .setActive(Boolean.TRUE.equals(row.get(mAdhoc.isActive))).setCreatedOn(toZonedDateTime(row.get(mAdhoc.createdDate)))
-                .setCreatedById(row.get(mAdhoc.createdbyId)).setUpdatedById(row.get(mAdhoc.lastmodifiedbyId))
-                .setUpdatedOn(toZonedDateTime(row.get(mAdhoc.lastmodifiedDate))).setCreatedBy(row.get(createdBy.username))
-                .setReportRunFrequencies(AdHocData.template().getReportRunFrequencies())
-                .setReportRunFrequency(toLong(row.get(mAdhoc.reportRunFrequencyCode)))
-                .setReportRunEvery(toLong(row.get(mAdhoc.reportRunEvery))).setLastRun(toZonedDateTime(row.get(mAdhoc.lastRun)));
+        return toAdHocData(row, createdBy);
     }
 
     private static ZonedDateTime toZonedDateTime(final Timestamp timestamp) {
