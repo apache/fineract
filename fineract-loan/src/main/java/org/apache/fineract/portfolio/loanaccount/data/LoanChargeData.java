@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -93,6 +94,14 @@ public class LoanChargeData {
     private final ExternalId externalId;
 
     private final ExternalId externalLoanId;
+
+    private StringEnumOptionData amortizationPeriodType;
+
+    private Integer amortizationDays;
+
+    private StringEnumOptionData amortizationCalculationType;
+
+    private StringEnumOptionData amortizationIncomeType;
 
     public static LoanChargeData template(final List<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null,
@@ -339,6 +348,10 @@ public class LoanChargeData {
         this.amountAccrued = chargeData.amountAccrued;
         this.amountUnrecognized = chargeData.amountUnrecognized;
         this.externalId = chargeData.externalId;
+        this.amortizationPeriodType = chargeData.amortizationPeriodType;
+        this.amortizationDays = chargeData.amortizationDays;
+        this.amortizationCalculationType = chargeData.amortizationCalculationType;
+        this.amortizationIncomeType = chargeData.amortizationIncomeType;
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amount, final EnumOptionData chargeCalculationType,
@@ -426,5 +439,13 @@ public class LoanChargeData {
 
     public void updateAmountAccrued(BigDecimal amountAccrued) {
         this.amountAccrued = amountAccrued;
+    }
+
+    public void updateAmortizationConfiguration(final StringEnumOptionData amortizationPeriodType, final Integer amortizationDays,
+            final StringEnumOptionData amortizationCalculationType, final StringEnumOptionData amortizationIncomeType) {
+        this.amortizationPeriodType = amortizationPeriodType;
+        this.amortizationDays = amortizationDays;
+        this.amortizationCalculationType = amortizationCalculationType;
+        this.amortizationIncomeType = amortizationIncomeType;
     }
 }

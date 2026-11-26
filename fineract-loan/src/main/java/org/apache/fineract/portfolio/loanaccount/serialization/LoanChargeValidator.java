@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -48,6 +49,18 @@ public final class LoanChargeValidator {
             final String defaultUserMessage = "This charge cannot be added as the loan is already closed.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "loan.is.closed", defaultUserMessage, loan.getId(), loanCharge.name());
 
+        }
+    }
+
+    /**
+     * Loan side: an amortized charge may be added to a loan only when the product has charge amortization enabled.
+     */
+    public void validateChargeAmortizationAllowed(final Loan loan, final Charge chargeDefinition) {
+        if (chargeDefinition.isAmortized() && !loan.getLoanProductRelatedDetail().isEnableChargeAmortization()) {
+            final String defaultUserMessage = "Amortized charge " + chargeDefinition.getId()
+                    + " can be added only to a loan whose product has charge amortization enabled";
+            throw new LoanChargeCannotBeAddedException("loanCharge", "charge.amortization.not.enabled", defaultUserMessage,
+                    chargeDefinition.getId(), chargeDefinition.getName());
         }
     }
 
