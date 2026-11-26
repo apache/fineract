@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.client;
 
-import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -53,7 +52,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ClientPersonImportHandler implements ImportHandler {
 
-    public static final String SEPARATOR = "-";
     private static final Logger LOG = LoggerFactory.getLogger(ClientPersonImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
@@ -61,11 +59,13 @@ public class ClientPersonImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
-        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat, locale);
+        AtomicInteger errorCount = new AtomicInteger();
+        List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, errorCount);
+        return importEntity(workbook, clients, dateFormat, locale, errorCount.get());
     }
 
-    public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+    public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat,
+            final AtomicInteger errorCount) {
         List<ClientData> clients = new ArrayList<>();
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(clientSheet, 0);
@@ -73,7 +73,11 @@ public class ClientPersonImportHandler implements ImportHandler {
             Row row;
             row = clientSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, ClientPersonConstants.STATUS_COL)) {
-                clients.add(readClient(workbook, row, locale, dateFormat));
+                try {
+                    clients.add(readClient(workbook, row, locale, dateFormat));
+                } catch (RuntimeException re) {
+                    ImportHandlerUtils.logReadExcelError(re, clientSheet, rowIndex, ClientPersonConstants.STATUS_COL, errorCount);
+                }
             }
         }
         return clients;
@@ -85,10 +89,9 @@ public class ClientPersonImportHandler implements ImportHandler {
         String lastName = ImportHandlerUtils.readAsString(ClientPersonConstants.LAST_NAME_COL, row);
         String middleName = ImportHandlerUtils.readAsString(ClientPersonConstants.MIDDLE_NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientPersonConstants.OFFICE_NAME_COL, row);
-        Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        if (officeId == 0L) {
-            officeId = null;
-        }
+        Long officeId = ImportHandlerUtils.requireLookupId(
+                ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName), "Office",
+                officeName);
         String staffName = ImportHandlerUtils.readAsString(ClientPersonConstants.STAFF_NAME_COL, row);
         Long staffId = null;
         if (staffName != null) {
@@ -101,50 +104,18 @@ public class ClientPersonImportHandler implements ImportHandler {
         if (!active) {
             activationDate = submittedOn;
         }
-        String mobileNo = null;
-        if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row) != null) {
-            mobileNo = Objects.requireNonNull(ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row)).toString();
-        }
+        String mobileNo = ImportHandlerUtils.readAsDigits(ClientPersonConstants.MOBILE_NO_COL, row, "Mobile number");
         LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
 
-        String clientType = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_TYPE_COL, row);
-        Long clientTypeId = null;
-        if (clientType != null) {
-            List<String> clientTypeAr = Splitter.on(SEPARATOR).splitToList(clientType);
-            if (clientTypeAr.size() > 1 && clientTypeAr.get(1) != null) {
-                clientTypeId = Long.parseLong(clientTypeAr.get(1));
-            }
-        }
-        String gender = ImportHandlerUtils.readAsString(ClientPersonConstants.GENDER_COL, row);
-        Long genderId = null;
-        if (gender != null) {
-            List<String> genderAr = Splitter.on(SEPARATOR).splitToList(gender);
-            if (genderAr.size() > 1 && genderAr.get(1) != null) {
-                genderId = Long.parseLong(genderAr.get(1));
-            }
-        }
-        String clientClassification = ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_CLASSIFICATION_COL, row);
-        Long clientClassificationId = null;
-        if (clientClassification != null) {
-            List<String> clientClassificationAr = Splitter.on(SEPARATOR).splitToList(clientClassification);
-            if (clientClassificationAr.size() > 1 && clientClassificationAr.get(1) != null) {
-                clientClassificationId = Long.parseLong(clientClassificationAr.get(1));
-            }
-        }
+        Long clientTypeId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.CLIENT_TYPE_COL, row);
+        Long genderId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.GENDER_COL, row);
+        Long clientClassificationId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.CLIENT_CLASSIFICATION_COL, row);
         Boolean isStaff = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_STAFF_COL, row);
 
         AddressData addressDataObj = null;
         Collection<AddressData> addressList = null;
         if (ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ADDRESS_ENABLED_COL, row)) {
-            String addressType = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_TYPE_COL, row);
-            Long addressTypeId = null;
-            if (addressType != null) {
-                List<String> addressTypeAr = Splitter.on(SEPARATOR).splitToList(addressType);
-
-                if (addressTypeAr.size() > 1 && addressTypeAr.get(1) != null) {
-                    addressTypeId = Long.parseLong(addressTypeAr.get(1));
-                }
-            }
+            Long addressTypeId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.ADDRESS_TYPE_COL, row);
             String street = ImportHandlerUtils.readAsString(ClientPersonConstants.STREET_COL, row);
             String addressLine1 = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_LINE_1_COL, row);
             String addressLine2 = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_LINE_2_COL, row);
@@ -154,25 +125,8 @@ public class ClientPersonImportHandler implements ImportHandler {
             String postalCode = ImportHandlerUtils.readAsString(ClientPersonConstants.POSTAL_CODE_COL, row);
             Boolean isActiveAddress = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_ACTIVE_ADDRESS_COL, row);
 
-            String stateProvince = ImportHandlerUtils.readAsString(ClientPersonConstants.STATE_PROVINCE_COL, row);
-            Long stateProvinceId = null;
-            if (stateProvince != null) {
-                List<String> stateProvinceAr = Splitter.on(SEPARATOR).splitToList(stateProvince);
-                // Arkansas-AL <-- expected format of the cell
-                // but probably it's either an empty cell or it is missing a
-                // hyphen
-                if (stateProvinceAr.size() > 1 && stateProvinceAr.get(1) != null) {
-                    stateProvinceId = Long.parseLong(stateProvinceAr.get(1));
-                }
-            }
-            String country = ImportHandlerUtils.readAsString(ClientPersonConstants.COUNTRY_COL, row);
-            Long countryId = null;
-            if (country != null) {
-                List<String> countryAr = Splitter.on(SEPARATOR).splitToList(country);
-                if (countryAr.size() > 1 && countryAr.get(1) != null) {
-                    countryId = Long.parseLong(countryAr.get(1));
-                }
-            }
+            Long stateProvinceId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.STATE_PROVINCE_COL, row);
+            Long countryId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.COUNTRY_COL, row);
             addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3, city, postalCode,
                     isActiveAddress, stateProvinceId, countryId);
             addressList = new ArrayList<>(List.of(addressDataObj));
@@ -183,10 +137,11 @@ public class ClientPersonImportHandler implements ImportHandler {
 
     }
 
-    public Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, String locale) {
+    public Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, String locale,
+            final int readErrorCount) {
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
+        int errorCount = readErrorCount;
         String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
