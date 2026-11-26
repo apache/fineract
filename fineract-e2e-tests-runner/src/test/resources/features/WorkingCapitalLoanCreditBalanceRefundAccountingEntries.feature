@@ -123,3 +123,34 @@ Feature: Working Capital Loan Credit Balance Refund Accounting Entries
       | Type      | Account code | Account name              | Debit | Credit |
       | LIABILITY | 245000       | Other Credit Liability    | 75.0  |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 75.0   |
+
+  @TestRailId:C127999
+  Scenario: Verify backdated CBR GL entries - journal entries carry the backdated transaction date
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 9200.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    When Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- Backdated partial credit balance refund ---
+    And Customer makes credit balance refund on "04 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "150.00"
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "04 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 50.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 50.0   |
+    # --- Backdated full credit balance refund ---
+    And Customer makes credit balance refund on "05 January 2026" with 150.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 150.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 150.0  |

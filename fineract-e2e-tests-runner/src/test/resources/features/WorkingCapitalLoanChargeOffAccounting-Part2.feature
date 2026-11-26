@@ -682,3 +682,74 @@ Feature: Working Capital Charge-Off Accounting Entries - Part2
       | LIABILITY | 240005       | Deferred Interest Revenue |       | 100.0  |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      |       | 100.0  |
       | LIABILITY | 240005       | Deferred Interest Revenue | 100.0 |        |
+
+  @TestRailId:C127980
+  Scenario: Verify Working Capital charge-off accounting - backdated CBR is rejected before the charge-off date and accepted after it
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "03 January 2026"
+# --- Overpaying repayment after the charge-off ---
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    When Admin sets the business date to "10 January 2026"
+# --- Before the charge-off date ---
+    Then Initiating a credit balance refund on "02 January 2026" with 100.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                    |
+      | 400                | cannot.be.before.charge.off.date |
+    Then Working Capital loan status will be "OVERPAID"
+# --- Backdated after the charge-off and the last repayment: post-charge-off routing, same overpayment GL ---
+    And Customer makes credit balance refund on "07 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "07 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 100.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2026-01-07 |
+      | timeline.actualMaturityDate | 2026-01-07 |
+
+  @TestRailId:C127996
+  Scenario: Verify backdated Working Capital credit balance refund - UC1: charged-off loan rejects dates before the charge-off and the last repayment and accepts the repayment date
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- Charge-off ---
+    And Admin charges off the Working Capital loan on "03 January 2026"
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 January 2026" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "100.00"
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- Before the charge-off date ---
+    Then Initiating a credit balance refund on "02 January 2026" with 40.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                    |
+      | 400                | cannot.be.before.charge.off.date |
+    # --- After the charge-off date, before the last repayment ---
+    Then Initiating a credit balance refund on "04 January 2026" with 40.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                                  |
+      | 400                | cannot.be.before.last.repayment.or.refund.date |
+    # --- On the date of the last repayment ---
+    When Customer makes credit balance refund on "05 January 2026" with 40.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "60.00"
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 40.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 40.0   |
+    # --- Full refund of the rest closes the loan on the backdated date ---
+    When Customer makes credit balance refund on "05 January 2026" with 60.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2026-01-05 |
+      | timeline.actualMaturityDate | 2026-01-05 |

@@ -963,7 +963,7 @@ Feature: Working Capital Loan Charge Accrual
       | LIABILITY | 245000       | Other Credit Liability    | 60.0  |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 60.0   |
 
-  @TestRailId:C127983
+  @TestRailId:C127994
   Scenario: Verify Working Capital - a credit balance refund cannot be dated before a charge accrual posted after the last repayment
     Given Admin sets the business date to "01 September 2028"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -1000,7 +1000,7 @@ Feature: Working Capital Loan Charge Accrual
       | 08 September 2028   | Accrual               | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
       | 08 September 2028   | Credit Balance Refund | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
 
-  @TestRailId:C127984
+  @TestRailId:C127995
   Scenario: Verify Working Capital - a credit balance refund cannot be dated before a charge added after the last repayment when product accounting rule is NONE
     Given Admin sets the business date to "01 September 2028"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
