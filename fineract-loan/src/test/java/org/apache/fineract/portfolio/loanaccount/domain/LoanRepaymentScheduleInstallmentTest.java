@@ -212,10 +212,38 @@ class LoanRepaymentScheduleInstallmentTest {
     }
 
     @Test
-    void copyFromSchedulePeriodRemovesTheInstallmentChargesFromTheirLoanCharge() {
+    void copyFromSchedulePeriodLeavesTheInstallmentChargesToTheirLoanCharge() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        final LoanInstallmentCharge installmentCharge = addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+
+        installment.copyFrom(mock(LoanScheduleModelPeriod.class));
+
+        // The loan charge recalculation replaces these installment charges, and a waived loan charge, which is not
+        // recalculated, keeps them so that the replay keeps the waiver.
+        assertThat(installment.getInstallmentCharges()).isEmpty();
+        assertThat(installmentChargesOfLoanCharge).containsExactly(installmentCharge);
+    }
+
+    @Test
+    void copyFromSchedulePeriodRemovesTheInstallmentChargesOfReAgedInstallmentFromTheirLoanCharge() {
         final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
         final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
         addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+        installment.setReAged(true);
+
+        installment.copyFrom(mock(LoanScheduleModelPeriod.class));
+
+        assertThat(installment.getInstallmentCharges()).isEmpty();
+        assertThat(installmentChargesOfLoanCharge).isEmpty();
+    }
+
+    @Test
+    void copyFromSchedulePeriodRemovesTheInstallmentChargesOfAdditionalInstallmentFromTheirLoanCharge() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+        installment.setAdditional(true);
 
         installment.copyFrom(mock(LoanScheduleModelPeriod.class));
 

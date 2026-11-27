@@ -1174,7 +1174,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         // Reset fields and relations
         resetBalances();
         updateLoanCompoundingDetails(InterestRecalculationAdditionalDetailData.toEntities(period.getLoanCompoundingDetails()));
-        removeInstallmentCharges();
+        if (isReAged() || isAdditional()) {
+            // The transaction processor made these installment charges for the re-age or the additional installment.
+            // They are stale once this becomes a regular installment again, so they leave their loan charge too
+            removeInstallmentCharges();
+        } else {
+            // The loan charge made these installment charges, so they stay with it: recalculating the loan charge
+            // replaces them, and a waived loan charge, which is not recalculated, keeps its waiver in them
+            getInstallmentCharges().clear();
+        }
         getPostDatedChecks().clear();
         // Update fields
         setFromDate(period.periodFromDate());
@@ -1285,7 +1293,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     /**
      * Removes the installment charges of this installment, from the loan charges they belong to as well. Call it when
-     * the installment leaves the repayment schedule or its charges are recreated.
+     * the installment leaves the repayment schedule.
      */
     public void removeInstallmentCharges() {
         detachFromLoanCharges(List.copyOf(getInstallmentCharges()));

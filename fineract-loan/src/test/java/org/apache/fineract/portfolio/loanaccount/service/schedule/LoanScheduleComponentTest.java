@@ -77,7 +77,7 @@ class LoanScheduleComponentTest {
     }
 
     @Test
-    void scheduleModelRemovesTheChargesOfDroppedAndRecreatedInstallments() {
+    void scheduleModelRemovesTheChargesOfDroppedInstallments() {
         final LoanRepaymentScheduleInstallment kept = installment(1);
         final LoanInstallmentCharge chargeOfKept = charge(kept);
         final LoanRepaymentScheduleInstallment dropped = installment(2);
@@ -96,7 +96,8 @@ class LoanScheduleComponentTest {
         assertThat(installments).containsExactly(kept);
         assertThat(kept.getInstallmentCharges()).isEmpty();
         assertThat(dropped.getInstallmentCharges()).isEmpty();
-        assertThat(installmentChargesOfLoanCharge).doesNotContain(chargeOfKept, chargeOfDropped).isEmpty();
+        // The kept installment's charge stays with the loan charge, which recalculates it
+        assertThat(installmentChargesOfLoanCharge).containsExactly(chargeOfKept).doesNotContain(chargeOfDropped);
     }
 
     @Test
