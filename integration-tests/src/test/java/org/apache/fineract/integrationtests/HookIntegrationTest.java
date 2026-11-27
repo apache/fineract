@@ -45,7 +45,10 @@ public class HookIntegrationTest extends FeignIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
 
     private static final String ECHO_WEBHOOK_BASE_URL = "http://echo-webhook.herokuapp.com:80/";
-    private static final String UPDATED_PAYLOAD_URL = "http://localhost";
+    // a public (documentation range) address, so the URL passes the outbound address check without a DNS lookup; the
+    // test never sends anything to it
+    private static final String UPDATED_PAYLOAD_URL = "http://203.0.113.10/";
+    private static final String LOOPBACK_PAYLOAD_URL = "http://localhost/";
     private static final String NOTIFIED_OFFICE_ID_FIELD = "officeId";
     private static final LocalDate OFFICE_OPENING_DATE = LocalDate.of(2012, Month.JANUARY, 1);
 
@@ -96,6 +99,11 @@ public class HookIntegrationTest extends FeignIntegrationTest {
         Assertions.assertEquals(registeredHookId, hookHelper.retrieveHook(registeredHookId).getId());
         Assertions.assertEquals(payloadUrl, hookHelper.retrievePayloadUrl(registeredHookId));
         LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}", registeredHookId);
+
+        // webhooks may not target loopback or private addresses unless fineract.hooks.allow-private-addresses is set
+        final CallFailedRuntimeException rejected = hookHelper.updateHookExpectingError(registeredHookId, LOOPBACK_PAYLOAD_URL);
+        Assertions.assertEquals(400, rejected.getStatus());
+        Assertions.assertEquals(payloadUrl, hookHelper.retrievePayloadUrl(registeredHookId));
 
         hookHelper.updateHook(registeredHookId, UPDATED_PAYLOAD_URL);
         Assertions.assertEquals(UPDATED_PAYLOAD_URL, hookHelper.retrievePayloadUrl(registeredHookId));
