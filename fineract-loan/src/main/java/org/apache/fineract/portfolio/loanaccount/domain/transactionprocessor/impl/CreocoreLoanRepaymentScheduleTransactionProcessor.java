@@ -65,33 +65,6 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractL
     }
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first then principal.
-     */
-    @SuppressWarnings("unused")
-    @Override
-    protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
-
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
-                charges);
-    }
-
-    /**
-     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
-     */
-    @SuppressWarnings("unused")
-    @Override
-    protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
-            Set<LoanCharge> charges) {
-
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
-                transactionMappings, charges);
-    }
-
-    /**
      * For normal on-time repayments, pays off interest first, then principal.
      */
     @Override

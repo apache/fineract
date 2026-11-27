@@ -286,15 +286,19 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     // abstract interface
 
     /**
-     * For early/'in advance' repayments.
+     * For early/'in advance' repayments. By default, pays off the installment in the same way as an on-time payment;
+     * subclasses override this when early payments need a different allocation.
      *
      * @param transactionMappings
      *            TODO
      * @param charges
      */
-    protected abstract Money handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+    protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
             List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money paymentInAdvance,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
+                charges);
+    }
 
     /**
      * For normal on-time repayments.
@@ -308,15 +312,19 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
 
     /**
-     * For late repayments, how should components of installment be paid off
+     * For late repayments, how should components of installment be paid off. By default, pays off the installment in
+     * the same way as an on-time payment; subclasses override this when late payments need a different allocation.
      *
      * @param transactionMappings
      *            TODO
      * @param charges
      */
-    protected abstract Money handleTransactionThatIsALateRepaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
+    protected Money handleTransactionThatIsALateRepaymentOfInstallment(LoanRepaymentScheduleInstallment currentInstallment,
             List<LoanRepaymentScheduleInstallment> installments, LoanTransaction loanTransaction, Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges);
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
+                transactionMappings, charges);
+    }
 
     /**
      * Invoked when a transaction results in an over-payment of the full loan.
