@@ -4381,6 +4381,23 @@ public class LoanStepDef extends AbstractStepDef {
         ok(() -> fineractClient.loanProducts().createLoanProduct(request));
     }
 
+    @Given("Loan product {string} dedicated to this scenario exists with interest recalculation and overdueDaysForNPA {int}")
+    public void ensureDedicatedNpaLoanProduct(final String loanProductName, final Integer overdueDaysForNPA) {
+        final Optional<Long> existingId = findLoanProductIdByName(loanProductName);
+        if (existingId.isPresent()) {
+            final PutLoanProductsProductIdRequest updateRequest = new PutLoanProductsProductIdRequest()//
+                    .locale(LOCALE_EN)//
+                    .overdueDaysForNPA(overdueDaysForNPA);
+            ok(() -> fineractClient.loanProducts().updateLoanProduct(existingId.get(), updateRequest));
+            return;
+        }
+        final PostLoanProductsRequest request = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2InterestRecalculationDailyTillPreClose()//
+                .name(loanProductName)//
+                .overdueDaysForNPA(overdueDaysForNPA);
+        ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
     @When("Admin updates {string} loan product chargeback credit allocation to strategy {string} and credit allocation order {string}")
     public void updateLoanProductChargebackCreditAllocation(final String loanProductName, final String creditAllocationStrategy,
             final String creditAllocationOrder) {

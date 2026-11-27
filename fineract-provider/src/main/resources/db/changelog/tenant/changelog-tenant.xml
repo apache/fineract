@@ -313,4 +313,5 @@
     <include file="parts/0291_add_amortization_configuration_to_loan_charge.xml" relativeToChangelogFile="true" />
     <include file="parts/0292_create_loan_deferred_charge_balance.xml" relativeToChangelogFile="true" />
     <include file="parts/0293_fix_stretchy_report_sql.xml" relativeToChangelogFile="true" />
+    <include file="parts/0294_add_recalculate_loan_permission.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -99,6 +99,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REACTIVATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REAGE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REAMORTIZE;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECALCULATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECOVERGUARANTEES;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECOVERYPAYMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECREATE;
@@ -3828,6 +3829,15 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder undoContractTermination(final Long loanId) {
         this.actionName = ACTION_CONTRACT_TERMINATION_UNDO;
+        this.entityName = ENTITY_LOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder recalculateLoan(final Long loanId) {
+        this.actionName = ACTION_RECALCULATE;
         this.entityName = ENTITY_LOAN;
         this.entityId = loanId;
         this.loanId = loanId;

@@ -83,9 +83,17 @@ public class ProgressiveLoanModelCheckerHelper extends COBFilterApiMatcher {
     }
 
     @Override
+    public boolean isOnApiList(BodyCachingHttpServletRequestWrapper request) throws IOException {
+        if (LoanRecalculationRequestMatcher.isRecalculation(request.getMethod(), request.getPathInfo(), request.getQueryString())) {
+            return false;
+        }
+        return super.isOnApiList(request);
+    }
+
+    @Override
     protected boolean isApiMatching(String method, String pathInfo) {
         return HTTP_METHODS.contains(HttpMethod.valueOf(method)) && !IGNORE_LOAN_PATH_PATTERN.matcher(pathInfo).find()
-                && URL_FUNCTION.test(pathInfo);
+                && URL_FUNCTION.test(pathInfo) && !LoanRecalculationRequestMatcher.isRecalculation(method, pathInfo);
     }
 
     private boolean isGlim(String pathInfo) {
@@ -112,6 +120,10 @@ public class ProgressiveLoanModelCheckerHelper extends COBFilterApiMatcher {
         for (BatchRequest batchRequest : getBatchRequests(request)) {
             // check the URL for Loan related ID
             String relativeUrl = batchRequest.getRelativeUrl();
+            if (LoanRecalculationRequestMatcher.isRecalculation(batchRequest.getMethod(), relativeUrl)) {
+                // the recalculation command applies the lock rule itself and must not be caught up or remodelled first
+                continue;
+            }
             if (!relativeUrl.contains("$.resourceId")) {
                 // if resourceId reference is used, we simply don't know the resourceId without executing the requests
                 // first, so skipping it

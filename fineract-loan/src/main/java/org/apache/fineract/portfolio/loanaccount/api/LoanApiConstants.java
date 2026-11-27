@@ -193,6 +193,7 @@ public interface LoanApiConstants {
     String UNDO_CONTRACT_TERMINATION_COMMAND = "undoContractTermination";
     String LOAN_WITHDRAWAL_COMMAND = "loanWithdrawal";
     String UNDO_LOAN_WITHDRAWAL_COMMAND = "undoLoanWithdrawal";
+    String RECALCULATE_COMMAND = "recalculate";
     String BUY_DOWN_FEE_COMMAND = "buyDownFee";
     String BUY_DOWN_FEE_ADJUSTMENT_COMMAND = "buyDownFeeAdjustment";
     String REAGE_COMMAND = "reAge";

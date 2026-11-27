@@ -635,7 +635,10 @@ public class LoansApiResource {
             + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n"
             + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n"
             + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n"
-            + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
+            + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n\n" + "Recalculate Loan (command=recalculate):\n"
+            + "Regenerates the repayment schedule of a progressive loan from its terms, replays its transactions and rebuilds its "
+            + "interest schedule model. Meant for repairing loans affected by a defect that has since been fixed.\n"
+            + "Showing request and response for Assign a Loan Officer")
     @AlternativeOperationId("stateTransitions")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)))
     @ApiResponses({
@@ -836,7 +839,10 @@ public class LoansApiResource {
             + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n"
             + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n"
             + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n"
-            + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
+            + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n\n" + "Recalculate Loan (command=recalculate):\n"
+            + "Regenerates the repayment schedule of a progressive loan from its terms, replays its transactions and rebuilds its "
+            + "interest schedule model. Meant for repairing loans affected by a defect that has since been fixed.\n"
+            + "Showing request and response for Assign a Loan Officer")
     @AlternativeOperationId("stateTransitions_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)))
     @ApiResponses({
@@ -1389,6 +1395,8 @@ public class LoansApiResource {
             commandRequest = builder.applyLoanWithdrawal(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.UNDO_LOAN_WITHDRAWAL_COMMAND)) {
             commandRequest = builder.undoLoanWithdrawal(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.RECALCULATE_COMMAND)) {
+            commandRequest = builder.recalculateLoan(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {
