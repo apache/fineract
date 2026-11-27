@@ -31,8 +31,10 @@ import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
 import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -43,11 +45,16 @@ import org.junit.jupiter.api.Test;
 class OfficeImportHandlerRowErrorsTest {
 
     private final CommandDispatcher dispatcher = mock(CommandDispatcher.class);
-    private final OfficeImportHandler handler = new OfficeImportHandler(dispatcher);
+    private final PlatformSecurityContext context = mock(PlatformSecurityContext.class);
+    private final AppUser user = mock(AppUser.class);
+    private OfficeImportHandler handler;
 
     @BeforeEach
     void setUp() {
         when(dispatcher.dispatch(any(OfficeCreateCommand.class))).thenReturn(OfficeCreateResponse::new);
+        when(context.authenticatedUser()).thenReturn(user);
+        when(user.hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CREATE_OFFICE")).thenReturn(false);
+        handler = new OfficeImportHandler(dispatcher, context);
     }
 
     @Test

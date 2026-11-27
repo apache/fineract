@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.command.StaffCreateCommand;
 import org.apache.fineract.organisation.staff.data.StaffCreateResponse;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -53,9 +54,14 @@ public class StaffImportHandler implements ImportHandler {
     private final CommandDispatcher dispatcher;
     private final StaffDataMapper staffDataMapper;
     private final StaffDateMapper staffDateMapper;
+    private final PlatformSecurityContext context;
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        if (this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CREATE_STAFF")) {
+            return ImportHandlerUtils.rejectUnauthorizedRows(workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME),
+                    StaffConstants.STATUS_COL, "User has no authority to create staff");
+        }
         List<StaffData> staffList = readExcelFile(workbook, locale, dateFormat);
         return importEntity(workbook, staffList, dateFormat);
     }

@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
 import org.apache.fineract.organisation.office.data.OfficeCreateRequest;
 import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
@@ -53,14 +54,20 @@ public class OfficeImportHandler implements ImportHandler {
     private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
     static final String PARENT_OFFICE_ID_NOT_POSITIVE = "Parent OfficeId must be a positive number";
     private final CommandDispatcher dispatcher;
+    private final PlatformSecurityContext context;
 
     @Autowired
-    public OfficeImportHandler(final CommandDispatcher dispatcher) {
+    public OfficeImportHandler(final CommandDispatcher dispatcher, final PlatformSecurityContext context) {
         this.dispatcher = dispatcher;
+        this.context = context;
     }
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        if (this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CREATE_OFFICE")) {
+            return ImportHandlerUtils.rejectUnauthorizedRows(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME),
+                    OfficeConstants.STATUS_COL, "User has no authority to create offices");
+        }
         AtomicInteger errorCount = new AtomicInteger();
         Map<Integer, String> rowErrors = new HashMap<>();
         List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat, errorCount, rowErrors);

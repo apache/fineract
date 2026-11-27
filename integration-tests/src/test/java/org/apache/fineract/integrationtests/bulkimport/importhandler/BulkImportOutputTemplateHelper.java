@@ -37,11 +37,16 @@ public final class BulkImportOutputTemplateHelper {
 
     public static Workbook waitForWorkbook(Supplier<byte[]> downloader, String sheetName, int rowIndex, int statusColumn)
             throws InterruptedException, IOException {
+        return waitForWorkbook(downloader, sheetName, rowIndex, statusColumn, DEFAULT_MAX_WAIT_MILLIS);
+    }
+
+    public static Workbook waitForWorkbook(Supplier<byte[]> downloader, String sheetName, int rowIndex, int statusColumn,
+            long maxWaitMillis) throws InterruptedException, IOException {
         long start = System.currentTimeMillis();
         DataFormatter formatter = new DataFormatter();
         RuntimeException lastException = null;
 
-        while ((System.currentTimeMillis() - start) < DEFAULT_MAX_WAIT_MILLIS) {
+        while ((System.currentTimeMillis() - start) < maxWaitMillis) {
             try {
                 Workbook workbook = new HSSFWorkbook(new ByteArrayInputStream(downloader.get()));
                 Sheet sheet = workbook.getSheet(sheetName);

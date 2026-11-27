@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
@@ -69,6 +70,28 @@ public final class ImportHandlerUtils {
         errorCount.incrementAndGet();
         String errorMessage = getErrorMessage(re);
         writeErrorMessage(sheet, rowIndex, errorMessage, statusCol);
+    }
+
+    /**
+     * Marks every unimported row in {@code sheet} as failed with {@code authorizationMessage} without reading or
+     * mapping row cells.
+     */
+    public static Count rejectUnauthorizedRows(final Sheet sheet, final int statusCol, final String authorizationMessage) {
+        final int noOfEntries = getNumberOfRows(sheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        int errorCount = 0;
+        for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
+            final Row row = sheet.getRow(rowIndex);
+            if (isNotImported(row, statusCol)) {
+                errorCount++;
+                writeErrorMessage(sheet, rowIndex, authorizationMessage, statusCol);
+            }
+        }
+        sheet.setColumnWidth(statusCol, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        final Row headerRow = sheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
+        if (headerRow != null) {
+            writeString(statusCol, headerRow, TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
+        }
+        return Count.instance(0, errorCount);
     }
 
     public static Integer getNumberOfRows(Sheet sheet, int primaryColumn) {
