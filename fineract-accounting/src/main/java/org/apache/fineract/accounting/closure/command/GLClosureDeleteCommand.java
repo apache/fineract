@@ -16,15 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.data.request;
+package org.apache.fineract.accounting.closure.command;
 
-import java.io.Serial;
-import java.io.Serializable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.accounting.closure.data.GLClosureDeleteRequest;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.HookableCommand;
 
-public record GLClosureRequest(Long id, Long officeId, String closingDate, String comments, String dateFormat,
-        String locale) implements Serializable {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class GLClosureDeleteCommand extends Command<GLClosureDeleteRequest> implements HookableCommand {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @Override
+    public String hookEntityName() {
+        return "GLCLOSURE";
+    }
 
+    @Override
+    public String hookActionName() {
+        return "DELETE";
+    }
 }

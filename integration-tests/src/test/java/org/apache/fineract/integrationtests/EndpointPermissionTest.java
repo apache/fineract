@@ -30,10 +30,12 @@ import org.apache.fineract.client.models.MeetingCreateRequest;
 import org.apache.fineract.client.models.NoteUpdateRequest;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PaymentTypeUpdateRequest;
+import org.apache.fineract.client.models.PostGlClosuresRequest;
 import org.apache.fineract.client.models.PostRolesRequest;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.ProductMixCreateRequest;
 import org.apache.fineract.client.models.ProductMixUpdateRequest;
+import org.apache.fineract.client.models.PutGlClosuresRequest;
 import org.apache.fineract.client.models.PutRolesRoleIdPermissionsRequest;
 import org.apache.fineract.client.models.StaffCreateRequest;
 import org.apache.fineract.client.models.TemplateCreateRequest;
@@ -117,6 +119,14 @@ public class EndpointPermissionTest extends FeignIntegrationTest {
         assertForbidden(c -> c.paymentType().createPaymentType(new PaymentTypeCreateRequest()));
         assertForbidden(c -> c.paymentType().updatePaymentType(ANY_ID, new PaymentTypeUpdateRequest()));
         assertForbidden(c -> c.paymentType().deleteCodePaymentType(ANY_ID));
+    }
+
+    @Test
+    public void testGLClosureEndpointsRequirePermission() {
+        assertForbidden(c -> c.accountingClosure().retrieveAllGLClosures(ANY_ID));
+        assertForbidden(c -> c.accountingClosure().createGLClosure(new PostGlClosuresRequest()));
+        assertForbidden(c -> c.accountingClosure().updateGLClosure(ANY_ID, new PutGlClosuresRequest()));
+        assertForbidden(c -> c.accountingClosure().deleteGLClosure(ANY_ID));
     }
 
     @Test

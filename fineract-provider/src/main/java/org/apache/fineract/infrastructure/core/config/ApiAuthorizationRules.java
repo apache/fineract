@@ -151,6 +151,11 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.POST, "/api/*/paymenttypes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PAYMENTTYPE"),
             rule(HttpMethod.PUT, "/api/*/paymenttypes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PAYMENTTYPE"),
             rule(HttpMethod.DELETE, "/api/*/paymenttypes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE"),
+            // accounting closure
+            rule(HttpMethod.GET, "/api/*/glclosures/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GLCLOSURE"),
+            rule(HttpMethod.POST, "/api/*/glclosures", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GLCLOSURE"),
+            rule(HttpMethod.PUT, "/api/*/glclosures/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GLCLOSURE"),
+            rule(HttpMethod.DELETE, "/api/*/glclosures/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GLCLOSURE"),
             // product mix
             rule(HttpMethod.GET, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PRODUCTMIX"),
             rule(HttpMethod.POST, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PRODUCTMIX"),
