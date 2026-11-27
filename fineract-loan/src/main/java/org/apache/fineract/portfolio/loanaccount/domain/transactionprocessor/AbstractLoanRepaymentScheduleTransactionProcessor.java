@@ -48,7 +48,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -75,8 +74,6 @@ import org.springframework.util.CollectionUtils;
  */
 @RequiredArgsConstructor
 public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implements LoanRepaymentScheduleTransactionProcessor {
-
-    private static final Comparator<Long> CHARGE_ID_ORDER = Comparator.nullsLast(Comparator.naturalOrder());
 
     protected final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeProcessor = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
     protected final ExternalIdFactory externalIdFactory;
@@ -629,8 +626,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
         Money transactionAmountUnprocessed = processTransaction(loanTransaction, currency, installments, charges, chargeAmountToProcess);
 
-        final Set<LoanCharge> loanFees = extractFeeCharges(charges);
-        final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+        final Set<LoanCharge> loanFees = LoanChargeSelector.extractFeeCharges(charges);
+        final Set<LoanCharge> loanPenalties = LoanChargeSelector.extractPenaltyCharges(charges);
         Integer installmentNumber = null;
         if (loanTransaction.isChargePayment() && installments.size() == 1) {
             installmentNumber = installments.getFirst().getInstallmentNumber();
@@ -690,26 +687,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return transactionAmountUnprocessed;
     }
 
-    protected Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {
-        final Set<LoanCharge> feeCharges = new HashSet<>();
-        for (final LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isFeeCharge()) {
-                feeCharges.add(loanCharge);
-            }
-        }
-        return feeCharges;
-    }
-
-    protected Set<LoanCharge> extractPenaltyCharges(final Set<LoanCharge> loanCharges) {
-        final Set<LoanCharge> penaltyCharges = new HashSet<>();
-        for (final LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isPenaltyCharge()) {
-                penaltyCharges.add(loanCharge);
-            }
-        }
-        return penaltyCharges;
-    }
-
     protected void updateChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money chargeAmount, final Set<LoanCharge> charges,
             final Integer installmentNumber) {
 
@@ -717,7 +694,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         final Set<LoanCharge> chargesThatCannotBeFullyPaidByOneInstallment = new HashSet<>();
 
         while (amountRemaining.isGreaterThanZero()) {
-            final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges, chargeAmount.getCurrency());
+            final LoanCharge unpaidCharge = LoanChargeSelector.findEarliestUnpaidChargeFromUnOrderedSet(charges,
+                    chargeAmount.getCurrency());
             Money feeAmount = chargeAmount.zero();
             if (loanTransaction.isChargePayment()) {
                 feeAmount = chargeAmount;
@@ -764,33 +742,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             case PAY -> this::updateChargesPaidAmountBy;
             case UNPAY -> this::undoChargesPaidAmountBy;
         };
-    }
-
-    protected LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, final MonetaryCurrency currency) {
-        LoanCharge earliestUnpaidCharge = null;
-        LoanCharge installemntCharge = null;
-        LoanInstallmentCharge chargePerInstallment = null;
-        for (final LoanCharge loanCharge : charges) {
-            if (loanCharge.getAmountOutstanding(currency).isGreaterThanZero() && !loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isInstalmentFee()) {
-                    LoanInstallmentCharge unpaidLoanChargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
-                    if (chargePerInstallment == null || DateUtils.isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate(),
-                            unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
-                        installemntCharge = loanCharge;
-                        chargePerInstallment = unpaidLoanChargePerInstallment;
-                    }
-                } else if (earliestUnpaidCharge == null || isPaidBefore(loanCharge, earliestUnpaidCharge)) {
-                    earliestUnpaidCharge = loanCharge;
-                }
-            }
-        }
-
-        if (earliestUnpaidCharge == null || (chargePerInstallment != null && DateUtils.isAfter(earliestUnpaidCharge.getDueLocalDate(),
-                chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
-            earliestUnpaidCharge = installemntCharge;
-        }
-
-        return earliestUnpaidCharge;
     }
 
     protected void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
@@ -856,8 +807,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         }
 
-        final Set<LoanCharge> loanFees = extractFeeCharges(charges);
-        final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+        final Set<LoanCharge> loanFees = LoanChargeSelector.extractFeeCharges(charges);
+        final Set<LoanCharge> loanPenalties = LoanChargeSelector.extractPenaltyCharges(charges);
         Integer installmentNumber = null;
 
         final Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
@@ -877,7 +828,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         Money amountRemaining = chargeAmount;
         while (amountRemaining.isGreaterThanZero()) {
-            final LoanCharge paidCharge = findLatestPaidChargeFromUnOrderedSet(charges, chargeAmount.getCurrency());
+            final LoanCharge paidCharge = LoanChargeSelector.findLatestPaidChargeFromUnOrderedSet(charges, chargeAmount.getCurrency());
 
             if (paidCharge != null) {
                 Money feeAmount = chargeAmount.zero();
@@ -895,47 +846,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
-    }
-
-    private LoanCharge findLatestPaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, MonetaryCurrency currency) {
-        LoanCharge latestPaidCharge = null;
-        LoanCharge installemntCharge = null;
-        LoanInstallmentCharge chargePerInstallment = null;
-        for (final LoanCharge loanCharge : charges) {
-            boolean isPaidOrPartiallyPaid = loanCharge.isPaidOrPartiallyPaid(currency);
-            if (isPaidOrPartiallyPaid && !loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isInstalmentFee()) {
-                    LoanInstallmentCharge paidLoanChargePerInstallment = loanCharge
-                            .getLastPaidOrPartiallyPaidInstallmentLoanCharge(currency);
-                    if (chargePerInstallment == null || (paidLoanChargePerInstallment != null
-                            && DateUtils.isBefore(chargePerInstallment.getRepaymentInstallment().getDueDate(),
-                                    paidLoanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
-                        installemntCharge = loanCharge;
-                        chargePerInstallment = paidLoanChargePerInstallment;
-                    }
-                } else if (latestPaidCharge == null || isPaidBefore(latestPaidCharge, loanCharge)) {
-                    latestPaidCharge = loanCharge;
-                }
-            }
-        }
-        if (latestPaidCharge == null || (chargePerInstallment != null
-                && DateUtils.isAfter(latestPaidCharge.getDueLocalDate(), chargePerInstallment.getRepaymentInstallment().getDueDate()))) {
-            latestPaidCharge = installemntCharge;
-        }
-
-        return latestPaidCharge;
-    }
-
-    /**
-     * The order in which charges of the same kind are paid: by due date, then by id, so that charges due on the same
-     * date are paid in the order they were created. A charge not saved yet comes after the saved ones. Undoing a
-     * payment goes in the reverse order.
-     */
-    private static boolean isPaidBefore(final LoanCharge charge, final LoanCharge other) {
-        if (!DateUtils.isEqual(charge.getDueLocalDate(), other.getDueLocalDate())) {
-            return DateUtils.isBefore(charge.getDueLocalDate(), other.getDueLocalDate());
-        }
-        return CHARGE_ID_ORDER.compare(charge.getId(), other.getId()) < 0;
     }
 
     protected void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges,
