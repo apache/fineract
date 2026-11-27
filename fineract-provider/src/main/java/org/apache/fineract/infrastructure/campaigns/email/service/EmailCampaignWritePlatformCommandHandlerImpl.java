@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.gson.Gson;
@@ -72,6 +71,7 @@ import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.template.service.NoPartialsMustacheFactory;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -349,7 +349,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
     private String compileEmailTemplate(final String textMessageTemplate, final String campaignName,
             final Map<String, Object> emailParams) {
-        final MustacheFactory mf = new DefaultMustacheFactory();
+        final MustacheFactory mf = new NoPartialsMustacheFactory();
         final Mustache mustache = mf.compile(Reader.of(textMessageTemplate), campaignName);
 
         final StringWriter stringWriter = new StringWriter();

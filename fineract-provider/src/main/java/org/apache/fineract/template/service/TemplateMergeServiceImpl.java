@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.template.service;
 
-import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import java.io.IOException;
@@ -64,7 +63,7 @@ public class TemplateMergeServiceImpl implements TemplateMergeService {
     public String compile(final TemplateData template, final Map<String, Object> scopes) {
         scopes.put("static", TemplateFunctions.INSTANCE);
 
-        var mf = new DefaultMustacheFactory();
+        var mf = new NoPartialsMustacheFactory();
         var mustache = mf.compile(Reader.of(template.getText()), template.getName());
 
         compiledMapFromMappers(asMap(template.getMappers()), scopes);
@@ -78,7 +77,7 @@ public class TemplateMergeServiceImpl implements TemplateMergeService {
     }
 
     private void compiledMapFromMappers(final Map<String, String> data, final Map<String, Object> scopes) {
-        final MustacheFactory mf = new DefaultMustacheFactory();
+        final MustacheFactory mf = new NoPartialsMustacheFactory();
 
         if (data != null) {
             for (final Map.Entry<String, String> entry : data.entrySet()) {

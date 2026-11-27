@@ -171,6 +171,10 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
 
             this.adHocCommandFromApiJsonDeserializer.validateForUpdate(command.json());
 
+            if (command.parameterExists(AdHocJsonInputParams.QUERY.getValue())) {
+                sqlValidator.validate("adhoc", command.stringValueOfParameterNamed(AdHocJsonInputParams.QUERY.getValue()));
+            }
+
             final AdHoc adHoc = this.adHocRepository.findById(adHocId).orElseThrow(() -> new AdHocNotFoundException(adHocId));
 
             final Map<String, Object> changes = applyChanges(adHoc, command);
