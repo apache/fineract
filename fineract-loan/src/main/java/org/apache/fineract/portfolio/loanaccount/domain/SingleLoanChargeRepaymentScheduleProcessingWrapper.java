@@ -21,7 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -29,6 +31,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A wrapper around loan schedule related data exposing needed behaviour by loan.
@@ -255,5 +258,32 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             loan.addLoanRepaymentScheduleInstallment(additionalInstallment);
             return additionalInstallment;
         }
+    }
+
+    /**
+     * Adds a charge-only installment for the latest charge with a specific due date, if that charge falls after the last
+     * installment of the schedule.
+     */
+    public void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges, List<LoanRepaymentScheduleInstallment> installments) {
+        LoanCharge latestCharge = getLatestLoanChargeWithSpecificDueDate(charges);
+        if (latestCharge == null) {
+            return;
+        }
+        addChargeOnlyRepaymentInstallmentIfRequired(latestCharge, installments);
+    }
+
+    private LoanCharge getLatestLoanChargeWithSpecificDueDate(Set<LoanCharge> charges) {
+        if (charges == null) {
+            return null;
+        }
+        LoanCharge latestCharge = null;
+        final List<LoanCharge> chargesWithSpecificDueDate = new ArrayList<>(
+                charges.stream().filter(LoanCharge::isSpecifiedDueDate).toList());
+        if (!CollectionUtils.isEmpty(chargesWithSpecificDueDate)) {
+            chargesWithSpecificDueDate
+                    .sort((charge1, charge2) -> DateUtils.compare(charge1.getEffectiveDueDate(), charge2.getEffectiveDueDate()));
+            latestCharge = chargesWithSpecificDueDate.getLast();
+        }
+        return latestCharge;
     }
 }

@@ -61,7 +61,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor} which is more convenient for concrete
@@ -97,7 +96,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 }
             }
         }
-        addChargeOnlyRepaymentInstallmentIfRequired(charges, installments);
+        loanChargeProcessor.addChargeOnlyRepaymentInstallmentIfRequired(charges, installments);
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
@@ -846,30 +845,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
-    }
-
-    protected void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges,
-            List<LoanRepaymentScheduleInstallment> installments) {
-        LoanCharge latestCharge = getLatestLoanChargeWithSpecificDueDate(charges);
-        if (latestCharge == null) {
-            return;
-        }
-        loanChargeProcessor.addChargeOnlyRepaymentInstallmentIfRequired(latestCharge, installments);
-    }
-
-    protected LoanCharge getLatestLoanChargeWithSpecificDueDate(Set<LoanCharge> charges) {
-        if (charges == null) {
-            return null;
-        }
-        LoanCharge latestCharge = null;
-        final List<LoanCharge> chargesWithSpecificDueDate = new ArrayList<>(
-                charges.stream().filter(LoanCharge::isSpecifiedDueDate).toList());
-        if (!CollectionUtils.isEmpty(chargesWithSpecificDueDate)) {
-            chargesWithSpecificDueDate
-                    .sort((charge1, charge2) -> DateUtils.compare(charge1.getEffectiveDueDate(), charge2.getEffectiveDueDate()));
-            latestCharge = chargesWithSpecificDueDate.getLast();
-        }
-        return latestCharge;
     }
 
     private BigDecimal getInterestTillChargeOffForPeriod(final Loan loan, final LocalDate chargeOffDate) {
