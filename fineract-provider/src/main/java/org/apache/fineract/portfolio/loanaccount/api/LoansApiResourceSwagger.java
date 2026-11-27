@@ -923,6 +923,8 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2022, 07, 01]")
             public LocalDate submittedOnDate;
             public boolean manuallyReversed;
+            @Schema(description = "Fee Refund decision of a Merchant Issued Refund or Payout Refund. Null when the loan product config is used.", example = "false")
+            public Boolean feeRefundCalculation;
             @Schema(example = "[2022, 07, 01]")
             public LocalDate possibleNextRepaymentDate;
             @Schema(description = "List of GetLoansLoanIdLoanChargePaidByData")

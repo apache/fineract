@@ -68,6 +68,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -594,6 +596,21 @@ public class LoanStepDef extends AbstractStepDef {
     public void createTransactionWithAutoIdempotencyKeyAndWithInterestRefundCalculationFlagProvided(final String transactionTypeInput,
             final String transactionPaymentType, final String transactionDate, final double transactionAmount,
             final boolean interestRefundCalculation) throws IOException {
+        createTransactionWithAutoIdempotencyKeyAndRefundCalculationFlag(transactionTypeInput, transactionPaymentType, transactionDate,
+                transactionAmount, request -> request.interestRefundCalculation(interestRefundCalculation));
+    }
+
+    @When("Customer makes {string} transaction with {string} payment type on {string} with {double} EUR transaction amount and system-generated Idempotency key and feeRefundCalculation {booleanValue}")
+    public void createTransactionWithAutoIdempotencyKeyAndWithFeeRefundCalculationFlagProvided(final String transactionTypeInput,
+            final String transactionPaymentType, final String transactionDate, final double transactionAmount,
+            final boolean feeRefundCalculation) throws IOException {
+        createTransactionWithAutoIdempotencyKeyAndRefundCalculationFlag(transactionTypeInput, transactionPaymentType, transactionDate,
+                transactionAmount, request -> request.feeRefundCalculation(feeRefundCalculation));
+    }
+
+    private void createTransactionWithAutoIdempotencyKeyAndRefundCalculationFlag(final String transactionTypeInput,
+            final String transactionPaymentType, final String transactionDate, final double transactionAmount,
+            final UnaryOperator<PostLoansLoanIdTransactionsRequest> refundCalculationFlag) throws IOException {
         eventStore.reset();
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         assert loanResponse != null;
@@ -604,9 +621,9 @@ public class LoanStepDef extends AbstractStepDef {
         final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
         final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
 
-        final PostLoansLoanIdTransactionsRequest paymentTransactionRequest = loanRequestFactory.defaultPaymentTransactionRequest()
-                .transactionDate(transactionDate).transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue)
-                .interestRefundCalculation(interestRefundCalculation);
+        final PostLoansLoanIdTransactionsRequest paymentTransactionRequest = refundCalculationFlag
+                .apply(loanRequestFactory.defaultPaymentTransactionRequest().transactionDate(transactionDate)
+                        .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue));
 
         final ApiResponse<PostLoansLoanIdTransactionsResponse> paymentTransactionApiResponse = ok(() -> fineractClient.loanTransactions()
                 .handleCommandsLoanTransactionWithHttpInfo(loanId, paymentTransactionRequest, transactionTypeValue, Map.of()));
@@ -2709,6 +2726,103 @@ public class LoanStepDef extends AbstractStepDef {
                 .orElseThrow(() -> new IllegalStateException(String.format("No Fee Refund transaction found on %s", date))).getId();
 
         eventAssertion.assertEventRaised(LoanTransactionFeeRefundPostEvent.class, feeRefundTransactionId);
+    }
+
+    @When("Admin manually adds Fee Refund for {string} transaction made on {string} with {double} EUR fee refund amount")
+    public void addFeeRefundTransactionManually(final String transactionType, final String transactionDate, final double amount) {
+        final long loanId = createdLoanId();
+        final Long refundId = eventCheckHelper.findNthTransaction("1", transactionType, transactionDate, loanId).getId();
+        addFeeRefundTransaction(loanId, () -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, refundId,
+                manualFeeRefundRequest(amount), Map.of("command", "fee-refund")));
+    }
+
+    @When("Admin manually adds Fee Refund by loan external id for {string} transaction made on {string} with {double} EUR fee refund amount")
+    public void addFeeRefundTransactionManuallyByLoanExternalId(final String transactionType, final String transactionDate,
+            final double amount) {
+        final long loanId = createdLoanId();
+        final Long refundId = eventCheckHelper.findNthTransaction("1", transactionType, transactionDate, loanId).getId();
+        final String loanExternalId = loanExternalId(loanId);
+        addFeeRefundTransaction(loanId, () -> fineractClient.loanTransactions().adjustLoanTransactionByLoanExternalId(loanExternalId,
+                refundId, manualFeeRefundRequest(amount), Map.of("command", "fee-refund")));
+    }
+
+    @Then("Admin fails to add Fee Refund for {string} transaction made on {string} with {double} EUR fee refund amount due to a validation error:")
+    public void addFeeRefundTransactionManuallyFails(final String transactionType, final String transactionDate, final double amount,
+            final DataTable table) {
+        final long loanId = createdLoanId();
+        final Long transactionId = eventCheckHelper.findNthTransaction("1", transactionType, transactionDate, loanId).getId();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId,
+                transactionId, manualFeeRefundRequest(amount), Map.of("command", "fee-refund")));
+
+        final List<List<String>> data = table.asLists();
+        final int httpCodeExpected = Integer.parseInt(data.get(0).get(1));
+        final String errorMessageExpected = data.get(1).get(1);
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.wrongErrorCode(exception.getStatus(), httpCodeExpected))
+                .isEqualTo(httpCodeExpected);
+        assertThat(exception.getDeveloperMessage())
+                .as(ErrorMessageHelper.wrongErrorMessage(exception.getDeveloperMessage(), errorMessageExpected))
+                .contains(errorMessageExpected);
+    }
+
+    @Then("Fee Refund template for {string} transaction made on {string} has {double} EUR amount")
+    public void checkFeeRefundTemplate(final String transactionType, final String transactionDate, final double amountExpected) {
+        final long loanId = createdLoanId();
+        final Long refundId = eventCheckHelper.findNthTransaction("1", transactionType, transactionDate, loanId).getId();
+        assertFeeRefundTemplate(ok(() -> fineractClient.loanTransactions().retrieveTemplateLoanTransaction(loanId,
+                Map.of("command", "fee-refund", "transactionId", refundId))), transactionDate, amountExpected);
+    }
+
+    @Then("Fee Refund template by loan external id for {string} transaction made on {string} has {double} EUR amount")
+    public void checkFeeRefundTemplateByLoanExternalId(final String transactionType, final String transactionDate,
+            final double amountExpected) {
+        final long loanId = createdLoanId();
+        final Long refundId = eventCheckHelper.findNthTransaction("1", transactionType, transactionDate, loanId).getId();
+        final String loanExternalId = loanExternalId(loanId);
+        assertFeeRefundTemplate(ok(() -> fineractClient.loanTransactions().retrieveTemplateLoanTransactionByLoanExternalId(loanExternalId,
+                Map.of("command", "fee-refund", "transactionId", refundId))), transactionDate, amountExpected);
+    }
+
+    @Then("{string} transaction made on {string} has feeRefundCalculation {string}")
+    public void checkFeeRefundCalculation(final String transactionType, final String transactionDate, final String feeRefundCalculation) {
+        final Boolean feeRefundCalculationExpected = "null".equals(feeRefundCalculation) ? null : Boolean.valueOf(feeRefundCalculation);
+        final GetLoansLoanIdTransactions refund = eventCheckHelper.findNthTransaction("1", transactionType, transactionDate,
+                createdLoanId());
+        assertThat(refund.getFeeRefundCalculation()).as("Wrong feeRefundCalculation of %s on %s", transactionType, transactionDate)
+                .isEqualTo(feeRefundCalculationExpected);
+    }
+
+    private long createdLoanId() {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        return Objects.requireNonNull(loanCreateResponse).getLoanId();
+    }
+
+    private String loanExternalId(final long loanId) {
+        final String loanExternalId = ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of())).getExternalId();
+        assertThat(loanExternalId).as("Loan %s has no external id", loanId).isNotNull();
+        return loanExternalId;
+    }
+
+    private PostLoansLoanIdTransactionsTransactionIdRequest manualFeeRefundRequest(final double amount) {
+        return new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_FORMAT).locale(LOCALE_EN).transactionAmount(amount)
+                .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.AUTOPAY)).externalId("EXT-FEE-REF-" + UUID.randomUUID())
+                .note("");
+    }
+
+    private void addFeeRefundTransaction(final long loanId, final Supplier<PostLoansLoanIdTransactionsResponse> feeRefundCall) {
+        eventStore.reset();
+        final PostLoansLoanIdTransactionsResponse feeRefundResponse = ok(feeRefundCall);
+        eventCheckHelper.transactionEventCheck(feeRefundResponse, TransactionType.FEE_REFUND, null);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    private void assertFeeRefundTemplate(final GetLoansLoanIdTransactionsTemplateResponse template, final String transactionDate,
+            final double amountExpected) {
+        assertThat(template.getType().getCode()).isEqualTo("loanTransactionType.feeRefund");
+        assertThat(FORMATTER.format(template.getDate())).isEqualTo(transactionDate);
+        assertThat(template.getAmount()).isEqualTo(amountExpected);
+        assertThat(template.getCurrency().getCode()).isEqualTo("EUR");
+        assertThat(template.getPaymentTypeOptions()).isNotEmpty();
     }
 
     @Then("Loan has {double} total interest overdue amount")

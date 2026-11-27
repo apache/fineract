@@ -1845,3 +1845,420 @@ Feature: LoanChargesDownPaymentFeeRefund
       | 12 January 2026  | Accrual                | 25.0   | 0.0       | 0.0      | 25.0 | 0.0       | 0.0          | false    | false    |
     Then Loan has 10.0 total fee refund amount
     Then Loan has 330.0 outstanding amount
+
+  @FeeRefundOverride
+  Scenario: Verify Merchant Issued Refund with feeRefundCalculation false creates no Fee Refund, also after reverse-replay - UC54
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    Then Loan has 0.0 total fee refund amount
+    Then "Merchant Issued Refund" transaction made on "10 January 2026" has feeRefundCalculation "false"
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes "AUTOPAY" repayment on "05 January 2026" with 50 EUR transaction amount
+  # the replayed Merchant Issued Refund keeps the decision
+    Then Loan Transactions tab has a transaction with date: "10 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 10 January 2026  | Merchant Issued Refund | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 200.0        |
+    Then Loan has 0.0 total fee refund amount
+    Then "Merchant Issued Refund" transaction made on "10 January 2026" has feeRefundCalculation "false"
+    Then Loan has 200.0 outstanding amount
+    When Loan Pay-off is made on "12 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @FeeRefundOverride
+  Scenario: Verify Payout Refund with feeRefundCalculation false creates no Fee Refund - UC55
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    Then Loan has 0.0 total fee refund amount
+    Then "Payout Refund" transaction made on "10 January 2026" has feeRefundCalculation "false"
+    Then Loan has 250.0 outstanding amount
+    When Loan Pay-off is made on "10 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @FeeRefundOverride
+  Scenario: Verify Merchant Issued Refund with feeRefundCalculation true creates the Fee Refund on a product without Fee Refund configuration - UC56
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation true
+  # 500 / 1000 * 25 = 12.5
+    Then Loan Transactions tab has a transaction with date: "10 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 10 January 2026  | Merchant Issued Refund | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        |
+      | 10 January 2026  | Fee Refund             | 12.5   | 12.5      | 0.0      | 0.0  | 0.0       | 237.5        |
+    Then Loan has 12.5 total fee refund amount
+    Then "Merchant Issued Refund" transaction made on "10 January 2026" has feeRefundCalculation "true"
+    Then Loan Transactions tab has a "FEE_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 12.5   |
+      | INCOME | 404007       | Fee Income       | 12.5  |        |
+    Then LoanTransactionFeeRefundPostBusinessEvent is raised on "10 January 2026"
+    When Loan Pay-off is made on "10 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @FeeRefundOverride
+  Scenario: Verify a refund posted with feeRefundCalculation false does not use up the Fee Refund cap - UC57
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 600 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    When Admin sets the business date to "15 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2026" with 600 EUR transaction amount and system-generated Idempotency key
+  # 600 / 1000 * 25 = 15.0: the skipped refund of 10 January is not part of the cap
+    Then Loan Transactions tab has a transaction with date: "15 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 15 January 2026  | Merchant Issued Refund | 600.0  | 150.0     | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 15 January 2026  | Fee Refund             | 15.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
+    Then Loan has 15.0 total fee refund amount
+    Then Loan has 465.0 overpaid amount
+    When Admin makes Credit Balance Refund transaction on "15 January 2026" with 465 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @FeeRefundOverride
+  Scenario: Verify undo of an earlier refund does not restore the Fee Refund of a refund posted with feeRefundCalculation false - UC58
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 1000 EUR transaction amount and system-generated Idempotency key
+    Then Loan has 25.0 total fee refund amount
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "12 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    When Customer undo "1"th "Merchant Issued Refund" transaction made on "10 January 2026" with linked "Fee Refund" transaction
+  # without the stored decision the replay would create 500 / 1000 * 25 = 12.5 for 12 January
+    Then Loan has 0.0 total fee refund amount
+    Then "Merchant Issued Refund" transaction made on "12 January 2026" has feeRefundCalculation "false"
+    Then Loan has 250.0 outstanding amount
+    When Loan Pay-off is made on "12 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund for a Merchant Issued Refund posted with feeRefundCalculation false - UC59
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    Then Loan has 0.0 total fee refund amount
+  # 500 / 1000 * 25 = 12.5
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "10 January 2026" has 12.5 EUR amount
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "10 January 2026" with 12.5 EUR fee refund amount
+    Then Loan Transactions tab has a transaction with date: "10 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 10 January 2026  | Merchant Issued Refund | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        |
+      | 10 January 2026  | Fee Refund             | 12.5   | 12.5      | 0.0      | 0.0  | 0.0       | 237.5        |
+    Then Loan has 12.5 total fee refund amount
+    Then Loan Transactions tab has a "FEE_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 12.5   |
+      | INCOME | 404007       | Fee Income       | 12.5  |        |
+  # the manual Fee Refund clears the stored decision
+    Then "Merchant Issued Refund" transaction made on "10 January 2026" has feeRefundCalculation "null"
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes "AUTOPAY" repayment on "05 January 2026" with 50 EUR transaction amount
+  # the reverse-replay keeps one Fee Refund of 12.5
+    Then Loan Transactions tab has a transaction with date: "10 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 10 January 2026  | Merchant Issued Refund | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 200.0        |
+      | 10 January 2026  | Fee Refund             | 12.5   | 12.5      | 0.0      | 0.0  | 0.0       | 187.5        |
+    Then Loan has 12.5 total fee refund amount
+    Then Loan has 187.5 outstanding amount
+    When Loan Pay-off is made on "12 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund for an earlier skipped refund reduces the capped Fee Refund of the later refund - UC60
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 600 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    When Admin sets the business date to "15 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2026" with 600 EUR transaction amount and system-generated Idempotency key
+    Then Loan has 15.0 total fee refund amount
+  # 600 / 1000 * 25 = 15.0 for 10 January, the earlier refund comes first in the cap
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "10 January 2026" has 15.0 EUR amount
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "10 January 2026" with 15.0 EUR fee refund amount
+  # 15 January is reverse-replayed: 25 - 15 = 10.0 left
+    Then Loan Transactions tab has a transaction with date: "10 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 10 January 2026  | Merchant Issued Refund | 600.0  | 600.0     | 0.0      | 0.0  | 0.0       | 150.0        |
+      | 10 January 2026  | Fee Refund             | 15.0   | 15.0      | 0.0      | 0.0  | 0.0       | 135.0        |
+    Then Loan Transactions tab has a transaction with date: "15 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 15 January 2026  | Merchant Issued Refund | 600.0  | 135.0     | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 15 January 2026  | Fee Refund             | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
+    Then Loan has 25.0 total fee refund amount
+    Then "Merchant Issued Refund" transaction made on "10 January 2026" has feeRefundCalculation "null"
+    Then Loan has 475.0 overpaid amount
+    When Admin makes Credit Balance Refund transaction on "15 January 2026" with 475 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify undo of the Merchant Issued Refund reverses its manual Fee Refund - UC61
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "10 January 2026" with 12.5 EUR fee refund amount
+    Then Loan has 12.5 total fee refund amount
+    When Customer undo "1"th "Merchant Issued Refund" transaction made on "10 January 2026" with linked "Fee Refund" transaction
+    Then Loan has 0.0 total fee refund amount
+    Then Loan has 750.0 outstanding amount
+    When Loan Pay-off is made on "10 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund validation errors - UC62
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND_MIR | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "AUTOPAY" repayment on "05 January 2026" with 50 EUR transaction amount
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 100 EUR transaction amount and system-generated Idempotency key
+    Then Loan has 12.5 total fee refund amount
+    Then Admin fails to add Fee Refund for "Merchant Issued Refund" transaction made on "10 January 2026" with 12.5 EUR fee refund amount due to a validation error:
+      | http code     | 403                                            |
+      | error message | Fee Refund already exists for this transaction |
+    Then Admin fails to add Fee Refund for "Repayment" transaction made on "05 January 2026" with 1.25 EUR fee refund amount due to a validation error:
+      | http code     | 403                                                                |
+      | error message | Target transaction must be Merchant Issued Refund or Payout Refund |
+  # the product supports only Merchant Issued Refund and the Payout Refund was posted without feeRefundCalculation true
+    Then Admin fails to add Fee Refund for "Payout Refund" transaction made on "10 January 2026" with 2.5 EUR fee refund amount due to a validation error:
+      | http code     | 403                                                   |
+      | error message | Fee Refund calculation is not supported for this loan |
+    When Admin sets the business date to "12 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "12 January 2026" with 50 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+  # 50 / 1000 * 25 = 1.25
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "12 January 2026" has 1.25 EUR amount
+    Then Admin fails to add Fee Refund for "Merchant Issued Refund" transaction made on "12 January 2026" with 1.0 EUR fee refund amount due to a validation error:
+      | http code     | 403                                                      |
+      | error message | Amount must be equal to the calculated Fee Refund amount |
+    When Customer undo "1"th "Merchant Issued Refund" transaction made on "12 January 2026"
+  # a reversed refund is rejected as not a refund, as for the manual Interest Refund
+    Then Admin fails to add Fee Refund for "Merchant Issued Refund" transaction made on "12 January 2026" with 1.25 EUR fee refund amount due to a validation error:
+      | http code     | 403                                                                |
+      | error message | Target transaction must be Merchant Issued Refund or Payout Refund |
+    Then Loan has 12.5 total fee refund amount
+    Then Loan has 87.5 outstanding amount
+    When Loan Pay-off is made on "12 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund and its template through the loan external id - UC63
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 400 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+  # 400 / 1000 * 25 = 10.0
+    Then Fee Refund template by loan external id for "Payout Refund" transaction made on "10 January 2026" has 10.0 EUR amount
+    When Admin manually adds Fee Refund by loan external id for "Payout Refund" transaction made on "10 January 2026" with 10.0 EUR fee refund amount
+    Then Loan Transactions tab has a transaction with date: "10 January 2026", and with the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 10 January 2026  | Payout Refund    | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 350.0        |
+      | 10 January 2026  | Fee Refund       | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 340.0        |
+    Then Loan has 10.0 total fee refund amount
+    When Loan Pay-off is made on "10 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @FeeRefundOverride
+  Scenario: Verify a Merchant Issued Refund posted with feeRefundCalculation true cannot be adjusted - UC64
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation true
+    Then Customer is forbidden to adjust "1"th "Merchant Issued Refund" transaction made on "10 January 2026" with 400.0 EUR transaction amount due to a validation error:
+      | http code     | 403                                                                                      |
+      | error message | cannot be adjusted as fee refund is enabled for loanTransactionType.merchantIssuedRefund |
+    Then Loan has 12.5 total fee refund amount
+    When Loan Pay-off is made on "10 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund on a multi-disbursement loan uses all Down Payment fees and the total disbursed amount - UC65
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "500" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    When Admin successfully disburse the loan on "02 January 2026" with "500" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    Then Loan has 0.0 total fee refund amount
+  # 500 / 1000 (total disbursed) * (25 + 25) = 25.0
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "10 January 2026" has 25.0 EUR amount
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "10 January 2026" with 25.0 EUR fee refund amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2026  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 01 January 2026  | Down Payment           | 150.0  | 125.0     | 0.0      | 25.0 | 0.0       | 375.0        | false    | false    |
+      | 02 January 2026  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 875.0        | false    | false    |
+      | 02 January 2026  | Down Payment           | 150.0  | 125.0     | 0.0      | 25.0 | 0.0       | 750.0        | false    | false    |
+      | 10 January 2026  | Merchant Issued Refund | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
+      | 10 January 2026  | Fee Refund             | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 225.0        | false    | false    |
+    Then Loan has 25.0 total fee refund amount
+    Then Loan Transactions tab has a "FEE_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 25.0   |
+      | INCOME | 404007       | Fee Income       | 25.0  |        |
+    When Loan Pay-off is made on "10 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund for a Merchant Issued Refund made after the charge-off - UC66
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin does charge-off the loan on "10 January 2026"
+    When Admin sets the business date to "15 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2026" with 400 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    Then Loan has 0.0 total fee refund amount
+  # 400 / 1000 * 25 = 10.0
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "15 January 2026" has 10.0 EUR amount
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "15 January 2026" with 10.0 EUR fee refund amount
+    Then Loan Transactions tab has a transaction with date: "15 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 15 January 2026  | Merchant Issued Refund | 400.0  | 400.0     | 0.0      | 0.0  | 0.0       | 350.0        |
+      | 15 January 2026  | Fee Refund             | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 340.0        |
+    Then Loan has 10.0 total fee refund amount
+    Then Loan has 340.0 outstanding amount
+    When Loan Pay-off is made on "15 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  @FeeRefundCashAccounting
+  Scenario: Verify manual Fee Refund on cash based product creates no journal entries - UC67
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADV_PYMNT_INTEREST_RECALCULATION_INTEREST_REFUND_FEE_REFUND_CASH_ACCOUNTING | 01 January 2026   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "15 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2026" with 500 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    Then Loan has 0.0 total fee refund amount
+  # 500 / 1000 * 25 = 12.5
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "15 January 2026" has 12.5 EUR amount
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "15 January 2026" with 12.5 EUR fee refund amount
+  # the same result as the automatic Fee Refund (UC43)
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2026  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 01 January 2026  | Down Payment           | 275.0  | 250.0     | 0.0      | 25.0 | 0.0       | 750.0        | false    | false    |
+      | 15 January 2026  | Merchant Issued Refund | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
+      | 15 January 2026  | Interest Refund        | 2.3    | 2.3       | 0.0      | 0.0  | 0.0       | 247.7        | false    | false    |
+      | 15 January 2026  | Fee Refund             | 12.5   | 12.5      | 0.0      | 0.0  | 0.0       | 235.2        | false    | false    |
+    Then Loan has 12.5 total fee refund amount
+  # cash based accounting creates no journal entries for Fee Refund, for the manual one too
+    Then Loan Transactions tab has a "FEE_REFUND" transaction with date "15 January 2026" which has no Journal entries
+    When Loan Pay-off is made on "15 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @ManualFeeRefund
+  Scenario: Verify manual Fee Refund for a skipped refund reduces the capped Fee Refund of a later refund on the same date - UC68
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin updates charge "LOAN_DOWN_PAYMENT_FEE" with "FLAT" calculation type and 25.0 EUR amount
+    When Admin creates a fully customized loan with charges and following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type | charge amount % |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_FEE_REFUND | 01 January 2026   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DOWN_PAYMENT_FEE   | 25.00           |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "1000" EUR transaction amount
+    When Admin sets the business date to "15 January 2026"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2026" with 600 EUR transaction amount and system-generated Idempotency key and feeRefundCalculation false
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 January 2026" with 600 EUR transaction amount and system-generated Idempotency key
+    Then Loan has 15.0 total fee refund amount
+  # 600 / 1000 * 25 = 15.0 for the first refund, it comes first in the cap
+    Then Fee Refund template for "Merchant Issued Refund" transaction made on "15 January 2026" has 15.0 EUR amount
+    When Admin manually adds Fee Refund for "Merchant Issued Refund" transaction made on "15 January 2026" with 15.0 EUR fee refund amount
+  # the second refund of the same date is reverse-replayed too: 25 - 15 = 10.0 left
+  # the manual Fee Refund is created last, so on the same date it is processed after the second refund
+    Then Loan Transactions tab has a transaction with date: "15 January 2026", and with the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 15 January 2026  | Merchant Issued Refund | 600.0  | 600.0     | 0.0      | 0.0  | 0.0       | 150.0        |
+      | 15 January 2026  | Merchant Issued Refund | 600.0  | 150.0     | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 15 January 2026  | Fee Refund             | 15.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 15 January 2026  | Fee Refund             | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
+    Then Loan has 25.0 total fee refund amount
+    Then "Merchant Issued Refund" transaction made on "15 January 2026" has feeRefundCalculation "null"
+    Then Loan has 475.0 overpaid amount
+    When Admin makes Credit Balance Refund transaction on "15 January 2026" with 475 EUR transaction amount
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

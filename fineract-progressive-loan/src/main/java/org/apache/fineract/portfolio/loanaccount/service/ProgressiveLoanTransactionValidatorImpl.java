@@ -695,8 +695,8 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     }
 
     @Override
-    public void validateManualInterestRefundTransaction(final String json) {
-        loanTransactionValidator.validateManualInterestRefundTransaction(json);
+    public void validateManualRefundTransaction(final String json) {
+        loanTransactionValidator.validateManualRefundTransaction(json);
     }
 
     @Override

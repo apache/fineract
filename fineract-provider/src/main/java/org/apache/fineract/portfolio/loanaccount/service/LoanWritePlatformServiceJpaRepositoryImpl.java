@@ -360,4 +360,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return this.loanTransactionWritePlatformService.makeManualInterestRefund(loanId, transactionId, command);
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult makeManualFeeRefund(final Long loanId, final Long transactionId, final JsonCommand command) {
+        return this.loanTransactionWritePlatformService.makeManualFeeRefund(loanId, transactionId, command);
+    }
+
 }

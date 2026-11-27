@@ -811,7 +811,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public RefundTransactionResult makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
             final LoanTransactionType loanTransactionType, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final ExternalId txnExternalId, final Boolean interestRefundCalculationOverride) {
+            final PaymentDetail paymentDetail, final ExternalId txnExternalId, final Boolean interestRefundCalculationOverride,
+            final Boolean feeRefundCalculationOverride) {
         // Pre-processing business event
         switch (loanTransactionType) {
             case MERCHANT_ISSUED_REFUND ->
@@ -823,6 +824,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         LoanTransaction refundTransaction = LoanTransaction.refund(loan, loanTransactionType, transactionAmount, paymentDetail,
                 transactionDate, txnExternalId);
+        refundTransaction.setFeeRefundCalculation(feeRefundCalculationOverride);
 
         final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
                 refundTransaction);
@@ -831,7 +833,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 () -> loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
                         .map(LoanSupportedInterestRefundTypes::getTransactionType)
                         .anyMatch(transactionType -> transactionType.equals(loanTransactionType)));
-        final boolean shouldCreateFeeRefundTransaction = loan.getSupportedFeeRefundTransactionTypes().contains(loanTransactionType);
+        final boolean shouldCreateFeeRefundTransaction = DownPaymentFees.isFeeRefundEnabled(loan, refundTransaction);
         LoanTransaction interestRefundTransaction = null;
         LoanTransaction feeRefundTransaction = null;
 

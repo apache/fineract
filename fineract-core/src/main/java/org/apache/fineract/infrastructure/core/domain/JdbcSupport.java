@@ -73,6 +73,10 @@ public final class JdbcSupport {
         return (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
     }
 
+    public static Boolean getBoolean(final ResultSet rs, final String columnName) throws SQLException {
+        return (Boolean) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Boolean.class);
+    }
+
     public static Integer getIntegerDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
         final Integer value = (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
         return defaultToNullIfZero(value);

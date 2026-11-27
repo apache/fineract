@@ -87,6 +87,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INVALIDATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_LOAN_WITHDRAWAL;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_LOAN_WITHDRAWAL_UNDO;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MANUAL_FEE_REFUND_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MANUAL_INTEREST_REFUND_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MERCHANTISSUEDREFUND;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_PAY;
@@ -3877,6 +3878,15 @@ public class CommandWrapperBuilder {
         this.loanId = loanId;
         this.entityId = transactionId;
         this.href = "/loans/" + loanId + "/transactions/" + transactionId + "?command=interest-refund";
+        return this;
+    }
+
+    public CommandWrapperBuilder manualFeeRefund(final Long loanId, final Long transactionId) {
+        this.actionName = ACTION_MANUAL_FEE_REFUND_TRANSACTION;
+        this.entityName = ENTITY_LOAN;
+        this.loanId = loanId;
+        this.entityId = transactionId;
+        this.href = "/loans/" + loanId + "/transactions/" + transactionId + "?command=fee-refund";
         return this;
     }
 

@@ -386,6 +386,52 @@ public class DownPaymentFeesTest {
         assertEquals(List.of(withoutFeeRefund, withReversedFeeRefund), DownPaymentFees.refundsWithoutFeeRefund(loan));
     }
 
+    @Test
+    public void testFeeRefundIsEnabledByTheStoredDecisionOtherwiseByTheSupportedTypes() {
+        final Loan loan = mockRefundLoan(List.of(), List.of());
+
+        assertTrue(DownPaymentFees.isFeeRefundEnabled(loan, refund(5L, JAN_2, 100, LoanTransactionType.MERCHANT_ISSUED_REFUND, null)));
+        assertFalse(DownPaymentFees.isFeeRefundEnabled(loan, refund(5L, JAN_2, 100, LoanTransactionType.MERCHANT_ISSUED_REFUND, false)));
+        assertFalse(DownPaymentFees.isFeeRefundEnabled(loan, refund(5L, JAN_2, 100, LoanTransactionType.PAYOUT_REFUND, null)));
+        assertTrue(DownPaymentFees.isFeeRefundEnabled(loan, refund(5L, JAN_2, 100, LoanTransactionType.PAYOUT_REFUND, true)));
+    }
+
+    @Test
+    public void testFeeRefundIsSupportedForASupportedTypeEvenWhenSkippedOrWhenForced() {
+        final Loan loan = mockRefundLoan(List.of(), List.of());
+
+        assertTrue(DownPaymentFees.isFeeRefundSupported(loan, refund(5L, JAN_2, 100, LoanTransactionType.MERCHANT_ISSUED_REFUND, false)));
+        assertTrue(DownPaymentFees.isFeeRefundSupported(loan, refund(5L, JAN_2, 100, LoanTransactionType.PAYOUT_REFUND, true)));
+        assertFalse(DownPaymentFees.isFeeRefundSupported(loan, refund(5L, JAN_2, 100, LoanTransactionType.PAYOUT_REFUND, null)));
+        assertFalse(DownPaymentFees.isFeeRefundSupported(loan, refund(5L, JAN_2, 100, LoanTransactionType.PAYOUT_REFUND, false)));
+    }
+
+    @Test
+    public void testSkippedRefundDoesNotUseUpTheCap() {
+        final LoanTransaction skipped = refund(5L, JAN_2, 600, LoanTransactionType.MERCHANT_ISSUED_REFUND, false);
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), skipped), List.of(chargedFee(JAN_1, 25)));
+
+        assertEqualsAmount("15", DownPaymentFees.refundAmount(loan, refund(6L, JAN_3, 600)));
+    }
+
+    @Test
+    public void testForcedRefundOfAnUnsupportedTypeUsesUpTheCap() {
+        final LoanTransaction forced = refund(5L, JAN_2, 600, LoanTransactionType.PAYOUT_REFUND, true);
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), forced), List.of(chargedFee(JAN_1, 25)));
+
+        assertEqualsAmount("15", DownPaymentFees.refundAmount(loan, forced));
+        assertEqualsAmount("10", DownPaymentFees.refundAmount(loan, refund(6L, JAN_3, 600)));
+    }
+
+    @Test
+    public void testSkippedRefundGetsNoMissingFeeRefundButAForcedRefundDoes() {
+        final LoanTransaction skipped = refund(5L, JAN_2, 100, LoanTransactionType.MERCHANT_ISSUED_REFUND, false);
+        final LoanTransaction forced = refund(6L, JAN_2, 100, LoanTransactionType.PAYOUT_REFUND, true);
+        final Loan loan = mockRefundLoan(List.of(disbursement(JAN_1, 1000), skipped, forced), List.of(chargedFee(JAN_1, 25)));
+
+        assertEquals(List.of(forced), DownPaymentFees.refundsWithoutFeeRefund(loan));
+    }
+
     private static void assertEqualsAmount(final String expected, final BigDecimal actual) {
         assertEquals(0, new BigDecimal(expected).compareTo(actual), () -> "expected " + expected + " but was " + actual);
     }
@@ -416,6 +462,15 @@ public class DownPaymentFeesTest {
         lenient().when(refund.getTypeOf()).thenReturn(LoanTransactionType.MERCHANT_ISSUED_REFUND);
         lenient().when(refund.getTransactionDate()).thenReturn(date);
         lenient().when(refund.getAmount()).thenReturn(BigDecimal.valueOf(amount));
+        lenient().when(refund.getFeeRefundCalculation()).thenReturn(null);
+        return refund;
+    }
+
+    private static LoanTransaction refund(final Long id, final LocalDate date, final long amount, final LoanTransactionType type,
+            final Boolean feeRefundCalculation) {
+        final LoanTransaction refund = refund(id, date, amount);
+        lenient().when(refund.getTypeOf()).thenReturn(type);
+        lenient().when(refund.getFeeRefundCalculation()).thenReturn(feeRefundCalculation);
         return refund;
     }
 

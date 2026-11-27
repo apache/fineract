@@ -59,4 +59,7 @@ public interface LoanTransactionWritePlatformService {
 
     @Transactional
     CommandProcessingResult makeManualInterestRefund(Long loanId, Long transactionId, JsonCommand command);
+
+    @Transactional
+    CommandProcessingResult makeManualFeeRefund(Long loanId, Long transactionId, JsonCommand command);
 }

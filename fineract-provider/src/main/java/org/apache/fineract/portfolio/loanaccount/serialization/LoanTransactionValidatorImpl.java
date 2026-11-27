@@ -1028,7 +1028,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     protected Set<String> getRepaymentParameters() {
         return new HashSet<>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note", "locale", "dateFormat",
                 "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "loanId",
-                "numberOfRepayments", "interestRefundCalculation"));
+                "numberOfRepayments", "interestRefundCalculation", "feeRefundCalculation"));
     }
 
     @Override
@@ -1150,7 +1150,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     @Override
-    public void validateManualInterestRefundTransaction(final String json) {
+    public void validateManualRefundTransaction(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }

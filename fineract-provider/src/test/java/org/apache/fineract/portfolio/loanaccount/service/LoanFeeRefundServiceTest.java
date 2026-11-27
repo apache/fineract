@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -53,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -124,6 +127,56 @@ public class LoanFeeRefundServiceTest {
         assertTrue(underTest.createMissingFeeRefunds(loan).isEmpty());
         verify(loan, never()).addLoanTransaction(any());
         verify(businessEventNotifierService, never()).notifyPreBusinessEvent(any());
+    }
+
+    @Test
+    public void testCreateMissingFeeRefundsSkipsARefundPostedWithoutFeeRefund() {
+        refund("600", LocalDate.of(2026, 1, 10)).setFeeRefundCalculation(false);
+
+        assertTrue(underTest.createMissingFeeRefunds(loan).isEmpty());
+        verify(loan, never()).addLoanTransaction(any());
+    }
+
+    @Test
+    public void testCreateManualFeeRefundLinksTheRefundAndClearsItsSkip() {
+        final LoanTransaction skippedRefund = refund("500", LocalDate.of(2026, 1, 15));
+        skippedRefund.setFeeRefundCalculation(false);
+        final PaymentDetail paymentDetail = mock(PaymentDetail.class);
+        final ExternalId externalId = new ExternalId("manual-fee-refund");
+
+        final LoanTransaction feeRefund = underTest.createManualFeeRefund(loan, skippedRefund, new BigDecimal("12.5"), paymentDetail,
+                externalId);
+
+        assertTrue(feeRefund.isFeeRefund());
+        assertEquals(0, new BigDecimal("12.5").compareTo(feeRefund.getAmount()));
+        assertEquals(skippedRefund.getTransactionDate(), feeRefund.getTransactionDate());
+        assertEquals(paymentDetail, feeRefund.getPaymentDetail());
+        assertEquals(externalId, feeRefund.getExternalId());
+        assertEquals(List.of(skippedRefund),
+                feeRefund
+                        .getLoanTransactionRelations(relation -> LoanTransactionRelationTypeEnum.RELATED.equals(relation.getRelationType()))
+                        .stream().map(LoanTransactionRelation::getToTransaction).toList());
+        assertNull(skippedRefund.getFeeRefundCalculation());
+        verify(businessEventNotifierService).notifyPreBusinessEvent(any(LoanTransactionFeeRefundPreBusinessEvent.class));
+    }
+
+    @Test
+    public void testCreateManualFeeRefundKeepsAForcedDecision() {
+        final LoanTransaction forcedRefund = LoanTransaction.refund(loan, LoanTransactionType.PAYOUT_REFUND, new BigDecimal("500"), null,
+                LocalDate.of(2026, 1, 15), null);
+        forcedRefund.setFeeRefundCalculation(true);
+
+        underTest.createManualFeeRefund(loan, forcedRefund, new BigDecimal("12.5"), null, ExternalId.empty());
+
+        assertTrue(forcedRefund.getFeeRefundCalculation());
+    }
+
+    @Test
+    public void testReplayCopyOfARefundKeepsItsFeeRefundDecision() {
+        final LoanTransaction skippedRefund = refund("500", LocalDate.of(2026, 1, 15));
+        skippedRefund.setFeeRefundCalculation(false);
+
+        assertFalse(LoanTransaction.copyTransactionProperties(skippedRefund).getFeeRefundCalculation());
     }
 
     // 1000 disbursed with a fee of 25, Fee refund on Merchant issued refund

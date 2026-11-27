@@ -89,7 +89,7 @@ public interface LoanAccountDomainService {
 
     RefundTransactionResult makeRefund(Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO, LoanTransactionType loanTransactionType,
             LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail, ExternalId txnExternalId,
-            Boolean interestRefundCalculationOverride);
+            Boolean interestRefundCalculationOverride, Boolean feeRefundCalculationOverride);
 
     void updateAndSavePostDatedChecksForIndividualAccount(Loan loan, LoanTransaction transaction);
 

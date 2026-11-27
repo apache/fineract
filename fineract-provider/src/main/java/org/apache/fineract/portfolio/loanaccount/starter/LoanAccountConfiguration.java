@@ -161,6 +161,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementWritePl
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentFeeEventNotifier;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanFeeRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanMaximumAmountCalculator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
@@ -546,14 +547,14 @@ public class LoanAccountConfiguration {
             GuarantorDomainService guarantorDomainService, LoanTransactionAssembler loanTransactionAssembler,
             LoanTransactionRelationRepository loanTransactionRelationRepository, LoanTransactionService loanTransactionService,
             LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator,
-            LoanDownPaymentHandlerService loanDownPaymentHandlerService) {
+            LoanDownPaymentHandlerService loanDownPaymentHandlerService, LoanFeeRefundService loanFeeRefundService) {
         return new LoanTransactionWritePlatformServiceImpl(loanTransactionValidator, loanAccountDomainService, loanTransactionRepository,
                 loanAssembler, paymentDetailWritePlatformService, accountTransfersReadPlatformService, businessEventNotifierService,
                 loanUtilService, loanLifecycleStateMachine, externalIdFactory, loanAccrualsProcessingService, loanScheduleService,
                 reprocessLoanTransactionsService, loanAccountService, journalEntryPoster, loanTransactionProcessingService,
                 loanBalanceService, loanReadPlatformService, glimRepository, loanAdjustmentService, guarantorDomainService,
                 loanTransactionAssembler, loanTransactionRelationRepository, loanTransactionService, loanDownPaymentTransactionValidator,
-                loanDownPaymentHandlerService);
+                loanDownPaymentHandlerService, loanFeeRefundService);
     }
 
     @Bean

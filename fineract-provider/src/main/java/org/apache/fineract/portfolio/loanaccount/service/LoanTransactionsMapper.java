@@ -52,6 +52,7 @@ public class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
                 + " tr.overpayment_portion_derived as overpayment, tr.outstanding_loan_balance_derived as outstandingLoanBalance, "
                 + " tr.unrecognized_income_portion as unrecognizedIncome, tr.submitted_on_date as submittedOnDate, "
                 + " tr.manually_adjusted_or_reversed as manuallyReversed, tr.reversal_external_id as reversalExternalId, tr.reversed_on_date as reversedOnDate, "
+                + " tr.fee_refund_calculation as feeRefundCalculation, "
                 + " pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                 + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, l.net_disbursal_amount as netDisbursalAmount,"
                 + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc."
@@ -129,6 +130,7 @@ public class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
         final String reversalExternalIdStr = rs.getString("reversalExternalId");
         final ExternalId reversalExternalId = ExternalIdFactory.produce(reversalExternalIdStr);
         final LocalDate reversedOnDate = JdbcSupport.getLocalDate(rs, "reversedOnDate");
+        final Boolean feeRefundCalculation = JdbcSupport.getBoolean(rs, "feeRefundCalculation");
 
         final BigDecimal netDisbursalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "netDisbursalAmount");
 
@@ -160,6 +162,6 @@ public class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
                 .unrecognizedIncomePortion(unrecognizedIncomePortion).externalId(externalId).transfer(transfer)
                 .outstandingLoanBalance(outstandingLoanBalance).submittedOnDate(submittedOnDate).manuallyReversed(manuallyReversed)
                 .reversalExternalId(reversalExternalId).reversedOnDate(reversedOnDate).loanId(loanId).externalLoanId(externalLoanId)
-                .classification(classificationData).build();
+                .classification(classificationData).feeRefundCalculation(feeRefundCalculation).build();
     }
 }
