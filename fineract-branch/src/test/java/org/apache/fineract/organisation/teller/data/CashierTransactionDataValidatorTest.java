@@ -23,23 +23,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -48,21 +51,25 @@ import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.exception.CashierAlreadyAllocated;
 import org.apache.fineract.organisation.teller.exception.CashierInsufficientAmountException;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
+import org.apache.fineract.query.QMCashiers;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.Answers;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.mockito.MockitoAnnotations;
 
 class CashierTransactionDataValidatorTest {
 
     private static final LocalDate TODAY = LocalDate.of(2026, 10, 15);
     private static final String CURRENCY = "USD";
+    private static final QMCashiers CASHIER = new QMCashiers("c");
 
-    private NamedParameterJdbcTemplate jdbcTemplate;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private SQLQuery<Tuple> query;
+    private SQLQueryFactory queryFactory;
     private TellerManagementReadPlatformService tellerManagementReadPlatformService;
     private CashierTransactionDataValidator validator;
     private Teller teller;
@@ -70,9 +77,10 @@ class CashierTransactionDataValidatorTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate = mock(NamedParameterJdbcTemplate.class);
+        MockitoAnnotations.openMocks(this);
+        queryFactory = mock(SQLQueryFactory.class);
         tellerManagementReadPlatformService = mock(TellerManagementReadPlatformService.class);
-        validator = new CashierTransactionDataValidator(tellerManagementReadPlatformService, jdbcTemplate);
+        validator = new CashierTransactionDataValidator(tellerManagementReadPlatformService, queryFactory);
         teller = new Teller().setStartDate(LocalDate.of(2026, 1, 1));
     }
 
@@ -117,9 +125,16 @@ class CashierTransactionDataValidatorTest {
         return stored(id, true, " ", " ");
     }
 
-    @SuppressWarnings("unchecked")
-    private void cashiersOfStaff(Cashier... cashiers) {
-        when(jdbcTemplate.query(anyString(), anyMap(), any(RowMapper.class))).thenReturn(List.of(cashiers));
+    /** The query serving the stored assignments of the staff member; the filters it was given can be verified. */
+    private SQLQuery<Tuple> cashiersOfStaff(Cashier... cashiers) {
+        when(queryFactory.select(CASHIER.id, CASHIER.fullDay, CASHIER.startTime, CASHIER.endTime)).thenReturn(query);
+        when(query.fetch()).thenReturn(List.of(cashiers).stream().map(CashierTransactionDataValidatorTest::row).toList());
+        return query;
+    }
+
+    private static Tuple row(Cashier cashier) {
+        return Projections.tuple(CASHIER.id, CASHIER.fullDay, CASHIER.startTime, CASHIER.endTime).newInstance(cashier.getId(),
+                cashier.getIsFullDay(), cashier.getStartTime(), cashier.getEndTime());
     }
 
     private void validate(Cashier cashier) {
@@ -202,14 +217,21 @@ class CashierTransactionDataValidatorTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void onlyAssignmentsOfTheSameStaffAndDatesAreRead() {
-        cashiersOfStaff();
+        SQLQuery<Tuple> query = cashiersOfStaff();
         validate(newPartDay("09:00", "13:00"));
 
-        ArgumentCaptor<Map<String, Object>> params = ArgumentCaptor.forClass(Map.class);
-        verify(jdbcTemplate).query(anyString(), params.capture(), any(RowMapper.class));
-        assertEquals(Map.of("staffId", 1L, "fromDate", LocalDate.of(2026, 10, 1), "toDate", LocalDate.of(2026, 10, 31)), params.getValue());
+        verify(query).from(CASHIER);
+        verify(query).where(CASHIER.staffId.eq(1L), CASHIER.startDate.loe(Date.valueOf(LocalDate.of(2026, 10, 31))),
+                CASHIER.endDate.goe(Date.valueOf(LocalDate.of(2026, 10, 1))));
+    }
+
+    @Test
+    void storedAssignmentWithoutFullDayFlagIsTreatedAsPartDay() {
+        // full_day is nullable; a NULL read as false before, so the assignment is compared by its hours
+        cashiersOfStaff(stored(1, false, "14:00", "17:00").setIsFullDay(null));
+        assertDoesNotThrow(() -> validate(newPartDay("09:00", "13:00")));
+        assertThrows(CashierAlreadyAllocated.class, () -> validate(newPartDay("15:00", "16:00")));
     }
 
     @Test
@@ -219,7 +241,7 @@ class CashierTransactionDataValidatorTest {
                 () -> validate(newPartDay("22:00", "02:00")));
         assertEquals("validation.msg.teller.hourEndTime.must.be.after.start.time",
                 failure.getErrors().get(0).getUserMessageGlobalisationCode());
-        verify(jdbcTemplate, never()).query(anyString(), anyMap(), any(RowMapper.class));
+        verifyNoInteractions(queryFactory);
     }
 
     @Test
@@ -274,18 +296,15 @@ class CashierTransactionDataValidatorTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void disbursalIsCheckedAgainstThePartDayCashierWithinItsHours() {
         now(10, 30);
-        cashiersOfStaff(storedPartDay(5, "09:00", "13:00"));
+        SQLQuery<Tuple> query = cashiersOfStaff(storedPartDay(5, "09:00", "13:00"));
         cashInHand(5, "100");
 
         assertThrows(CashierInsufficientAmountException.class, () -> disburse("500"));
 
         // Today's assignments of the user's staff member are read
-        ArgumentCaptor<Map<String, Object>> params = ArgumentCaptor.forClass(Map.class);
-        verify(jdbcTemplate).query(anyString(), params.capture(), any(RowMapper.class));
-        assertEquals(Map.of("staffId", 1L, "fromDate", TODAY, "toDate", TODAY), params.getValue());
+        verify(query).where(CASHIER.staffId.eq(1L), CASHIER.startDate.loe(Date.valueOf(TODAY)), CASHIER.endDate.goe(Date.valueOf(TODAY)));
     }
 
     @Test
