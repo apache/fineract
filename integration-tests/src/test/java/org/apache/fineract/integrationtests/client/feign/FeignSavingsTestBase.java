@@ -18,12 +18,16 @@
  */
 package org.apache.fineract.integrationtests.client.feign;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
@@ -35,6 +39,7 @@ import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChar
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest;
 import org.apache.fineract.client.models.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
@@ -57,6 +62,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTra
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSchedulerHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -163,6 +169,25 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         businessDateHelper.runAt(date, detectDateFormat(date), action);
     }
 
+    /** Restores the saved date and enabled flag while preserving failures from both the action and restoration. */
+    protected void runAtWithRestoredBusinessDate(String date, Runnable action) {
+        // A fresh tenant has no persisted business dates and uses the tenant's current date.
+        LocalDate originalDate = ok(() -> fineractClient().businessDateManagement().getBusinessDates()).stream()
+                .filter(businessDate -> businessDate.getType() == BusinessDateResponse.TypeEnum.BUSINESS_DATE
+                        && businessDate.getDate() != null)
+                .map(BusinessDateResponse::getDate).findFirst().orElseGet(Utils::getLocalDateOfTenant);
+        Boolean originallyEnabled = globalConfigurationHelper.retrieveConfigurationByName("enable-business-date").getEnabled();
+        assertNotNull(originalDate, "The original business date must be available before changing it");
+        assertNotNull(originallyEnabled, "The original business date enabled flag must be available before changing it");
+
+        assertAll("Savings action and business date restoration", () -> {
+            globalConfigurationHelper.updateConfigurationByName("enable-business-date", true);
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", date, detectDateFormat(date));
+            action.run();
+        }, () -> businessDateHelper.updateBusinessDate("BUSINESS_DATE", originalDate.toString()), () -> globalConfigurationHelper
+                .updateGlobalConfiguration("enable-business-date", new PutGlobalConfigurationsRequest().enabled(originallyEnabled)));
+    }
+
     private static String detectDateFormat(String date) {
         return date.matches("\\d{4}-\\d{2}-\\d{2}") ? LoanTestData.ISO_DATE_PATTERN : LoanTestData.DATETIME_PATTERN;
     }
@@ -184,5 +209,30 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse updateSavingsAccountCharge(Long savingsId,
             Long savingsAccountChargeId, PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest request) {
         return savingsHelper.updateSavingsAccountCharge(savingsId, savingsAccountChargeId, request);
+    }
+
+    protected void cleanupSavingsAccount(Long savingsId, String closedOnDate) {
+        SavingsAccountData account = getSavingsDetails(savingsId);
+        SavingsAccountStatusEnumData status = account.getStatus();
+        assertNotNull(status);
+
+        if (Boolean.TRUE.equals(status.getActive())) {
+            assertNotNull(account.getSummary(), "Savings summary should not be null for account " + savingsId);
+            BigDecimal balance = account.getSummary().getAccountBalance();
+            assertNotNull(balance);
+
+            if (balance.signum() < 0) {
+                deposit(savingsId, balance.negate().toPlainString(), closedOnDate);
+            }
+
+            closeSavings(savingsId, closedOnDate, true);
+            verifySavingsStatus(savingsId, SavingsAccountStatusEnumData::getClosed);
+        } else if (Boolean.TRUE.equals(status.getApproved()) || Boolean.TRUE.equals(status.getSubmittedAndPendingApproval())) {
+            if (Boolean.TRUE.equals(status.getApproved())) {
+                savingsHelper.undoApproval(savingsId);
+            }
+            savingsHelper.rejectSavings(savingsId, closedOnDate);
+            verifySavingsStatus(savingsId, SavingsAccountStatusEnumData::getRejected);
+        }
     }
 }

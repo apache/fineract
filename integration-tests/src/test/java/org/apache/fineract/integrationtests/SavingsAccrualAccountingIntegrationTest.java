@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,6 +29,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -47,6 +50,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestVali
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 @Order(2)
 public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBase {
@@ -78,9 +82,11 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
     private static final BigDecimal PERCENT = new BigDecimal("100");
     private static final int DIGITS_AFTER_DECIMAL = 4;
 
+    private final List<Long> createdSavingsAccountIds = new ArrayList<>();
+
     @Test
     public void testPositiveAccrualPostsCorrectJournalEntries() {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
@@ -110,7 +116,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testNegativeAccrualPostsCorrectJournalEntries() {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withMappings(accrualProduct(OVERDRAFT_INTEREST_RATE).allowOverdraft(true), accounts)
@@ -142,7 +148,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testPostInterestJobPostsCashBasedJournalEntries() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withCashMappings(accrualProduct(INTEREST_RATE), accounts);
@@ -165,7 +171,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testPostInterestJobPostsCashBasedOverdraftJournalEntries() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withCashMappings(accrualProduct(OVERDRAFT_INTEREST_RATE), accounts)//
@@ -192,7 +198,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testPostInterestJobPostsAccrualJournalEntries() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
@@ -219,7 +225,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
      */
     @Test
     public void testPostInterestJobPostsAccrualJournalEntriesWithPivotDateConfiguration() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
@@ -230,16 +236,16 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
             final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
             deposit(savingsAccountId, AMOUNT, startDateString());
 
-            globalConfigurationHelper.updateGlobalConfiguration(
-                    GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-            try {
-                schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
-            } finally {
+            final GlobalConfigurationPropertyData originalConfiguration = globalConfigurationHelper
+                    .retrieveConfigurationByName(GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING);
+            assertAll("Post interest and restore pivot date configuration", () -> {
                 globalConfigurationHelper.updateGlobalConfiguration(
                         GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
-                        new PutGlobalConfigurationsRequest().enabled(true));
-            }
+                        new PutGlobalConfigurationsRequest().enabled(false));
+                schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+            }, () -> globalConfigurationHelper.updateGlobalConfiguration(
+                    GlobalConfigurationConstants.ALLOW_BACKDATED_TRANSACTION_BEFORE_INTEREST_POSTING,
+                    new PutGlobalConfigurationsRequest().enabled(originalConfiguration.getEnabled())));
 
             final List<JournalEntryTransactionItem> journalEntries = journalEntriesOf(interestPostingOf(savingsAccountId));
             assertHasEntry(journalEntries, DEBIT, accounts.interestPayable(),
@@ -251,7 +257,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testPostInterestJobCreditsInterestThatPaysDownAnOverdraftToOverdraftPortfolioControl() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withCashMappings(accrualProduct(INTEREST_RATE), accounts);
@@ -274,7 +280,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testPostInterestJobCreditsAccrualInterestThatPaysDownAnOverdraftToOverdraftPortfolioControl() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withMappings(accrualProduct(INTEREST_RATE), accounts);
@@ -298,7 +304,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testReversingACashBasedJobPostingThatPaysDownAnOverdraftNetsEveryAccountToZero() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final Long savingsAccountId = createAccountOverdrawnAtPostingDate(withCashMappings(accrualProduct(INTEREST_RATE), accounts));
@@ -309,7 +315,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testReversingAnAccrualJobPostingThatPaysDownAnOverdraftNetsEveryAccountToZero() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final Long savingsAccountId = createAccountOverdrawnAtPostingDate(withMappings(accrualProduct(INTEREST_RATE), accounts));
@@ -320,7 +326,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testReversingAJobPostedOverdraftInterestPostingNetsEveryAccountToZero() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             final PostSavingsProductsRequest product = withCashMappings(accrualProduct(OVERDRAFT_INTEREST_RATE), accounts)//
@@ -350,7 +356,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testUndoingCashBasedDepositsAndWithdrawalsNetsEveryAccountToZero() {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             verifyUndoingDepositsAndWithdrawalsNetsEveryAccountToZero(withCashMappings(accrualProduct(INTEREST_RATE), accounts), accounts);
@@ -359,7 +365,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testUndoingAccrualDepositsAndWithdrawalsNetsEveryAccountToZero() {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             verifyUndoingDepositsAndWithdrawalsNetsEveryAccountToZero(withMappings(accrualProduct(INTEREST_RATE), accounts), accounts);
@@ -368,7 +374,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testReversingACashBasedDepositAfterInterestPostingNetsEveryAccountToZero() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             verifyReversingADepositAfterInterestPostingNetsEveryAccountToZero(withCashMappings(accrualProduct(INTEREST_RATE), accounts),
@@ -378,7 +384,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
 
     @Test
     public void testReversingAnAccrualDepositAfterInterestPostingNetsEveryAccountToZero() {
-        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(POST_INTEREST_BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
 
             verifyReversingADepositAfterInterestPostingNetsEveryAccountToZero(withMappings(accrualProduct(INTEREST_RATE), accounts),
@@ -517,7 +523,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
      * must be reversed with their journal entries, so Interest Payable goes back to 0.
      */
     private void verifyAccrualsAreReversedWithTheDeposit(final BiConsumer<Long, Long> takeBackDeposit) {
-        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+        runAtWithSavingsCleanup(BUSINESS_DATE, () -> {
             final AccrualAccounts accounts = createDistinctAccrualAccounts();
             final Long savingsProductId = savingsProductHelper.createSavingsProduct(withMappings(accrualProduct(INTEREST_RATE), accounts))
                     .getResourceId();
@@ -673,6 +679,23 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
             Account interestOnSavings, Account writeOff) {
     }
 
+    private void runAtWithSavingsCleanup(final String businessDate, final Runnable scenario) {
+        runAtWithRestoredBusinessDate(businessDate,
+                () -> assertAll("Savings scenario and cleanup", scenario::run, () -> closeCreatedSavingsAccounts(businessDate)));
+    }
+
+    private void closeCreatedSavingsAccounts(final String businessDate) {
+        final List<Long> accountIds = List.copyOf(createdSavingsAccountIds);
+        createdSavingsAccountIds.clear();
+        final String closedOnDate = DATE_FORMATTER.format(LocalDate.parse(businessDate));
+
+        final List<Executable> cleanups = new ArrayList<>();
+        for (Long savingsAccountId : accountIds) {
+            cleanups.add(() -> cleanupSavingsAccount(savingsAccountId, closedOnDate));
+        }
+        assertAll("Close savings accounts created by the test", cleanups);
+    }
+
     private Long createActiveSavingsAccount(final Long savingsProductId) {
         final Long clientId = createClient(CLIENT_ACTIVATION_DATE);
         assertNotNull(clientId);
@@ -680,6 +703,7 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         final String startDateString = startDateString();
         final Long savingsAccountId = submitSavingsApplication(clientId, savingsProductId, startDateString).getSavingsId();
         assertNotNull(savingsAccountId);
+        createdSavingsAccountIds.add(savingsAccountId);
 
         approveSavings(savingsAccountId, startDateString);
         activateSavings(savingsAccountId, startDateString);
