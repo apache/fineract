@@ -33,6 +33,7 @@ dependencies {
     implementation(project(path: ':fineract-tax'))
     implementation(project(path: ':fineract-fund'))
     implementation(project(path: ':fineract-savings'))
+    implementation(project(path: ':fineract-querydsl'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-webmvc',
