@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+
+import java.math.BigDecimal;
+import java.util.List;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductGeneralRuleException;
@@ -70,6 +76,60 @@ class LoanProductTest {
         Assertions.assertTrue(loanProductWith(LoanScheduleType.PROGRESSIVE, true).supportsDownPaymentCharges());
         Assertions.assertFalse(loanProductWith(LoanScheduleType.PROGRESSIVE, false).supportsDownPaymentCharges());
         Assertions.assertFalse(loanProductWith(LoanScheduleType.CUMULATIVE, true).supportsDownPaymentCharges());
+    }
+
+    @Test
+    void testGetOverdueInstallmentChargeReturnsNullWhenChargesIsNull() {
+        LoanProduct loanProduct = new LoanProduct();
+        Assertions.assertNull(loanProduct.getOverdueInstallmentCharge());
+    }
+
+    @Test
+    void testGetOverdueInstallmentChargeReturnsNullWhenChargesIsEmpty() {
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setCharges(List.of());
+        Assertions.assertNull(loanProduct.getOverdueInstallmentCharge());
+    }
+
+    @Test
+    void testGetOverdueInstallmentChargeReturnsNullWhenNoneOfTheChargesIsOverdueInstallment() {
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setCharges(List.of(mockCharge(1L, false, true, BigDecimal.TEN)));
+        Assertions.assertNull(loanProduct.getOverdueInstallmentCharge());
+    }
+
+    @Test
+    void testGetOverdueInstallmentChargeIgnoresOverdueInstallmentChargeNotAppliedToLoans() {
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setCharges(List.of(mockCharge(1L, true, false, BigDecimal.TEN)));
+        Assertions.assertNull(loanProduct.getOverdueInstallmentCharge());
+    }
+
+    @Test
+    void testGetOverdueInstallmentChargeReturnsTheOverdueInstallmentChargeAmongOthers() {
+        Charge feeCharge = mockCharge(1L, false, true, BigDecimal.ONE);
+        Charge overdueCharge = mockCharge(2L, true, true, BigDecimal.TEN);
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setCharges(List.of(feeCharge, overdueCharge));
+        Assertions.assertSame(overdueCharge, loanProduct.getOverdueInstallmentCharge());
+    }
+
+    @Test
+    void testGetOverdueInstallmentChargeReturnsTheLowestIdWhenProductHasSeveralOverdueCharges() {
+        Charge firstOverdueCharge = mockCharge(1L, true, true, BigDecimal.TEN);
+        Charge secondOverdueCharge = mockCharge(2L, true, true, BigDecimal.valueOf(20));
+        LoanProduct loanProduct = new LoanProduct();
+        loanProduct.setCharges(List.of(secondOverdueCharge, firstOverdueCharge));
+        Assertions.assertSame(firstOverdueCharge, loanProduct.getOverdueInstallmentCharge());
+    }
+
+    private static Charge mockCharge(final Long id, final boolean overdueInstallment, final boolean loanCharge, final BigDecimal amount) {
+        Charge charge = mock(Charge.class);
+        lenient().when(charge.getId()).thenReturn(id);
+        lenient().when(charge.isOverdueInstallment()).thenReturn(overdueInstallment);
+        lenient().when(charge.isLoanCharge()).thenReturn(loanCharge);
+        lenient().when(charge.getAmount()).thenReturn(amount);
+        return charge;
     }
 
     private LoanProduct loanProductWith(final LoanScheduleType scheduleType, final boolean enableDownPayment) {

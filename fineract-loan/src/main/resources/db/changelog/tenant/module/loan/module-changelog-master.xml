@@ -62,4 +62,5 @@
   <include relativeToChangelogFile="true" file="parts/1037_add_semi_monthly_repayment_frequency.xml"/>
   <include relativeToChangelogFile="true" file="parts/1038_add_credit_allocation_strategy.xml"/>
   <include relativeToChangelogFile="true" file="parts/1039_add_fee_refund_support.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1040_add_overdue_charge_amount_to_loan.xml"/>
 </databaseChangeLog>
