@@ -88,9 +88,16 @@ public final class SavingsAccountTransactionSummaryWrapper {
         final BigDecimal totalInterestPosted = interestTotal.getAmountDefaultedToNullIfZero();
         final BigDecimal totalOverdraftInterestDerived = overdraftInterestTotal.getAmountDefaultedToNullIfZero();
         final BigDecimal totalWithholdTax = withHoldTaxTotal.getAmountDefaultedToNullIfZero();
+        // Charges paid after the pivot date reduce the balance like withdrawals do. Only the balance is derived from
+        // them: the fee totals are kept up to date per transaction and are not part of the pivot totals.
+        final BigDecimal totalChargesPaid = Money.of(currency, calculateTotalWithdrawalFees(currency, savingsAccountTransactions))
+                .plus(calculateTotalAnnualFees(currency, savingsAccountTransactions))
+                .plus(calculateTotalFeesCharge(currency, savingsAccountTransactions))
+                .plus(calculateTotalPenaltyCharge(currency, savingsAccountTransactions)).getAmount();
 
         final BigDecimal accountBalance = Money.of(currency, runningBalanceOnPivotDate).plus(Money.of(currency, totalDeposits))
-                .plus(totalInterestPosted).minus(totalWithdrawals).minus(totalWithholdTax).minus(totalOverdraftInterestDerived).getAmount();
+                .plus(totalInterestPosted).minus(totalWithdrawals).minus(totalChargesPaid).minus(totalWithholdTax)
+                .minus(totalOverdraftInterestDerived).getAmount();
 
         return new SavingsAccountPivotSummaryTotals(totalDeposits, totalWithdrawals, totalInterestPosted, totalOverdraftInterestDerived,
                 totalWithholdTax, accountBalance, findInterestPostedTillDate(savingsAccountTransactions));
