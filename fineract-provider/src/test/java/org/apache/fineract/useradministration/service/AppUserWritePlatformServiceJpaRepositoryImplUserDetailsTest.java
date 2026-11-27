@@ -291,6 +291,54 @@ class AppUserWritePlatformServiceJpaRepositoryImplUserDetailsTest {
     }
 
     @Test
+    void updateOfOwnRolesWithoutAllFunctionsIsRejected() {
+        existingUser("jdoe");
+        actingAs(USER_ID, false);
+
+        assertThrows(NoAuthorizationException.class, () -> underTest.updateUser(USER_ID, command("{\"roles\": [\"4\"]}")));
+
+        verify(appUserRepository, never()).saveAndFlush(any(AppUser.class));
+    }
+
+    @Test
+    void updateOfOwnOfficeWithoutAllFunctionsIsRejected() {
+        existingUser("jdoe");
+        actingAs(USER_ID, false);
+
+        assertThrows(NoAuthorizationException.class, () -> underTest.updateUser(USER_ID, command("{\"officeId\": 2}")));
+
+        verify(appUserRepository, never()).saveAndFlush(any(AppUser.class));
+    }
+
+    @Test
+    void updateOfOwnDetailsWithoutAllFunctionsIsAllowed() {
+        final AppUser user = existingUser("jdoe");
+        actingAs(USER_ID, false);
+
+        underTest.updateUser(USER_ID, command("{\"firstname\": \"Jane\", \"roles\": [\"3\"], \"officeId\": 1}"));
+
+        assertEquals("Jane", user.getFirstname());
+        verify(appUserRepository).saveAndFlush(user);
+    }
+
+    @Test
+    void updateOfOwnRolesWithAllFunctionsIsAllowed() {
+        final AppUser user = existingUser("jdoe");
+        actingAs(USER_ID, true);
+
+        underTest.updateUser(USER_ID, command("{\"roles\": [\"4\"]}"));
+
+        assertEquals(Set.of(otherRole), user.getRoles());
+    }
+
+    private void actingAs(final Long id, final boolean allFunctions) {
+        final AppUser caller = mock(AppUser.class);
+        lenient().when(caller.getId()).thenReturn(id);
+        lenient().when(caller.hasAnyPermission("ALL_FUNCTIONS")).thenReturn(allFunctions);
+        lenient().when(context.authenticatedUser(any(CommandWrapper.class))).thenReturn(caller);
+    }
+
+    @Test
     void updateOfTheSystemUserNameIsRejected() {
         existingUser("system");
 

@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.security.service.FineractOidcUserServi
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -64,6 +65,9 @@ public class FineractOidcJwtAuthenticationConverter implements Converter<Jwt, Fi
             return new FineractJwtAuthenticationToken(jwt, appUser.getAuthorities(), appUser);
         } catch (OidcUserNotFoundException ex) {
             log.warn("JWT conversion failed — OIDC user not found: {}", ex.getMessage());
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, ex.getMessage(), null), ex);
+        } catch (AccountStatusException ex) {
+            log.warn("JWT conversion failed — OIDC user is not usable: {}", ex.getMessage());
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, ex.getMessage(), null), ex);
         }
     }

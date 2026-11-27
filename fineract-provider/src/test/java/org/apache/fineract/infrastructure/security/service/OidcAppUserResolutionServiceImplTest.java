@@ -52,6 +52,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.security.authentication.DisabledException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -356,5 +357,34 @@ class OidcAppUserResolutionServiceImplTest {
         Role role = org.mockito.Mockito.mock(Role.class);
         when(role.getName()).thenReturn(name);
         return role;
+    }
+
+    @Test
+    void rejectsDisabledUserFoundByUsername() {
+        when(appUserRepository.findAppUserByName("alice")).thenReturn(existingUser);
+        when(existingUser.isNotEnabled()).thenReturn(true);
+
+        assertThatThrownBy(() -> service.resolveOrCreate("alice", "alice@example.com", null, null, OidcTokenRoles.undecided()))
+                .isInstanceOf(DisabledException.class);
+        verify(appUserRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void rejectsDeletedUserFoundByUsername() {
+        when(appUserRepository.findAppUserByName("alice")).thenReturn(existingUser);
+        when(existingUser.isDeleted()).thenReturn(true);
+
+        assertThatThrownBy(() -> service.resolveOrCreate("alice", "alice@example.com", null, null, OidcTokenRoles.undecided()))
+                .isInstanceOf(DisabledException.class);
+    }
+
+    @Test
+    void rejectsDisabledUserFoundByEmail() {
+        when(appUserRepository.findAppUserByName("alice")).thenReturn(null);
+        when(appUserRepository.findActiveUserByEmail("alice@example.com")).thenReturn(existingUser);
+        when(existingUser.isNotEnabled()).thenReturn(true);
+
+        assertThatThrownBy(() -> service.resolveOrCreate("alice", "alice@example.com", null, null, OidcTokenRoles.undecided()))
+                .isInstanceOf(DisabledException.class);
     }
 }

@@ -22,6 +22,7 @@ import jakarta.persistence.PersistenceException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.command.PermissionsCommand;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
 import org.apache.fineract.useradministration.domain.Role;
@@ -53,6 +56,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     private static final String NAME_PARAM_NAME = "name";
     private static final String DESCRIPTION_PARAM_NAME = "description";
+    private static final String ALL_FUNCTIONS = "ALL_FUNCTIONS";
+    private static final String ALL_FUNCTIONS_READ = "ALL_FUNCTIONS_READ";
+    private static final String READ_PREFIX = "READ_";
 
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
@@ -128,13 +134,13 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Override
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
         try {
-            this.context.authenticatedUser();
+            final AppUser currentUser = this.context.authenticatedUser();
 
             this.roleCommandFromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+            validateMayManage(currentUser, role);
 
-            String previousRoleName = role.getName();
             final Map<String, Object> changes = applyChanges(role, command);
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
@@ -163,9 +169,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {
-        this.context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+        validateMayManage(currentUser, role);
 
         final Collection<Permission> allPermissions = this.permissionRepository.findAll();
 
@@ -178,6 +185,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final boolean isSelected = entry.getValue();
 
             final Permission permission = findPermissionByCode(allPermissions, entry.getKey());
+            if (isSelected && !role.hasPermissionTo(permission.getCode())) {
+                validateMayGrant(currentUser, permission.getCode());
+            }
             final boolean changed = role.updatePermission(permission, isSelected);
             if (changed) {
                 changedPermissions.put(entry.getKey(), isSelected);
@@ -194,6 +204,23 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                 .withEntityId(roleId) //
                 .with(changes) //
                 .build();
+    }
+
+    /** Only a holder of ALL_FUNCTIONS may change a role that itself holds ALL_FUNCTIONS. */
+    private static void validateMayManage(final AppUser currentUser, final Role role) {
+        if (role.hasPermissionTo(ALL_FUNCTIONS) && !currentUser.hasAnyPermission(ALL_FUNCTIONS)) {
+            throw new NoAuthorizationException("User has no authority to modify a role that holds " + ALL_FUNCTIONS);
+        }
+    }
+
+    /** A permission can only be granted to a role by a user who holds it. */
+    private static void validateMayGrant(final AppUser currentUser, final String permissionCode) {
+        final boolean allowed = permissionCode.toUpperCase(Locale.ROOT).startsWith(READ_PREFIX)
+                ? currentUser.hasAnyPermission(permissionCode, ALL_FUNCTIONS_READ)
+                : currentUser.hasAnyPermission(permissionCode);
+        if (!allowed) {
+            throw new NoAuthorizationException("User has no authority to grant permission: " + permissionCode);
+        }
     }
 
     private Permission findPermissionByCode(final Collection<Permission> allPermissions, final String permissionCode) {
@@ -223,8 +250,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     public CommandProcessingResult deleteRole(Long roleId) {
 
         try {
+            final AppUser currentUser = this.context.authenticatedUser();
             // Checking the role present in DB or not using role_id
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+            validateMayManage(currentUser, role);
 
             // Roles associated with users can't be deleted
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
@@ -249,8 +278,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Override
     public CommandProcessingResult disableRole(Long roleId) {
         try {
+            final AppUser currentUser = this.context.authenticatedUser();
             // Checking the role present in DB or not using role_id
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+            validateMayManage(currentUser, role);
             // if(role.isDisabled()){throw new RoleNotFoundException(roleId);}
 
             // Roles associated with users can't be disable
@@ -279,8 +310,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Override
     public CommandProcessingResult enableRole(Long roleId) {
         try {
+            final AppUser currentUser = this.context.authenticatedUser();
             // Checking the role present in DB or not using role_id
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+            validateMayManage(currentUser, role);
             // if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
 
             role.enableRole();

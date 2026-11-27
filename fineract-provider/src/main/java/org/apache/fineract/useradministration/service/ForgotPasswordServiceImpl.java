@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.PlatformEmailService;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -66,7 +67,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         final String organisationName = user.getOffice().getName();
         final String contactName = user.getFirstname() + " " + user.getLastname();
 
-        this.emailService.sendForgotPasswordEmail(organisationName, contactName, email, user.getUsername(), temporaryPassword);
+        final String recipient = StringUtils.defaultIfBlank(user.getEmail(), email);
+
+        this.emailService.sendForgotPasswordEmail(organisationName, contactName, recipient, user.getUsername(), temporaryPassword);
 
         log.info("Password reset email sent to user: {}", user.getUsername());
     }
