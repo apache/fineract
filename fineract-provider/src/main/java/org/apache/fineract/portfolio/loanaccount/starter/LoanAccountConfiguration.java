@@ -161,6 +161,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementWritePl
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentFeeEventNotifier;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanForeclosureDetailService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanMaximumAmountCalculator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
@@ -471,7 +472,8 @@ public class LoanAccountConfiguration {
             LoanUtilService loanUtilService, AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             DatabaseSpecificSQLGenerator sqlGenerator, DelinquencyReadPlatformService delinquencyReadPlatformService,
             LoanForeclosureValidator loanForeclosureValidator, LoanTransactionProcessingService loadTransactionProcessingService,
-            LoanBalanceService loanBalanceService, LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
+            LoanForeclosureDetailService loanForeclosureDetailService,
+            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
             LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository,
             @Lazy InterestRefundServiceDelegate interestRefundServiceDelegate, LoanMaximumAmountCalculator loanMaximumAmountCalculator,
             LoanAccountDataReadService loanAccountDataReadService) {
@@ -479,8 +481,8 @@ public class LoanAccountConfiguration {
                 loanProductReadPlatformService, loanDropdownReadPlatformService, fundReadPlatformService, chargeReadService,
                 codeValueReadPlatformService, paymentTypeReadPlatformService, loanUtilService, accountDetailsReadPlatformService,
                 sqlGenerator, delinquencyReadPlatformService, loanForeclosureValidator, loadTransactionProcessingService,
-                loanBalanceService, loanCapitalizedIncomeBalanceRepository, loanBuyDownFeeBalanceRepository, interestRefundServiceDelegate,
-                loanMaximumAmountCalculator, loanAccountDataReadService);
+                loanForeclosureDetailService, loanCapitalizedIncomeBalanceRepository, loanBuyDownFeeBalanceRepository,
+                interestRefundServiceDelegate, loanMaximumAmountCalculator, loanAccountDataReadService);
     }
 
     @Bean

@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanFeeRefundService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanForeclosureDetailService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
@@ -158,6 +159,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanBalanceService loanBalanceService;
+    private final LoanForeclosureDetailService loanForeclosureDetailService;
     private final LoanTransactionService loanTransactionService;
     private final LoanAccountDomainServiceJpaHelper loanAccountDomainServiceJpaHelper;
     private final LoanJournalEntryPoster journalEntryPoster;
@@ -715,8 +717,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         MonetaryCurrency currency = loan.getCurrency();
         List<LoanTransaction> newTransactions = new ArrayList<>();
 
-        final ScheduleGeneratorDTO scheduleGeneratorDTO = null;
-        final LoanRepaymentScheduleInstallment foreCloseDetail = loanBalanceService.fetchLoanForeclosureDetail(loan, foreClosureDate);
+        // Progressive loans rebuild their schedule while the foreclosure is processed
+        final ScheduleGeneratorDTO scheduleGeneratorDTO = loan.isProgressiveSchedule()
+                ? loanUtilService.buildScheduleGeneratorDTO(loan, null)
+                : null;
+        final LoanRepaymentScheduleInstallment foreCloseDetail = loanForeclosureDetailService.fetchForeclosureDetail(loan, foreClosureDate);
 
         loanAccrualsProcessingService.processAccrualsOnLoanForeClosure(loan, foreClosureDate, newTransactions);
 
@@ -724,7 +729,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         Money feePayable = foreCloseDetail.getFeeChargesCharged(currency);
         Money penaltyPayable = foreCloseDetail.getPenaltyChargesCharged(currency);
         Money payPrincipal = foreCloseDetail.getPrincipal(currency);
-        updateInstallmentsPostDate(loan, foreClosureDate);
+        if (loan.isProgressiveSchedule()) {
+            // The progressive processor accelerates the maturity instead of cutting the schedule
+            final LoanRepaymentScheduleInstallment currentInstallment = loan.getRelatedRepaymentScheduleInstallment(foreClosureDate);
+            final int lastInstallmentNumber = currentInstallment != null ? currentInstallment.getInstallmentNumber()
+                    : loan.getRepaymentScheduleInstallments().size();
+            updateChargesPostDate(loan, foreClosureDate, lastInstallmentNumber);
+        } else {
+            updateInstallmentsPostDate(loan, foreClosureDate);
+        }
 
         LoanTransaction payment = null;
 
@@ -733,6 +746,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             payment = LoanTransaction.repayment(loan.getOffice(), payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable),
                     paymentDetail, foreClosureDate, externalId);
             payment.updateLoan(loan);
+            payment.markAsForeclosure();
             newTransactions.add(payment);
         }
 
@@ -994,6 +1008,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         newInstallments.add(newInstallment);
         loan.updateLoanScheduleOnForeclosure(newInstallments);
 
+        updateChargesPostDate(loan, transactionDate, installmentNumber);
+    }
+
+    /**
+     * Deactivates the charges due after the foreclosure date and reverses the waivers of those charges and of the
+     * installment fees after installment {@code installmentNumber}.
+     */
+    private void updateChargesPostDate(final Loan loan, final LocalDate transactionDate, final int installmentNumber) {
+        final MonetaryCurrency currency = loan.getCurrency();
         final Set<LoanCharge> charges = loan.getActiveCharges();
         final int penaltyWaitPeriod = 0;
         for (LoanCharge loanCharge : charges) {
