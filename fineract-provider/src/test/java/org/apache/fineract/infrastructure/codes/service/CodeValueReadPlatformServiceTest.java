@@ -114,6 +114,42 @@ public class CodeValueReadPlatformServiceTest {
         verify(query).where(cv.id.eq(1));
     }
 
+    @Test
+    void retrieveCodeValuesByCodeMapsEveryRowIntoMutableList() {
+        givenRows(row(1, "Passport", "Travel document", 1, true, false), row(2, "Driving License", null, 2, true, true));
+
+        List<CodeValueData> result = service.retrieveCodeValuesByCode("Customer Identifier");
+
+        assertEquals(2, result.size());
+        CodeValueData first = result.get(0);
+        assertEquals(1L, first.getId());
+        assertEquals("Passport", first.getName());
+        assertEquals("Travel document", first.getDescription());
+        assertEquals(1, first.getPosition());
+        assertTrue(first.getActive());
+        assertFalse(first.getMandatory());
+        assertEquals("Driving License", result.get(1).getName());
+        assertTrue(result.get(1).getMandatory());
+        // AccountingRuleApiResource appends to the returned list, so it must stay mutable.
+        result.add(new CodeValueData());
+    }
+
+    @Test
+    void retrieveCodeValuesByCodeFiltersByCodeNameAndActive() {
+        SQLQuery<Tuple> query = givenRows();
+
+        service.retrieveCodeValuesByCode("Customer Identifier");
+        InOrder order = inOrder(context, queryFactory);
+
+        order.verify(context).authenticatedUser();
+        order.verify(queryFactory).select(cv.id, cv.codeValue, cv.codeDescription, cv.orderPosition, cv.isActive, cv.isMandatory);
+        verify(query).from(cv);
+        verify(query).innerJoin(code);
+        verify(query).on(cv.codeId.eq(code.id));
+        verify(query).where(code.codeName.like("Customer Identifier"), cv.isActive.isTrue());
+        verify(query).orderBy(cv.orderPosition.asc());
+    }
+
     @SuppressWarnings("unchecked")
     private SQLQuery<Tuple> givenRows(Tuple... rows) {
         // RETURNS_SELF makes from/innerJoin/on/where return the same mock, so only fetchOne() and fetch() need
