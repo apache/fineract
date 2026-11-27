@@ -218,7 +218,7 @@ class SavingsAccountChargeUndoPaymentTest {
         final SavingsAccountTransaction closingPayment = pay(account, charge, 2L, "5.00");
         pay(account, charge, 3L, "10.00");
 
-        assertThatThrownBy(() -> account.undoTransaction(closingPayment)).isInstanceOf(PlatformApiDataValidationException.class)
+        assertThatThrownBy(() -> account.undoTransaction(closingPayment, false)).isInstanceOf(PlatformApiDataValidationException.class)
                 .satisfies(e -> assertThat(((PlatformApiDataValidationException) e).getErrors().get(0).getUserMessageGlobalisationCode())
                         .endsWith("transaction.undo.recurring.charge.has.later.transactions"));
 
@@ -235,12 +235,12 @@ class SavingsAccountChargeUndoPaymentTest {
         final SavingsAccountTransaction closingPayment = pay(account, charge, 2L, "5.00");
         final SavingsAccountTransaction openCyclePayment = pay(account, charge, 3L, "10.00");
 
-        account.undoTransaction(openCyclePayment);
+        account.undoTransaction(openCyclePayment, false);
 
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo(FEE);
         assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
 
-        account.undoTransaction(closingPayment);
+        account.undoTransaction(closingPayment, false);
 
         assertThat(amountPaid(charge)).isEqualByComparingTo("40.00");
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("5.00");
@@ -254,7 +254,7 @@ class SavingsAccountChargeUndoPaymentTest {
         final SavingsAccountTransaction earlierPayment = pay(account, charge, 1L, "3.00");
         pay(account, charge, 2L, "7.00");
 
-        account.undoTransaction(earlierPayment);
+        account.undoTransaction(earlierPayment, false);
 
         assertThat(amountPaid(charge)).isEqualByComparingTo("7.00");
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("38.00");
@@ -268,7 +268,7 @@ class SavingsAccountChargeUndoPaymentTest {
         final SavingsAccountTransaction waiver = transaction(account, charge, 1L, charge.waive(currency), true);
         pay(account, charge, 2L, "5.00");
 
-        assertThatThrownBy(() -> account.undoTransaction(waiver)).isInstanceOf(PlatformApiDataValidationException.class);
+        assertThatThrownBy(() -> account.undoTransaction(waiver, false)).isInstanceOf(PlatformApiDataValidationException.class);
 
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo("40.00");
         assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));
@@ -282,9 +282,9 @@ class SavingsAccountChargeUndoPaymentTest {
         final SavingsAccountTransaction secondCycleBackdated = pay(account, charge, 2L, "45.00");
         account.transactions.add(firstCycle);
 
-        assertThatThrownBy(() -> account.undoTransaction(firstCycle)).isInstanceOf(PlatformApiDataValidationException.class);
+        assertThatThrownBy(() -> account.undoTransaction(firstCycle, false)).isInstanceOf(PlatformApiDataValidationException.class);
 
-        account.undoTransaction(secondCycleBackdated);
+        account.undoTransaction(secondCycleBackdated, false);
 
         assertThat(charge.getAmountOutstanding(currency).getAmount()).isEqualByComparingTo(FEE);
         assertThat(charge.getDueDate()).isEqualTo(DUE_DATE.plusWeeks(1));

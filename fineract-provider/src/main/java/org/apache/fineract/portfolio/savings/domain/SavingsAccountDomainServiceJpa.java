@@ -341,7 +341,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             reversal = SavingsAccountTransaction.reversal(savingsAccountTransaction);
             chargePaidBySet = savingsAccountTransaction.getSavingsAccountChargesPaid();
             reversal.getSavingsAccountChargesPaid().addAll(chargePaidBySet);
-            account.undoTransaction(savingsAccountTransaction);
+            account.undoTransaction(savingsAccountTransaction, backdatedTxnsAllowedTill);
             if (postReversals) {
                 newTransactions.add(reversal);
             }
