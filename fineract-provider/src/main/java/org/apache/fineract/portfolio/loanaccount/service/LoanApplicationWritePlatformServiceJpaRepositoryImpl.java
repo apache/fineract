@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +47,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
@@ -85,6 +87,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.SemiMonthlyScheduleDates;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
@@ -545,39 +548,54 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loanId).orElseThrow();
         JsonArray approvalFormData = command.arrayOfParameterNamed("approvalFormData");
 
+        final List<Loan> glimChildLoans = this.loanRepository.findByGlimId(loanId);
+        final Set<Long> glimChildLoanIds = new HashSet<>();
+        for (Loan glimChildLoan : glimChildLoans) {
+            glimChildLoanIds.add(glimChildLoan.getId());
+        }
+
         JsonObject jsonObject = null;
         JsonCommand childCommand = null;
         Long[] childLoanId = new Long[approvalFormData.size()];
         BigDecimal parentPrincipalAmount = command.bigDecimalValueOfParameterNamed("glimPrincipal");
 
+        // every child loan in the request must belong to this GLIM account and may be approved only once
+        final Set<Long> requestedChildLoanIds = new HashSet<>();
         for (int i = 0; i < approvalFormData.size(); i++) {
 
             jsonObject = approvalFormData.get(i).getAsJsonObject();
 
             childLoanId[i] = jsonObject.get("loanId").getAsLong();
+            if (!glimChildLoanIds.contains(childLoanId[i])) {
+                throw new LoanNotFoundException(childLoanId[i]);
+            }
+            if (!requestedChildLoanIds.add(childLoanId[i])) {
+                throw new GeneralPlatformDomainRuleException("error.msg.glim.approval.duplicate.child.loan",
+                        "Loan with identifier " + childLoanId[i] + " is listed more than once in the approval request", childLoanId[i]);
+            }
         }
 
         CommandProcessingResult result = null;
-        int count = 0;
         int j = 0;
         for (JsonElement approvals : approvalFormData) {
 
             childCommand = JsonCommand.fromExistingCommand(command, approvals);
 
             result = approveApplication(childLoanId[j++], childCommand);
+        }
 
-            if (result.getLoanId() != null) {
-                count++;
-                // if all the child loans are approved, mark the parent loan as
-                // approved
-                if (count == parentLoan.getChildAccountsCount()) {
-                    parentLoan.setPrincipalAmount(parentPrincipalAmount);
-                    parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
-                    glimRepository.save(parentLoan);
-                }
-
+        // mark the parent loan as approved only when all the child loans are approved
+        boolean allChildLoansApproved = !glimChildLoans.isEmpty();
+        for (Loan glimChildLoan : glimChildLoans) {
+            if (!glimChildLoan.isApproved()) {
+                allChildLoansApproved = false;
+                break;
             }
-
+        }
+        if (allChildLoansApproved) {
+            parentLoan.setPrincipalAmount(parentPrincipalAmount);
+            parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
+            glimRepository.save(parentLoan);
         }
 
         return result;

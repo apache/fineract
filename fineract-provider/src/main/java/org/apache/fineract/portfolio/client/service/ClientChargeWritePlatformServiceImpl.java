@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -59,6 +60,7 @@ import org.apache.fineract.portfolio.client.domain.ClientChargeRepositoryWrapper
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
+import org.apache.fineract.portfolio.client.exception.ClientChargeNotFoundException;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -142,7 +144,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
 
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
 
-            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientCharge clientCharge = findClientChargeForClient(clientId, clientChargeId);
             final ClientChargeDefinitionData chargeDefinition = this.clientChargeDefinitionResolver.applyCurrency(clientCharge);
 
             final Locale locale = command.extractLocale();
@@ -190,6 +192,14 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
 
     }
 
+    private ClientCharge findClientChargeForClient(final Long clientId, final Long clientChargeId) {
+        final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+        if (clientCharge.getClient() == null || !Objects.equals(clientCharge.getClient().getId(), clientId)) {
+            throw new ClientChargeNotFoundException(clientChargeId, clientId);
+        }
+        return clientCharge;
+    }
+
     private void generateAccountingEntries(final ClientTransaction clientTransaction, final ClientChargeDefinitionData chargeDefinition) {
         final Map<String, Object> accountingBridgeData = this.clientChargeDefinitionResolver.toAccountingBridgeData(clientTransaction,
                 Map.of(chargeDefinition.chargeId(), chargeDefinition));
@@ -200,7 +210,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     public CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId) {
         try {
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
-            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientCharge clientCharge = findClientChargeForClient(clientId, clientChargeId);
             this.clientChargeDefinitionResolver.applyCurrency(clientCharge);
             final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
@@ -236,7 +246,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
     public CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId) {
         try {
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
-            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientCharge clientCharge = findClientChargeForClient(clientId, clientChargeId);
             this.clientChargeDefinitionResolver.applyCurrency(clientCharge);
 
             // Validate business rules for charge deletion

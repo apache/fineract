@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -119,6 +120,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             if (guarantorCommand.getSavingsId() != null) {
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(guarantorCommand.getSavingsId(),
                         backdatedTxnsAllowedTill);
+                validateSavingsAccountBelongsToGuarantor(guarantorCommand, savingsAccount);
                 validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(loan, savingsAccount);
                 accountAssociations = AccountAssociations.associateSavingsAccount(loan, savingsAccount,
                         AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), backdatedTxnsAllowedTill);
@@ -193,6 +195,37 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             handleGuarantorDataIntegrityIssues(throwable, dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private void validateSavingsAccountBelongsToGuarantor(final GuarantorCommand guarantorCommand, final SavingsAccount savingsAccount) {
+        final GuarantorType guarantorType = GuarantorType.fromInt(guarantorCommand.getGuarantorTypeId());
+        final boolean belongsToGuarantor;
+        if (guarantorType.isCustomer()) {
+            belongsToGuarantor = isGuarantorAccount(guarantorCommand.getEntityId(), savingsAccount);
+        } else if (guarantorType.isGroup()) {
+            belongsToGuarantor = guarantorCommand.getEntityId() != null
+                    && Objects.equals(savingsAccount.groupId(), guarantorCommand.getEntityId());
+        } else {
+            // staff and external guarantors do not own savings accounts that could be pledged
+            belongsToGuarantor = false;
+        }
+        if (!belongsToGuarantor) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.guarantor.savings.account.not.owned.by.guarantor",
+                    "Savings account with identifier " + savingsAccount.getId() + " does not belong to the guarantor",
+                    savingsAccount.getId(), guarantorCommand.getEntityId());
+        }
+    }
+
+    /**
+     * A client guarantor can pledge their own savings account or the savings account of a group they are a member of.
+     */
+    private boolean isGuarantorAccount(final Long guarantorClientId, final SavingsAccount savingsAccount) {
+        if (Objects.equals(savingsAccount.clientId(), guarantorClientId)) {
+            return true;
+        }
+        final Long groupId = savingsAccount.groupId();
+        return groupId != null && guarantorClientId != null
+                && this.clientRepositoryWrapper.findOneWithNotFoundDetection(guarantorClientId, true).isChildOfGroup(groupId);
     }
 
     private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan,

@@ -308,7 +308,30 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
         validateUserPriviledgeOnTellerAndRetrieve(currentUser, tellerId);
 
-        return this.cashierRepository.findById(cashierId).orElse(null);
+        return findCashierOfTeller(tellerId, cashierId);
+    }
+
+    private Cashier findCashierOfTeller(final Long tellerId, final Long cashierId) {
+        final Cashier cashier = this.cashierRepository.findById(cashierId).orElseThrow(() -> new CashierNotFoundException(cashierId));
+        // a persisted cashier always references a persisted teller, so its id is compared whenever it is present
+        final Long ownerId = cashier.getTeller() == null ? null : cashier.getTeller().getId();
+        if (ownerId != null && !ownerId.equals(tellerId)) {
+            throw new CashierNotFoundException(cashierId);
+        }
+        return cashier;
+    }
+
+    /**
+     * Loads the cashier of the teller and checks that the teller's office is within the current user's office
+     * hierarchy.
+     */
+    private Cashier findCashierOfTellerInUserScope(final Long tellerId, final Long cashierId) {
+        final Cashier cashier = findCashierOfTeller(tellerId, cashierId);
+        final Teller owner = cashier.getTeller();
+        if (owner != null) {
+            this.context.validateAccessRights(owner.getOffice().getHierarchy());
+        }
+        return cashier;
     }
 
     @Override
@@ -341,30 +364,23 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
     @Override
     public CommandProcessingResult allocateCashToCashier(final Long cashierId, JsonCommand command) {
-        return doTransactionForCashier(cashierId, CashierTxnType.ALLOCATE, command); // For
-                                                                                     // fund
-                                                                                     // allocation
-                                                                                     // to
-                                                                                     // cashier
+        return doTransactionForCashier(command.entityId(), cashierId, CashierTxnType.ALLOCATE, command);
     }
 
     @Override
     public CommandProcessingResult settleCashFromCashier(final Long cashierId, JsonCommand command) {
-
+        findCashierOfTellerInUserScope(command.entityId(), cashierId);
         this.cashierTransactionDataValidator.validateSettleCashAndCashOutTransactions(cashierId, command);
 
-        return doTransactionForCashier(cashierId, CashierTxnType.SETTLE, command); // For
-                                                                                   // fund
-                                                                                   // settlement
-                                                                                   // from
-                                                                                   // cashier
+        return doTransactionForCashier(command.entityId(), cashierId, CashierTxnType.SETTLE, command);
     }
 
-    private CommandProcessingResult doTransactionForCashier(final Long cashierId, final CashierTxnType txnType, JsonCommand command) {
+    private CommandProcessingResult doTransactionForCashier(final Long tellerId, final Long cashierId, final CashierTxnType txnType,
+            JsonCommand command) {
         try {
             final AppUser currentUser = this.context.authenticatedUser();
 
-            final Cashier cashier = this.cashierRepository.findById(cashierId).orElseThrow(() -> new CashierNotFoundException(cashierId));
+            final Cashier cashier = findCashierOfTellerInUserScope(tellerId, cashierId);
 
             this.fromApiJsonDeserializer.validateForCashTxnForCashier(command.json());
 
