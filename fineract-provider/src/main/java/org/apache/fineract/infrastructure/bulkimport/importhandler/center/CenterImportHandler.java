@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.CenterConstants;
@@ -72,27 +73,35 @@ public class CenterImportHandler implements ImportHandler {
         List<CenterRow> centers = new ArrayList<>();
         List<CalendarData> meetings = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, centers, meetings, statuses, locale, dateFormat);
-        return importEntity(workbook, centers, meetings, statuses, dateFormat);
+        AtomicInteger errorCount = new AtomicInteger();
+        readExcelFile(workbook, centers, meetings, statuses, locale, dateFormat, errorCount);
+        return importEntity(workbook, centers, meetings, statuses, dateFormat, errorCount.get());
     }
 
     private void readExcelFile(final Workbook workbook, final List<CenterRow> centers, final List<CalendarData> meetings,
-            final List<String> statuses, final String locale, final String dateFormat) {
-
+            final List<String> statuses, final String locale, final String dateFormat, final AtomicInteger errorCount) {
         Sheet centersSheet = workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(centersSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = centersSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, CenterConstants.STATUS_COL)) {
-                centers.add(readCenter(workbook, statuses, row, locale, dateFormat));
-                meetings.add(readMeeting(row, locale, dateFormat));
+                try {
+                    String status = ImportHandlerUtils.readAsString(CenterConstants.STATUS_COL, row);
+                    CenterRow centerData = readCenter(workbook, row, locale, dateFormat);
+                    CalendarData calendarData = readMeeting(row, locale, dateFormat);
+                    statuses.add(status);
+                    centers.add(centerData);
+                    meetings.add(calendarData);
+                } catch (RuntimeException re) {
+                    ImportHandlerUtils.logReadExcelError(re, centersSheet, rowIndex, CenterConstants.STATUS_COL, errorCount);
+                }
             }
         }
     }
 
     private CalendarData readMeeting(final Row row, final String locale, final String dateFormat) {
-        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row);
+        LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row, dateFormat, locale);
         Boolean isRepeating = ImportHandlerUtils.readAsBoolean(CenterConstants.IS_REPEATING_COL, row);
         String frequency = ImportHandlerUtils.readAsString(CenterConstants.FREQUENCY_COL, row);
         EnumOptionData frequencyEnum = new EnumOptionData(null, null, ImportHandlerUtils.getFrequencyId(frequency));
@@ -112,9 +121,7 @@ public class CenterImportHandler implements ImportHandler {
         }
     }
 
-    private CenterRow readCenter(final Workbook workbook, final List<String> statuses, final Row row, final String locale,
-            final String dateFormat) {
-        String status = ImportHandlerUtils.readAsString(CenterConstants.STATUS_COL, row);
+    private CenterRow readCenter(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
         String officeName = ImportHandlerUtils.readAsString(CenterConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
         String staffName = ImportHandlerUtils.readAsString(CenterConstants.STAFF_NAME_COL, row);
@@ -122,10 +129,10 @@ public class CenterImportHandler implements ImportHandler {
 
         String externalId = ImportHandlerUtils.readAsString(CenterConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(CenterConstants.ACTIVE_COL, row);
-        LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row);
+        LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row, dateFormat, locale);
         LocalDate activationDate;
         if (Boolean.TRUE.equals(active)) {
-            activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row);
+            activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         } else {
             activationDate = submittedOn;
         }
@@ -145,7 +152,6 @@ public class CenterImportHandler implements ImportHandler {
             }
         }
 
-        statuses.add(status);
         final Locale dateLocale = StringUtils.isBlank(locale) ? null : JsonParserHelper.localeFromString(locale);
         final CenterCreateRequest request = CenterCreateRequest.builder() //
                 .name(centerName) //
@@ -163,12 +169,12 @@ public class CenterImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<CenterRow> centers, final List<CalendarData> meetings,
-            final List<String> statuses, final String dateFormat) {
+            final List<String> statuses, final String dateFormat, final int readErrorCount) {
+        int errorCount = readErrorCount;
         Sheet centerSheet = workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         int progressLevel = 0;
         String centerId = EMPTY_STR;
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage;
         for (int i = 0; i < centers.size(); i++) {
             Row row = centerSheet.getRow(centers.get(i).rowIndex());

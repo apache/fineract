@@ -22,6 +22,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -57,11 +58,12 @@ public class UserImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
         List<String> statuses = new ArrayList<>();
-        List<AppUserData> users = readExcelFile(workbook, statuses);
-        return importEntity(workbook, users);
+        AtomicInteger errorCount = new AtomicInteger();
+        List<AppUserData> users = readExcelFile(workbook, statuses, errorCount);
+        return importEntity(workbook, users, errorCount.get());
     }
 
-    private List<AppUserData> readExcelFile(final Workbook workbook, final List<String> statuses) {
+    private List<AppUserData> readExcelFile(final Workbook workbook, final List<String> statuses, AtomicInteger errorCount) {
         List<AppUserData> users = new ArrayList<>();
         Sheet usersSheet = workbook.getSheet(TemplatePopulateImportConstants.USER_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(usersSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
@@ -69,7 +71,11 @@ public class UserImportHandler implements ImportHandler {
             Row row;
             row = usersSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, UserConstants.STATUS_COL)) {
-                users.add(readUsers(workbook, row, statuses));
+                try {
+                    users.add(readUsers(workbook, row, statuses));
+                } catch (RuntimeException re) {
+                    ImportHandlerUtils.logReadExcelError(re, usersSheet, rowIndex, UserConstants.STATUS_COL, errorCount);
+                }
             }
         }
         return users;
@@ -105,10 +111,10 @@ public class UserImportHandler implements ImportHandler {
 
     }
 
-    private Count importEntity(final Workbook workbook, final List<AppUserData> users) {
+    private Count importEntity(final Workbook workbook, final List<AppUserData> users, final int readErrorCount) {
+        int errorCount = readErrorCount;
         Sheet userSheet = workbook.getSheet(TemplatePopulateImportConstants.USER_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         for (AppUserData user : users) {

@@ -58,7 +58,6 @@ public class ClientPersonImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-
         AtomicInteger errorCount = new AtomicInteger();
         List<ClientData> clients = readExcelFile(workbook, locale, dateFormat, errorCount);
         return importEntity(workbook, clients, dateFormat, locale, errorCount.get());
@@ -98,14 +97,14 @@ public class ClientPersonImportHandler implements ImportHandler {
             staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
         }
         ExternalId externalId = externalIdFactory.create(ImportHandlerUtils.readAsString(ClientPersonConstants.EXTERNAL_ID_COL, row));
-        LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientPersonConstants.SUBMITTED_ON_COL, row);
-        LocalDate activationDate = ImportHandlerUtils.readAsDate(ClientPersonConstants.ACTIVATION_DATE_COL, row);
+        LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientPersonConstants.SUBMITTED_ON_COL, row, dateFormat, locale);
+        LocalDate activationDate = ImportHandlerUtils.readAsDate(ClientPersonConstants.ACTIVATION_DATE_COL, row, dateFormat, locale);
         Boolean active = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.ACTIVE_COL, row);
         if (!active) {
             activationDate = submittedOn;
         }
         String mobileNo = ImportHandlerUtils.readAsDigits(ClientPersonConstants.MOBILE_NO_COL, row, "Mobile number");
-        LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
+        LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row, dateFormat, locale);
 
         Long clientTypeId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.CLIENT_TYPE_COL, row);
         Long genderId = ImportHandlerUtils.readDropdownId(ClientPersonConstants.GENDER_COL, row);

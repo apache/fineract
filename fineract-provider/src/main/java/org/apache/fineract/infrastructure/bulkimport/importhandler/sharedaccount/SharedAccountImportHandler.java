@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -63,19 +64,24 @@ public class SharedAccountImportHandler implements ImportHandler {
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
         List<ShareAccountData> shareAccountDataList = new ArrayList<>();
         List<String> statuses = new ArrayList<>();
-        readExcelFile(workbook, shareAccountDataList, statuses, locale, dateFormat);
-        return importEntity(workbook, shareAccountDataList, dateFormat);
+        AtomicInteger errorCount = new AtomicInteger();
+        readExcelFile(workbook, shareAccountDataList, statuses, locale, dateFormat, errorCount);
+        return importEntity(workbook, shareAccountDataList, dateFormat, errorCount.get());
     }
 
     private void readExcelFile(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final List<String> statuses,
-            final String locale, String dateFormat) {
+            final String locale, String dateFormat, final AtomicInteger errorCount) {
         Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(sharedAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = sharedAccountsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, SharedAccountsConstants.STATUS_COL)) {
-                shareAccountDataList.add(readSharedAccount(workbook, row, statuses, locale, dateFormat));
+                try {
+                    shareAccountDataList.add(readSharedAccount(workbook, row, statuses, locale, dateFormat));
+                } catch (RuntimeException re) {
+                    ImportHandlerUtils.logReadExcelError(re, sharedAccountsSheet, rowIndex, SharedAccountsConstants.STATUS_COL, errorCount);
+                }
             }
         }
     }
@@ -89,7 +95,7 @@ public class SharedAccountImportHandler implements ImportHandler {
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),
                 productName);
 
-        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.SUBMITTED_ON_COL, row);
+        LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.SUBMITTED_ON_COL, row, dateFormat, locale);
 
         String externalId = ImportHandlerUtils.readAsString(SharedAccountsConstants.EXTERNAL_ID_COL, row);
 
@@ -119,7 +125,7 @@ public class SharedAccountImportHandler implements ImportHandler {
                 lockPeriodFrequencyType = 3;
             }
         }
-        LocalDate applicationDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.APPLICATION_DATE_COL, row);
+        LocalDate applicationDate = ImportHandlerUtils.readAsDate(SharedAccountsConstants.APPLICATION_DATE_COL, row, dateFormat, locale);
         Boolean allowDividendCalc = ImportHandlerUtils
                 .readAsBoolean(SharedAccountsConstants.ALLOW_DIVIDEND_CALCULATION_FOR_INACTIVE_CLIENTS_COL, row);
 
@@ -148,10 +154,11 @@ public class SharedAccountImportHandler implements ImportHandler {
                 defaultSavingsAccountId, row.getRowNum(), locale, dateFormat);
     }
 
-    private Count importEntity(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final String dateFormat,
+            final int readErrorCount) {
+        int errorCount = readErrorCount;
         Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
         int successCount = 0;
-        int errorCount = 0;
         String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
