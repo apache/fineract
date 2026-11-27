@@ -70,6 +70,7 @@ import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyExcepti
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.validation.ChargeAmortizationValidator;
+import org.apache.fineract.portfolio.charge.validation.ChargeDefinitionValidator;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -291,12 +292,16 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
             countFrequencyType = PeriodFrequencyType.fromInt(request.getCountFrequencyType());
         }
 
-        final Charge charge = new Charge(request.getName(), amount, request.getCurrencyCode(), chargeAppliesTo,
-                ChargeTimeType.fromInt(request.getChargeTimeType()), ChargeCalculationType.fromInt(request.getChargeCalculationType()),
-                Boolean.TRUE.equals(request.getPenalty()), Boolean.TRUE.equals(request.getActive()), paymentMode,
-                request.feeOnMonthDayAsMonthDay(), request.getFeeInterval(), request.getMinCap(), request.getMaxCap(),
-                request.getFeeFrequency(), enableFreeWithdrawalCharge, freeWithdrawalFrequency, restartCountFrequency, countFrequencyType,
-                incomeAccount, taxGroup, Boolean.TRUE.equals(request.getEnablePaymentType()), paymentType);
+        final ChargeTimeType chargeTime = ChargeTimeType.fromInt(request.getChargeTimeType());
+        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(request.getChargeCalculationType());
+        final boolean penalty = Boolean.TRUE.equals(request.getPenalty());
+        ChargeDefinitionValidator.validateForCreate(request.getName(), chargeAppliesTo, chargeTime, chargeCalculationType, penalty);
+
+        final Charge charge = new Charge(request.getName(), amount, request.getCurrencyCode(), chargeAppliesTo, chargeTime,
+                chargeCalculationType, penalty, Boolean.TRUE.equals(request.getActive()), paymentMode, request.feeOnMonthDayAsMonthDay(),
+                request.getFeeInterval(), request.getMinCap(), request.getMaxCap(), request.getFeeFrequency(), enableFreeWithdrawalCharge,
+                freeWithdrawalFrequency, restartCountFrequency, countFrequencyType, incomeAccount, taxGroup,
+                Boolean.TRUE.equals(request.getEnablePaymentType()), paymentType);
         charge.applyAmortizationConfiguration(
                 ChargeAmortizationValidator.enumValue(request.getAmortizationPeriodType(), ChargeAmortizationPeriodType.class),
                 request.getAmortizationDays(),
