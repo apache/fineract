@@ -117,9 +117,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             if (loanTransaction.isChargePayment()) {
                 List<LoanChargePaidDetail> chargePaidDetails = new ArrayList<>();
-                final Set<LoanChargePaidBy> chargePaidBies = loanTransaction.getLoanChargesPaid();
+                final Set<LoanChargePaidBy> chargesPaidBy = loanTransaction.getLoanChargesPaid();
                 final Set<LoanCharge> transferCharges = new HashSet<>();
-                for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
+                for (final LoanChargePaidBy chargePaidBy : chargesPaidBy) {
                     LoanCharge loanCharge = chargePaidBy.getLoanCharge();
                     transferCharges.add(loanCharge);
                     if (loanCharge.isInstalmentFee()) {
@@ -133,11 +133,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     for (final LoanCharge loanCharge : transferCharges) {
                         boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(), isFirstPeriod);
                         if (isDue) {
-                            Money amountForProcess = loanCharge.getAmount(currency);
-                            if (amountForProcess.isGreaterThan(loanTransaction.getAmount(currency))) {
-                                amountForProcess = loanTransaction.getAmount(currency);
+                            Money chargeAmountDue = loanCharge.getAmount(currency);
+                            if (chargeAmountDue.isGreaterThan(loanTransaction.getAmount(currency))) {
+                                chargeAmountDue = loanTransaction.getAmount(currency);
                             }
-                            LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(amountForProcess, installment,
+                            LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(chargeAmountDue, installment,
                                     loanCharge.isFeeCharge());
                             chargePaidDetails.add(chargePaidDetail);
                             break;
@@ -146,24 +146,24 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     startDate = installment.getDueDate();
                 }
                 loanTransaction.resetDerivedComponents();
-                Money unprocessed = loanTransaction.getAmount(currency);
+                Money unprocessedAmount = loanTransaction.getAmount(currency);
                 for (LoanChargePaidDetail chargePaidDetail : chargePaidDetails) {
                     final List<LoanRepaymentScheduleInstallment> processInstallments = new ArrayList<>(1);
                     processInstallments.add(chargePaidDetail.getInstallment());
-                    Money processAmt = chargePaidDetail.getAmount();
-                    if (processAmt.isGreaterThan(unprocessed)) {
-                        processAmt = unprocessed;
+                    Money amountToApply = chargePaidDetail.getAmount();
+                    if (amountToApply.isGreaterThan(unprocessedAmount)) {
+                        amountToApply = unprocessedAmount;
                     }
-                    unprocessed = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges, processAmt,
-                            chargePaidDetail.isFeeCharge());
-                    if (!unprocessed.isGreaterThanZero()) {
+                    unprocessedAmount = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges,
+                            amountToApply, chargePaidDetail.isFeeCharge());
+                    if (!unprocessedAmount.isGreaterThanZero()) {
                         break;
                     }
                 }
 
-                if (unprocessed.isGreaterThanZero()) {
-                    onLoanOverpayment(loanTransaction, unprocessed);
-                    loanTransaction.setOverPayments(unprocessed);
+                if (unprocessedAmount.isGreaterThanZero()) {
+                    onLoanOverpayment(loanTransaction, unprocessedAmount);
+                    loanTransaction.setOverPayments(unprocessedAmount);
                 }
 
             } else {
