@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRI
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -237,8 +238,13 @@ public class DepositAccountClosureWritePlatformService {
                 Map<String, Object> changes = new HashMap<>();
                 final AppUser user = context.authenticatedUser();
                 Long toSavingsId = fdAccount.getTransferToSavingsAccountId();
+                // the closure posts the journal entries of the transactions it creates, so they are skipped below
+                this.savingAccountRepositoryWrapper.saveAndFlush(fdAccount);
+                final Collection<Long> idsBeforeClosure = fdAccount.findExistingTransactionIds();
                 this.depositAccountDomainService.handleFDAccountMaturityClosure(fdAccount, null, user, fmt, fdAccount.maturityDate(),
                         fdAccount.getOnAccountClosureId(), toSavingsId, "Apply maturity instructions", changes);
+                fdAccount.findExistingTransactionIds().stream().filter(id -> !idsBeforeClosure.contains(id))
+                        .forEach(existingTransactionIds::add);
 
                 if (changes.get("reinvestedDepositId") != null) {
                     Long reinvestedDepositId = (Long) changes.get("reinvestedDepositId");

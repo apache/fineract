@@ -47,6 +47,7 @@ public class FeignRecurringDepositHelper {
     private static final String POST_INTEREST = "postInterest";
     private static final String CALCULATE_PREMATURE_AMOUNT = "calculatePrematureAmount";
     private static final String PREMATURE_CLOSE = "prematureClose";
+    private static final String CLOSE = "close";
     private static final String DEPOSIT = "deposit";
     private static final String MODIFY_TRANSACTION = "modify";
     private static final String UNDO_TRANSACTION = "undo";
@@ -112,6 +113,13 @@ public class FeignRecurringDepositHelper {
         return command(accountId,
                 DepositRequestBuilders.prematureCloseRecurringDeposit(closedOnDate, onAccountClosureId, toSavingsAccountId),
                 PREMATURE_CLOSE);
+    }
+
+    /** Closes a matured account; {@code onAccountClosureId} selects withdraw, transfer to savings or re-invest. */
+    public PostRecurringDepositAccountsAccountIdResponse close(Long accountId, String closedOnDate, int onAccountClosureId,
+            Long toSavingsAccountId) {
+        return command(accountId,
+                DepositRequestBuilders.prematureCloseRecurringDeposit(closedOnDate, onAccountClosureId, toSavingsAccountId), CLOSE);
     }
 
     public PostRecurringDepositAccountsAccountIdResponse command(Long accountId, PostRecurringDepositAccountsAccountIdRequest request,

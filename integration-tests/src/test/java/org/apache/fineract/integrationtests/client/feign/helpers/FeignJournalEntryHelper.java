@@ -170,6 +170,10 @@ public class FeignJournalEntryHelper {
         return "";
     }
 
+    public void checkExactJournalEntriesForAccount(Account account, String date, LoanTestData.Journal... accountEntries) {
+        verifyJournalEntriesMatch(new ArrayList<>(retrieveJournalEntries(null, account, date)), accountEntries);
+    }
+
     private void checkJournalEntryForAccount(Long officeId, Account account, String date, LoanTestData.Journal... accountEntries) {
         List<JournalEntryTransactionItem> actualEntries = retrieveJournalEntries(officeId, account, date);
 

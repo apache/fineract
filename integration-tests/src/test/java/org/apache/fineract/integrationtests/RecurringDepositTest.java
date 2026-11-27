@@ -187,6 +187,85 @@ public class RecurringDepositTest extends FeignDepositTestBase {
         BigDecimal maturityAmount = recurringDepositHelper.getAccount(recurringDepositAccountId).getMaturityAmount();
         journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, maturityAmount));
         journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE, debit(liabilityAccount, maturityAmount));
+        journalEntryHelper.checkExactJournalEntriesForAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, maturityAmount));
+    }
+
+    @Test
+    public void testRecurringDepositAccountWithClosureTypeWithdrawal() {
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account liabilityAccount = accountHelper.createLiabilityAccount();
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
+
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
+        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        todaysDate.add(Calendar.DATE, daysInMonth - currentDate + 1);
+        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
+        final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
+
+        Long clientId = clientHelper.createClient();
+        Assertions.assertNotNull(clientId);
+
+        Long recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, CASH_BASED, assetAccount, liabilityAccount,
+                incomeAccount, expenseAccount);
+        Assertions.assertNotNull(recurringDepositProductId);
+
+        Long recurringDepositAccountId = applyForRecurringDepositApplication(clientId, recurringDepositProductId, SUBMITTED_ON_DATE,
+                WHOLE_TERM, expectedFirstDepositOnDate);
+        Assertions.assertNotNull(recurringDepositAccountId);
+
+        DepositTestValidators.verifyRecurringDepositIsPending(statusOf(recurringDepositAccountId));
+
+        recurringDepositHelper.approve(recurringDepositAccountId, APPROVED_ON_DATE);
+        DepositTestValidators.verifyRecurringDepositIsApproved(statusOf(recurringDepositAccountId));
+
+        recurringDepositHelper.activate(recurringDepositAccountId, ACTIVATION_DATE);
+        DepositTestValidators.verifyRecurringDepositIsActive(statusOf(recurringDepositAccountId));
+
+        BigDecimal depositAmount = recurringDepositHelper.getAccount(recurringDepositAccountId).getMandatoryRecommendedDepositAmount();
+
+        Assertions.assertNotNull(
+                recurringDepositHelper.deposit(recurringDepositAccountId, expectedFirstDepositOnDate, depositAmount).getResourceId());
+
+        journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, expectedFirstDepositOnDate, debit(assetAccount, depositAmount));
+        journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, expectedFirstDepositOnDate,
+                credit(liabilityAccount, depositAmount));
+
+        Assertions.assertNotNull(recurringDepositHelper.calculateInterest(recurringDepositAccountId));
+        Assertions.assertNotNull(recurringDepositHelper.postInterest(recurringDepositAccountId).getResourceId());
+
+        BigDecimal totalInterestPosted = recurringDepositHelper.getSummary(recurringDepositAccountId).getTotalInterestPosted();
+
+        journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE,
+                debit(expenseAccount, totalInterestPosted));
+        journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE,
+                credit(liabilityAccount, totalInterestPosted));
+
+        Assertions.assertNotNull(recurringDepositHelper
+                .close(recurringDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null).getResourceId());
+
+        DepositTestValidators.verifyRecurringDepositAccountIsClosed(statusOf(recurringDepositAccountId));
+
+        BigDecimal maturityAmount = recurringDepositHelper.getAccount(recurringDepositAccountId).getMaturityAmount();
+        journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, maturityAmount));
+        journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE, debit(liabilityAccount, maturityAmount));
+        journalEntryHelper.checkExactJournalEntriesForAccount(assetAccount, CLOSED_ON_DATE, credit(assetAccount, maturityAmount));
     }
 
     /***
