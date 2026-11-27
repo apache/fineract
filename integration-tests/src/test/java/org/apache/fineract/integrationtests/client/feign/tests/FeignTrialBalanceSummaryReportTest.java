@@ -429,7 +429,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
     private Long createCashBasedZeroInterestLoanProduct(Account feeIncomeAccount) {
         return loanHelper.createLoanProduct(new PostLoanProductsRequest()//
                 .name("TrialBal RE Product " + System.currentTimeMillis())//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//
                 .inMultiplesOf(1)//
@@ -543,7 +543,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
     private Long createLoanProduct() {
         return loanHelper.createLoanProduct(new PostLoanProductsRequest()//
                 .name("TrialBal Product " + System.currentTimeMillis())//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(2)//
                 .inMultiplesOf(1)//

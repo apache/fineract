@@ -46,7 +46,7 @@ public class LoanProductExternalIdTest extends FeignLoanTestBase {
         assertEquals(externalId, getLoanProductsProductIdResponse.getExternalId());
 
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
-                .shortName(Utils.uniqueRandomStringGenerator("", 3));
+                .shortName(Utils.uniqueRandomStringGenerator("", 8));
         PutLoanProductsProductIdResponse putLoanProductsProductIdResponse = loanHelper.updateLoanProductByExternalId(externalId,
                 requestModifyLoan);
         assertNotNull(putLoanProductsProductIdResponse.getResourceId());

@@ -617,7 +617,7 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
 
     private Long createDefaultProduct() {
         final String uniqueName = "WCL ChgAfterMat " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         // A delinquency bucket and a breach are configured so that, once the charge creates an outstanding balance, the
         // schedule services can generate the delinquency + breach periods the tests assert.
         final PostDelinquencyRangeResponse range = delinquencyHelper.createRange(new DelinquencyRangeRequest()
@@ -636,7 +636,7 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
 
     private Long createAccrualWithDeferredRevenueProduct() {
         final String uniqueName = "WCL ChgAfterMatAcc " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE))
                 .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())

@@ -39,7 +39,7 @@ public final class SavingsRequestBuilders {
     public static PostSavingsProductsRequest defaultSavingsProduct() {
         return new PostSavingsProductsRequest()//
                 .name("Savings Product " + System.currentTimeMillis())//
-                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 8))//
                 .description("Test savings product")//
                 .currencyCode("USD")//
                 .digitsAfterDecimal(4)//

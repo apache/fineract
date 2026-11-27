@@ -584,7 +584,7 @@ public class LoanChargeRoundingTest extends FeignLoanTestBase {
     }
 
     private PostLoanProductsRequest baseLoanProductRequest() {
-        return new PostLoanProductsRequest().name("LP-" + UUID.randomUUID()).shortName(Utils.uniqueRandomStringGenerator("", 4))
+        return new PostLoanProductsRequest().name("LP-" + UUID.randomUUID()).shortName(Utils.uniqueRandomStringGenerator("", 8))
                 .currencyCode("USD").locale("en").dateFormat("dd MMMM yyyy").principal(10000.00).numberOfRepayments(1).repaymentEvery(1)
                 .repaymentFrequencyType(1L).interestRatePerPeriod(1.0).interestRateFrequencyType(1).amortizationType(1).interestType(0)
                 .interestCalculationPeriodType(1).transactionProcessingStrategyCode("mifos-standard-strategy").accountingRule(1)

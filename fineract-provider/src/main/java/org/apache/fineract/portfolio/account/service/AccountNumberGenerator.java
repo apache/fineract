@@ -53,6 +53,8 @@ import org.springframework.stereotype.Component;
 public class AccountNumberGenerator implements AccountNumberGeneratorService {
 
     private static final int maxLength = 9;
+    // Length of account_no in m_client, m_group, m_loan, m_savings_account and m_wc_loan
+    private static final int ACCOUNT_NO_MAX_LENGTH = 20;
 
     private static final String ID = "id";
     private static final String ENTITY_TYPE = "entityType";
@@ -195,6 +197,12 @@ public class AccountNumberGenerator implements AccountNumberGeneratorService {
                 }
             } else {
                 accountNumber = StringUtils.leftPad(accountNumber, Integer.valueOf(propertyMap.get(ID).length()), '0');
+                // The 10 char cap above only fits for numbers of up to 10 digits. With a longer
+                // custom-account-number-length, trim the prefix further so prefix and number fit account_no.
+                if (prefix != null) {
+                    int prefixRoom = Math.max(0, ACCOUNT_NO_MAX_LENGTH - accountNumber.length());
+                    prefix = prefix.substring(0, Math.min(prefix.length(), prefixRoom));
+                }
             }
 
             accountNumber = StringUtils.overlay(accountNumber, prefix, 0, 0);

@@ -1413,7 +1413,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private PostLoanProductsRequest loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
 
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
@@ -1568,7 +1568,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private Long createLoanProductAccountingAccrualPeriodicWithInterest(boolean isMultiDisburse) {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
         Long resourceId = loanHelper.createLoanProduct(new PostLoanProductsRequest().name(name).shortName(shortName)
                 .multiDisburseLoan(isMultiDisburse).maxTrancheCount(isMultiDisburse ? 2 : 1).interestType(isMultiDisburse ? 0 : 1)
                 .interestCalculationPeriodType(isMultiDisburse ? 0 : 1).disallowExpectedDisbursements(isMultiDisburse)
@@ -1659,7 +1659,7 @@ public class LoanTransactionAccrualActivityPostingTest extends FeignLoanTestBase
 
     private PostLoanProductsRequest loanProductAccountingAccrualAdvanvedPaymentAllocationAccrualActivity(boolean isMultiDisburse) {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         return new PostLoanProductsRequest().name(name).shortName(shortName).multiDisburseLoan(isMultiDisburse)
                 .maxTrancheCount(isMultiDisburse ? 2 : 1).interestType(isMultiDisburse ? 0 : 1)

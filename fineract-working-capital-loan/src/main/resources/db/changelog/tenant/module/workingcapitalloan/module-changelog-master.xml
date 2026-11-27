@@ -116,4 +116,5 @@
   <include relativeToChangelogFile="true" file="parts/0092_wc_loan_account_no_named_unique.xml"/>
   <include relativeToChangelogFile="true" file="parts/0093_wc_loan_accounts_stayed_locked_external_event.xml"/>
   <include relativeToChangelogFile="true" file="parts/0094_wc_loan_foreign_key_indexes.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0095_wc_loan_product_short_name_length.xml"/>
 </databaseChangeLog>

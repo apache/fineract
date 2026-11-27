@@ -525,7 +525,7 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
     private Long createProductAllowingDiscount() {
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL Restate " + UUID.randomUUID().toString().substring(0, 8))
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4))
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8))
                         .withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
                 .getResourceId();
         createdProductIds.add(productId);

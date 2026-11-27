@@ -104,7 +104,7 @@ public class FeignWorkingCapitalLoanAddChargeBusinessEventTest extends FeignInte
 
     private Long createProduct() {
         final String uniqueName = "WCL AddCharge " + Utils.uniqueRandomStringGenerator("", 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(
                         new WorkingCapitalLoanProductTestBuilder().withName(uniqueName).withShortName(uniqueShortName).build())

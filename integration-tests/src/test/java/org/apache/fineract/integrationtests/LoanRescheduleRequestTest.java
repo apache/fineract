@@ -568,7 +568,7 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
 
     private Long createLoanProductPeriodicWithInterest() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
-        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        String shortName = Utils.uniqueRandomStringGenerator("", 8);
         return createLoanProduct(new PostLoanProductsRequest()//
                 .name(name)//
                 .shortName(shortName)//

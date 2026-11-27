@@ -296,7 +296,7 @@ public class FeignWorkingCapitalLoanAmortizationNormalizationTest extends FeignI
     private Long createProduct() {
         final Long productId = productHelper
                 .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName("WCL Norm " + unique())
-                        .withShortName(Utils.uniqueRandomStringGenerator("", 4)).withRepaymentEvery(1).withRepaymentFrequencyType("DAYS")
+                        .withShortName(Utils.uniqueRandomStringGenerator("", 8)).withRepaymentEvery(1).withRepaymentFrequencyType("DAYS")
                         .withPeriodPaymentRate(RATE).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
                 .getResourceId();
         createdProductIds.add(productId);

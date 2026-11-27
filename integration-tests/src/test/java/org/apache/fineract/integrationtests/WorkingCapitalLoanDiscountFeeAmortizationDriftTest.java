@@ -315,7 +315,7 @@ public class WorkingCapitalLoanDiscountFeeAmortizationDriftTest {
 
     private Long createProduct() {
         final String uniqueName = "WCL Drift " + UUID.randomUUID().toString().substring(0, 8);
-        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 8);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withRepaymentEvery(1).withRepaymentFrequencyType("DAYS")
                 .withPeriodPaymentRate(PERIOD_PAYMENT_RATE).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
