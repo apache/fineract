@@ -174,6 +174,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
     private final LoanAccountService loanAccountService;
     private final LoanWriteServiceHelper loanWriteServiceHelper;
     private final LoanCounterService loanCounterService;
+    private final LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService;
 
     @Transactional
     @Override
@@ -1270,7 +1271,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
                         || (loanTermVariations.getTermType().isEMIAmountVariation()
                                 && DateUtils.isEqual(loanTermVariations.getTermApplicableFrom(), lastTransactionDate))
                         || DateUtils.isAfter(loanTermVariations.getTermApplicableFrom(), lastTransactionDate));
-        reverseExistingTransactionsTillLastDisbursal(loan, lastDisbursalTransaction);
+        reverseExistingTransactionsTillLastDisbursal(loan, lastDisbursalTransaction, disbursementDetail);
         loanDisbursementService.deactivateDownPaymentFeesOfTranche(loan, disbursementDetail);
         loanScheduleService.regenerateScheduleWithReprocessingTransactions(loan, scheduleGeneratorDTO);
         actualChanges.put("undolastdisbursal", "true");
@@ -1283,29 +1284,17 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
     /**
      * Reverse only disbursement, accruals, and repayments at disbursal transactions
      */
-    private void reverseExistingTransactionsTillLastDisbursal(Loan loan, final LoanTransaction lastDisbursalTransaction) {
-        LoanCharge chargeToDeactivate = null;
-
+    private void reverseExistingTransactionsTillLastDisbursal(Loan loan, final LoanTransaction lastDisbursalTransaction,
+            final LoanDisbursementDetails undoneTranche) {
+        // The tranche charges of the undone tranche are deactivated, and their deferred charge is reversed through the
+        // balance link. Matched by the tranche itself, not by date: tranches of the same day share the date.
         for (final LoanCharge charge : loan.getCharges()) {
-            if (charge.isTrancheDisbursementCharge()) {
-                if (charge.getTrancheDisbursementCharge() != null
-                        && charge.getTrancheDisbursementCharge().getloanDisbursementDetails() != null) {
-
-                    LocalDate expectedDate = charge.getTrancheDisbursementCharge().getloanDisbursementDetails().expectedDisbursementDate();
-                    LocalDate actualDate = charge.getTrancheDisbursementCharge().getloanDisbursementDetails().actualDisbursementDate();
-
-                    if ((actualDate != null && actualDate.equals(lastDisbursalTransaction.getTransactionDate()))
-                            || (expectedDate != null && expectedDate.equals(lastDisbursalTransaction.getTransactionDate()))) {
-                        chargeToDeactivate = charge;
-                        break;
-                    }
-                }
+            if (charge.isTrancheDisbursementChargeOf(undoneTranche)) {
+                charge.resetPaidAmount(loan.getCurrency());
+                charge.setActive(false);
+                loanDeferredChargeWritePlatformService.reverseForLoanCharge(charge.getId())
+                        .ifPresent(deferredCharge -> journalEntryPoster.postJournalEntriesForLoanTransaction(deferredCharge, false, false));
             }
-        }
-
-        if (chargeToDeactivate != null) {
-            chargeToDeactivate.resetPaidAmount(loan.getCurrency());
-            chargeToDeactivate.setActive(false);
         }
 
         // Now reverse all relevant transactions

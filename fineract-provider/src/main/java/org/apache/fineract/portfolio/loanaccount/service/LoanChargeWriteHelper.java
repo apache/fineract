@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
@@ -56,6 +57,7 @@ public class LoanChargeWriteHelper {
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanAccountService loanAccountService;
     private final LoanChargeService loanChargeService;
+    private final LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService;
 
     public void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
@@ -101,6 +103,14 @@ public class LoanChargeWriteHelper {
         loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
         loanChargeService.addLoanCharge(loan, loanCharge);
         loanCharge = this.loanChargeRepository.saveAndFlush(loanCharge);
+
+        // Specified-due-date amortized charges become effective on add when due ≤ business date, but only on a
+        // disbursed loan; charges added earlier get their deferral at disbursement. Future due dates wait until due.
+        // Disbursement / tranche charges are created at disbursement instead.
+        final LoanStatus status = loan.getStatus();
+        if (loanCharge.isSpecifiedDueDate() && (status.isActive() || status.isOverpaid() || status.isClosedObligationsMet())) {
+            loanDeferredChargeWritePlatformService.createForEffectiveCharge(loan, loanCharge, loanCharge.getDueLocalDate());
+        }
 
         // we want to apply charge transactions only for those loans charges that are applied when a loan is active and
         // the loan product uses Upfront Accrual accounting (or None/Cash when allow-cash-and-non-cash-accrual is true),

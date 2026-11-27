@@ -1015,8 +1015,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
-        return isNotReversed()
-                && (isDisbursement() || isAccrualActivity() || isRepaymentAtDisbursement() || isRepayment() || isDownPayment());
+        return isNotReversed() && (isDisbursement() || isAccrualActivity() || isRepaymentAtDisbursement() || isRepayment()
+                || isDownPayment() || isDeferredChargeAmortization() || isDeferredChargeAmortizationAdjustment());
     }
 
     public Money getOutstandingLoanBalanceMoney(final MonetaryCurrency currency) {

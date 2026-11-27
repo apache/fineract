@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ChargeAmortizationStepDef extends AbstractStepDef {
 
     static final String CHARGE_ID = "chargeAmortizationChargeId";
+    static final String CHARGE_NAME = "chargeAmortizationChargeName";
     private static final String CURRENCY_CODE = "EUR";
     private static final String LOCALE_EN = "en";
     private static final String PERIOD_TYPE = "amortizationPeriodType";
@@ -61,10 +62,12 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
 
     @When("Admin creates a loan fee with {string} charge time type and the following amortization configuration:")
     public void createLoanFeeWithAmortization(final String chargeTimeType, final DataTable table) {
-        final ChargeCreateRequest request = withAmortization(loanCharge(ChargeTimeType.valueOf(chargeTimeType), false),
+        final String chargeName = Utils.randomStringGenerator("AMORTIZED_FEE_", 8);
+        final ChargeCreateRequest request = withAmortization(loanCharge(ChargeTimeType.valueOf(chargeTimeType), false, chargeName),
                 table.asMaps().get(0));
         final Long chargeId = ok(() -> fineractClient.charges().createCharge(request)).getResourceId();
         testContext().set(CHARGE_ID, chargeId);
+        testContext().set(CHARGE_NAME, chargeName);
     }
 
     @When("Admin updates the amortization configuration of the charge to:")
@@ -93,8 +96,8 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
     @Then("Creating a loan charge with {string} charge time type, penalty {string} and the following amortization configuration results an error:")
     public void createLoanChargeWithAmortizationFails(final String chargeTimeType, final String penalty, final DataTable table) {
         final Map<String, String> data = table.asMaps().get(0);
-        final ChargeCreateRequest request = withAmortization(
-                loanCharge(ChargeTimeType.valueOf(chargeTimeType), Boolean.parseBoolean(penalty)), data);
+        final ChargeCreateRequest request = withAmortization(loanCharge(ChargeTimeType.valueOf(chargeTimeType),
+                Boolean.parseBoolean(penalty), Utils.randomStringGenerator("AMORTIZED_FEE_", 8)), data);
         assertFailure(fail(() -> fineractClient.charges().createCharge(request)), data);
     }
 
@@ -124,13 +127,13 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
         return chargeId;
     }
 
-    private static ChargeCreateRequest loanCharge(final ChargeTimeType chargeTimeType, final boolean penalty) {
+    private static ChargeCreateRequest loanCharge(final ChargeTimeType chargeTimeType, final boolean penalty, final String chargeName) {
         return new ChargeCreateRequest() //
                 .chargeAppliesTo(ChargeProductAppliesTo.LOAN.value) //
                 .chargeTimeType(chargeTimeType.value) //
                 .chargeCalculationType(ChargeCalculationType.FLAT.value) //
                 .chargePaymentMode(ChargePaymentMode.REGULAR.value) //
-                .name(Utils.randomStringGenerator("AMORTIZED_FEE_", 8)) //
+                .name(chargeName) //
                 .amount(10.0D) //
                 .active(true) //
                 .currencyCode(CURRENCY_CODE) //

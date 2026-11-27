@@ -34,6 +34,7 @@ public class ProgressiveLoanStatusChangePlatformServiceImpl {
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final CapitalizedIncomePlatformService capitalizedIncomeWritePlatformService;
+    private final LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService;
 
     @PostConstruct
     public void addListeners() {
@@ -48,6 +49,7 @@ public class ProgressiveLoanStatusChangePlatformServiceImpl {
             log.debug("Loan Status change for loan {}", loan.getId());
             if (!event.getOldStatus().isSubmittedAndPendingApproval() && loan.isApproved()) {
                 capitalizedIncomeWritePlatformService.resetBalance(loan.getId());
+                loanDeferredChargeWritePlatformService.resetBalance(loan.getId());
             }
         }
     }

@@ -203,7 +203,8 @@ class LoanChargeWritePlatformServiceImplTest {
         // build the real services around the mocks, as @InjectMocks did for the single class before the split
         final LoanChargeWriteHelper loanChargeWriteHelper = new LoanChargeWriteHelper(loanChargeRepository, loanUtilService, null,
                 configurationDomainService, loanAccrualsProcessingService, loanChargeValidator, loanScheduleService,
-                reprocessLoanTransactionsService, loanAccountService, loanChargeService);
+                reprocessLoanTransactionsService, loanAccountService, loanChargeService,
+                mock(LoanDeferredChargeWritePlatformService.class));
         loanChargeWritePlatformService = new LoanChargeWritePlatformServiceImpl(
                 new LoanChargeAddUpdateWritePlatformService(loanChargeApiJsonValidator, loanAssembler, chargeRepository,
                         businessEventNotifierService, loanTransactionRepository, null, loanAccountDomainService, null, loanUtilService,
