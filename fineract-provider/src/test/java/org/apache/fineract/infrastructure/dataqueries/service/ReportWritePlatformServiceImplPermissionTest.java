@@ -81,7 +81,7 @@ class ReportWritePlatformServiceImplPermissionTest {
     @BeforeEach
     void setUp() {
         when(reportingProcessServiceProvider.findAllReportingTypes()).thenReturn(List.of("Table"));
-        report = new Report("Old name", "Table", null, "Client", "desc", true, "select 1", List.of("Table"));
+        report = new Report("Old name", "Table", null, "Client", "desc", true, "select 1");
         when(reportRepository.findById(REPORT_ID)).thenReturn(Optional.of(report));
         service = new ReportWritePlatformServiceImpl(context, fromApiJsonDeserializer, reportRepository, reportParameterRepository,
                 reportParameterUsageRepository, permissionRepository, roleRepository, reportingProcessServiceProvider);

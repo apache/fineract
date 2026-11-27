@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.calendar.service;
 
+import static org.apache.fineract.portfolio.calendar.CalendarConstants.CALENDAR_RESOURCE_NAME;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -128,6 +130,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final String recurrence = repeating ? Calendar.constructRecurrence(CalendarFrequencyType.fromInt(request.getFrequency()),
                 request.getInterval(), request.getRepeatsOnDay(), request.getRepeatsOnNthDayOfMonth(),
                 request.getRepeatsOnLastWeekdayOfMonth(), request.getRepeatsOnDayOfMonth()) : null;
+        validateCollectionCalendarRepeats(request.getTypeId(), repeating);
         final Calendar newCalendar = new Calendar(request.getTitle(), request.getDescription(), request.getLocation(), startDate, endDate,
                 request.getDuration(), request.getTypeId(), repeating, recurrence, request.getRemindById(), request.getFirstReminder(),
                 request.getSecondReminder(), meetingTime);
@@ -294,6 +297,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         } else {
             changes = calendarForUpdate.update(request, startDate, endDate, meetingTime, areActiveEntitiesSynced);
+            // checked on the updated calendar, after the start date and calendar type checks of the update, as before
+            validateCollectionCalendarRepeats(calendarForUpdate.getTypeId(), calendarForUpdate.isRepeating());
         }
 
         if (!changes.isEmpty()) {
@@ -336,6 +341,19 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             throw new CalendarEntityTypeNotSupportedException(entityType);
         }
         return calendarEntityType;
+    }
+
+    /**
+     * A collection calendar has to repeat. A calendar of another type may or may not repeat.
+     */
+    private static void validateCollectionCalendarRepeats(final Integer typeId, final boolean repeating) {
+        if (CalendarType.fromInt(typeId).isCollection() && !repeating) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME)
+                    .parameter(CalendarSupportedParameters.REPEATING.getValue())
+                    .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private static void validateForUpdate(final CalendarUpdateRequest request) {

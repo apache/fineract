@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ import com.google.gson.JsonElement;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -53,6 +55,9 @@ import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -283,8 +288,133 @@ class ReportWritePlatformServiceImplTest {
         verify(reportRepository, never()).saveAndFlush(any(Report.class));
     }
 
+    // ------------------------------------------------------------- validation of the report
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidReports")
+    void createReportRejectsAnInvalidReportWithTheExpectedErrors(final String name, final String json, final List<String> expectedErrors) {
+        when(reportingProcessServiceProvider.findAllReportingTypes()).thenReturn(List.of("Table", "Chart", "Pentaho"));
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> service.createReport(command(json)));
+
+        assertEquals(expectedErrors, errors(exception));
+        verify(reportRepository, never()).saveAndFlush(any(Report.class));
+    }
+
+    private static Stream<Arguments> invalidReports() {
+        final String hundredAndOneCharacters = "a".repeat(101);
+        final String fortySixCharacters = "b".repeat(46);
+        return Stream.of(Arguments.of("missing name", """
+                {"reportType": "Table", "reportSql": "select 1"}
+                """, List.of("reportName: validation.msg.report.reportName.cannot.be.blank")),
+                Arguments.of("name too long",
+                        "{\"reportName\": \"" + hundredAndOneCharacters + "\", \"reportType\": \"Table\", \"reportSql\": \"select 1\"}",
+                        List.of("reportName: validation.msg.report.reportName.exceeds.max.length")),
+                Arguments.of("missing type", """
+                        {"reportName": "R"}
+                        """,
+                        List.of("reportType: validation.msg.report.reportType.cannot.be.blank",
+                                "reportType: validation.msg.report.reportType.is.not.one.of.expected.enumerations")),
+                Arguments.of("unknown type", """
+                        {"reportName": "R", "reportType": "Pivot", "reportSql": "select 1"}
+                        """,
+                        List.of("reportType: validation.msg.report.reportType.is.not.one.of.expected.enumerations",
+                                "reportSql: validation.msg.report.reportSql.cannot.also.be.provided.when.reportType.is.Pivot")),
+                Arguments.of("sub type too long on a table", """
+                        {"reportName": "R", "reportType": "Table", "reportSubType": "123456789012345678901", "reportSql": "select 1"}
+                        """,
+                        List.of("reportSubType: validation.msg.report.reportSubType.exceeds.max.length",
+                                "reportSubType: validation.msg.report.reportSubType.cannot.also.be.provided.when.reportType.is.Table")),
+                Arguments.of("chart without sub type", """
+                        {"reportName": "R", "reportType": "Chart", "reportSql": "select 1"}
+                        """,
+                        List.of("reportSubType: validation.msg.report.reportSubType.must.be.provided.when.reportType.is.Chart",
+                                "reportSubType: validation.msg.report.reportSubType.is.not.one.of.expected.enumerations")),
+                Arguments.of("chart with an unknown sub type", """
+                        {"reportName": "R", "reportType": "Chart", "reportSubType": "Line", "reportSql": "select 1"}
+                        """, List.of("reportSubType: validation.msg.report.reportSubType.is.not.one.of.expected.enumerations")),
+                Arguments.of("table with a sub type", """
+                        {"reportName": "R", "reportType": "Table", "reportSubType": "Bar", "reportSql": "select 1"}
+                        """,
+                        List.of("reportSubType: validation.msg.report.reportSubType.cannot.also.be.provided.when.reportType.is.Table")),
+                Arguments.of("category too long",
+                        "{\"reportName\": \"R\", \"reportType\": \"Table\", \"reportCategory\": \"" + fortySixCharacters
+                                + "\", \"reportSql\": \"select 1\"}",
+                        List.of("reportCategory: validation.msg.report.reportCategory.exceeds.max.length")),
+                Arguments.of("table without sql", """
+                        {"reportName": "R", "reportType": "Table"}
+                        """, List.of("reportSql: validation.msg.report.reportSql.must.be.provided.when.reportType.is.Table")),
+                Arguments.of("chart without sql", """
+                        {"reportName": "R", "reportType": "Chart", "reportSubType": "Pie"}
+                        """, List.of("reportSql: validation.msg.report.reportSql.must.be.provided.when.reportType.is.Chart")),
+                Arguments.of("other type with sql", """
+                        {"reportName": "R", "reportType": "Pentaho", "reportSql": "select 1"}
+                        """, List.of("reportSql: validation.msg.report.reportSql.cannot.also.be.provided.when.reportType.is.Pentaho")),
+                Arguments.of("several errors keep the order of the checks",
+                        "{\"reportType\": \"Table\", \"reportCategory\": \"" + fortySixCharacters + "\"}",
+                        List.of("reportName: validation.msg.report.reportName.cannot.be.blank",
+                                "reportCategory: validation.msg.report.reportCategory.exceeds.max.length",
+                                "reportSql: validation.msg.report.reportSql.must.be.provided.when.reportType.is.Table")));
+    }
+
+    @Test
+    void createReportAcceptsAChartWithASubTypeAndAnOtherTypeWithoutSql() {
+        when(reportingProcessServiceProvider.findAllReportingTypes()).thenReturn(List.of("Table", "Chart", "Pentaho"));
+
+        service.createReport(command("""
+                {"reportName": "Chart report", "reportType": "Chart", "reportSubType": "Bar", "reportSql": "select 1"}
+                """));
+        service.createReport(command("""
+                {"reportName": "Pentaho report", "reportType": "Pentaho"}
+                """));
+
+        verify(reportRepository, times(2)).saveAndFlush(any(Report.class));
+    }
+
+    @Test
+    void createReportValidatesBeforeLookingUpTheReportParameters() {
+        assertThrows(PlatformApiDataValidationException.class, () -> service.createReport(command("""
+                {"reportType": "Table", "reportSql": "select 1", "reportParameters": [{"parameterId": 1}]}
+                """)));
+
+        verify(reportParameterRepository, never()).findById(any());
+    }
+
+    @Test
+    void updateReportValidatesTheMergedReport() {
+        existingReport();
+        when(reportingProcessServiceProvider.findAllReportingTypes()).thenReturn(List.of("Table", "Chart"));
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> service.updateReport(REPORT_ID, command("""
+                        {"reportType": "Chart"}
+                        """)));
+
+        assertEquals(List.of("reportSubType: validation.msg.report.reportSubType.must.be.provided.when.reportType.is.Chart",
+                "reportSubType: validation.msg.report.reportSubType.is.not.one.of.expected.enumerations"), errors(exception));
+        verify(reportRepository, never()).saveAndFlush(any(Report.class));
+    }
+
+    @Test
+    void updateOfACoreReportReportsAValidationErrorBeforeTheCoreReportRule() {
+        final Report report = existingReport();
+        ReflectionTestUtils.setField(report, "coreReport", true);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> service.updateReport(REPORT_ID, command("""
+                        {"reportSql": ""}
+                        """)));
+
+        assertEquals(List.of("reportSql: validation.msg.report.reportSql.must.be.provided.when.reportType.is.Table"), errors(exception));
+    }
+
+    private static List<String> errors(final PlatformApiDataValidationException exception) {
+        return exception.getErrors().stream().map(e -> e.getParameterName() + ": " + e.getUserMessageGlobalisationCode()).toList();
+    }
+
     private Report existingReport() {
-        final Report report = new Report("Client list", "Table", null, "Client", "All clients", false, "select 1", List.of("Table"));
+        final Report report = new Report("Client list", "Table", null, "Client", "All clients", false, "select 1");
         when(reportRepository.findById(REPORT_ID)).thenReturn(Optional.of(report));
         return report;
     }

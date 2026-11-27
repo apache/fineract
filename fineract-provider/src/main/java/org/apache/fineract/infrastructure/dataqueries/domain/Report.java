@@ -25,16 +25,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
@@ -73,7 +67,7 @@ public final class Report extends AbstractPersistableCustom<Long> {
     }
 
     public Report(final String reportName, final String reportType, final String reportSubType, final String reportCategory,
-            final String description, final boolean useReport, final String reportSql, final Collection<String> reportTypes) {
+            final String description, final boolean useReport, final String reportSql) {
         this.reportName = reportName;
         this.reportType = reportType;
         this.reportSubType = reportSubType;
@@ -82,7 +76,6 @@ public final class Report extends AbstractPersistableCustom<Long> {
         this.coreReport = false;
         this.useReport = useReport;
         this.reportSql = reportSql;
-        validate(reportTypes);
     }
 
     public void updateReportName(final String reportName) {
@@ -126,48 +119,6 @@ public final class Report extends AbstractPersistableCustom<Long> {
             }
         }
         return reportParameterUsage;
-    }
-
-    public void validate(final Collection<String> reportTypes) {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("report");
-
-        baseDataValidator.reset().parameter("reportName").value(this.reportName).notBlank().notExceedingLengthOf(100);
-
-        baseDataValidator.reset().parameter("reportType").value(this.reportType).notBlank().isOneOfTheseValues(reportTypes.toArray());
-
-        baseDataValidator.reset().parameter("reportSubType").value(this.reportSubType).notExceedingLengthOf(20);
-
-        if (StringUtils.isNotBlank(this.reportType)) {
-            if (this.reportType.equals("Chart")) {
-                baseDataValidator.reset().parameter("reportSubType").value(this.reportSubType)
-                        .cantBeBlankWhenParameterProvidedIs("reportType", this.reportType)
-                        .isOneOfTheseValues(new Object[] { "Bar", "Pie" });
-            } else {
-                baseDataValidator.reset().parameter("reportSubType").value(this.reportSubType)
-                        .mustBeBlankWhenParameterProvidedIs("reportType", this.reportType);
-            }
-        }
-
-        baseDataValidator.reset().parameter("reportCategory").value(this.reportCategory).notExceedingLengthOf(45);
-
-        if (StringUtils.isNotBlank(this.reportType)) {
-            if (this.reportType.equals("Table") || this.reportType.equals("Chart")) {
-                baseDataValidator.reset().parameter("reportSql").value(this.reportSql).cantBeBlankWhenParameterProvidedIs("reportType",
-                        this.reportType);
-            } else {
-                baseDataValidator.reset().parameter("reportSql").value(this.reportSql).mustBeBlankWhenParameterProvidedIs("reportType",
-                        this.reportType);
-            }
-        }
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
     }
 
     public String getReportName() {

@@ -35,7 +35,9 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarDeleteRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
@@ -47,6 +49,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarHistoryRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
+import org.apache.fineract.portfolio.calendar.exception.CalendarDateException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarDeleteNotAllowedException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarEntityTypeNotSupportedException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
@@ -57,9 +60,11 @@ import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.meeting.domain.MeetingRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class CalendarWritePlatformServiceJpaRepositoryImplTest {
 
@@ -75,6 +80,7 @@ class CalendarWritePlatformServiceJpaRepositoryImplTest {
 
     @BeforeEach
     void setUp() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
         calendarRepository = mock(CalendarRepository.class);
         calendarInstanceRepository = mock(CalendarInstanceRepository.class);
         groupRepository = mock(GroupRepositoryWrapper.class);
@@ -91,6 +97,11 @@ class CalendarWritePlatformServiceJpaRepositoryImplTest {
         when(groupRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(group);
         when(calendarRepository.saveAndFlush(any(Calendar.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(calendarInstanceRepository.countOfLoansSyncedWithCalendar(any(), any())).thenReturn(0);
+    }
+
+    @AfterEach
+    void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
@@ -332,6 +343,100 @@ class CalendarWritePlatformServiceJpaRepositoryImplTest {
                 1, null);
         when(calendarRepository.findById(CALENDAR_ID)).thenReturn(Optional.of(calendar));
         return calendar;
+    }
+
+    // ------------------------------------------------------------- a collection calendar must repeat
+
+    @Test
+    void createRejectsACollectionCalendarThatDoesNotRepeat() {
+        assertMustRepeatRejection(() -> service.createCalendar(createRequest().build()));
+
+        verify(calendarRepository, never()).saveAndFlush(any(Calendar.class));
+    }
+
+    @Test
+    void createReportsACollectionCalendarThatDoesNotRepeatAloneAndBeforeTheStartDateError() {
+        // the start date is before the activation date of the group, which is reported when there is no other error
+        assertMustRepeatRejection(() -> service.createCalendar(createRequest().startDate("04 March 2023").build()));
+    }
+
+    @Test
+    void createReportsTheStartDateErrorForACalendarThatMayNotRepeat() {
+        assertThatThrownBy(() -> service.createCalendar(createRequest().typeId(4).startDate("04 March 2023").build()))
+                .isInstanceOfSatisfying(PlatformApiDataValidationException.class,
+                        e -> assertThat(e.getErrors()).extracting(ApiParameterError::getUserMessageGlobalisationCode)
+                                .containsExactly("validation.msg.calendar.cannot.be.before.groups.activation.date"));
+    }
+
+    @Test
+    void updateRejectsTurningOffRepeatingOfACollectionCalendar() {
+        storedWeeklyCalendar();
+
+        assertMustRepeatRejection(() -> service.updateCalendar(updateRequest().repeating(false).build()));
+
+        verify(calendarRepository, never()).saveAndFlush(any(Calendar.class));
+    }
+
+    @Test
+    void updateRejectsACollectionCalendarThatIsStoredAsNotRepeatingEvenWhenRepeatingIsNotSent() {
+        final Calendar calendar = storedWeeklyCalendar();
+        ReflectionTestUtils.setField(calendar, "repeating", false);
+
+        assertMustRepeatRejection(() -> service.updateCalendar(updateRequest().title("New title").build()));
+
+        verify(calendarRepository, never()).saveAndFlush(any(Calendar.class));
+    }
+
+    @Test
+    void updateAcceptsTurningOffRepeatingOfACalendarThatMayNotRepeat() {
+        final Calendar calendar = new Calendar("Meeting", null, null, LocalDate.of(2024, 3, 4), null, null, 4, true,
+                "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", null, null, null, null);
+        when(calendarRepository.findById(CALENDAR_ID)).thenReturn(Optional.of(calendar));
+
+        service.updateCalendar(updateRequest().repeating(false).build());
+
+        assertThat(calendar.isRepeating()).isFalse();
+        assertThat(calendar.getRecurrence()).isNull();
+    }
+
+    @Test
+    void updateReportsAStartDateInThePastBeforeTheCollectionCalendarError() {
+        storedWeeklyCalendar();
+
+        assertThatThrownBy(() -> service.updateCalendar(updateRequest().repeating(false).startDate("04 March 2020").build()))
+                .isInstanceOfSatisfying(CalendarDateException.class,
+                        e -> assertThat(e.getGlobalisationMessageCode()).isEqualTo("error.msg.calendar.new.start.date.cannot.be.in.past"));
+    }
+
+    @Test
+    void updateReportsAChangeOfTheCalendarTypeBeforeTheCollectionCalendarError() {
+        storedWeeklyCalendar();
+
+        assertThatThrownBy(() -> service.updateCalendar(updateRequest().repeating(false).typeId(4).build())).isInstanceOfSatisfying(
+                CalendarParameterUpdateNotSupportedException.class,
+                e -> assertThat(e.getGlobalisationMessageCode()).isEqualTo("error.msg.calendar.update.of.meeting.type.is.not.supported"));
+    }
+
+    @Test
+    void updateOfTheMeetingDatesDoesNotCheckTheRepeatingFlag() {
+        final Calendar calendar = storedWeeklyCalendar();
+
+        service.updateCalendar(updateRequest().reschedulebasedOnMeetingDates(true).newMeetingDate("01 January 2100")
+                .presentMeetingDate("04 March 2024").repeating(false).build());
+
+        assertThat(calendar.isRepeating()).isTrue();
+        assertThat(calendar.getStartDate()).isEqualTo(LocalDate.of(2100, 1, 1));
+    }
+
+    private static void assertMustRepeatRejection(final Runnable call) {
+        assertThatThrownBy(call::run).isInstanceOfSatisfying(PlatformApiDataValidationException.class, e -> {
+            assertThat(e.getGlobalisationMessageCode()).isEqualTo("validation.msg.validation.errors.exist");
+            assertThat(e.getErrors()).hasSize(1);
+            final ApiParameterError error = e.getErrors().get(0);
+            assertThat(error.getUserMessageGlobalisationCode()).isEqualTo("validation.msg.calendar.must.repeat.for.collection.calendar");
+            assertThat(error.getDefaultUserMessage()).isEqualTo("Failed data validation due to: must.repeat.for.collection.calendar.");
+            assertThat(error.getParameterName()).isEqualTo("repeating");
+        });
     }
 
     @Test
