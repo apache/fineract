@@ -33,6 +33,8 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.command.StaffCreateCommand;
 import org.apache.fineract.organisation.staff.data.StaffCreateResponse;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -53,6 +55,7 @@ public class StaffImportHandler implements ImportHandler {
     private final CommandDispatcher dispatcher;
     private final StaffDataMapper staffDataMapper;
     private final StaffDateMapper staffDateMapper;
+    private final PlatformSecurityContext context;
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
@@ -108,6 +111,9 @@ public class StaffImportHandler implements ImportHandler {
                 request.setJoiningDate(staffDateMapper.map(staff.getJoiningDate(), staff.getDateFormat()));
 
                 command.setPayload(request);
+                if (this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CREATE_STAFF")) {
+                    throw new NoAuthorizationException("User has no authority to create staff");
+                }
 
                 final Supplier<StaffCreateResponse> response = dispatcher.dispatch(command);
 
