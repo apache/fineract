@@ -116,56 +116,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         final List<LoanTransaction> transactionsToBeProcessed = new ArrayList<>();
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             if (loanTransaction.isChargePayment()) {
-                List<LoanChargePaidDetail> chargePaidDetails = new ArrayList<>();
-                final Set<LoanChargePaidBy> chargesPaidBy = loanTransaction.getLoanChargesPaid();
-                final Set<LoanCharge> transferCharges = new HashSet<>();
-                for (final LoanChargePaidBy chargePaidBy : chargesPaidBy) {
-                    LoanCharge loanCharge = chargePaidBy.getLoanCharge();
-                    transferCharges.add(loanCharge);
-                    if (loanCharge.isInstalmentFee()) {
-                        chargePaidDetails.addAll(loanCharge.fetchRepaymentInstallment(currency));
-                    }
-                }
-                LocalDate startDate = disbursementDate;
-                int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
-                for (final LoanRepaymentScheduleInstallment installment : installments) {
-                    boolean isFirstPeriod = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
-                    for (final LoanCharge loanCharge : transferCharges) {
-                        boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(), isFirstPeriod);
-                        if (isDue) {
-                            Money chargeAmountDue = loanCharge.getAmount(currency);
-                            if (chargeAmountDue.isGreaterThan(loanTransaction.getAmount(currency))) {
-                                chargeAmountDue = loanTransaction.getAmount(currency);
-                            }
-                            LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(chargeAmountDue, installment,
-                                    loanCharge.isFeeCharge());
-                            chargePaidDetails.add(chargePaidDetail);
-                            break;
-                        }
-                    }
-                    startDate = installment.getDueDate();
-                }
-                loanTransaction.resetDerivedComponents();
-                Money unprocessedAmount = loanTransaction.getAmount(currency);
-                for (LoanChargePaidDetail chargePaidDetail : chargePaidDetails) {
-                    final List<LoanRepaymentScheduleInstallment> processInstallments = new ArrayList<>(1);
-                    processInstallments.add(chargePaidDetail.getInstallment());
-                    Money amountToApply = chargePaidDetail.getAmount();
-                    if (amountToApply.isGreaterThan(unprocessedAmount)) {
-                        amountToApply = unprocessedAmount;
-                    }
-                    unprocessedAmount = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges,
-                            amountToApply, chargePaidDetail.isFeeCharge());
-                    if (!unprocessedAmount.isGreaterThanZero()) {
-                        break;
-                    }
-                }
-
-                if (unprocessedAmount.isGreaterThanZero()) {
-                    onLoanOverpayment(loanTransaction, unprocessedAmount);
-                    loanTransaction.setOverPayments(unprocessedAmount);
-                }
-
+                reprocessChargePaymentTransaction(loanTransaction, disbursementDate, currency, installments);
             } else {
                 transactionsToBeProcessed.add(loanTransaction);
             }
@@ -231,6 +182,59 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
         reprocessInstallments(disbursementDate, transactionsToBeProcessed, installments, currency);
         return changedTransactionDetail;
+    }
+
+    private void reprocessChargePaymentTransaction(final LoanTransaction loanTransaction, final LocalDate disbursementDate,
+            final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments) {
+        List<LoanChargePaidDetail> chargePaidDetails = new ArrayList<>();
+        final Set<LoanChargePaidBy> chargesPaidBy = loanTransaction.getLoanChargesPaid();
+        final Set<LoanCharge> transferCharges = new HashSet<>();
+        for (final LoanChargePaidBy chargePaidBy : chargesPaidBy) {
+            LoanCharge loanCharge = chargePaidBy.getLoanCharge();
+            transferCharges.add(loanCharge);
+            if (loanCharge.isInstalmentFee()) {
+                chargePaidDetails.addAll(loanCharge.fetchRepaymentInstallment(currency));
+            }
+        }
+        LocalDate startDate = disbursementDate;
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            boolean isFirstPeriod = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
+            for (final LoanCharge loanCharge : transferCharges) {
+                boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(), isFirstPeriod);
+                if (isDue) {
+                    Money chargeAmountDue = loanCharge.getAmount(currency);
+                    if (chargeAmountDue.isGreaterThan(loanTransaction.getAmount(currency))) {
+                        chargeAmountDue = loanTransaction.getAmount(currency);
+                    }
+                    LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(chargeAmountDue, installment,
+                            loanCharge.isFeeCharge());
+                    chargePaidDetails.add(chargePaidDetail);
+                    break;
+                }
+            }
+            startDate = installment.getDueDate();
+        }
+        loanTransaction.resetDerivedComponents();
+        Money unprocessedAmount = loanTransaction.getAmount(currency);
+        for (LoanChargePaidDetail chargePaidDetail : chargePaidDetails) {
+            final List<LoanRepaymentScheduleInstallment> processInstallments = new ArrayList<>(1);
+            processInstallments.add(chargePaidDetail.getInstallment());
+            Money amountToApply = chargePaidDetail.getAmount();
+            if (amountToApply.isGreaterThan(unprocessedAmount)) {
+                amountToApply = unprocessedAmount;
+            }
+            unprocessedAmount = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges,
+                    amountToApply, chargePaidDetail.isFeeCharge());
+            if (!unprocessedAmount.isGreaterThanZero()) {
+                break;
+            }
+        }
+
+        if (unprocessedAmount.isGreaterThanZero()) {
+            onLoanOverpayment(loanTransaction, unprocessedAmount);
+            loanTransaction.setOverPayments(unprocessedAmount);
+        }
     }
 
     @Override
