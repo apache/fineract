@@ -41,10 +41,8 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.annotation.LegacyApiResponse;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
 import org.apache.fineract.useradministration.service.PasswordValidationPolicyReadPlatformService;
@@ -60,8 +58,6 @@ public class PasswordPreferencesApiResource {
 
     private final PlatformSecurityContext context;
     private final PasswordValidationPolicyReadPlatformService passwordValidationPolicyReadPlatformService;
-    private final DefaultToApiJsonSerializer<PasswordValidationPolicyData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -71,16 +67,15 @@ public class PasswordPreferencesApiResource {
     @Operation(summary = "List Password Preferences", operationId = "retrieveAllPasswordPreferences", description = "Returns the password policies and their current status (active/inactive).", tags = {
             "Password preferences" })
     @AlternativeOperationId("retrieve_1")
-    public String retrieve(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "active", "description" })
+    public PasswordValidationPolicyData retrieve(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
 
         final PasswordValidationPolicyData passwordValidationPolicyData = this.passwordValidationPolicyReadPlatformService
                 .retrieveActiveValidationPolicy();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, passwordValidationPolicyData,
-                PasswordPreferencesApiConstants.RESPONSE_DATA_PARAMETERS);
+        return passwordValidationPolicyData;
     }
 
     @PUT
@@ -91,7 +86,8 @@ public class PasswordPreferencesApiResource {
     @AlternativeOperationId("update_25")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
-    public String update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @LegacyApiResponse
+    public CommandProcessingResult update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updatePasswordPreferences() //
@@ -100,7 +96,7 @@ public class PasswordPreferencesApiResource {
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @GET
@@ -111,13 +107,13 @@ public class PasswordPreferencesApiResource {
     @AlternativeOperationId("template_21")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class)))) })
-    public String template(@Context final UriInfo uriInfo) {
+    @LegacyApiResponse({ "id", "active", "description" })
+    public Collection<PasswordValidationPolicyData> template(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
 
         final Collection<PasswordValidationPolicyData> validationPolicies = this.passwordValidationPolicyReadPlatformService.retrieveAll();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, validationPolicies, PasswordPreferencesApiConstants.RESPONSE_DATA_PARAMETERS);
+        return validationPolicies;
     }
 
 }
