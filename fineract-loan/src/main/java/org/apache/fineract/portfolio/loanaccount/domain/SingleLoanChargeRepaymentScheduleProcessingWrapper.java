@@ -261,8 +261,8 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
     }
 
     /**
-     * Adds a charge-only installment for the latest charge with a specific due date, if that charge falls after the last
-     * installment of the schedule.
+     * Adds a charge-only installment for the latest charge with a specific due date, if that charge falls after the
+     * last installment of the schedule.
      */
     public void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges, List<LoanRepaymentScheduleInstallment> installments) {
         LoanCharge latestCharge = getLatestLoanChargeWithSpecificDueDate(charges);

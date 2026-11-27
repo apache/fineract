@@ -27,8 +27,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 
 /**
- * Selects loan charges from an unordered set of charges: filters them by kind (fee or penalty) and finds the next charge
- * to pay or to undo, following the order in which charges are paid.
+ * Selects loan charges from an unordered set of charges: filters them by kind (fee or penalty) and finds the next
+ * charge to pay or to undo, following the order in which charges are paid.
  */
 final class LoanChargeSelector {
 

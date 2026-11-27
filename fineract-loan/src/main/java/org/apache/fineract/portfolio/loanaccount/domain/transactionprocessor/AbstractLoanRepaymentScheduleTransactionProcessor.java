@@ -188,8 +188,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             loanTransaction.reverse();
             changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, loanTransaction));
         } else if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
-            loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
-                    newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
+            loanTransaction
+                    .updateLoanTransactionToRepaymentScheduleMappings(newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
         } else {
             createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
         }
@@ -236,8 +236,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (amountToApply.isGreaterThan(unprocessedAmount)) {
                 amountToApply = unprocessedAmount;
             }
-            unprocessedAmount = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges,
-                    amountToApply, chargePaidDetail.isFeeCharge());
+            unprocessedAmount = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges, amountToApply,
+                    chargePaidDetail.isFeeCharge());
             if (!unprocessedAmount.isGreaterThanZero()) {
                 break;
             }
