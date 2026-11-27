@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service.schedule;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -56,7 +57,7 @@ public class LoanScheduleComponent {
             }
         }
         // Review Installments removed
-        loan.getRepaymentScheduleInstallments().removeIf(i -> !existInstallment(periods, i.getInstallmentNumber()));
+        removeInstallments(loan, i -> !existInstallment(periods, i.getInstallmentNumber()));
 
         loan.updateLoanScheduleDependentDerivedFields();
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
@@ -73,10 +74,20 @@ public class LoanScheduleComponent {
             }
         }
         // Review Installments removed
-        loan.getRepaymentScheduleInstallments().removeIf(i -> !existInstallment(installments, i.getInstallmentNumber()));
+        removeInstallments(loan, i -> !existInstallment(installments, i.getInstallmentNumber()));
 
         loan.updateLoanScheduleDependentDerivedFields();
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
+    }
+
+    private void removeInstallments(final Loan loan, final Predicate<LoanRepaymentScheduleInstallment> filter) {
+        loan.getRepaymentScheduleInstallments().removeIf(installment -> {
+            if (!filter.test(installment)) {
+                return false;
+            }
+            installment.removeInstallmentCharges();
+            return true;
+        });
     }
 
     private LoanRepaymentScheduleInstallment findByInstallmentNumber(final Collection<LoanRepaymentScheduleInstallment> installments,

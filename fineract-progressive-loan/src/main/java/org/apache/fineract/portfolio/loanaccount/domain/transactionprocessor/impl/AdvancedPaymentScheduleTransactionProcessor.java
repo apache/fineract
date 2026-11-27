@@ -231,8 +231,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
         // Remove re-aged and additional (N+1) installments (if applicable), those will be recreated during the
         // reprocessing
-        installments.removeIf(LoanRepaymentScheduleInstallment::isReAged);
-        installments.removeIf(LoanRepaymentScheduleInstallment::isAdditional);
+        InstallmentProcessingHelper.removeInstallmentsIf(installments, LoanRepaymentScheduleInstallment::isReAged);
+        InstallmentProcessingHelper.removeInstallmentsIf(installments, LoanRepaymentScheduleInstallment::isAdditional);
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetBalances();
@@ -3738,7 +3738,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate))
                 .forEach(i -> liftedLoanCharges.addAll(getLoanChargesOfInstallment(ctx, i, 1)));
 
-        installments.removeIf(i -> i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate));
+        InstallmentProcessingHelper.removeInstallmentsIf(installments,
+                i -> i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate));
 
         final ListIterator<LoanRepaymentScheduleInstallment> iterator = installments.listIterator();
 
@@ -4291,9 +4292,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         // an additional installment that falls within the re-aged schedule is dropped, unless something was paid,
         // waived or written off on it: its outstanding amounts were lifted above, so it holds only what settled it,
         // which must stay settled
-        installments.removeIf(i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
-                && !i.isAdditional())
-                || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && !hasSettledAmounts(i, currency)));
+        InstallmentProcessingHelper.removeInstallmentsIf(installments,
+                i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
+                        && !i.isAdditional())
+                        || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && !hasSettledAmounts(i, currency)));
 
         installments.stream().filter(i -> i.isAdditional() && i.getDueDate().isAfter(model.getMaturityDate())).forEach(i -> {
             i.setFromDate(model.getMaturityDate());
@@ -4356,7 +4358,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 installments.add(created);
             }
         }
-        normalInstallmentsMarkedForRemoval.forEach(installments::remove);
+        normalInstallmentsMarkedForRemoval.forEach(i -> InstallmentProcessingHelper.removeInstallment(installments, i));
         reprocessInstallments(installments);
 
     }
@@ -4447,7 +4449,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         && stubToMerge.getTotalPaid(currency).isZero()) {
                     firstReAgeInstallmentProps = new FirstReAgeInstallmentProps(stubToMerge.getInstallmentNumber(),
                             stubToMerge.getFromDate());
-                    installments.remove(stubToMerge);
+                    InstallmentProcessingHelper.removeInstallment(installments, stubToMerge);
                 }
             }
 
@@ -4517,7 +4519,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .filter(i -> i != null && !i.isAdditional() && !i.isDownPayment() && i.getInstallmentNumber() != null
                         && i.getInstallmentNumber() > lastReAgedInstallmentNumber && i.getTotalPaid(currency).isZero())
                 .toList();
-        toRemove.forEach(installments::remove);
+        toRemove.forEach(i -> InstallmentProcessingHelper.removeInstallment(installments, i));
         reprocessInstallments(installments);
     }
 
@@ -4706,7 +4708,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 interestToLift = interestToLift.minus(liftedInterest);
             }
             if (installment.getDue(currency).isZero() && installment.getTotalPaid(currency).isZero()) {
-                installments.remove(installment);
+                InstallmentProcessingHelper.removeInstallment(installments, installment);
             }
         }
     }

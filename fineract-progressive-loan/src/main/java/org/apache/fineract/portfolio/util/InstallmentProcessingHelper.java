@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.util;
 
 import java.util.List;
+import java.util.function.Predicate;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
 public final class InstallmentProcessingHelper {
@@ -29,5 +30,31 @@ public final class InstallmentProcessingHelper {
             final int installmentNumber) {
         installments.stream().filter(i -> i.getInstallmentNumber() != null && i.getInstallmentNumber() >= installmentNumber)
                 .forEach(i -> i.setInstallmentNumber(i.getInstallmentNumber() + 1));
+    }
+
+    /**
+     * Removes the installments that match the filter from the repayment schedule, together with their installment
+     * charges, see {@link LoanRepaymentScheduleInstallment#removeInstallmentCharges()}.
+     */
+    public static void removeInstallmentsIf(final List<LoanRepaymentScheduleInstallment> installments,
+            final Predicate<LoanRepaymentScheduleInstallment> filter) {
+        installments.removeIf(installment -> {
+            if (!filter.test(installment)) {
+                return false;
+            }
+            installment.removeInstallmentCharges();
+            return true;
+        });
+    }
+
+    /**
+     * Removes the installment from the repayment schedule, together with its installment charges, see
+     * {@link LoanRepaymentScheduleInstallment#removeInstallmentCharges()}.
+     */
+    public static void removeInstallment(final List<LoanRepaymentScheduleInstallment> installments,
+            final LoanRepaymentScheduleInstallment installment) {
+        if (installments.remove(installment)) {
+            installment.removeInstallmentCharges();
+        }
     }
 }
