@@ -331,6 +331,60 @@ public class FeignLoanReAgedChargeScheduleRebuildTest extends FeignLoanTestBase 
     }
 
     /**
+     * The installment fee that the re-age took over is waived on a re-aged installment. The waiver must stay on that
+     * installment, and the schedule must agree with the loan.
+     */
+    @Test
+    void waiveInstallmentFeeOfReAgedInstallment() {
+        runAt(DISBURSEMENT_DATE, () -> {
+            Long loanId = createDisbursedLoan();
+            Long loanChargeId = addLoanCharge(loanId, createInstallmentFeeCharge(2.0), null, 2.0).getResourceId();
+
+            updateBusinessDate(RE_AGE_DATE);
+            reAgeLoan(loanId, PAYABLE_INTEREST);
+            GetLoansLoanIdRepaymentPeriod reAgedInstallment = firstReAgedInstallment(loanId);
+            assertThat(reAgedInstallment.getFeeChargesOutstanding()).as("Installment fee taken over by the re-age")
+                    .isEqualByComparingTo(BigDecimal.valueOf(4));
+
+            waiveLoanCharge(loanId, loanChargeId, reAgedInstallment.getPeriod());
+
+            assertInstallmentFeeWaived(loanId, reAgedInstallment.getPeriod(), BigDecimal.valueOf(4));
+            assertLoanStaysUsable(loanId, RE_AGE_DATE);
+        });
+    }
+
+    /**
+     * The installment fee that the re-age took over is waived on a re-aged installment, then the early repayment is
+     * reversed. The replay creates the re-aged installments again, and the waiver must stay on the same installment
+     * with the amount it waived.
+     */
+    @Test
+    void reverseRepaymentAfterWaivingInstallmentFeeOfReAgedInstallment() {
+        runAt(DISBURSEMENT_DATE, () -> {
+            Long loanId = createDisbursedLoan();
+            Long loanChargeId = addLoanCharge(loanId, createInstallmentFeeCharge(2.0), null, 2.0).getResourceId();
+            Long repaymentId = repayEarly(loanId, EARLY_REPAYMENT);
+
+            updateBusinessDate(RE_AGE_DATE);
+            reAgeLoan(loanId, PAYABLE_INTEREST);
+            GetLoansLoanIdRepaymentPeriod reAgedInstallment = firstReAgedInstallment(loanId);
+            BigDecimal feeWaived = reAgedInstallment.getFeeChargesOutstanding();
+            assertThat(feeWaived).as("Installment fee taken over by the re-age").isGreaterThan(BigDecimal.ZERO);
+            waiveLoanCharge(loanId, loanChargeId, reAgedInstallment.getPeriod());
+            assertInstallmentFeeWaived(loanId, reAgedInstallment.getPeriod(), feeWaived);
+
+            reverseRepayment(loanId, repaymentId, RE_AGE_DATE);
+
+            assertInstallmentFeeWaived(loanId, reAgedInstallment.getPeriod(), feeWaived);
+            List<GetLoansLoanIdRepaymentPeriod> reAgedPeriods = reAgedPeriods(assertValidSchedule(getLoanDetails(loanId)),
+                    RE_AGE_LOCAL_DATE);
+            assertThat(sum(reAgedPeriods, GetLoansLoanIdRepaymentPeriod::getFeeChargesDue)).as("Installment fee after the reversal")
+                    .isEqualByComparingTo(BigDecimal.valueOf(12));
+            assertLoanStaysUsable(loanId, RE_AGE_DATE);
+        });
+    }
+
+    /**
      * The default interest handling does not spread the charge over the re-aged installments, the reversal must work
      * the same.
      */
@@ -499,6 +553,29 @@ public class FeignLoanReAgedChargeScheduleRebuildTest extends FeignLoanTestBase 
         assertThat(periods.getLast().getPrincipalLoanBalanceOutstanding()).as("Balance of the loan after the last installment")
                 .isEqualByComparingTo(BigDecimal.ZERO);
         return periods;
+    }
+
+    private GetLoansLoanIdRepaymentPeriod firstReAgedInstallment(Long loanId) {
+        return reAgedPeriods(assertValidSchedule(getLoanDetails(loanId)), RE_AGE_LOCAL_DATE).getFirst();
+    }
+
+    /**
+     * Checks that the installment fee waived is on the installment it was waived on, and that the schedule agrees with
+     * the loan on the fees waived and outstanding.
+     */
+    private void assertInstallmentFeeWaived(Long loanId, Integer installmentNumber, BigDecimal feeWaived) {
+        GetLoansLoanIdResponse loan = getLoanDetails(loanId);
+        List<GetLoansLoanIdRepaymentPeriod> periods = assertValidSchedule(loan);
+        GetLoansLoanIdRepaymentPeriod installment = periods.stream().filter(p -> installmentNumber.equals(p.getPeriod())).findFirst()
+                .orElseThrow();
+        assertThat(installment.getFeeChargesWaived()).as("Fee waived on installment %s", installmentNumber).isEqualByComparingTo(feeWaived);
+        assertThat(installment.getFeeChargesOutstanding()).as("Fee outstanding on installment %s", installmentNumber)
+                .isEqualByComparingTo(installment.getFeeChargesDue().subtract(feeWaived));
+        assertThat(loan.getSummary().getFeeChargesWaived()).as("Fees waived on the loan").isEqualByComparingTo(feeWaived);
+        assertThat(sum(periods, GetLoansLoanIdRepaymentPeriod::getFeeChargesWaived)).as("Fees waived on the schedule")
+                .isEqualByComparingTo(feeWaived);
+        assertThat(sum(periods, GetLoansLoanIdRepaymentPeriod::getFeeChargesOutstanding)).as("Fees outstanding on the schedule")
+                .isEqualByComparingTo(loan.getSummary().getFeeChargesOutstanding());
     }
 
     private static List<GetLoansLoanIdRepaymentPeriod> reAgedPeriods(List<GetLoansLoanIdRepaymentPeriod> periods, LocalDate reAgeDate) {

@@ -104,6 +104,26 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         this.waived = true;
     }
 
+    /**
+     * Waives the given amount, but no more than what is outstanding. The installment charge counts as waived once
+     * nothing is left outstanding.
+     *
+     * @return the amount waived
+     */
+    public BigDecimal waive(final BigDecimal amount) {
+        final BigDecimal amountToWaive = MathUtil.nullToZero(amount).min(MathUtil.nullToZero(this.amountOutstanding));
+        if (!MathUtil.isGreaterThanZero(amountToWaive)) {
+            return BigDecimal.ZERO;
+        }
+        this.amountWaived = MathUtil.add(this.amountWaived, amountToWaive);
+        this.amountOutstanding = calculateOutstanding();
+        if (!MathUtil.isGreaterThanZero(this.amountOutstanding)) {
+            this.paid = false;
+            this.waived = true;
+        }
+        return amountToWaive;
+    }
+
     public void undoWaive() {
         this.amountOutstanding = this.amountWaived;
         this.amountWaived = BigDecimal.ZERO;
