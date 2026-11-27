@@ -22,28 +22,19 @@ import static org.apache.fineract.query.QMAdhoc.mAdhoc;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQueryFactory;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
-import org.apache.fineract.adhocquery.domain.AdHocProjection;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.query.QMAppuser;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final AdHocMapper adHocRowMapper;
     private final SQLQueryFactory queryFactory;
 
     private static AdHocData toAdHocData(final Tuple row, final QMAppuser createdBy) {
@@ -75,10 +66,16 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     @Override
     @Transactional(readOnly = true)
     public List<AdHocData> retrieveAllActiveAdHocQuery() {
-        final QMAppuser creatingUser = new QMAppuser("cb");
+        final QMAppuser createdBy = new QMAppuser("cb");
 
-        return queryFactory.select(new AdHocProjection(creatingUser)).from(mAdhoc).leftJoin(creatingUser)
-                .on(creatingUser.id.eq(mAdhoc.createdbyId)).where(mAdhoc.isActive.isTrue()).orderBy(mAdhoc.id.asc()).fetch();
+        final List<Tuple> rows = this.queryFactory
+                .select(mAdhoc.id, mAdhoc.name, mAdhoc.query, mAdhoc.tableName, mAdhoc.tableFields, mAdhoc.isActive, mAdhoc.email,
+                        mAdhoc.reportRunFrequencyCode, mAdhoc.reportRunEvery, mAdhoc.lastRun, mAdhoc.createdDate, mAdhoc.createdbyId,
+                        createdBy.username, mAdhoc.lastmodifiedbyId, mAdhoc.lastmodifiedDate)
+                .from(mAdhoc).leftJoin(createdBy).on(createdBy.id.eq(mAdhoc.createdbyId)).where(mAdhoc.isActive.isTrue())
+                .orderBy(mAdhoc.id.asc()).fetch();
+
+        return rows.stream().map(row -> toAdHocData(row, createdBy)).toList();
     }
 
     @Override
@@ -108,49 +105,6 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
     private static Long toLong(final Integer value) {
         return value == null ? null : value.longValue();
-    }
-
-    public static final class AdHocMapper implements RowMapper<AdHocData> {
-
-        private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-        public AdHocMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
-            this.sqlGenerator = sqlGenerator;
-        }
-
-        @Override
-        public AdHocData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String name = rs.getString("name");
-            final String query = rs.getString("query");
-            final String tableName = rs.getString("tableName");
-            final String tableFields = rs.getString("tableField");
-            final Boolean isActive = rs.getBoolean("isActive");
-            final ZonedDateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
-            final Long createdById = JdbcSupport.getLong(rs, "createdById");
-            final Long updatedById = JdbcSupport.getLong(rs, "updatedById");
-            final ZonedDateTime updatedOn = JdbcSupport.getDateTime(rs, "updatedOn");
-            final String createdByUsername = rs.getString("createdBy");
-            final String email = rs.getString("email");
-            final Long reportRunFrequency = JdbcSupport.getLong(rs, "report_run_frequency_code");
-            final Long reportRunEvery = JdbcSupport.getLong(rs, "report_run_every");
-            final ZonedDateTime lastRun = JdbcSupport.getDateTime(rs, "last_run");
-
-            return new AdHocData().setId(id).setName(name).setQuery(query).setTableName(tableName).setTableFields(tableFields)
-                    .setEmail(email).setActive(isActive).setCreatedOn(createdDate).setCreatedById(createdById).setUpdatedById(updatedById)
-                    .setUpdatedOn(updatedOn).setCreatedBy(createdByUsername)
-                    .setReportRunFrequencies(AdHocData.template().getReportRunFrequencies()).setReportRunFrequency(reportRunFrequency)
-                    .setReportRunEvery(reportRunEvery).setLastRun(lastRun);
-        }
-
-        public String schema() {
-            return " r.id as id, r.name as name, r.query as query, r.table_name as tableName,r.table_fields as tableField ,r.is_active as isActive ,r.email as email ,"
-                    + " r.report_run_frequency_code, r.report_run_every, r.last_run, "
-                    + " r.created_date as createdDate, r.createdby_id as createdById,cb.username as createdBy,r.lastmodifiedby_id as updatedById ,r.lastmodified_date as updatedOn "
-                    + " from m_adhoc r left join m_appuser cb on cb.id=r.createdby_id left join m_appuser mb on mb.id=r.lastmodifiedby_id";
-
-        }
     }
 
     @Override
