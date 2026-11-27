@@ -18,9 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.fineract.query.QMClient.mClient;
+import static org.apache.fineract.query.QMCodeValue.mCodeValue;
+import static org.apache.fineract.query.QMLoan.mLoan;
+import static org.apache.fineract.query.QMLoanRescheduleRequest.mLoanRescheduleRequest;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -44,6 +51,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanRescheduleRequestReadPlatformService {
@@ -52,13 +60,15 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private static final LoanRescheduleRequestRowMapper LOAN_RESCHEDULE_REQUEST_ROW_MAPPER = new LoanRescheduleRequestRowMapper();
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final SQLQueryFactory queryFactory;
 
     @Autowired
     public LoanRescheduleRequestReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, LoanRepositoryWrapper loanRepositoryWrapper,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, final SQLQueryFactory queryFactory) {
         this.jdbcTemplate = jdbcTemplate;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.queryFactory = queryFactory;
     }
 
     private static final class LoanRescheduleRequestRowMapper implements RowMapper<LoanRescheduleRequestData> {
@@ -186,40 +196,6 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
     }
 
-    private static final class LoanRescheduleRequestRowMapperForBulkApproval implements RowMapper<LoanRescheduleRequestData> {
-
-        private String schema() {
-            final StringBuilder sqlBuilder = new StringBuilder(200);
-
-            sqlBuilder.append("lrr.id as id, lrr.status_enum as statusEnum, lrr.reschedule_from_date as rescheduleFromDate, ");
-            sqlBuilder.append("cv.id as rescheduleReasonCvId, cv.code_value as rescheduleReasonCvValue, ");
-            sqlBuilder.append(
-                    " loan.id as loanId, loan.account_no as loanAccountNumber, client.id as clientId, client.display_name as clientName ");
-            sqlBuilder.append("from m_loan_reschedule_request lrr ");
-            sqlBuilder.append("left join m_loan loan on loan.id = lrr.loan_id ");
-            sqlBuilder.append("left join m_client client on client.id = loan.client_id ");
-            sqlBuilder.append("left join m_code_value cv on cv.id = lrr.reschedule_reason_cv_id ");
-            return sqlBuilder.toString();
-        }
-
-        @Override
-        public LoanRescheduleRequestData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = rs.getLong("id");
-            final Long loanId = rs.getLong("loanId");
-            final Integer statusEnumId = JdbcSupport.getInteger(rs, "statusEnum");
-            final LoanRescheduleRequestStatusEnumData statusEnum = LoanRescheduleRequestEnumerations.status(statusEnumId);
-            final String clientName = rs.getString("clientName");
-            final String loanAccountNumber = rs.getString("loanAccountNumber");
-            final Long clientId = rs.getLong("clientId");
-            final LocalDate rescheduleFromDate = JdbcSupport.getLocalDate(rs, "rescheduleFromDate");
-            final Long rescheduleReasonCvId = JdbcSupport.getLong(rs, "rescheduleReasonCvId");
-            final String rescheduleReasonCvValue = rs.getString("rescheduleReasonCvValue");
-            final CodeValueData rescheduleReasonCodeValue = CodeValueData.instance(rescheduleReasonCvId, rescheduleReasonCvValue);
-            return LoanRescheduleRequestData.instance(id, loanId, statusEnum, clientName, loanAccountNumber, clientId, rescheduleFromDate,
-                    rescheduleReasonCodeValue);
-        }
-    }
-
     @Override
     public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId) {
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
@@ -273,11 +249,15 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command, Long loanId) {
-        LoanRescheduleRequestRowMapperForBulkApproval loanRescheduleRequestRowMapperForBulkApproval = new LoanRescheduleRequestRowMapperForBulkApproval();
-        String sql = "select " + loanRescheduleRequestRowMapperForBulkApproval.schema();
-        List<String> extraFilters = new ArrayList<>();
-        List<Object> extraParams = new ArrayList<>();
+        final SQLQuery<Tuple> query = queryFactory
+                .select(mLoanRescheduleRequest.id, mLoanRescheduleRequest.statusEnum, mLoanRescheduleRequest.rescheduleFromDate,
+                        mCodeValue.id, mCodeValue.codeValue, mLoan.id, mLoan.accountNo, mClient.id, mClient.displayName) //
+                .from(mLoanRescheduleRequest) //
+                .leftJoin(mLoan).on(mLoan.id.eq(mLoanRescheduleRequest.loanId)) //
+                .leftJoin(mClient).on(mClient.id.eq(mLoan.clientId)) //
+                .leftJoin(mCodeValue).on(mCodeValue.id.eq(mLoanRescheduleRequest.rescheduleReasonCvId));
 
         if (!StringUtils.isEmpty(command) && !command.equalsIgnoreCase(RescheduleLoansApiConstants.allCommandParamName)) {
             int statusParam = 100;
@@ -287,18 +267,27 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
                 statusParam = 300;
             }
 
-            extraFilters.add("lrr.status_enum = ?");
-            extraParams.add(statusParam);
+            query.where(mLoanRescheduleRequest.statusEnum.eq(statusParam));
         }
 
         if (loanId != null) {
-            extraFilters.add("loan.id = ?");
-            extraParams.add(loanId);
+            query.where(mLoan.id.eq(loanId));
         }
 
-        if (isNotEmpty(extraFilters)) {
-            sql += " where " + String.join(" AND ", extraFilters);
-        }
-        return jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, extraParams.toArray()); // NOSONAR
+        return query.fetch().stream().map(LoanRescheduleRequestReadPlatformServiceImpl::mapRescheduleRequest).toList();
+    }
+
+    private static LoanRescheduleRequestData mapRescheduleRequest(final Tuple row) {
+        final Date rescheduleFromDate = row.get(mLoanRescheduleRequest.rescheduleFromDate);
+        final Integer reasonId = row.get(mCodeValue.id);
+        final CodeValueData reason = CodeValueData.instance(reasonId == null ? null : reasonId.longValue(), row.get(mCodeValue.codeValue));
+        final Long loanId = row.get(mLoan.id);
+        final Long clientId = row.get(mClient.id);
+
+        // Preserve ResultSet.getLong's zero value for missing rows in the left joins.
+        return LoanRescheduleRequestData.instance(row.get(mLoanRescheduleRequest.id), loanId == null ? 0L : loanId,
+                LoanRescheduleRequestEnumerations.status(row.get(mLoanRescheduleRequest.statusEnum)), row.get(mClient.displayName),
+                row.get(mLoan.accountNo), clientId == null ? 0L : clientId,
+                rescheduleFromDate == null ? null : rescheduleFromDate.toLocalDate(), reason);
     }
 }
