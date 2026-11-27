@@ -53,8 +53,8 @@ class WebhookCommandEventPublisher {
     private final ObjectMapper mapper;
     private final ErrorHandler errorHandler;
 
-    void publishSuccess(Command<?> hookable, Object request, Object response) {
-        publish(hookable, request, payload -> {
+    void publishSuccess(Command<?> command, Object request, Object response) {
+        publish(command, request, payload -> {
             // As in the legacy command processing, the office and client are exposed at the top level of the payload,
             // where the SMS hooks look up the client to notify, and the office is cleared from the response.
             final JsonNode responseNode = mapper.valueToTree(response);
@@ -69,17 +69,17 @@ class WebhookCommandEventPublisher {
         });
     }
 
-    void publishError(Command<?> hookable, Object request, Throwable error) {
-        publish(hookable, request, payload -> {
+    void publishError(Command<?> command, Object request, Throwable error) {
+        publish(command, request, payload -> {
             final ErrorInfo errorInfo = errorHandler.handle(ErrorHandler.getMappable(error));
             payload.put("status", "Exception");
             payload.put("response", errorResponse(errorInfo));
         });
     }
 
-    private void publish(Command<?> hookable, Object request, Consumer<Map<String, Object>> result) {
-        final String entityName = hookable.entityName();
-        final String actionName = hookable.actionName();
+    private void publish(Command<?> command, Object request, Consumer<Map<String, Object>> result) {
+        final String entityName = command.entityName();
+        final String actionName = command.actionName();
 
         try {
             final AppUser user = context.authenticatedUser();

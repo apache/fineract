@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.hooks.command;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookError;
-import org.apache.fineract.command.core.HookableCommand;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,7 +40,7 @@ final class WebhookCommandHookError implements CommandHookError<Object, Object> 
 
         // a command whose execution was skipped never ran, so it did not fail: the error is about the request (e.g. a
         // refused repeat of an idempotency key), not about a change to announce
-        if (ctx.isSkipExecution() || !(command instanceof HookableCommand)) {
+        if (ctx.isSkipExecution()) {
             return;
         }
 

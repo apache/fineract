@@ -21,12 +21,11 @@ package org.apache.fineract.infrastructure.documentmanagement.command;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.HookableCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DocumentUpdateCommand extends Command<DocumentUpdateRequest> implements HookableCommand {
+public class DocumentUpdateCommand extends Command<DocumentUpdateRequest> {
 
     @Override
     public String entityName() {
