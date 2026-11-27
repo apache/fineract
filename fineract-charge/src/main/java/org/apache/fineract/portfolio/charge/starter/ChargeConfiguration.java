@@ -21,21 +21,13 @@ package org.apache.fineract.portfolio.charge.starter;
 import jakarta.validation.Validator;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
-import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityVisibilityService;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
-import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
-import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.charge.service.ChargeReadService;
-import org.apache.fineract.portfolio.charge.service.ChargeReadServiceImpl;
-import org.apache.fineract.portfolio.charge.service.ChargeWriteService;
-import org.apache.fineract.portfolio.charge.service.ChargeWriteServiceImpl;
+import org.apache.fineract.portfolio.charge.service.*;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -57,22 +49,22 @@ public class ChargeConfiguration {
     @ConditionalOnMissingBean(ChargeReadService.class)
     public ChargeReadService chargeReadService(CurrencyReadPlatformService currencyReadPlatformService,
             ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, JdbcTemplate jdbcTemplate,
-            DropdownReadPlatformService dropdownReadPlatformService, FineractEntityAccessUtil fineractEntityAccessUtil,
+            DropdownReadPlatformService dropdownReadPlatformService, FineractEntityVisibilityService fineractEntityVisibilityService,
             AccountingDropdownReadPlatformService accountingDropdownReadPlatformService, TaxReadPlatformService taxReadPlatformService,
-            ConfigurationDomainServiceJpa configurationDomainServiceJpa, NamedParameterJdbcTemplate namedParameterJdbcTemplate,
-            LoanRepository loanRepository, SavingsAccountRepository savingsAccountRepository) {
+            ConfigurationDomainService configurationDomainService, NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            LoanOfficeIdProvider loanOfficeIdProvider, SavingsAccountOfficeIdProvider savingsAccountOfficeIdProvider) {
         return new ChargeReadServiceImpl(currencyReadPlatformService, chargeDropdownReadPlatformService, jdbcTemplate,
-                dropdownReadPlatformService, fineractEntityAccessUtil, accountingDropdownReadPlatformService, taxReadPlatformService,
-                configurationDomainServiceJpa, namedParameterJdbcTemplate, loanRepository, savingsAccountRepository);
+                dropdownReadPlatformService, fineractEntityVisibilityService, accountingDropdownReadPlatformService, taxReadPlatformService,
+                configurationDomainService, namedParameterJdbcTemplate, loanOfficeIdProvider, savingsAccountOfficeIdProvider);
     }
 
     @Bean
     @ConditionalOnMissingBean(ChargeWriteService.class)
     public ChargeWriteService chargeWriteService(Validator validator, ChargeRepository chargeRepository,
-            LoanProductRepository loanProductRepository, FineractEntityAccessUtil fineractEntityAccessUtil,
+            LoanProductChargeUsageChecker loanProductChargeUsageChecker, FineractEntityVisibilityService fineractEntityVisibilityService,
             GLAccountRepositoryWrapper glAccountRepository, TaxGroupRepositoryWrapper taxGroupRepository,
             PaymentTypeRepository paymentTypeRepository) {
-        return new ChargeWriteServiceImpl(validator, chargeRepository, loanProductRepository, fineractEntityAccessUtil, glAccountRepository,
-                taxGroupRepository, paymentTypeRepository);
+        return new ChargeWriteServiceImpl(validator, chargeRepository, loanProductChargeUsageChecker, fineractEntityVisibilityService,
+                glAccountRepository, taxGroupRepository, paymentTypeRepository);
     }
 }

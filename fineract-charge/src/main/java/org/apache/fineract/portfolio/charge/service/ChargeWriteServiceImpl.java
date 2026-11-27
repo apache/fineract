@@ -31,7 +31,6 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.time.MonthDay;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -46,7 +45,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrappe
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityVisibilityService;
 import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
 import org.apache.fineract.portfolio.charge.data.ChargeCreateRequest;
 import org.apache.fineract.portfolio.charge.data.ChargeCreateResponse;
@@ -71,8 +70,6 @@ import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.validation.ChargeAmortizationValidator;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.paymenttype.exception.PaymentTypeNotFoundException;
@@ -104,8 +101,8 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
 
     private final Validator validator;
     private final ChargeRepository chargeRepository;
-    private final LoanProductRepository loanProductRepository;
-    private final FineractEntityAccessUtil fineractEntityAccessUtil;
+    private final LoanProductChargeUsageChecker loanProductChargeUsageChecker;
+    private final FineractEntityVisibilityService fineractEntityVisibilityService;
     private final GLAccountRepositoryWrapper glAccountRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
     private final PaymentTypeRepository paymentTypeRepository;
@@ -140,7 +137,7 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
 
             // check if the office specific products are enabled. If yes, then save this charge against a specific
             // office i.e. this charge is specific for this office.
-            fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
+            fineractEntityVisibilityService.checkConfigurationAndAddProductRestrictionsForUserOffice(
                     FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES, charge.getId());
 
             return ChargeCreateResponse.builder().resourceId(charge.getId()).build();
@@ -247,14 +244,14 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
             throw new ChargeNotFoundException(chargeId);
         }
 
-        final Collection<LoanProduct> loanProducts = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId);
+        final boolean isChargeExistWithLoanProducts = this.loanProductChargeUsageChecker.isChargeAttachedToAnyLoanProduct(chargeId);
         final boolean isChargeExistWithLoans = chargeRepository.isAnyActiveLoanChargeAssociatedWithCharge(chargeId);
         final boolean isChargeExistWithSavings = chargeRepository.isAnyActiveSavingsAccountChargeAssociatedWithCharge(chargeId);
         final boolean isChargeExistWithWorkingCapitalLoan = chargeRepository.isAnyWorkingCapitalLoansAssociateWithThisCharge(chargeId)
                 .isPresent();
 
         // TODO: Change error messages around:
-        if (!loanProducts.isEmpty() || isChargeExistWithLoans || isChargeExistWithSavings || isChargeExistWithWorkingCapitalLoan) {
+        if (isChargeExistWithLoanProducts || isChargeExistWithLoans || isChargeExistWithSavings || isChargeExistWithWorkingCapitalLoan) {
             throw new ChargeCannotBeDeletedException("error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
                     "This charge cannot be deleted, it is already used in loan");
         }
@@ -495,8 +492,9 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
     }
 
     private void validateLoanProductsSupportDownPaymentCharges(final Long chargeId) {
-        final boolean attachedToUnsupportedProduct = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId).stream()
-                .anyMatch(product -> !product.supportsDownPaymentCharges());
+        final boolean attachedToUnsupportedProduct = this.loanProductChargeUsageChecker
+                .isChargeAttachedToLoanProductNotSupportingDownPaymentCharges(chargeId);
+
         if (attachedToUnsupportedProduct) {
             throw new ChargeCannotBeUpdatedException("error.msg.charge.down.payment.requires.progressive.down.payment.loan.product",
                     "Charge cannot be changed to a down payment charge, it is attached to a loan product that is not progressive or has no down payment enabled.");
@@ -504,8 +502,9 @@ public class ChargeWriteServiceImpl implements ChargeWriteService {
     }
 
     private void validateLoanProductsSupportChargeAmortization(final Long chargeId) {
-        final boolean attachedToUnsupportedProduct = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId).stream()
-                .anyMatch(product -> !product.getLoanProductRelatedDetail().isEnableChargeAmortization());
+        final boolean attachedToUnsupportedProduct = this.loanProductChargeUsageChecker
+                .isChargeAttachedToLoanProductWithoutChargeAmortization(chargeId);
+
         if (attachedToUnsupportedProduct) {
             throw new ChargeCannotBeUpdatedException("error.msg.charge.amortization.requires.charge.amortization.loan.product",
                     "Charge cannot be amortized, it is attached to a loan product that does not have charge amortization enabled.");

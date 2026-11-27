@@ -29,4 +29,7 @@ public interface FineractEntityVisibilityService {
             Function<T, Long> idExtractor);
 
     boolean isVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType accessType, Long officeId, Long entityId);
+
+    void checkConfigurationAndAddProductRestrictionsForUserOffice(FineractEntityAccessType fineractEntityAccessType,
+            Long productOrChargeId);
 }
