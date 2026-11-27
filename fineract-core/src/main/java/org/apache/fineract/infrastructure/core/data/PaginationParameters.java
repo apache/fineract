@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.security.utils.SqlIdentifierValidator;
 
 @Builder
 @Getter
@@ -35,8 +36,38 @@ public class PaginationParameters {
     private Integer offset;
     @Getter(AccessLevel.NONE)
     private Integer limit;
+    @Getter(AccessLevel.NONE)
     private String orderBy;
+    @Getter(AccessLevel.NONE)
     private String sortOrder;
+
+    /**
+     * The orderBy is concatenated into SQL by many read services, so only plain column identifiers are returned.
+     */
+    public String getOrderBy() {
+        return SqlIdentifierValidator.validateOrderBy(orderBy);
+    }
+
+    /**
+     * The sortOrder is concatenated into SQL by many read services, so only ASC or DESC is returned.
+     */
+    public String getSortOrder() {
+        return SqlIdentifierValidator.validateSortOrder(sortOrder);
+    }
+
+    /**
+     * The orderBy as requested, for validators that report unsupported values; SQL must use {@link #getOrderBy()}.
+     */
+    String requestedOrderBy() {
+        return orderBy;
+    }
+
+    /**
+     * The sortOrder as requested, for validators that report unsupported values; SQL must use {@link #getSortOrder()}.
+     */
+    String requestedSortOrder() {
+        return sortOrder;
+    }
 
     public Integer getLimit() {
         if (limit == null) {

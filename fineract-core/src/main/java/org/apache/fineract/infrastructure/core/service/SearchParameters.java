@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.security.utils.SqlIdentifierValidator;
 
 @Builder
 @Getter
@@ -41,7 +42,9 @@ public class SearchParameters {
     private Integer offset;
     @Getter(AccessLevel.NONE)
     private Integer limit;
+    @Getter(AccessLevel.NONE)
     private String orderBy;
+    @Getter(AccessLevel.NONE)
     private String sortOrder;
     private String accountNo;
     private String currencyCode;
@@ -55,6 +58,20 @@ public class SearchParameters {
     private Long productId;
     private Long categoryId;
     private Integer legalForm;
+
+    /**
+     * The orderBy is concatenated into SQL by many read services, so only plain column identifiers are returned.
+     */
+    public String getOrderBy() {
+        return SqlIdentifierValidator.validateOrderBy(orderBy);
+    }
+
+    /**
+     * The sortOrder is concatenated into SQL by many read services, so only ASC or DESC is returned.
+     */
+    public String getSortOrder() {
+        return SqlIdentifierValidator.validateSortOrder(sortOrder);
+    }
 
     public Integer getLimit() {
         if (limit == null) {

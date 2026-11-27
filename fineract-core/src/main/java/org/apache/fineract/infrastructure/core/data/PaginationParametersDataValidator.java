@@ -35,21 +35,23 @@ public class PaginationParametersDataValidator {
     public void validateParameterValues(PaginationParameters parameters, final Set<String> supportedOrdeByValues,
             final String resourceName) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        if (parameters.hasOrderBy() && !supportedOrdeByValues.contains(parameters.getOrderBy())) {
-            final String defaultUserMessage = "The orderBy value '" + parameters.getOrderBy()
-                    + "' is not supported. The supported orderBy values are " + supportedOrdeByValues;
+        final String orderBy = parameters.requestedOrderBy();
+        if (parameters.hasOrderBy() && !supportedOrdeByValues.contains(orderBy)) {
+            final String defaultUserMessage = "The orderBy value '" + orderBy + "' is not supported. The supported orderBy values are "
+                    + supportedOrdeByValues;
             final ApiParameterError error = ApiParameterError.parameterError(
-                    "validation.msg." + resourceName + ".orderBy.value.is.not.supported", defaultUserMessage, "orderBy",
-                    parameters.getOrderBy(), supportedOrdeByValues.toString());
+                    "validation.msg." + resourceName + ".orderBy.value.is.not.supported", defaultUserMessage, "orderBy", orderBy,
+                    supportedOrdeByValues.toString());
             dataValidationErrors.add(error);
         }
 
-        if (parameters.hasSortOrder() && !sortOrderValues.contains(parameters.getSortOrder().toUpperCase(Locale.ROOT))) {
-            final String defaultUserMessage = "The sortOrder value '" + parameters.getSortOrder()
+        final String sortOrder = parameters.requestedSortOrder();
+        if (parameters.hasSortOrder() && !sortOrderValues.contains(sortOrder.toUpperCase(Locale.ROOT))) {
+            final String defaultUserMessage = "The sortOrder value '" + sortOrder
                     + "' is not supported. The supported sortOrder values are " + sortOrderValues;
             final ApiParameterError error = ApiParameterError.parameterError(
-                    "validation.msg." + resourceName + ".sortOrder.value.is.not.supported", defaultUserMessage, "sortOrder",
-                    parameters.getSortOrder(), sortOrderValues.toString());
+                    "validation.msg." + resourceName + ".sortOrder.value.is.not.supported", defaultUserMessage, "sortOrder", sortOrder,
+                    sortOrderValues.toString());
             dataValidationErrors.add(error);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
