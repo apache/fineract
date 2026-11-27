@@ -131,7 +131,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 installments.sort(byDate);
             }
 
-            if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
+            final boolean isRepaymentLikeTransaction = loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver()
+                    || loanTransaction.isRecoveryRepayment();
+            if (isRepaymentLikeTransaction) {
                 Loan loan = loanTransaction.getLoan();
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
@@ -203,9 +205,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             for (final LoanCharge loanCharge : transferCharges) {
                 boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(), isFirstPeriod);
                 if (isDue) {
+                    final Money transactionAmount = loanTransaction.getAmount(currency);
                     Money chargeAmountDue = loanCharge.getAmount(currency);
-                    if (chargeAmountDue.isGreaterThan(loanTransaction.getAmount(currency))) {
-                        chargeAmountDue = loanTransaction.getAmount(currency);
+                    if (chargeAmountDue.isGreaterThan(transactionAmount)) {
+                        chargeAmountDue = transactionAmount;
                     }
                     LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(chargeAmountDue, installment,
                             loanCharge.isFeeCharge());
