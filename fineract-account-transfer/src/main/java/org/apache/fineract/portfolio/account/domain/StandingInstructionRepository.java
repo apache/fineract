@@ -44,6 +44,12 @@ public interface StandingInstructionRepository
     @Query(FIND_BY_LOAN_AND_STATUS_QUERY)
     Collection<AccountTransferStandingInstruction> findByLoanAccountAndStatus(@Param("loan") Loan loan, @Param("status") Integer status);
 
+    @Query("select case when count(instruction) > 0 then true else false end "
+            + "from AccountTransferStandingInstruction instruction where instruction.status in :statuses "
+            + "and (instruction.accountTransferDetails.toLoanAccount = :loan "
+            + "or instruction.accountTransferDetails.fromLoanAccount = :loan)")
+    boolean existsByLoanAccountAndStatuses(@Param("loan") Loan loan, @Param("statuses") Collection<Integer> statuses);
+
     @Query(FIND_BY_SAVINGS_AND_STATUS_QUERY)
     Collection<AccountTransferStandingInstruction> findBySavingsAccountAndStatus(@Param("savingsAccount") SavingsAccount savingsAccount,
             @Param("status") Integer status);

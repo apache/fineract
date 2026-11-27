@@ -75,6 +75,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceTyp
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
@@ -174,6 +175,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
     private final LoanAccountService loanAccountService;
     private final LoanWriteServiceHelper loanWriteServiceHelper;
     private final LoanCounterService loanCounterService;
+    private final StandingInstructionRepository standingInstructionRepository;
 
     @Transactional
     @Override
@@ -746,6 +748,14 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
                     "Undo Loan: " + loanId + " disbursement is not allowed. Loan Account is Charged-off", loanId);
         }
+        if (standingInstructionRepository.existsByLoanAccountAndStatuses(loan,
+                List.of(StandingInstructionStatus.ACTIVE.getValue(), StandingInstructionStatus.DISABLED.getValue()))) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.undo.disbursal.standing.instruction.exists",
+                    "Undo disbursal is not allowed for loan " + loanId
+                            + " because it has active or disabled standing instructions. Delete them and try again.",
+                    loanId);
+        }
+
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
         loanCounterService.removeLoanCycle(loan);
 
