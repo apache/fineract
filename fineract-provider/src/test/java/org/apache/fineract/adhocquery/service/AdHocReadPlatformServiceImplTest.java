@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.sql.Configuration;
@@ -48,13 +47,11 @@ import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Runs the QueryDSL queries of {@link AdHocReadPlatformServiceImpl#retrieveAllAdHocQuery()} and
@@ -82,10 +79,18 @@ class AdHocReadPlatformServiceImplTest {
             on cb.id = m_adhoc.createdby_id
             order by m_adhoc.id asc""";
 
+    private static final String EXPECTED_ACTIVE_SQL = """
+            select m_adhoc.id, m_adhoc.name, m_adhoc.query, m_adhoc.table_name, m_adhoc.table_fields, m_adhoc.is_active, m_adhoc.email, \
+            m_adhoc.report_run_frequency_code, m_adhoc.report_run_every, m_adhoc.last_run, m_adhoc.created_date, m_adhoc.createdby_id, \
+            cb.username, m_adhoc.lastmodifiedby_id, m_adhoc.lastmodified_date
+            from m_adhoc m_adhoc
+            left join m_appuser cb
+            on cb.id = m_adhoc.createdby_id
+            where m_adhoc.is_active = ?
+            order by m_adhoc.id asc""";
+
     private static final ZoneId TENANT_ZONE = ZoneId.of("Asia/Kolkata");
 
-    private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-    private final DatabaseSpecificSQLGenerator sqlGenerator = mock(DatabaseSpecificSQLGenerator.class);
     private final Connection connection = mock(Connection.class);
     private final PreparedStatement statement = mock(PreparedStatement.class);
     private String executedSql;
@@ -109,7 +114,6 @@ class AdHocReadPlatformServiceImplTest {
         assertFullRow(adHoc);
         assertEquals(EXPECTED_SQL, executedSql);
         verify(statement).setLong(1, 7L);
-        verifyNoInteractions(jdbcTemplate);
     }
 
     @Test
@@ -185,8 +189,7 @@ class AdHocReadPlatformServiceImplTest {
         });
         when(statement.executeQuery()).thenReturn(resultSet);
 
-        return new AdHocReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, new AdHocReadPlatformServiceImpl.AdHocMapper(sqlGenerator),
-                new SQLQueryFactory(new Configuration(templates), () -> connection));
+        return new AdHocReadPlatformServiceImpl(new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
     /**
@@ -224,7 +227,6 @@ class AdHocReadPlatformServiceImplTest {
         assertEquals(1, result.size());
         assertFullRow(result.get(0));
         assertEquals(EXPECTED_ALL_SQL, executedSql);
-        verifyNoInteractions(jdbcTemplate);
     }
 
     @Test
@@ -236,7 +238,6 @@ class AdHocReadPlatformServiceImplTest {
         assertEquals(1, result.size());
         assertFullRow(result.get(0));
         assertEquals(EXPECTED_ALL_SQL, executedSql);
-        verifyNoInteractions(jdbcTemplate);
     }
 
     @Test
@@ -246,7 +247,6 @@ class AdHocReadPlatformServiceImplTest {
         List<AdHocData> result = service.retrieveAllAdHocQuery();
 
         assertTrue(result.isEmpty());
-        verifyNoInteractions(jdbcTemplate);
     }
 
     @Test
@@ -274,6 +274,29 @@ class AdHocReadPlatformServiceImplTest {
 
         assertFullRow(result.get(1));
         assertEquals(EXPECTED_ALL_SQL, executedSql);
-        verifyNoInteractions(jdbcTemplate);
+    }
+
+    @Test
+    void retrieveAllActiveMapsAllFieldsOnPostgreSQL() throws SQLException {
+        AdHocReadPlatformService service = service(PostgreSQLTemplates.builder().build(), fullRow());
+
+        List<AdHocData> result = service.retrieveAllActiveAdHocQuery();
+
+        assertEquals(1, result.size());
+        assertFullRow(result.get(0));
+        assertEquals(EXPECTED_ACTIVE_SQL, executedSql);
+        verify(statement).setBoolean(1, true);
+    }
+
+    @Test
+    void retrieveAllActiveMapsAllFieldsOnMySQL() throws SQLException {
+        AdHocReadPlatformService service = service(MySQLTemplates.builder().build(), fullRow());
+
+        List<AdHocData> result = service.retrieveAllActiveAdHocQuery();
+
+        assertEquals(1, result.size());
+        assertFullRow(result.get(0));
+        assertEquals(EXPECTED_ACTIVE_SQL, executedSql);
+        verify(statement).setBoolean(1, true);
     }
 }
