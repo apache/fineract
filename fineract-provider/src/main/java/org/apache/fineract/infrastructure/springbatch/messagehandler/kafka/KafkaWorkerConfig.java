@@ -24,12 +24,15 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 import static org.springframework.kafka.support.serializer.JacksonJsonDeserializer.TRUSTED_PACKAGES;
+import static org.springframework.kafka.support.serializer.JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS;
+import static org.springframework.kafka.support.serializer.JacksonJsonDeserializer.VALUE_DEFAULT_TYPE;
 
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractRemoteJobMessageHandlerKafkaProperties;
+import org.apache.fineract.infrastructure.springbatch.ContextualMessage;
 import org.apache.fineract.infrastructure.springbatch.messagehandler.conditions.kafka.KafkaWorkerCondition;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +67,11 @@ public class KafkaWorkerConfig {
         props.put(GROUP_ID_CONFIG, kafkaProperties.getConsumer().getGroupId());
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
         props.put(VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        props.put(TRUSTED_PACKAGES, "*");
+        // Always deserialize into the message class this worker consumes; type information sent by the producer is
+        // ignored
+        props.put(USE_TYPE_INFO_HEADERS, false);
+        props.put(VALUE_DEFAULT_TYPE, ContextualMessage.class);
+        props.put(TRUSTED_PACKAGES, ContextualMessage.class.getPackageName());
         props.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
         return new DefaultKafkaConsumerFactory<>(props);
     }

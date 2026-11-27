@@ -160,6 +160,7 @@ public class HookWritePlatformServiceImpl implements HookWritePlatformService {
 
                 hook.setConfig(assembleConfig(request.getConfig(), hook.getTemplate()));
                 hook.getConfig().forEach(hookConfiguration -> hookConfiguration.setHook(hook));
+                validatePayloadUrl(hook.getConfig());
             }
 
             if (!changes.isEmpty()) {
@@ -222,6 +223,29 @@ public class HookWritePlatformServiceImpl implements HookWritePlatformService {
         return configuration;
     }
 
+    private void validatePayloadUrl(final Set<HookConfiguration> config) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("hook");
+        for (final HookConfiguration conf : config) {
+            if (conf.getFieldName().equals(payloadURLName) && !isPayloadUrlReachable(conf.getFieldValue())) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("url.invalid");
+            }
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    private boolean isPayloadUrlReachable(final String url) {
+        try {
+            processorHelper.assertUrlAllowed(url);
+            processorHelper.createWebHookService(url).sendEmptyRequest(url).execute();
+            return true;
+        } catch (IOException | IllegalArgumentException re) {
+            return false;
+        }
+    }
+
     private void validateHookRules(final HookTemplate template, final Set<HookConfiguration> config, Set<HookResource> events) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -240,10 +264,7 @@ public class HookWritePlatformServiceImpl implements HookWritePlatformService {
             }
 
             if (conf.getFieldName().equals(payloadURLName)) {
-                try {
-                    var service = processorHelper.createWebHookService(fieldValue);
-                    service.sendEmptyRequest(fieldValue).execute();
-                } catch (IOException | IllegalArgumentException re) {
+                if (!isPayloadUrlReachable(fieldValue)) {
                     baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("url.invalid");
                 }
             }

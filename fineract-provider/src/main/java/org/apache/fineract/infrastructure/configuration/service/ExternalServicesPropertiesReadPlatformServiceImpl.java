@@ -22,7 +22,6 @@ import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -54,20 +53,12 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
 
     private static final class ExternalServiceMapper implements RowMapper<ExternalServicesPropertiesData> {
 
-        List<String> secretAttributes;
-
-        ExternalServiceMapper() {
-            secretAttributes = new ArrayList<>();
-            secretAttributes.add("password");
-            secretAttributes.add("server_key");
-        }
-
         @Override
         public ExternalServicesPropertiesData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             final String name = rs.getString("name");
             String value = rs.getString("value");
-            // Masking the password as we should not send the password back
-            if (name != null && secretAttributes.contains(name)) {
+            // Secrets (passwords, keys, tokens) must not be sent back
+            if (value != null && ExternalServicesSecretProperties.isSecretProperty(name)) {
                 value = StringUtil.maskValue(value);
             }
             return new ExternalServicesPropertiesData().setName(name).setValue(value);

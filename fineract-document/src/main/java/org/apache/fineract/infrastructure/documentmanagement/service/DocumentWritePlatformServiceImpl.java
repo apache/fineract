@@ -22,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 
 import jakarta.validation.Valid;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.fineract.infrastructure.contentstore.data.ContentStoreType;
 import org.apache.fineract.infrastructure.contentstore.exception.ContentPolicyException;
 import org.apache.fineract.infrastructure.contentstore.service.ContentStoreService;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -115,13 +117,31 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
                 // these two only make sense if we have an actual file
 
                 if (request.getStream() != null && StringUtils.isNotEmpty(path) && !Strings.CI.equals(doc.getLocation(), path)) {
-                    storeService.delete(doc.getLocation());
-                    upload(path, request.getStream(), request.getType());
-                    doc.setLocation(path);
+                    final var previousLocation = doc.getLocation();
+                    final String storedPath;
+                    if (isKeyScopedStore()) {
+                        // upload first, so the previous object is only removed once the new one is stored
+                        storedPath = upload(path, request.getStream(), request.getType());
+                        if (!isSameLocation(previousLocation, storedPath)) {
+                            storeService.delete(previousLocation);
+                        }
+                    } else {
+                        storeService.delete(previousLocation);
+                        storedPath = upload(path, request.getStream(), request.getType());
+                    }
+                    doc.setLocation(storedPath);
                     doc.setFileName(FilenameUtils.getName(path));
                 }
             } else if (request.getStream() != null) {
-                upload(doc.getLocation(), request.getStream(), request.getType());
+                final var previousLocation = doc.getLocation();
+                final var storedPath = upload(previousLocation, request.getStream(), request.getType());
+                // only a key scoped store (e.g. S3 with tenant prefix) can answer with a different key for the same
+                // document;
+                // other stores keep the location, so nothing is relocated or deleted there
+                if (isKeyScopedStore() && storedPath != null && !isSameLocation(previousLocation, storedPath)) {
+                    doc.setLocation(storedPath);
+                    storeService.delete(previousLocation);
+                }
             }
             if (StringUtils.isNotEmpty(request.getDescription()) && !Strings.CI.equals(doc.getDescription(), request.getDescription())) {
                 doc.setDescription(request.getDescription());
@@ -169,6 +189,14 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
             throw ErrorHandler.getMappable(e, "error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
+    }
+
+    private boolean isKeyScopedStore() {
+        return storeService.getType() == ContentStoreType.S3;
+    }
+
+    private static boolean isSameLocation(final String first, final String second) {
+        return Path.of(first).normalize().equals(Path.of(second).normalize());
     }
 
     private String upload(final String path, final InputStream stream, final String type) {
