@@ -932,25 +932,20 @@ public final class ClientDataValidator {
         return legalForm != null ? legalForm.getLabel().toUpperCase(Locale.ROOT) : null;
     }
 
-    public void validateClientBeforeCreating(final LocalDate dateOfBirth,
-                                             final LocalDate incorpValidityTill, final CodeValue constitution) {
+    public void validateClientBeforeCreating(final LocalDate dateOfBirth, final LocalDate incorpValidityTill,
+            final CodeValue constitution) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        if (incorpValidityTill != null && dateOfBirth != null
-                && DateUtils.isAfter(dateOfBirth, incorpValidityTill)) {
-            dataValidationErrors.add(ApiParameterError.parameterError(
-                    "error.msg.clients.incorpValidityTill.after.incorp.date",
-                    "incorpvaliditytill date cannot be after the incorporation date",
-                    ClientApiConstants.incorpValidityTillParamName,
+        if (incorpValidityTill != null && dateOfBirth != null && DateUtils.isAfter(dateOfBirth, incorpValidityTill)) {
+            dataValidationErrors.add(ApiParameterError.parameterError("error.msg.clients.incorpValidityTill.after.incorp.date",
+                    "incorpvaliditytill date cannot be after the incorporation date", ClientApiConstants.incorpValidityTillParamName,
                     incorpValidityTill));
         }
 
         if (constitution == null) {
-            dataValidationErrors.add(ApiParameterError.parameterError(
-                    "error.msg.clients.constitutionid.is.null",
-                    "Constitution ID may not be null",
-                    ClientApiConstants.constitutionIdParamName));
+            dataValidationErrors.add(ApiParameterError.parameterError("error.msg.clients.constitutionid.is.null",
+                    "Constitution ID may not be null", ClientApiConstants.constitutionIdParamName));
         }
 
         if (!dataValidationErrors.isEmpty()) {

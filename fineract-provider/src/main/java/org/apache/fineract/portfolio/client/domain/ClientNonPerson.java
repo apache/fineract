@@ -96,7 +96,6 @@ public class ClientNonPerson extends AbstractPersistableCustom<Long> {
 
     }
 
-
     public LocalDate getIncorpValidityTillLocalDate() {
         return this.incorpValidityTill;
     }
