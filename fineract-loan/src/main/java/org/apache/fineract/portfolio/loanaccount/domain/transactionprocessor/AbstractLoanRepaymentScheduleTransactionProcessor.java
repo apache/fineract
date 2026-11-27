@@ -134,39 +134,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final boolean isRepaymentLikeTransaction = loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver()
                     || loanTransaction.isRecoveryRepayment();
             if (isRepaymentLikeTransaction) {
-                Loan loan = loanTransaction.getLoan();
-                // pass through for new transactions
-                if (loanTransaction.getId() == null) {
-                    processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder, null,
-                            loan.getActiveLoanTermVariations()));
-                    loanTransaction.adjustInterestComponent();
+                if (isNewTransaction(loanTransaction)) {
+                    reprocessNewRepaymentTransaction(loanTransaction, currency, installments, charges, overpaymentHolder);
                 } else {
-                    /**
-                     * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties)
-                     * has changed.<br>
-                     **/
-                    final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
-
-                    // Reset derived component of new loan transaction and
-                    // re-process transaction
-                    processLatestTransaction(newLoanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder,
-                            null, loan.getActiveLoanTermVariations()));
-                    newLoanTransaction.adjustInterestComponent();
-                    /**
-                     * Check if the transaction amounts have changed. If so, reverse the original transaction and update
-                     * changedTransactionDetail accordingly
-                     **/
-                    if (newLoanTransaction.isReversed()) {
-                        loanTransaction.reverse();
-                        changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, loanTransaction));
-                    } else if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
-                        loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
-                                newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
-                    } else {
-                        createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
-                    }
+                    reprocessExistingRepaymentTransaction(loanTransaction, currency, installments, charges, overpaymentHolder,
+                            changedTransactionDetail);
                 }
-
             } else if (loanTransaction.isWriteOff()) {
                 loanTransaction.resetDerivedComponents();
                 handleWriteOff(loanTransaction, currency, installments);
@@ -184,6 +157,46 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
         reprocessInstallments(disbursementDate, transactionsToBeProcessed, installments, currency);
         return changedTransactionDetail;
+    }
+
+    private static boolean isNewTransaction(final LoanTransaction loanTransaction) {
+        return loanTransaction.getId() == null;
+    }
+
+    /**
+     * New transactions are passed through and processed directly.
+     */
+    private void reprocessNewRepaymentTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final MoneyHolder overpaymentHolder) {
+        final Loan loan = loanTransaction.getLoan();
+        processLatestTransaction(loanTransaction,
+                new TransactionCtx(currency, installments, charges, overpaymentHolder, null, loan.getActiveLoanTermVariations()));
+        loanTransaction.adjustInterestComponent();
+    }
+
+    /**
+     * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties) has changed. If
+     * so, reverse the original transaction and update changedTransactionDetail accordingly.
+     */
+    private void reprocessExistingRepaymentTransaction(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
+            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final MoneyHolder overpaymentHolder,
+            final ChangedTransactionDetail changedTransactionDetail) {
+        final Loan loan = loanTransaction.getLoan();
+        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+
+        // Reset derived component of new loan transaction and re-process transaction
+        processLatestTransaction(newLoanTransaction,
+                new TransactionCtx(currency, installments, charges, overpaymentHolder, null, loan.getActiveLoanTermVariations()));
+        newLoanTransaction.adjustInterestComponent();
+        if (newLoanTransaction.isReversed()) {
+            loanTransaction.reverse();
+            changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, loanTransaction));
+        } else if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+            loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
+                    newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
+        } else {
+            createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
+        }
     }
 
     private void reprocessChargePaymentTransaction(final LoanTransaction loanTransaction, final LocalDate disbursementDate,
