@@ -33,9 +33,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.annotation.PartialResponseParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
@@ -52,8 +50,6 @@ import org.springframework.stereotype.Component;
 public class ReportMailingJobRunHistoryApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final DefaultToApiJsonSerializer<ReportMailingJobRunHistoryData> reportMailingToApiJsonSerializer;
     private final ReportMailingJobRunHistoryReadPlatformService reportMailingJobRunHistoryReadPlatformService;
     private final SqlValidator sqlValidator;
 
@@ -63,7 +59,8 @@ public class ReportMailingJobRunHistoryApiResource {
             + "\n" + "Example Requests:\n" + "\n" + "reportmailingjobrunhistory/1")
     @AlternativeOperationId("retrieveAllByReportMailingJobId")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportMailingJobRunHistoryData.class)))
-    public String retrieveAllByReportMailingJobId(@Context final UriInfo uriInfo,
+    @PartialResponseParameters({})
+    public Page<ReportMailingJobRunHistoryData> retrieveAllByReportMailingJobId(@Context final UriInfo uriInfo,
             @QueryParam("reportMailingJobId") @Parameter(description = "reportMailingJobId") final Long reportMailingJobId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
@@ -76,10 +73,6 @@ public class ReportMailingJobRunHistoryApiResource {
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
 
-        final Page<ReportMailingJobRunHistoryData> reportMailingJobRunHistoryData = this.reportMailingJobRunHistoryReadPlatformService
-                .retrieveRunHistoryByJobId(reportMailingJobId, searchParameters);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return this.reportMailingToApiJsonSerializer.serialize(settings, reportMailingJobRunHistoryData);
+        return this.reportMailingJobRunHistoryReadPlatformService.retrieveRunHistoryByJobId(reportMailingJobId, searchParameters);
     }
 }
