@@ -69,19 +69,6 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     }
 
     /**
-     * For early/'in advance' repayments, pays off principal component only.
-     */
-    @SuppressWarnings("unused")
-    @Override
-    protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
-
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
-                charges);
-    }
-
-    /**
      * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */
     @Override

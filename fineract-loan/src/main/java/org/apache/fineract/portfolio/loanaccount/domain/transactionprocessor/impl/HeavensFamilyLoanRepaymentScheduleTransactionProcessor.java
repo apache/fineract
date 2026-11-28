@@ -66,19 +66,6 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         return STRATEGY_NAME;
     }
 
-    /**
-     * For late repayments, pay off in the same way as on-time payments, interest first then principal.
-     */
-    @Override
-    protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
-            Set<LoanCharge> charges) {
-
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
-                transactionMappings, charges);
-    }
-
     @Override
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
