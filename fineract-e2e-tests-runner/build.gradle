@@ -56,7 +56,7 @@ dependencies {
     testImplementation 'io.cucumber:cucumber-spring'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine'
 
-    testImplementation 'io.qameta.allure:allure-cucumber7-jvm'
+    testImplementation 'io.qameta.allure:allure-cucumber8-jvm'
 
     testImplementation 'org.assertj:assertj-core'
 
@@ -81,10 +81,14 @@ dependencies {
 allure {
     // Pins the Allure 2 commandline for allureReport/allureServe. This must stay set: with no
     // version the plugin defaults to Allure 3, which pulls a Node.js toolchain instead.
-    // 2.42.1 is the plugin's own Allure 2 default. The io.qameta.allure:* adapters are a separate
-    // release stream (no shared version number exists) and are left unpinned so the plugin keeps
-    // the whole adapter family on one version.
+    // 2.42.1 is the plugin's own Allure 2 default.
     version = '2.42.1'
+    adapter {
+        // The plugin would add allure-java 2.x adapters, which have no Cucumber 8 support. The only
+        // adapter the cucumber task uses is allure-cucumber8-jvm, declared above and versioned in
+        // org.apache.fineract.dependencies.gradle.
+        autoconfigure = false
+    }
 }
 
 tasks.named('test') {
@@ -116,5 +120,5 @@ cucumber {
         name = project.getProperty("cucumber.name")
     }
 
-    plugin = ['pretty', 'io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm']
+    plugin = ['pretty', 'io.qameta.allure.cucumber8jvm.AllureCucumber8Jvm']
 }
