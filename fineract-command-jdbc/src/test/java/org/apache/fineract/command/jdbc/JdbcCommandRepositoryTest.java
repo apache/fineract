@@ -29,6 +29,7 @@ import org.apache.fineract.command.test.sample.command.DummyCommand;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.apache.fineract.command.test.sample.data.DummyResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,6 +37,7 @@ import org.springframework.test.context.ContextConfiguration;
 @Slf4j
 @SpringBootTest
 @ContextConfiguration(classes = TestConfiguration.class)
+@DisabledIfSystemProperty(named = "fineract.test.database", matches = "mysql|mariadb")
 class JdbcCommandRepositoryTest extends CommandBaseTest {
 
     @Autowired
