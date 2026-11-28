@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.updateloanarrearsageing;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQueryFactory;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,6 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanArrearsAgingService;
+import org.apache.fineract.query.QMLoan;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -49,6 +52,7 @@ public class LoanArrearsAgeingUpdateHandler {
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final LoanArrearsAgingService loanArrearsAgingService;
+    private final SQLQueryFactory queryFactory;
 
     private void truncateLoanArrearsAgingDetails() {
         jdbcTemplate.execute("truncate table m_loan_arrears_aging");
@@ -197,21 +201,33 @@ public class LoanArrearsAgeingUpdateHandler {
     }
 
     private List<Map<String, Object>> getLoanSummary(final List<Long> loanIds) {
-        final StringBuilder transactionsSql = new StringBuilder();
-        transactionsSql.append("select ml.id as loanId, ");
-        transactionsSql
-                .append("ml.principal_repaid_derived as principalAmtPaid, ml.principal_writtenoff_derived as  principalAmtWrittenoff, ");
-        transactionsSql.append(" ml.interest_repaid_derived as interestAmtPaid, ml.interest_waived_derived as interestAmtWaived, ");
-        transactionsSql.append("ml.fee_charges_repaid_derived as feeAmtPaid, ml.fee_charges_waived_derived as feeAmtWaived, ");
-        transactionsSql
-                .append("ml.penalty_charges_repaid_derived as penaltyAmtPaid, ml.penalty_charges_waived_derived as penaltyAmtWaived ");
-        transactionsSql.append("from m_loan ml ");
-        transactionsSql.append("where ml.id IN (:loanIds)").append(" order by ml.id");
+        QMLoan ml = new QMLoan("ml");
+        List<Tuple> result = queryFactory
+                .select(ml.id.as("loanId"), ml.principalRepaidDerived.as("principalAmtPaid"),
+                        ml.principalWrittenoffDerived.as("principalAmtWrittenoff"), ml.interestRepaidDerived.as("interestAmtPaid"),
+                        ml.interestWaivedDerived.as("interestAmtWaived"), ml.feeChargesRepaidDerived.as("feeAmtPaid"),
+                        ml.feeChargesWaivedDerived.as("feeAmtWaived"), ml.penaltyChargesRepaidDerived.as("penaltyAmtPaid"),
+                        ml.penaltyChargesWaivedDerived.as("penaltyAmtWaived"))
+                .from(ml).where(ml.id.in(loanIds)).orderBy(ml.id.asc()).fetch();
 
-        final NamedParameterJdbcTemplate namedJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        SqlParameterSource parameters = new MapSqlParameterSource("loanIds", loanIds);
-        List<Map<String, Object>> loanSummary = namedJdbcTemplate.queryForList(transactionsSql.toString(), parameters);
-        return loanSummary;
+        return result.stream().map(LoanArrearsAgeingUpdateHandler::mapLoanSummary).toList();
+
+    }
+
+    private static Map<String, Object> mapLoanSummary(Tuple row) {
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("loanId", row.get(0, Long.class));
+        summary.put("principalAmtPaid", row.get(1, BigDecimal.class));
+        summary.put("principalAmtWrittenoff", row.get(2, BigDecimal.class));
+        summary.put("interestAmtPaid", row.get(3, BigDecimal.class));
+        summary.put("interestAmtWaived", row.get(4, BigDecimal.class));
+        summary.put("feeAmtPaid", row.get(5, BigDecimal.class));
+        summary.put("feeAmtWaived", row.get(6, BigDecimal.class));
+        summary.put("penaltyAmtPaid", row.get(7, BigDecimal.class));
+        summary.put("penaltyAmtWaived", row.get(8, BigDecimal.class));
+
+        return summary;
+
     }
 
     private Map<Long, List<LoanSchedulePeriodData>> getScheduleDate(List<Long> loanIds) {
