@@ -172,7 +172,7 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
         }
 
         // if the param present, then we should have the loan product ids. If
-        // not we will load all loan products
+        // not, the update leaves the criteria's loan products unchanged
         if (this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM, element)) {
             JsonArray jsonloanProducts = this.fromApiJsonHelper.extractJsonArrayNamed(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM,
                     element);

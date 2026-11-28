@@ -103,12 +103,15 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             if (provisioningCriteria == null) {
                 throw new ProvisioningCategoryNotFoundException(criteriaId);
             }
-            List<LoanProduct> products = this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson());
-            final Map<String, Object> changes = provisioningCriteria.update(command, products);
-            if (!changes.isEmpty()) {
+            // A request without loanProducts or definitions keeps the current ones
+            final List<LoanProduct> products = command.parameterExists(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM)
+                    ? this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson())
+                    : null;
+            provisioningCriteria.update(command, products);
+            if (command.parameterExists(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)) {
                 updateProvisioningCriteriaDefinitions(provisioningCriteria, command);
-                provisioningCriteriaRepository.saveAndFlush(provisioningCriteria);
             }
+            provisioningCriteriaRepository.saveAndFlush(provisioningCriteria);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(provisioningCriteria.getId()) //
