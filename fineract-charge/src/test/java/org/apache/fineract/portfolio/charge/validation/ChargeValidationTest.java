@@ -366,6 +366,50 @@ public class ChargeValidationTest {
         assertThat(validate(request)).isEmpty();
     }
 
+    // The next tests show which charge definition rules the bean validation already covers on create, and which ones
+    // only ChargeDefinitionValidator checks.
+
+    @Test
+    public void createSavingsChargeWithLoanOnlyChargeTimeTypeFails() {
+        final ChargeCreateRequest request = withdrawalFeeRequest();
+        request.setChargeTimeType(ChargeTimeType.DISBURSEMENT.getValue());
+
+        assertThat(validate(request)).containsExactly(CHARGE_TIME_TYPE_INVALID);
+    }
+
+    @Test
+    public void createSavingsChargeWithLoanOnlyCalculationTypeFails() {
+        final ChargeCreateRequest request = withdrawalFeeRequest();
+        request.setChargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue());
+
+        assertThat(validate(request)).containsExactly(CHARGE_CALCULATION_TYPE_INVALID);
+    }
+
+    @Test
+    public void createSavingsMonthlyFeeWithPercentageOfAmountHasNoViolations() {
+        final ChargeCreateRequest request = savingsMonthlyFeeRequest();
+        request.setChargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue());
+
+        assertThat(validate(request)).isEmpty();
+    }
+
+    @Test
+    public void createLoanPenaltyDueAtDisbursementHasNoViolations() {
+        final ChargeCreateRequest request = loanChargeRequest();
+        request.setChargeTimeType(ChargeTimeType.DISBURSEMENT.getValue());
+        request.setPenalty(true);
+
+        assertThat(validate(request)).isEmpty();
+    }
+
+    @Test
+    public void createLoanOverdueFeeThatIsNotAPenaltyHasNoViolations() {
+        final ChargeCreateRequest request = loanChargeRequest();
+        request.setChargeTimeType(ChargeTimeType.OVERDUE_INSTALLMENT.getValue());
+
+        assertThat(validate(request)).isEmpty();
+    }
+
     // ---------------------------------------------------------------- update
 
     @Test

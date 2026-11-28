@@ -29,24 +29,17 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.MonthDay;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.exception.ChargeDueAtDisbursementCannotBePenaltyException;
-import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyException;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -181,9 +174,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         this.taxGroup = taxGroup;
         this.chargePaymentMode = paymentMode == null ? null : paymentMode.getValue();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
-
         if (isMonthlyFee() || isAnnualFee()) {
             this.feeOnMonth = feeOnMonthDay.getMonthValue();
             this.feeOnDay = feeOnMonthDay.getDayOfMonth();
@@ -192,27 +182,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         this.feeFrequency = feeFrequency;
 
         if (isSavingsCharge()) {
-            // TODO vishwas, this validation seems unnecessary as identical
-            // validation is performed in the write service
-            if (!isAllowedSavingsChargeTime()) {
-                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
-                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
-            }
-            // TODO vishwas, this validation seems unnecessary as identical
-            // validation is performed in the writeservice
-            if (!isAllowedSavingsChargeCalculationType()) {
-                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
-                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
-            }
-
-            if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
-                    || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
-                    && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
-                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
-                        .failWithCodeNoParameterAddedToErrorCode(
-                                "savings.charge.calculation.type.percentage.allowed.only.for.withdrawal.or.NoActivity");
-            }
-
             if (enableFreeWithdrawalCharge) {
                 this.enableFreeWithdrawal = true;
                 this.freeWithdrawalFrequency = freeWithdrawalFrequency;
@@ -224,30 +193,11 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 this.enablePaymentType = true;
                 this.paymentType = paymentType;
             }
-
-        } else if (isLoanCharge()) {
-
-            if (penalty && (chargeTime.isTimeOfDisbursement() || chargeTime.isTrancheDisbursement())) {
-                throw new ChargeDueAtDisbursementCannotBePenaltyException(name);
-            }
-            if (!penalty && chargeTime.isOverdueInstallment()) {
-                throw new ChargeMustBePenaltyException(name);
-            }
-            // TODO vishwas, this validation seems unnecessary as identical
-            // validation is performed in the write service
-            if (!isAllowedLoanChargeTime()) {
-                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
-                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
-            }
         }
 
         if (isPercentageOfDisbursementAmount() || isPercentageOfApprovedAmount()) {
             this.minCap = minCap;
             this.maxCap = maxCap;
-        }
-
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
 

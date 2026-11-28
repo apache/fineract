@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
@@ -57,6 +58,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeUpdatedException;
 import org.apache.fineract.portfolio.charge.exception.ChargeDueAtDisbursementCannotBePenaltyException;
+import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyException;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -244,6 +246,62 @@ class ChargeWriteServiceImplTest {
     void createFullLoanTermWithDays_isRejected() {
         assertCreateRejected(List.of("validation.msg.charge.amortizationDays.supported.only.for.number.of.days.period.type"),
                 amortized(loanFee(ChargeTimeType.DISBURSEMENT), "FULL_LOAN_TERM", 30, null, null));
+    }
+
+    // ------------------------------------------------------------- create: charge definition rules
+    // The rules themselves are covered by ChargeDefinitionValidatorTest; these tests check that create applies them,
+    // and when.
+
+    @Test
+    void createSavingsPercentageOfAmountChargeDueOnASpecifiedDate_isRejected() {
+        assertCreateRejected(
+                List.of("validation.msg.charges.savings.charge.calculation.type.percentage.allowed.only.for.withdrawal.or.NoActivity"),
+                savingsCharge(ChargeTimeType.SPECIFIED_DUE_DATE, ChargeCalculationType.PERCENT_OF_AMOUNT));
+    }
+
+    @Test
+    void createLoanPenaltyDueAtDisbursement_isRejected() {
+        assertThrows(ChargeDueAtDisbursementCannotBePenaltyException.class,
+                () -> underTest.create(loanCharge(ChargeTimeType.DISBURSEMENT, true)));
+        verify(chargeRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createLoanOverdueFeeThatIsNotAPenalty_isRejected() {
+        assertThrows(ChargeMustBePenaltyException.class, () -> underTest.create(loanFee(ChargeTimeType.OVERDUE_INSTALLMENT)));
+        verify(chargeRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createSavingsMonthlyFee_keepsTheFeeMonthAndDay() {
+        final Charge charge = create(savingsCharge(ChargeTimeType.MONTHLY_FEE, ChargeCalculationType.FLAT));
+
+        assertEquals(3, charge.getFeeOnMonth());
+        assertEquals(4, charge.getFeeOnDay());
+    }
+
+    @Test
+    void createWithAnUnknownIncomeAccount_isRejectedBeforeTheChargeDefinitionRules() {
+        when(glAccountRepository.findOneWithNotFoundDetection(7L)).thenThrow(new GLAccountNotFoundException(7L));
+
+        assertThrows(GLAccountNotFoundException.class,
+                () -> underTest.create(withIncomeAccount(loanCharge(ChargeTimeType.DISBURSEMENT, true), 7L)));
+        verify(chargeRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createAmortizedLoanPenaltyDueAtDisbursement_isRejectedByTheChargeDefinitionRulesFirst() {
+        assertThrows(ChargeDueAtDisbursementCannotBePenaltyException.class,
+                () -> underTest.create(amortized(loanCharge(ChargeTimeType.DISBURSEMENT, true), "FULL_LOAN_TERM", null, null, null)));
+        verify(chargeRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createAmortizedSavingsPercentageOfAmountCharge_isRejectedByTheChargeDefinitionRulesFirst() {
+        assertCreateRejected(
+                List.of("validation.msg.charges.savings.charge.calculation.type.percentage.allowed.only.for.withdrawal.or.NoActivity"),
+                amortized(savingsCharge(ChargeTimeType.SPECIFIED_DUE_DATE, ChargeCalculationType.PERCENT_OF_AMOUNT), "FULL_LOAN_TERM", null,
+                        null, null));
     }
 
     // ------------------------------------------------------------- update: amortization
@@ -456,6 +514,20 @@ class ChargeWriteServiceImplTest {
 
     private static ChargeCreateRequest clientFee() {
         return createRequest(ChargeAppliesTo.CLIENT, ChargeTimeType.SPECIFIED_DUE_DATE, false);
+    }
+
+    private static ChargeCreateRequest savingsCharge(final ChargeTimeType chargeTimeType,
+            final ChargeCalculationType chargeCalculationType) {
+        final ChargeCreateRequest request = createRequest(ChargeAppliesTo.SAVINGS, chargeTimeType, false);
+        request.setChargeCalculationType(chargeCalculationType.getValue());
+        if (chargeTimeType.isMonthlyFee() || chargeTimeType.isAnnualFee()) {
+            request.setFeeOnMonthDay("04 March");
+            request.setMonthDayFormat("dd MMM");
+        }
+        if (chargeTimeType.isMonthlyFee()) {
+            request.setFeeInterval(1);
+        }
+        return request;
     }
 
     private static ChargeCreateRequest createRequest(final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTimeType,
