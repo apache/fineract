@@ -36,6 +36,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.campaigns.jobs.ReportOutputFiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
@@ -136,7 +137,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
                 if (responseObject != null && responseObject.getClass().equals(ByteArrayOutputStream.class)) {
                     final ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) responseObject;
                     final Path fileLocation = Path.of(fineractProperties.getContent().getFilesystem().getRootFolder());
-                    final Path fileNameWithoutExtension = fileLocation.resolve(reportName);
+                    final Path fileName = ReportOutputFiles.resolve(fileLocation, reportName, emailAttachmentFileFormat.getValue());
 
                     if (!Files.isDirectory(fileLocation)) {
                         Files.createDirectories(fileLocation);
@@ -145,9 +146,6 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
                     if (byteArrayOutputStream.size() == 0) {
                         errorLog.append("Report processing failed, empty output stream created");
                     } else if ((errorLog != null && errorLog.length() == 0) && (byteArrayOutputStream.size() > 0)) {
-                        final Path fileName = fileNameWithoutExtension
-                                .resolveSibling(reportName + "." + emailAttachmentFileFormat.getValue());
-
                         sendReportFileToEmailRecipients(reportMailingJob, fileName, byteArrayOutputStream, errorLog);
                     }
                 } else {

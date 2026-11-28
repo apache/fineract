@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
-import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import java.io.Reader;
@@ -36,6 +35,7 @@ import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
 import org.apache.fineract.infrastructure.security.data.OTPRequest;
 import org.apache.fineract.infrastructure.security.domain.TwoFactorConfiguration;
 import org.apache.fineract.infrastructure.security.domain.TwoFactorConfigurationRepository;
+import org.apache.fineract.template.service.NoPartialsMustacheFactory;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -278,7 +278,7 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
     }
 
     private String compileTextTemplate(final String template, final String name, final Map<String, Object> params) {
-        final MustacheFactory mf = new DefaultMustacheFactory();
+        final MustacheFactory mf = new NoPartialsMustacheFactory();
         final Mustache mustache = mf.compile(Reader.of(template), name);
 
         final StringWriter stringWriter = new StringWriter();
