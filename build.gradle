@@ -24,6 +24,7 @@ buildscript {
         fineractJavaProjects = subprojects.findAll{
             [
                 'fineract-core',
+                'fineract-testcontainers-support',
                 'fineract-security',
                 'fineract-cob',
                 'fineract-validation',
@@ -431,6 +432,7 @@ configure(project.fineractJavaProjects) {
     // NOTE: order matters!
 
     apply plugin: 'java'
+    apply plugin: 'org.apache.fineract.database-tests'
     apply plugin: 'idea'
 
     java {

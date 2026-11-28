@@ -51,14 +51,4 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testRuntimeOnly(
-            'org.mariadb.jdbc:mariadb-java-client',
-            'com.mysql:mysql-connector-j',
-            )
-    testImplementation (
-            'org.testcontainers:junit-jupiter',
-            'org.testcontainers:postgresql',
-            'org.testcontainers:mariadb',
-            'org.testcontainers:mysql',
-            )
 }

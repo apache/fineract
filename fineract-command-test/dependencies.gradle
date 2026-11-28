@@ -18,6 +18,8 @@
  */
 
 dependencies {
+    api project(':fineract-testcontainers-support')
+
     implementation(
             project(path: ':fineract-command'),
             )
@@ -33,10 +35,6 @@ dependencies {
 
             'org.liquibase:liquibase-core',
 
-            'com.mysql:mysql-connector-j',
-            'org.postgresql:postgresql',
-            'org.mariadb.jdbc:mariadb-java-client',
-
             'org.apache.commons:commons-lang3',
 
             'org.mapstruct:mapstruct',
@@ -49,12 +47,6 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    implementation (
-            'org.testcontainers:junit-jupiter',
-            'org.testcontainers:postgresql',
-            'org.testcontainers:mariadb',
-            'org.testcontainers:mysql',
-            )
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
