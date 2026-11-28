@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,6 +30,7 @@ import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
@@ -38,6 +42,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 @Getter
 @Builder
 @AllArgsConstructor
+@JsonLocalDateArrayFormat
 public class LoanChargeData {
 
     private final Long id;
@@ -67,6 +72,7 @@ public class LoanChargeData {
 
     private final BigDecimal amountOrPercentage;
 
+    @JsonIgnoreProperties("overdueInstallmentCharge")
     private final List<ChargeData> chargeOptions;
 
     private final boolean penalty;
@@ -91,8 +97,10 @@ public class LoanChargeData {
 
     private BigDecimal amountUnrecognized;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final ExternalId externalId;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final ExternalId externalLoanId;
 
     private StringEnumOptionData amortizationPeriodType;
@@ -429,6 +437,7 @@ public class LoanChargeData {
         return isAccountTransfer && !this.paid && !this.waived;
     }
 
+    @JsonIgnore
     public boolean isInstallmentFee() {
         boolean isInstalmentFee = false;
         if (this.chargeTimeType != null) {

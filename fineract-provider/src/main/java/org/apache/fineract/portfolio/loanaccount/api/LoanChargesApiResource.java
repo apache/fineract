@@ -38,21 +38,16 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -79,16 +74,11 @@ public class LoanChargesApiResource {
     public static final String COMMAND_WAIVE = "waive";
     public static final String COMMAND_ADJUSTMENT = "adjustment";
     public static final String COMMAND_DEACTIVATE_OVERDUE = "deactivateOverdue";
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "chargeId", "name", "penalty", "chargeTimeType", "dueAsOfDate", "chargeCalculationType", "percentage",
-                    "amountPercentageAppliedTo", "currency", "amountWaived", "amountWrittenOff", "amountOutstanding", "amountOrPercentage",
-                    "amount", "amountPaid", "chargeOptions", "installmentChargeData", "externalId"));
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
     private final PlatformSecurityContext context;
     private final ChargeReadService chargeReadService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final LoanReadPlatformService loanReadPlatformService;
 
@@ -96,26 +86,26 @@ public class LoanChargesApiResource {
     @Path("{loanId}/charges")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Loan Charges", operationId = "retrieveAllLoanCharges", description = "It lists all the Loan Charges specific to a Loan \n\n"
-            + "Example Requests:\n" + "\n" + "loans/1/charges\n" + "\n" + "\n" + "loans/1/charges?fields=name,amountOrPercentage")
+            + "Example Requests:\n" + "\n" + "loans/1/charges")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class))))
-    public String retrieveAllLoanCharges(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public Collection<LoanChargeData> retrieveAllLoanCharges(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @Context final UriInfo uriInfo) {
 
-        return retrieveAllLoanCharges(loanId, null, uriInfo);
+        return findLoanCharges(loanId, null);
     }
 
     @GET
     @Path("external-id/{loanExternalId}/charges")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Loan Charges", operationId = "retrieveAllLoanChargesByLoanExternalId", description = "It lists all the Loan Charges specific to a Loan \n\n"
-            + "Example Requests:\n" + "\n" + "loans/1/charges\n" + "\n" + "\n" + "loans/1/charges?fields=name,amountOrPercentage")
+            + "Example Requests:\n" + "\n" + "loans/1/charges")
     @AlternativeOperationId("retrieveAllLoanCharges_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class))))
-    public String retrieveAllLoanCharges(
+    public Collection<LoanChargeData> retrieveAllLoanCharges(
             @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @Context final UriInfo uriInfo) {
 
-        return retrieveAllLoanCharges(null, loanExternalId, uriInfo);
+        return findLoanCharges(null, loanExternalId);
     }
 
     @GET
@@ -125,10 +115,10 @@ public class LoanChargesApiResource {
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "loans/1/charges/template\n" + "\n")
     @AlternativeOperationId("retrieveTemplate_8")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.class)))
-    public String retrieveTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public LoanChargeData retrieveTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @Context final UriInfo uriInfo) {
 
-        return retrieveTemplate(loanId, null, uriInfo);
+        return buildTemplate(loanId, null);
     }
 
     @GET
@@ -138,65 +128,67 @@ public class LoanChargesApiResource {
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "loans/1/charges/template\n" + "\n")
     @AlternativeOperationId("retrieveTemplate_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.class)))
-    public String retrieveTemplate(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public LoanChargeData retrieveTemplate(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @Context final UriInfo uriInfo) {
 
-        return retrieveTemplate(null, loanExternalId, uriInfo);
+        return buildTemplate(null, loanExternalId);
     }
 
     @GET
     @Path("{loanId}/charges/{loanChargeId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanCharge", description = "Retrieves Loan Charge according to the Loan ID and Loan Charge ID"
-            + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+            + "Example Requests:\n" + "\n" + "/loans/1/charges/1")
     @AlternativeOperationId("retrieveLoanCharge")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
-    public String retrieveLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public LoanChargeData retrieveLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId, @Context final UriInfo uriInfo) {
 
-        return retrieveLoanCharge(loanId, null, loanChargeId, null, uriInfo);
+        return findLoanCharge(loanId, null, loanChargeId, null);
     }
 
     @GET
     @Path("{loanId}/charges/external-id/{loanChargeExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanChargeByChargeExternalId", description = "Retrieves Loan Charge according to the Loan ID and Loan Charge External ID"
-            + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n"
-            + "/loans/1/charges/external-id/1?fields=name,amountOrPercentage")
+            + "Example Requests:\n" + "\n" + "/loans/1/charges/external-id/1")
     @AlternativeOperationId("retrieveLoanCharge_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
-    public String retrieveLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public LoanChargeData retrieveLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
             @Context final UriInfo uriInfo) {
 
-        return retrieveLoanCharge(loanId, null, null, loanChargeExternalId, uriInfo);
+        return findLoanCharge(loanId, null, null, loanChargeExternalId);
     }
 
     @GET
     @Path("external-id/{loanExternalId}/charges/{loanChargeId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanChargeByLoanExternalId", description = "Retrieves Loan Charge according to the Loan external ID and Loan Charge ID"
-            + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+            + "Example Requests:\n" + "\n" + "/loans/1/charges/1")
     @AlternativeOperationId("retrieveLoanCharge_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
-    public String retrieveLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public LoanChargeData retrieveLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId, @Context final UriInfo uriInfo) {
 
-        return retrieveLoanCharge(null, loanExternalId, loanChargeId, null, uriInfo);
+        return findLoanCharge(null, loanExternalId, loanChargeId, null);
     }
 
     @GET
     @Path("external-id/{loanExternalId}/charges/external-id/{loanChargeExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanChargeByLoanAndChargeExternalId", description = "Retrieves Loan Charge according to the Loan External ID and Loan Charge External ID"
-            + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+            + "Example Requests:\n" + "\n" + "/loans/1/charges/1")
     @AlternativeOperationId("retrieveLoanCharge_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
-    public String retrieveLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
+    public LoanChargeData retrieveLoanCharge(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
             @Context final UriInfo uriInfo) {
 
-        return retrieveLoanCharge(null, loanExternalId, null, loanChargeExternalId, uriInfo);
+        return findLoanCharge(null, loanExternalId, null, loanChargeExternalId);
     }
 
     @POST
@@ -415,8 +407,8 @@ public class LoanChargesApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    private String retrieveLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
-            final String loanChargeExternalIdStr, final UriInfo uriInfo) {
+    private LoanChargeData findLoanCharge(final Long loanId, final String loanExternalIdStr, final Long loanChargeId,
+            final String loanChargeExternalIdStr) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
@@ -431,10 +423,7 @@ public class LoanChargesApiResource {
         final List<LoanInstallmentChargeData> installmentChargeData = this.loanChargeReadPlatformService
                 .retrieveInstallmentLoanCharges(resolvedLoanChargeId, true);
 
-        final LoanChargeData loanChargeData = new LoanChargeData(loanCharge, installmentChargeData);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanChargeData, RESPONSE_DATA_PARAMETERS);
+        return new LoanChargeData(loanCharge, installmentChargeData);
     }
 
     private String handleExecuteLoanCharge(final Long loanId, final String loanExternalIdStr, final String commandParam,
@@ -508,19 +497,16 @@ public class LoanChargesApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    private String retrieveAllLoanCharges(final Long loanId, final String loanExternalIdStr, final UriInfo uriInfo) {
+    private Collection<LoanChargeData> findLoanCharges(final Long loanId, final String loanExternalIdStr) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
         Long resolvedLoanId = loanId == null ? loanReadPlatformService.getResolvedLoanId(loanExternalId) : loanId;
 
-        final Collection<LoanChargeData> loanCharges = this.loanChargeReadPlatformService.retrieveLoanCharges(resolvedLoanId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanCharges, RESPONSE_DATA_PARAMETERS);
+        return this.loanChargeReadPlatformService.retrieveLoanCharges(resolvedLoanId);
     }
 
-    private String retrieveTemplate(final Long loanId, final String loanExternalIdStr, final UriInfo uriInfo) {
+    private LoanChargeData buildTemplate(final Long loanId, final String loanExternalIdStr) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
@@ -528,10 +514,7 @@ public class LoanChargesApiResource {
 
         final List<ChargeData> chargeOptions = this.chargeReadService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
                 new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
-        final LoanChargeData loanChargeTemplate = LoanChargeData.template(chargeOptions);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanChargeTemplate, RESPONSE_DATA_PARAMETERS);
+        return LoanChargeData.template(chargeOptions);
     }
 
     private Long getResolvedLoanChargeId(final Long loanChargeId, final ExternalId loanChargeExternalId) {

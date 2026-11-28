@@ -29,8 +29,13 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +56,8 @@ public class CollectChargesByLoanExternalIdCommandStrategy implements CommandStr
      * Loan charges api resource {@link LoanChargesApiResource}.
      */
     private final LoanChargesApiResource loanChargesApiResource;
+    private final DefaultToApiJsonSerializer<LoanChargeData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Override
     public BatchResponse execute(BatchRequest request, final UriInfo uriInfo) {
@@ -78,7 +85,10 @@ public class CollectChargesByLoanExternalIdCommandStrategy implements CommandStr
         // Calls 'retrieveAllLoanCharges' function from
         // 'LoanChargesApiResource' to Collect
         // Charges for a loan
-        responseBody = loanChargesApiResource.retrieveAllLoanCharges(loanExternalId, parameterizedUriInfo);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(parameterizedUriInfo.getQueryParameters());
+        responseBody = toApiJsonSerializer.serialize(settings,
+                loanChargesApiResource.retrieveAllLoanCharges(loanExternalId, parameterizedUriInfo),
+                LoanChargesApiConstants.LOAN_CHARGE_RESPONSE_DATA_PARAMETERS);
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charges have been
