@@ -44,6 +44,7 @@
 **/*.puml
 **/*.txt
 **/.openapi-generator-ignore
+/.all-contributorsrc
 /.asf.yaml
 /.rat-excludes
 /config/fineractdev-eclipse-preferences.epf

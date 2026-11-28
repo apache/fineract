@@ -302,6 +302,7 @@ allprojects  {
         excludes = [
             '**/src/main/templates/**/*.mustache',
             '**/.dockerignore',
+            '**/.all-contributorsrc',
             '**/*.launch',
             '**/licenses/**',
             '**/*.md',

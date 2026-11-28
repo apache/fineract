@@ -2,7 +2,7 @@
 
 Hello there!
 
-First of all, **Thank You** for contributing to Apache Fineract! We are grateful for your interest in this project.
+First of all, **Thank You** for contributing to Apache Fineract! We are grateful for your interest in this project. Everyone who has contributed is listed in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 Please join the [developer mailing list](https://fineract.apache.org/#contribute), if you have not already done so, as this is where discussions about this project take place - say _Hi_ there! Please also have a quick look at the [Code of Conduct](CODE_OF_CONDUCT.md).
 
