@@ -136,13 +136,11 @@ public class ReportsApiResource {
     @Operation(summary = "Create a Report", operationId = "createReport", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostRepostRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostReportsResponse.class)))
-    public String createReport(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult createReport(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createReport().withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -167,13 +165,11 @@ public class ReportsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Report", operationId = "deleteReport", description = "Only non-core reports can be deleted.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.DeleteReportsResponse.class)))
-    public String deleteReport(@PathParam("id") @Parameter(description = "id") final Long id) {
+    public CommandProcessingResult deleteReport(@PathParam("id") @Parameter(description = "id") final Long id) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteReport(id).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }

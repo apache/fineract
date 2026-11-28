@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueD
 /**
  * Jackson mixins that make the datatable data classes serialize their fields, as Gson did. They are registered on the
  * application mapper only. Annotating the classes themselves would change the generated OpenAPI spec and client models.
- * The same mixins as in #6875 (FINERACT-3183).
  */
 public final class DataqueriesJacksonMixins {
 
