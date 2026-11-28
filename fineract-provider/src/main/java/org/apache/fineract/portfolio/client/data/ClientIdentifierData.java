@@ -25,12 +25,14 @@ import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 /**
  * Immutable data object represent client identity data.
  */
 @Data
 @AllArgsConstructor
+@JsonLocalDateArrayFormat
 public class ClientIdentifierData implements Serializable {
 
     @Serial

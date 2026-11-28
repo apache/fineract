@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.client.api.ClientsApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -47,12 +49,13 @@ import org.springframework.stereotype.Component;
 public class UpdateClientCommandStrategy implements CommandStrategy {
 
     private final ClientsApiResource clientsApiResource;
+    private final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
 
     @Override
     public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
 
         final BatchResponse response = new BatchResponse();
-        final String responseBody;
+        final CommandProcessingResult result;
 
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
@@ -63,12 +66,12 @@ public class UpdateClientCommandStrategy implements CommandStrategy {
 
         // Calls 'update' function from 'ClientsApiResource' to update a
         // client
-        responseBody = clientsApiResource.update(clientId, request.getBody());
+        result = clientsApiResource.update(clientId, request.getBody());
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after the successful update of
         // client information
-        response.setBody(responseBody);
+        response.setBody(toApiJsonSerializer.serialize(result));
 
         return response;
     }

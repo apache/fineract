@@ -20,7 +20,9 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
 import java.math.BigDecimal;
+import lombok.Getter;
 
+@Getter
 @SuppressWarnings("unused")
 public final class ObligeeData {
 

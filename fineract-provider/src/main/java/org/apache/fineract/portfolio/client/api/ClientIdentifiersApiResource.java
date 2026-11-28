@@ -37,11 +37,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
@@ -50,7 +47,6 @@ import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformSer
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.command.ClientIdentifierCreateCommand;
 import org.apache.fineract.portfolio.client.command.ClientIdentifierDeleteCommand;
@@ -75,23 +71,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ClientIdentifiersApiResource {
 
-    private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "documentType",
-            "documentKey", "description", "issuanceDate", "expiryDate", "allowedDocumentTypes"));
-
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CLIENTIDENTIFIER";
 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final ClientIdentifierReadPlatformService clientIdentifierReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final CommandDispatcher dispatcher;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all Identifiers for a Client", operationId = "retrieveAllClientIdentifiers", description = "Example Requests:\n"
-            + "clients/1/identifiers\n" + "\n" + "\n" + "clients/1/identifiers?fields=documentKey,documentType,description")
+            + "clients/1/identifiers")
     public List<ClientIdentifierData> retrieveAllClientIdentifiers(
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -134,11 +126,10 @@ public class ClientIdentifiersApiResource {
     @Path("{identifierId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Identifier", operationId = "retrieveOneClientIdentifier", description = "Example Requests:\n"
-            + "clients/1/identifier/2\n" + "\n" + "\n" + "clients/1/identifier/2?template=true\n" + "\n"
-            + "clients/1/identifiers/2?fields=documentKey,documentType,description")
+            + "clients/1/identifier/2\n" + "\n" + "\n" + "clients/1/identifier/2?template=true")
     @AlternativeOperationId("retrieveClientIdentifiers")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.GetClientsClientIdIdentifiersResponse.class)))
-    public String retrieveClientIdentifiers(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientIdentifierData retrieveClientIdentifiers(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId,
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -149,7 +140,7 @@ public class ClientIdentifiersApiResource {
             final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Customer Identifier");
             clientIdentifierData = ClientIdentifierData.template(clientIdentifierData, codeValues);
         }
-        return this.toApiJsonSerializer.serialize(settings, clientIdentifierData, CLIENT_IDENTIFIER_DATA_PARAMETERS);
+        return clientIdentifierData;
     }
 
     @PUT

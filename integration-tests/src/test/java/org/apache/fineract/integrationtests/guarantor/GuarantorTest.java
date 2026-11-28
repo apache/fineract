@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GuarantorData;
 import org.apache.fineract.client.models.GuarantorFundingData;
@@ -531,6 +532,28 @@ public class GuarantorTest extends FeignLoanTestBase {
         }
 
         assertTrue(foundGuarantorWithCorrectSavingsId, "Should have found guarantor with correct group savings account ID");
+    }
+
+    @Test
+    public void testRetrieveAccountsForGuarantorClient() {
+
+        final Long borrowerClient = createVerifiedClient();
+        final Long guarantorClientId = createVerifiedClient();
+
+        final Long guarantorSavingAccountId = openSavingsAccount(guarantorClientId, BigDecimal.valueOf(700));
+
+        final Long loanId = createLoanProductWithHoldFunds("70", "20", "30");
+        final String disbursementDate = daysAgo(7 * 4);
+        final Long applicationId = applyForCollateralisedLoan(borrowerClient, loanId, disbursementDate);
+        assertNotNull(applicationId);
+        verifyLoanStatus(applicationId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
+
+        final Long loanGuarantorId = guarantorHelper.createGuarantor(applicationId,
+                existingCustomerWithGuaranteeAmount(guarantorClientId, guarantorSavingAccountId, BigDecimal.valueOf(30)));
+        assertNotNull(loanGuarantorId);
+
+        final GetClientsClientIdAccountsResponse guarantorAccount = clientHelper.getClientAccounts(guarantorClientId);
+        assertNotNull(guarantorAccount);
     }
 
     private Long createVerifiedClient() {
