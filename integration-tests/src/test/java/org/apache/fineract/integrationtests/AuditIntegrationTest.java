@@ -31,9 +31,9 @@ import org.apache.fineract.client.models.AuditSearchData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.AuditHelper;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -117,11 +117,10 @@ public class AuditIntegrationTest extends FeignIntegrationTest {
             AuditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, clientId, "REACTIVATE", "CLIENT");
         }
 
-        // When Office is created
-        OfficeHelper officeHelper = new OfficeHelper();
-        int officeId = officeHelper.createOffice(java.time.LocalDate.of(2020, 6, 22)).getResourceId().intValue();
-        auditsRecieved = AuditHelper.getAuditDetails(officeId, "CREATE", "OFFICE");
-        AuditHelper.verifyOneAuditOnly(auditsRecieved, officeId, "CREATE", "OFFICE");
+        // When Role is created
+        final Integer roleId = FeignRoleHelper.createRole().intValue();
+        auditsRecieved = AuditHelper.getAuditDetails(roleId, "CREATE", "ROLE");
+        AuditHelper.verifyOneAuditOnly(auditsRecieved, roleId, "CREATE", "ROLE");
     }
 
     @Test

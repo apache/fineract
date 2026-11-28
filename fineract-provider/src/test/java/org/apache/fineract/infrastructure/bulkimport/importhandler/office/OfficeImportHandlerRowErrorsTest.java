@@ -23,23 +23,32 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class OfficeImportHandlerRowErrorsTest {
 
-    private final PortfolioCommandSourceWritePlatformService commandService = mock(PortfolioCommandSourceWritePlatformService.class);
-    private final OfficeImportHandler handler = new OfficeImportHandler(commandService);
+    private final CommandDispatcher dispatcher = mock(CommandDispatcher.class);
+    private final OfficeImportHandler handler = new OfficeImportHandler(dispatcher);
+
+    @BeforeEach
+    void setUp() {
+        when(dispatcher.dispatch(any(OfficeCreateCommand.class))).thenReturn(OfficeCreateResponse::new);
+    }
 
     @Test
     void aParentOfficeIdThatIsNotANumberFailsOnlyItsRow() throws IOException {
@@ -59,7 +68,7 @@ class OfficeImportHandlerRowErrorsTest {
             assertThat(status(sheet, 1)).isEqualTo(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
             assertThat(status(sheet, 2)).isEqualTo("Parent OfficeId must be a positive number");
             assertThat(status(sheet, 3)).isEqualTo(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
-            verify(commandService, times(2)).logCommandSource(any());
+            verify(dispatcher, times(2)).dispatch(any(OfficeCreateCommand.class));
         }
     }
 
@@ -83,7 +92,7 @@ class OfficeImportHandlerRowErrorsTest {
             assertThat(status(sheet, 1)).isEqualTo(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
             assertThat(status(sheet, 2)).startsWith("Unable to parse date 'not a date'");
             assertThat(status(sheet, 3)).isEqualTo(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
-            verify(commandService, times(2)).logCommandSource(any());
+            verify(dispatcher, times(2)).dispatch(any(OfficeCreateCommand.class));
         }
     }
 

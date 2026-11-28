@@ -181,6 +181,10 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.GET, "/api/*/staff/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STAFF"),
             rule(HttpMethod.POST, "/api/*/staff/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFF"),
             rule(HttpMethod.PUT, "/api/*/staff/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFF"),
+            // office
+            rule(HttpMethod.POST, "/api/*/offices", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_OFFICE"),
+            rule(HttpMethod.PUT, "/api/*/offices/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_OFFICE"),
+            rule(HttpMethod.PUT, "/api/*/offices/external-id/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_OFFICE"),
             // meeting
             rule(HttpMethod.GET, "/api/*/*/*/meetings/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MEETING"),
             rule(HttpMethod.POST, "/api/*/*/*/meetings", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MEETING"),
