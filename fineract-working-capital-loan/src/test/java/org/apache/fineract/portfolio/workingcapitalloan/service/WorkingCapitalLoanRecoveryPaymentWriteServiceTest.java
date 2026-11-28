@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -90,6 +89,7 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
 
     private static final Long LOAN_ID = 12L;
     private static final BigDecimal AMOUNT = new BigDecimal("40");
+    private static final int HALF_UP_ROUNDING_MODE = 4;
 
     @Mock
     private WorkingCapitalLoanRepository loanRepository;
@@ -137,7 +137,7 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         businessDate = LocalDate.now(ZoneId.systemDefault());
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(java.util.Map.of(BusinessDateType.BUSINESS_DATE, businessDate)));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
 
         balance = WorkingCapitalLoanBalance.createFor(loan);
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));

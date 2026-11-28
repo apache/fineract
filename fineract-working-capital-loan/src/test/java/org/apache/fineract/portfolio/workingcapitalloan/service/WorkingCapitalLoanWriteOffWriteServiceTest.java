@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -99,6 +98,7 @@ import org.mockito.quality.Strictness;
 class WorkingCapitalLoanWriteOffWriteServiceTest {
 
     private static final Long LOAN_ID = 11L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
 
     @Mock
     private WorkingCapitalLoanRepository loanRepository;
@@ -153,7 +153,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         businessDate = LocalDate.now(ZoneId.systemDefault());
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(java.util.Map.of(BusinessDateType.BUSINESS_DATE, businessDate)));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
 
         when(loanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
         when(loan.getOffice()).thenReturn(office);

@@ -105,7 +105,54 @@ public enum JavaType {
     }
 
     public boolean isPrimitive() {
-        return ordinal() <= DOUBLE.ordinal();
+        return this == BOOLEAN || this == BYTE || this == SHORT || this == INT || this == LONG || this == CHAR || this == FLOAT
+                || this == DOUBLE;
+    }
+
+    private int comparisonRank() {
+        return switch (this) {
+            case BOOLEAN -> 0;
+            case BYTE -> 1;
+            case SHORT -> 2;
+            case INT -> 3;
+            case LONG -> 4;
+            case CHAR -> 5;
+            case FLOAT -> 6;
+            case DOUBLE -> 7;
+            case BOOLEAN_OBJ -> 8;
+            case BYTE_OBJ -> 9;
+            case SHORT_OBJ -> 10;
+            case INT_OBJ -> 11;
+            case LONG_OBJ -> 12;
+            case CHAR_OBJ -> 13;
+            case FLOAT_OBJ -> 14;
+            case DOUBLE_OBJ -> 15;
+            case BIGDECIMAL -> 16;
+            case BIGINTEGER -> 17;
+            case NUMBER -> 18;
+            case STRING -> 19;
+            case DATETIME -> 20;
+            case TIME -> 21;
+            case DATE -> 22;
+            case LOCAL_DATE -> 23;
+            case LOCAL_TIME -> 24;
+            case LOCAL_DATETIME -> 25;
+            case OFFSET_TIME -> 26;
+            case OFFSET_DATETIME -> 27;
+            case BINARY -> 28;
+            case ARRAY -> 29;
+            case COLLECTION -> 30;
+            case MAP -> 31;
+            case PC -> 32;
+            case LOCALE -> 33;
+            case PC_UNTYPED -> 34;
+            case CALENDAR -> 35;
+            case OID -> 36;
+            case INPUT_STREAM -> 37;
+            case INPUT_READER -> 38;
+            case ENUM -> 39;
+            case OBJECT -> 40;
+        };
     }
 
     public boolean isBooleanType() {
@@ -315,10 +362,10 @@ public enum JavaType {
             if (Number.class.isAssignableFrom(type) && isNumericType()) {
                 JavaType thatType = forType(type);
                 if (thisType.isAnyIntegerType() && thatType.isAnyIntegerType()) {
-                    return thatType.ordinal() <= thisType.ordinal();
+                    return thatType.comparisonRank() <= thisType.comparisonRank();
                 }
                 if (thisType.isAnyFloatType() && thatType.isAnyFloatType()) {
-                    return thatType.ordinal() <= thisType.ordinal();
+                    return thatType.comparisonRank() <= thisType.comparisonRank();
                 }
             }
         }

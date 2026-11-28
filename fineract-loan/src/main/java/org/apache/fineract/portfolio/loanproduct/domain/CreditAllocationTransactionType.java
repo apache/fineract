@@ -30,12 +30,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 @RequiredArgsConstructor
 public enum CreditAllocationTransactionType {
 
-    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback"); //
+    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback", 1); //
 
     private final LoanTransactionType loanTransactionType;
     private final String humanReadableName;
+    private final long id;
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        return Arrays.stream(values()).map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 }

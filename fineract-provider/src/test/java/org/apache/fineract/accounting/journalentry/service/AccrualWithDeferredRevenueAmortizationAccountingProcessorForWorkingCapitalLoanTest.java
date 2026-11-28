@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,6 +93,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     private static final Long TXN_ID = 200L;
     private static final String CURRENCY_CODE = "USD";
     private static final int WORKING_CAPITAL_LOAN_ENTITY_TYPE = PortfolioProductType.WORKING_CAPITAL_LOAN.getValue();
+    private static final int HALF_UP_ROUNDING_MODE = 4;
 
     @Mock
     private AccountingProcessorHelper helper;
@@ -166,7 +166,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     @BeforeEach
     void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(
                 Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 5, 1), BusinessDateType.COB_DATE, LocalDate.of(2026, 4, 30))));
 

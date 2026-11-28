@@ -28,7 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +67,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class WorkingCapitalLoanPrePaymentTemplateTest {
 
     private static final Long LOAN_ID = 7L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
     private static final LocalDate TRANSACTION_DATE = LocalDate.of(2026, 1, 20);
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 1, 25);
     private static final String PREPAY = "prepayLoan";
@@ -90,7 +90,7 @@ public class WorkingCapitalLoanPrePaymentTemplateTest {
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
     }
 

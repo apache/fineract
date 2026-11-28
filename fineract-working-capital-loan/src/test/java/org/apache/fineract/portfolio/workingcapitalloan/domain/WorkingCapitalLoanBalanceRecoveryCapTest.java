@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -43,6 +42,8 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class WorkingCapitalLoanBalanceRecoveryCapTest {
 
+    private static final int HALF_UP_ROUNDING_MODE = 4;
+
     @Mock
     private WorkingCapitalLoan loan;
 
@@ -51,7 +52,7 @@ class WorkingCapitalLoanBalanceRecoveryCapTest {
     @BeforeEach
     void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         balance = WorkingCapitalLoanBalance.createFor(loan);
         // A loan written off for 100 principal + 10 fee + 5 penalty.
         balance.setPrincipalWrittenOff(new BigDecimal("100"));

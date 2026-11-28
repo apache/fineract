@@ -29,14 +29,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @RequiredArgsConstructor
 public enum FutureInstallmentAllocationRule {
 
-    NEXT_INSTALLMENT("Next installment"), //
-    LAST_INSTALLMENT("Last installment"), //
-    NEXT_LAST_INSTALLMENT("Next/Last installment"), //
-    REAMORTIZATION("Reamortization"); //
+    NEXT_INSTALLMENT("Next installment", 1), //
+    LAST_INSTALLMENT("Last installment", 2), //
+    NEXT_LAST_INSTALLMENT("Next/Last installment", 3), //
+    REAMORTIZATION("Reamortization", 4); //
 
     private final String humanReadableName;
+    private final long id;
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        return Arrays.stream(values()).map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 }

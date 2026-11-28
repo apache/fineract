@@ -28,7 +28,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,6 +70,7 @@ import org.mockito.quality.Strictness;
 class WorkingCapitalLoanBreachResetFlagDerivationTest {
 
     private static final Long LOAN_ID = 1L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
 
     @Mock
     private WorkingCapitalLoanBreachScheduleRepository repository;
@@ -102,7 +102,7 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
     void setUp() {
         originalTenant = ThreadLocalContextUtil.getTenant();
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         final WorkingCapitalLoanActiveBreachResetResolver resolver = new WorkingCapitalLoanActiveBreachResetResolver(
                 breachActionRepository);
         scheduleService = new WorkingCapitalLoanBreachScheduleServiceImpl(repository, mapper, loanRepository, breachActionRepository,

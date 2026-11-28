@@ -30,27 +30,28 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 @RequiredArgsConstructor
 public enum PaymentAllocationTransactionType {
 
-    DEFAULT(null, "Default"), //
-    REPAYMENT(LoanTransactionType.REPAYMENT, "Repayment"), //
-    DOWN_PAYMENT(LoanTransactionType.DOWN_PAYMENT, "Down payment"), //
-    MERCHANT_ISSUED_REFUND(LoanTransactionType.MERCHANT_ISSUED_REFUND, "Merchant issued refund"), //
-    PAYOUT_REFUND(LoanTransactionType.PAYOUT_REFUND, "Payout refund"), //
-    GOODWILL_CREDIT(LoanTransactionType.GOODWILL_CREDIT, "Goodwill credit"), //
-    CHARGE_REFUND(LoanTransactionType.CHARGE_REFUND, "Charge refund"), //
-    CHARGE_ADJUSTMENT(LoanTransactionType.CHARGE_ADJUSTMENT, "Charge adjustment"), //
-    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST, "Waive interest"), //
-    CHARGE_PAYMENT(LoanTransactionType.CHARGE_PAYMENT, "Charge payment"), //
-    REFUND_FOR_ACTIVE_LOAN(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, "Refund for active loan"), //
-    INTEREST_PAYMENT_WAIVER(LoanTransactionType.INTEREST_PAYMENT_WAIVER, "Interest payment waiver"), //
-    INTEREST_REFUND(LoanTransactionType.INTEREST_REFUND, "Interest refund"), //
-    CAPITALIZED_INCOME_ADJUSTMENT(LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT, "Capitalized income adjustment"), //
-    FEE_REFUND(LoanTransactionType.FEE_REFUND, "Fee refund");
+    DEFAULT(null, "Default", 1), //
+    REPAYMENT(LoanTransactionType.REPAYMENT, "Repayment", 2), //
+    DOWN_PAYMENT(LoanTransactionType.DOWN_PAYMENT, "Down payment", 3), //
+    MERCHANT_ISSUED_REFUND(LoanTransactionType.MERCHANT_ISSUED_REFUND, "Merchant issued refund", 4), //
+    PAYOUT_REFUND(LoanTransactionType.PAYOUT_REFUND, "Payout refund", 5), //
+    GOODWILL_CREDIT(LoanTransactionType.GOODWILL_CREDIT, "Goodwill credit", 6), //
+    CHARGE_REFUND(LoanTransactionType.CHARGE_REFUND, "Charge refund", 7), //
+    CHARGE_ADJUSTMENT(LoanTransactionType.CHARGE_ADJUSTMENT, "Charge adjustment", 8), //
+    WAIVE_INTEREST(LoanTransactionType.WAIVE_INTEREST, "Waive interest", 9), //
+    CHARGE_PAYMENT(LoanTransactionType.CHARGE_PAYMENT, "Charge payment", 10), //
+    REFUND_FOR_ACTIVE_LOAN(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, "Refund for active loan", 11), //
+    INTEREST_PAYMENT_WAIVER(LoanTransactionType.INTEREST_PAYMENT_WAIVER, "Interest payment waiver", 12), //
+    INTEREST_REFUND(LoanTransactionType.INTEREST_REFUND, "Interest refund", 13), //
+    CAPITALIZED_INCOME_ADJUSTMENT(LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT, "Capitalized income adjustment", 14), //
+    FEE_REFUND(LoanTransactionType.FEE_REFUND, "Fee refund", 15);
 
     private final LoanTransactionType loanTransactionType;
     private final String humanReadableName;
+    private final long id;
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        return Arrays.stream(values()).map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 
     public boolean isDefault() {

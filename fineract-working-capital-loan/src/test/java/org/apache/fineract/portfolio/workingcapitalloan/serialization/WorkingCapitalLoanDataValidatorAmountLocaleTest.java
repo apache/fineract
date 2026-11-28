@@ -26,7 +26,6 @@ import static org.mockito.Mockito.lenient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +61,7 @@ import org.mockito.quality.Strictness;
 class WorkingCapitalLoanDataValidatorAmountLocaleTest {
 
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 3, 15);
+    private static final int HALF_UP_ROUNDING_MODE = 4;
 
     private WorkingCapitalLoanDataValidator validator;
 
@@ -75,7 +75,7 @@ class WorkingCapitalLoanDataValidatorAmountLocaleTest {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
 
         validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null);
 

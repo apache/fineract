@@ -164,12 +164,19 @@ public enum JdbcJavaType {
 
     @NonNull
     private DialectType getDialectType(@NonNull DatabaseType dialect) {
-        DialectType dialectType = dialectTypes.get(dialect.ordinal());
+        DialectType dialectType = dialectTypes.get(databaseTypeIndex(dialect));
         if (dialectType == null) {
             throw new PlatformServiceUnavailableException("error.msg.database.dialect.not.allowed",
                     "Dialect " + dialect + " is not supported for " + this);
         }
         return dialectType;
+    }
+
+    private int databaseTypeIndex(@NonNull DatabaseType dialect) {
+        return switch (dialect) {
+            case MYSQL -> 0;
+            case POSTGRESQL -> 1;
+        };
     }
 
     public boolean isBooleanType() {

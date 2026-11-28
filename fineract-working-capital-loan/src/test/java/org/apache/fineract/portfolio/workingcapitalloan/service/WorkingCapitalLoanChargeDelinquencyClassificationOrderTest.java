@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,6 +94,7 @@ class WorkingCapitalLoanChargeDelinquencyClassificationOrderTest {
     private static final Long LOAN_CHARGE_ID = 6L;
     private static final Long CHARGE_DEFINITION_ID = 3L;
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 6, 1);
+    private static final int HALF_UP_ROUNDING_MODE = 4;
 
     @Mock
     private PlatformSecurityContext context;
@@ -178,7 +178,7 @@ class WorkingCapitalLoanChargeDelinquencyClassificationOrderTest {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
 
         when(workingCapitalLoanRepository.findById(LOAN_ID)).thenReturn(Optional.of(loan));
         when(loan.getOffice()).thenReturn(office);

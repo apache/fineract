@@ -28,12 +28,13 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @RequiredArgsConstructor
 public enum CreditAllocationStrategy {
 
-    RULE_BASED("Rule based"), //
-    PRINCIPAL_ONLY("Principal only"); //
+    RULE_BASED("Rule based", 1), //
+    PRINCIPAL_ONLY("Principal only", 2); //
 
     private final String humanReadableName;
+    private final long id;
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        return Arrays.stream(values()).map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 }
