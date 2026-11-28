@@ -28,6 +28,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanDeferredChargeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceReadService;
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeBalanceReadServiceImpl;
@@ -37,6 +38,8 @@ import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomePlatfo
 import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomeWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDeferredChargeWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDeferredChargeWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanMaximumAmountCalculator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
@@ -91,6 +94,15 @@ public class ProgressiveLoanAccountConfiguration {
     public CapitalizedIncomeBalanceReadService capitalizedIncomeBalanceReadService(LoanRepositoryWrapper loanRepository,
             LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository) {
         return new CapitalizedIncomeBalanceReadServiceImpl(loanRepository, loanCapitalizedIncomeBalanceRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoanDeferredChargeWritePlatformService.class)
+    public LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService(
+            LoanTransactionRepository loanTransactionRepository, LoanDeferredChargeBalanceRepository deferredChargeBalanceRepository,
+            BusinessEventNotifierService businessEventNotifierService, ExternalIdFactory externalIdFactory) {
+        return new LoanDeferredChargeWritePlatformServiceImpl(loanTransactionRepository, deferredChargeBalanceRepository,
+                businessEventNotifierService, externalIdFactory);
     }
 
 }

@@ -154,6 +154,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanClosureWritePlatfor
 import org.apache.fineract.portfolio.loanaccount.service.LoanClosureWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCounterService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCounterServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanDeferredChargeWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementDetailsAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementWritePlatformService;
@@ -340,10 +341,10 @@ public class LoanAccountConfiguration {
             ConfigurationDomainService configurationDomainService, LoanAccrualsProcessingService loanAccrualsProcessingService,
             LoanChargeValidator loanChargeValidator, LoanScheduleService loanScheduleService,
             ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanAccountService loanAccountService,
-            LoanChargeService loanChargeService) {
+            LoanChargeService loanChargeService, LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService) {
         return new LoanChargeWriteHelper(loanChargeRepository, loanUtilService, accountAssociationsReadPlatformService,
                 configurationDomainService, loanAccrualsProcessingService, loanChargeValidator, loanScheduleService,
-                reprocessLoanTransactionsService, loanAccountService, loanChargeService);
+                reprocessLoanTransactionsService, loanAccountService, loanChargeService, loanDeferredChargeWritePlatformService);
     }
 
     @Bean
@@ -659,7 +660,8 @@ public class LoanAccountConfiguration {
             ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanJournalEntryPoster journalEntryPoster,
             LoanBalanceService loanBalanceService, LoanOriginatorLinkingService loanOriginatorLinkingService,
             LoanChargeService loanChargeService, LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier,
-            LoanAccountService loanAccountService, LoanWriteServiceHelper loanWriteServiceHelper, LoanCounterService loanCounterService) {
+            LoanAccountService loanAccountService, LoanWriteServiceHelper loanWriteServiceHelper, LoanCounterService loanCounterService,
+            LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService) {
         return new LoanDisbursementWritePlatformServiceImpl(loanTransactionValidator, loanAccountDomainService, loanTransactionRepository,
                 loanAssembler, calendarInstanceRepository, paymentDetailWritePlatformService, configurationDomainService,
                 accountTransfersWritePlatformService, accountAssociationsReadPlatformService, loanReadPlatformService, fromApiJsonHelper,
@@ -669,7 +671,7 @@ public class LoanAccountConfiguration {
                 loanDownPaymentHandlerService, loanAccrualsProcessingService, loanDownPaymentTransactionValidator, loanDisbursementService,
                 loanScheduleService, loanChargeValidator, reprocessLoanTransactionsService, journalEntryPoster, loanBalanceService,
                 loanOriginatorLinkingService, loanChargeService, loanDownPaymentFeeEventNotifier, loanAccountService,
-                loanWriteServiceHelper, loanCounterService);
+                loanWriteServiceHelper, loanCounterService, loanDeferredChargeWritePlatformService);
     }
 
     @Bean
@@ -719,9 +721,10 @@ public class LoanAccountConfiguration {
     public LoanDisbursementService loanDisbursementService(LoanChargeValidator loanChargeValidator,
             LoanDisbursementValidator loanDisbursementValidator, LoanChargeService loanChargeService, LoanBalanceService loanBalanceService,
             LoanJournalEntryPoster journalEntryPoster, LoanTransactionRepository loanTransactionRepository,
-            ConfigurationDomainService configurationDomainService) {
+            ConfigurationDomainService configurationDomainService,
+            LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService) {
         return new LoanDisbursementService(loanChargeValidator, loanDisbursementValidator, loanChargeService, loanBalanceService,
-                journalEntryPoster, loanTransactionRepository, configurationDomainService);
+                journalEntryPoster, loanTransactionRepository, configurationDomainService, loanDeferredChargeWritePlatformService);
     }
 
     @Bean

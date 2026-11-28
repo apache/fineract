@@ -303,17 +303,26 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return isDueAtDownPayment() && this.disbursementDetail != null && this.disbursementDetail.actualDisbursementDate() == null;
     }
 
+    public boolean isDownPaymentFeeOf(final LoanDisbursementDetails tranche) {
+        return isDueAtDownPayment() && isSameTranche(this.disbursementDetail, tranche);
+    }
+
+    public boolean isTrancheDisbursementChargeOf(final LoanDisbursementDetails tranche) {
+        return isTrancheDisbursementCharge() && this.loanTrancheDisbursementCharge != null
+                && isSameTranche(this.loanTrancheDisbursementCharge.getloanDisbursementDetails(), tranche);
+    }
+
     // Compared by id, or as entity instances while the tranche is not saved yet: LoanDisbursementDetails.equals only
     // compares the expected date and principal, which tranches of the same day can share
     @SuppressWarnings("ReferenceEquality")
-    public boolean isDownPaymentFeeOf(final LoanDisbursementDetails tranche) {
-        if (!isDueAtDownPayment() || tranche == null || this.disbursementDetail == null) {
+    private static boolean isSameTranche(final LoanDisbursementDetails chargeTranche, final LoanDisbursementDetails tranche) {
+        if (chargeTranche == null || tranche == null) {
             return false;
         }
-        if (this.disbursementDetail.getId() != null && tranche.getId() != null) {
-            return this.disbursementDetail.getId().equals(tranche.getId());
+        if (chargeTranche.getId() != null && tranche.getId() != null) {
+            return chargeTranche.getId().equals(tranche.getId());
         }
-        return this.disbursementDetail == tranche;
+        return chargeTranche == tranche;
     }
 
     public boolean isDueAtDisbursementOrDownPayment() {

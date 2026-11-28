@@ -50,12 +50,14 @@ import org.apache.fineract.test.stepdef.AbstractStepDef;
 public class LoanProductChargeAmortizationStepDef extends AbstractStepDef {
 
     private static final String PRODUCT_ID = "chargeAmortizationLoanProductId";
+    static final String CUMULATIVE_PRODUCT = "chargeAmortizationLoanProductCumulative";
     private static final String LOCALE_EN = "en";
     private static final String LOAN_SCHEDULE_TYPE = "loanScheduleType";
     private static final String ACCOUNTING_RULE = "accountingRule";
     private static final String ENABLE_CHARGE_AMORTIZATION = "enableChargeAmortization";
     private static final String DEFERRED_INCOME_LIABILITY_MAPPED = "deferredIncomeLiabilityMapped";
     private static final String ATTACH_CHARGE = "attachCharge";
+    private static final String MULTI_DISBURSE = "multiDisburse";
 
     private final FineractFeignClient fineractClient;
     private final LoanProductsRequestFactory loanProductsRequestFactory;
@@ -63,9 +65,10 @@ public class LoanProductChargeAmortizationStepDef extends AbstractStepDef {
 
     @When("Admin creates a loan product with the following charge amortization settings:")
     public void createLoanProduct(final DataTable table) {
-        final PostLoanProductsRequest request = productRequest(table.asMaps().get(0));
+        final PostLoanProductsRequest request = productRequest(table.asMaps().getFirst());
         final Long productId = ok(() -> fineractClient.loanProducts().createLoanProduct(request)).getResourceId();
         testContext().set(PRODUCT_ID, productId);
+        testContext().set(CUMULATIVE_PRODUCT, "CUMULATIVE".equals(cell(table.asMaps().getFirst(), LOAN_SCHEDULE_TYPE)));
     }
 
     @Then("Creating a loan product with the following charge amortization settings results an error:")
@@ -116,10 +119,15 @@ public class LoanProductChargeAmortizationStepDef extends AbstractStepDef {
             }
         }
         final String enableChargeAmortization = cell(data, ENABLE_CHARGE_AMORTIZATION);
-        return request.enableChargeAmortization(enableChargeAmortization == null ? null : Boolean.valueOf(enableChargeAmortization)) //
+        request.enableChargeAmortization(enableChargeAmortization == null ? null : Boolean.valueOf(enableChargeAmortization)) //
                 .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccountId(data)) //
                 .charges(Boolean.parseBoolean(cell(data, ATTACH_CHARGE)) ? List.of(new LoanProductChargeData().id(createdChargeId()))
                         : List.of());
+        if (Boolean.parseBoolean(cell(data, MULTI_DISBURSE))) {
+            // Expected tranches so TRANCHE_DISBURSEMENT charges are created per tranche at submit.
+            request.multiDisburseLoan(true).disallowExpectedDisbursements(false).maxTrancheCount(10);
+        }
+        return request;
     }
 
     private PutLoanProductsProductIdRequest updateRequest(final Map<String, String> data) {

@@ -37,12 +37,16 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -73,9 +77,12 @@ public class LoanDisbursementServiceTest {
 
     private final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(new CurrencyData("EUR"));
     private final LoanChargeService loanChargeService = mock(LoanChargeService.class);
+    private final ConfigurationDomainService configurationDomainService = mock(ConfigurationDomainService.class);
+    private final LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService = mock(
+            LoanDeferredChargeWritePlatformService.class);
     private final LoanDisbursementService underTest = new LoanDisbursementService(mock(LoanChargeValidator.class),
             mock(LoanDisbursementValidator.class), loanChargeService, mock(LoanBalanceService.class), mock(LoanJournalEntryPoster.class),
-            mock(LoanTransactionRepository.class), mock(ConfigurationDomainService.class));
+            mock(LoanTransactionRepository.class), configurationDomainService, loanDeferredChargeWritePlatformService);
     private final Charge flatFee = mockDefinition(1L);
     private final Charge otherFee = mockDefinition(2L);
 
@@ -339,6 +346,28 @@ public class LoanDisbursementServiceTest {
 
         verifyDeactivated(overrideFee);
         verifyUntouched(configuredFee);
+    }
+
+    @Test
+    public void testDisbursementDefersASpecifiedDueDateChargeAndStillAppliesItsUpfrontAccrual() {
+        final LoanCharge specifiedDueDateFee = mock(LoanCharge.class);
+        when(specifiedDueDateFee.getCharge()).thenReturn(flatFee);
+        when(specifiedDueDateFee.isSpecifiedDueDate()).thenReturn(true);
+        when(specifiedDueDateFee.getDueLocalDate()).thenReturn(JAN_2);
+        final Loan loan = mockLoan(specifiedDueDateFee);
+        when(loan.getActualDisbursementDate()).thenReturn(JAN_1);
+        when(loan.isUpfrontAccrualAccountingEnabledOnLoanProduct()).thenReturn(true);
+
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, JAN_2)));
+        try {
+            underTest.handleDisbursementTransaction(loan, JAN_1, null, false);
+        } finally {
+            ThreadLocalContextUtil.reset();
+        }
+
+        // the deferral is created on the due date, and the upfront accrual of a cumulative loan is not skipped
+        verify(loanDeferredChargeWritePlatformService).createForEffectiveCharge(loan, specifiedDueDateFee, JAN_2);
+        verify(loanChargeService).handleChargeAppliedTransaction(loan, specifiedDueDateFee, JAN_1);
     }
 
     private void disburse(final Loan loan, final LoanDisbursementDetails tranche, final LocalDate date) {

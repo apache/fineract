@@ -77,6 +77,7 @@ public class LoanDisbursementService {
     private final LoanJournalEntryPoster loanJournalEntryPoster;
     private final LoanTransactionRepository loanTransactionRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final LoanDeferredChargeWritePlatformService loanDeferredChargeWritePlatformService;
 
     public void updateDisbursementDetails(final Loan loan, final JsonCommand jsonCommand, final Map<String, Object> actualChanges) {
         updateDisbursementDetails(loan, jsonCommand, actualChanges, true);
@@ -259,11 +260,19 @@ public class LoanDisbursementService {
                     .equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) && disbursedOn.equals(actualDisbursementDate)
                     && !charge.isWaived() && !charge.isFullyPaid();
 
+            if (charge.isSpecifiedDueDate()) {
+                // Charges already on the loan (e.g. from application, or surviving undo+redisburse): create when due ≤
+                // business date. Kept out of the if/else chain below so specified-due-date charges still reach the
+                // upfront accrual branch. createForEffectiveCharge no-ops for future due dates and existing balances.
+                loanDeferredChargeWritePlatformService.createForEffectiveCharge(loan, charge, charge.getDueLocalDate());
+            }
+
             /*
              * create a Charge applied transaction only when Up front Accrual accounting is enabled. No accrual
              * transactions should be created for None or Cash based accounting.
              */
             if (isDisbursementCharge || isTrancheDisbursementCharge) {
+                loanDeferredChargeWritePlatformService.createForEffectiveCharge(loan, charge, disbursedOn);
                 if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                     charge.markAsFullyPaid();
                     // Add "Loan Charge Paid By" details to this transaction
