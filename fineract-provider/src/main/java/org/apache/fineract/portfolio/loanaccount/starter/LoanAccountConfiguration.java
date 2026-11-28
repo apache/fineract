@@ -43,6 +43,7 @@ import org.apache.fineract.organisation.teller.data.CashierTransactionDataValida
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -659,7 +660,8 @@ public class LoanAccountConfiguration {
             ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanJournalEntryPoster journalEntryPoster,
             LoanBalanceService loanBalanceService, LoanOriginatorLinkingService loanOriginatorLinkingService,
             LoanChargeService loanChargeService, LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier,
-            LoanAccountService loanAccountService, LoanWriteServiceHelper loanWriteServiceHelper, LoanCounterService loanCounterService) {
+            LoanAccountService loanAccountService, LoanWriteServiceHelper loanWriteServiceHelper, LoanCounterService loanCounterService,
+            StandingInstructionRepository standingInstructionRepository) {
         return new LoanDisbursementWritePlatformServiceImpl(loanTransactionValidator, loanAccountDomainService, loanTransactionRepository,
                 loanAssembler, calendarInstanceRepository, paymentDetailWritePlatformService, configurationDomainService,
                 accountTransfersWritePlatformService, accountAssociationsReadPlatformService, loanReadPlatformService, fromApiJsonHelper,
@@ -669,7 +671,7 @@ public class LoanAccountConfiguration {
                 loanDownPaymentHandlerService, loanAccrualsProcessingService, loanDownPaymentTransactionValidator, loanDisbursementService,
                 loanScheduleService, loanChargeValidator, reprocessLoanTransactionsService, journalEntryPoster, loanBalanceService,
                 loanOriginatorLinkingService, loanChargeService, loanDownPaymentFeeEventNotifier, loanAccountService,
-                loanWriteServiceHelper, loanCounterService);
+                loanWriteServiceHelper, loanCounterService, standingInstructionRepository);
     }
 
     @Bean

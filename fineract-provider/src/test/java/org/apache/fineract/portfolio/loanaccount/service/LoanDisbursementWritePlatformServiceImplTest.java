@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonArray;
@@ -53,6 +54,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -63,6 +65,8 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
@@ -179,6 +183,9 @@ public class LoanDisbursementWritePlatformServiceImplTest {
     @Mock
     private LoanAccountService loanAccountService;
 
+    @Mock
+    private StandingInstructionRepository standingInstructionRepository;
+
     @InjectMocks
     private LoanDisbursementWritePlatformServiceImpl loanDisbursementWritePlatformService;
 
@@ -196,6 +203,39 @@ public class LoanDisbursementWritePlatformServiceImplTest {
                 new LoanCounterServiceImpl(loanRepositoryWrapper));
         lenient().when(loanAccountService.saveAndFlushLoanAndInstallmentsWithDataIntegrityViolationChecks(any(Loan.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    @Test
+    public void undoLoanDisbursal_withStandingInstruction_shouldRejectBeforeChangingLoan() {
+        Loan loan = mock(Loan.class);
+        JsonCommand command = mock(JsonCommand.class);
+
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
+
+        when(standingInstructionRepository.existsByLoanAccountAndStatuses(loan,
+                List.of(StandingInstructionStatus.ACTIVE.getValue(), StandingInstructionStatus.DISABLED.getValue()))).thenReturn(true);
+
+        GeneralPlatformDomainRuleException exception = assertThrows(GeneralPlatformDomainRuleException.class,
+                () -> loanDisbursementWritePlatformService.undoLoanDisbursal(LOAN_ID, command));
+
+        assertEquals("error.msg.loan.undo.disbursal.standing.instruction.exists", exception.getGlobalisationMessageCode());
+
+        verify(loan, never()).setActualDisbursementDate(any());
+
+        verifyNoInteractions(businessEventNotifierService, loanAccountService, accountTransfersWritePlatformService);
+    }
+
+    @Test
+    public void undoLoanDisbursal_withChargedOffLoan_shouldPreserveExistingValidation() {
+        Loan loan = mock(Loan.class);
+        when(loanAssembler.assembleFromInUserScope(LOAN_ID)).thenReturn(loan);
+        when(loan.isChargedOff()).thenReturn(true);
+
+        GeneralPlatformDomainRuleException exception = assertThrows(GeneralPlatformDomainRuleException.class,
+                () -> loanDisbursementWritePlatformService.undoLoanDisbursal(LOAN_ID, mock(JsonCommand.class)));
+
+        assertEquals("error.msg.loan.is.charged.off", exception.getGlobalisationMessageCode());
+        verifyNoInteractions(standingInstructionRepository, businessEventNotifierService);
     }
 
     private void setupMoneyHelper() {

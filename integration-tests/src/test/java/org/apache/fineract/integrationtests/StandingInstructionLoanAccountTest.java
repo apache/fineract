@@ -18,30 +18,37 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.StandingInstructionsHistoryApi.RetrieveAllStandingInstructionHistoryQueryParams;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetPageItemsStandingInstructionSwagger;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.StandingInstructionUpdateRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.FeignErrors;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -115,6 +122,51 @@ public class StandingInstructionLoanAccountTest extends FeignLoanTestBase {
             assertEquals(1, history.size());
             assertEquals(0, BigDecimal.valueOf(1000).compareTo(BigDecimal.valueOf(history.get(0).getAmount())));
         });
+    }
+
+    @Test
+    public void undoDisbursalRequiresDeletingStandingInstruction() {
+        runAt("01 March 2023", () -> {
+            Long clientId = createClient();
+            Long loanId = createDisbursedLoanWithStandingInstruction(clientId);
+
+            List<GetPageItemsStandingInstructionSwagger> instructions = listStandingInstructions(null, clientId, loanId);
+
+            assertEquals(1, instructions.size());
+
+            Long instructionId = instructions.get(0).getId();
+
+            assertEquals(StandingInstructionStatus.ACTIVE.getValue(), instructions.get(0).getStatus().getId());
+            assertUndoDisbursalRejected(loanId);
+
+            ok(() -> client.standingInstructions().updateStandingInstruction(instructionId, "update",
+                    new StandingInstructionUpdateRequest().status(StandingInstructionStatus.DISABLED.getValue())));
+
+            assertEquals(StandingInstructionStatus.DISABLED.getValue(),
+                    listStandingInstructions(null, clientId, loanId).get(0).getStatus().getId());
+            assertUndoDisbursalRejected(loanId);
+
+            ok(() -> client.standingInstructions().updateStandingInstruction(instructionId, "delete",
+                    new StandingInstructionUpdateRequest()));
+
+            undoDisbursement(loanId);
+
+            GetLoansLoanIdResponse loan = getLoanDetails(loanId);
+            assertEquals("loanStatusType.approved", loan.getStatus().getCode());
+            assertTrue(loan.getStatus().getWaitingForDisbursal());
+        });
+    }
+
+    private void assertUndoDisbursalRejected(Long loanId) {
+        CallFailedRuntimeException failure = fail(
+                () -> client.loans().handleCommandsLoan(loanId, new PostLoansLoanIdRequest(), Map.of("command", "undoDisbursal")));
+        assertEquals(403, failure.getStatus());
+        assertErrorGlobalisationCode(failure, "error.msg.loan.undo.disbursal.standing.instruction.exists");
+        assertEquals(
+                "Undo disbursal is not allowed for loan " + loanId
+                        + " because it has active or disabled standing instructions. Delete them and try again.",
+                FeignErrors.firstError(failure).defaultUserMessage());
+        assertEquals(Boolean.TRUE, getLoanDetails(loanId).getStatus().getActive());
     }
 
     private Long createDisbursedLoanWithStandingInstruction(Long clientId) {
