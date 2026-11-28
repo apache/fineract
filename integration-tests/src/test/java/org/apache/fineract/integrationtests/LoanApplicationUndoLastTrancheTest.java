@@ -20,10 +20,13 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
@@ -162,6 +165,33 @@ public class LoanApplicationUndoLastTrancheTest extends FeignLoanTestBase {
         validateLoanStatus(loanDetails, "loanStatusType.active");
         evaluateLoanDisbursementDetails(loanDetails, 1, 1000.00);
         validateLoanTotalOutstandingBalance(loanDetails, 1000.00);
+    }
+
+    @Test
+    public void loanApplicationUndoLastTrancheWithRepaymentOnTheSameDate() {
+        final Double proposedAmount = 1000.0;
+        final String firstDisbursalDate = "01 March 2014";
+        final String lastDisbursalDate = "03 March 2014";
+
+        final Long clientId = createClient("01 January 2014");
+
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                .withDisallowExpectedDisbursements(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).buildRequest(null));
+
+        final Long loanId = applyForLoanApplicationWithTranches(clientId, loanProductId, proposedAmount, 0.0, List.of());
+
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(proposedAmount, firstDisbursalDate));
+        loanHelper.disburseLoan(firstDisbursalDate, loanId, "500");
+        loanHelper.disburseLoan(lastDisbursalDate, loanId, "500");
+        assertNotNull(makeLoanRepayment(loanId, LoanRequestBuilders.repayLoan(100.00, lastDisbursalDate)));
+
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> undoLastDisbursal(loanId));
+        assertEquals(403, exception.getStatus());
+        assertTrue(exception.getMessage().contains("error.msg.cannot.undo.last.disbursal.after.repayments"));
+
+        final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        evaluateLoanDisbursementDetails(loanDetails, 2, 1000.00);
+        validateLoanTotalOutstandingBalance(loanDetails, 900.00);
     }
 
     private BigDecimal undoLastDisbursal(final Long loanId) {
