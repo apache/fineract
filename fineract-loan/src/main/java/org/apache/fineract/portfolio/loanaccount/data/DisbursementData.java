@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
@@ -33,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 @RequiredArgsConstructor
 @Getter
 @Accessors(chain = true)
+@JsonLocalDateArrayFormat
 public final class DisbursementData implements LoanPrincipalRelatedDataHolder, Comparable<DisbursementData> {
 
     private final Long id;
@@ -43,15 +47,18 @@ public final class DisbursementData implements LoanPrincipalRelatedDataHolder, C
     private final BigDecimal netDisbursalAmount;
     private final String loanChargeId;
     private final BigDecimal chargeAmount;
+    @JsonProperty("waivedChargeAmount")
     private final BigDecimal waivedChargeAmount;
     @Setter
     private BigDecimal disburseChargeAmount;
 
     // import fields
+    @JsonIgnore
     private transient Integer rowIndex;
     private String dateFormat;
     private String locale;
     private String note;
+    @JsonIgnore
     private transient String linkAccountId;
 
     public static DisbursementData importInstance(LocalDate actualDisbursementDate, String linkAccountId, Integer rowIndex, String locale,
@@ -85,6 +92,7 @@ public final class DisbursementData implements LoanPrincipalRelatedDataHolder, C
         return disbursementDate;
     }
 
+    @JsonIgnore
     public boolean isDisbursed() {
         return this.actualDisbursementDate != null;
     }
@@ -112,6 +120,7 @@ public final class DisbursementData implements LoanPrincipalRelatedDataHolder, C
         return DateUtils.isDateInRangeFromInclusiveToExclusive(fromInclusive, upToNotInclusive, target);
     }
 
+    @JsonIgnore
     public BigDecimal getWaivedChargeAmount() {
         return this.waivedChargeAmount == null ? BigDecimal.ZERO : this.waivedChargeAmount;
     }

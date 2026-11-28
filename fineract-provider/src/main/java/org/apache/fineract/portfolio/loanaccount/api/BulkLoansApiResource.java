@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -108,12 +111,11 @@ public class BulkLoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String loanReassignment(final String apiRequestBodyAsJson) {
+    @ApiResponse(responseCode = "default", description = "default response", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string")))
+    public CommandProcessingResult loanReassignment(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficersInBulk().withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }
