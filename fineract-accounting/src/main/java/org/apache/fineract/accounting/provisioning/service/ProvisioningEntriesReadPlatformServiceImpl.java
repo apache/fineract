@@ -29,6 +29,8 @@ import static org.apache.fineract.query.QMLoanproductProvisioningMapping.mLoanpr
 import static org.apache.fineract.query.QMProvisioningCriteriaDefinition.mProvisioningCriteriaDefinition;
 import static org.apache.fineract.query.QMProvisioningHistory.mProvisioningHistory;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryFlag.Position;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
@@ -41,7 +43,6 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -52,9 +53,7 @@ import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningDataProjection;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntryProjection;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.query.QAccGlAccount;
 import org.apache.fineract.query.QMAppuser;
 import org.apache.fineract.query.QMLoanRepaymentSchedule;
@@ -76,9 +75,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningEntriesReadPlatformService {
 
     protected final JdbcTemplate jdbcTemplate;
-
-    protected final PaginationHelper loanProductProvisioningEntryDataPaginationHelper;
-    protected final DatabaseSpecificSQLGenerator sqlGenerator;
     protected final SQLQueryFactory queryFactory;
 
     @Override
@@ -141,52 +137,6 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             return PROVISIONING_ENTRY_SCHEMA;
         }
 
-    }
-
-    private static final class LoanProductProvisioningEntryRowMapper implements RowMapper<LoanProductProvisioningEntryData> {
-
-        private static final String LOAN_PRODUCT_PROVISIONING_ENTRY_SCHEMA = """
-                 entry.id, entry.history_id as historyId, office_id, entry.criteria_id as criteriaid, office.name as officename, product.name as productname, entry.product_id,
-                category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, liability.name as liabilityname,
-                expense.id as expenseid, expense.gl_code as expensecode, expense.name as expensename, entry.currency_code, entry.overdue_in_days, entry.reseve_amount from m_loanproduct_provisioning_entry entry
-                left join m_office office ON office.id = entry.office_id
-                left join m_product_loan product ON product.id = entry.product_id
-                left join m_provision_category category ON category.id = entry.category_id
-                left join acc_gl_account liability ON liability.id = entry.liability_account
-                left join acc_gl_account expense ON expense.id = entry.expense_account\s""";
-
-        @Override
-        @SuppressWarnings("unused")
-        public LoanProductProvisioningEntryData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Long historyId = rs.getLong("historyId");
-            Long officeId = rs.getLong("office_id");
-            String officeName = rs.getString("officename");
-            Long productId = rs.getLong("product_id");
-            String productName = rs.getString("productname");
-            String currentcyCode = rs.getString("currency_code");
-            Long overdueDays = rs.getLong("overdue_in_days");
-            Long categoryId = rs.getLong("category_id");
-            String categoryName = rs.getString("category_name");
-            BigDecimal amountreserved = rs.getBigDecimal("reseve_amount");
-            Long liabilityAccountCode = rs.getLong("liabilityid");
-            String liabilityAccountglCode = rs.getString("liabilitycode");
-            String expenseAccountglCode = rs.getString("expensecode");
-            Long expenseAccountCode = rs.getLong("expenseid");
-            Long criteriaId = rs.getLong("criteriaid");
-            String liabilityAccountName = rs.getString("liabilityname");
-            String expenseAccountName = rs.getString("expensename");
-            return new LoanProductProvisioningEntryData().setHistoryId(historyId).setOfficeId(officeId).setOfficeName(officeName)
-                    .setCurrencyCode(currentcyCode).setProductId(productId).setProductName(productName).setCategoryId(categoryId)
-                    .setCategoryName(categoryName).setOverdueInDays(overdueDays).setAmountreserved(amountreserved)
-                    .setLiablityAccount(liabilityAccountCode).setLiabilityAccountCode(liabilityAccountglCode)
-                    .setLiabilityAccountName(liabilityAccountName).setExpenseAccount(expenseAccountCode)
-                    .setExpenseAccountCode(expenseAccountglCode).setExpenseAccountName(expenseAccountName).setCriteriaId(criteriaId);
-
-        }
-
-        private String getSchema() {
-            return LOAN_PRODUCT_PROVISIONING_ENTRY_SCHEMA;
-        }
     }
 
     private static final class ProvisioningEntryDataMapperWithSumReserved implements RowMapper<ProvisioningEntryData> {
@@ -337,47 +287,49 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     }
 
     @Override
-    public Page<LoanProductProvisioningEntryData> retrieveProvisioningEntries(SearchParameters searchParams) {
-        LoanProductProvisioningEntryRowMapper mapper = new LoanProductProvisioningEntryRowMapper();
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(mapper.getSchema());
-        String whereClose = " where ";
-        List<Object> items = new ArrayList<>();
+    @Transactional(readOnly = true)
+    public Page<LoanProductProvisioningEntryData> retrieveProvisioningEntries(final SearchParameters searchParams) {
+        final QMLoanproductProvisioningEntry entry = new QMLoanproductProvisioningEntry("entry");
+        final QMOffice office = new QMOffice("office");
+        final QMProductLoan product = new QMProductLoan("product");
+        final QMProvisionCategory category = new QMProvisionCategory("category");
+        final QAccGlAccount liability = new QAccGlAccount("liability");
+        final QAccGlAccount expense = new QAccGlAccount("expense");
 
+        final BooleanBuilder filters = new BooleanBuilder();
         if (searchParams.hasProvisioningEntryId()) {
-            sqlBuilder.append(whereClose + " entry.history_id = ?");
-            items.add(searchParams.getProvisioningEntryId());
-            whereClose = " and ";
+            filters.and(entry.historyId.eq(searchParams.getProvisioningEntryId()));
         }
-
         if (searchParams.hasOfficeId()) {
-            sqlBuilder.append(whereClose + " entry.office_id = ?");
-            items.add(searchParams.getOfficeId());
-            whereClose = " and ";
+            filters.and(entry.officeId.eq(searchParams.getOfficeId()));
         }
-
         if (searchParams.hasProductId()) {
-            sqlBuilder.append(whereClose + " entry.product_id = ?");
-            items.add(searchParams.getProductId());
-            whereClose = " and ";
+            filters.and(entry.productId.eq(searchParams.getProductId()));
+        }
+        if (searchParams.hasCategoryId()) {
+            filters.and(entry.categoryId.eq(searchParams.getCategoryId()));
         }
 
-        if (searchParams.hasCategoryId()) {
-            sqlBuilder.append(whereClose + " entry.category_id = ?");
-            items.add(searchParams.getCategoryId());
-        }
-        sqlBuilder.append(" order by entry.id");
+        final SQLQuery<LoanProductProvisioningEntryData> query = queryFactory
+                .select(LoanProductProvisioningEntryProjection.withJdbcNullDefaults(entry, office, product, category, liability, expense))
+                .from(entry).leftJoin(office).on(office.id.eq(entry.officeId)).leftJoin(product).on(product.id.eq(entry.productId))
+                .leftJoin(category).on(category.id.eq(entry.categoryId)).leftJoin(liability).on(liability.id.eq(entry.liabilityAccount))
+                .leftJoin(expense).on(expense.id.eq(entry.expenseAccount)).where(filters).orderBy(entry.id.asc());
 
         if (searchParams.hasLimit()) {
-            sqlBuilder.append(" limit ").append(searchParams.getLimit());
+            query.limit(searchParams.getLimit());
             if (searchParams.hasOffset()) {
-                sqlBuilder.append(" offset ").append(searchParams.getOffset());
+                final int offset = searchParams.getOffset();
+                if (offset < 0) {
+                    query.addFlag(Position.END, Expressions.stringTemplate(" offset {0s}", offset));
+                } else {
+                    query.offset(offset);
+                }
             }
         }
-        Object[] whereClauseItemsitems = items.toArray();
-        return this.loanProductProvisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(),
-                whereClauseItemsitems, mapper);
-    }
 
+        final List<LoanProductProvisioningEntryData> items = query.fetch();
+        final Long total = queryFactory.select(Wildcard.count).from(entry).where(filters).fetchOne();
+        return new Page<>(items, Math.toIntExact(Objects.requireNonNull(total)));
+    }
 }

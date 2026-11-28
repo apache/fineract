@@ -47,8 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -301,8 +299,7 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
             return isCount ? resultSet(new Object[] { total }) : resultSet(rows);
         });
 
-        return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, mock(PaginationHelper.class),
-                mock(DatabaseSpecificSQLGenerator.class), new SQLQueryFactory(new Configuration(templates), () -> connection));
+        return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
     private ProvisioningEntriesReadPlatformService service(SQLTemplates templates, Object[]... rows) throws SQLException {
@@ -312,8 +309,7 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
         });
         when(statement.executeQuery()).thenReturn(resultSet(rows));
 
-        return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, mock(PaginationHelper.class),
-                mock(DatabaseSpecificSQLGenerator.class), new SQLQueryFactory(new Configuration(templates), () -> connection));
+        return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
     /**
