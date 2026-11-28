@@ -25,4 +25,16 @@ import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class NoteCreateCommand extends Command<NoteCreateRequest> {}
+public class NoteCreateCommand extends Command<NoteCreateRequest> {
+
+    /** A note is governed by the permission of whatever it is attached to, not by one note permission. */
+    @Override
+    public String entityName() {
+        return getPayload().getType().getPermissionEntityName();
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

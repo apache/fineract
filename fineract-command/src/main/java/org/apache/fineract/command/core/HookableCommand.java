@@ -20,12 +20,11 @@ package org.apache.fineract.command.core;
 
 /**
  * Implemented by commands whose successful execution must notify the webhooks registered for its event, as the legacy
- * command processing does for every command. The names are the entity and action a hook subscribes to, e.g.
- * {@code DOCUMENT} and {@code CREATE}.
+ * command processing does for every command.
+ *
+ * <p>
+ * A marker only. The entity and action a hook subscribes to are {@link Command#entityName()} and
+ * {@link Command#actionName()}, which every command declares; this says nothing more than whether webhooks are notified
+ * for this one.
  */
-public interface HookableCommand {
-
-    String hookEntityName();
-
-    String hookActionName();
-}
+public interface HookableCommand {}

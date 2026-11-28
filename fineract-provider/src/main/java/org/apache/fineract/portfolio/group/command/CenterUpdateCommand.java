@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.CenterUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CenterUpdateCommand extends Command<CenterUpdateRequest> {}
+public class CenterUpdateCommand extends Command<CenterUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CENTER";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

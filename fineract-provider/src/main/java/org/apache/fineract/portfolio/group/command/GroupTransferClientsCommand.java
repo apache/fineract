@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.GroupTransferClientsRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupTransferClientsCommand extends Command<GroupTransferClientsRequest> {}
+public class GroupTransferClientsCommand extends Command<GroupTransferClientsRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "TRANSFERCLIENTS";
+    }
+}

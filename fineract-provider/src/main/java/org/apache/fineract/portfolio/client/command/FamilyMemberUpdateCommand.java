@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.client.data.FamilyMemberUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FamilyMemberUpdateCommand extends Command<FamilyMemberUpdateRequest> {}
+public class FamilyMemberUpdateCommand extends Command<FamilyMemberUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "FAMILYMEMBERS";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

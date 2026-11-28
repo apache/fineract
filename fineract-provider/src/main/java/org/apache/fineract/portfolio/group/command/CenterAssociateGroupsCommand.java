@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.CenterAssociateGroupsRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CenterAssociateGroupsCommand extends Command<CenterAssociateGroupsRequest> {}
+public class CenterAssociateGroupsCommand extends Command<CenterAssociateGroupsRequest> {
+
+    @Override
+    public String entityName() {
+        return "CENTER";
+    }
+
+    @Override
+    public String actionName() {
+        return "ASSOCIATEGROUPS";
+    }
+}

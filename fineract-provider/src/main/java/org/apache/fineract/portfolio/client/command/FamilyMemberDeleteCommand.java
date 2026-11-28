@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.client.data.FamilyMemberDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FamilyMemberDeleteCommand extends Command<FamilyMemberDeleteRequest> {}
+public class FamilyMemberDeleteCommand extends Command<FamilyMemberDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "FAMILYMEMBERS";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

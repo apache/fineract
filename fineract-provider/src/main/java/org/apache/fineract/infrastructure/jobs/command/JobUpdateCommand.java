@@ -26,4 +26,15 @@ import org.apache.fineract.infrastructure.jobs.data.JobUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JobUpdateCommand extends Command<JobUpdateRequest> {}
+public class JobUpdateCommand extends Command<JobUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "SCHEDULER";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

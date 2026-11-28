@@ -25,4 +25,15 @@ import org.apache.fineract.organisation.staff.data.StaffUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class StaffUpdateCommand extends Command<StaffUpdateRequest> {}
+public class StaffUpdateCommand extends Command<StaffUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "STAFF";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

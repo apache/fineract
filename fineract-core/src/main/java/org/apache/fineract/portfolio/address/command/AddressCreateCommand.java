@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class AddressCreateCommand extends Command<AddressCreateRequest> {}
+public class AddressCreateCommand extends Command<AddressCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "ADDRESS";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupAssignStaffCommand extends Command<GroupAssignStaffRequest> {}
+public class GroupAssignStaffCommand extends Command<GroupAssignStaffRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "ASSIGNSTAFF";
+    }
+}

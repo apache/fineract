@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.CenterCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CenterCreateCommand extends Command<CenterCreateRequest> {}
+public class CenterCreateCommand extends Command<CenterCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CENTER";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

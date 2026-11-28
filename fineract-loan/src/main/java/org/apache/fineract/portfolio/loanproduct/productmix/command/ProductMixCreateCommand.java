@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixCreat
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProductMixCreateCommand extends Command<ProductMixCreateRequest> {}
+public class ProductMixCreateCommand extends Command<ProductMixCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "PRODUCTMIX";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

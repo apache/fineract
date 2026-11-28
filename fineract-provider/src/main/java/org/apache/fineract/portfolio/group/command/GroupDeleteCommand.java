@@ -22,7 +22,22 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.domain.GroupTypes;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupDeleteCommand extends Command<GroupDeleteRequest> {}
+public class GroupDeleteCommand extends Command<GroupDeleteRequest> {
+
+    /**
+     * Centers reuse this command; m_permission keeps their actions apart, so the entity follows the endpoint called.
+     */
+    @Override
+    public String entityName() {
+        return getPayload().getGroupingType() == GroupTypes.CENTER ? "CENTER" : "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

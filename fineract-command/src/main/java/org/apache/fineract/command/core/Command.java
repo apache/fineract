@@ -26,7 +26,7 @@ import lombok.experimental.FieldNameConstants;
 
 @Data
 @FieldNameConstants
-public class Command<T> implements Serializable {
+public abstract class Command<T> implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -58,4 +58,21 @@ public class Command<T> implements Serializable {
     private String error;
 
     private T payload;
+
+    /**
+     * The entity this command acts on, in the vocabulary of {@code m_permission} - {@code DOCUMENT},
+     * {@code BUSINESS_DATE}, {@code CLIENT_COLLATERAL_PRODUCT}. Recorded against the command so that it can be found in
+     * an audit and, once maker-checker reaches this framework, so that the permission governing its approval can be
+     * derived the way the legacy processing derives it.
+     *
+     * <p>
+     * Abstract rather than defaulted on purpose: a command whose name is missing would be written with no entity, and a
+     * row that no checker inbox and no audit search can find is worse than a compile error. For a command that acts on
+     * different entities depending on its payload - a note, an image - this is computed from that payload, which is set
+     * before the command is stored.
+     */
+    public abstract String entityName();
+
+    /** The action this command performs on {@link #entityName()}, again as {@code m_permission} spells it. */
+    public abstract String actionName();
 }

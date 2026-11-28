@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class AddressUpdateCommand extends Command<AddressUpdateRequest> {}
+public class AddressUpdateCommand extends Command<AddressUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "ADDRESS";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}
