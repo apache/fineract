@@ -19,7 +19,9 @@
 package org.apache.fineract.portfolio.group.data;
 
 import java.util.Collection;
+import lombok.Getter;
 
+@Getter
 public final class StaffCenterData {
 
     private final Long staffId;

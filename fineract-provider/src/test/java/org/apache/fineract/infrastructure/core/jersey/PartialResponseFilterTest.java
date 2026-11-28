@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,11 +44,16 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.lang.annotation.Annotation;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.fineract.infrastructure.core.annotation.PartialResponseParameters;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArrayModule;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,6 +89,17 @@ class PartialResponseFilterTest {
     @PartialResponseParameters({ "version", "status" })
     private static void methodWithItsOwnParameters() {
         // only the annotation is used, the method is never called
+    }
+
+    private record Dated(Long id, LocalDate activationDate, String name) {
+    }
+
+    // Only looked up through getDeclaredMethod for its annotations, which Error Prone does not see as a use
+    @SuppressWarnings("unused")
+    @JsonLocalDateArrayFormat
+    @PartialResponseParameters({ "id", "activationDate", "name" })
+    private static void methodWithLocalDateArrayFormat() {
+        // only the annotations are used, the method is never called
     }
 
     @BeforeEach
@@ -269,5 +287,56 @@ class PartialResponseFilterTest {
         underTest.filter(requestContext, responseContext);
 
         verify(responseContext, never()).setEntity(any(), any(), any());
+    }
+
+    @Test
+    void theAnnotationsOfTheResourceMethodAreFoundWhenJerseyPassesNone() throws Exception {
+        final ResourceInfo resourceInfo = mock(ResourceInfo.class);
+        when(resourceInfo.getResourceMethod()).thenReturn(PartialResponseFilterTest.class.getDeclaredMethod("methodWithItsOwnParameters"));
+        underTest.setResourceInfo(resourceInfo);
+        queryParameters.putSingle("fields", "status");
+        when(responseContext.getEntity()).thenReturn(Map.of("version", 2, "status", "success"));
+
+        underTest.filter(requestContext, responseContext);
+
+        final JsonNode pruned = capturePrunedEntity();
+        assertFalse(pruned.has("version"));
+        assertTrue(pruned.has("status"));
+    }
+
+    @Test
+    void parametersDeclaredForTheRequestOverrideTheAnnotations() {
+        withSupportedParameters(SUPPORTED);
+        final Map<String, Object> properties = new HashMap<>();
+        doAnswer(invocation -> properties.put(invocation.getArgument(0), invocation.getArgument(1))).when(requestContext)
+                .setProperty(anyString(), any());
+        when(requestContext.getProperty(anyString())).thenAnswer(invocation -> properties.get(invocation.<String>getArgument(0)));
+        PartialResponseFilter.setSupportedParameters(requestContext, Set.of("prefixType", "prefixCharacter"));
+        queryParameters.putSingle("fields", "prefixType");
+        when(responseContext.getEntity()).thenReturn(new Item(1L, null, new Nested(401L, "prefix", "PREFIX"), "LN"));
+
+        underTest.filter(requestContext, responseContext);
+
+        final JsonNode pruned = capturePrunedEntity();
+        assertTrue(pruned.has("id"), "id is only in the annotation's set, which the declared set replaces");
+        assertFalse(pruned.has("prefixCharacter"), "prefixCharacter is in the declared set but was not requested");
+        assertTrue(pruned.has("prefixType"));
+    }
+
+    @Test
+    void thePrunedResponseKeepsTheLocalDateArrayFormatOfItsResourceMethod() throws Exception {
+        final PartialResponseFilter filter = new PartialResponseFilter(new ObjectMapper().registerModule(new JacksonLocalDateArrayModule()),
+                new UnsupportedParameterExceptionMapper());
+        final ResourceInfo resourceInfo = mock(ResourceInfo.class);
+        when(resourceInfo.getResourceMethod())
+                .thenReturn(PartialResponseFilterTest.class.getDeclaredMethod("methodWithLocalDateArrayFormat"));
+        filter.setResourceInfo(resourceInfo);
+        queryParameters.putSingle("fields", "activationDate");
+        when(responseContext.getEntity()).thenReturn(new Dated(1L, LocalDate.of(2026, 3, 4), "group"));
+
+        filter.filter(requestContext, responseContext);
+
+        final JsonNode pruned = capturePrunedEntity();
+        assertEquals("{\"activationDate\":[2026,3,4]}", pruned.toString());
     }
 }
