@@ -38,6 +38,8 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.ChartOfAccountsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.CodeValueDataIdSerializer;
@@ -88,7 +90,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
     private boolean readExcelFile(final Workbook workbook, final List<GLAccountData> glAccounts) {
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(chartOfAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.CHART_OF_ACCOUNTS).countRows(chartOfAccountsSheet);
         boolean flagForOpBal = false;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
@@ -215,7 +217,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
             final List<CreditDebit> credits, final List<CreditDebit> debits, final String locale, final String dateFormat) {
 
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(chartOfAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.CHART_OF_ACCOUNTS).countRows(chartOfAccountsSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = chartOfAccountsSheet.getRow(rowIndex);

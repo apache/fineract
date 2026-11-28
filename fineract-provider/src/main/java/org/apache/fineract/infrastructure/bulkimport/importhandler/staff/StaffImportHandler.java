@@ -29,6 +29,8 @@ import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.StaffConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
@@ -63,7 +65,7 @@ public class StaffImportHandler implements ImportHandler {
     private List<StaffData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
         List<StaffData> staffList = new ArrayList<>();
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(staffSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.STAFF).countRows(staffSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = staffSheet.getRow(rowIndex);

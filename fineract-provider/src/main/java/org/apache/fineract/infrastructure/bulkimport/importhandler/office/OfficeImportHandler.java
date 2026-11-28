@@ -29,6 +29,8 @@ import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -71,7 +73,7 @@ public class OfficeImportHandler implements ImportHandler {
             final AtomicInteger errorCount, final Map<Integer, String> rowErrors) {
         List<OfficeData> offices = new ArrayList<>();
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.OFFICES).countRows(officeSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row = officeSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, OfficeConstants.STATUS_COL)) {

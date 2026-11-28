@@ -32,6 +32,8 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.FixedDepositConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
@@ -82,7 +84,7 @@ public class FixedDepositImportHandler implements ImportHandler {
             final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
             final List<ClosingOfSavingsAccounts> closedOnDate, final List<String> statuses, final String locale, final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.FIXED_DEPOSIT_ACCOUNTS).countRows(savingsSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsSheet.getRow(rowIndex);

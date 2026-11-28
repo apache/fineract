@@ -29,6 +29,8 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.SharedAccountsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.BulkImportTemplateLayout;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
@@ -70,7 +72,7 @@ public class SharedAccountImportHandler implements ImportHandler {
     private void readExcelFile(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final List<String> statuses,
             final String locale, String dateFormat) {
         Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(sharedAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+        Integer noOfEntries = BulkImportTemplateLayout.of(GlobalEntityType.SHARE_ACCOUNTS).countRows(sharedAccountsSheet);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = sharedAccountsSheet.getRow(rowIndex);
