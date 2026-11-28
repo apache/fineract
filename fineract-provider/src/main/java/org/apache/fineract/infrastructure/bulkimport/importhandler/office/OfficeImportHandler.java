@@ -32,6 +32,8 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
 import org.apache.fineract.organisation.office.data.OfficeCreateRequest;
 import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
@@ -53,10 +55,12 @@ public class OfficeImportHandler implements ImportHandler {
     private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
     static final String PARENT_OFFICE_ID_NOT_POSITIVE = "Parent OfficeId must be a positive number";
     private final CommandDispatcher dispatcher;
+    private final PlatformSecurityContext context;
 
     @Autowired
-    public OfficeImportHandler(final CommandDispatcher dispatcher) {
+    public OfficeImportHandler(final CommandDispatcher dispatcher, final PlatformSecurityContext context) {
         this.dispatcher = dispatcher;
+        this.context = context;
     }
 
     @Override
@@ -134,6 +138,9 @@ public class OfficeImportHandler implements ImportHandler {
                         .openingDate(openingDateStr).externalId(office.getExternalId() != null ? office.getExternalId().getValue() : null)
                         .build();
                 command.setPayload(request);
+                if (this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CREATE_OFFICE")) {
+                    throw new NoAuthorizationException("User has no authority to create offices");
+                }
                 final Supplier<OfficeCreateResponse> response = dispatcher.dispatch(command);
                 response.get();
                 successCount++;

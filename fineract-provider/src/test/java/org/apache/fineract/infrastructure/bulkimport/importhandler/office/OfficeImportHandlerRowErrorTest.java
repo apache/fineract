@@ -31,8 +31,10 @@ import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
 import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -45,7 +47,11 @@ class OfficeImportHandlerRowErrorTest {
     void invalidParentOfficeIdFailsOnlyItsOwnRow() throws IOException {
         CommandDispatcher dispatcher = mock(CommandDispatcher.class);
         when(dispatcher.dispatch(any(OfficeCreateCommand.class))).thenReturn(OfficeCreateResponse::new);
-        OfficeImportHandler handler = new OfficeImportHandler(dispatcher);
+        PlatformSecurityContext context = mock(PlatformSecurityContext.class);
+        AppUser user = mock(AppUser.class);
+        when(context.authenticatedUser()).thenReturn(user);
+        when(user.hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CREATE_OFFICE")).thenReturn(false);
+        OfficeImportHandler handler = new OfficeImportHandler(dispatcher, context);
 
         try (Workbook workbook = new HSSFWorkbook()) {
             Sheet sheet = workbook.createSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
