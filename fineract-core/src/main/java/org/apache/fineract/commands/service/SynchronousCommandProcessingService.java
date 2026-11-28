@@ -20,6 +20,7 @@ package org.apache.fineract.commands.service;
 
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.ERROR;
 import static org.apache.fineract.commands.domain.CommandProcessingResultType.PROCESSED;
+import static org.apache.fineract.commands.domain.CommandProcessingResultType.UNDER_PROCESSING;
 import static org.apache.http.HttpStatus.SC_OK;
 
 import com.google.gson.Gson;
@@ -208,25 +209,41 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         if (commandSource == null) {
             return;
         }
-        ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
-        publishHookErrorEvent(executionContext.wrapper(), executionContext.command(), errorInfo);
+
         if (executionContext.enclosingTransaction()) {
+            ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
+            publishHookErrorEvent(executionContext.wrapper(), executionContext.command(), errorInfo);
             return;
         }
 
-        Integer statusCode = errorInfo.getStatusCode();
-        commandSource.setResultStatusCode(statusCode);
-        commandSource.setResult(errorInfo.getMessage());
-        if (statusCode != SC_OK) {
-            commandSource.setStatus(ERROR);
+        CommandSource latestCommandSource = commandSourceService.getCommandSourceInNewTransaction(commandSource.getId());
+
+        if (latestCommandSource.isProcessed()) {
+            throw new IdempotentCommandProcessSucceedException(executionContext.wrapper(), latestCommandSource.getIdempotencyKey(),
+                    latestCommandSource);
         }
-        if (!saveAsRecoverableError(executionContext, mappable)) {
-            commandSourceService.saveResult(commandSource);
+
+        if (latestCommandSource.getStatusEnum() != UNDER_PROCESSING) {
+            return;
+        }
+
+        ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
+        publishHookErrorEvent(executionContext.wrapper(), executionContext.command(), errorInfo);
+
+        Integer statusCode = errorInfo.getStatusCode();
+        latestCommandSource.setResultStatusCode(statusCode);
+        latestCommandSource.setResult(errorInfo.getMessage());
+
+        if (statusCode != SC_OK) {
+            latestCommandSource.setStatus(ERROR);
+        }
+
+        if (!saveAsRecoverableError(latestCommandSource, mappable)) {
+            commandSourceService.saveResult(latestCommandSource);
         }
     }
 
-    private boolean saveAsRecoverableError(CommandExecutionContext executionContext, RuntimeException mappable) {
-        CommandSource commandSource = executionContext.commandSource();
+    private boolean saveAsRecoverableError(CommandSource commandSource, RuntimeException mappable) {
         try {
             if (recoverableErrorClassifier.isRecoverable(mappable)) {
                 commandSourceService.saveRecoverableErrorResult(commandSource);
