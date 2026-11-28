@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
@@ -297,10 +296,6 @@ class EmailCampaignWritePlatformCommandHandlerImplTest {
         assertEquals("Hello", campaign.getEmailSubject());
     }
 
-    /**
-     * Documents existing behaviour: the start date is reported as changed whenever it is sent, because the change check
-     * compares the stored date-time with a time of day.
-     */
     @Test
     void updateOfTheStartDateReportsItWithTheDateFormatAndLocale() {
         final EmailCampaign campaign = existing("""
@@ -321,20 +316,58 @@ class EmailCampaignWritePlatformCommandHandlerImplTest {
         assertEquals(LocalDateTime.of(2099, 1, 11, 8, 0), campaign.getRecurrenceStartDate());
     }
 
-    /**
-     * Documents a known defect, not intended behaviour: the start date change check reads the value with the separate
-     * {@code timeFormat} parameter, so an update of the start date without it fails. Because the update validator does
-     * not accept {@code timeFormat}, updating a scheduled campaign through the API returns 500. Tracked in
-     * <a href="https://issues.apache.org/jira/browse/FINERACT-3315">FINERACT-3315</a>; update this test when that is
-     * fixed.
-     */
     @Test
-    void updateOfTheStartDateWithoutATimeFormatFails() {
-        existing(DIRECT_CAMPAIGN);
+    void updateOfTheStartDateWithoutATimeFormatSucceeds() {
+        final EmailCampaign campaign = existing("""
+                {"campaignName": "Newsletter", "campaignType": 2, "businessRuleId": 3, "paramValue": "{}",
+                 "emailSubject": "Hello", "emailMessage": "Dear client", "recurrence": "FREQ=DAILY",
+                 "recurrenceStartDate": "10 January 2099 10:30", "dateFormat": "dd MMMM yyyy HH:mm", "locale": "en"}
+                """);
 
-        assertThrows(NullPointerException.class, () -> update("""
+        final CommandProcessingResult result = update("""
                 {"recurrenceStartDate": "11 January 2099 08:00", "dateFormat": "dd MMMM yyyy HH:mm", "locale": "en"}
-                """));
+                """);
+
+        assertEquals(List.of("recurrenceStartDate", "dateFormat", "locale"), List.copyOf(result.getChanges().keySet()));
+        assertEquals("11 January 2099 08:00", result.getChanges().get("recurrenceStartDate"));
+        assertEquals("dd MMMM yyyy HH:mm", result.getChanges().get("dateFormat"));
+        assertEquals("en", result.getChanges().get("locale"));
+        assertEquals(LocalDateTime.of(2099, 1, 11, 8, 0), campaign.getRecurrenceStartDate());
+        verify(emailCampaignRepository).saveAndFlush(campaign);
+    }
+
+    @Test
+    void updateOfTheStartDateWithUnchangedValueReportsNothingAndDoesNotSave() {
+        final EmailCampaign campaign = existing("""
+                {"campaignName": "Newsletter", "campaignType": 2, "businessRuleId": 3, "paramValue": "{}",
+                 "emailSubject": "Hello", "emailMessage": "Dear client", "recurrence": "FREQ=DAILY",
+                 "recurrenceStartDate": "10 January 2099 10:30", "dateFormat": "dd MMMM yyyy HH:mm", "locale": "en"}
+                """);
+
+        final CommandProcessingResult result = update("""
+                {"recurrenceStartDate": "10 January 2099 10:30", "dateFormat": "dd MMMM yyyy HH:mm", "locale": "en"}
+                """);
+
+        assertEquals(Map.of(), changesOf(result));
+        assertEquals(LocalDateTime.of(2099, 1, 10, 10, 30), campaign.getRecurrenceStartDate());
         verify(emailCampaignRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateWithoutStartDatePreservesExistingStartDate() {
+        final EmailCampaign campaign = existing("""
+                {"campaignName": "Newsletter", "campaignType": 2, "businessRuleId": 3, "paramValue": "{}",
+                 "emailSubject": "Hello", "emailMessage": "Dear client", "recurrence": "FREQ=DAILY",
+                 "recurrenceStartDate": "10 January 2099 10:30", "dateFormat": "dd MMMM yyyy HH:mm", "locale": "en"}
+                """);
+
+        final CommandProcessingResult result = update("""
+                {"campaignName": "Renamed Campaign", "dateFormat": "dd MMMM yyyy", "locale": "en"}
+                """);
+
+        assertEquals(Map.of("campaignName", "Renamed Campaign"), result.getChanges());
+        assertEquals("Renamed Campaign", campaign.getCampaignName());
+        assertEquals(LocalDateTime.of(2099, 1, 10, 10, 30), campaign.getRecurrenceStartDate());
+        verify(emailCampaignRepository).saveAndFlush(campaign);
     }
 }

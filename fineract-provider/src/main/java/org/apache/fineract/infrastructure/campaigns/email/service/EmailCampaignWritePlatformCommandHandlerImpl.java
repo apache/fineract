@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -546,19 +547,22 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             actualChanges.put(EmailCampaignValidator.recurrenceParamName, newValue);
             emailCampaign.updateRecurrence(newValue);
         }
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-        final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+        if (command.hasParameter(EmailCampaignValidator.recurrenceStartDate)) {
+            final String dateFormatAsInput = command.dateFormat();
+            final String localeAsInput = command.locale();
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateFormatAsInput).withLocale(locale);
 
-        if (command.isChangeInLocalDateTimeParameterNamed(EmailCampaignValidator.recurrenceStartDate,
-                emailCampaign.getRecurrenceStartDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate);
-            actualChanges.put(EmailCampaignValidator.recurrenceStartDate, valueAsInput);
-            actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
+            final LocalDateTime newRecurrenceStartDate = LocalDateTime.parse(valueAsInput, fmt);
 
-            emailCampaign.updateRecurrenceStartDate(LocalDateTime.parse(valueAsInput, fmt));
+            if (!Objects.equals(emailCampaign.getRecurrenceStartDate(), newRecurrenceStartDate)) {
+                actualChanges.put(EmailCampaignValidator.recurrenceStartDate, valueAsInput);
+                actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
+                actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
+
+                emailCampaign.updateRecurrenceStartDate(newRecurrenceStartDate);
+            }
         }
 
         return actualChanges;

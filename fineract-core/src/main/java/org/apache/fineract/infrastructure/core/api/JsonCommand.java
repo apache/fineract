@@ -24,7 +24,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.MonthDay;
 import java.time.OffsetTime;
@@ -324,15 +323,6 @@ public final class JsonCommand {
     }
 
     public boolean isChangeInLocalTimeParameterNamed(final String parameterName, final LocalTime existingValue) {
-        boolean isChanged = false;
-        if (parameterExists(parameterName)) {
-            final LocalTime workingValue = localTimeValueOfParameterNamed(parameterName);
-            isChanged = differenceExists(existingValue, workingValue);
-        }
-        return isChanged;
-    }
-
-    public boolean isChangeInLocalDateTimeParameterNamed(final String parameterName, final LocalDateTime existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final LocalTime workingValue = localTimeValueOfParameterNamed(parameterName);
