@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.client.api.ClientsApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -45,24 +47,25 @@ import org.springframework.stereotype.Component;
 public class CreateClientCommandStrategy implements CommandStrategy {
 
     private final ClientsApiResource clientsApiResource;
+    private final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
 
     @Override
     public BatchResponse execute(final BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
 
         final BatchResponse response = new BatchResponse();
-        final String responseBody;
+        final CommandProcessingResult result;
 
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
         // Calls 'create' function from 'ClientsApiResource' to create a new
         // client
-        responseBody = clientsApiResource.create(request.getBody());
+        result = clientsApiResource.create(request.getBody());
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after the successful creation of
         // the client
-        response.setBody(responseBody);
+        response.setBody(toApiJsonSerializer.serialize(result));
 
         return response;
     }

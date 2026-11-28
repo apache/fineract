@@ -31,9 +31,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -41,12 +39,9 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -67,8 +62,6 @@ public class ClientTransactionsApiResource {
 
     private final PlatformSecurityContext context;
     private final ClientTransactionReadPlatformService clientTransactionReadPlatformService;
-    private final DefaultToApiJsonSerializer<ClientTransactionData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
 
@@ -78,27 +71,27 @@ public class ClientTransactionsApiResource {
     @Operation(summary = "List Client Transactions", operationId = "retrieveAllClientTransactions", description = "The list capability of client transaction can support pagination."
             + "\n\n" + "Example Requests:\n\n" + "clients/189/transactions\n\n" + "clients/189/transactions?offset=10&limit=50")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class)))
-    public String retrieveAllClientTransactions(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+    public Page<ClientTransactionData> retrieveAllClientTransactions(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        return getAllClientTransactions(clientId, uriInfo, offset, limit);
+        return getAllClientTransactions(clientId, offset, limit);
     }
 
     @GET
     @Path("{clientId}/transactions/{transactionId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransaction", description = "Example Requests:\n"
-            + "clients/1/transactions/1\n" + "\n" + "\n" + "clients/1/transactions/1?fields=id,officeName")
+            + "clients/1/transactions/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
-            @Context final UriInfo uriInfo) {
+    public ClientTransactionData retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        return getClientTransaction(clientId, transactionId, uriInfo);
+        return getClientTransaction(clientId, transactionId);
     }
 
     @POST
@@ -107,7 +100,7 @@ public class ClientTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Undo a Client Transaction", operationId = "undoClientTransaction", description = "Undoes a Client Transaction")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String undoClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public CommandProcessingResult undoClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -123,9 +116,9 @@ public class ClientTransactionsApiResource {
             + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions?offset=10&limit=50")
     @AlternativeOperationId("retrieveAllClientTransactions_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class)))
-    public String retrieveAllClientTransactions(
+    public Page<ClientTransactionData> retrieveAllClientTransactions(
             @PathParam("clientExternalId") @Parameter(description = "clientExternalId") final String clientExternalId,
-            @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
@@ -136,21 +129,19 @@ public class ClientTransactionsApiResource {
             throw new ClientNotFoundException(clientExtId);
         }
 
-        return getAllClientTransactions(clientId, uriInfo, offset, limit);
+        return getAllClientTransactions(clientId, offset, limit);
     }
 
     @GET
     @Path("external-id/{clientExternalId}/transactions/{transactionId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByClientExternalId", description = "Example Requests:\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1\n" + "\n" + "\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1?fields=id,officeName")
+            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/1")
     @AlternativeOperationId("retrieveClientTransaction_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String retrieveClientTransaction(
+    public ClientTransactionData retrieveClientTransaction(
             @PathParam("clientExternalId") @Parameter(description = "clientExternalId") final String clientExternalId,
-            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
-            @Context final UriInfo uriInfo) {
+            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
@@ -161,7 +152,7 @@ public class ClientTransactionsApiResource {
             throw new ClientNotFoundException(clientExtId);
         }
 
-        return getClientTransaction(clientId, transactionId, uriInfo);
+        return getClientTransaction(clientId, transactionId);
     }
 
     @POST
@@ -171,7 +162,7 @@ public class ClientTransactionsApiResource {
     @Operation(summary = "Undo a Client Transaction", operationId = "undoClientTransactionByClientExternalId", description = "Undoes a Client Transaction")
     @AlternativeOperationId("undoClientTransaction_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String undoClientTransaction(
+    public CommandProcessingResult undoClientTransaction(
             @PathParam("clientExternalId") @Parameter(description = "clientExternalId") final String clientExternalId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
@@ -191,13 +182,11 @@ public class ClientTransactionsApiResource {
     @Path("{clientId}/transactions/external-id/{transactionExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByTransactionExternalId", description = "Example Requests:\n"
-            + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854\n" + "\n" + "\n"
-            + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?fields=id,officeName")
+            + "clients/1/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854")
     @AlternativeOperationId("retrieveClientTransaction_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId,
-            @Context final UriInfo uriInfo) {
+    public ClientTransactionData retrieveClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
@@ -209,22 +198,19 @@ public class ClientTransactionsApiResource {
             throw new ClientTransactionNotFoundException(clientId, transactionExtId);
         }
 
-        return getClientTransaction(clientId, transactionId, uriInfo);
+        return getClientTransaction(clientId, transactionId);
     }
 
     @GET
     @Path("external-id/{clientExternalId}/transactions/external-id/{transactionExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client Transaction", operationId = "retrieveClientTransactionByClientAndTransactionExternalId", description = "Example Requests:\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854\n"
-            + "\n" + "\n"
-            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?fields=id,officeName")
+            + "clients/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854/transactions/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854")
     @AlternativeOperationId("retrieveClientTransaction_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String retrieveClientTransaction(
+    public ClientTransactionData retrieveClientTransaction(
             @PathParam("clientExternalId") @Parameter(description = "clientExternalId") final String clientExternalId,
-            @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId,
-            @Context final UriInfo uriInfo) {
+            @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
@@ -240,7 +226,7 @@ public class ClientTransactionsApiResource {
             throw new ClientTransactionNotFoundException(clientId, transactionExtId);
         }
 
-        return getClientTransaction(clientId, transactionId, uriInfo);
+        return getClientTransaction(clientId, transactionId);
     }
 
     @POST
@@ -250,7 +236,7 @@ public class ClientTransactionsApiResource {
     @Operation(summary = "Undo a Client Transaction", operationId = "undoClientTransactionByTransactionExternalId", description = "Undoes a Client Transaction")
     @AlternativeOperationId("undoClientTransaction_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String undoClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public CommandProcessingResult undoClientTransaction(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -271,7 +257,7 @@ public class ClientTransactionsApiResource {
     @Operation(summary = "Undo a Client Transaction", operationId = "undoClientTransactionByClientAndTransactionExternalId", description = "Undoes a Client Transaction")
     @AlternativeOperationId("undoClientTransaction_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)))
-    public String undoClientTransaction(
+    public CommandProcessingResult undoClientTransaction(
             @PathParam("clientExternalId") @Parameter(description = "clientExternalId") final String clientExternalId,
             @PathParam("transactionExternalId") @Parameter(description = "transactionExternalId") final String transactionExternalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
@@ -293,31 +279,22 @@ public class ClientTransactionsApiResource {
         return undoTransaction(clientId, transactionId, commandParam, apiRequestBodyAsJson);
     }
 
-    private String getClientTransaction(Long clientId, Long transactionId, UriInfo uriInfo) {
-        final ClientTransactionData clientTransaction = clientTransactionReadPlatformService.retrieveTransaction(clientId, transactionId);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, clientTransaction, ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+    private ClientTransactionData getClientTransaction(Long clientId, Long transactionId) {
+        return clientTransactionReadPlatformService.retrieveTransaction(clientId, transactionId);
     }
 
-    private String getAllClientTransactions(Long clientId, UriInfo uriInfo, Integer offset, Integer limit) {
+    private Page<ClientTransactionData> getAllClientTransactions(Long clientId, Integer offset, Integer limit) {
 
         SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
-        final Page<ClientTransactionData> clientTransactions = clientTransactionReadPlatformService.retrieveAllTransactions(clientId,
-                searchParameters);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, clientTransactions, ClientApiConstants.CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        return clientTransactionReadPlatformService.retrieveAllTransactions(clientId, searchParameters);
     }
 
-    private String undoTransaction(Long clientId, Long transactionId, String commandParam, String apiRequestBodyAsJson) {
+    private CommandProcessingResult undoTransaction(Long clientId, Long transactionId, String commandParam, String apiRequestBodyAsJson) {
         if (is(commandParam, ClientApiConstants.CLIENT_TRANSACTION_COMMAND_UNDO)) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().undoClientTransaction(clientId, transactionId)
                     .withJson(apiRequestBodyAsJson).build();
 
-            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-            return toApiJsonSerializer.serialize(result);
+            return commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, ClientApiConstants.CLIENT_TRANSACTION_COMMAND_UNDO);
         }

@@ -48,6 +48,11 @@ public class ExternalIdJsonConverter implements JsonConverter<ExternalId> {
     }
 
     @Override
+    public boolean isEmpty(ExternalId value) {
+        return value == null || value.isEmpty();
+    }
+
+    @Override
     public Class<ExternalId> convertedType() {
         return ExternalId.class;
     }

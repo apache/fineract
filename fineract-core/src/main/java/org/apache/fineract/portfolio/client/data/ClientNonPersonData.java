@@ -22,12 +22,14 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 /**
  * Immutable data object representing the ClientNonPerson
  */
 @Getter
 @SuppressWarnings("unused")
+@JsonLocalDateArrayFormat
 public class ClientNonPersonData implements Serializable {
 
     private final CodeValueData constitution;
