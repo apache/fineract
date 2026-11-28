@@ -30,8 +30,10 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.config.FineractProperties.FineractSecurityProperties.FineractSecurityOidcFederationProperties.OidcIssuerProperties;
 import org.apache.fineract.infrastructure.core.domain.TenantOidcConfig;
 import org.apache.fineract.infrastructure.security.converter.FineractOidcJwtAuthenticationConverter;
+import org.apache.fineract.infrastructure.security.event.TenantOidcConfigChangedEvent;
 import org.apache.fineract.infrastructure.security.service.TenantOidcConfigService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -169,5 +171,15 @@ public class DynamicJwtIssuerAuthenticationManagerResolver implements Authentica
     public void evictFromCache(String issuerUri) {
         managerCache.remove(issuerUri);
         log.info("Evicted AuthenticationManager cache for issuer: {}", issuerUri);
+    }
+
+    @EventListener
+    public void onTenantOidcConfigChanged(TenantOidcConfigChangedEvent event) {
+        if (event.oldIssuerUri() != null) {
+            evictFromCache(event.oldIssuerUri());
+        }
+        if (event.newIssuerUri() != null) {
+            evictFromCache(event.newIssuerUri());
+        }
     }
 }

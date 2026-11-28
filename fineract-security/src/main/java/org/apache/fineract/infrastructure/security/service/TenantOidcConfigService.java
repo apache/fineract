@@ -88,6 +88,12 @@ public class TenantOidcConfigService {
         });
     }
 
+    public void evictIssuer(String issuerUri) {
+        if (issuerUri != null) {
+            issuerCache.remove(issuerUri);
+        }
+    }
+
     /** Removes all cached entries — useful after bulk changes or on application events. */
     public void evictAll() {
         issuerCache.clear();

@@ -113,4 +113,21 @@ class ForgotPasswordServiceImplTest {
         assertFalse(actualExpiry.isBefore(minExpected));
         assertTrue(actualExpiry.isBefore(maxExpected));
     }
+
+    @Test
+    void requestPasswordResetShouldSendMailToTheStoredEmailAddress() {
+        when(appUserRepository.findActiveUserByEmail(EMAIL)).thenReturn(user);
+        when(user.isPasswordResetAllowed()).thenReturn(true);
+        when(passwordEncoder.encode(anyString())).thenReturn("{bcrypt}encoded-temporary-password");
+        when(user.getOffice()).thenReturn(office);
+        when(office.getName()).thenReturn("Head Office");
+        when(user.getFirstname()).thenReturn("Demo");
+        when(user.getLastname()).thenReturn("User");
+        when(user.getUsername()).thenReturn("demo");
+        when(user.getEmail()).thenReturn("stored@example.com");
+
+        subject.requestPasswordReset(EMAIL);
+
+        verify(emailService).sendForgotPasswordEmail(eq("Head Office"), eq("Demo User"), eq("stored@example.com"), eq("demo"), anyString());
+    }
 }

@@ -37,10 +37,13 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.TenantOidcConfig;
 import org.apache.fineract.infrastructure.core.exception.ResourceNotFoundException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.TenantOidcConfigData;
 import org.apache.fineract.infrastructure.security.domain.OidcFederationType;
+import org.apache.fineract.infrastructure.security.event.TenantOidcConfigChangedEvent;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.TenantOidcConfigService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,6 +66,7 @@ public class TenantOidcConfigApiResource {
     private final PlatformSecurityContext context;
     private final TenantOidcConfigService tenantOidcConfigService;
     private final ToApiJsonSerializer<TenantOidcConfigData> apiJsonSerializer;
+    private final ApplicationEventPublisher eventPublisher;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -70,6 +74,7 @@ public class TenantOidcConfigApiResource {
             + "The clientSecret is never included in the response.")
     public String retrieve(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
+        assertCurrentTenant(tenantId);
 
         TenantOidcConfig config = tenantOidcConfigService.findByTenantId(tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
@@ -86,6 +91,7 @@ public class TenantOidcConfigApiResource {
             + "The issuerUri must be globally unique across all tenants.")
     public String create(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId, String requestBody) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
+        assertCurrentTenant(tenantId);
 
         TenantOidcConfig config = parseRequest(tenantId, requestBody, null);
         TenantOidcConfig saved = tenantOidcConfigService.save(config);
@@ -99,13 +105,16 @@ public class TenantOidcConfigApiResource {
             + "If clientSecret is omitted in the request body, the existing encrypted secret is preserved.")
     public String update(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId, String requestBody) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
+        assertCurrentTenant(tenantId);
 
         TenantOidcConfig existing = tenantOidcConfigService.findByTenantId(tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
                         "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
 
         TenantOidcConfig updated = parseRequest(tenantId, requestBody, existing);
+        String oldIssuerUri = existing.getIssuerUri();
         TenantOidcConfig saved = tenantOidcConfigService.save(updated);
+        evictIssuers(oldIssuerUri, saved.getIssuerUri());
         return apiJsonSerializer.serialize(TenantOidcConfigData.from(saved));
     }
 
@@ -115,12 +124,34 @@ public class TenantOidcConfigApiResource {
             + "After deletion, authentication via this tenant's IdP will no longer work.")
     public String delete(@Parameter(description = "tenantId") @PathParam("tenantId") String tenantId) {
         context.authenticatedUser().validateHasPermissionTo(PERMISSION);
+        assertCurrentTenant(tenantId);
 
-        tenantOidcConfigService.findByTenantId(tenantId).orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
-                "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
+        TenantOidcConfig existing = tenantOidcConfigService.findByTenantId(tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("tenantOidcConfig.not.found",
+                        "No OIDC configuration found for tenant: " + tenantId, new Object[] { tenantId }));
 
+        String oldIssuerUri = existing.getIssuerUri();
         tenantOidcConfigService.deleteByTenantId(tenantId);
+        evictIssuers(oldIssuerUri, null);
         return "{}";
+    }
+
+    /**
+     * Only the configuration of the caller's own tenant may be accessed; any other tenant id is reported as not found.
+     */
+    private void assertCurrentTenant(String tenantId) {
+        String currentTenantId = ThreadLocalContextUtil.getTenant() != null ? ThreadLocalContextUtil.getTenant().getTenantIdentifier()
+                : null;
+        if (tenantId == null || !tenantId.equals(currentTenantId)) {
+            throw new ResourceNotFoundException("tenantOidcConfig.not.found", "No OIDC configuration found for tenant: " + tenantId,
+                    new Object[] { tenantId });
+        }
+    }
+
+    private void evictIssuers(String oldIssuerUri, String newIssuerUri) {
+        tenantOidcConfigService.evictIssuer(oldIssuerUri);
+        tenantOidcConfigService.evictIssuer(newIssuerUri);
+        eventPublisher.publishEvent(new TenantOidcConfigChangedEvent(oldIssuerUri, newIssuerUri));
     }
 
     private TenantOidcConfig parseRequest(String tenantId, String body, TenantOidcConfig existing) {
