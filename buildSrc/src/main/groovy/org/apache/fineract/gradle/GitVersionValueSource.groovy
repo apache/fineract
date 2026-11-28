@@ -50,8 +50,9 @@ import org.gradle.api.provider.ValueSourceParameters
  *
  * Version rules: on a branch matching one of {@code releaseBranchPatterns}, or when HEAD carries a tag matching
  * {@code releaseTagPattern}, the version is the major.minor.patch of the describe tag; otherwise it is
- * major.(minor+1).0-SNAPSHOT. The describe tag is the first tag matching {@code describeTagPattern} found while
- * walking HEAD's ancestors (all parents, newest commit first) -- note this differs from `git describe`.
+ * major.(minor+1).0-SHORTSHA-SNAPSHOT, where SHORTSHA is the first 7 characters of the HEAD commit id. The describe
+ * tag is the first tag matching {@code describeTagPattern} found while walking HEAD's ancestors (all parents, newest
+ * commit first) -- note this differs from `git describe`.
  * Returns no value when versioning is disabled or the project is not in a git repository.
  */
 @CompileStatic
@@ -157,7 +158,7 @@ abstract class GitVersionValueSource implements ValueSource<String, Parameters> 
         String minor = version.group('minor') ?: '0'
         String patch = version.group('patch') ?: '0'
 
-        String result = release ? "${major}.${minor}.${patch}" : "${major}.${increase(minor)}.0-SNAPSHOT"
+        String result = release ? "${major}.${minor}.${patch}" : "${major}.${increase(minor)}.0-${rev.substring(0, 7)}-SNAPSHOT"
         LOG.info("git version: ${result} (branch: ${branch}, head tags: ${headTags}, describe tag: ${describeTag})")
         return result.replace('/', '-')
     }

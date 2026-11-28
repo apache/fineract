@@ -205,6 +205,14 @@ jobs:
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
+  publish-nexus-snapshots:
+    needs: build-core
+    uses: $/.github/workflows/publish-nexus-snapshots.yml
+    secrets:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      NEXUS_USER: ${{ secrets.NEXUS_USER }}
+      NEXUS_PW: ${{ secrets.NEXUS_PW }}
+
   publish-dockerhub:
     needs: build-core
     uses: $/.github/workflows/publish-dockerhub.yml
