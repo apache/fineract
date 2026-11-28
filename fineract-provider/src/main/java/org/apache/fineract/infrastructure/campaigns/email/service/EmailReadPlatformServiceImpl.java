@@ -79,10 +79,6 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
             return EMAIL_SCHEMA;
         }
 
-        private String tableName() {
-            return "scheduled_email_messages_outbound";
-        }
-
         @Override
         public EmailData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
@@ -159,14 +155,6 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     @Override
     public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
         return retrieveEmailByStatus(EmailMessageStatusType.SENT.getValue(), searchParameters.getLimit());
-    }
-
-    @Override
-    public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " " + sqlGenerator.limit(limit) : "";
-        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum =? " + sqlPlusLimit;
-
-        return this.jdbcTemplate.queryForList(sql, Long.class, EmailMessageStatusType.SENT.getValue()); // NOSONAR
     }
 
     @Override
