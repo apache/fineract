@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -35,6 +37,7 @@ import org.apache.fineract.portfolio.calendar.data.CalendarData;
 /**
  * Immutable data object representing groups.
  */
+@Getter
 public final class CenterData implements Serializable {
 
     private final Long id;
@@ -54,13 +57,19 @@ public final class CenterData implements Serializable {
 
     private final GroupTimelineData timeline;
     // associations
+    // Hidden from the OpenAPI schema, as are officeOptions and staffOptions: they lead to OfficeData, which documents
+    // externalId as an object and so changes the externalId attribute of the existing /v2/centers response
+    @Schema(hidden = true)
     private final Collection<GroupGeneralData> groupMembers;
 
     // template
+    @Schema(hidden = true)
     private final Collection<GroupGeneralData> groupMembersOptions;
     private final CalendarData collectionMeetingCalendar;
     private final Collection<CodeValueData> closureReasons;
+    @Schema(hidden = true)
     private final Collection<OfficeData> officeOptions;
+    @Schema(hidden = true)
     private final Collection<StaffData> staffOptions;
     private final BigDecimal totalCollected;
     private final BigDecimal totalOverdue;

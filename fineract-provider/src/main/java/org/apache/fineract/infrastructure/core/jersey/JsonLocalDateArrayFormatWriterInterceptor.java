@@ -23,11 +23,19 @@ import jakarta.ws.rs.ext.Provider;
 import jakarta.ws.rs.ext.WriterInterceptor;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonLocalDateBeanSerializerModifier;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 
+/**
+ * Writes every date of a response as an array when its resource method is annotated with
+ * {@link JsonLocalDateArrayFormat}, so a resource can keep the legacy Gson date format for shared classes that other
+ * resources write as ISO dates.
+ */
 @Provider
 @Component
 public class JsonLocalDateArrayFormatWriterInterceptor implements WriterInterceptor {
