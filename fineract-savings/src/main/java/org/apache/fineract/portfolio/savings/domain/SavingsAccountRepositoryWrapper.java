@@ -71,12 +71,13 @@ public class SavingsAccountRepositoryWrapper {
      * instead.
      *
      * <p>
-     * MySQL, and MariaDB without innodb_snapshot_isolation, answer the lock with the latest row even when the
-     * transaction already holds an older snapshot, while its plain reads, such as the transactions of the account,
-     * still come from that snapshot. An account changed since the snapshot would then be updated from a stale view and
-     * still pass its version check. The versions are therefore read again with a plain read after the lock, and a
-     * difference fails the transaction, as PostgreSQL does. A transaction that read nothing before the lock takes its
-     * snapshot with that read, so it sees the locked versions.
+     * At REPEATABLE READ, MySQL, and MariaDB without innodb_snapshot_isolation, answer the lock with the latest row
+     * even when the transaction already holds an older snapshot, while its plain reads, such as the transactions of the
+     * account, still come from that snapshot. An account changed since the snapshot would then be updated from a stale
+     * view and still pass its version check. The versions are therefore read again with a plain read after the lock,
+     * and a difference fails the transaction, as PostgreSQL does at REPEATABLE READ. A transaction that read nothing
+     * before the lock takes its snapshot with that read, so it sees the locked versions. At READ COMMITTED, the
+     * default, every statement reads a fresh snapshot, so the re-read sees the locked versions and the check passes.
      * </p>
      */
     @Transactional

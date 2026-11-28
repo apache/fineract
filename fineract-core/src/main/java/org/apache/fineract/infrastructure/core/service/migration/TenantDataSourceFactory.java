@@ -58,6 +58,7 @@ public class TenantDataSourceFactory {
         dataSource.setMaximumPoolSize(tenantDataSource.getMaximumPoolSize());
         dataSource.setIdleTimeout(tenantDataSource.getIdleTimeout());
         dataSource.setConnectionTestQuery(tenantDataSource.getConnectionTestQuery());
+        dataSource.setTransactionIsolation(tenantDataSource.getTransactionIsolation());
 
         FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
         if (!databasePasswordEncryptor.isMasterPasswordHashValid(tenantConnection.getMasterPasswordHash())) {

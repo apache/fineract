@@ -93,6 +93,7 @@ public class DataSourcePerTenantServiceFactory {
         config.setDriverClassName(hikariConfig.getDriverClassName());
         config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
         config.setAutoCommit(hikariConfig.isAutoCommit());
+        config.setTransactionIsolation(hikariConfig.getTransactionIsolation());
         config.setLeakDetectionThreshold(getLeakDetectionThreshold());
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management

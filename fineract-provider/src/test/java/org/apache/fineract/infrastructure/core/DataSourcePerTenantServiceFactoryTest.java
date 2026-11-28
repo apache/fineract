@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -276,6 +277,42 @@ public class DataSourcePerTenantServiceFactoryTest {
         verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
         HikariConfig hikariConfig = hikariConfigCaptor.getValue();
         assertEquals(MASTER_DB_LEAK_DETECTION_THRESHOLD, hikariConfig.getLeakDetectionThreshold());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldUseMasterTransactionIsolation_WhenConfiguredOnHikari() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(tenantHikariConfig.getTransactionIsolation()).willReturn("TRANSACTION_REPEATABLE_READ");
+
+        // when
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, tenantConnection);
+
+        // then
+        assertNotNull(dataSource);
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertEquals("TRANSACTION_REPEATABLE_READ", hikariConfig.getTransactionIsolation());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldKeepDriverDefaultTransactionIsolation_WhenNotConfiguredOnHikari() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(tenantHikariConfig.getTransactionIsolation()).willReturn(null);
+
+        // when
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, tenantConnection);
+
+        // then
+        assertNotNull(dataSource);
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertNull(hikariConfig.getTransactionIsolation());
     }
 
     @Test

@@ -167,7 +167,8 @@ public class SchedulerWritePlatformServiceJpaRepositoryImpl implements Scheduler
     // LOWEST_PRECEDENCE - 3) wraps Spring's transaction interceptor (LOWEST_PRECEDENCE), so each
     // retry attempt re-enters the transaction interceptor. Combined with REQUIRES_NEW, every
     // attempt runs in a brand-new transaction with a fresh DB snapshot. This is what lets a
-    // serialization failure (e.g. Postgres 40001 under the pool's REPEATABLE_READ default) recover:
+    // concurrency failure (an optimistic lock failure, or a Postgres 40001 serialization failure when the pool
+    // is configured for REPEATABLE READ) recover:
     // on retry the competing node's job-claim is already committed and visible, so we veto correctly
     // instead of failing. The caller (SchedulerVetoer#veto) must stay non-transactional for this.
     @Retry(name = "processJobDetailForExecution", fallbackMethod = "fallbackProcessJobDetailForExecution")

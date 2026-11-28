@@ -117,17 +117,18 @@ public class ScheduledJobRunnerConfig {
         // explicit level here would make createJobExecution fail outright rather than merely behave differently.
         //
         // The practical effect is that create* and getLastJobExecution* inherit the pool baseline, which
-        // application.properties sets to TRANSACTION_REPEATABLE_READ - a stronger level than the READ_COMMITTED this
-        // used to request. That is safe here because the create path has no read-modify-write for REPEATABLE READ to
-        // abort: it only INSERTs rows it creates itself (job instance, job execution, its parameters and its execution
-        // context), getLastJobExecution* is read-only, and id generation runs outside the transaction on both
-        // supported databases (PostgresSequenceMaxValueIncrementer uses a non-transactional nextval;
-        // MySQLMaxValueIncrementer is configured with useNewConnection - see
-        // FineractDataFieldMaxValueIncrementerFactory). The MySQL gap locking that distinguishes the two levels
-        // applies to locking reads and range UPDATE/DELETE, none of which occur here.
+        // application.properties sets to TRANSACTION_READ_COMMITTED - the level this used to request explicitly. A
+        // deployment that raises FINERACT_HIKARI_TRANSACTION_ISOLATION to TRANSACTION_REPEATABLE_READ is safe here as
+        // well, because the create path has no read-modify-write for REPEATABLE READ to abort: it only INSERTs rows it
+        // creates itself (job instance, job execution, its parameters and its execution context),
+        // getLastJobExecution* is read-only, and id generation runs outside the transaction on both supported
+        // databases (PostgresSequenceMaxValueIncrementer uses a non-transactional nextval; MySQLMaxValueIncrementer is
+        // configured with useNewConnection - see FineractDataFieldMaxValueIncrementerFactory). The MySQL gap locking
+        // that distinguishes the two levels applies to locking reads and range UPDATE/DELETE, none of which occur here.
         //
-        // Concurrent creation of the SAME job instance is the one visible difference: on PostgreSQL it can surface as
-        // a serialization failure instead of a duplicate-key violation. It needs identical job parameters, which the
+        // Concurrent creation of the SAME job instance is the one visible difference at REPEATABLE READ: on PostgreSQL
+        // it can surface as a serialization failure instead of a duplicate-key violation. It needs identical job
+        // parameters, which the
         // run.id increment in NextJobParametersResolver normally prevents, and duplicate scheduled launches are
         // guarded by the pessimistic job lock in SchedularWritePlatformService#processJobDetailForExecution - not by
         // the repository's isolation level, which is why Spring Batch's SERIALIZABLE default was dropped in the first
