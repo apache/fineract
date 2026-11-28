@@ -20,6 +20,7 @@
 package org.apache.fineract.portfolio.interestratechart.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -40,6 +41,7 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
 import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartCreateCommand;
 import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartDeleteCommand;
@@ -84,7 +86,12 @@ public class InterestRateChartsApiResource {
             """)
     @AlternativeOperationId("retrieveAll_26")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class))))
-    public Collection<InterestRateChartData> retrieveAll(@QueryParam("productId") final Long productId) {
+    @ApiResponse(responseCode = "400", description = "Missing required productId query parameter")
+    public Collection<InterestRateChartData> retrieveAll(
+            @QueryParam("productId") @Parameter(required = true, description = "Deposit product ID") final Long productId) {
+
+        new DataValidatorBuilder().resource(InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME)
+                .parameter(InterestRateChartApiConstants.productIdParamName).value(productId).notNull().throwValidationErrors();
 
         return chartReadPlatformService.retrieveAllWithSlabs(productId);
     }
