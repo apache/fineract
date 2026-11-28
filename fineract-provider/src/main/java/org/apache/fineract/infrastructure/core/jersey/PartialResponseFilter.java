@@ -34,6 +34,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,6 +49,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.annotation.PartialResponseParameters;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
+import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonLocalDateBeanSerializerModifier;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,6 +68,12 @@ import org.springframework.stereotype.Component;
 public class PartialResponseFilter implements ContainerResponseFilter {
 
     private static final String FIELDS_PARAMETER = "fields";
+
+    /**
+     * Request property through which a resource method can declare the supported parameters of the response it is
+     * returning, when they depend on the request. It takes precedence over {@link PartialResponseParameters}.
+     */
+    private static final String SUPPORTED_PARAMETERS_PROPERTY = PartialResponseFilter.class.getName() + ".supportedParameters";
 
     private final ObjectMapper objectMapper;
     private final UnsupportedParameterExceptionMapper unsupportedParameterExceptionMapper;
@@ -85,7 +94,7 @@ public class PartialResponseFilter implements ContainerResponseFilter {
         if (requested.isEmpty()) {
             return;
         }
-        final Set<String> supported = supportedParameters(responseContext.getEntityAnnotations());
+        final Set<String> supported = supportedParameters(requestContext, responseContext.getEntityAnnotations());
         if (supported == null) {
             // the method does not take part in partial responses
             return;
@@ -109,7 +118,11 @@ public class PartialResponseFilter implements ContainerResponseFilter {
             shouldSkip = skip::contains;
         }
 
-        final JsonNode tree = objectMapper.valueToTree(responseContext.getEntity());
+        // the tree is built before the response is written, so the legacy date format has to be applied here already
+        final Object entity = responseContext.getEntity();
+        final JsonNode tree = JsonLocalDateArrayFormatWriterInterceptor.isLocalDateArrayFormat(responseContext.getEntityAnnotations(),
+                resourceInfo) ? JacksonLocalDateBeanSerializerModifier.withLocalDateArrayFormat(() -> objectMapper.valueToTree(entity))
+                        : objectMapper.valueToTree(entity);
         prune(tree, entityType(responseContext), shouldSkip);
         responseContext.setEntity(tree, responseContext.getEntityAnnotations(), responseContext.getMediaType());
     }
@@ -133,15 +146,36 @@ public class PartialResponseFilter implements ContainerResponseFilter {
         return mediaType != null && MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType);
     }
 
-    private Set<String> supportedParameters(final Annotation[] annotations) {
+    /**
+     * Declares the supported parameters of the response to the current request, for a resource method whose response
+     * depends on the request and so cannot be described by one {@link PartialResponseParameters} annotation.
+     */
+    public static void setSupportedParameters(final ContainerRequestContext requestContext, final Set<String> supportedParameters) {
+        requestContext.setProperty(SUPPORTED_PARAMETERS_PROPERTY, Set.copyOf(supportedParameters));
+    }
+
+    private Set<String> supportedParameters(final ContainerRequestContext requestContext, final Annotation[] annotations) {
+        if (requestContext.getProperty(SUPPORTED_PARAMETERS_PROPERTY) instanceof Set<?> declared) {
+            final Set<String> parameters = new LinkedHashSet<>();
+            declared.forEach(parameter -> parameters.add((String) parameter));
+            return parameters;
+        }
         for (final Annotation annotation : annotations) {
             if (annotation instanceof PartialResponseParameters partialResponseParameters) {
                 return new LinkedHashSet<>(Arrays.asList(partialResponseParameters.value()));
             }
         }
+        // Jersey passes the annotations of the method it invokes, which has none when the resource is a Spring proxy,
+        // so the annotations are also looked up on the resource method and class and the ones they override or extend
+        final Method resourceMethod = resourceInfo == null ? null : resourceInfo.getResourceMethod();
+        final PartialResponseParameters onMethod = resourceMethod == null ? null
+                : AnnotatedElementUtils.findMergedAnnotation(resourceMethod, PartialResponseParameters.class);
+        if (onMethod != null) {
+            return new LinkedHashSet<>(Arrays.asList(onMethod.value()));
+        }
         final Class<?> resourceClass = resourceInfo == null ? null : resourceInfo.getResourceClass();
         final PartialResponseParameters onClass = resourceClass == null ? null
-                : resourceClass.getAnnotation(PartialResponseParameters.class);
+                : AnnotatedElementUtils.findMergedAnnotation(resourceClass, PartialResponseParameters.class);
         return onClass == null ? null : new LinkedHashSet<>(Arrays.asList(onClass.value()));
     }
 
