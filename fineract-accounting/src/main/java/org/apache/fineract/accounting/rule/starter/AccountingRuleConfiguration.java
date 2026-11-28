@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.rule.starter;
 
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
@@ -39,9 +40,9 @@ public class AccountingRuleConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AccountingRuleReadPlatformService.class)
-    public AccountingRuleReadPlatformService accountingRuleReadPlatformService(JdbcTemplate jdbcTemplate,
-            GLAccountReadPlatformService glAccountReadPlatformService) {
-        return new AccountingRuleReadPlatformServiceImpl(jdbcTemplate, glAccountReadPlatformService);
+    public AccountingRuleReadPlatformService accountingRuleReadPlatformService(final JdbcTemplate jdbcTemplate,
+            final GLAccountReadPlatformService glAccountReadPlatformService, final SQLQueryFactory queryFactory) {
+        return new AccountingRuleReadPlatformServiceImpl(jdbcTemplate, glAccountReadPlatformService, queryFactory);
     }
 
     @Bean
