@@ -103,6 +103,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final NoteRepository noteRepository;
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
+    private final SavingsAccountApplicationTransitionValidator savingsAccountApplicationTransitionValidator;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final CommandProcessingService commandProcessingService;
     private final SavingsAccountDomainService savingsAccountDomainService;
@@ -450,6 +451,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
                 StatusEnum.APPROVE.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
+        this.savingsAccountApplicationTransitionValidator.validateApproval(savingsAccount, command);
         final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
@@ -572,6 +574,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
                 StatusEnum.REJECTED.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
+        this.savingsAccountApplicationTransitionValidator.validateRejection(savingsAccount, command);
         final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
@@ -608,6 +611,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
                 StatusEnum.WITHDRAWN.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
+        this.savingsAccountApplicationTransitionValidator.validateApplicantWithdrawal(savingsAccount, command);
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);

@@ -125,6 +125,7 @@ import org.apache.fineract.portfolio.savings.service.RecurringDepositProductWrit
 import org.apache.fineract.portfolio.savings.service.SavingsAccountActivationService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountActivationServiceImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountApplicationTransitionApiJsonValidator;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountApplicationTransitionValidator;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
@@ -344,6 +345,7 @@ public class SavingsConfiguration {
             ClientRepositoryWrapper clientRepository, GroupRepository groupRepository, SavingsProductRepository savingsProductRepository,
             NoteRepository noteRepository, StaffRepositoryWrapper staffRepository,
             SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
+            SavingsAccountApplicationTransitionValidator savingsAccountApplicationTransitionValidator,
             SavingsAccountChargeAssembler savingsAccountChargeAssembler, AccountAssociationsRepository accountAssociationsRepository,
             FromJsonHelper fromJsonHelper, CalendarInstanceRepository calendarInstanceRepository,
             ConfigurationDomainService configurationDomainService, AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
@@ -351,9 +353,9 @@ public class SavingsConfiguration {
         return new DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl(context, depositAccountInterestCalculationService,
                 savingAccountRepository, fixedDepositAccountRepository, recurringDepositAccountRepository, depositAccountAssembler,
                 depositAccountDataValidator, accountNumberGenerator, clientRepository, groupRepository, savingsProductRepository,
-                noteRepository, staffRepository, savingsAccountApplicationTransitionApiJsonValidator, savingsAccountChargeAssembler,
-                accountAssociationsRepository, fromJsonHelper, calendarInstanceRepository, configurationDomainService,
-                accountNumberFormatRepository, businessEventNotifierService);
+                noteRepository, staffRepository, savingsAccountApplicationTransitionApiJsonValidator,
+                savingsAccountApplicationTransitionValidator, savingsAccountChargeAssembler, accountAssociationsRepository, fromJsonHelper,
+                calendarInstanceRepository, configurationDomainService, accountNumberFormatRepository, businessEventNotifierService);
     }
 
     @Bean
@@ -408,6 +410,12 @@ public class SavingsConfiguration {
     public SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator(
             FromJsonHelper fromApiJsonHelper) {
         return new SavingsAccountApplicationTransitionApiJsonValidator(fromApiJsonHelper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SavingsAccountApplicationTransitionValidator.class)
+    public SavingsAccountApplicationTransitionValidator savingsAccountApplicationTransitionValidator() {
+        return new SavingsAccountApplicationTransitionValidator();
     }
 
     @Bean
@@ -529,6 +537,7 @@ public class SavingsConfiguration {
             ClientRepositoryWrapper clientRepository, GroupRepository groupRepository, SavingsProductRepository savingsProductRepository,
             NoteRepository noteRepository, StaffRepositoryWrapper staffRepository,
             SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
+            SavingsAccountApplicationTransitionValidator savingsAccountApplicationTransitionValidator,
             SavingsAccountChargeAssembler savingsAccountChargeAssembler, CommandProcessingService commandProcessingService,
             SavingsAccountDomainService savingsAccountDomainService, SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, BusinessEventNotifierService businessEventNotifierService,
@@ -536,8 +545,9 @@ public class SavingsConfiguration {
             GroupRepositoryWrapper groupRepositoryWrapper, GroupSavingsIndividualMonitoringWritePlatformService gsimWritePlatformService) {
         return new SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(context, savingAccountRepository, savingAccountAssembler,
                 savingsAccountDataValidator, accountNumberGenerator, clientRepository, groupRepository, savingsProductRepository,
-                noteRepository, staffRepository, savingsAccountApplicationTransitionApiJsonValidator, savingsAccountChargeAssembler,
-                commandProcessingService, savingsAccountDomainService, savingsAccountWritePlatformService, accountNumberFormatRepository,
+                noteRepository, staffRepository, savingsAccountApplicationTransitionApiJsonValidator,
+                savingsAccountApplicationTransitionValidator, savingsAccountChargeAssembler, commandProcessingService,
+                savingsAccountDomainService, savingsAccountWritePlatformService, accountNumberFormatRepository,
                 businessEventNotifierService, entityDatatableChecksWritePlatformService, gsimRepository, groupRepositoryWrapper,
                 gsimWritePlatformService);
     }
