@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
@@ -32,14 +35,24 @@ import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestB
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
 
     private static final String DEPOSIT_DATE = "04 March 2013";
     private static final String WITHDRAWAL_DATE = "05 March 2013";
     private static final long FORCE_WITHDRAWAL_LIMIT = 5000L;
-    private static final long DISABLED_LIMIT = 0L;
+    private final List<Long> createdSavingsAccountIds = new ArrayList<>();
+    private GlobalConfigurationPropertyData originalForceWithdrawalConfiguration;
+
+    @BeforeEach
+    public void saveForceWithdrawalConfiguration() {
+        originalForceWithdrawalConfiguration = null;
+        originalForceWithdrawalConfiguration = globalConfigurationHelper
+                .retrieveConfigurationByName(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT);
+    }
 
     @Test
     public void testForceWithdrawal() {
@@ -59,6 +72,8 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
         assertNotNull(savingsProduct.getResourceId());
 
         Long savingsId = submitSavingsApplication(clientId, savingsProduct.getResourceId(), DEPOSIT_DATE).getSavingsId();
+        assertNotNull(savingsId);
+        createdSavingsAccountIds.add(savingsId);
         approveSavings(savingsId, DEPOSIT_DATE);
         activateSavings(savingsId, DEPOSIT_DATE);
         SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
@@ -86,6 +101,8 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
         assertNotNull(savingsProduct.getResourceId());
 
         Long savingsId = submitSavingsApplication(clientId, savingsProduct.getResourceId(), DEPOSIT_DATE).getSavingsId();
+        assertNotNull(savingsId);
+        createdSavingsAccountIds.add(savingsId);
         approveSavings(savingsId, DEPOSIT_DATE);
         activateSavings(savingsId, DEPOSIT_DATE);
         SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
@@ -121,6 +138,8 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
         assertNotNull(savingsProduct.getResourceId());
 
         Long savingsId = submitSavingsApplication(clientId, savingsProduct.getResourceId(), DEPOSIT_DATE).getSavingsId();
+        assertNotNull(savingsId);
+        createdSavingsAccountIds.add(savingsId);
         approveSavings(savingsId, DEPOSIT_DATE);
         activateSavings(savingsId, DEPOSIT_DATE);
         SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
@@ -144,8 +163,25 @@ public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
     }
 
     @AfterEach
-    public void resetForceWithdrawalConfiguration() {
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
-                new PutGlobalConfigurationsRequest().value(DISABLED_LIMIT).enabled(false));
+    public void cleanupSavingsAndResetConfiguration() {
+        List<Long> accountIds = List.copyOf(createdSavingsAccountIds);
+        createdSavingsAccountIds.clear();
+
+        List<Executable> cleanups = new ArrayList<>();
+        for (Long savingsId : accountIds) {
+            cleanups.add(() -> cleanupSavingsAccount(savingsId, WITHDRAWAL_DATE));
+        }
+
+        assertAll("Savings cleanup and state restoration", () -> {
+            if (!accountIds.isEmpty()) {
+                runAtWithRestoredBusinessDate(WITHDRAWAL_DATE, () -> assertAll("Clean up owned accounts", cleanups));
+            }
+        }, () -> {
+            if (originalForceWithdrawalConfiguration != null) {
+                globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
+                        new PutGlobalConfigurationsRequest().value(originalForceWithdrawalConfiguration.getValue())
+                                .enabled(originalForceWithdrawalConfiguration.getEnabled()));
+            }
+        });
     }
 }
