@@ -102,18 +102,6 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             final Integer duration, final Integer typeId, final boolean repeating, final String recurrence, final Integer remindById,
             final Integer firstReminder, final Integer secondReminder, final LocalTime meetingtime) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
-
-        final CalendarType calendarType = CalendarType.fromInt(typeId);
-        if (calendarType.isCollection() && !repeating) {
-            baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue())
-                    .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
         this.title = StringUtils.defaultIfEmpty(title, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.location = StringUtils.defaultIfEmpty(location, null);
@@ -269,18 +257,6 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         // if repeating is false then update recurrence to NULL
         if (!this.repeating) {
             this.recurrence = null;
-        }
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
-
-        final CalendarType calendarType = CalendarType.fromInt(this.typeId);
-        if (calendarType.isCollection() && !this.repeating) {
-            baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue())
-                    .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
         }
 
         final String newRecurrence = this.repeating ? mergeRecurrence(request) : null;

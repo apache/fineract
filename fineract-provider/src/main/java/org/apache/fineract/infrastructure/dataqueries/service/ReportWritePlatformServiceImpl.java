@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.dataqueries.data.ReportDataValidator;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportParameter;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportParameterRepository;
@@ -218,7 +219,9 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         final boolean useReport = command.parameterExists("useReport") && command.booleanPrimitiveValueOfParameterNamed("useReport");
         final String reportSql = optionalString(command, "reportSql");
 
-        return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql, reportTypes);
+        final Report report = new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql);
+        ReportDataValidator.validate(report, reportTypes);
+        return report;
     }
 
     private static String optionalString(final JsonCommand command, final String paramName) {
@@ -279,7 +282,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
             }
         }
 
-        report.validate(reportTypes);
+        ReportDataValidator.validate(report, reportTypes);
 
         if (!changes.isEmpty() && report.isCoreReport()) {
             for (final String key : changes.keySet()) {
