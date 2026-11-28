@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.CenterDisassociateGroupsRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CenterDisassociateGroupsCommand extends Command<CenterDisassociateGroupsRequest> {}
+public class CenterDisassociateGroupsCommand extends Command<CenterDisassociateGroupsRequest> {
+
+    @Override
+    public String entityName() {
+        return "CENTER";
+    }
+
+    @Override
+    public String actionName() {
+        return "DISASSOCIATEGROUPS";
+    }
+}

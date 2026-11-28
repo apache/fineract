@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.GroupDisassociateClientsRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupDisassociateClientsCommand extends Command<GroupDisassociateClientsRequest> {}
+public class GroupDisassociateClientsCommand extends Command<GroupDisassociateClientsRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "DISASSOCIATECLIENTS";
+    }
+}

@@ -21,15 +21,19 @@ package org.apache.fineract.infrastructure.hooks.command;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookAfter;
-import org.apache.fineract.command.core.HookableCommand;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Publishes the {@link org.apache.fineract.infrastructure.hooks.event.HookEvent} for commands processed by the new
- * command processing, which unlike the legacy {@code SynchronousCommandProcessingService} would otherwise never notify
- * webhooks.
+ * Publishes the {@link org.apache.fineract.infrastructure.hooks.event.HookEvent} of every command processed by the new
+ * command processing, as the legacy {@code SynchronousCommandProcessingService} does for every command. The event
+ * carries the command's {@link org.apache.fineract.command.core.Command#entityName() entity} and
+ * {@link org.apache.fineract.command.core.Command#actionName() action}, which is what a hook subscribes to.
+ *
+ * <p>
+ * Not opt-in: a module that moves to the new command processing keeps notifying the webhooks subscribed to its events
+ * without having to remember it.
  */
 @RequiredArgsConstructor
 @Component
@@ -41,10 +45,6 @@ final class WebhookCommandHookAfter implements CommandHookAfter<Object, Object> 
     public void onAfter(CommandContext<Object, Object> ctx) {
         var command = ctx.getCommand();
 
-        if (!(command instanceof HookableCommand hookable)) {
-            return;
-        }
-
         // read before registering, so that what is published is the response as it was when the command finished
         var response = ctx.getResponse();
 
@@ -55,11 +55,11 @@ final class WebhookCommandHookAfter implements CommandHookAfter<Object, Object> 
 
                 @Override
                 public void afterCommit() {
-                    publisher.publishSuccess(hookable, command.getPayload(), response);
+                    publisher.publishSuccess(command, command.getPayload(), response);
                 }
             });
         } else {
-            publisher.publishSuccess(hookable, command.getPayload(), response);
+            publisher.publishSuccess(command, command.getPayload(), response);
         }
     }
 }

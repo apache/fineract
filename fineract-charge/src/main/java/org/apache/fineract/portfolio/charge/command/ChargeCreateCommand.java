@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.charge.data.ChargeCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ChargeCreateCommand extends Command<ChargeCreateRequest> {}
+public class ChargeCreateCommand extends Command<ChargeCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CHARGE";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

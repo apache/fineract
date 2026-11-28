@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupCreateCommand extends Command<GroupCreateRequest> {}
+public class GroupCreateCommand extends Command<GroupCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.GroupUpdateRoleRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupUpdateRoleCommand extends Command<GroupUpdateRoleRequest> {}
+public class GroupUpdateRoleCommand extends Command<GroupUpdateRoleRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATEROLE";
+    }
+}

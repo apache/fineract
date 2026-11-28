@@ -26,4 +26,15 @@ import org.apache.fineract.portfolio.group.data.GroupAssignRoleRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupAssignRoleCommand extends Command<GroupAssignRoleRequest> {}
+public class GroupAssignRoleCommand extends Command<GroupAssignRoleRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "ASSIGNROLE";
+    }
+}

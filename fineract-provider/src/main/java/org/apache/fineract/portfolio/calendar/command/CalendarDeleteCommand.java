@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.calendar.data.CalendarDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CalendarDeleteCommand extends Command<CalendarDeleteRequest> {}
+public class CalendarDeleteCommand extends Command<CalendarDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "CALENDAR";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

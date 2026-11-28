@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateReques
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FloatingRateUpdateCommand extends Command<FloatingRateUpdateRequest> {}
+public class FloatingRateUpdateCommand extends Command<FloatingRateUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "FLOATINGRATE";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

@@ -25,4 +25,16 @@ import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class NoteDeleteCommand extends Command<NoteDeleteRequest> {}
+public class NoteDeleteCommand extends Command<NoteDeleteRequest> {
+
+    /** A note is governed by the permission of whatever it is attached to, not by one note permission. */
+    @Override
+    public String entityName() {
+        return getPayload().getType().getPermissionEntityName();
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

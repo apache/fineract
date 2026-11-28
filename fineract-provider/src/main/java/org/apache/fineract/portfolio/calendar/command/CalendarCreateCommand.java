@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CalendarCreateCommand extends Command<CalendarCreateRequest> {}
+public class CalendarCreateCommand extends Command<CalendarCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CALENDAR";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

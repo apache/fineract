@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GroupUpdateCommand extends Command<GroupUpdateRequest> {}
+public class GroupUpdateCommand extends Command<GroupUpdateRequest> {
+
+    @Override
+    public String entityName() {
+        return "GROUP";
+    }
+
+    @Override
+    public String actionName() {
+        return "UPDATE";
+    }
+}

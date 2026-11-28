@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.charge.data.ChargeDeleteRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ChargeDeleteCommand extends Command<ChargeDeleteRequest> {}
+public class ChargeDeleteCommand extends Command<ChargeDeleteRequest> {
+
+    @Override
+    public String entityName() {
+        return "CHARGE";
+    }
+
+    @Override
+    public String actionName() {
+        return "DELETE";
+    }
+}

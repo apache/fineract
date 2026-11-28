@@ -53,12 +53,16 @@ public class FeignHookHelper {
     }
 
     public HookCreateResponse createHook(String payloadUrl) {
+        return createHook(payloadUrl, OFFICE_ENTITY, CREATE_ACTION);
+    }
+
+    public HookCreateResponse createHook(String payloadUrl, String entityName, String actionName) {
         HookCreateRequest request = new HookCreateRequest()//
                 .name(HookApiConstants.webTemplateName)//
                 .displayName(Utils.randomStringGenerator("Hook_DisplayName_", 5))//
                 .isActive(true)//
                 .config(webHookConfig(payloadUrl))//
-                .events(officeCreatedEvents());
+                .events(List.of(new HookEventData().actionName(actionName).entityName(entityName)));
         return ok(() -> fineractClient.hooks().createHook(request));
     }
 

@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandContext;
-import org.apache.fineract.command.core.HookableCommand;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -86,10 +85,10 @@ class WebhookCommandHookAfterTest {
     }
 
     @Test
-    void shouldPublishHookEventForHookableCommand() {
+    void shouldPublishHookEventForCommand() {
         final TestResponse response = new TestResponse(7L);
 
-        underTest.onAfter(afterContext(hookableCommand(), response));
+        underTest.onAfter(afterContext(documentCommand(), response));
 
         final HookEvent event = publishedEvent();
         final HookEventSource source = (HookEventSource) event.getSource();
@@ -114,7 +113,7 @@ class WebhookCommandHookAfterTest {
 
     @Test
     void shouldExposeOfficeAndClientAtTopLevelOfPayload() {
-        underTest.onAfter(afterContext(hookableCommand(), new TestClientResponse(7L, 2L, 3L)));
+        underTest.onAfter(afterContext(documentCommand(), new TestClientResponse(7L, 2L, 3L)));
 
         final JsonNode payload = mapper.readTree(publishedEvent().getPayload());
         assertEquals(2L, payload.get("officeId").asLong());
@@ -125,20 +124,22 @@ class WebhookCommandHookAfterTest {
     }
 
     @Test
-    void shouldIgnoreCommandThatIsNotHookable() {
-        final Command<Object> command = new Command<>();
-        command.setPayload(new TestRequest("contract.pdf", null));
+    void shouldPublishHookEventForEveryCommand() {
+        final Command<Object> command = new TestStaffCommand();
+        command.setPayload(new TestRequest("staff", null));
 
         underTest.onAfter(afterContext(command, new TestResponse(7L)));
 
-        verifyNoInteractions(eventPublisher);
+        final HookEventSource source = (HookEventSource) publishedEvent().getSource();
+        assertEquals("STAFF", source.getEntityName());
+        assertEquals("CREATE", source.getActionName());
     }
 
     @Test
     void shouldDeferPublicationUntilEnclosingTransactionCommits() {
         TransactionSynchronizationManager.initSynchronization();
 
-        underTest.onAfter(afterContext(hookableCommand(), new TestResponse(7L)));
+        underTest.onAfter(afterContext(documentCommand(), new TestResponse(7L)));
 
         verifyNoInteractions(eventPublisher);
 
@@ -151,7 +152,7 @@ class WebhookCommandHookAfterTest {
     void shouldNotFailCommandWhenPublishingFails() {
         doThrow(new IllegalStateException("listener failed")).when(eventPublisher).publishEvent(any(HookEvent.class));
 
-        assertDoesNotThrow(() -> underTest.onAfter(afterContext(hookableCommand(), new TestResponse(7L))));
+        assertDoesNotThrow(() -> underTest.onAfter(afterContext(documentCommand(), new TestResponse(7L))));
     }
 
     private HookEvent publishedEvent() {
@@ -160,21 +161,35 @@ class WebhookCommandHookAfterTest {
         return captor.getValue();
     }
 
-    private static Command<Object> hookableCommand() {
-        final TestHookableCommand command = new TestHookableCommand();
+    private static Command<Object> documentCommand() {
+        final TestDocumentCommand command = new TestDocumentCommand();
         command.setPayload(new TestRequest("contract.pdf", new ByteArrayInputStream(new byte[] { 1, 2, 3 })));
         return command;
     }
 
-    private static final class TestHookableCommand extends Command<Object> implements HookableCommand {
+    /** A command that declares nothing but its names, like every command migrated to the new command processing. */
+    private static final class TestStaffCommand extends Command<Object> {
 
         @Override
-        public String hookEntityName() {
+        public String entityName() {
+            return "STAFF";
+        }
+
+        @Override
+        public String actionName() {
+            return "CREATE";
+        }
+    }
+
+    private static final class TestDocumentCommand extends Command<Object> {
+
+        @Override
+        public String entityName() {
             return "DOCUMENT";
         }
 
         @Override
-        public String hookActionName() {
+        public String actionName() {
             return "CREATE";
         }
     }

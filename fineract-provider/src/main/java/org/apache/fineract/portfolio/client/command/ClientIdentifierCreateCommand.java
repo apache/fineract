@@ -25,4 +25,15 @@ import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ClientIdentifierCreateCommand extends Command<ClientIdentifierCreateRequest> {}
+public class ClientIdentifierCreateCommand extends Command<ClientIdentifierCreateRequest> {
+
+    @Override
+    public String entityName() {
+        return "CLIENTIDENTIFIER";
+    }
+
+    @Override
+    public String actionName() {
+        return "CREATE";
+    }
+}

@@ -16,16 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.command.jdbc.store.domain;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 
 /**
- * Implemented by commands whose successful execution must notify the webhooks registered for its event, as the legacy
- * command processing does for every command. The names are the entity and action a hook subscribes to, e.g.
- * {@code DOCUMENT} and {@code CREATE}.
+ * A command read back out of the command table.
+ *
+ * <p>
+ * Every command declares its entity and action in code, which is what makes them impossible to forget. A command
+ * reconstructed from a stored row has no code to ask - the class that declared them is not involved - so it carries the
+ * names that were recorded with it instead.
  */
-public interface HookableCommand {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class StoredCommand<T> extends Command<T> {
 
-    String hookEntityName();
+    private String entityName;
 
-    String hookActionName();
+    private String actionName;
+
+    @Override
+    public String entityName() {
+        return entityName;
+    }
+
+    @Override
+    public String actionName() {
+        return actionName;
+    }
 }
