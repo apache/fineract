@@ -601,7 +601,7 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
     public CommandProcessingResult defineOpeningBalance(final JsonCommand command) {
         try {
             final JournalEntryCommand journalEntryCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-            journalEntryCommand.validateForCreate();
+            journalEntryCommand.validateForOpeningBalance();
 
             final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper
                     .findByFinancialActivityTypeWithNotFoundDetection(300);

@@ -51,7 +51,9 @@ import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
@@ -182,6 +184,35 @@ class JournalEntryWritePlatformServiceImplTest {
         assertDoesNotThrow(() -> service.createJournalEntry(command));
 
         verify(helper, times(2)).persistJournalEntry(any(JournalEntry.class));
+    }
+
+    @Test
+    void createJournalEntryRejectsZeroAmountLine() {
+        final JsonCommand command = commandWithLines(BigDecimal.ZERO, BigDecimal.TEN);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> service.createJournalEntry(command));
+
+        assertThat(exception.getErrors()).extracting(ApiParameterError::getParameterName).containsExactly("credits[0].amount");
+        assertThat(exception.getErrors()).extracting(ApiParameterError::getDefaultUserMessage)
+                .containsExactly("The parameter `credits[0].amount` must be greater than 0.");
+        verifyNoInteractions(officeRepositoryWrapper, helper);
+    }
+
+    @Test
+    void defineOpeningBalanceDoesNotRejectZeroAmountLine() {
+        final JsonCommand command = commandWithLines(BigDecimal.ZERO, BigDecimal.ZERO);
+        final IllegalStateException passedValidation = new IllegalStateException("validation passed");
+        when(financialActivityAccountRepositoryWrapper.findByFinancialActivityTypeWithNotFoundDetection(300)).thenThrow(passedValidation);
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> service.defineOpeningBalance(command));
+
+        assertThat(thrown).isSameAs(passedValidation);
+    }
+
+    private JsonCommand commandWithLines(final BigDecimal creditAmount, final BigDecimal debitAmount) {
+        return commandFor(new SingleDebitOrCreditEntryCommand[] { new SingleDebitOrCreditEntryCommand(1L, creditAmount, null, Set.of()) },
+                new SingleDebitOrCreditEntryCommand[] { new SingleDebitOrCreditEntryCommand(2L, debitAmount, null, Set.of()) });
     }
 
     private JsonCommand commandFor(final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits) {
