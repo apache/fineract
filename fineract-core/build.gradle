@@ -19,6 +19,7 @@
 description = 'Fineract Core'
 
 apply plugin: 'java'
+apply plugin: 'org.apache.fineract.database-tests'
 apply plugin: 'eclipse'
 
 configurations {

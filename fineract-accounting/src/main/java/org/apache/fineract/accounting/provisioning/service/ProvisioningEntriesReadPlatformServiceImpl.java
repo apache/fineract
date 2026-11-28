@@ -51,6 +51,7 @@ import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningE
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningDataProjection;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntryProjection;
+import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntryIdDateProjection;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -62,8 +63,10 @@ import org.apache.fineract.query.QMLoanproductProvisioningEntry;
 import org.apache.fineract.query.QMOffice;
 import org.apache.fineract.query.QMProductLoan;
 import org.apache.fineract.query.QMProvisionCategory;
+import org.apache.fineract.query.QMProvisioningHistory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -299,41 +302,12 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
     @Override
     public ProvisioningEntryData retrieveExistingProvisioningIdDateWithJournals() {
-        ProvisioningEntryData data = null;
-        ProvisioningEntryIdDateRowMapper mapper = new ProvisioningEntryIdDateRowMapper();
-        try {
-            data = this.jdbcTemplate.queryForObject(mapper.schema(), mapper, new Object[] {});
-        } catch (EmptyResultDataAccessException e) {
-            data = null;
-        }
-        return data;
-    }
-
-    private static final class ProvisioningEntryIdDateRowMapper implements RowMapper<ProvisioningEntryData> {
-
-        private static final String PROVISIONING_ENTRY_ID_DATE_SCHEMA = """
-                select history1.id, history1.created_date from m_provisioning_history history1
-                where history1.created_date = (select max(history2.created_date) from m_provisioning_history history2
-                where history2.journal_entry_created='1')\s""";
-
-        @Override
-        public ProvisioningEntryData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Long id = rs.getLong("id");
-            Date createdDate = rs.getDate("created_date");
-            Long createdBy = null;
-            String createdName = null;
-            Long modifiedBy = null;
-            String modifiedName = null;
-            BigDecimal totalReservedAmount = null;
-            LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
-            return new ProvisioningEntryData().setId(id).setJournalEntry(Boolean.TRUE).setCreatedById(createdBy).setCreatedUser(createdName)
-                    .setCreatedDate(createdLocalDate).setModifiedById(modifiedBy).setModifiedUser(modifiedName)
-                    .setReservedAmount(totalReservedAmount);
-        }
-
-        private String schema() {
-            return PROVISIONING_ENTRY_ID_DATE_SCHEMA;
-        }
+        final QMProvisioningHistory postedHistory = new QMProvisioningHistory("postedHistory");
+        return DataAccessUtils.singleResult(this.queryFactory.select(new ProvisioningEntryIdDateProjection(mProvisioningHistory))
+                .from(mProvisioningHistory)
+                .where(mProvisioningHistory.createdDate
+                        .eq(select(postedHistory.createdDate.max()).from(postedHistory).where(postedHistory.journalEntryCreated.isTrue())))
+                .fetch());
     }
 
     @Override
