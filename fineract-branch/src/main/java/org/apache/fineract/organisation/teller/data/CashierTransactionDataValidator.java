@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.organisation.teller.data;
 
+import com.querydsl.sql.SQLQueryFactory;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -43,26 +43,26 @@ import org.apache.fineract.organisation.teller.exception.CashierDateRangeOutOfTe
 import org.apache.fineract.organisation.teller.exception.CashierInsufficientAmountException;
 import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
+import org.apache.fineract.query.QMCashiers;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CashierTransactionDataValidator {
 
     private final TellerManagementReadPlatformService tellerManagementReadPlatformService;
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final SQLQueryFactory queryFactory;
     private static final Logger LOG = LoggerFactory.getLogger(CashierTransactionDataValidator.class);
 
     @Autowired
     public CashierTransactionDataValidator(final TellerManagementReadPlatformService tellerManagementReadPlatformService,
-            final NamedParameterJdbcTemplate jdbcTemplate) {
+            final SQLQueryFactory queryFactory) {
         this.tellerManagementReadPlatformService = tellerManagementReadPlatformService;
-        this.jdbcTemplate = jdbcTemplate;
+        this.queryFactory = queryFactory;
     }
 
     public void validateSettleCashAndCashOutTransactions(final Long cashierId, String currencyCode, final BigDecimal transactionAmount) {
@@ -143,18 +143,17 @@ public class CashierTransactionDataValidator {
      * updated, or of the loan being disbursed).
      */
     private List<Cashier> findCashiersOfStaff(final Long staffId, final LocalDate fromDate, final LocalDate toDate) {
-        final String sql = "SELECT c.id, c.full_day, c.start_time, c.end_time FROM m_cashiers c WHERE c.staff_id = :staffId "
-                + "AND c.start_date <= :toDate AND c.end_date >= :fromDate";
-        final Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("staffId", staffId);
-        paramMap.put("fromDate", fromDate);
-        paramMap.put("toDate", toDate);
-        return jdbcTemplate.query(sql, paramMap, (rs, rowNum) -> {
-            final Cashier cashier = new Cashier().setIsFullDay(rs.getBoolean("full_day")).setStartTime(rs.getString("start_time"))
-                    .setEndTime(rs.getString("end_time"));
-            cashier.setId(rs.getLong("id"));
-            return cashier;
-        });
+        final QMCashiers cashiers = new QMCashiers("c");
+        return queryFactory.select(cashiers.id, cashiers.fullDay, cashiers.startTime, cashiers.endTime).from(cashiers)
+                .where(cashiers.staffId.eq(staffId), cashiers.startDate.loe(Date.valueOf(toDate)),
+                        cashiers.endDate.goe(Date.valueOf(fromDate)))
+                .fetch().stream().map(row -> {
+                    // A NULL full_day flag reads as false, as it did with ResultSet.getBoolean
+                    final Cashier cashier = new Cashier().setIsFullDay(Boolean.TRUE.equals(row.get(cashiers.fullDay)))
+                            .setStartTime(row.get(cashiers.startTime)).setEndTime(row.get(cashiers.endTime));
+                    cashier.setId(row.get(cashiers.id));
+                    return cashier;
+                }).toList();
     }
 
     private static boolean isFullDay(final Cashier cashier) {
