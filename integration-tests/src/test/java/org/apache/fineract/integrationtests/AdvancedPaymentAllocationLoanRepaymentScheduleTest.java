@@ -50,7 +50,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.LoanProduct;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
@@ -5060,7 +5059,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
+                    .repaymentStartDateType(2)//
                     .enableDownPayment(false)//
                     .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(null)//
@@ -5176,7 +5175,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
+                    .repaymentStartDateType(2)//
                     .enableDownPayment(false)//
                     .allowPartialPeriodInterestCalculation(null)//
                     .enableAutoRepaymentForDownPayment(null)//
@@ -5906,7 +5905,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                     .repaymentFrequencyType(2L)//
                     .chargeOffBehaviour("ZERO_INTEREST")//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
+                    .repaymentStartDateType(2)//
                     .enableDownPayment(false)//
                     .enableAccrualActivityPosting(true)//
                     .allowPartialPeriodInterestCalculation(null)//
@@ -6048,7 +6047,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                         .repaymentFrequencyType(2L)//
                         .chargeOffBehaviour("ZERO_INTEREST")//
                         .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                        .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
+                        .repaymentStartDateType(2)//
                         .enableDownPayment(false)//
                         .enableAccrualActivityPosting(true)//
                         .allowPartialPeriodInterestCalculation(null)//
