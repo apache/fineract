@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -51,6 +52,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -477,6 +479,68 @@ public class TellerWritePlatformServiceJpaImplTest {
             assertNotNull(result);
             assertEquals(1L, result.getCommandId());
             assertEquals(1L, result.getResourceId());
+        }
+    }
+
+    @Nested
+    class CashierOfTheTeller {
+
+        private static final Long TELLER_ID = 1L;
+        private static final Long OTHER_TELLER_ID = 2L;
+        private static final Long CASHIER_ID = 3L;
+
+        private Cashier cashier;
+
+        @BeforeEach
+        void setUp() {
+            cashier = mock(Cashier.class);
+            when(cashierRepository.findById(CASHIER_ID)).thenReturn(Optional.of(cashier));
+            when(cashier.getTeller()).thenReturn(teller);
+            when(teller.getId()).thenReturn(TELLER_ID);
+        }
+
+        @Test
+        void allocateCashRejectsACashierOfAnotherTeller() {
+            when(command.entityId()).thenReturn(OTHER_TELLER_ID);
+
+            assertThrows(CashierNotFoundException.class, () -> underTest.allocateCashToCashier(CASHIER_ID, command));
+
+            verify(cashierTxnRepository, never()).save(any(CashierTransaction.class));
+        }
+
+        @Test
+        void settleCashRejectsACashierOfAnotherTellerBeforeValidatingTheBalance() {
+            when(command.entityId()).thenReturn(OTHER_TELLER_ID);
+
+            assertThrows(CashierNotFoundException.class, () -> underTest.settleCashFromCashier(CASHIER_ID, command));
+
+            verify(cashierTransactionDataValidator, never()).validateSettleCashAndCashOutTransactions(anyLong(), any(JsonCommand.class));
+            verify(cashierTxnRepository, never()).save(any(CashierTransaction.class));
+        }
+
+        @Test
+        void allocateCashRejectsATellerOutsideTheUserOfficeHierarchy() {
+            when(command.entityId()).thenReturn(TELLER_ID);
+            when(teller.getOffice()).thenReturn(office);
+            when(office.getHierarchy()).thenReturn(".2.");
+            doThrow(new NoAuthorizationException("not in scope")).when(context).validateAccessRights(".2.");
+
+            assertThrows(NoAuthorizationException.class, () -> underTest.allocateCashToCashier(CASHIER_ID, command));
+
+            verify(cashierTxnRepository, never()).save(any(CashierTransaction.class));
+        }
+
+        @Test
+        void deleteCashierAllocationRejectsACashierOfAnotherTeller() {
+            when(currentUser.getOffice()).thenReturn(office);
+            when(office.getId()).thenReturn(1L);
+            when(officeRepositoryWrapper.findOfficeHierarchy(anyLong())).thenReturn(office);
+            when(tellerRepositoryWrapper.findOneWithNotFoundDetection(OTHER_TELLER_ID)).thenReturn(teller);
+            when(teller.officeId()).thenReturn(1L);
+
+            assertThrows(CashierNotFoundException.class, () -> underTest.deleteCashierAllocation(OTHER_TELLER_ID, CASHIER_ID, command));
+
+            verify(cashierRepository, never()).delete(any(Cashier.class));
         }
     }
 
