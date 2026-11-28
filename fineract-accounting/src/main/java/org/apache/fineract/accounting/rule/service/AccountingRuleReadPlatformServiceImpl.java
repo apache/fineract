@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.accounting.rule.service;
 
+import static org.apache.fineract.query.QAccAccountingRule.accAccountingRule;
+import static org.apache.fineract.query.QAccRuleTags.accRuleTags;
+import static org.apache.fineract.query.QMCodeValue.mCodeValue;
+
+import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,38 +31,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.accounting.rule.data.AccountingRuleData;
 import org.apache.fineract.accounting.rule.data.AccountingTagRuleData;
+import org.apache.fineract.accounting.rule.domain.AccountingTagRuleProjection;
 import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundException;
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleReadPlatformService {
 
     protected final JdbcTemplate jdbcTemplate;
     protected final GLAccountReadPlatformService glAccountReadPlatformService;
+    private final SQLQueryFactory queryFactory;
 
     private static final class AccountingRuleDataExtractor implements ResultSetExtractor<Map<Long, AccountingRuleData>> {
 
         private final String schemaSql;
-        private final JdbcTemplate jdbcTemplate;
+        private final SQLQueryFactory queryFactory;
         private final GLAccountReadPlatformService glAccountReadPlatformService;
         private final boolean isAssociationParametersExists;
 
-        AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate, final GLAccountReadPlatformService glAccountReadPlatformService,
+        AccountingRuleDataExtractor(final SQLQueryFactory queryFactory, final GLAccountReadPlatformService glAccountReadPlatformService,
                 final boolean isAssociationParametersExists) {
-            this.jdbcTemplate = jdbcTemplate;
+            this.queryFactory = queryFactory;
             this.glAccountReadPlatformService = glAccountReadPlatformService;
             this.isAssociationParametersExists = isAssociationParametersExists;
             final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -139,18 +143,19 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             return extractedData;
         }
 
-        private List<AccountingTagRuleData> getCreditOrDebitTags(final Long creditOrDebitAccount, final Integer transactionType) {
-            final AccountingTagRuleDataMapper mapper = new AccountingTagRuleDataMapper();
-            final String taggedAccountsSchema = "Select " + mapper.taggedAccountSchema() + " where rule.id = ? and tag.acc_type_enum=?";
-            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[] { creditOrDebitAccount, transactionType }); // NOSONAR
+        private List<AccountingTagRuleData> getCreditOrDebitTags(final Long accountingRuleId, final Integer transactionType) {
+            return queryFactory.select(new AccountingTagRuleProjection()).from(mCodeValue).innerJoin(accRuleTags)
+                    .on(accRuleTags.tagId.eq(mCodeValue.id)).innerJoin(accAccountingRule).on(accRuleTags.accRuleId.eq(accAccountingRule.id))
+                    .where(accAccountingRule.id.eq(accountingRuleId), accRuleTags.accTypeEnum.eq(transactionType)).fetch();
         }
 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AccountingRuleData> retrieveAllAccountingRules(final String hierarchySearchString,
             final boolean isAssociationParametersExists) {
-        final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
+        final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.queryFactory,
                 this.glAccountReadPlatformService, isAssociationParametersExists);
         Object[] arguments = new Object[] {};
         String sql = "select " + resultSetExtractor.schema() + " and system_defined=false ";
@@ -164,9 +169,10 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AccountingRuleData retrieveAccountingRuleById(final Long accountingRuleId) {
         try {
-            final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
+            final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.queryFactory,
                     this.glAccountReadPlatformService, false);
             final String sql = "select " + resultSetExtractor.schema() + " and rule.id = ?";
 
@@ -180,25 +186,5 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountingRuleNotFoundException(accountingRuleId, e);
         }
-    }
-
-    private static final class AccountingTagRuleDataMapper implements RowMapper<AccountingTagRuleData> {
-
-        private String taggedAccountSchema() {
-            return " tag.id as id,tag.tag_id as tagId, tag.acc_type_enum as transactionType, cv.code_value as tagName from m_code_value cv join acc_rule_tags tag on tag.tag_id=cv.id "
-                    + "join acc_accounting_rule rule on tag.acc_rule_id=rule.id ";
-        }
-
-        @Override
-        public AccountingTagRuleData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = rs.getLong("id");
-            final Long tagId = rs.getLong("tagId");
-            final Integer transactionType = JdbcSupport.getInteger(rs, "transactionType");
-            final String tagName = rs.getString("tagName");
-            final CodeValueData tag = CodeValueData.instance(tagId, tagName);
-            final EnumOptionData transactionTypeEnum = AccountingEnumerations.journalEntryType(transactionType);
-            return new AccountingTagRuleData().setId(id).setTag(tag).setTransactionType(transactionTypeEnum);
-        }
-
     }
 }
