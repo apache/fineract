@@ -22,9 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +51,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 /**
  * Runs the QueryDSL queries of {@link ProvisioningEntriesReadPlatformServiceImpl} through a real
@@ -62,15 +59,18 @@ import org.springframework.jdbc.core.RowMapper;
  */
 class ProvisioningEntriesReadPlatformServiceImplTest {
 
-    private static final String SELECT_SQL = """
+    private static final String HISTORY_SQL = """
             select m_provisioning_history.id, m_provisioning_history.journal_entry_created, m_provisioning_history.createdby_id, \
             m_provisioning_history.created_date, created.username, m_provisioning_history.lastmodifiedby_id, modified.username
             from m_provisioning_history m_provisioning_history
             left join m_appuser created
             on created.id = m_provisioning_history.createdby_id
             left join m_appuser modified
-            on modified.id = m_provisioning_history.lastmodifiedby_id
-            order by m_provisioning_history.created_date asc""";
+            on modified.id = m_provisioning_history.lastmodifiedby_id""";
+
+    private static final String SELECT_SQL = HISTORY_SQL + "\norder by m_provisioning_history.created_date asc";
+
+    private static final String HISTORY_BY_ID_SQL = HISTORY_SQL + "\nwhere m_provisioning_history.id = ?";
 
     private static final String COUNT_SQL = "select count(*)\nfrom m_provisioning_history m_provisioning_history";
 
@@ -93,6 +93,7 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
 
     private final Connection connection = mock(Connection.class);
     private final PreparedStatement statement = mock(PreparedStatement.class);
+    private final PreparedStatement historyStatement = mock(PreparedStatement.class);
     private final List<String> executedSql = new ArrayList<>();
     private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
@@ -197,20 +198,19 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
 
     @Test
     void retrieveProvisioningEntryDataByCriteriaIdMapsAllFieldsOnPostgreSQL() throws SQLException {
-        Object[] row = new Object[] { 100L, 1L, "Head Office", "USD", 2L, "Personal Loan", 3L, "Standard", 15L,
+        final Object[] row = new Object[] { 100L, 1L, "Head Office", "USD", 2L, "Personal Loan", 3L, "Standard", 15L,
                 new BigDecimal("500.000000"), 20L, "2000", "Provision Liability", 30L, "5000", "Provision Expense", 10L };
-        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build(), row);
+        final ProvisioningEntriesReadPlatformService service = serviceForCriteriaLookup(PostgreSQLTemplates.builder().build(),
+                new Object[] { 100L, true, 10L, Date.valueOf("2026-11-10"), "mifos", 11L, "admin" }, row);
 
-        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(100L))).thenReturn(new ProvisioningEntryData().setId(100L));
-
-        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(10L);
+        final ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(10L);
 
         assertNotNull(result);
         assertEquals(100L, result.getId());
         assertNotNull(result.getProvisioningEntries());
         assertEquals(1, result.getProvisioningEntries().size());
 
-        LoanProductProvisioningEntryData entryData = result.getProvisioningEntries().iterator().next();
+        final LoanProductProvisioningEntryData entryData = result.getProvisioningEntries().iterator().next();
         assertEquals(100L, entryData.getHistoryId());
         assertEquals(1L, entryData.getOfficeId());
         assertEquals("Head Office", entryData.getOfficeName());
@@ -229,49 +229,49 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
         assertEquals("Provision Expense", entryData.getExpenseAccountName());
         assertEquals(10L, entryData.getCriteriaId());
 
-        assertEquals(EXPECTED_SQL, executedSql.get(0));
+        assertEquals(List.of(EXPECTED_SQL, HISTORY_BY_ID_SQL), executedSql);
         verify(statement).setLong(1, 10L);
+        verify(historyStatement).setLong(1, 100L);
     }
 
     @Test
     void retrieveProvisioningEntryDataByCriteriaIdMapsAllFieldsOnMySQL() throws SQLException {
-        Object[] row = new Object[] { 101L, 2L, "Regional Branch", "EUR", 5L, "Auto Loan", 4L, "Substandard", 30L,
+        final Object[] row = new Object[] { 101L, 2L, "Regional Branch", "EUR", 5L, "Auto Loan", 4L, "Substandard", 30L,
                 new BigDecimal("750.500000"), 25L, "2100", "Auto Liability", 35L, "5100", "Auto Expense", 20L };
-        ProvisioningEntriesReadPlatformService service = service(MySQLTemplates.builder().build(), row);
+        final ProvisioningEntriesReadPlatformService service = serviceForCriteriaLookup(MySQLTemplates.builder().build(),
+                new Object[] { 101L, true, 10L, Date.valueOf("2026-11-10"), "mifos", 11L, "admin" }, row);
 
-        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(101L))).thenReturn(new ProvisioningEntryData().setId(101L));
-
-        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(20L);
+        final ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(20L);
 
         assertNotNull(result);
         assertEquals(101L, result.getId());
-        assertEquals(EXPECTED_SQL, executedSql.get(0));
+        assertEquals(List.of(EXPECTED_SQL, HISTORY_BY_ID_SQL), executedSql);
         verify(statement).setLong(1, 20L);
+        verify(historyStatement).setLong(1, 101L);
     }
 
     @Test
     void retrieveProvisioningEntryDataByCriteriaIdReturnsNullWhenNoEntriesFound() throws SQLException {
-        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build());
+        final ProvisioningEntriesReadPlatformService service = serviceForCriteriaLookup(PostgreSQLTemplates.builder().build(), null);
 
-        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(999L);
+        final ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(999L);
 
         assertNull(result);
-        assertEquals(EXPECTED_SQL, executedSql.get(0));
+        assertEquals(List.of(EXPECTED_SQL), executedSql);
         verify(statement).setLong(1, 999L);
     }
 
     @Test
     void retrieveProvisioningEntryDataByCriteriaIdKeepsNullableFieldsNull() throws SQLException {
-        Object[] row = new Object[] { 200L, null, null, "USD", null, null, null, null, null, null, null, null, null, null, null, null,
+        final Object[] row = new Object[] { 200L, null, null, "USD", null, null, null, null, null, null, null, null, null, null, null, null,
                 50L };
-        ProvisioningEntriesReadPlatformService service = service(PostgreSQLTemplates.builder().build(), row);
+        final ProvisioningEntriesReadPlatformService service = serviceForCriteriaLookup(PostgreSQLTemplates.builder().build(),
+                new Object[] { 200L, null, null, null, null, null, null }, row);
 
-        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(200L))).thenReturn(new ProvisioningEntryData().setId(200L));
-
-        ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(50L);
+        final ProvisioningEntryData result = service.retrieveProvisioningEntryDataByCriteriaId(50L);
 
         assertNotNull(result);
-        LoanProductProvisioningEntryData entryData = result.getProvisioningEntries().iterator().next();
+        final LoanProductProvisioningEntryData entryData = result.getProvisioningEntries().iterator().next();
         assertEquals(200L, entryData.getHistoryId());
         assertNull(entryData.getOfficeId());
         assertNull(entryData.getOfficeName());
@@ -305,12 +305,14 @@ class ProvisioningEntriesReadPlatformServiceImplTest {
                 mock(DatabaseSpecificSQLGenerator.class), new SQLQueryFactory(new Configuration(templates), () -> connection));
     }
 
-    private ProvisioningEntriesReadPlatformService service(SQLTemplates templates, Object[]... rows) throws SQLException {
+    private ProvisioningEntriesReadPlatformService serviceForCriteriaLookup(final SQLTemplates templates, final Object[] history,
+            final Object[]... rows) throws SQLException {
         when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
             executedSql.add(invocation.getArgument(0));
-            return statement;
+            return executedSql.size() == 1 ? statement : historyStatement;
         });
-        when(statement.executeQuery()).thenReturn(resultSet(rows));
+        when(statement.executeQuery()).thenAnswer(invocation -> resultSet(rows));
+        when(historyStatement.executeQuery()).thenAnswer(invocation -> history == null ? resultSet() : resultSet(history));
 
         return new ProvisioningEntriesReadPlatformServiceImpl(jdbcTemplate, mock(PaginationHelper.class),
                 mock(DatabaseSpecificSQLGenerator.class), new SQLQueryFactory(new Configuration(templates), () -> connection));

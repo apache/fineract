@@ -51,6 +51,7 @@ import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningE
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningDataProjection;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntryProjection;
+import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntryProjection;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -64,6 +65,7 @@ import org.apache.fineract.query.QMProductLoan;
 import org.apache.fineract.query.QMProvisionCategory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -272,29 +274,31 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     }
 
     @Override
-    public ProvisioningEntryData retrieveProvisioningEntryDataByCriteriaId(Long criteriaId) {
-        ProvisioningEntryData data = null;
-        QMLoanproductProvisioningEntry entry = new QMLoanproductProvisioningEntry("entry");
-        QMOffice office = new QMOffice("office");
-        QMProductLoan product = new QMProductLoan("product");
-        QMProvisionCategory category = new QMProvisionCategory("category");
-        QAccGlAccount liability = new QAccGlAccount("liability");
-        QAccGlAccount expense = new QAccGlAccount("expense");
+    public ProvisioningEntryData retrieveProvisioningEntryDataByCriteriaId(final Long criteriaId) {
+        final QMLoanproductProvisioningEntry entry = new QMLoanproductProvisioningEntry("entry");
+        final QMOffice office = new QMOffice("office");
+        final QMProductLoan product = new QMProductLoan("product");
+        final QMProvisionCategory category = new QMProvisionCategory("category");
+        final QAccGlAccount liability = new QAccGlAccount("liability");
+        final QAccGlAccount expense = new QAccGlAccount("expense");
 
-        List<LoanProductProvisioningEntryData> entries = this.queryFactory
+        final List<LoanProductProvisioningEntryData> entries = this.queryFactory
                 .select(new LoanProductProvisioningEntryProjection(entry, office, product, category, liability, expense)).from(entry)
                 .leftJoin(office).on(office.id.eq(entry.officeId)).leftJoin(product).on(product.id.eq(entry.productId)).leftJoin(category)
                 .on(category.id.eq(entry.categoryId)).leftJoin(liability).on(liability.id.eq(entry.liabilityAccount)).leftJoin(expense)
                 .on(expense.id.eq(entry.expenseAccount)).where(entry.criteriaId.eq(criteriaId)).fetch();
 
-        if (entries != null && !entries.isEmpty()) {
-            Long entryId = entries.get(0).getHistoryId();
-            ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
-            final String sql1 = "select " + mapper1.getSchema() + " where entry.id = ?";
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, entryId); // NOSONAR
-            data.setProvisioningEntries(entries);
+        if (entries.isEmpty()) {
+            return null;
         }
-        return data;
+
+        final Long historyId = entries.getFirst().getHistoryId();
+        final QMAppuser created = new QMAppuser("created");
+        final QMAppuser modified = new QMAppuser("modified");
+        final List<ProvisioningEntryData> history = queryFactory.select(new ProvisioningEntryProjection(created, modified))
+                .from(mProvisioningHistory).leftJoin(created).on(created.id.eq(mProvisioningHistory.createdbyId)).leftJoin(modified)
+                .on(modified.id.eq(mProvisioningHistory.lastmodifiedbyId)).where(mProvisioningHistory.id.eq(historyId)).fetch();
+        return DataAccessUtils.requiredSingleResult(history).setProvisioningEntries(entries);
     }
 
     @Override
