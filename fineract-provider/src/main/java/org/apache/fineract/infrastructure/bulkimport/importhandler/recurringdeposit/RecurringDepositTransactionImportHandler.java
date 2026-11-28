@@ -34,10 +34,12 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.SavingsAccountTransactionEnumValueSerialiser;
+import org.apache.fineract.infrastructure.bulkimport.importhandler.savings.SavingsTransactionClientCheck;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -54,10 +56,13 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTransactionImportHandler.class);
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
 
     @Autowired
-    public RecurringDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public RecurringDepositTransactionImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
     }
 
     @Override
@@ -124,6 +129,8 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
 
         for (SavingsAccountTransactionData transaction : savingsTransactions) {
             try {
+                SavingsTransactionClientCheck.requireAccountOfClient(savingsTransactionSheet.getRow(transaction.getRowIndex()),
+                        transaction.getSavingsAccountId(), savingsAccountRepositoryWrapper);
                 JsonObject savingsTransactionJsonob = gsonBuilder.create().toJsonTree(transaction).getAsJsonObject();
                 savingsTransactionJsonob.remove("transactionType");
                 savingsTransactionJsonob.remove("reversed");
