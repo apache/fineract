@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -50,6 +52,7 @@ public class AdjustChargeCommandStrategy implements CommandStrategy {
      * Loan charges api resource {@link LoanChargesApiResource}.
      */
     private final LoanChargesApiResource loanChargesApiResource;
+    private final DefaultToApiJsonSerializer<CommandProcessingResult> toApiJsonSerializer;
 
     @Override
     public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
@@ -88,7 +91,8 @@ public class AdjustChargeCommandStrategy implements CommandStrategy {
         }
 
         // Calls 'executeLoanCharge' function from 'loanChargesApiResource'
-        responseBody = loanChargesApiResource.executeLoanCharge(loanId, loanChargeId, command, request.getBody());
+        responseBody = toApiJsonSerializer
+                .serialize(loanChargesApiResource.executeLoanCharge(loanId, loanChargeId, command, request.getBody()));
 
         response.setStatusCode(HttpStatus.SC_OK);
 
