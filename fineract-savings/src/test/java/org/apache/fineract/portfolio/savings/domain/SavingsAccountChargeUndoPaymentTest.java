@@ -31,7 +31,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -41,7 +40,6 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -336,11 +334,7 @@ class SavingsAccountChargeUndoPaymentTest {
         when(chargeDefinition.feeInterval()).thenReturn(1);
         final SavingsAccount savingsAccount = mock(SavingsAccount.class);
         when(savingsAccount.getCurrency()).thenReturn(currency);
-        final JsonCommand command = mock(JsonCommand.class);
-        when(command.bigDecimalValueOfParameterNamed(SavingsApiConstants.amountParamName)).thenReturn(FEE);
-        when(command.localDateValueOfParameterNamed(SavingsApiConstants.dueAsOfDateParamName)).thenReturn(DUE_DATE);
-        when(command.integerValueOfParameterNamed(SavingsApiConstants.feeIntervalParamName)).thenReturn(1);
-        return SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
+        return SavingsAccountCharge.createNew(savingsAccount, chargeDefinition, FEE, DUE_DATE, null, 1);
     }
 
     private Money money(final String amount) {
