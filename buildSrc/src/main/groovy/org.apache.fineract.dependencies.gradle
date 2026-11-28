@@ -25,6 +25,9 @@ ext['jackson-2-bom.version'] = '2.22.4'
 ext['jackson-bom.version'] = '3.1.8'
 ext['log4j2.version'] = '2.25.5'
 ext['httpclient5.version'] = '5.6.4'
+// Cucumber 8's junit-platform-engine is built against JUnit 6.1, newer than the 6.0 line in the Spring Boot BOM.
+// Keep in step with the org.junit:junit-bom import below.
+ext['junit-jupiter.version'] = '6.1.3'
 
 // Configuration for the dependency management plugin
 // https://github.com/spring-gradle-plugins/dependency-management-plugin
@@ -37,9 +40,9 @@ dependencyManagement {
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:4.0.2'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.62.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.3.21'
-        mavenBom 'org.junit:junit-bom:6.0.3'
+        mavenBom 'org.junit:junit-bom:6.1.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.22.4'
-        mavenBom 'io.cucumber:cucumber-bom:7.34.3'
+        mavenBom 'io.cucumber:cucumber-bom:8.1.0'
         mavenBom 'org.mockito:mockito-bom:5.23.0'
         mavenBom 'software.amazon.awssdk:bom:2.44.4'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.4.0'
@@ -241,12 +244,9 @@ dependencyManagement {
             entry 'sshd-core'
         }
 
-        dependencySet(group: 'io.cucumber', version: '7.34.3') {
-            entry 'cucumber-java'
-            entry 'cucumber-java8'
-            entry 'cucumber-junit-platform-engine'
-            entry 'cucumber-spring'
-        }
+        // The Allure Gradle plugin only knows adapters up to allure-cucumber7-jvm (allure-java 2.x);
+        // the Cucumber 8 adapter exists only in allure-java 3.x, so it is declared and versioned here.
+        dependency 'io.qameta.allure:allure-cucumber8-jvm:3.1.1'
 
         dependency 'org.reflections:reflections:0.10.2'
 
