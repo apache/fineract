@@ -23,7 +23,7 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "REFUNDBYCASH")
 public class LoanRefundByCashCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+    private final LoanTransactionWritePlatformService writePlatformService;
 
     @Transactional
     @Override

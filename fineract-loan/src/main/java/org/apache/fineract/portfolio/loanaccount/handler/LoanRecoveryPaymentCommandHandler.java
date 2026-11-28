@@ -24,7 +24,7 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionWritePlatformService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "RECOVERYPAYMENT")
 public class LoanRecoveryPaymentCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+    private final LoanTransactionWritePlatformService writePlatformService;
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
