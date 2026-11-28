@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.models.ApiResponse;
-import org.apache.fineract.client.models.BusinessDateResponse;
-import org.apache.fineract.client.models.BusinessDateResponse.TypeEnum;
+import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.JobExecuteRequest;
 import org.apache.fineract.client.models.JobExecuteResponse;
 import org.apache.fineract.client.models.JobParameterDTO;
@@ -40,32 +39,42 @@ import org.apache.fineract.client.models.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+// Runs early in its shard, before other test classes leave savings accounts behind for the COB jobs to process.
+@Order(1)
 class FeignSavingsCobLockLookupTest extends FeignSavingsTestBase {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH);
+
+    // The catch-up run picks the accounts whose last COB date is the day before its own. Fixed dates keep that to the
+    // account this test brought to SEED_COB_DATE.
+    private static final LocalDate ACTIVATION_DATE = LocalDate.of(2025, 2, 17);
+    private static final LocalDate SEED_COB_DATE = ACTIVATION_DATE.plusDays(1);
+    private static final LocalDate CATCH_UP_COB_DATE = SEED_COB_DATE.plusDays(1);
 
     private final List<Executable> savingsCleanups = new ArrayList<>();
 
     @Test
     void catchUpJobAdvancesAPreviouslyProcessedSavingsAccountAndSkipsANeverProcessedAccount() {
-        withPausedScheduler(() -> {
-            final LocalDate cobDate = getCobDate();
-            final LocalDate activationDate = cobDate.minusDays(2);
+        runAt(DATE_FORMAT.format(SEED_COB_DATE.plusDays(1)), () -> withPausedScheduler(() -> {
+            moveCobDateTo(SEED_COB_DATE);
             final Long productId = createDormancyTrackingProduct();
-            final Long previouslyProcessed = createSavingsAccount(productId, activationDate, cobDate);
-            executeCob(cobDate.minusDays(1), false);
+            final Long previouslyProcessed = createSavingsAccount(productId);
+            // Inline COB, not the batch job: a regular (not catch-up) batch run also processes every never-processed
+            // savings account that other test classes left active in the shared database, which can take minutes.
+            executeInlineCob(previouslyProcessed);
             assertSubStatus(previouslyProcessed, "SavingsAccountSubStatusEnum.inactive");
 
-            final Long neverProcessed = createSavingsAccount(productId, activationDate, cobDate);
-            executeCob(cobDate, true);
+            final Long neverProcessed = createSavingsAccount(productId);
+            moveCobDateTo(CATCH_UP_COB_DATE);
+            executeCatchUpCob(CATCH_UP_COB_DATE);
 
             assertSubStatus(previouslyProcessed, "SavingsAccountSubStatusEnum.dormant");
             assertSubStatus(neverProcessed, "SavingsAccountSubStatusEnum.none");
-        });
+        }));
     }
 
     private void withPausedScheduler(final Runnable scenario) {
@@ -83,19 +92,9 @@ class FeignSavingsCobLockLookupTest extends FeignSavingsTestBase {
         }
     }
 
-    private LocalDate getCobDate() {
-        if (!Boolean.TRUE.equals(globalConfigurationHelper.retrieveConfigurationByName("enable-business-date").getEnabled())) {
-            return Utils.getLocalDateOfTenant();
-        }
-        final List<BusinessDateResponse> dates = ok(() -> fineractClient().businessDateManagement().getBusinessDates());
-        final LocalDate businessDate = dateOrTenantDate(dates, TypeEnum.BUSINESS_DATE);
-        final LocalDate cobDate = dateOrTenantDate(dates, TypeEnum.COB_DATE);
-        return cobDate.isAfter(businessDate) ? businessDate : cobDate;
-    }
-
-    private LocalDate dateOrTenantDate(final List<BusinessDateResponse> dates, final TypeEnum type) {
-        return dates.stream().filter(date -> date.getType() == type && date.getDate() != null).map(BusinessDateResponse::getDate)
-                .findFirst().orElseGet(Utils::getLocalDateOfTenant);
+    private void moveCobDateTo(final LocalDate cobDate) {
+        businessDateHelper.updateBusinessDate("BUSINESS_DATE", DATE_FORMAT.format(cobDate.plusDays(1)), DATETIME_PATTERN);
+        businessDateHelper.updateBusinessDate("COB_DATE", DATE_FORMAT.format(cobDate), DATETIME_PATTERN);
     }
 
     private Long createDormancyTrackingProduct() {
@@ -105,26 +104,30 @@ class FeignSavingsCobLockLookupTest extends FeignSavingsTestBase {
         return productId;
     }
 
-    private Long createSavingsAccount(final Long productId, final LocalDate activationDate, final LocalDate cleanupDate) {
-        final String date = DATE_FORMAT.format(activationDate);
+    private Long createSavingsAccount(final Long productId) {
+        final String date = DATE_FORMAT.format(ACTIVATION_DATE);
         final Long clientId = createClient(date);
         assertNotNull(clientId);
         final Long savingsId = submitSavingsApplication(clientId, productId, date).getSavingsId();
         assertNotNull(savingsId);
-        savingsCleanups.add(() -> cleanupSavings(savingsId, cleanupDate));
+        // Valid in both phases of the test: the business date is never before CATCH_UP_COB_DATE.
+        savingsCleanups.add(() -> cleanupSavings(savingsId, CATCH_UP_COB_DATE));
         approveSavings(savingsId, date);
         activateSavings(savingsId, date);
         assertSubStatus(savingsId, "SavingsAccountSubStatusEnum.none");
         return savingsId;
     }
 
-    private void executeCob(final LocalDate cobDate, final boolean catchUp) {
+    private void executeInlineCob(final Long savingsId) {
+        ok(() -> fineractClient().inlineJob().executeInlineJob(JobName.SAVINGS_COB.name(),
+                new InlineJobRequest().savingsIds(List.of(savingsId))));
+    }
+
+    private void executeCatchUpCob(final LocalDate cobDate) {
         schedulerHelper.executeAndAwaitJob(JobName.SAVINGS_COB.toString(), job -> {
             final JobExecuteRequest request = new JobExecuteRequest()
-                    .addJobParametersItem(new JobParameterDTO().parameterName("BusinessDate").parameterValue(cobDate.toString()));
-            if (catchUp) {
-                request.addJobParametersItem(new JobParameterDTO().parameterName("IS_CATCH_UP").parameterValue("true"));
-            }
+                    .addJobParametersItem(new JobParameterDTO().parameterName("BusinessDate").parameterValue(cobDate.toString()))
+                    .addJobParametersItem(new JobParameterDTO().parameterName("IS_CATCH_UP").parameterValue("true"));
             final Long jobId = job.getJobId();
             assertNotNull(jobId);
             final ApiResponse<JobExecuteResponse> response = ok(

@@ -274,7 +274,7 @@ Feature: Working Capital Loan Credit Balance Refund
       | 400                | cannot.be.before.disbursal.date |
 
   @TestRailId:C76675
-  Scenario: Verify that a backdated credit balance refund is rejected
+  Scenario: Verify that a backdated credit balance refund dated after the last repayment is accepted
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -286,9 +286,14 @@ Feature: Working Capital Loan Credit Balance Refund
     And Customer makes repayment on "02 January 2026" with 9100.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "OVERPAID"
     When Admin sets the business date to "05 January 2026"
-    And Initiating a credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
-      | HTTP response code | Error message                                  |
-      | 400                | Backdated credit balance refund is not allowed |
+    And Customer makes credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "50.00"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment             | 9100.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Credit Balance Refund | 50.0              | 0.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C76676
   Scenario: Verify that a credit balance refund cannot be repeated after the loan has been closed via full refund
@@ -742,7 +747,7 @@ Feature: Working Capital Loan Credit Balance Refund
       | 15 January 2026 | Credit Balance Refund | 250.0             | 0.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85509
-  Scenario: Verify working capital loan credit balance refund backdated is rejected - UC6
+  Scenario: Verify working capital loan full backdated credit balance refund closes the loan on its own date - UC6
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -763,15 +768,25 @@ Feature: Working Capital Loan Credit Balance Refund
       | 02 January 2026 | Repayment    | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
-    Then Customer fails to make credit balance refund on "05 January 2026" with 200.0 EUR transaction amount backdated outcomes with error message
-    Then Working Capital loan status will be "OVERPAID"
+    # The refund is dated 05 January, so that is the day the loan closes - not the business date it was posted on
+    When Customer makes credit balance refund on "05 January 2026" with 200.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 9000.0    | 9000.0             | 0.0            | 0.0              | 200.0             |
+      | 9000.0    | 9000.0             | 0.0            | 0.0              | 0.0               |
+    And Working capital loan details has the following field values:
+      | overpaidOnDate              | null       |
+      | timeline.closedOnDate       | 2026-01-05 |
+      | timeline.actualMaturityDate | 2026-01-05 |
     And Working Capital Loan has transactions:
-      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment    | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment             | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Credit Balance Refund | 200.0             | 0.0              | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 200.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
   @TestRailId:C85510
   Scenario: Verify working capital loan credit balance refund within breach schedule with undo backdated repayment- UC7
@@ -1052,3 +1067,159 @@ Feature: Working Capital Loan Credit Balance Refund
       | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
 
+  @TestRailId:C127981
+  Scenario: Verify that a credit balance refund dated before the last repayment or credit balance refund is rejected
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 8950.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin sets the business date to "04 January 2026"
+    And Customer makes repayment on "04 January 2026" with 200.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "150.00"
+    When Admin sets the business date to "08 January 2026"
+# --- Before the last repayment ---
+    Then Initiating a credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                                  |
+      | 400                | cannot.be.before.last.repayment.or.refund.date |
+# --- Between the last repayment and the business date ---
+    When Customer makes credit balance refund on "05 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "100.00"
+# --- Before the last credit balance refund, though after the last repayment ---
+    Then Initiating a credit balance refund on "04 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                                  |
+      | 400                | cannot.be.before.last.repayment.or.refund.date |
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "100.00"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment             | 8950.0            | 8950.0           | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Repayment             | 200.0             | 50.0             | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Credit Balance Refund | 50.0              | 0.0              | 0.0               | 0.0                   | false    |
+# --- On the date of the last credit balance refund, refunding the rest ---
+    When Customer makes credit balance refund on "05 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2026-01-05 |
+      | timeline.actualMaturityDate | 2026-01-05 |
+
+  @TestRailId:C127982
+  Scenario: Verify that undoing a repayment before a backdated credit balance refund replays the refund and re-injects the over-refunded excess as principal
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "02 January 2026" with 200.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "05 January 2026" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "300.00"
+    When Admin sets the business date to "10 January 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    When Customer makes credit balance refund on "07 January 2026" with 300.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2026-01-07 |
+      | timeline.actualMaturityDate | 2026-01-07 |
+    And Customer undo "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan
+    # The replay leaves only 9000 repaid, so 200 of the 07 January refund loses its overpayment backing and becomes due principal
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "creditBalanceRefund" transaction on "07 January 2026" with principal portion changed from "0.0" to "200.0" and fee portion changed from "0.0" to "0.0"
+    And Working Capital loan status will be "ACTIVE"
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9200.0    | 9000.0             | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment             | 200.0             | 200.0            | 0.0               | 0.0                   | true     |
+      | 05 January 2026 | Repayment             | 9100.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 07 January 2026 | Credit Balance Refund | 300.0             | 200.0            | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C127997
+  Scenario: Verify backdated Working Capital credit balance refund - UC2: refund cannot be dated before the last goodwill credit or payout refund
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 8950.0 transaction amount on Working Capital loan
+    # --- Goodwill credit ---
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes "GOODWILL_CREDIT" transaction on "04 January 2026" with 200.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "150.00"
+    # --- Payout refund ---
+    When Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes "PAYOUT_REFUND" transaction on "06 January 2026" with 30.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    When Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- Credit balance refund before the goodwill credit ---
+    Then Initiating a credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                                  |
+      | 400                | cannot.be.before.last.repayment.or.refund.date |
+    # --- Credit balance refund between the goodwill credit and the payout refund ---
+    Then Initiating a credit balance refund on "05 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                                  |
+      | 400                | cannot.be.before.last.repayment.or.refund.date |
+    # --- Credit balance refund on the date of the payout refund ---
+    When Customer makes credit balance refund on "06 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "06 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 50.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 50.0   |
+
+  @TestRailId:C127998
+  Scenario: Verify backdated Working Capital credit balance refund - UC3: undoing a repayment before a partial backdated credit balance refund re-injects the over-refunded excess as principal
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "02 January 2026" with 200.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 January 2026" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "300.00"
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- Partial credit balance refund ---
+    And Customer makes credit balance refund on "07 January 2026" with 150.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "150.00"
+    # --- Undo transaction ---
+    And Customer undo "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "creditBalanceRefund" transaction on "07 January 2026" with principal portion changed from "0.0" to "50.0" and fee portion changed from "0.0" to "0.0"
+    And Working Capital loan status will be "ACTIVE"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment             | 200.0             | 200.0            | 0.0               | 0.0                   | true     |
+      | 05 January 2026 | Repayment             | 9100.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 07 January 2026 | Credit Balance Refund | 150.0             | 50.0             | 0.0               | 0.0                   | false    |

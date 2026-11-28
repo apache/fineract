@@ -703,6 +703,17 @@ Creates a repayment transaction. Required: `transactionDate`, `transactionAmount
 
 Creates a credit balance refund transaction for an overpaid loan. Required: `transactionDate`, `transactionAmount`.
 
+The refund can be backdated, with the same date rules as a term or progressive loan. The `transactionDate` must not be:
+
+* in the future
+* before the disbursement date
+* before the latest non-reversed repayment-like transaction, refund, credit balance refund or discount fee adjustment
+* before the charge-off date, if the loan is charged off
+* before the latest non-reversed charge accrual, so that a refund that closes the loan never leaves recognized income after the closing date
+* before the date the latest active charge was added, so that a refund that closes the loan never closes it before a charge it carries existed (this also holds on a product without accounting, which posts no accrual)
+
+A refund of the whole overpayment closes the loan, and the closing and maturity dates are the refund's `transactionDate`.
+
 === POST /v1/working-capital-loans/{loanId}/transactions?command=goodwillCredit
 
 Creates a goodwill credit transaction. Required: `transactionDate`, `transactionAmount`.

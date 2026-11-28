@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
@@ -61,6 +62,21 @@ public class WorkingCapitalLoanTransactionFinder {
 
     /** Repayment proper, as opposed to the wider {@link #PAYMENT_TYPES}. */
     private static final List<LoanTransactionType> REPAYMENT_TYPES = List.of(LoanTransactionType.REPAYMENT);
+
+    /**
+     * Transaction types a credit balance refund cannot be dated before: every payment-like type, a refund for an active
+     * loan, an earlier credit balance refund, and a discount-fee adjustment. Mirrors the filter of
+     * {@code Loan#possibleNextRefundDate()}; the discount-fee adjustment is the working capital counterpart of the
+     * capitalized income adjustment counted there - it pays principal down, so it can create the overpayment being
+     * refunded.
+     */
+    private static final List<LoanTransactionType> REFUND_DATE_FLOOR_TYPES = Stream
+            .concat(PAYMENT_TYPES.stream(), Stream.of(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, LoanTransactionType.CREDIT_BALANCE_REFUND,
+                    LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT))
+            .distinct().toList();
+
+    /** Charge accruals, the income a credit balance refund that closes the loan must not be dated before. */
+    private static final List<LoanTransactionType> ACCRUAL_TYPES = List.of(LoanTransactionType.ACCRUAL);
 
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
 
@@ -128,6 +144,25 @@ public class WorkingCapitalLoanTransactionFinder {
      */
     public Optional<TransactionDateAndAmountHolder> findLastRepayment(final Long loanId) {
         return findLastActiveTransactionOfTypes(loanId, REPAYMENT_TYPES);
+    }
+
+    /**
+     * Returns the date of the latest non-reversed payment-like transaction, refund for an active loan, credit balance
+     * refund or discount-fee adjustment, if any. A credit balance refund may be backdated, but not before this date.
+     * Mirrors {@code Loan#possibleNextRefundDate()}, except that an empty result means there is no such floor, rather
+     * than falling back to the business date.
+     */
+    public Optional<LocalDate> findLastRepaymentOrRefundDate(final WorkingCapitalLoan loan) {
+        return findLastActiveTransactionOfTypes(loan.getId(), REFUND_DATE_FLOOR_TYPES).map(TransactionDateAndAmountHolder::transactionDate);
+    }
+
+    /**
+     * Returns the date of the latest non-reversed charge accrual, if any. A credit balance refund that closes the loan
+     * sets the closing date to its own date, so it must not be dated before income the loan has already recognized:
+     * that accrual would then sit after the closing date.
+     */
+    public Optional<LocalDate> findLastAccrualDate(final WorkingCapitalLoan loan) {
+        return findLastActiveTransactionOfTypes(loan.getId(), ACCRUAL_TYPES).map(TransactionDateAndAmountHolder::transactionDate);
     }
 
     public BigDecimal sumPayments(final Long loanId) {

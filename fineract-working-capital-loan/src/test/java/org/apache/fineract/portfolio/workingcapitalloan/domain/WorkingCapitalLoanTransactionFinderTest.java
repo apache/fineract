@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,6 +78,41 @@ public class WorkingCapitalLoanTransactionFinderTest {
 
         verifyQueriedTypes();
         assertThat(typesCaptor.getValue()).containsExactly(LoanTransactionType.REPAYMENT);
+    }
+
+    @Test
+    public void findLastRepaymentOrRefundDate_countsPaymentsRefundsCreditBalanceRefundsAndDiscountFeeAdjustments() {
+        final WorkingCapitalLoan loan = mock(WorkingCapitalLoan.class);
+        when(loan.getId()).thenReturn(LOAN_ID);
+        final LocalDate lastRefundDate = LocalDate.of(2026, 1, 20);
+        when(transactionRepository.findActiveByTypesOrderByDateDesc(eq(LOAN_ID), anyList(), any()))
+                .thenReturn(List.of(new TransactionDateAndAmountHolder(lastRefundDate, new BigDecimal("30.00"))));
+
+        assertThat(finder.findLastRepaymentOrRefundDate(loan)).contains(lastRefundDate);
+
+        verifyQueriedTypes();
+        assertThat(typesCaptor.getValue()).contains(LoanTransactionType.REPAYMENT, LoanTransactionType.GOODWILL_CREDIT,
+                LoanTransactionType.PAYOUT_REFUND, LoanTransactionType.CHARGE_ADJUSTMENT, LoanTransactionType.REFUND_FOR_ACTIVE_LOAN,
+                LoanTransactionType.CREDIT_BALANCE_REFUND, LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT);
+        // System postings and a charge-off do not move the refund date floor.
+        assertThat(typesCaptor.getValue()).doesNotContain(LoanTransactionType.ACCRUAL, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION,
+                LoanTransactionType.CHARGE_OFF, LoanTransactionType.DISBURSEMENT);
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
+    }
+
+    @Test
+    public void findLastAccrualDate_countsOnlyChargeAccruals() {
+        final WorkingCapitalLoan loan = mock(WorkingCapitalLoan.class);
+        when(loan.getId()).thenReturn(LOAN_ID);
+        final LocalDate lastAccrualDate = LocalDate.of(2026, 1, 25);
+        when(transactionRepository.findActiveByTypesOrderByDateDesc(eq(LOAN_ID), anyList(), any()))
+                .thenReturn(List.of(new TransactionDateAndAmountHolder(lastAccrualDate, new BigDecimal("40.00"))));
+
+        assertThat(finder.findLastAccrualDate(loan)).contains(lastAccrualDate);
+
+        verifyQueriedTypes();
+        assertThat(typesCaptor.getValue()).containsExactly(LoanTransactionType.ACCRUAL);
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
     }
 
     @Test

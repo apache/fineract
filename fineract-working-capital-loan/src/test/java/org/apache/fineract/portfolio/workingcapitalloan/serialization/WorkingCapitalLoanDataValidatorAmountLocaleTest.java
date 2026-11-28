@@ -77,7 +77,7 @@ class WorkingCapitalLoanDataValidatorAmountLocaleTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null, null);
 
         final WorkingCapitalLoanBalance balance = WorkingCapitalLoanBalance.createFor(loan);
         balance.setPrincipalWrittenOff(new BigDecimal("100"));

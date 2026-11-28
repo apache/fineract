@@ -928,6 +928,113 @@ Feature: Working Capital Loan Charge Accrual
     And Customer makes credit balance refund on "05 September 2028" with 60.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
+  @TestRailId:C127979
+  Scenario: Verify Working Capital - a backdated full credit balance refund closes the loan on its own date without a second closure accrual
+    Given Admin sets the business date to "01 September 2028"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate    | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 September 2028  | 01 September 2028        | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "eod"
+    And Admin sets the business date to "05 September 2028"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- Overpay the loan, then add a fee that the overpayment settles: its income is recognized via the closure path ---
+    And Customer makes repayment on "05 September 2028" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 September 2028" due date and 40.0 transaction amount
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "60.00"
+    # --- Refund the remaining overpayment, backdated between the last repayment and the business date ---
+    When Admin sets the business date to "10 September 2028"
+    And Customer makes credit balance refund on "07 September 2028" with 60.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2028-09-07 |
+      | timeline.actualMaturityDate | 2028-09-07 |
+    # The fee was already accrued when the overpayment settled it, so closing the loan posts no further accrual
+    And Working Capital Loan has transactions:
+      | transactionDate     | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 September 2028   | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 September 2028   | Repayment             | 9100.0            | 9000.0           | 40.0              | 0.0                   | false    |
+      | 05 September 2028   | Accrual               | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+      | 07 September 2028   | Credit Balance Refund | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CREDIT_BALANCE_REFUND" transaction with date "07 September 2028" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 245000       | Other Credit Liability    | 60.0  |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 60.0   |
+
+  @TestRailId:C127994
+  Scenario: Verify Working Capital - a credit balance refund cannot be dated before a charge accrual posted after the last repayment
+    Given Admin sets the business date to "01 September 2028"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate    | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 September 2028  | 01 September 2028        | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "eod"
+    And Admin sets the business date to "05 September 2028"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 September 2028" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    # --- The fee is added on 08 September, so the overpayment settles it and its accrual is posted on that day ---
+    When Admin sets the business date to "08 September 2028"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 September 2028" due date and 40.0 transaction amount
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "60.00"
+    # --- A full refund dated before that accrual would close the loan with the accrual left after the closing date ---
+    When Admin sets the business date to "10 September 2028"
+    Then Initiating a credit balance refund on "07 September 2028" with 60.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                               |
+      | 400                | cannot.be.before.last.accrual.date          |
+      | 400                | cannot.be.before.last.charge.submitted.date |
+    Then Working Capital loan status will be "OVERPAID"
+    # --- Dated on the accrual date it is accepted, and the loan closes on that date ---
+    And Customer makes credit balance refund on "08 September 2028" with 60.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2028-09-08 |
+      | timeline.actualMaturityDate | 2028-09-08 |
+    And Working Capital Loan has transactions:
+      | transactionDate     | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 September 2028   | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 September 2028   | Repayment             | 9100.0            | 9000.0           | 40.0              | 0.0                   | false    |
+      | 08 September 2028   | Accrual               | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+      | 08 September 2028   | Credit Balance Refund | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C127995
+  Scenario: Verify Working Capital - a credit balance refund cannot be dated before a charge added after the last repayment when product accounting rule is NONE
+    Given Admin sets the business date to "01 September 2028"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate   | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 September 2028 | 01 September 2028        | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "eod"
+    And Admin sets the business date to "05 September 2028"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 September 2028" with 9100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    # --- The fee is added on 08 September; without accounting no accrual is posted for it ---
+    When Admin sets the business date to "08 September 2028"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 September 2028" due date and 40.0 transaction amount
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "60.00"
+    # --- A full refund dated before the charge was added would close the loan before the charge existed ---
+    When Admin sets the business date to "10 September 2028"
+    Then Initiating a credit balance refund on "07 September 2028" with 60.0 transaction amount on Working Capital loan results an error with the following data:
+      | HTTP response code | Error message                               |
+      | 400                | cannot.be.before.last.charge.submitted.date |
+    Then Working Capital loan status will be "OVERPAID"
+    # --- Dated on the day the charge was added it is accepted, and the loan closes on that date ---
+    And Customer makes credit balance refund on "08 September 2028" with 60.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan details has the following field values:
+      | timeline.closedOnDate       | 2028-09-08 |
+      | timeline.actualMaturityDate | 2028-09-08 |
+    And Working Capital Loan has transactions:
+      | transactionDate   | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 September 2028 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 September 2028 | Repayment             | 9100.0            | 9000.0           | 40.0              | 0.0                   | false    |
+      | 08 September 2028 | Credit Balance Refund | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+
   @TestRailId:C106707
   Scenario: Verify no accrual is created via the closure path when a charge is added to an overpaid Working Capital loan under real-time and submitted-date when product accounting rule is NONE
     Given Admin sets the business date to "01 September 2028"
