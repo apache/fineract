@@ -19,7 +19,6 @@
 
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -106,15 +105,23 @@ public class PaymentTypeIntegrationTest extends FeignIntegrationTest {
     }
 
     @Test
-    public void testUpdateViolatingNotNullConstraintIsDataIntegrityErrorNotNotFound() {
-        Long paymentTypeId = createPaymentType(false);
+    public void testUpdateWithOnlyNameAndDescriptionKeepsTheOtherFields() {
+        // The web app sends only these two fields for a system-defined payment type
+        String codeName = Utils.randomStringGenerator("PT_CODE_", 6);
+        Long paymentTypeId = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(Utils.randomStringGenerator("P_T", 5))
+                .description(Utils.randomStringGenerator("PT_Desc", 15)).isCashPayment(true).position(2L).codeName(codeName)
+                .isSystemDefined(true)).getResourceId();
         try {
-            // position is omitted, so the update writes NULL into the NOT NULL order_position column
-            CallFailedRuntimeException exception = fail(() -> fineractClient().paymentType().updatePaymentType(paymentTypeId,
-                    new PaymentTypeUpdateRequest().name(Utils.randomStringGenerator("P_TC", 5)).isSystemDefined(false)));
+            String newDescription = Utils.randomStringGenerator("PT_NewDesc", 15);
+            paymentTypeHelper.updatePaymentType(paymentTypeId, new PaymentTypeUpdateRequest()
+                    .name(paymentTypeHelper.retrievePaymentType(paymentTypeId).getName()).description(newDescription));
 
-            assertEquals(403, exception.getStatus());
-            assertEquals("error.msg.paymenttypes.unknown.data.integrity.issue", exception.getUserMessageGlobalisationCode());
+            PaymentTypeData updated = paymentTypeHelper.retrievePaymentType(paymentTypeId);
+            assertEquals(newDescription, updated.getDescription());
+            assertEquals(codeName, updated.getCodeName());
+            assertEquals(2L, updated.getPosition());
+            assertTrue(updated.getIsCashPayment());
+            assertTrue(updated.getIsSystemDefined());
         } finally {
             paymentTypeHelper.deletePaymentType(paymentTypeId);
         }
