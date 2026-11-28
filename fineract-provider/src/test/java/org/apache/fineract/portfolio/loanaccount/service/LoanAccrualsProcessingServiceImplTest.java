@@ -135,6 +135,8 @@ public class LoanAccrualsProcessingServiceImplTest {
     @Mock
     private LoanRepositoryWrapper loanRepositoryWrapper;
 
+    private LoanPeriodicAccrualServiceImpl loanPeriodicAccrualService;
+
     @BeforeEach
     void setUp() {
         when(loan.isClosed()).thenReturn(false);
@@ -147,6 +149,21 @@ public class LoanAccrualsProcessingServiceImplTest {
                 org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE, today,
                 org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.COB_DATE, today)));
         MoneyHelper.initializeTenantRoundingMode("test", 6);
+
+        LoanAccrualTransactionService loanAccrualTransactionService = new LoanAccrualTransactionServiceImpl(externalIdFactory,
+                businessEventNotifierService, configurationDomainService, loanTransactionRepository, loanChargePaidByRepository,
+                journalEntryPoster);
+        loanPeriodicAccrualService = new LoanPeriodicAccrualServiceImpl(externalIdFactory, businessEventNotifierService,
+                configurationDomainService, loanRepositoryWrapper, loanTransactionRepository, loanScheduleFactory, null, null,
+                loanChargeService, loanBalanceService, journalEntryPoster, loanAccrualTransactionService);
+        ReflectionTestUtils.setField(accrualsProcessingService, "loanAccrualTransactionService", loanAccrualTransactionService);
+        ReflectionTestUtils.setField(accrualsProcessingService, "loanPeriodicAccrualService", loanPeriodicAccrualService);
+        ReflectionTestUtils.setField(accrualsProcessingService, "loanAccrualReprocessingService",
+                new LoanAccrualReprocessingServiceImpl(businessEventNotifierService, configurationDomainService, loanTransactionRepository,
+                        loanChargeService, journalEntryPoster, loanAccrualTransactionService));
+        ReflectionTestUtils.setField(accrualsProcessingService, "loanIncomePostingService",
+                new LoanIncomePostingServiceImpl(businessEventNotifierService, configurationDomainService, loanRepositoryWrapper,
+                        loanTransactionRepository, loanBalanceService, journalEntryPoster, loanAccrualTransactionService));
     }
 
     @AfterEach
@@ -195,7 +212,7 @@ public class LoanAccrualsProcessingServiceImplTest {
         when(installment.getLoanTransactionToRepaymentScheduleMappings()).thenReturn(Set.of(nullTransactionMapping, interestWaiverMapping));
 
         // When
-        BigDecimal result = ReflectionTestUtils.invokeMethod(accrualsProcessingService, "calcInterestTransactionWaivedAmount", installment,
+        BigDecimal result = ReflectionTestUtils.invokeMethod(loanPeriodicAccrualService, "calcInterestTransactionWaivedAmount", installment,
                 tillDate);
 
         // Then
@@ -218,7 +235,7 @@ public class LoanAccrualsProcessingServiceImplTest {
         when(chargeWaiverTransaction.getTransactionDate()).thenReturn(tillDate);
 
         // When
-        BigDecimal result = ReflectionTestUtils.invokeMethod(accrualsProcessingService, "calcChargeWaivedAmount",
+        BigDecimal result = ReflectionTestUtils.invokeMethod(loanPeriodicAccrualService, "calcChargeWaivedAmount",
                 List.of(nullTransactionPaidBy, chargeWaiverPaidBy), tillDate);
 
         // Then
