@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.util.List;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.writer.AbstractCOBItemWriter;
@@ -29,12 +30,23 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanIntere
 public abstract class AbstractLoanItemWriter extends AbstractCOBItemWriter<Loan> {
 
     private final ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
+    private final LoanRepository loanRepository;
 
     protected AbstractLoanItemWriter(COBBusinessStepService cobBusinessStepService,
             ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService, LockingService loanLockingService,
             LoanRepository loanRepository) {
         super(cobBusinessStepService, loanLockingService, loanRepository);
         this.progressiveLoanModelProcessingService = progressiveLoanModelProcessingService;
+        this.loanRepository = loanRepository;
+    }
+
+    /**
+     * Loads the loans of the chunk. Each association their business steps read, such as the repayment schedule or the
+     * transactions, is then read in one more query for all of them, instead of one query per loan.
+     */
+    @Override
+    protected void prefetch(List<Long> loanIds) {
+        loanRepository.findByIdInWithAssociations(loanIds);
     }
 
     @Override

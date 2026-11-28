@@ -1710,10 +1710,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.loanTransactions.size(); // NOSONAR
     }
 
-    public void initializeRepaymentSchedule() {
-        this.repaymentScheduleInstallments.size(); // NOSONAR
-    }
-
     public boolean hasInvalidLoanType() {
         return getLoanType() == AccountType.INVALID;
     }

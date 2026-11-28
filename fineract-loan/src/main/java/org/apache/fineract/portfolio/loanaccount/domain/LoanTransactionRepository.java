@@ -80,14 +80,13 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     Optional<LoanTransactionOwnerTaggingData> findOwnerTaggingDataById(@Param("id") Long id);
 
     @Query("""
-                SELECT COALESCE(SUM(lt.unrecognizedIncomePortion), 0)
+                SELECT lt
                 FROM LoanTransaction lt
                 WHERE lt.loan = :loan
                 AND lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.WAIVE_INTEREST
                 AND lt.reversed = false
-                AND lt.dateOf <= :toDate
             """)
-    BigDecimal findTotalUnrecognizedIncomeFromInterestWaiverByLoanAndDate(@Param("loan") Loan loan, @Param("toDate") LocalDate toDate);
+    List<LoanTransaction> findNonReversedInterestWaiversByLoan(@Param("loan") Loan loan);
 
     // (0 - x) instead of -x: avoids EclipseLink concurrent unary-negation race in ArgumentListFunctionExpression
     @Query("""

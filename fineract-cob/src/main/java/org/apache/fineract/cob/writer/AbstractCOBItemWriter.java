@@ -92,6 +92,12 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
             return;
         }
         TreeMap<Long, String> businessStepMap = getBusinessStepMap(getBusinessSteps());
+        List<Long> ids = List.copyOf(accountIds.getItems());
+        try {
+            prefetch(ids);
+        } catch (RuntimeException e) {
+            throw chunkFailure(ids, e);
+        }
         for (Long accountId : accountIds) {
             try {
                 runBusinessSteps(businessStepMap, accountId);
@@ -99,7 +105,6 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
                 throw new COBAccountFailedException(accountId, e);
             }
         }
-        List<Long> ids = List.copyOf(accountIds.getItems());
         try {
             // The accounts were loaded in this transaction and are managed, so flushing writes their changes; saving
             // them as well would only merge, and cascade the merge through every association of the account, to no
@@ -107,12 +112,21 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
             repository.flush();
             lockingService.deleteByLoanIdInAndLockOwner(ids, getLockOwner());
         } catch (RuntimeException e) {
-            // A flush covers the whole chunk, so its failure belongs to one account only when the chunk has one.
-            if (ids.size() == 1) {
-                throw new COBAccountFailedException(ids.getFirst(), e);
-            }
-            throw e;
+            throw chunkFailure(ids, e);
         }
+    }
+
+    /**
+     * Runs once per chunk, in the transaction the business steps run in, before they run. A subclass can load the
+     * accounts of the chunk here, together with what their business steps read, in a few queries for the whole chunk.
+     * Loading each account for its steps then finds it already managed and reads no row again.
+     */
+    protected void prefetch(List<Long> accountIds) {}
+
+    private RuntimeException chunkFailure(List<Long> ids, RuntimeException e) {
+        // A prefetch or flush covers the whole chunk, so its failure belongs to one account only when the chunk has
+        // one.
+        return ids.size() == 1 ? new COBAccountFailedException(ids.getFirst(), e) : e;
     }
 
     private void runBusinessSteps(TreeMap<Long, String> businessStepMap, Long accountId) throws Exception {
