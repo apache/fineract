@@ -2,7 +2,7 @@
 
 Hello there!
 
-First of all, **Thank You** for contributing to Apache Fineract! We are grateful for your interest in this project.
+First of all, **Thank You** for contributing to Apache Fineract! We are grateful for your interest in this project. Everyone who has contributed is listed in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 Please join the [developer mailing list](https://fineract.apache.org/#contribute), if you have not already done so, as this is where discussions about this project take place - say _Hi_ there! Please also have a quick look at the [Code of Conduct](CODE_OF_CONDUCT.md).
 
@@ -301,6 +301,7 @@ The project uses [Lombok](https://projectlombok.org/) to reduce boilerplate code
 - The human submitter is responsible for correctness, safety, performance, and maintainability of all submitted changes.
 - Follow the [Generative Tooling Guidance by the ASF](https://www.apache.org/legal/generative-tooling.html).
 - Disclose generative AI tool usage with `Assisted-By: TOOL-MODEL-VERSION` trailer(s) in commit log messages, e.g. `Assisted-By: botcoder-poem-5.1`.
+- This covers reviews and comments too: whoever posts them is accountable for them, and automated accounts must be marked as described in [Reviews](#reviews).
 
 ## Change Process
 
@@ -361,6 +362,11 @@ them in different commits. This helps to review your code faster.
 
 We have an automated bot which marks pull requests as "stale" after a while, and ultimately automatically closes them.
 
+### Reviews
+
+Anyone can review a pull request, and reviews are welcome. To be merged, a pull request needs an approving review from a Fineract committer. The [Apache Fineract committee page](https://projects.apache.org/committee.html?fineract) lists the committers and PMC members. If you are not sure whom to ask for a review, ask on the [developer mailing list](https://lists.apache.org/list.html?dev@fineract.apache.org).
+
+Automated accounts that review or comment on pull requests (bots, AI agents) must be clearly marked as automated and name who runs them. Don't request a review from an account you can't identify; ask on the mailing list instead.
 
 ### Merge Strategy
 
