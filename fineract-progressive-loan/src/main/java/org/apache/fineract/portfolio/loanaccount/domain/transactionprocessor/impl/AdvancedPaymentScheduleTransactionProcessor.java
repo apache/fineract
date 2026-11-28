@@ -231,8 +231,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
         // Remove re-aged and additional (N+1) installments (if applicable), those will be recreated during the
         // reprocessing
-        installments.removeIf(LoanRepaymentScheduleInstallment::isReAged);
-        installments.removeIf(LoanRepaymentScheduleInstallment::isAdditional);
+        InstallmentProcessingHelper.removeInstallmentsIf(installments, LoanRepaymentScheduleInstallment::isReAged);
+        InstallmentProcessingHelper.removeInstallmentsIf(installments, LoanRepaymentScheduleInstallment::isAdditional);
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetBalances();
@@ -3734,11 +3734,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .orElse(null);
         final AtomicBoolean movedPaidAmountsInstallmentUsed = new AtomicBoolean(false);
 
-        final List<LoanCharge> liftedLoanCharges = new ArrayList<>();
+        // each loan charge once, however many installments it is lifted from
+        final Set<LoanCharge> liftedLoanCharges = new LinkedHashSet<>();
         installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate))
                 .forEach(i -> liftedLoanCharges.addAll(getLoanChargesOfInstallment(ctx, i, 1)));
 
-        installments.removeIf(i -> i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate));
+        InstallmentProcessingHelper.removeInstallmentsIf(installments,
+                i -> i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate));
 
         final ListIterator<LoanRepaymentScheduleInstallment> iterator = installments.listIterator();
 
@@ -4279,7 +4281,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         List<ReAgedChargeEqualAmortizationValues> calculatedCharges = outstandingBalances.liftedLoanCharges().stream()
                 .map(loanCharge -> new ReAgedChargeEqualAmortizationValues(loanCharge, emiCalculator.calculateEqualAmortizationValues(
-                        loanCharge.getAmountOutstanding(currency), numberOfReAgeInstallments, null, currency)))
+                        getAmountOutstandingAtReAge(loanTransaction, loanCharge, currency), numberOfReAgeInstallments, null, currency)))
                 .toList();
 
         BalancesWithPaidInAdvance paidInAdvanceBalances = liftEarlyRepaidBalances(installments, transactionDate, currency,
@@ -4291,9 +4293,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         // an additional installment that falls within the re-aged schedule is dropped, unless something was paid,
         // waived or written off on it: its outstanding amounts were lifted above, so it holds only what settled it,
         // which must stay settled
-        installments.removeIf(i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
-                && !i.isAdditional())
-                || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && !hasSettledAmounts(i, currency)));
+        InstallmentProcessingHelper.removeInstallmentsIf(installments,
+                i -> (i.getInstallmentNumber() != null && !i.isDownPayment() && !i.getDueDate().isBefore(transactionDate)
+                        && !i.isAdditional())
+                        || (i.isAdditional() && !i.getDueDate().isAfter(model.getMaturityDate()) && !hasSettledAmounts(i, currency)));
 
         installments.stream().filter(i -> i.isAdditional() && i.getDueDate().isAfter(model.getMaturityDate())).forEach(i -> {
             i.setFromDate(model.getMaturityDate());
@@ -4356,8 +4359,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 installments.add(created);
             }
         }
-        normalInstallmentsMarkedForRemoval.forEach(installments::remove);
+        normalInstallmentsMarkedForRemoval.forEach(i -> InstallmentProcessingHelper.removeInstallment(installments, i));
         reprocessInstallments(installments);
+        reApplyInstallmentFeeWaivers(loanTransaction, installments);
 
     }
 
@@ -4408,7 +4412,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         List<ReAgedChargeEqualAmortizationValues> calculatedCharges = outstandingBalances.liftedLoanCharges().stream()
                 .map(loanCharge -> new ReAgedChargeEqualAmortizationValues(loanCharge, emiCalculator.calculateEqualAmortizationValues(
-                        loanCharge.getAmountOutstanding(currency), numberOfReAgeInstallments, null, currency)))
+                        getAmountOutstandingAtReAge(loanTransaction, loanCharge, currency), numberOfReAgeInstallments, null, currency)))
                 .toList();
 
         LocalDate relativeStartDate = loanReAgeParameter.getStartDate().isBefore(transactionDate) ? loanReAgeParameter.getStartDate()
@@ -4447,7 +4451,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         && stubToMerge.getTotalPaid(currency).isZero()) {
                     firstReAgeInstallmentProps = new FirstReAgeInstallmentProps(stubToMerge.getInstallmentNumber(),
                             stubToMerge.getFromDate());
-                    installments.remove(stubToMerge);
+                    InstallmentProcessingHelper.removeInstallment(installments, stubToMerge);
                 }
             }
 
@@ -4517,8 +4521,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .filter(i -> i != null && !i.isAdditional() && !i.isDownPayment() && i.getInstallmentNumber() != null
                         && i.getInstallmentNumber() > lastReAgedInstallmentNumber && i.getTotalPaid(currency).isZero())
                 .toList();
-        toRemove.forEach(installments::remove);
+        toRemove.forEach(i -> InstallmentProcessingHelper.removeInstallment(installments, i));
         reprocessInstallments(installments);
+        reApplyInstallmentFeeWaivers(loanTransaction, installments);
     }
 
     // Identity on purpose: charges move only when the matching source is another installment instance than the target
@@ -4557,8 +4562,72 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void createChargeMappingsForInstallment(final LoanRepaymentScheduleInstallment installment,
             List<ReAgedChargeEqualAmortizationValues> reAgedChargeEqualAmortizationValues, Integer index) {
-        reAgedChargeEqualAmortizationValues.forEach(amortizationValue -> installment.getInstallmentCharges().add(new LoanInstallmentCharge(
-                amortizationValue.equalAmortizationValues.calculateValueBigDecimal(index), amortizationValue.charge, installment)));
+        reAgedChargeEqualAmortizationValues.forEach(amortizationValue -> {
+            final LoanInstallmentCharge installmentCharge = new LoanInstallmentCharge(
+                    amortizationValue.equalAmortizationValues.calculateValueBigDecimal(index), amortizationValue.charge, installment);
+            installment.getInstallmentCharges().add(installmentCharge);
+            amortizationValue.charge.getLoanInstallmentCharge().add(installmentCharge);
+        });
+    }
+
+    /**
+     * What was outstanding on the loan charge when the re-age was made. The installment fee waivers made on the re-aged
+     * installments after the re-age are not reprocessed, so the loan charge already holds them when the re-age is
+     * replayed: they are added back, to be spread over the re-aged installments and waived on them again, see
+     * {@link #reApplyInstallmentFeeWaivers}.
+     */
+    private static Money getAmountOutstandingAtReAge(final LoanTransaction reAge, final LoanCharge loanCharge,
+            final MonetaryCurrency currency) {
+        final BigDecimal waivedAfterReAge = installmentFeeWaiversAfter(reAge, loanCharge).values().stream().reduce(ZERO, BigDecimal::add);
+        return loanCharge.getAmountOutstanding(currency).plus(waivedAfterReAge);
+    }
+
+    /**
+     * Waives the installment fees on the re-aged installments again, as the waivers made after the re-age waived them.
+     * The re-age creates the installment charges of the re-aged installments anew each time it is replayed.
+     */
+    private static void reApplyInstallmentFeeWaivers(final LoanTransaction reAge,
+            final List<LoanRepaymentScheduleInstallment> installments) {
+        installments.stream().filter(LoanRepaymentScheduleInstallment::isReAged)
+                .filter(installment -> !DateUtils.isBefore(installment.getDueDate(), reAge.getTransactionDate()))
+                .forEach(installment -> installment.getInstallmentCharges().forEach(installmentCharge -> {
+                    final BigDecimal waiverAmount = installmentFeeWaiversAfter(reAge, installmentCharge.getLoanCharge())
+                            .getOrDefault(installment.getInstallmentNumber(), ZERO);
+                    final BigDecimal waived = installmentCharge.waive(waiverAmount);
+                    if (MathUtil.isGreaterThanZero(waived)) {
+                        installment.setFeeChargesWaived(MathUtil.add(installment.getFeeChargesWaived(), waived));
+                        installment.updateObligationsMet(installment.getLoan().getCurrency(), reAge.getTransactionDate());
+                    }
+                }));
+    }
+
+    /**
+     * The amounts of the installment fee waivers made on the loan charge after the re-age, by installment number.
+     */
+    private static Map<Integer, BigDecimal> installmentFeeWaiversAfter(final LoanTransaction reAge, final LoanCharge loanCharge) {
+        final Map<Integer, BigDecimal> waivers = new HashMap<>();
+        if (loanCharge == null || loanCharge.getId() == null || !loanCharge.isInstalmentFee()) {
+            return waivers;
+        }
+        reAge.getLoan().getLoanTransactions().stream()
+                .filter(transaction -> transaction.isWaiveCharge() && transaction.isNotReversed() && isMadeAfter(transaction, reAge))
+                .flatMap(transaction -> transaction.getLoanChargesPaid().stream())
+                .filter(paidBy -> paidBy.getInstallmentNumber() != null && paidBy.getLoanCharge() != null
+                        && loanCharge.getId().equals(paidBy.getLoanCharge().getId()))
+                .forEach(paidBy -> waivers.merge(paidBy.getInstallmentNumber(), paidBy.getAmount(), BigDecimal::add));
+        return waivers;
+    }
+
+    /**
+     * Whether the transaction was made after the re-age: on a later date, or on the same date and saved after it. A
+     * replayed re-age that replaces the original one is not saved yet, so a transaction on its date counts as later.
+     */
+    private static boolean isMadeAfter(final LoanTransaction transaction, final LoanTransaction reAge) {
+        final int byDate = DateUtils.compare(transaction.getTransactionDate(), reAge.getTransactionDate());
+        if (byDate != 0) {
+            return byDate > 0;
+        }
+        return transaction.getId() == null || reAge.getId() == null || transaction.getId() > reAge.getId();
     }
 
     private FirstReAgeInstallmentProps calculateFirstReAgeInstallmentProps(List<LoanRepaymentScheduleInstallment> installments,
@@ -4706,7 +4775,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 interestToLift = interestToLift.minus(liftedInterest);
             }
             if (installment.getDue(currency).isZero() && installment.getTotalPaid(currency).isZero()) {
-                installments.remove(installment);
+                InstallmentProcessingHelper.removeInstallment(installments, installment);
             }
         }
     }
@@ -4722,7 +4791,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         AtomicReference<Money> accruedInterestToMove = new AtomicReference<>(Money.zero(currency));
         AtomicReference<Money> accruedFeeToMove = new AtomicReference<>(Money.zero(currency));
         AtomicReference<Money> accruedPenaltyToMove = new AtomicReference<>(Money.zero(currency));
-        final List<LoanCharge> liftedLoanCharges = new ArrayList<>();
+        // each loan charge once, however many installments it is lifted from: the re-age makes one installment charge
+        // of each on every re-aged installment
+        final Set<LoanCharge> liftedLoanCharges = new LinkedHashSet<>();
 
         installments.stream().filter(i -> !skipDownPayments || !i.isDownPayment()).forEach(i -> {
             Money principalOutstanding = i.getPrincipalOutstanding(currency);
@@ -4785,7 +4856,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
         return new OutstandingBalances(outstandingPrincipalBalance.get(), outstandingInterestBalance.get(), accruedInterestToMove.get(),
                 outstandingFeesBalance.get(), accruedFeeToMove.get(), outstandingPenaltiesBalance.get(), accruedPenaltyToMove.get(),
-                liftedLoanCharges);
+                List.copyOf(liftedLoanCharges));
     }
 
     @Getter

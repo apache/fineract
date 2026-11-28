@@ -18,19 +18,24 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,6 +195,97 @@ class LoanRepaymentScheduleInstallmentTest {
         // Test that value is properly rounded
         final BigDecimal expected = new BigDecimal("123456789.123457");
         assertEquals(expected, installment.getPrincipal());
+    }
+
+    @Test
+    void removeInstallmentChargesRemovesThemFromTheirLoanChargeToo() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        final LoanInstallmentCharge installmentCharge = addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+        final LoanInstallmentCharge installmentChargeOfOtherInstallment = addInstallmentCharge(otherInstallment(), loanCharge,
+                BigDecimal.ONE);
+
+        installment.removeInstallmentCharges();
+
+        assertThat(installment.getInstallmentCharges()).isEmpty();
+        assertThat(installmentChargesOfLoanCharge).containsExactly(installmentChargeOfOtherInstallment).doesNotContain(installmentCharge);
+    }
+
+    @Test
+    void copyFromSchedulePeriodLeavesTheInstallmentChargesToTheirLoanCharge() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        final LoanInstallmentCharge installmentCharge = addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+
+        installment.copyFrom(mock(LoanScheduleModelPeriod.class));
+
+        // The loan charge recalculation replaces these installment charges, and a waived loan charge, which is not
+        // recalculated, keeps them so that the replay keeps the waiver.
+        assertThat(installment.getInstallmentCharges()).isEmpty();
+        assertThat(installmentChargesOfLoanCharge).containsExactly(installmentCharge);
+    }
+
+    @Test
+    void copyFromSchedulePeriodRemovesTheInstallmentChargesOfReAgedInstallmentFromTheirLoanCharge() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+        installment.setReAged(true);
+
+        installment.copyFrom(mock(LoanScheduleModelPeriod.class));
+
+        assertThat(installment.getInstallmentCharges()).isEmpty();
+        assertThat(installmentChargesOfLoanCharge).isEmpty();
+    }
+
+    @Test
+    void copyFromSchedulePeriodRemovesTheInstallmentChargesOfAdditionalInstallmentFromTheirLoanCharge() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+        installment.setAdditional(true);
+
+        installment.copyFrom(mock(LoanScheduleModelPeriod.class));
+
+        assertThat(installment.getInstallmentCharges()).isEmpty();
+        assertThat(installmentChargesOfLoanCharge).isEmpty();
+    }
+
+    @Test
+    void copyFromInstallmentRemovesTheReplacedInstallmentChargesFromTheirLoanCharge() {
+        final Set<LoanInstallmentCharge> installmentChargesOfLoanCharge = new HashSet<>();
+        final LoanCharge loanCharge = loanChargeHolding(installmentChargesOfLoanCharge);
+        final LoanInstallmentCharge replaced = addInstallmentCharge(installment, loanCharge, BigDecimal.TEN);
+        final LoanInstallmentCharge installmentChargeOfOtherInstallment = addInstallmentCharge(otherInstallment(), loanCharge,
+                BigDecimal.ONE);
+        final LoanRepaymentScheduleInstallment source = otherInstallment();
+        final LoanInstallmentCharge replacement = addInstallmentCharge(source, loanCharge, BigDecimal.TWO);
+
+        installment.copyFrom(source);
+
+        assertThat(installment.getInstallmentCharges()).containsExactly(replacement);
+        assertThat(installmentChargesOfLoanCharge).containsExactlyInAnyOrder(installmentChargeOfOtherInstallment, replacement)
+                .doesNotContain(replaced);
+    }
+
+    private static LoanCharge loanChargeHolding(final Set<LoanInstallmentCharge> installmentCharges) {
+        final LoanCharge loanCharge = mock(LoanCharge.class);
+        when(loanCharge.getLoanInstallmentCharge()).thenReturn(installmentCharges);
+        return loanCharge;
+    }
+
+    private static LoanInstallmentCharge addInstallmentCharge(final LoanRepaymentScheduleInstallment installment,
+            final LoanCharge loanCharge, final BigDecimal amount) {
+        final LoanInstallmentCharge installmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+        installment.getInstallmentCharges().add(installmentCharge);
+        loanCharge.getLoanInstallmentCharge().add(installmentCharge);
+        return installmentCharge;
+    }
+
+    private static LoanRepaymentScheduleInstallment otherInstallment() {
+        return new LoanRepaymentScheduleInstallment(mock(Loan.class), 2, LocalDate.now(ZoneId.systemDefault()).plusMonths(1),
+                LocalDate.now(ZoneId.systemDefault()).plusMonths(2), BigDecimal.valueOf(1000), BigDecimal.valueOf(100), BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, false, false);
     }
 
     private void testBigDecimalSetter(final Consumer<BigDecimal> setter, final Supplier<BigDecimal> getter) {

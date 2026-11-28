@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -1173,7 +1174,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         // Reset fields and relations
         resetBalances();
         updateLoanCompoundingDetails(InterestRecalculationAdditionalDetailData.toEntities(period.getLoanCompoundingDetails()));
-        getInstallmentCharges().clear();
+        if (isReAged() || isAdditional()) {
+            // The transaction processor made these installment charges for the re-age or the additional installment.
+            // They are stale once this becomes a regular installment again, so they leave their loan charge too
+            removeInstallmentCharges();
+        } else {
+            // The loan charge made these installment charges, so they stay with it: recalculating the loan charge
+            // replaces them, and a waived loan charge, which is not recalculated, keeps its waiver in them
+            getInstallmentCharges().clear();
+        }
         getPostDatedChecks().clear();
         // Update fields
         setFromDate(period.periodFromDate());
@@ -1278,7 +1287,28 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
                         .findAny().ifPresentOrElse(retainedInstallmentCharges::add, () -> retainedInstallmentCharges.add(nic));
             });
         }
+        detachFromLoanCharges(getInstallmentCharges().stream().filter(ic -> !retainedInstallmentCharges.contains(ic)).toList());
         setInstallmentCharges(retainedInstallmentCharges);
+    }
+
+    /**
+     * Removes the installment charges of this installment, from the loan charges they belong to as well. Call it when
+     * the installment leaves the repayment schedule.
+     */
+    public void removeInstallmentCharges() {
+        detachFromLoanCharges(List.copyOf(getInstallmentCharges()));
+        getInstallmentCharges().clear();
+    }
+
+    /**
+     * An installment charge is held by its installment and by its loan charge, and both remove orphans. One that leaves
+     * the installment, or whose installment leaves the schedule, is deleted, so it must leave the loan charge too: left
+     * there, the loan charge still holds the deleted row, and saving the loan either fails or keeps the row and its
+     * installment.
+     */
+    private static void detachFromLoanCharges(final Collection<LoanInstallmentCharge> installmentCharges) {
+        installmentCharges.stream().filter(ic -> ic.getLoanCharge() != null)
+                .forEach(ic -> ic.getLoanCharge().getLoanInstallmentCharge().remove(ic));
     }
 
     private void updatePostDatedChecks(Set<PostDatedChecks> postDatedChecks) {
