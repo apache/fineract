@@ -22,8 +22,10 @@ import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQueryFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -79,10 +81,13 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
         this.context.authenticatedUser();
 
-        final CodeValueDataMapper rm = new CodeValueDataMapper();
-        final String sql = "select " + rm.schema() + "where c.code_name like ? and cv.is_active = true order by position";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { code }); // NOSONAR
+        return queryFactory.select(cv.id, cv.codeValue, cv.codeDescription, cv.orderPosition, cv.isActive, cv.isMandatory).from(cv)
+                .innerJoin(this.code).on(cv.codeId.eq(this.code.id)).where(this.code.codeName.like(code), cv.isActive.isTrue())
+                .orderBy(cv.orderPosition.asc()).fetch().stream()
+                .map(row -> CodeValueData.instance(row.get(cv.id).longValue(), row.get(cv.codeValue), row.get(cv.orderPosition),
+                        row.get(cv.codeDescription), row.get(cv.isActive), row.get(cv.isMandatory)))
+                // mutable like the old JdbcTemplate result: AccountingRuleApiResource calls addAll() on it
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
