@@ -160,7 +160,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
-            fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
+            fineractEntityAccessUtil.checkConfigurationAndAddProductRestrictionsForUserOffice(
                     FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanProduct.getId());
 
             if (command.parameterExists(LoanProductDataValidator.DATATABLES)) {

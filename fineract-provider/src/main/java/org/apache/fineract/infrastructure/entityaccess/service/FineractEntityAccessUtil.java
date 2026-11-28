@@ -69,9 +69,10 @@ public class FineractEntityAccessUtil implements FineractEntityVisibilityService
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
     }
 
+    @Override
     @Transactional
     @CacheEvict(value = FineractEntityAccessReadServiceImpl.OFFICE_ENTITY_ACCESS_CACHE_NAME, allEntries = true)
-    public void checkConfigurationAndAddProductResrictionsForUserOffice(final FineractEntityAccessType fineractEntityAccessType,
+    public void checkConfigurationAndAddProductRestrictionsForUserOffice(final FineractEntityAccessType fineractEntityAccessType,
             final Long productOrChargeId) {
 
         AppUser thisUser = this.context.authenticatedUser();
@@ -120,6 +121,7 @@ public class FineractEntityAccessUtil implements FineractEntityVisibilityService
         return entities.stream().filter(entity -> access.isVisible(idExtractor.apply(entity))).collect(Collectors.toList());
     }
 
+    @Override
     public boolean isVisibleToOffice_ifGlobalConfigEnabled(final FineractEntityAccessType accessType, final Long officeId,
             final Long entityId) {
         return !filterVisibleToOffice_ifGlobalConfigEnabled(accessType, officeId, List.of(entityId), Function.identity()).isEmpty();

@@ -29,14 +29,14 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityVisibilityService;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -48,9 +48,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.springframework.cache.annotation.Cacheable;
@@ -72,13 +70,13 @@ public class ChargeReadServiceImpl implements ChargeReadService {
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DropdownReadPlatformService dropdownReadPlatformService;
-    private final FineractEntityAccessUtil fineractEntityAccessUtil;
+    private final FineractEntityVisibilityService fineractEntityVisibilityService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final TaxReadPlatformService taxReadPlatformService;
-    private final ConfigurationDomainServiceJpa configurationDomainServiceJpa;
+    private final ConfigurationDomainService configurationDomainService;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final LoanRepository loanRepository;
-    private final SavingsAccountRepository savingsAccountRepository;
+    private final LoanOfficeIdProvider loanOfficeIdProvider;
+    private final SavingsAccountOfficeIdProvider savingsAccountOfficeIdProvider;
 
     @Override
     @Cacheable(value = "charges", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
@@ -103,8 +101,8 @@ public class ChargeReadServiceImpl implements ChargeReadService {
             final ChargeMapper rm = new ChargeMapper();
             final String sql = "select " + rm.chargeSchema() + " where c.id = ? and c.is_deleted=false ;";
             final ChargeData charge = this.jdbcTemplate.queryForObject(sql, rm, chargeId); // NOSONAR
-            if (!this.fineractEntityAccessUtil.isVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES,
-                    null, chargeId)) {
+            if (!this.fineractEntityVisibilityService
+                    .isVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES, null, chargeId)) {
                 throw new ChargeNotFoundException(chargeId);
             }
             return charge;
@@ -158,7 +156,7 @@ public class ChargeReadServiceImpl implements ChargeReadService {
                 .retrieveSharesCalculationTypes();
         final List<EnumOptionData> shareChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveSharesCollectionTimeTypes();
         final Collection<TaxGroupData> taxGroupOptions = this.taxReadPlatformService.retrieveTaxGroupsForLookUp();
-        final String accountMappingForChargeConfig = this.configurationDomainServiceJpa.getAccountMappingForCharge();
+        final String accountMappingForChargeConfig = this.configurationDomainService.getAccountMappingForCharge();
         final List<GLAccountData> expenseAccountOptions = this.accountingDropdownReadPlatformService.retrieveExpenseAccountOptions();
         final List<GLAccountData> assetAccountOptions = this.accountingDropdownReadPlatformService.retrieveAssetAccountOptions();
 
@@ -231,7 +229,8 @@ public class ChargeReadServiceImpl implements ChargeReadService {
         String sql = "select " + rm.chargeSchema() + " join m_loan la on la.currency_code = c.currency_code" + " where la.id=:loanId"
                 + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo" + excludeClause + " ";
         sql += " order by c.name ";
-        return visibleToOffice(this.namedParameterJdbcTemplate.query(sql, paramMap, rm), this.loanRepository.findOfficeIdByLoanId(loanId));
+        return visibleToOffice(this.namedParameterJdbcTemplate.query(sql, paramMap, rm),
+                this.loanOfficeIdProvider.findOfficeIdByLoanId(loanId));
     }
 
     /**
@@ -287,8 +286,8 @@ public class ChargeReadServiceImpl implements ChargeReadService {
     }
 
     private List<ChargeData> visibleToOffice(final List<ChargeData> charges, final Long officeId) {
-        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES,
-                officeId, charges, ChargeData::getId);
+        return this.fineractEntityVisibilityService.filterVisibleToOffice_ifGlobalConfigEnabled(
+                FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES, officeId, charges, ChargeData::getId);
     }
 
     private static final class ChargeMapper implements RowMapper<ChargeData> {
@@ -522,6 +521,6 @@ public class ChargeReadServiceImpl implements ChargeReadService {
         final String sql = "select " + rm.chargeSchema() + " join m_savings_account sa on sa.currency_code = c.currency_code"
                 + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? " + " and sa.id = ?";
         return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId), // NOSONAR
-                this.savingsAccountRepository.findOfficeIdBySavingsAccountId(savingsAccountId));
+                this.savingsAccountOfficeIdProvider.findOfficeIdBySavingsAccountId(savingsAccountId));
     }
 }
