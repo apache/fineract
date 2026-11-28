@@ -37,25 +37,26 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @RequiredArgsConstructor
 public enum PaymentAllocationType {
 
-    PAST_DUE_PENALTY(PAST_DUE, PENALTY, "Past due penalty"), //
-    PAST_DUE_FEE(PAST_DUE, FEE, "Past due fee"), //
-    PAST_DUE_PRINCIPAL(PAST_DUE, PRINCIPAL, "Past due principal"), //
-    PAST_DUE_INTEREST(PAST_DUE, INTEREST, "Past due interest"), //
-    DUE_PENALTY(DUE, PENALTY, "Due penalty"), //
-    DUE_FEE(DUE, FEE, "Due fee"), //
-    DUE_PRINCIPAL(DUE, PRINCIPAL, "Due principal"), //
-    DUE_INTEREST(DUE, INTEREST, "Due interest"), //
-    IN_ADVANCE_PENALTY(IN_ADVANCE, PENALTY, "In advance penalty"), //
-    IN_ADVANCE_FEE(IN_ADVANCE, FEE, "In advance fee"), //
-    IN_ADVANCE_PRINCIPAL(IN_ADVANCE, PRINCIPAL, "In advance principal"), //
-    IN_ADVANCE_INTEREST(IN_ADVANCE, INTEREST, "In advanced interest"); //
+    PAST_DUE_PENALTY(PAST_DUE, PENALTY, "Past due penalty", 1), //
+    PAST_DUE_FEE(PAST_DUE, FEE, "Past due fee", 2), //
+    PAST_DUE_PRINCIPAL(PAST_DUE, PRINCIPAL, "Past due principal", 3), //
+    PAST_DUE_INTEREST(PAST_DUE, INTEREST, "Past due interest", 4), //
+    DUE_PENALTY(DUE, PENALTY, "Due penalty", 5), //
+    DUE_FEE(DUE, FEE, "Due fee", 6), //
+    DUE_PRINCIPAL(DUE, PRINCIPAL, "Due principal", 7), //
+    DUE_INTEREST(DUE, INTEREST, "Due interest", 8), //
+    IN_ADVANCE_PENALTY(IN_ADVANCE, PENALTY, "In advance penalty", 9), //
+    IN_ADVANCE_FEE(IN_ADVANCE, FEE, "In advance fee", 10), //
+    IN_ADVANCE_PRINCIPAL(IN_ADVANCE, PRINCIPAL, "In advance principal", 11), //
+    IN_ADVANCE_INTEREST(IN_ADVANCE, INTEREST, "In advanced interest", 12); //
 
     private final DueType dueType;
     private final AllocationType allocationType;
     private final String humanReadableName;
+    private final long id;
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        return Arrays.stream(values()).map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 
 }

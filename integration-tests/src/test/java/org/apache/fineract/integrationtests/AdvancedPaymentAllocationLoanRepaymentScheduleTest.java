@@ -5060,7 +5060,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
                     .enableDownPayment(false)//
                     .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(null)//
@@ -5176,7 +5176,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
                     .enableDownPayment(false)//
                     .allowPartialPeriodInterestCalculation(null)//
                     .enableAutoRepaymentForDownPayment(null)//
@@ -5906,7 +5906,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                     .repaymentFrequencyType(2L)//
                     .chargeOffBehaviour("ZERO_INTEREST")//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
                     .enableDownPayment(false)//
                     .enableAccrualActivityPosting(true)//
                     .allowPartialPeriodInterestCalculation(null)//
@@ -6048,7 +6048,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                         .repaymentFrequencyType(2L)//
                         .chargeOffBehaviour("ZERO_INTEREST")//
                         .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                        .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                        .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.getValue())//
                         .enableDownPayment(false)//
                         .enableAccrualActivityPosting(true)//
                         .allowPartialPeriodInterestCalculation(null)//

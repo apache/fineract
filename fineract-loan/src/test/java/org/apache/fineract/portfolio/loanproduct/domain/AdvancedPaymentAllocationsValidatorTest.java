@@ -215,7 +215,7 @@ class AdvancedPaymentAllocationsValidatorTest {
     private static List<Pair<Integer, PaymentAllocationType>> createPaymentAllocationTypeList() {
         return EnumSet.allOf(PaymentAllocationType.class).stream().map(p -> {
             try {
-                return Pair.of(Integer.parseInt(String.valueOf(Integer.parseInt(String.valueOf(p.ordinal())) + 1)), p);
+                return Pair.of((int) p.getId(), p);
             } catch (NumberFormatException e) {
                 throw new RuntimeException("Failed to create payment allocation type list", e);
             }

@@ -31,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +63,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
 
     private static final Long LOAN_ID = 1L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
     private static final NearBreachParameters PARAMETERS = new NearBreachParameters(BigDecimal.valueOf(33), 3,
             WorkingCapitalLoanPeriodFrequencyType.DAYS, 0, List.of(), List.of());
 
@@ -85,7 +85,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImplTest {
         originalTenant = ThreadLocalContextUtil.getTenant();
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 1, 1))));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         underTest = new WorkingCapitalLoanNearBreachEvaluationServiceImpl(breachScheduleRepository, breachActionRepository,
                 nearBreachActionRepository, new WorkingCapitalLoanActiveBreachResetResolver(breachActionRepository));
         lenient().when(breachActionRepository.isBreachDisabled(anyLong())).thenReturn(false);

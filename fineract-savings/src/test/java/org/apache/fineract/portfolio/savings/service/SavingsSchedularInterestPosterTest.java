@@ -31,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,12 +61,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 class SavingsSchedularInterestPosterTest {
 
+    private static final int HALF_UP_ROUNDING_MODE = 4;
+
     @BeforeEach
     void setUp() {
         // Money creation reads the rounding mode of the current tenant, so the tenant context has to be
         // in place before any test builds a Money or a transaction holding one
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
     }
 
     @AfterEach

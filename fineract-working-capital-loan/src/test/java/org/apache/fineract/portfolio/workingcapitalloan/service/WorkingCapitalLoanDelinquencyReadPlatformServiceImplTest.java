@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -57,6 +56,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class WorkingCapitalLoanDelinquencyReadPlatformServiceImplTest {
 
     private static final Long LOAN_ID = 7L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
     private static final LocalDate BUSINESS_DATE = LocalDate.of(2026, 1, 20);
 
     @Mock
@@ -87,7 +87,7 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImplTest {
                 transactionFinder);
         originalTenant = ThreadLocalContextUtil.getTenant();
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         when(delinquencyRangeScheduleTagHistoryRepository.findByLoanIdOrderByAddedOnDateDesc(anyLong())).thenAnswer(invocation -> tags
                 .stream().sorted(Comparator.comparing(WorkingCapitalLoanDelinquencyRangeScheduleTagHistory::getAddedOnDate).reversed())
                 .toList());

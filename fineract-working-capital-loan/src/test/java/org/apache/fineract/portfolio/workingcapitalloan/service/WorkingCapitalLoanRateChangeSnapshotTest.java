@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +53,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class WorkingCapitalLoanRateChangeSnapshotTest {
 
     private static final LocalDate EFFECTIVE_DATE = LocalDate.of(2019, 1, 25);
+    private static final int HALF_EVEN_ROUNDING_MODE = 6;
 
     @Mock
     private WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
@@ -69,7 +69,7 @@ class WorkingCapitalLoanRateChangeSnapshotTest {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, EFFECTIVE_DATE)));
-        MoneyHelper.updateTenantRoundingMode("default", RoundingMode.HALF_EVEN.ordinal());
+        MoneyHelper.updateTenantRoundingMode("default", HALF_EVEN_ROUNDING_MODE);
     }
 
     @AfterEach

@@ -795,12 +795,12 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public LoanChargeData toData() {
-        EnumOptionData chargeTimeTypeData = new EnumOptionData((long) getChargeTimeType().ordinal(), getChargeTimeType().getCode(),
+        EnumOptionData chargeTimeTypeData = new EnumOptionData((long) getChargeTimeType().getValue(), getChargeTimeType().getCode(),
                 String.valueOf(getChargeTimeType().getValue()));
-        EnumOptionData chargeCalculationTypeData = new EnumOptionData((long) getChargeCalculation().ordinal(),
+        EnumOptionData chargeCalculationTypeData = new EnumOptionData((long) getChargeCalculation().getValue(),
                 getChargeCalculation().getCode(), String.valueOf(getChargeCalculation().getValue()));
-        EnumOptionData chargePaymentModeData = new EnumOptionData((long) getChargePaymentMode().ordinal(), getChargePaymentMode().getCode(),
-                String.valueOf(getChargePaymentMode().getValue()));
+        EnumOptionData chargePaymentModeData = new EnumOptionData((long) getChargePaymentMode().getValue(),
+                getChargePaymentMode().getCode(), String.valueOf(getChargePaymentMode().getValue()));
         List<LoanInstallmentChargeData> loanInstallmentChargeDataList = installmentCharges().stream().map(LoanInstallmentCharge::toData)
                 .toList();
 

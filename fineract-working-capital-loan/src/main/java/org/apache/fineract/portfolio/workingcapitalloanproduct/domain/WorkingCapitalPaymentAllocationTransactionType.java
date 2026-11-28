@@ -41,6 +41,6 @@ public enum WorkingCapitalPaymentAllocationTransactionType {
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
         return Arrays.stream(values()).map(WorkingCapitalPaymentAllocationTransactionType::toPaymentAllocationTransactionType)
-                .map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+                .map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 }

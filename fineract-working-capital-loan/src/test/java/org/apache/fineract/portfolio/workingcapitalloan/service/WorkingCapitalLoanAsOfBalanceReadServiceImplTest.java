@@ -26,7 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +58,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class WorkingCapitalLoanAsOfBalanceReadServiceImplTest {
 
     private static final Long LOAN_ID = 7L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
     private static final LocalDate AS_OF = LocalDate.of(2026, 1, 15);
 
     @Mock
@@ -75,7 +75,7 @@ public class WorkingCapitalLoanAsOfBalanceReadServiceImplTest {
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
         balance = WorkingCapitalLoanBalance.createFor(mock(WorkingCapitalLoan.class));
     }
 

@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +73,7 @@ import org.mockito.quality.Strictness;
 class WorkingCapitalLoanDelinquencyResetInsidePauseTest {
 
     private static final Long LOAN_ID = 1L;
+    private static final int HALF_UP_ROUNDING_MODE = 4;
     private static final LocalDate RESET_DATE = LocalDate.of(2026, 1, 12);
     private static final BigDecimal EXPECTED = new BigDecimal("100.00");
 
@@ -109,7 +109,7 @@ class WorkingCapitalLoanDelinquencyResetInsidePauseTest {
         businessDates.put(BusinessDateType.BUSINESS_DATE, RESET_DATE.plusDays(1));
         businessDates.put(BusinessDateType.COB_DATE, RESET_DATE);
         ThreadLocalContextUtil.setBusinessDates(businessDates);
-        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
+        MoneyHelper.initializeTenantRoundingMode("default", HALF_UP_ROUNDING_MODE);
 
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getApprovedPrincipal()).thenReturn(new BigDecimal("1000"));

@@ -28,14 +28,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @Getter
 public enum AllocationType {
 
-    PENALTY("Penalty"), //
-    FEE("Fee"), //
-    PRINCIPAL("Principal"), //
-    INTEREST("Interest"); //
+    PENALTY("Penalty", 1), //
+    FEE("Fee", 2), //
+    PRINCIPAL("Principal", 3), //
+    INTEREST("Interest", 4); //
 
     private final String humanReadableName;
+    private final long id;
 
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
+        return Arrays.stream(values()).map(v -> new EnumOptionData(v.getId(), v.name(), v.getHumanReadableName())).toList();
     }
 }
