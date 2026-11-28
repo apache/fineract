@@ -48,7 +48,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -86,7 +85,6 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.exception.DifferentCurrenciesException;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -134,7 +132,6 @@ public class InteropServiceImpl implements InteropService {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     private static final class KycMapper implements RowMapper<InteropKycData> {
@@ -515,7 +512,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public @NonNull String disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson) {
+    public @NonNull CommandProcessingResult disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
 
@@ -524,11 +521,11 @@ public class InteropServiceImpl implements InteropService {
         final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
         CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     @Override
-    public @NonNull String loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson) {
+    public @NonNull CommandProcessingResult loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
 
@@ -537,7 +534,7 @@ public class InteropServiceImpl implements InteropService {
         final CommandWrapper commandRequest = builder.loanRepaymentTransaction(loanId).build();
         CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
