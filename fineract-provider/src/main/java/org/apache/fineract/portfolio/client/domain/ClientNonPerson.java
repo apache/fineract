@@ -26,18 +26,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
@@ -99,33 +94,6 @@ public class ClientNonPerson extends AbstractPersistableCustom<Long> {
             this.remarks = remarks.trim();
         }
 
-        validate(client);
-    }
-
-    private void validate(final Client client) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        validateIncorpValidityTillDate(client, dataValidationErrors);
-
-        if (this.constitution == null) {
-            dataValidationErrors.add(ApiParameterError.parameterError("error.msg.clients.constitutionid.is.null",
-                    "Constitution ID may not be null", ClientApiConstants.constitutionIdParamName));
-        }
-
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-    }
-
-    private void validateIncorpValidityTillDate(final Client client, final List<ApiParameterError> dataValidationErrors) {
-        if (getIncorpValidityTillLocalDate() != null && client.dateOfBirthLocalDate() != null
-                && DateUtils.isAfter(client.dateOfBirthLocalDate(), getIncorpValidityTillLocalDate())) {
-            final String defaultUserMessage = "incorpvaliditytill date cannot be after the incorporation date";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.incorpValidityTill.after.incorp.date",
-                    defaultUserMessage, ClientApiConstants.incorpValidityTillParamName, this.incorpValidityTill);
-
-            dataValidationErrors.add(error);
-        }
     }
 
     public LocalDate getIncorpValidityTillLocalDate() {

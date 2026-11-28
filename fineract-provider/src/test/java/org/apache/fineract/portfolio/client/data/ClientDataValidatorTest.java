@@ -19,14 +19,19 @@
 package org.apache.fineract.portfolio.client.data;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.validator.PhoneNumberValidationService;
@@ -252,5 +257,58 @@ class ClientDataValidatorTest {
                 () -> validator.validateForCreate(json));
 
         assertTrue(ex.getErrors().stream().anyMatch(e -> ClientApiConstants.datatables.equals(e.getParameterName())));
+    }
+
+    @Test
+    void validateClientBeforeCreating_withValidityDateBeforeIncorporationDate_reportsDateError() {
+        LocalDate incorporationDate = LocalDate.of(2026, 1, 2);
+        LocalDate validityDate = incorporationDate.minusDays(1);
+
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateClientBeforeCreating(incorporationDate, validityDate, mock(CodeValue.class)));
+
+        assertEquals(1, ex.getErrors().size());
+        assertDateError(ex.getErrors().get(0));
+    }
+
+    @Test
+    void validateClientBeforeCreating_withoutConstitution_reportsConstitutionError() {
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateClientBeforeCreating(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 2), null));
+
+        assertEquals(1, ex.getErrors().size());
+        assertConstitutionError(ex.getErrors().get(0));
+    }
+
+    @Test
+    void validateClientBeforeCreating_withBothInvalidValues_reportsBothErrorsInOrder() {
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateClientBeforeCreating(LocalDate.of(2026, 1, 2), LocalDate.of(2026, 1, 1), null));
+
+        assertEquals(2, ex.getErrors().size());
+        assertDateError(ex.getErrors().get(0));
+        assertConstitutionError(ex.getErrors().get(1));
+    }
+
+    @Test
+    void validateClientBeforeCreating_withValidDates_andConstitution_doesNotThrow() {
+        CodeValue constitution = mock(CodeValue.class);
+        LocalDate incorporationDate = LocalDate.of(2026, 1, 1);
+
+        assertDoesNotThrow(() -> validator.validateClientBeforeCreating(incorporationDate, incorporationDate, constitution));
+        assertDoesNotThrow(() -> validator.validateClientBeforeCreating(incorporationDate, null, constitution));
+        assertDoesNotThrow(() -> validator.validateClientBeforeCreating(null, incorporationDate, constitution));
+    }
+
+    private static void assertDateError(ApiParameterError error) {
+        assertEquals("error.msg.clients.incorpValidityTill.after.incorp.date", error.getUserMessageGlobalisationCode());
+        assertEquals("incorpvaliditytill date cannot be after the incorporation date", error.getDefaultUserMessage());
+        assertEquals(ClientApiConstants.incorpValidityTillParamName, error.getParameterName());
+    }
+
+    private static void assertConstitutionError(ApiParameterError error) {
+        assertEquals("error.msg.clients.constitutionid.is.null", error.getUserMessageGlobalisationCode());
+        assertEquals("Constitution ID may not be null", error.getDefaultUserMessage());
+        assertEquals(ClientApiConstants.constitutionIdParamName, error.getParameterName());
     }
 }

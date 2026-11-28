@@ -356,6 +356,8 @@ public class ClientCreateUpdateWritePlatformService {
                         ClientApiConstants.CLIENT_NON_PERSON_MAIN_BUSINESS_LINE, clientNonPersonMainBusinessLineId);
             }
 
+            fromApiJsonDeserializer.validateClientBeforeCreating(client.getDateOfBirth(), incorpValidityTill, clientNonPersonConstitution);
+
             final ClientNonPerson newClientNonPerson = ClientNonPerson.createNew(client, clientNonPersonConstitution,
                     clientNonPersonMainBusinessLine, incorpNumber, incorpValidityTill, remarks);
 
