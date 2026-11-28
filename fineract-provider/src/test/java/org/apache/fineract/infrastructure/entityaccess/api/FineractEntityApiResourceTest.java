@@ -23,10 +23,6 @@ import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
-import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -47,12 +43,6 @@ class FineractEntityApiResourceTest {
     @Mock
     private FineractEntityAccessReadService readPlatformService;
     @Mock
-    private DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer;
-    @Mock
-    private DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts;
-    @Mock
-    private ApiRequestParameterHelper apiRequestParameterHelper;
-    @Mock
     private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     @Mock
     private AppUser appUser;
@@ -64,8 +54,7 @@ class FineractEntityApiResourceTest {
     @BeforeEach
     void setUp() {
         when(context.authenticatedUser()).thenReturn(appUser);
-        underTest = new FineractEntityApiResource(context, readPlatformService, toApiJsonSerializer, toApiJsonSerializerOfficeToLoanProducts,
-                apiRequestParameterHelper, commandsSourceWritePlatformService);
+        underTest = new FineractEntityApiResource(context, readPlatformService, commandsSourceWritePlatformService);
     }
 
     @Test

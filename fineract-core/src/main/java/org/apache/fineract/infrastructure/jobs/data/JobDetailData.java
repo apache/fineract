@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ public class JobDetailData {
     private String shortName;
 
     @SuppressWarnings("unused")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant nextRunTime;
 
     @SuppressWarnings("unused")

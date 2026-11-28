@@ -32,12 +32,10 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.cob.data.LoanIdsResponseDTO;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/jobs")
@@ -47,7 +45,6 @@ import org.springframework.stereotype.Component;
 public class InlineJobApiResource {
 
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-    private final DefaultToApiJsonSerializer<LoanIdsResponseDTO> serializer;
 
     @POST
     @Path("{jobName}/inline")
@@ -57,11 +54,10 @@ public class InlineJobApiResource {
     @RequestBody(content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class)))
     @ApiResponse(responseCode = "400", description = "Request body item size validation error")
-    public String executeInlineJob(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
+    public CommandProcessingResult executeInlineJob(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
             @Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().executeInlineJob(jobName).withJson(jsonRequestBody).build();
-        CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-        return serializer.serialize(result);
+        return commandWritePlatformService.logCommandSource(commandRequest);
     }
 }

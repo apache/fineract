@@ -27,11 +27,9 @@ import static org.mockito.Mockito.when;
 import jakarta.ws.rs.core.Response;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.IdTypeResolver;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerJobRunnerReadService;
@@ -42,23 +40,18 @@ class SchedulerJobApiResourceTest {
 
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService = mock(SchedulerJobRunnerReadService.class);
     private final JobRegisterService jobRegisterService = mock(JobRegisterService.class);
-    private final ApiRequestParameterHelper apiRequestParameterHelper = mock(ApiRequestParameterHelper.class);
-    private final ToApiJsonSerializer<?> toApiJsonSerializer = mock(ToApiJsonSerializer.class);
-    private final ToApiJsonSerializer<?> jobHistoryToApiJsonSerializer = mock(ToApiJsonSerializer.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService = mock(
             PortfolioCommandSourceWritePlatformService.class);
     private final PlatformSecurityContext context = mock(PlatformSecurityContext.class);
     private final CommandDispatcher dispatcher = mock(CommandDispatcher.class);
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private SchedulerJobApiResource resourceWithBatchManagerEnabled(boolean enabled) {
         FineractProperties fineractProperties = new FineractProperties();
         FineractProperties.FineractModeProperties mode = new FineractProperties.FineractModeProperties();
         mode.setBatchManagerEnabled(enabled);
         fineractProperties.setMode(mode);
-        return new SchedulerJobApiResource(schedulerJobRunnerReadService, jobRegisterService, apiRequestParameterHelper,
-                (ToApiJsonSerializer) toApiJsonSerializer, (ToApiJsonSerializer) jobHistoryToApiJsonSerializer,
-                commandsSourceWritePlatformService, context, fineractProperties, dispatcher);
+        return new SchedulerJobApiResource(schedulerJobRunnerReadService, jobRegisterService, commandsSourceWritePlatformService, context,
+                fineractProperties, dispatcher);
     }
 
     @Test

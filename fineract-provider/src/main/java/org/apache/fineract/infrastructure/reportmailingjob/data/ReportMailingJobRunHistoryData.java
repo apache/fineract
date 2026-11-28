@@ -22,6 +22,7 @@ import java.time.ZonedDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonZonedDateTimeEpochFormat;
 
 /**
  * Immutable data object representing report mailing job run history data.
@@ -29,6 +30,7 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonZonedDateTimeEpochFormat
 public final class ReportMailingJobRunHistoryData {
 
     private Long id;

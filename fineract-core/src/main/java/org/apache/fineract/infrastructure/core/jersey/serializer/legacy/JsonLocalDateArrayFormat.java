@@ -23,6 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+/**
+ * Writes LocalDate values as [year, month, day] arrays instead of ISO strings, like the legacy Gson serialization. On a
+ * class it applies to the dates of that class; on a resource method it applies to every date in the response.
+ */
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonLocalDateArrayFormat {}

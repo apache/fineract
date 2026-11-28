@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public final class FineractEntityApiResourceConstants {
 
     private FineractEntityApiResourceConstants() {
@@ -45,9 +41,5 @@ public final class FineractEntityApiResourceConstants {
     public static final String OFFICE_ACCESS_TO_CHARGES_FEES = " office_access_to_fees/charges ";
     public static final String ROLE_ACCESS_TO_LOAN_PRODUCTS = " role_access_to_loan_products ";
     public static final String ROLE_ACCESS_TO_SAVINGS_PRODUCTS = " role_access_to_savings_products ";
-
-    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(mappingTypes));
-
-    static final Set<String> FETCH_ENTITY_TO_ENTITY_MAPPINGS = new HashSet<>(Arrays.asList(mapId, relId, fromEnityType, toEntityType));
 
 }
