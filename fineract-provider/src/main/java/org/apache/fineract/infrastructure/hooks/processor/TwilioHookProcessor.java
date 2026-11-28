@@ -66,6 +66,7 @@ public class TwilioHookProcessor implements HookProcessor {
             final Hook hook, final FineractContext context) throws IOException {
 
         final String url = smsProviderData.getUrl();
+        processorHelper.assertUrlAllowed(url);
         final WebHookService service = processorHelper.createWebHookService(url);
 
         @SuppressWarnings("rawtypes")

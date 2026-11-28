@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.configuration.serialization.ExternalSe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.StringUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -185,5 +186,42 @@ class ExternalServiceWritePlatformServiceJpaRepositoryImplTest {
         assertEquals("587", port.getValue());
         verify(repository).saveAndFlush(host);
         verify(repository).saveAndFlush(port);
+    }
+
+    @Test
+    void updateWithTheMaskedFormOfAStoredSecretKeepsTheStoredValue() {
+        final String stored = "abcdefgh12345678";
+        final ExternalServicesProperties secretKey = property("s3_secret_key", stored);
+
+        final CommandProcessingResult result = update("{\"s3_secret_key\": \"" + StringUtil.maskValue(stored) + "\"}", "s3_secret_key");
+
+        assertTrue(changesOf(result).isEmpty());
+        assertEquals(stored, secretKey.getValue());
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateWithADifferentValueForAStoredSecretReplacesIt() {
+        final ExternalServicesProperties secretKey = property("s3_secret_key", "abcdefgh12345678");
+
+        final CommandProcessingResult result = update("""
+                {"s3_secret_key": "another-value-9999"}
+                """, "s3_secret_key");
+
+        assertEquals(Map.of("value", "another-value-9999"), result.getChanges());
+        assertEquals("another-value-9999", secretKey.getValue());
+        verify(repository).saveAndFlush(secretKey);
+    }
+
+    @Test
+    void updateOfANonSecretPropertyWithAMaskLikeValueStoresIt() {
+        final String stored = "smtp.example.com";
+        final ExternalServicesProperties host = property("host", stored);
+        final String maskLike = StringUtil.maskValue(stored);
+
+        final CommandProcessingResult result = update("{\"host\": \"" + maskLike + "\"}", "host");
+
+        assertEquals(Map.of("value", maskLike), result.getChanges());
+        assertEquals(maskLike, host.getValue());
     }
 }

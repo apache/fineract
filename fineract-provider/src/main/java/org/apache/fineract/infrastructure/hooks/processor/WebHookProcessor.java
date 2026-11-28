@@ -67,6 +67,7 @@ public class WebHookProcessor implements HookProcessor {
             final String actionName, final FineractContext context) {
 
         final String fineractEndpointUrl = System.getProperty("baseUrl");
+        processorHelper.assertUrlAllowed(url);
         final WebHookService service = processorHelper.createWebHookService(url);
 
         @SuppressWarnings("rawtypes")

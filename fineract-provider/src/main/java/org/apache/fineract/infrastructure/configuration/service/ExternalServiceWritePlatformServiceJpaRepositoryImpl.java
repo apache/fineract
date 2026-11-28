@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.configuration.service.ExternalServices
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.service.StringUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,10 @@ public class ExternalServiceWritePlatformServiceJpaRepositoryImpl implements Ext
         final String valueParamName = ExternalservicePropertiesJSONinputParams.VALUE.getValue();
         if (command.isChangeInStringParameterNamed(paramName, property.getValue())) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
+            if (isMaskedSecretValue(paramName, property.getValue(), newValue)) {
+                // The masked form of the stored secret was sent back, so the stored value is kept.
+                return actualChanges;
+            }
             if (paramName.equals(SMTPJSONinputParams.PASSWORD.getValue()) && newValue.equals("XXXX")) {
                 // If Param Name is Password and ParamValue is XXXX that means
                 // the password has not been changed.
@@ -98,6 +103,11 @@ public class ExternalServiceWritePlatformServiceJpaRepositoryImpl implements Ext
         }
 
         return actualChanges;
+    }
+
+    private static boolean isMaskedSecretValue(final String paramName, final String storedValue, final String newValue) {
+        return storedValue != null && newValue != null && ExternalServicesSecretProperties.isSecretProperty(paramName)
+                && newValue.equals(StringUtil.maskValue(storedValue));
     }
 
 }

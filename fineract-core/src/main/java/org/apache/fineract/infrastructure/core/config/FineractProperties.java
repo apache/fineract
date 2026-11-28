@@ -77,6 +77,7 @@ public class FineractProperties {
 
     private FineractDatabaseProperties database;
     private FineractQueryProperties query;
+    private FineractHooksProperties hooks;
     private FineractApiProperties api;
     private FineractSecurityProperties security;
 
@@ -484,6 +485,13 @@ public class FineractProperties {
     public static class FineractQueryProperties {
 
         private int inClauseParameterSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractHooksProperties {
+
+        private boolean allowPrivateAddresses;
     }
 
     @Getter

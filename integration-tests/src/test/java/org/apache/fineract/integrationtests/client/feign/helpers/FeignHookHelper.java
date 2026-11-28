@@ -63,13 +63,22 @@ public class FeignHookHelper {
     }
 
     public HookUpdateResponse updateHook(Long hookId, String payloadUrl) {
-        HookUpdateRequest request = new HookUpdateRequest()//
+        final HookUpdateRequest request = hookUpdateRequest(payloadUrl);
+        return ok(() -> fineractClient.hooks().updateHook(hookId, request));
+    }
+
+    public CallFailedRuntimeException updateHookExpectingError(Long hookId, String payloadUrl) {
+        final HookUpdateRequest request = hookUpdateRequest(payloadUrl);
+        return fail(() -> fineractClient.hooks().updateHook(hookId, request));
+    }
+
+    private HookUpdateRequest hookUpdateRequest(String payloadUrl) {
+        return new HookUpdateRequest()//
                 .name(HookApiConstants.webTemplateName)//
                 .displayName(Utils.randomStringGenerator("Hook_DisplayName_", 5))//
                 .isActive(true)//
                 .config(webHookConfig(payloadUrl))//
                 .events(officeCreatedEvents());
-        return ok(() -> fineractClient.hooks().updateHook(hookId, request));
     }
 
     public HookDeleteResponse deleteHook(Long hookId) {

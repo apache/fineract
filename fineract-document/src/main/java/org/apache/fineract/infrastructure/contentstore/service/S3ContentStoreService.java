@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.contentstore.policy.DefaultPostUploadC
 import org.apache.fineract.infrastructure.contentstore.policy.DefaultPreUploadContentPolicy;
 import org.apache.fineract.infrastructure.contentstore.util.ContentPathSanitizer;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -57,11 +58,17 @@ public class S3ContentStoreService implements ContentStoreService {
     private final ContentDetectorManager contentDetectorManager;
     private final FineractProperties properties;
 
+    /**
+     * New objects are stored below "tenants/&lt;tenant identifier&gt;/". Locations stored before that was introduced
+     * have no such prefix and are used as they are.
+     */
+    static final String TENANT_KEY_ROOT = "tenants";
+
     @Override
     public InputStream download(String path) {
         downloadContentPolicy.check(ContentPolicyContext.builder().path(path).build());
 
-        final var safePath = pathSanitizer.sanitize(path);
+        final var safePath = checkLocation(pathSanitizer.sanitize(path));
 
         try {
             return s3Client
@@ -81,6 +88,11 @@ public class S3ContentStoreService implements ContentStoreService {
         preUploadContentPolicy.check(ContentPolicyContext.builder().path(path).mimeType(mimeType).build());
 
         var safePath = pathSanitizer.sanitize(path);
+        checkLocation(safePath);
+        final var tenantPrefix = getTenantPrefix();
+        if (!safePath.startsWith(tenantPrefix)) {
+            safePath = tenantPrefix + safePath;
+        }
 
         try {
             final var p = safePath;
@@ -110,13 +122,39 @@ public class S3ContentStoreService implements ContentStoreService {
     public void delete(String path) {
         deleteContentPolicy.check(ContentPolicyContext.builder().path(path).build());
 
-        final var safePath = pathSanitizer.sanitize(path);
+        final var safePath = checkLocation(pathSanitizer.sanitize(path));
 
         try {
             s3Client.deleteObject(builder -> builder.bucket(properties.getContent().getS3().getBucketName()).key(safePath));
         } catch (Exception e) {
             throw new ContentStoreException(e);
         }
+    }
+
+    private String getTenantPrefix() {
+        final var tenant = ThreadLocalContextUtil.getTenant();
+        if (tenant == null) {
+            throw new ContentStoreException(new IllegalStateException("No tenant is set for the current request"));
+        }
+        final var tenantIdentifier = tenant.getTenantIdentifier();
+        if (tenantIdentifier == null || tenantIdentifier.isBlank() || tenantIdentifier.contains("/") || tenantIdentifier.contains("\\")
+                || tenantIdentifier.contains("..")) {
+            throw new ContentStoreException(new IllegalStateException("Tenant identifier cannot be used as an object key prefix"));
+        }
+        return TENANT_KEY_ROOT + getDelimiter() + tenantIdentifier + getDelimiter();
+    }
+
+    /**
+     * Makes sure a location can only address objects of the current tenant (or objects stored without a tenant prefix).
+     */
+    private String checkLocation(final String location) {
+        if (location.startsWith("/") || location.equals("..") || location.startsWith("../")) {
+            throw new ContentPolicyException(String.format("Invalid content location: %s", location));
+        }
+        if (location.startsWith(TENANT_KEY_ROOT + getDelimiter()) && !location.startsWith(getTenantPrefix())) {
+            throw new ContentPolicyException(String.format("Content location does not belong to the current tenant: %s", location));
+        }
+        return location;
     }
 
     @Override
