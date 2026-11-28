@@ -74,8 +74,8 @@ class AbstractLoanRepaymentScheduleTransactionProcessorChargeOrderTest {
         LoanCharge first = unpaidCharge(1L, DUE_DATE);
         LoanCharge second = unpaidCharge(2L, DUE_DATE);
 
-        assertThat(processor.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(second, first), CURRENCY)).isSameAs(first);
-        assertThat(processor.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(first, second), CURRENCY)).isSameAs(first);
+        assertThat(LoanChargeSelector.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(second, first), CURRENCY)).isSameAs(first);
+        assertThat(LoanChargeSelector.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(first, second), CURRENCY)).isSameAs(first);
     }
 
     @Test
@@ -83,7 +83,7 @@ class AbstractLoanRepaymentScheduleTransactionProcessorChargeOrderTest {
         LoanCharge saved = unpaidCharge(5L, DUE_DATE);
         LoanCharge unsaved = unpaidCharge(null, DUE_DATE);
 
-        assertThat(processor.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(unsaved, saved), CURRENCY)).isSameAs(saved);
+        assertThat(LoanChargeSelector.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(unsaved, saved), CURRENCY)).isSameAs(saved);
     }
 
     @Test
@@ -91,7 +91,7 @@ class AbstractLoanRepaymentScheduleTransactionProcessorChargeOrderTest {
         LoanCharge laterLowerId = unpaidCharge(1L, DUE_DATE.plusDays(1));
         LoanCharge earlierHigherId = unpaidCharge(2L, DUE_DATE);
 
-        assertThat(processor.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(laterLowerId, earlierHigherId), CURRENCY))
+        assertThat(LoanChargeSelector.findEarliestUnpaidChargeFromUnOrderedSet(orderedSet(laterLowerId, earlierHigherId), CURRENCY))
                 .isSameAs(earlierHigherId);
     }
 
