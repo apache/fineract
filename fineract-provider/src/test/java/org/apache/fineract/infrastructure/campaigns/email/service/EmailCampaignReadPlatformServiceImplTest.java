@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -41,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailBusinessRuleNotFound;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -61,6 +63,8 @@ class EmailCampaignReadPlatformServiceImplTest {
             left join stretchy_parameter sp
             on sp.id = srp.parameter_id
             where sr.report_type = ?""";
+
+    private static final String EXPECTED_SQL_ONE_TEMPLATE = EXPECTED_SQL + " and sr.id = ?";
 
     private final Connection connection = mock(Connection.class);
     private final PreparedStatement statement = mock(PreparedStatement.class);
@@ -171,6 +175,59 @@ class EmailCampaignReadPlatformServiceImplTest {
         assertEquals(1, executedSql.size());
         assertEquals(EXPECTED_SQL, executedSql.get(0));
         verify(statement).setString(1, "Email");
+    }
+
+    @Test
+    void retrieveOneTemplateGeneratesExpectedSqlAndBindsParametersOnPostgreSQL() throws SQLException {
+        Object[] row1 = new Object[] { 1, "Client Campaign", "Email", "ClientSub", "Description 1", "paramVar1", "text", "Office",
+                "officeId" };
+        Object[] row2 = new Object[] { 1, "Client Campaign", "Email", "ClientSub", "Description 1", "paramVar2", "text", "Date",
+                "dateParam" };
+        EmailCampaignReadPlatformServiceImpl service = service(PostgreSQLTemplates.builder().build(), row1, row2);
+
+        EmailBusinessRulesData data = service.retrieveOneTemplate(1L);
+
+        assertNotNull(data);
+        assertEquals(1L, data.getReportId());
+        assertEquals("Client Campaign", data.getReportName());
+        assertEquals("Email", data.getReportType());
+        assertEquals("ClientSub", data.getReportSubType());
+        assertEquals("Description 1", data.getReportDescription());
+        assertEquals(2, data.getReportParamName().size());
+        assertEquals("officeId", data.getReportParamName().get("Office"));
+        assertEquals("dateParam", data.getReportParamName().get("Date"));
+
+        assertEquals(1, executedSql.size());
+        assertEquals(EXPECTED_SQL_ONE_TEMPLATE, executedSql.get(0));
+        verify(statement).setString(1, "Email");
+        verify(statement).setInt(2, 1);
+    }
+
+    @Test
+    void retrieveOneTemplateGeneratesExpectedSqlAndBindsParametersOnMySQL() throws SQLException {
+        EmailCampaignReadPlatformServiceImpl service = service(MySQLTemplates.builder().build(),
+                new Object[] { 1, "Client Campaign", "Email", "ClientSub", "Description 1", "paramVar1", "text", "Office", "officeId" });
+
+        EmailBusinessRulesData data = service.retrieveOneTemplate(1L);
+
+        assertNotNull(data);
+        assertEquals(1L, data.getReportId());
+        assertEquals(1, executedSql.size());
+        assertEquals(EXPECTED_SQL_ONE_TEMPLATE, executedSql.get(0));
+        verify(statement).setString(1, "Email");
+        verify(statement).setInt(2, 1);
+    }
+
+    @Test
+    void retrieveOneTemplateThrowsWhenBusinessRuleDoesNotExist() throws SQLException {
+        EmailCampaignReadPlatformServiceImpl service = service(PostgreSQLTemplates.builder().build());
+
+        assertThrows(EmailBusinessRuleNotFound.class, () -> service.retrieveOneTemplate(99L));
+
+        assertEquals(1, executedSql.size());
+        assertEquals(EXPECTED_SQL_ONE_TEMPLATE, executedSql.get(0));
+        verify(statement).setString(1, "Email");
+        verify(statement).setInt(2, 99);
     }
 
     private EmailCampaignReadPlatformServiceImpl service(SQLTemplates templates, Object[]... rows) throws SQLException {
