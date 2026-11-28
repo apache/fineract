@@ -82,6 +82,8 @@ public class DataSourcePerTenantServiceFactoryTest {
     public static final long MASTER_DB_VALIDATION_INTERVAL = 500L;
     public static final long MASTER_DB_INIT_FAIL_TIMEOUT = 0L;
     public static final long MASTER_DB_LEAK_DETECTION_THRESHOLD = 20_000L;
+    public static final long MASTER_DB_MAX_LIFETIME = 300_000L;
+    public static final long MASTER_DB_KEEPALIVE_TIME = 60_000L;
 
     public static final String MASTER_DB_DRIVER_CLASS_NAME = "org.postgresql.Driver";
     public static final String MASTER_DB_CONN_TEST_QUERY = "SELECT 1";
@@ -159,6 +161,8 @@ public class DataSourcePerTenantServiceFactoryTest {
         given(tenantHikariConfig.getDataSourceProperties()).willReturn(mock(Properties.class));
         given(tenantHikariConfig.isAutoCommit()).willReturn(MASTER_DB_AUTO_COMMIT_ENABLED);
         given(tenantHikariConfig.getLeakDetectionThreshold()).willReturn(0L);
+        given(tenantHikariConfig.getMaxLifetime()).willReturn(MASTER_DB_MAX_LIFETIME);
+        given(tenantHikariConfig.getKeepaliveTime()).willReturn(MASTER_DB_KEEPALIVE_TIME);
 
         given(hikariDataSourceFactory.create(any())).willReturn(mock(HikariDataSource.class));
 
@@ -208,6 +212,40 @@ public class DataSourcePerTenantServiceFactoryTest {
         assertEquals(MASTER_DB_CONN_TEST_QUERY, hikariConfig.getConnectionTestQuery());
         assertEquals(MASTER_DB_AUTO_COMMIT_ENABLED, hikariConfig.isAutoCommit());
         assertEquals(0L, hikariConfig.getLeakDetectionThreshold());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldUseMasterMaxLifetimeAndKeepaliveTime() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+
+        // when
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, tenantConnection);
+
+        // then
+        assertNotNull(dataSource);
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertEquals(MASTER_DB_MAX_LIFETIME, hikariConfig.getMaxLifetime());
+        assertEquals(MASTER_DB_KEEPALIVE_TIME, hikariConfig.getKeepaliveTime());
+    }
+
+    @Test
+    void testCreateNewDataSourceFor_ShouldUseMasterMaxLifetimeAndKeepaliveTime_WhenInReadOnlyMode() {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+
+        // when
+        underTest.createNewDataSourceFor(TENANT, tenantConnection);
+
+        // then
+        verify(hikariDataSourceFactory).create(hikariConfigCaptor.capture());
+        HikariConfig hikariConfig = hikariConfigCaptor.getValue();
+        assertEquals(MASTER_DB_MAX_LIFETIME, hikariConfig.getMaxLifetime());
+        assertEquals(MASTER_DB_KEEPALIVE_TIME, hikariConfig.getKeepaliveTime());
     }
 
     @Test
