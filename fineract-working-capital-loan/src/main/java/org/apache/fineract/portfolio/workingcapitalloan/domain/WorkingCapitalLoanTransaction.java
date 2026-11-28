@@ -119,6 +119,8 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
      * a second row; keeping both sides in sync means the constraint no longer gets the chance, so the check lives here
      * instead. Callers that mean to re-allocate must mutate the existing allocation's portions, not build a new one.
      */
+    // Identity on purpose: attaching the same allocation instance again is fine, a different one is not
+    @SuppressWarnings("ReferenceEquality")
     void attachAllocation(final WorkingCapitalLoanTransactionAllocation allocation) {
         if (this.allocation != null && this.allocation != allocation) {
             throw new IllegalStateException("WC loan transaction " + getId() + " already has allocation " + this.allocation.getId()

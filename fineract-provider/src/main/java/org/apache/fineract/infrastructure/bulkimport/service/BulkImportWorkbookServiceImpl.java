@@ -50,6 +50,7 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreate
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.poi.openxml4j.util.ZipArchiveFakeEntry;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.tika.Tika;
@@ -94,6 +95,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                         && !fileType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
                     throw unreadableWorkbook(null);
                 }
+                BulkImportFileSizeCheck.requireReadablePartSizes(bytes, ZipArchiveFakeEntry.getMaxEntrySize());
                 Workbook workbook = readWorkbook(clonedInputStream);
                 final GlobalEntityType entityType = BulkImportTemplateLayout.findEntityType(entity).orElse(null);
                 if (entityType == null) {

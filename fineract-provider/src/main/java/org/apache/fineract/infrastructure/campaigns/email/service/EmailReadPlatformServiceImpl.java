@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.sql.SQLQueryFactory;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -36,19 +39,23 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.apache.fineract.query.QScheduledEmailMessagesOutbound;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final EmailMapper emailRowMapper = new EmailMapper();
     private final PaginationHelper paginationHelper;
+    private final SQLQueryFactory queryFactory;
+    private final QScheduledEmailMessagesOutbound emo = new QScheduledEmailMessagesOutbound("emo");
 
     private static final class EmailMapper implements RowMapper<EmailData> {
 
@@ -102,18 +109,46 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Collection<EmailData> retrieveAll() {
-        final String sql = "select " + this.emailRowMapper.schema();
-        return this.jdbcTemplate.query(sql, this.emailRowMapper); // NOSONAR
+        List<Tuple> rows = queryFactory.select(emo.id, emo.groupId, emo.clientId, emo.staffId, emo.campaignName, emo.statusEnum,
+                emo.emailAddress, emo.submittedonDate, emo.emailSubject, emo.message, emo.errorMessage).from(emo).fetch();
+        List<EmailData> result = new ArrayList<>(rows.size());
+        for (Tuple row : rows) {
+            result.add(mapRow(row));
+        }
+        return result;
+    }
+
+    private EmailData mapRow(Tuple row) {
+        Long id = row.get(emo.id);
+        Long groupId = row.get(emo.groupId);
+        Long clientId = row.get(emo.clientId);
+        Long staffId = row.get(emo.staffId);
+        String campaignName = row.get(emo.campaignName);
+        Integer statusId = row.get(emo.statusEnum);
+        String emailAddress = row.get(emo.emailAddress);
+        Date submittedonDate = row.get(emo.submittedonDate);
+        LocalDate sentDate = submittedonDate != null ? submittedonDate.toLocalDate() : null;
+        String emailSubject = row.get(emo.emailSubject);
+        String message = row.get(emo.message);
+        String errorMessage = row.get(emo.errorMessage);
+
+        EnumOptionData status = statusId != null ? EmailMessageEnumerations.status(statusId) : null;
+
+        return EmailData.instance(id, groupId, clientId, staffId, status, emailAddress, emailSubject, message, null, null, null, null, null,
+                campaignName, sentDate, errorMessage);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EmailData retrieveOne(final Long resourceId) {
-        try {
-            final String sql = "select " + this.emailRowMapper.schema() + " where emo.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.emailRowMapper, new Object[] { resourceId }); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            throw new EmailNotFoundException(resourceId, e);
+        final Tuple row = queryFactory
+                .select(emo.id, emo.groupId, emo.clientId, emo.staffId, emo.campaignName, emo.statusEnum, emo.emailAddress,
+                        emo.submittedonDate, emo.emailSubject, emo.message, emo.errorMessage)
+                .from(emo).where(emo.id.eq(resourceId)).fetchOne();
+        if (row == null) {
+            throw new EmailNotFoundException(resourceId);
         }
+        return mapRow(row);
     }
 
     @Override

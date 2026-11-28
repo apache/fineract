@@ -563,6 +563,9 @@ public class LoanTransactionsApiResource {
             case capitalizedIncomeAmortizationAdjustment -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT;
             case buyDownFeeAmortization -> LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION;
             case buyDownFeeAmortizationAdjustment -> LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT;
+            case deferredCharge -> LoanTransactionType.DEFERRED_CHARGE;
+            case deferredChargeAmortization -> LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION;
+            case deferredChargeAmortizationAdjustment -> LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT;
             default ->
                 throw new InvalidLoanTransactionTypeException("transaction", transactionTypeParam.name(), "Unknown transaction type");
         };

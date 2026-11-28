@@ -268,7 +268,7 @@ class GLAccountDetailIntegrationTest extends FeignIntegrationTest {
                 .type(new EnumOptionData().id(type.getValue().longValue()).code(type.getCode()).value(type.name()))
                 .usage(new EnumOptionData().id(usage.getValue().longValue()).code(usage.getCode()).value(usage.name()))
                 .nameDecorated(parent == null ? request.getName() : "...." + request.getName())
-                .tagId(new CodeValueData().id(tagId == null ? 0L : tagId).name(tagName));
+                .tagId(tagId == null ? null : new CodeValueData().id(tagId).name(tagName));
     }
 
     private static void assertAccountFields(final GetGLAccountsResponse expected, final GetGLAccountsResponse actual) {

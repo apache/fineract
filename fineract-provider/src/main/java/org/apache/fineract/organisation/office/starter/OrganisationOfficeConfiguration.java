@@ -27,12 +27,13 @@ import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.OfficeTransactionRepository;
 import org.apache.fineract.organisation.office.mapper.OfficeDataMapper;
-import org.apache.fineract.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.office.serialization.OfficeTransactionCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformServiceImpl;
 import org.apache.fineract.organisation.office.service.OfficeWritePlatformService;
 import org.apache.fineract.organisation.office.service.OfficeWritePlatformServiceJpaRepositoryImpl;
+import org.apache.fineract.organisation.office.service.OfficeWriteService;
+import org.apache.fineract.organisation.office.service.OfficeWriteServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,12 +54,16 @@ public class OrganisationOfficeConfiguration {
     @Bean
     @ConditionalOnMissingBean(OfficeWritePlatformService.class)
     public OfficeWritePlatformService officeWritePlatformService(PlatformSecurityContext context,
-            OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
             OfficeRepositoryWrapper officeRepositoryWrapper, OfficeTransactionRepository officeTransactionRepository,
             ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
-        return new OfficeWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer,
-                moneyTransferCommandFromApiJsonDeserializer, officeRepositoryWrapper, officeTransactionRepository,
-                applicationCurrencyRepository);
+        return new OfficeWritePlatformServiceJpaRepositoryImpl(context, moneyTransferCommandFromApiJsonDeserializer,
+                officeRepositoryWrapper, officeTransactionRepository, applicationCurrencyRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(OfficeWriteService.class)
+    public OfficeWriteService officeWriteService(PlatformSecurityContext context, OfficeRepositoryWrapper officeRepositoryWrapper) {
+        return new OfficeWriteServiceImpl(context, officeRepositoryWrapper);
     }
 }

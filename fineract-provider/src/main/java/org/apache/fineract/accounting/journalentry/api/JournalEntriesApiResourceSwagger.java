@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
@@ -31,6 +32,32 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 final class JournalEntriesApiResourceSwagger {
 
     private JournalEntriesApiResourceSwagger() {}
+
+    @Schema(name = "JournalEntryCommand")
+    public static final class PostJournalEntriesRequest {
+
+        private PostJournalEntriesRequest() {}
+
+        public Long officeId;
+        public String currencyCode;
+        public LocalDate transactionDate;
+        public String comments;
+        public String referenceNumber;
+        @Schema(description = "ID of the accounting rule to apply")
+        public Long accountingRule;
+        public BigDecimal amount;
+        public Long paymentTypeId;
+        public String accountNumber;
+        public String checkNumber;
+        public String receiptNumber;
+        public String bankNumber;
+        public String routingCode;
+        public SingleDebitOrCreditEntryCommand[] credits;
+        public SingleDebitOrCreditEntryCommand[] debits;
+        public String locale;
+        public String dateFormat;
+        public String externalAssetOwner;
+    }
 
     @Schema(description = "PostJournalEntriesResponse")
     public static final class PostJournalEntriesResponse {

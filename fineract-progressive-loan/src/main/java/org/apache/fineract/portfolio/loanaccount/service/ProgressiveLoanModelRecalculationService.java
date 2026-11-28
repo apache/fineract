@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
@@ -42,13 +43,22 @@ public class ProgressiveLoanModelRecalculationService {
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final LoanScheduleService loanScheduleService;
+    private final ILoanUtilService loanUtilService;
 
+    /**
+     * Rebuilds the model by regenerating the repayment schedule from the loan terms and replaying the transactions over
+     * it, the way the write requests that reprocess a loan do. The changes this makes to the loan are not kept: it runs
+     * in a read-only transaction of its own, and only the model is returned.
+     */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public ProgressiveLoanInterestScheduleModel getRecalculatedModel(Long loanId, LocalDate tillDate) {
         Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         LoanRepaymentScheduleTransactionProcessor transactionProcessor = transactionProcessorFactory
                 .determineProcessor(loan.getTransactionProcessingStrategyCode());
         if (transactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor) {
+            ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
+            loanScheduleService.regenerateScheduleForReprocessing(loan, scheduleGeneratorDTO);
             List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
             Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> result = advancedPaymentScheduleTransactionProcessor
                     .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), tillDate, loanTransactions, loan.getCurrency(),

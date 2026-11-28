@@ -18,35 +18,26 @@
  */
 package org.apache.fineract.adhocquery.starter;
 
+import com.querydsl.sql.SQLQueryFactory;
 import org.apache.fineract.adhocquery.domain.AdHocRepository;
 import org.apache.fineract.adhocquery.service.AdHocDataValidator;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformServiceImpl;
 import org.apache.fineract.adhocquery.service.AdHocWritePlatformService;
 import org.apache.fineract.adhocquery.service.AdHocWritePlatformServiceJpaRepositoryImpl;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class AdhocQueryConfiguration {
 
     @Bean
-    public AdHocReadPlatformServiceImpl.AdHocMapper adHocRowMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
-        return new AdHocReadPlatformServiceImpl.AdHocMapper(sqlGenerator);
-    }
-
-    @Bean
     @ConditionalOnMissingBean(AdHocReadPlatformService.class)
-    public AdHocReadPlatformService adHocReadPlatformService(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
-            AdHocReadPlatformServiceImpl.AdHocMapper adHocRowMapper) {
-        return new AdHocReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, adHocRowMapper) {
-
-        };
+    public AdHocReadPlatformService adHocReadPlatformService(SQLQueryFactory queryFactory) {
+        return new AdHocReadPlatformServiceImpl(queryFactory) {};
     }
 
     @Bean

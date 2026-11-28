@@ -90,6 +90,8 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
         }
     }
 
+    // Identity on purpose: tells which of the two delegates is the active one
+    @SuppressWarnings("ReferenceEquality")
     public Collection<CacheData> retrieveAll() {
 
         final boolean noCacheEnabled = currentCacheManager == defaultCacheManager;

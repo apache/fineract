@@ -25,16 +25,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
 
 @Entity
@@ -69,38 +65,23 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom<Lon
 
     }
 
-    public Map<String, Object> updateMap(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+    public void updateFromId(final Long fromId) {
+        this.fromId = fromId;
+    }
 
-        if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.fromEnityType, this.fromId)) {
-            final Long newValue = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
-            actualChanges.put(FineractEntityApiResourceConstants.fromEnityType, newValue);
-            this.fromId = newValue;
-        }
+    public void updateToId(final Long toId) {
+        this.toId = toId;
+    }
 
-        if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.toEntityType, this.toId)) {
-            final Long newValue = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
-            actualChanges.put(FineractEntityApiResourceConstants.toEntityType, newValue);
-            this.toId = newValue;
-        }
-
-        if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.startDate, this.startDate)) {
-            final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-            actualChanges.put(FineractEntityApiResourceConstants.startDate, valueAsInput);
-            this.startDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-        }
-
-        if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.endDate, this.endDate)) {
-            final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
-            actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
-            this.endDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
-        }
+    /**
+     * Changes the period of the mapping. The end date, when there is one, must not be before the start date.
+     */
+    public void updatePeriod(final LocalDate startDate, final LocalDate endDate) {
         if (endDate != null && DateUtils.isBefore(endDate, startDate)) {
             throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
         }
-
-        return actualChanges;
-
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     /*
@@ -111,5 +92,4 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom<Lon
     /*
      * public Date getStartDate() { return (Date) ObjectUtils.defaultIfNull(new Date(this.startDate), null); }
      */
-
 }

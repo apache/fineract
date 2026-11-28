@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import jakarta.persistence.FlushModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
@@ -69,6 +71,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.journalentry.LoanJournalEntryCreatedBusinessEvent;
@@ -108,6 +111,7 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final FlushModeHandler flushModeHandler;
 
     @Override
     public LoanDTO populateLoanDtoFromDTO(final AccountingBridgeDataDTO accountingBridgeData) {
@@ -1021,7 +1025,7 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
                 transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.SAVING.getValue(), savingsId, null, null,
                 savingsAccountTransactionId, null, null);
 
-        persistJournalEntry(journalEntry);
+        persistSavingsJournalEntry(journalEntry);
     }
 
     private void createCreditJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
@@ -1134,7 +1138,7 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
                 transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.SAVING.getValue(), savingsId, null, null,
                 savingsAccountTransactionId, null, null);
 
-        persistJournalEntry(journalEntry);
+        persistSavingsJournalEntry(journalEntry);
     }
 
     private void createDebitJournalEntryForClientPayments(final Office office, final String currencyCode, final GLAccount account,
@@ -1339,6 +1343,11 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
 
     private GLAccount getLinkedGLAccountForSavingsCharges(final Long savingsProductId, final int accountMappingTypeId,
             final Long chargeId) {
+        return readMappingWithoutFlush(() -> findLinkedGLAccountForSavingsCharges(savingsProductId, accountMappingTypeId, chargeId));
+    }
+
+    private GLAccount findLinkedGLAccountForSavingsCharges(final Long savingsProductId, final int accountMappingTypeId,
+            final Long chargeId) {
 
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(savingsProductId,
                 PortfolioProductType.SAVING.getValue(), accountMappingTypeId);
@@ -1369,6 +1378,11 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
     }
 
     private GLAccount getLinkedGLAccountForSavingsProduct(final Long savingsProductId, final int accountMappingTypeId,
+            final Long paymentTypeId) {
+        return readMappingWithoutFlush(() -> findLinkedGLAccountForSavingsProduct(savingsProductId, accountMappingTypeId, paymentTypeId));
+    }
+
+    private GLAccount findLinkedGLAccountForSavingsProduct(final Long savingsProductId, final int accountMappingTypeId,
             final Long paymentTypeId) {
         GLAccount glAccount;
         if (isOrganizationAccount(accountMappingTypeId)) {
@@ -1435,6 +1449,15 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             accountMapping = chargeSpecificIncomeAccountMapping;
         }
         return accountMapping.getGlAccount();
+    }
+
+    /**
+     * Reads GL account mappings without flushing the persistence context first. The mappings are configuration that
+     * posting never changes, so the flush only costs time: on a savings account with many transactions, flushing before
+     * every lookup made posting quadratic in the number of transactions.
+     */
+    private GLAccount readMappingWithoutFlush(final Supplier<GLAccount> lookup) {
+        return flushModeHandler.withFlushMode(FlushModeType.COMMIT, lookup);
     }
 
     private boolean isOrganizationAccount(final int accountMappingTypeId) {
@@ -1525,6 +1548,16 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
             businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanJournalEntryCreatedBusinessEvent(savedJournalEntry));
         }
         return savedJournalEntry;
+    }
+
+    /**
+     * Persists a savings journal entry without flushing it. No business event is raised for savings entries, and
+     * nothing reads their IDs during posting, so they are flushed together when posting for the account is done (see
+     * {@code JournalEntryWritePlatformServiceImpl#createJournalEntriesForSavings}). A flush per entry re-scanned the
+     * savings account and all its transactions each time, which made posting quadratic in the number of transactions.
+     */
+    private void persistSavingsJournalEntry(final JournalEntry journalEntry) {
+        this.glJournalEntryRepository.save(journalEntry);
     }
 
     private void createJournalEntriesForLoanChargesInternal(final Office office, final String currencyCode, final int accountMappingTypeId,

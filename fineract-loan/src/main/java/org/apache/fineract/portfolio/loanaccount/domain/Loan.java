@@ -1225,7 +1225,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public boolean isUserTransaction(LoanTransaction transaction) {
-        return !(transaction.isReversed() || transaction.isAccrualRelated() || transaction.isIncomePosting());
+        return !(transaction.isReversed() || transaction.isAccrualRelated() || transaction.isIncomePosting()
+                || transaction.isDeferredCharge());
     }
 
     public LocalDate getLastUserTransactionDateExcludingAmortization() {
@@ -1821,8 +1822,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public LoanTransaction getLastUserTransaction() {
         return getLoanTransactions().stream() //
-                .filter(t -> t.isNotReversed()
-                        && !(t.isAccrual() || t.isAccrualAdjustment() || t.isIncomePosting() || t.isAmortizationRelated())) //
+                .filter(t -> t.isNotReversed() && !(t.isAccrual() || t.isAccrualAdjustment() || t.isIncomePosting()
+                        || t.isAmortizationRelated() || t.isDeferredCharge())) //
                 .reduce((first, second) -> second) //
                 .orElse(null);
     }

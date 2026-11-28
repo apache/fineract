@@ -25,31 +25,31 @@
 
     <changeSet author="fineract" id="drop-index-1" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
-            <indexExists indexName="m_loan_transaction_transaction_type_enum_index"/>
+            <indexExists tableName="m_loan_transaction" indexName="m_loan_transaction_transaction_type_enum_index"/>
         </preConditions>
         <dropIndex indexName="m_loan_transaction_transaction_type_enum_index" tableName="m_loan_transaction"/>
     </changeSet>
     <changeSet author="fineract" id="drop-index-2" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
-            <indexExists indexName="m_loan_transaction_transaction_date_index"/>
+            <indexExists tableName="m_loan_transaction" indexName="m_loan_transaction_transaction_date_index"/>
         </preConditions>
         <dropIndex indexName="m_loan_transaction_transaction_date_index" tableName="m_loan_transaction"/>
     </changeSet>
     <changeSet author="fineract" id="drop-index-3" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
-            <indexExists indexName="m_loan_transaction_created_on_utc_index"/>
+            <indexExists tableName="m_loan_transaction" indexName="m_loan_transaction_created_on_utc_index"/>
         </preConditions>
         <dropIndex indexName="m_loan_transaction_created_on_utc_index" tableName="m_loan_transaction"/>
     </changeSet>
     <changeSet author="fineract" id="drop-index-4" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
-            <indexExists indexName="m_loan_transaction_is_reversed_index"/>
+            <indexExists tableName="m_loan_transaction" indexName="m_loan_transaction_is_reversed_index"/>
         </preConditions>
         <dropIndex indexName="m_loan_transaction_is_reversed_index" tableName="m_loan_transaction"/>
     </changeSet>
     <changeSet author="fineract" id="drop-index-5" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
-            <indexExists indexName="m_loan_transaction_submitted_on_date_index"/>
+            <indexExists tableName="m_loan_transaction" indexName="m_loan_transaction_submitted_on_date_index"/>
         </preConditions>
         <dropIndex indexName="m_loan_transaction_submitted_on_date_index" tableName="m_loan_transaction"/>
     </changeSet>

@@ -56,6 +56,8 @@ class EnumFromIntConsistencyTest {
         assertThat(enumsWithFromInt()).isNotEmpty();
     }
 
+    // Identity on purpose: fromInt must return the very enum constant
+    @SuppressWarnings("ReferenceEquality")
     @ParameterizedTest(name = "{0}")
     @MethodSource("enumsWithFromInt")
     void fromIntReturnsTheConstantOwningTheValue(Class<?> enumType) throws ReflectiveOperationException {

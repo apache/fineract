@@ -2027,6 +2027,23 @@ public class LoanProductsRequestFactory {
                 .paymentAllocation(createDefaultPaymentAllocation());
     }
 
+    /**
+     * LP2 EMI 360/30 with daily interest recalculation till pre-close and the default advanced payment allocation, the
+     * same settings as LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE
+     */
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2InterestRecalculationDailyTillPreClose() {
+        return defaultLoanProductsRequestLP2Emi()//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .paymentAllocation(createDefaultPaymentAllocation());
+    }
+
     public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiWithCreditAllocation(final List<CreditAllocationData> creditAllocation) {
         return defaultLoanProductsRequestLP2Emi()//
                 .daysInYearType(DaysInYearType.DAYS360.value)//

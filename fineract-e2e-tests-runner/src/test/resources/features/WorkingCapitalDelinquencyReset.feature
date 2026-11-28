@@ -27,10 +27,10 @@ Feature: Working Capital Delinquency Reset Action
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 5            | 2026-01-16  |              | D00            | 1              | 30             |
-      | 4            | 2026-01-16  |              | D00            | 1              | 30             |
-      | 3            | 2026-01-16  |              | D00            | 1              | 30             |
-      | 2            | 2026-01-16  |              | D00            | 1              | 30             |
-      | 1            | 2026-01-16  |              | D00            | 1              | 30             |
+      | 4            | 2026-01-13  |              | D00            | 1              | 30             |
+      | 3            | 2026-01-10  |              | D00            | 1              | 30             |
+      | 2            | 2026-01-07  |              | D00            | 1              | 30             |
+      | 1            | 2026-01-04  |              | D00            | 1              | 30             |
 #    --- Delinquency reset ---
     When Admin creates a Working Capital delinquency reset
     Then WC loan last delinquency action has the following data:
@@ -47,20 +47,20 @@ Feature: Working Capital Delinquency Reset Action
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 5            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 4            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 3            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 2            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 1            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
+      | 4            | 2026-01-13  | 2026-01-16   | D00            | 1              | 30             |
+      | 3            | 2026-01-10  | 2026-01-16   | D00            | 1              | 30             |
+      | 2            | 2026-01-07  | 2026-01-16   | D00            | 1              | 30             |
+      | 1            | 2026-01-04  | 2026-01-16   | D00            | 1              | 30             |
     When Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 6            | 2026-01-19  |              | D00            | 1              | 30             |
       | 5            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 4            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 3            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 2            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 1            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
+      | 4            | 2026-01-13  | 2026-01-16   | D00            | 1              | 30             |
+      | 3            | 2026-01-10  | 2026-01-16   | D00            | 1              | 30             |
+      | 2            | 2026-01-07  | 2026-01-16   | D00            | 1              | 30             |
+      | 1            | 2026-01-04  | 2026-01-16   | D00            | 1              | 30             |
 #   --- Delinquency reset undo ---
     When Admin creates Working Capital delinquency reset undo
     Then WC loan delinquency range schedule has the following periods:
@@ -81,10 +81,10 @@ Feature: Working Capital Delinquency Reset Action
       | 1            | 2026-01-20  |              | D00            | 1              | 30             |
       | 6            | 2026-01-19  |              | D00            | 1              | 30             |
       | 5            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 4            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 3            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 2            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
-      | 1            | 2026-01-16  | 2026-01-16   | D00            | 1              | 30             |
+      | 4            | 2026-01-13  | 2026-01-16   | D00            | 1              | 30             |
+      | 3            | 2026-01-10  | 2026-01-16   | D00            | 1              | 30             |
+      | 2            | 2026-01-07  | 2026-01-16   | D00            | 1              | 30             |
+      | 1            | 2026-01-04  | 2026-01-16   | D00            | 1              | 30             |
 #    --- Close loan ---
     When Admin closes the Working Capital loan with a full repayment on "20 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -1157,8 +1157,8 @@ Feature: Working Capital Delinquency Reset Action
       | 5            | 16 January 2026 | 18 January 2026 | 200            | 0          | 200               |                       |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
-      | 2            | 2026-01-08  | 2026-01-09   | D00            | 1              | 30             |
-      | 1            | 2026-01-08  | 2026-01-09   | D00            | 1              | 30             |
+      | 2            | 2026-01-07  | 2026-01-09   | D00            | 1              | 30             |
+      | 1            | 2026-01-04  | 2026-01-09   | D00            | 1              | 30             |
 #   --- Close loan ---
     Then Admin closes the Working Capital loan with a full repayment on "16 January 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

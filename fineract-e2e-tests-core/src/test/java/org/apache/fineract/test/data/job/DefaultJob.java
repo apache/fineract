@@ -31,7 +31,8 @@ public enum DefaultJob implements Job {
     RECALCULATE_INTEREST_FOR_LOANS("Recalculate Interest For Loans", "LA_RINT"), //
     WORKING_CAPITAL_LOAN_COB("Working Capital Loan COB", "WC_COB"), //
     JOURNAL_ENTRY_AGGREGATION("Journal Entry Aggregation", "JRNL_AGG"), //
-    RETAINED_EARNING("Retained Earning Job", "RE_ERNG"); //
+    RETAINED_EARNING("Retained Earning Job", "RE_ERNG"), //
+    UPDATE_NON_PERFORMING_ASSETS("Update Non Performing Assets", "LA_UNPA"); //
 
     private final String customName;
     private final String shortName;

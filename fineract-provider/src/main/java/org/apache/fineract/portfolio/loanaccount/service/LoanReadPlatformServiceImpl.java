@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +41,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -81,7 +79,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -124,6 +121,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final LoanRepaymentScheduleService loanRepaymentScheduleService;
     private final LoanAccountDataReadService loanAccountDataReadService;
     private final LoanTemplateReadPlatformService loanTemplateReadPlatformService;
+    private final LoanIdentifierResolverService loanIdentifierResolverService;
 
     @Override
     public LoanAccountData retrieveOne(Long loanId) {
@@ -532,12 +530,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public Long getLoanIdByLoanExternalId(String externalId) {
-        ExternalId loanExternalId = ExternalIdFactory.produce(externalId);
-        Long loanId = loanRepositoryWrapper.findIdByExternalId(loanExternalId);
-        if (Objects.isNull(loanId)) {
-            throw new LoanNotFoundException(loanExternalId);
-        }
-        return loanId;
+        return loanIdentifierResolverService.getLoanIdByLoanExternalId(externalId);
     }
 
     @Override
@@ -854,22 +847,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public Long retrieveLoanIdByAccountNumber(String loanAccountNumber) {
-        try {
-            return this.jdbcTemplate.queryForObject("select l.id from m_loan l where l.account_no = ?", Long.class, loanAccountNumber);
-
-        } catch (final EmptyResultDataAccessException e) {
-            return null;
-        }
+        return loanIdentifierResolverService.retrieveLoanIdByAccountNumber(loanAccountNumber);
     }
 
     @Override
     public String retrieveAccountNumberByAccountId(Long accountId) {
-        try {
-            final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, String.class, accountId);
-        } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(accountId, e);
-        }
+        return loanIdentifierResolverService.retrieveAccountNumberByAccountId(accountId);
     }
 
     @Override
@@ -880,48 +863,32 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public Long retrieveLoanTransactionIdByExternalId(ExternalId externalId) {
-        return loanTransactionRepository.findIdByExternalId(externalId);
+        return loanIdentifierResolverService.retrieveLoanTransactionIdByExternalId(externalId);
     }
 
     @Override
     public Long retrieveLoanIdByExternalId(ExternalId externalId) {
-        return loanRepositoryWrapper.findIdByExternalId(externalId);
+        return loanIdentifierResolverService.retrieveLoanIdByExternalId(externalId);
     }
 
     @Override
     public List<Long> retrieveLoanIdsByExternalIds(List<ExternalId> externalIds) {
-        return loanRepositoryWrapper.findIdByExternalIds(externalIds);
+        return loanIdentifierResolverService.retrieveLoanIdsByExternalIds(externalIds);
     }
 
     @Override
     public boolean existsByLoanId(Long loanId) {
-        return loanRepositoryWrapper.existsByLoanId(loanId);
+        return loanIdentifierResolverService.existsByLoanId(loanId);
     }
 
     @Override
     public Long getResolvedLoanId(final ExternalId loanExternalId) {
-        loanExternalId.throwExceptionIfEmpty();
-
-        final Long resolvedLoanId = retrieveLoanIdByExternalId(loanExternalId);
-
-        if (resolvedLoanId == null) {
-            throw new LoanNotFoundException(loanExternalId);
-        }
-
-        return resolvedLoanId;
+        return loanIdentifierResolverService.getResolvedLoanId(loanExternalId);
     }
 
     @Override
     public Long getResolvedLoanTransactionId(final Long transactionId, final ExternalId externalTransactionId) {
-        Long resolvedLoanTransactionId = transactionId;
-        if (resolvedLoanTransactionId == null) {
-            externalTransactionId.throwExceptionIfEmpty();
-            resolvedLoanTransactionId = retrieveLoanTransactionIdByExternalId(externalTransactionId);
-            if (resolvedLoanTransactionId == null) {
-                throw new LoanTransactionNotFoundException(externalTransactionId);
-            }
-        }
-        return resolvedLoanTransactionId;
+        return loanIdentifierResolverService.getResolvedLoanTransactionId(transactionId, externalTransactionId);
     }
 
 }

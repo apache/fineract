@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.accounting.glaccount.service;
 
+import static org.apache.fineract.query.QAccAccountingRule.accAccountingRule;
 import static org.apache.fineract.query.QAccGlAccount.accGlAccount;
+import static org.apache.fineract.query.QAccRuleTags.accRuleTags;
 import static org.apache.fineract.query.QMCodeValue.mCodeValue;
 
 import com.querydsl.core.types.dsl.Expressions;
@@ -26,23 +28,20 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountLookupProjection;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountProjection;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidClassificationException;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.query.QAccGlJournalEntry;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +56,6 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     private static final NumberExpression<Long> ORGANIZATION_RUNNING_BALANCE = Expressions.numberTemplate(Long.class, "{0}",
             BALANCE_ENTRY.organizationRunningBalance);
 
-    private final JdbcTemplate jdbcTemplate;
     private final SQLQueryFactory queryFactory;
 
     @Override
@@ -173,22 +171,15 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountDataForLookup> retrieveAccountsByTagId(final Long ruleId, final Integer transactionType) {
-        final GLAccountDataLookUpMapper mapper = new GLAccountDataLookUpMapper();
-        final String sql = "Select " + GLAccountDataLookUpMapper.LOOKUP_SCHEMA + " where rule.id=? and tags.acc_type_enum=?";
-        return this.jdbcTemplate.query(sql, mapper, ruleId, transactionType);
+        if (ruleId == null || transactionType == null) {
+            return new ArrayList<>();
+        }
+
+        return baseQuery().where(accAccountingRule.id.eq(ruleId), accRuleTags.accTypeEnum.eq(transactionType)).fetch();
     }
 
-    private static final class GLAccountDataLookUpMapper implements RowMapper<GLAccountDataForLookup> {
-
-        private static final String LOOKUP_SCHEMA = " gl.id as id, gl.name as name, gl.gl_code as glCode from acc_accounting_rule rule join acc_rule_tags tags on tags.acc_rule_id = rule.id join acc_gl_account gl on gl.tag_id=tags.tag_id";
-
-        @Override
-        public GLAccountDataForLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String name = rs.getString("name");
-            final String glCode = rs.getString("glCode");
-
-            return new GLAccountDataForLookup().setId(id).setName(name).setGlCode(glCode);
-        }
+    private SQLQuery<GLAccountDataForLookup> baseQuery() {
+        return queryFactory.select(new GLAccountLookupProjection()).from(accAccountingRule).join(accRuleTags)
+                .on(accRuleTags.accRuleId.eq(accAccountingRule.id)).join(accGlAccount).on(accGlAccount.tagId.eq(accRuleTags.tagId));
     }
 }

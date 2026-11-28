@@ -117,6 +117,7 @@ public class LoanClosureWritePlatformServiceImpl implements LoanClosureWritePlat
     private final LoanBalanceService loanBalanceService;
     private final LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier;
     private final LoanWriteServiceHelper loanWriteServiceHelper;
+    private final LoanCounterService loanCounterService;
 
     @Transactional
     @Override
@@ -151,8 +152,8 @@ public class LoanClosureWritePlatformServiceImpl implements LoanClosureWritePlat
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.WRITE_OFF.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
-        loanWriteServiceHelper.removeLoanCycle(loan);
-        loanWriteServiceHelper.updateLoanCounters(loan, loan.getDisbursementDate());
+        loanCounterService.removeLoanCycle(loan);
+        loanCounterService.updateLoanCounters(loan, loan.getDisbursementDate());
 
         LocalDate recalculateFrom = null;
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -227,7 +228,7 @@ public class LoanClosureWritePlatformServiceImpl implements LoanClosureWritePlat
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        loanWriteServiceHelper.updateLoanCounters(loan, loan.getDisbursementDate());
+        loanCounterService.updateLoanCounters(loan, loan.getDisbursementDate());
 
         LocalDate recalculateFrom = null;
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -312,7 +313,7 @@ public class LoanClosureWritePlatformServiceImpl implements LoanClosureWritePlat
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
                     "Loan: " + loanId + " Close as rescheduled is not allowed. Loan Account is Charged-off", loanId);
         }
-        loanWriteServiceHelper.removeLoanCycle(loan);
+        loanCounterService.removeLoanCycle(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanCloseAsRescheduleBusinessEvent(loan));
 
         final Map<String, Object> changes = new LinkedHashMap<>();

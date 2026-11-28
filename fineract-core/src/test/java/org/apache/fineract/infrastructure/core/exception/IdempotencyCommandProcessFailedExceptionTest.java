@@ -29,7 +29,6 @@ import java.util.Map;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exceptionmapper.IdempotentCommandExceptionMapper;
@@ -60,7 +59,7 @@ public class IdempotencyCommandProcessFailedExceptionTest {
         IdempotentCommandExceptionMapper mapper = new IdempotentCommandExceptionMapper();
         CommandWrapper command = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null);
-        CommandSource source = CommandSource.fullEntryFrom(command, JsonCommand.from("{}"), null, "dummy-key", null, false);
+        CommandSource source = CommandSource.builder().commandAsJson("{}").idempotencyKey("dummy-key").build();
         IdempotentCommandProcessFailedException exception = new IdempotentCommandProcessFailedException(command, null, source);
         Response result = mapper.toResponse(exception);
         assertEquals(500, result.getStatus());

@@ -26,7 +26,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -82,7 +81,8 @@ class AppUserUpdateOfficeLinkedStaffTest {
 
         when(context.authenticatedUser(any(CommandWrapper.class))).thenReturn(mock(AppUser.class));
         when(appUserRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        when(user.update(command, platformPasswordEncoder)).thenReturn(Map.of("officeId", NEW_OFFICE_ID));
+        when(command.isChangeInLongParameterNamed("officeId", NEW_OFFICE_ID)).thenReturn(true);
+        when(command.longValueOfParameterNamed("officeId")).thenReturn(NEW_OFFICE_ID);
         when(officeRepositoryWrapper.findOneWithNotFoundDetection(NEW_OFFICE_ID)).thenReturn(newOffice);
         when(user.getOffice()).thenReturn(newOffice);
         when(user.getStaffId()).thenReturn(STAFF_ID);

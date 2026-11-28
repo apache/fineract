@@ -173,6 +173,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
     private final LoanDownPaymentFeeEventNotifier loanDownPaymentFeeEventNotifier;
     private final LoanAccountService loanAccountService;
     private final LoanWriteServiceHelper loanWriteServiceHelper;
+    private final LoanCounterService loanCounterService;
 
     @Transactional
     @Override
@@ -250,7 +251,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
                 .isPaymentTypeApplicableForDisbursementCharge();
 
         // Recalculate first repayment date based in actual disbursement date.
-        loanWriteServiceHelper.updateLoanCounters(loan, actualDisbursementDate);
+        loanCounterService.updateLoanCounters(loan, actualDisbursementDate);
         Money amountBeforeAdjust = loan.getPrincipal();
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
@@ -626,7 +627,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
             // assuming repayment schedule won't regenerate because expected
             // disbursement and actual disbursement happens on same date
             loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_DISBURSED);
-            loanWriteServiceHelper.updateLoanCounters(loan, actualDisbursementDate);
+            loanCounterService.updateLoanCounters(loan, actualDisbursementDate);
             if (canDisburse(loan)) {
                 Money amountBeforeAdjust = loan.getPrincipal();
                 Money disburseAmount = loanDisbursementService.adjustDisburseAmount(loan, command, actualDisbursementDate);
@@ -746,7 +747,7 @@ public class LoanDisbursementWritePlatformServiceImpl implements LoanDisbursemen
                     "Undo Loan: " + loanId + " disbursement is not allowed. Loan Account is Charged-off", loanId);
         }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
-        loanWriteServiceHelper.removeLoanCycle(loan);
+        loanCounterService.removeLoanCycle(loan);
 
         final LocalDate recalculateFrom = null;
         loan.setActualDisbursementDate(null);

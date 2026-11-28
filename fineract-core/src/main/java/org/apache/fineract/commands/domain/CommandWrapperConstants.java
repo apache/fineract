@@ -150,6 +150,7 @@ public final class CommandWrapperConstants {
     public static final String ACTION_CONTRACT_TERMINATION_UNDO = "CONTRACT_TERMINATION_UNDO";
     public static final String ACTION_LOAN_WITHDRAWAL = "LOAN_WITHDRAWAL";
     public static final String ACTION_LOAN_WITHDRAWAL_UNDO = "LOAN_WITHDRAWAL_UNDO";
+    public static final String ACTION_RECALCULATE = "RECALCULATE";
     public static final String ACTION_BUYDOWNFEE = "BUYDOWNFEE";
     public static final String ACTION_UPDATE_APPROVED_AMOUNT = "UPDATE_APPROVED_AMOUNT";
     public static final String ACTION_MANUAL_INTEREST_REFUND_TRANSACTION = "MANUAL_INTEREST_REFUND_TRANSACTION";
@@ -195,7 +196,6 @@ public final class CommandWrapperConstants {
     public static final String ENTITY_DISBURSEMENTDETAIL = "DISBURSEMENTDETAIL";
     public static final String ENTITY_GLIMLOAN = "GLIMLOAN";
     public static final String ENTITY_CODEVALUE = "CODEVALUE";
-    public static final String ENTITY_GLCLOSURE = "GLCLOSURE";
     public static final String ENTITY_PERIODICACCRUALACCOUNTING = "PERIODICACCRUALACCOUNTING";
     public static final String ENTITY_GLACCOUNT = "GLACCOUNT";
     public static final String ENTITY_JOURNALENTRY = "JOURNALENTRY";

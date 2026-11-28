@@ -172,6 +172,8 @@ class ProjectedAmortizationSchedulePrincipalAdjustmentTest {
      * would leave the projection disagreeing with the loan balance, which still owes the amount - and a credit balance
      * refund lands on an overpaid loan, so a date at or past maturity is the normal case rather than the exotic one.
      */
+    // Identity on purpose: every period except the last one
+    @SuppressWarnings("ReferenceEquality")
     @Test
     void clampsAnAdjustmentDatedBeyondTheTermOntoTheLastPeriod() {
         final ProjectedAmortizationScheduleModel model = model();

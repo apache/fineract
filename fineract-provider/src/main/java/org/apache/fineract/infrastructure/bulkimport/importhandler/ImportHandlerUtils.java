@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -54,8 +55,20 @@ import org.apache.poi.ss.util.CellReference;
 @Slf4j
 public final class ImportHandlerUtils {
 
+    private static final String NOT_A_NUMBER = " must be a number";
+    private static final String ROW_VALUE_MISSING = "A value in this row is missing or invalid";
+    private static final String ROW_NUMBER_INVALID = "A number in this row is empty or not a number";
+
     private ImportHandlerUtils() {
 
+    }
+
+    public static void logReadExcelError(final RuntimeException re, final Sheet sheet, final int rowIndex, final int statusCol,
+            final AtomicInteger errorCount) {
+        log.error("Problem occurred in readExcelFile function", re);
+        errorCount.incrementAndGet();
+        String errorMessage = getErrorMessage(re);
+        writeErrorMessage(sheet, rowIndex, errorMessage, statusCol);
     }
 
     public static Integer getNumberOfRows(Sheet sheet, int primaryColumn) {
@@ -102,9 +115,11 @@ public final class ImportHandlerUtils {
                             return ((Double) value.getNumberValue()).longValue();
                         } else if (value.getCellType() == CellType.STRING) {
                             String str = value.getStringValue();
-                            return StringUtils.isBlank(str) ? null : Long.parseLong(str.trim());
+                            return StringUtils.isBlank(str) ? null : parseLong(str.trim(), colIndex, row);
                         }
                     }
+                } catch (NumberFormatException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
@@ -114,18 +129,97 @@ public final class ImportHandlerUtils {
                 return ((Double) c.getNumericCellValue()).longValue();
             } else if (cachedType == CellType.STRING) {
                 String val = c.getStringCellValue().trim();
-                return StringUtils.isBlank(val) ? null : Long.parseLong(val);
+                return StringUtils.isBlank(val) ? null : parseLong(val, colIndex, row);
             } else if (cachedType == CellType.BLANK) {
                 return null;
             }
             return null;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return ((Double) c.getNumericCellValue()).longValue();
-        } else if (c.getCellType() == CellType.STRING && StringUtils.isNotBlank(c.getStringCellValue())) {
-            return Long.parseLong(c.getStringCellValue().trim());
+        } else if (c.getCellType() == CellType.STRING) {
+            String text = c.getStringCellValue().trim();
+            if (StringUtils.isBlank(text)) {
+                return null;
+            }
+            return parseLong(text, colIndex, row);
         } else {
             return null;
         }
+    }
+
+    private static Long parseLong(String text, int colIndex, Row row) {
+        try {
+            return Long.parseLong(text);
+        } catch (NumberFormatException ex) {
+            throw notANumber(colIndex, row, ex);
+        }
+    }
+
+    private static Integer parseInt(String text, int colIndex, Row row) {
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException ex) {
+            throw notANumber(colIndex, row, ex);
+        }
+    }
+
+    private static Double parseDouble(String text, int colIndex, Row row) {
+        try {
+            return Double.parseDouble(text);
+        } catch (NumberFormatException ex) {
+            throw notANumber(colIndex, row, ex);
+        }
+    }
+
+    public static String columnLabel(int colIndex, Row row) {
+        Row header = row.getSheet().getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
+        Cell cell = header == null ? null : header.getCell(colIndex);
+        String label = cell != null && cell.getCellType() == CellType.STRING ? cell.getStringCellValue().trim() : "";
+        label = StringUtils.removeEnd(label, "*").trim();
+        return label.isEmpty() ? "Column " + CellReference.convertNumToColString(colIndex) : label;
+    }
+
+    private static CellNotANumberException notANumber(int colIndex, Row row, NumberFormatException cause) {
+        CellNotANumberException exception = new CellNotANumberException(columnLabel(colIndex, row) + NOT_A_NUMBER);
+        exception.initCause(cause);
+        return exception;
+    }
+
+    public static String readAsDigits(int colIndex, Row row, String label) {
+        Cell c = row.getCell(colIndex);
+        if (c != null && (c.getCellType() == CellType.NUMERIC
+                || (c.getCellType() == CellType.FORMULA && c.getCachedFormulaResultType() == CellType.NUMERIC))) {
+            Long number = readAsLong(colIndex, row);
+            return number == null ? null : number.toString();
+        }
+        String text = readAsString(colIndex, row);
+        if (StringUtils.isBlank(text)) {
+            return null;
+        }
+        String digits = StringUtils.removeStart(text, "+");
+        if (!digits.matches("[0-9]+")) {
+            throw new IllegalArgumentException(label + " must contain digits only");
+        }
+        return digits;
+    }
+
+    public static Long readDropdownId(int colIndex, Row row) {
+        String value = readAsString(colIndex, row);
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        String id = StringUtils.substringAfterLast(value, "-").trim();
+        if (!id.matches("[0-9]+")) {
+            throw new IllegalArgumentException(columnLabel(colIndex, row) + " '" + value.trim() + "' not found");
+        }
+        return Long.parseLong(id);
+    }
+
+    public static Long requireLookupId(Long id, String label, String name) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(name == null ? label + " is mandatory" : label + " '" + name + "' not found");
+        }
+        return id;
     }
 
     public static String readAsString(int colIndex, Row row) {
@@ -307,9 +401,11 @@ public final class ImportHandlerUtils {
                             return ((Double) value.getNumberValue()).intValue();
                         } else if (value.getCellType() == CellType.STRING) {
                             String str = value.getStringValue();
-                            return StringUtils.isBlank(str) ? null : Integer.parseInt(str.trim());
+                            return StringUtils.isBlank(str) ? null : parseInt(str.trim(), colIndex, row);
                         }
                     }
+                } catch (NumberFormatException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
@@ -319,15 +415,19 @@ public final class ImportHandlerUtils {
                 return ((Double) c.getNumericCellValue()).intValue();
             } else if (cachedType == CellType.STRING) {
                 String val = c.getStringCellValue().trim();
-                return StringUtils.isBlank(val) ? null : Integer.parseInt(val);
+                return StringUtils.isBlank(val) ? null : parseInt(val, colIndex, row);
             } else if (cachedType == CellType.BLANK) {
                 return null;
             }
             return null;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return ((Double) c.getNumericCellValue()).intValue();
-        } else if (c.getCellType() == CellType.STRING && StringUtils.isNotBlank(c.getStringCellValue())) {
-            return Integer.parseInt(c.getStringCellValue().trim());
+        } else if (c.getCellType() == CellType.STRING) {
+            String text = c.getStringCellValue().trim();
+            if (StringUtils.isBlank(text)) {
+                return null;
+            }
+            return parseInt(text, colIndex, row);
         } else {
             return null;
         }
@@ -350,9 +450,11 @@ public final class ImportHandlerUtils {
                             return value.getNumberValue();
                         } else if (value.getCellType() == CellType.STRING) {
                             String str = value.getStringValue();
-                            return StringUtils.isBlank(str) ? 0.0 : Double.parseDouble(str.trim());
+                            return StringUtils.isBlank(str) ? 0.0 : parseDouble(str.trim(), colIndex, row);
                         }
                     }
+                } catch (NumberFormatException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.error("Cell evaluation error: ", e);
                 }
@@ -362,15 +464,19 @@ public final class ImportHandlerUtils {
                 return c.getNumericCellValue();
             } else if (cachedType == CellType.STRING) {
                 String val = c.getStringCellValue().trim();
-                return StringUtils.isBlank(val) ? 0.0 : Double.parseDouble(val);
+                return StringUtils.isBlank(val) ? 0.0 : parseDouble(val, colIndex, row);
             } else if (cachedType == CellType.BLANK) {
                 return 0.0;
             }
             return 0.0;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return row.getCell(colIndex).getNumericCellValue();
-        } else if (c.getCellType() == CellType.STRING && StringUtils.isNotBlank(c.getStringCellValue())) {
-            return Double.parseDouble(c.getStringCellValue().trim());
+        } else if (c.getCellType() == CellType.STRING) {
+            String text = c.getStringCellValue().trim();
+            if (StringUtils.isBlank(text)) {
+                return 0.0;
+            }
+            return parseDouble(text, colIndex, row);
         } else {
             return 0.0;
         }
@@ -436,6 +542,10 @@ public final class ImportHandlerUtils {
         } else if (re instanceof UnsupportedParameterException) {
             UnsupportedParameterException unsupportedParameterException = (UnsupportedParameterException) re;
             return getErrorList(unsupportedParameterException.getUnsupportedParameters());
+        } else if (re instanceof NullPointerException) {
+            return ROW_VALUE_MISSING;
+        } else if (re instanceof NumberFormatException && !(re instanceof CellNotANumberException)) {
+            return ROW_NUMBER_INVALID;
         } else {
             if (re.getMessage() != null) {
                 return re.getMessage();

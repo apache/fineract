@@ -151,6 +151,11 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.POST, "/api/*/paymenttypes", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PAYMENTTYPE"),
             rule(HttpMethod.PUT, "/api/*/paymenttypes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_PAYMENTTYPE"),
             rule(HttpMethod.DELETE, "/api/*/paymenttypes/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE"),
+            // accounting closure
+            rule(HttpMethod.GET, "/api/*/glclosures/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_GLCLOSURE"),
+            rule(HttpMethod.POST, "/api/*/glclosures", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GLCLOSURE"),
+            rule(HttpMethod.PUT, "/api/*/glclosures/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GLCLOSURE"),
+            rule(HttpMethod.DELETE, "/api/*/glclosures/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GLCLOSURE"),
             // product mix
             rule(HttpMethod.GET, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_PRODUCTMIX"),
             rule(HttpMethod.POST, "/api/*/loanproducts/*/productmix", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_PRODUCTMIX"),
@@ -176,6 +181,10 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.GET, "/api/*/staff/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STAFF"),
             rule(HttpMethod.POST, "/api/*/staff/**", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STAFF"),
             rule(HttpMethod.PUT, "/api/*/staff/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STAFF"),
+            // office
+            rule(HttpMethod.POST, "/api/*/offices", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_OFFICE"),
+            rule(HttpMethod.PUT, "/api/*/offices/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_OFFICE"),
+            rule(HttpMethod.PUT, "/api/*/offices/external-id/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_OFFICE"),
             // meeting
             rule(HttpMethod.GET, "/api/*/*/*/meetings/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_MEETING"),
             rule(HttpMethod.POST, "/api/*/*/*/meetings", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MEETING"),
@@ -249,6 +258,10 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.POST, "/api/*/*/*/calendars", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CALENDAR"),
             rule(HttpMethod.PUT, "/api/*/*/*/calendars/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CALENDAR"),
             rule(HttpMethod.DELETE, "/api/*/*/*/calendars/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CALENDAR"),
+            // client identifier
+            rule(HttpMethod.POST, "/api/*/clients/*/identifiers", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTIDENTIFIER"),
+            rule(HttpMethod.PUT, "/api/*/clients/*/identifiers/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTIDENTIFIER"),
+            rule(HttpMethod.DELETE, "/api/*/clients/*/identifiers/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTIDENTIFIER"),
             // share accounts and share products
             rule(HttpMethod.GET, "/api/*/accounts/*/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREACCOUNT"),
             rule(HttpMethod.GET, "/api/*/products/*/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREPRODUCT"),

@@ -21,7 +21,9 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +96,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             this.fromApiJsonDeserializer.validate(command.json());
 
-            final Report report = Report.fromJson(command, this.reportingProcessServiceProvider.findAllReportingTypes());
+            final Report report = newReport(command, this.reportingProcessServiceProvider.findAllReportingTypes());
             final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
             report.update(reportParameterUsages);
 
@@ -129,7 +131,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
             final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
             final String previousReportName = report.getReportName();
 
-            final Map<String, Object> changes = report.update(command, this.reportingProcessServiceProvider.findAllReportingTypes());
+            final Map<String, Object> changes = applyChanges(report, command, this.reportingProcessServiceProvider.findAllReportingTypes());
 
             if (changes.containsKey("reportName")) {
                 final Permission permission = this.permissionRepository.findOneByCode("READ" + "_" + previousReportName);
@@ -205,6 +207,90 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         return new CommandProcessingResultBuilder() //
                 .withEntityId(reportId) //
                 .build();
+    }
+
+    private static Report newReport(final JsonCommand command, final Collection<String> reportTypes) {
+        final String reportName = optionalString(command, "reportName");
+        final String reportType = optionalString(command, "reportType");
+        final String reportSubType = optionalString(command, "reportSubType");
+        final String reportCategory = optionalString(command, "reportCategory");
+        final String description = optionalString(command, "description");
+        final boolean useReport = command.parameterExists("useReport") && command.booleanPrimitiveValueOfParameterNamed("useReport");
+        final String reportSql = optionalString(command, "reportSql");
+
+        return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql, reportTypes);
+    }
+
+    private static String optionalString(final JsonCommand command, final String paramName) {
+        return command.parameterExists(paramName) ? command.stringValueOfParameterNamed(paramName) : null;
+    }
+
+    private static Map<String, Object> applyChanges(final Report report, final JsonCommand command, final Collection<String> reportTypes) {
+        final Map<String, Object> changes = new LinkedHashMap<>(8);
+
+        String paramName = "reportName";
+        if (command.isChangeInStringParameterNamed(paramName, report.getReportName())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateReportName(newValue);
+        }
+        paramName = "reportType";
+        if (command.isChangeInStringParameterNamed(paramName, report.getReportType())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateReportType(newValue);
+        }
+        paramName = "reportSubType";
+        if (command.isChangeInStringParameterNamed(paramName, report.getReportSubType())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateReportSubType(newValue);
+        }
+        paramName = "reportCategory";
+        if (command.isChangeInStringParameterNamed(paramName, report.getReportCategory())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateReportCategory(newValue);
+        }
+        paramName = "description";
+        if (command.isChangeInStringParameterNamed(paramName, report.getDescription())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateDescription(newValue);
+        }
+        paramName = "useReport";
+        if (command.isChangeInBooleanParameterNamed(paramName, report.isUseReport())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateUseReport(newValue);
+        }
+        paramName = "reportSql";
+        if (command.isChangeInStringParameterNamed(paramName, report.getReportSql())) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            changes.put(paramName, newValue);
+            report.updateReportSql(newValue);
+        }
+
+        final String reportParametersParamName = "reportParameters";
+        if (command.hasParameter(reportParametersParamName)) {
+            final JsonArray jsonArray = command.arrayOfParameterNamed(reportParametersParamName);
+            if (jsonArray != null) {
+                changes.put(reportParametersParamName, command.jsonFragment(reportParametersParamName));
+            }
+        }
+
+        report.validate(reportTypes);
+
+        if (!changes.isEmpty() && report.isCoreReport()) {
+            for (final String key : changes.keySet()) {
+                if (!key.equals("useReport")) {
+                    throw new PlatformDataIntegrityException("error.msg.only.use.report.can.be.updated.for.core.report",
+                            "Only the Use Report field can be updated for Core Reports", key);
+                }
+            }
+        }
+
+        return changes;
     }
 
     /*

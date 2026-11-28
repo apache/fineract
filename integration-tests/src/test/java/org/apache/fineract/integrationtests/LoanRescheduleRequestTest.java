@@ -22,11 +22,13 @@ import static org.apache.fineract.integrationtests.common.loans.LoanProductTestB
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -44,6 +46,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -191,6 +194,111 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
     public void testCreateLoanRescheduleRequest() {
         this.createRequiredEntities();
         this.createLoanRescheduleRequest();
+    }
+
+    @Test
+    public void testRetrieveAllRescheduleRequestsFiltersAndMapsRows() {
+        runAt(dateString, () -> {
+            List<Long> existingRequests = rescheduleRequestIds(retrieveRescheduleRequests(null, null));
+            List<Long> existingPendingRequests = rescheduleRequestIds(retrieveRescheduleRequests("pending", null));
+            List<Long> existingApprovedRequests = rescheduleRequestIds(retrieveRescheduleRequests("approve", null));
+
+            createRequiredEntities();
+            Long rejectedRequestId = createRescheduleRequest(defaultRescheduleRequest(loanId));
+            loanHelper.rejectRescheduleRequest(rejectedRequestId, new PostUpdateRescheduleLoansRequest().rejectedOnDate(dateString)
+                    .locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN));
+            createLoanRescheduleRequest();
+            Long pendingLoanId = loanId;
+            Long pendingRequestId = loanRescheduleRequestId;
+            GetLoanRescheduleRequestResponse pendingRequest = loanHelper.readRescheduleRequest(pendingRequestId, null);
+
+            createRequiredEntities();
+            createLoanRescheduleRequest();
+            Long approvedLoanId = loanId;
+            Long approvedRequestId = loanRescheduleRequestId;
+            approveRescheduleRequest(approvedRequestId, LoanRequestBuilders.approveReschedule(dateString));
+            GetLoanRescheduleRequestResponse approvedRequest = loanHelper.readRescheduleRequest(approvedRequestId, null);
+
+            createRequiredEntities();
+            Long loanWithoutRequestsId = loanId;
+
+            existingRequests.addAll(List.of(rejectedRequestId, pendingRequestId, approvedRequestId));
+            existingPendingRequests.add(pendingRequestId);
+            existingApprovedRequests.add(approvedRequestId);
+            assertRescheduleRequestIds(retrieveRescheduleRequests(null, null), existingRequests);
+            assertRescheduleRequestIds(retrieveRescheduleRequests("all", null), existingRequests);
+            assertRescheduleRequestIds(retrieveRescheduleRequests("ALL", null), existingRequests);
+            assertRescheduleRequestIds(retrieveRescheduleRequests("pending", null), existingPendingRequests);
+            assertRescheduleRequestIds(retrieveRescheduleRequests("ApPrOvE", null), existingApprovedRequests);
+            assertRescheduleRequestIds(retrieveRescheduleRequests(null, pendingLoanId), List.of(rejectedRequestId, pendingRequestId));
+            assertRescheduleRequestIds(retrieveRescheduleRequests("all", approvedLoanId), List.of(approvedRequestId));
+
+            List<GetLoanRescheduleRequestResponse> pending = retrieveRescheduleRequests("pending", pendingLoanId);
+            assertRescheduleRequestIds(pending, List.of(pendingRequestId));
+            assertRescheduleRequestSummary(pendingRequest, pending.getFirst());
+            List<GetLoanRescheduleRequestResponse> approved = retrieveRescheduleRequests("approve", approvedLoanId);
+            assertRescheduleRequestIds(approved, List.of(approvedRequestId));
+            assertRescheduleRequestSummary(approvedRequest, approved.getFirst());
+
+            assertRescheduleRequestIds(retrieveRescheduleRequests("approve", pendingLoanId), List.of());
+            assertRescheduleRequestIds(retrieveRescheduleRequests("pending", approvedLoanId), List.of());
+            assertRescheduleRequestIds(retrieveRescheduleRequests(null, loanWithoutRequestsId), List.of());
+            // Preserve the legacy reject filter (300), although rejected requests are stored with status 500.
+            assertRescheduleRequestIds(retrieveRescheduleRequests("reject", pendingLoanId), List.of());
+        });
+    }
+
+    @Test
+    public void testRetrieveRescheduleRequestsForGroupLoanWithoutIndividualClient() {
+        runAt(dateString, () -> {
+            createClientEntity();
+            createLoanProductEntity();
+            FeignGroupHelper groupHelper = new FeignGroupHelper(fineractClient());
+            Long groupId = groupHelper.createActiveGroup().getResourceId();
+            groupHelper.associateClient(groupId, clientId);
+            loanId = applyForLoan(LoanRequestBuilders.applyLoan(null, loanProductId, dateString, loanPrincipalAmount, numberOfRepayments)
+                    .loanType("group").groupId(groupId).interestRatePerPeriod(BigDecimal.valueOf(interestRatePerPeriod))
+                    .interestType(LoanTestData.InterestType.FLAT)
+                    .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY));
+            approveLoanApplication();
+            disburseLoan();
+            createLoanRescheduleRequest();
+
+            List<GetLoanRescheduleRequestResponse> requests = retrieveRescheduleRequests("pending", loanId);
+
+            assertRescheduleRequestIds(requests, List.of(loanRescheduleRequestId));
+            GetLoanRescheduleRequestResponse request = requests.getFirst();
+            assertRescheduleRequestSummary(loanHelper.readRescheduleRequest(loanRescheduleRequestId, null), request);
+            assertEquals(0L, request.getClientId());
+            assertNull(request.getClientName());
+        });
+    }
+
+    private List<GetLoanRescheduleRequestResponse> retrieveRescheduleRequests(String command, Long loanId) {
+        return ok(() -> fineractClient().rescheduleLoans().retrieveAllRescheduleLoans(command, loanId));
+    }
+
+    private static List<Long> rescheduleRequestIds(List<GetLoanRescheduleRequestResponse> requests) {
+        return new ArrayList<>(requests.stream().map(GetLoanRescheduleRequestResponse::getId).toList());
+    }
+
+    private static void assertRescheduleRequestIds(List<GetLoanRescheduleRequestResponse> requests, List<Long> expectedIds) {
+        List<Long> remaining = rescheduleRequestIds(requests);
+        for (Long expectedId : expectedIds) {
+            assertTrue(remaining.remove(expectedId), "Missing reschedule request " + expectedId);
+        }
+        assertTrue(remaining.isEmpty(), "Unexpected or duplicate reschedule requests: " + remaining);
+    }
+
+    private static void assertRescheduleRequestSummary(GetLoanRescheduleRequestResponse expected, GetLoanRescheduleRequestResponse actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getLoanId(), actual.getLoanId());
+        assertEquals(expected.getLoanAccountNumber(), actual.getLoanAccountNumber());
+        assertEquals(expected.getClientId(), actual.getClientId());
+        assertEquals(expected.getClientName(), actual.getClientName());
+        assertEquals(expected.getStatusEnum(), actual.getStatusEnum());
+        assertEquals(expected.getRescheduleFromDate(), actual.getRescheduleFromDate());
+        assertEquals(expected.getRescheduleReasonCodeValue(), actual.getRescheduleReasonCodeValue());
     }
 
     @Test

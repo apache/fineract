@@ -330,7 +330,8 @@ public final class LoanChargeApiJsonValidator {
                             locale);
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.chargeIdParameterName,
                             loanChargeElement);
-                    final Long loanChargeId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.idParameterName, element);
+                    // Must read id from the charge array element (not the top-level loan payload).
+                    final Long loanChargeId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.idParameterName, loanChargeElement);
                     if (loanChargeId == null) {
                         baseDataValidator.reset().parameter(LoanApiConstants.chargesParameterName)
                                 .parameterAtIndexArray(LoanApiConstants.chargeIdParameterName, i).value(chargeId).notNull()
@@ -380,6 +381,14 @@ public final class LoanChargeApiJsonValidator {
                         final String errorMessage = "Charge and Loan must have the same currency.";
                         // TODO: GeneralPlatformDomainRuleException vs PlatformApiDataValidationException
                         throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
+                    }
+                    // Only for newly added charges. Existing loan charges keep their frozen config; the current
+                    // charge definition may have changed since creation and must not re-gate modify-application.
+                    if (loanChargeId == null && chargeDefinition.isAmortized()
+                            && !loanProduct.getLoanProductRelatedDetail().isEnableChargeAmortization()) {
+                        baseDataValidator.reset().parameter(LoanApiConstants.chargesParameterName).value(chargeId)
+                                .failWithCodeAndMessage("charge.amortization.not.enabled", "Amortized charge " + chargeId
+                                        + " can be added only to a loan whose product has charge amortization enabled");
                     }
                     if (chargeDefinition.isOverdueInstallment()) {
                         final String defaultUserMessage = "Installment charge cannot be added to the loan.";

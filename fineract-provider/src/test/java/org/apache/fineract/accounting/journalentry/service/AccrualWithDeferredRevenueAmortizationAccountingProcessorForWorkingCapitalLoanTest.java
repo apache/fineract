@@ -422,6 +422,8 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 eq(TXN_ID), any(), eq(new BigDecimal("50")), isNull());
     }
 
+    // Identity on purpose: tells the new reversal entries from the original ones, and the GL account mocks apart
+    @SuppressWarnings("ReferenceEquality")
     @Test
     void testCreditBalanceRefundReversalSwapsToFundSourceDebitAndOverpaymentCredit() {
         when(txn.getReversedOnDate()).thenReturn(LocalDate.of(2026, 5, 3));

@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.jobs.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class JobExecuteCommandHandler implements CommandHandler<JobExecuteReques
 
     private final JobRegisterService jobRegisterService;
 
+    @Retry(name = "commandJobExecute", fallbackMethod = "fallback")
     @Override
     public JobExecuteResponse handle(Command<JobExecuteRequest> command) {
         JobExecuteRequest req = command.getPayload();
@@ -46,5 +48,10 @@ public class JobExecuteCommandHandler implements CommandHandler<JobExecuteReques
         Set<JobParameterDTO> paramSet = (params == null || params.isEmpty()) ? Set.of() : new HashSet<>(params);
         jobRegisterService.executeJobWithParameters(req.getJobId(), paramSet);
         return JobExecuteResponse.builder().resourceId(req.getJobId()).build();
+    }
+
+    @Override
+    public JobExecuteResponse fallback(Command<JobExecuteRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

@@ -23,13 +23,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.organisation.office.command.OfficeCreateCommand;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -40,8 +43,9 @@ class OfficeImportHandlerRowErrorTest {
 
     @Test
     void invalidParentOfficeIdFailsOnlyItsOwnRow() throws IOException {
-        PortfolioCommandSourceWritePlatformService commands = mock(PortfolioCommandSourceWritePlatformService.class);
-        OfficeImportHandler handler = new OfficeImportHandler(commands);
+        CommandDispatcher dispatcher = mock(CommandDispatcher.class);
+        when(dispatcher.dispatch(any(OfficeCreateCommand.class))).thenReturn(OfficeCreateResponse::new);
+        OfficeImportHandler handler = new OfficeImportHandler(dispatcher);
 
         try (Workbook workbook = new HSSFWorkbook()) {
             Sheet sheet = workbook.createSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
@@ -60,7 +64,7 @@ class OfficeImportHandlerRowErrorTest {
             for (int rowIndex = 2; rowIndex <= 5; rowIndex++) {
                 assertThat(status(sheet, rowIndex)).isEqualTo("Parent OfficeId must be a positive number");
             }
-            verify(commands, times(1)).logCommandSource(any());
+            verify(dispatcher, times(1)).dispatch(any(OfficeCreateCommand.class));
         }
     }
 

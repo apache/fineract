@@ -41,7 +41,7 @@
             <tableExists tableName="m_wc_loan"/>
             <columnExists tableName="m_wc_loan" columnName="write_off_reason_cv_id"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_write_off_reason"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan" foreignKeyName="FK_m_wc_loan_write_off_reason"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="write_off_reason_cv_id" baseTableName="m_wc_loan"

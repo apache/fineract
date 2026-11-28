@@ -79,6 +79,9 @@ public class LoanTransactionEnumData implements Serializable, LoanTransactionTyp
     private final boolean buyDownFeeAdjustment;
     private final boolean buyDownFeeAmortization;
     private final boolean buyDownFeeAmortizationAdjustment;
+    private final boolean deferredCharge;
+    private final boolean deferredChargeAmortization;
+    private final boolean deferredChargeAmortizationAdjustment;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -127,6 +130,10 @@ public class LoanTransactionEnumData implements Serializable, LoanTransactionTyp
         this.buyDownFeeAdjustment = Long.valueOf(LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getValue()).equals(this.id);
         this.buyDownFeeAmortization = Long.valueOf(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getValue()).equals(this.id);
         this.buyDownFeeAmortizationAdjustment = Long.valueOf(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getValue())
+                .equals(this.id);
+        this.deferredCharge = Long.valueOf(LoanTransactionType.DEFERRED_CHARGE.getValue()).equals(this.id);
+        this.deferredChargeAmortization = Long.valueOf(LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION.getValue()).equals(this.id);
+        this.deferredChargeAmortizationAdjustment = Long.valueOf(LoanTransactionType.DEFERRED_CHARGE_AMORTIZATION_ADJUSTMENT.getValue())
                 .equals(this.id);
     }
 

@@ -43,7 +43,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountTransactionsMapper;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.ColumnFilterData;
@@ -71,7 +71,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     private final DataTableValidator dataTableValidator;
     private final JdbcTemplate jdbcTemplate;
     private final SearchUtil searchUtil;
-    protected SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper tm = new SavingsAccountReadPlatformServiceImpl.SavingsAccountTransactionsMapper();
+    protected SavingsAccountTransactionsMapper tm = new SavingsAccountTransactionsMapper();
 
     @Override
     public Page<SavingsAccountTransactionData> searchTransactions(@NonNull Long savingsId,

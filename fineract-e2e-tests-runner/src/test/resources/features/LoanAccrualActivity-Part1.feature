@@ -1774,12 +1774,12 @@ Feature: LoanAccrualActivity - Part1
       | Nr | Days | Date            | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 5    | 06 January 2024 |           | 750.64          | 249.36        | 1.64     | 0.0  | 0.0       | 251.0  | 0.0  | 0.0        | 0.0  | 251.0       |
-      | 2  | 5    | 11 January 2024 |           | 500.96          | 249.68        | 1.32     | 0.0  | 0.0       | 251.0  | 0.0  | 0.0        | 0.0  | 251.0       |
-      | 3  | 5    | 16 January 2024 |           | 250.78          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0  | 0.0  | 0.0        | 0.0  | 251.0       |
-      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.78        | 0.41     | 0.0  | 0.0       | 251.19 | 0.0  | 0.0        | 0.0  | 251.19      |
+      | 2  | 5    | 11 January 2024 |           | 500.95          | 249.69        | 1.31     | 0.0  | 0.0       | 251.0  | 0.0  | 0.0        | 0.0  | 251.0       |
+      | 3  | 5    | 16 January 2024 |           | 250.77          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0  | 0.0  | 0.0        | 0.0  | 251.0       |
+      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.77        | 0.41     | 0.0  | 0.0       | 251.18 | 0.0  | 0.0        | 0.0  | 251.18      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1000.0        | 4.19     | 0.0  | 0.0       | 1004.19 | 0.0  | 0.0        | 0.0  | 1004.19     |
+      | 1000.0        | 4.18     | 0.0  | 0.0       | 1004.18 | 0.0  | 0.0        | 0.0  | 1004.18     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -1795,23 +1795,23 @@ Feature: LoanAccrualActivity - Part1
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
-      | 1  | 5    | 06 January 2024 |           | 750.55          | 249.45        | 1.55     | 0.0  | 0.0       | 251.0  | 150.0 | 150.0      | 0.0  | 101.0       |
-      | 2  | 5    | 11 January 2024 |           | 500.85          | 249.7         | 1.3      | 0.0  | 0.0       | 251.0  | 0.0   | 0.0        | 0.0  | 251.0       |
-      | 3  | 5    | 16 January 2024 |           | 250.67          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0  | 0.0   | 0.0        | 0.0  | 251.0       |
-      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.67        | 0.41     | 0.0  | 0.0       | 251.08 | 0.0   | 0.0        | 0.0  | 251.08      |
+      | 1  | 5    | 06 January 2024 |           | 750.54          | 249.46        | 1.54     | 0.0  | 0.0       | 251.0  | 150.0 | 150.0      | 0.0  | 101.0       |
+      | 2  | 5    | 11 January 2024 |           | 500.84          | 249.7         | 1.3      | 0.0  | 0.0       | 251.0  | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 3  | 5    | 16 January 2024 |           | 250.66          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0  | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.66        | 0.41     | 0.0  | 0.0       | 251.07 | 0.0   | 0.0        | 0.0  | 251.07      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
-      | 1000.0        | 4.08     | 0.0  | 0.0       | 1004.08 | 150.0 | 150.0      | 0.0  | 854.08      |
+      | 1000.0        | 4.07     | 0.0  | 0.0       | 1004.07 | 150.0 | 150.0      | 0.0  | 854.07      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 02 January 2024  | Accrual          | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 January 2024  | Accrual          | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 January 2024  | Accrual          | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 04 January 2024  | Repayment        | 150.0  | 148.45    | 1.55     | 0.0  | 0.0       | 851.55       | false    | false    |
+      | 04 January 2024  | Repayment        | 150.0  | 148.46    | 1.54     | 0.0  | 0.0       | 851.54       | false    | false    |
       | 05 January 2024  | Accrual          | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 January 2024  | Accrual Activity | 1.55   | 0.0       | 1.55     | 0.0  | 0.0       | 0.0          | false    | true     |
-      | 06 January 2024  | Accrual          | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024  | Accrual Activity | 1.54   | 0.0       | 1.54     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 06 January 2024  | Accrual          | 0.23   | 0.0       | 0.23     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2024  | Accrual          | 0.26   | 0.0       | 0.26     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:3709
@@ -1904,9 +1904,9 @@ Feature: LoanAccrualActivity - Part1
       | 11 January 2024   | Accrual           | 0.33    | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
       | 11 January 2024   | Accrual Activity  | 1.64    | 0.0        | 1.64      | 0.0   | 0.0        | 0.0           | false     | false     |
       | 12 January 2024   | Accrual           | 0.23    | 0.0        | 0.23      | 0.0   | 0.0        | 0.0           | false     | false     |
-      | 13 January 2024   | Accrual           | 0.3     | 0.0        | 0.3       | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 13 January 2024   | Accrual           | 0.29    | 0.0        | 0.29      | 0.0   | 0.0        | 0.0           | false     | false     |
       | 14 January 2024   | Accrual           | 0.36    | 0.0        | 0.36      | 0.0   | 0.0        | 0.0           | false     | false     |
-      | 15 January 2024   | Accrual           | 0.42    | 0.0        | 0.42      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 15 January 2024   | Accrual           | 0.43    | 0.0        | 0.43      | 0.0   | 0.0        | 0.0           | false     | false     |
     When Loan Pay-off is made on "11 January 2024"
     Then Loan Transactions tab has the following data:
       | Transaction date  | Transaction Type  | Amount   | Principal  | Interest  | Fees  | Penalties  | Loan Balance  | Reverted  | Replayed  |
@@ -2033,12 +2033,12 @@ Feature: LoanAccrualActivity - Part1
       | Nr | Days | Date            | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 5    | 06 January 2024 |           | 750.5           | 249.5         | 1.5      | 0.0  | 0.0       | 251.0 | 150.0 | 150.0      | 0.0  | 101.0       |
-      | 2  | 5    | 11 January 2024 |           | 500.77          | 249.73        | 1.27     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
-      | 3  | 5    | 16 January 2024 |           | 250.59          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
-      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.59        | 0.41     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 2  | 5    | 11 January 2024 |           | 500.76          | 249.74        | 1.26     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 3  | 5    | 16 January 2024 |           | 250.58          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.58        | 0.41     | 0.0  | 0.0       | 250.99| 0.0   | 0.0        | 0.0  | 250.99      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 1000.0        | 4.0      | 0.0  | 0.0       | 1004.0 | 150.0 | 150.0      | 0.0  | 854.0       |
+      | 1000.0        | 3.99     | 0.0  | 0.0       | 1003.99 | 150.0 | 150.0      | 0.0  | 853.99      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2095,12 +2095,12 @@ Feature: LoanAccrualActivity - Part1
       | Nr | Days | Date            | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024 |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 5    | 06 January 2024 |           | 750.5           | 249.5         | 1.5      | 0.0  | 0.0       | 251.0 | 150.0 | 150.0      | 0.0  | 101.0       |
-      | 2  | 5    | 11 January 2024 |           | 500.77          | 249.73        | 1.27     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
-      | 3  | 5    | 16 January 2024 |           | 250.59          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
-      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.59        | 0.41     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 2  | 5    | 11 January 2024 |           | 500.76          | 249.74        | 1.26     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 3  | 5    | 16 January 2024 |           | 250.58          | 250.18        | 0.82     | 0.0  | 0.0       | 251.0 | 0.0   | 0.0        | 0.0  | 251.0       |
+      | 4  | 5    | 21 January 2024 |           | 0.0             | 250.58        | 0.41     | 0.0  | 0.0       | 250.99| 0.0   | 0.0        | 0.0  | 250.99      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 1000.0        | 4.0      | 0.0  | 0.0       | 1004.0 | 150.0 | 150.0      | 0.0  | 854.0       |
+      | 1000.0        | 3.99     | 0.0  | 0.0       | 1003.99 | 150.0 | 150.0      | 0.0  | 853.99      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |

@@ -117,5 +117,22 @@ public class OfficeIntegrationTest extends FeignIntegrationTest {
 
         @RequestLine("GET /v1/offices/template")
         Map<String, Object> retrieveOfficeTemplate();
+    public void testOfficeModificationWithNonIsoFormatAndLocale() {
+        PostOfficesResponse createResponse = officeHelper.createOffice(LocalDate.of(2007, 7, 1));
+        Long officeId = createResponse.getResourceId();
+
+        String customName = Utils.uniqueRandomStringGenerator("Custom_Office_", 4);
+        officeHelper.updateOffice(officeId, customName, "15 août 2010", "dd MMMM yyyy", "fr");
+
+        GetOfficesResponse customOffice = officeHelper.retrieveOffice(officeId);
+        Assertions.assertEquals(customName, customOffice.getName());
+        Assertions.assertTrue(DateUtils.isEqual(customOffice.getOpeningDate(), LocalDate.of(2010, 8, 15)));
+
+        String usName = Utils.uniqueRandomStringGenerator("US_Office_", 4);
+        officeHelper.updateOffice(officeId, usName, "03/04/2024", "MM/dd/yyyy", "en");
+
+        GetOfficesResponse usOffice = officeHelper.retrieveOffice(officeId);
+        Assertions.assertEquals(usName, usOffice.getName());
+        Assertions.assertTrue(DateUtils.isEqual(usOffice.getOpeningDate(), LocalDate.of(2024, 3, 4)));
     }
 }

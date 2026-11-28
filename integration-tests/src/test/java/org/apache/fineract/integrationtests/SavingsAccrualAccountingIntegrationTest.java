@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
@@ -365,6 +366,26 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         });
     }
 
+    @Test
+    public void testReversingACashBasedDepositAfterInterestPostingNetsEveryAccountToZero() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            verifyReversingADepositAfterInterestPostingNetsEveryAccountToZero(withCashMappings(accrualProduct(INTEREST_RATE), accounts),
+                    accounts);
+        });
+    }
+
+    @Test
+    public void testReversingAnAccrualDepositAfterInterestPostingNetsEveryAccountToZero() {
+        businessDateHelper.runAt(POST_INTEREST_BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+
+            verifyReversingADepositAfterInterestPostingNetsEveryAccountToZero(withMappings(accrualProduct(INTEREST_RATE), accounts),
+                    accounts);
+        });
+    }
+
     /**
      * Every reversed savings transaction mirrors the entries stored for it, not only interest postings. The second
      * withdrawal takes the account past zero, so it is booked in two parts: Savings Control for what was in credit and
@@ -395,6 +416,33 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
                 "DEBIT to Overdraft Portfolio Control (Asset) Account not found for the withdrawal into overdraft.");
         assertHasEntry(overdrawingWithdrawal, CREDIT, accounts.overdraftPortfolioControl(), OVERDRAWN_BY,
                 "CREDIT to Overdraft Portfolio Control (Asset) Account not found for the undo of the withdrawal into overdraft.");
+    }
+
+    /**
+     * Reversing a deposit made before the last interest posting also reverses that posting and posts the interest
+     * again, so the reversal books entries for transactions it has only just created.
+     */
+    private void verifyReversingADepositAfterInterestPostingNetsEveryAccountToZero(final PostSavingsProductsRequest product,
+            final AccrualAccounts accounts) {
+        final Long savingsProductId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+        assertNotNull(savingsProductId, "Failed to create savings product.");
+        final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+        deposit(savingsAccountId, AMOUNT, startDateString());
+        final Long depositId = deposit(savingsAccountId, BACKDATED_DEPOSIT, BACKDATED_DEPOSIT_DATE).getResourceId();
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB);
+        final SavingsAccountTransactionData posting = interestPostingOf(savingsAccountId);
+
+        savingsTransactionHelper.reverseTransaction(savingsAccountId, depositId);
+
+        assertTrue(Boolean.TRUE.equals(savingsTransactionHelper.getTransaction(savingsAccountId, posting.getId()).getReversed()),
+                "Reversing the deposit did not reverse the interest posting after it.");
+        // the reversal mirrors the entries stored for the deposit and for the reversed posting
+        final List<JournalEntryTransactionItem> depositEntries = journalEntriesOf(depositId);
+        assertHasEntry(depositEntries, CREDIT, accounts.savingsControl(), "CREDIT to Savings Control not found for the deposit.");
+        assertHasEntry(depositEntries, DEBIT, accounts.savingsControl(),
+                "DEBIT to Savings Control not found for the reversal of the deposit.");
+        assertEveryAccountNetsToZero(depositEntries);
+        assertEveryAccountNetsToZero(journalEntriesOf(posting));
     }
 
     /**
@@ -450,6 +498,64 @@ public class SavingsAccrualAccountingIntegrationTest extends FeignSavingsTestBas
         withdraw(savingsAccountId, new BigDecimal(AMOUNT).add(OVERDRAWN_BY).toPlainString(),
                 DATE_FORMATTER.format(TODAY.minusDays(DAYS_TO_SUBTRACT).plusDays(DAYS_IN_CREDIT)));
         return savingsAccountId;
+    }
+
+    @Test
+    public void testUndoingTheDepositReversesItsAccrualsAndTheirJournalEntries() {
+        verifyAccrualsAreReversedWithTheDeposit(
+                (savingsAccountId, depositId) -> savingsTransactionHelper.undoTransaction(savingsAccountId, depositId));
+    }
+
+    @Test
+    public void testReversingTheDepositReversesItsAccrualsAndTheirJournalEntries() {
+        verifyAccrualsAreReversedWithTheDeposit(
+                (savingsAccountId, depositId) -> savingsTransactionHelper.reverseTransaction(savingsAccountId, depositId));
+    }
+
+    /**
+     * FINERACT-2994: accrue interest on a deposit, then take the deposit back. The accruals on the money that is gone
+     * must be reversed with their journal entries, so Interest Payable goes back to 0.
+     */
+    private void verifyAccrualsAreReversedWithTheDeposit(final BiConsumer<Long, Long> takeBackDeposit) {
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final AccrualAccounts accounts = createDistinctAccrualAccounts();
+            final Long savingsProductId = savingsProductHelper.createSavingsProduct(withMappings(accrualProduct(INTEREST_RATE), accounts))
+                    .getResourceId();
+            final Long savingsAccountId = createActiveSavingsAccount(savingsProductId);
+            final Long depositId = deposit(savingsAccountId, AMOUNT, startDateString()).getResourceId();
+
+            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
+            final List<SavingsAccountTransactionData> accruals = savingsTransactionHelper.getAccrualTransactions(savingsAccountId);
+            assertFalse(accruals.isEmpty(), "No accrual transactions were found.");
+            assertTrue(interestPayableBalance(accruals, accounts).signum() > 0, "The accruals did not credit Interest Payable.");
+
+            takeBackDeposit.accept(savingsAccountId, depositId);
+
+            final List<SavingsAccountTransactionData> afterUndo = savingsTransactionHelper.getAccrualTransactions(savingsAccountId);
+            for (SavingsAccountTransactionData accrual : afterUndo) {
+                assertTrue(Boolean.TRUE.equals(accrual.getReversed()), "The accrual of " + accrual.getDate() + " was not reversed.");
+                final List<JournalEntryTransactionItem> entries = journalEntriesOf(accrual);
+                assertHasEntry(entries, CREDIT, accounts.interestPayable(), "No accrual entry for " + accrual.getDate() + ".");
+                assertHasEntry(entries, DEBIT, accounts.interestPayable(), "No reversal entry for " + accrual.getDate() + ".");
+            }
+            assertEquals(0, interestPayableBalance(afterUndo, accounts).signum(), "Interest Payable did not return to 0.");
+        });
+    }
+
+    /** Credits minus debits on Interest Payable over the journal entries of the given accruals. */
+    private BigDecimal interestPayableBalance(final List<SavingsAccountTransactionData> accruals, final AccrualAccounts accounts) {
+        final Long interestPayableId = SavingsRequestBuilders.accountId(accounts.interestPayable());
+        BigDecimal balance = BigDecimal.ZERO;
+        for (SavingsAccountTransactionData accrual : accruals) {
+            for (JournalEntryTransactionItem entry : journalEntriesOf(accrual)) {
+                if (!interestPayableId.equals(entry.getGlAccountId()) || entry.getEntryType() == null || entry.getAmount() == null) {
+                    continue;
+                }
+                final BigDecimal amount = BigDecimal.valueOf(entry.getAmount());
+                balance = CREDIT.equals(entry.getEntryType().getValue()) ? balance.add(amount) : balance.subtract(amount);
+            }
+        }
+        return balance;
     }
 
     private SavingsAccountTransactionData interestPostingOf(final Long savingsAccountId) {

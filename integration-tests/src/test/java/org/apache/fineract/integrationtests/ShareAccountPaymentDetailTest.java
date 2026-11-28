@@ -341,6 +341,8 @@ public class ShareAccountPaymentDetailTest extends FeignSavingsTestBase {
     }
 
     /** The cash side of a share transaction posts to the share reference account or a payment type specific one. */
+    // Identity on purpose: the other one of the two fixture accounts
+    @SuppressWarnings("ReferenceEquality")
     private void assertCashSideHits(Long transactionId, Account expected, JournalEntryType entryType) {
         assertCashSideHits(transactionId, expected, entryType, expected == shareReference ? fundSource : shareReference);
     }

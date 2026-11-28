@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.entityaccess.service;
 
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -117,7 +118,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
             fromApiJsonDeserializer.checkForEntity(relId, fromId, toId);
 
-            final Map<String, Object> changes = mapForUpdate.updateMap(command);
+            final Map<String, Object> changes = applyChanges(mapForUpdate, command);
 
             if (!changes.isEmpty()) {
                 this.fineractEntityToEntityMappingRepository.saveAndFlush(mapForUpdate);
@@ -150,6 +151,39 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
                 .withEntityId(deleteMap.getId()) //
                 .build();
 
+    }
+
+    private static Map<String, Object> applyChanges(final FineractEntityToEntityMapping mapping, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+
+        if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.fromEnityType, mapping.getFromId())) {
+            final Long newValue = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
+            actualChanges.put(FineractEntityApiResourceConstants.fromEnityType, newValue);
+            mapping.updateFromId(newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.toEntityType, mapping.getToId())) {
+            final Long newValue = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
+            actualChanges.put(FineractEntityApiResourceConstants.toEntityType, newValue);
+            mapping.updateToId(newValue);
+        }
+
+        LocalDate startDate = mapping.getStartDate();
+        if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.startDate, startDate)) {
+            final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+            actualChanges.put(FineractEntityApiResourceConstants.startDate, valueAsInput);
+            startDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+        }
+
+        LocalDate endDate = mapping.getEndDate();
+        if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.endDate, endDate)) {
+            final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+            actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
+            endDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+        }
+        mapping.updatePeriod(startDate, endDate);
+
+        return actualChanges;
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {

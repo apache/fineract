@@ -251,6 +251,8 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
         }
     }
 
+    // Identity on purpose: every linked correction except the one being reused is reversed
+    @SuppressWarnings("ReferenceEquality")
     private void ensureFinalCorrection(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction relatedTransaction,
             final List<WorkingCapitalLoanTransaction> linkedCorrections, final BigDecimal amount, final boolean amortizationAdjustment) {
         final WorkingCapitalLoanTransaction correctionToReuse = linkedCorrections.isEmpty() ? null : linkedCorrections.getLast();

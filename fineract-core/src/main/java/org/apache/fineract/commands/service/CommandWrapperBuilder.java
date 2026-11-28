@@ -99,6 +99,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REACTIVATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REAGE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REAMORTIZE;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECALCULATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECOVERGUARANTEES;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECOVERYPAYMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_RECREATE;
@@ -153,7 +154,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_BATCH_BUSINESS_STEP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CENTER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENTIDENTIFIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT_COLLATERAL_PRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CODE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CODEVALUE;
@@ -182,7 +182,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITPRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FUND;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLACCOUNT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLCLOSURE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GLIMLOAN;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GROUP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_GSIMACCOUNT;
@@ -198,7 +197,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_AVAILABLE_DISBURSEMENT_AMOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_COLLATERAL_PRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_ORIGINATOR;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_OFFICE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_OFFICETRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ORGANISATIONCREDITBUREAU;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PERIODICACCRUALACCOUNTING;
@@ -461,22 +459,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_USER;
         this.entityId = userId;
         this.href = "/users/" + userId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createOffice() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_OFFICE;
-        this.entityId = null;
-        this.href = "/offices/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateOffice(final Long officeId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_OFFICE;
-        this.entityId = officeId;
-        this.href = "/offices/" + officeId;
         return this;
     }
 
@@ -938,33 +920,6 @@ public class CommandWrapperBuilder {
         this.entityName = "WC_NEAR_BREACH_ACTION";
         this.entityId = loanId;
         this.href = "/working-capital-loans/" + loanId + "/near-breach-actions";
-        return this;
-    }
-
-    public CommandWrapperBuilder createClientIdentifier(final Long clientId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = null;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = clientIdentifierId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/" + clientIdentifierId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = clientIdentifierId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/" + clientIdentifierId;
         return this;
     }
 
@@ -1765,30 +1720,6 @@ public class CommandWrapperBuilder {
         this.entityId = codeId;
         this.subentityId = codeValueId;
         this.href = "/codes/name/" + codeName + "/codevalues/" + codeValueId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createGLClosure() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_GLCLOSURE;
-        this.entityId = null;
-        this.href = "/glclosures/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateGLClosure(final Long glClosureId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_GLCLOSURE;
-        this.entityId = glClosureId;
-        this.href = "/glclosures/" + glClosureId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteGLClosure(final Long glClosureId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_GLCLOSURE;
-        this.entityId = glClosureId;
-        this.href = "/glclosures/" + glClosureId;
         return this;
     }
 
@@ -3856,6 +3787,15 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder undoContractTermination(final Long loanId) {
         this.actionName = ACTION_CONTRACT_TERMINATION_UNDO;
+        this.entityName = ENTITY_LOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder recalculateLoan(final Long loanId) {
+        this.actionName = ACTION_RECALCULATE;
         this.entityName = ENTITY_LOAN;
         this.entityId = loanId;
         this.loanId = loanId;

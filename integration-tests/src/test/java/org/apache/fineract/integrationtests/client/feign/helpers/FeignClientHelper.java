@@ -32,7 +32,11 @@ import org.apache.fineract.client.models.AddressUpdateResponse;
 import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.ClientAuditFieldsData;
-import org.apache.fineract.client.models.ClientIdentifierRequest;
+import org.apache.fineract.client.models.ClientIdentifierCreateRequest;
+import org.apache.fineract.client.models.ClientIdentifierCreateResponse;
+import org.apache.fineract.client.models.ClientIdentifierDeleteResponse;
+import org.apache.fineract.client.models.ClientIdentifierUpdateRequest;
+import org.apache.fineract.client.models.ClientIdentifierUpdateResponse;
 import org.apache.fineract.client.models.ClientTextSearch;
 import org.apache.fineract.client.models.DeleteClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientTransferProposalDateResponse;
@@ -46,14 +50,11 @@ import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
 import org.apache.fineract.client.models.PostClientsClientIdChanges;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsClientIdRequest;
 import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsClientIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PutClientsClientIdIdentifiersIdentifierIdResponse;
 import org.apache.fineract.client.models.PutClientsClientIdRequest;
 import org.apache.fineract.client.models.PutClientsClientIdResponse;
 import org.apache.fineract.client.models.SortOrder;
@@ -318,26 +319,51 @@ public class FeignClientHelper {
         return ok(() -> fineractClient.clientsAddress().retrieveAllClientAddresses(clientId, Collections.emptyMap()));
     }
 
-    public PostClientsClientIdIdentifiersResponse createClientIdentifier(Long clientId, PostClientsClientIdIdentifiersRequest request) {
+    public ClientIdentifierCreateResponse createClientIdentifier(Long clientId, ClientIdentifierCreateRequest request) {
         return ok(() -> fineractClient.clientIdentifier().createClientIdentifier(clientId, request));
+    }
+
+    public CallFailedRuntimeException createClientIdentifierExpectingError(Long clientId, ClientIdentifierCreateRequest request) {
+        return fail(() -> fineractClient.clientIdentifier().createClientIdentifier(clientId, request));
     }
 
     public GetClientsClientIdIdentifiersResponse getClientIdentifier(Long clientId, Long identifierId) {
         return ok(() -> fineractClient.clientIdentifier().retrieveOneClientIdentifier(clientId, identifierId));
     }
 
-    public PutClientsClientIdIdentifiersIdentifierIdResponse updateClientIdentifier(Long clientId, Long identifierId,
-            ClientIdentifierRequest request) {
+    public ClientIdentifierUpdateResponse updateClientIdentifier(Long clientId, Long identifierId, ClientIdentifierUpdateRequest request) {
         return ok(() -> fineractClient.clientIdentifier().updateClientIdentifier(clientId, identifierId, request));
     }
 
+    public CallFailedRuntimeException getClientIdentifierExpectingError(Long clientId, Long identifierId) {
+        return fail(() -> fineractClient.clientIdentifier().retrieveOneClientIdentifier(clientId, identifierId));
+    }
+
+    public CallFailedRuntimeException updateClientIdentifierExpectingError(Long clientId, Long identifierId,
+            ClientIdentifierUpdateRequest request) {
+        return fail(() -> fineractClient.clientIdentifier().updateClientIdentifier(clientId, identifierId, request));
+    }
+
+    public ClientIdentifierDeleteResponse deleteClientIdentifier(Long clientId, Long identifierId) {
+        return ok(() -> fineractClient.clientIdentifier().deleteClientIdentifier(clientId, identifierId));
+    }
+
+    public CallFailedRuntimeException deleteClientIdentifierExpectingError(Long clientId, Long identifierId) {
+        return fail(() -> fineractClient.clientIdentifier().deleteClientIdentifier(clientId, identifierId));
+    }
+
     /**
-     * Removes the identifier's issuance and expiry dates; see {@link ClientIdentifierCommandsApi} for why it is not
-     * generated.
+     * Removes the identifier's issuance and expiry dates by sending them as explicit JSON {@code null}s; see
+     * {@link ClientIdentifierCommandsApi} for why it is not generated.
      */
-    public PutClientsClientIdIdentifiersIdentifierIdResponse clearClientIdentifierDates(Long clientId, Long identifierId) {
+    public ClientIdentifierUpdateResponse clearClientIdentifierDates(Long clientId, Long identifierId) {
         return ok(() -> clientIdentifierCommandsApi.clearIdentifierDates(clientId, identifierId,
                 new ClientIdentifierCommandsApi.ClearIdentifierDatesRequest()));
+    }
+
+    /** Removes the identifier's issuance and expiry dates by sending them as empty strings. */
+    public ClientIdentifierUpdateResponse clearClientIdentifierDatesWithEmptyStrings(Long clientId, Long identifierId) {
+        return updateClientIdentifier(clientId, identifierId, new ClientIdentifierUpdateRequest().issuanceDate("").expiryDate(""));
     }
 
     public GetClientsClientIdTransactionsResponse getClientTransactions(String externalId) {

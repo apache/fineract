@@ -30,12 +30,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.IpAddressUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
@@ -75,7 +73,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "savings_account_id")
     private Long savingsId;
 
-    @Column(name = "api_get_url", length = 100)
+    @Column(name = "api_get_url", length = 255)
     private String resourceGetUrl;
 
     @Column(name = "resource_id")
@@ -202,32 +200,6 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
      */
     @Column(name = "submitted_ids_kept", nullable = false)
     private boolean submittedIdsKept;
-
-    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
-            String idempotencyKey, Integer status, boolean sanitized) {
-        return CommandSource.builder() //
-                .actionName(wrapper.actionName()) //
-                .entityName(wrapper.entityName()) //
-                .resourceGetUrl(wrapper.getHref()) //
-                .resourceId(command.entityId()) //
-                .subResourceId(command.subentityId()) //
-                .commandAsJson(command.json()) //
-                .maker(maker) //
-                .madeOnDate(DateUtils.getAuditOffsetDateTime()) //
-                .status(status) //
-                .idempotencyKey(idempotencyKey) //
-                .officeId(wrapper.getOfficeId()) //
-                .groupId(command.getGroupId()) //
-                .clientId(command.getClientId()) //
-                .loanId(command.getLoanId()) //
-                .savingsId(command.getSavingsId()) //
-                .productId(command.getProductId()) //
-                .transactionId(command.getTransactionId()) //
-                .creditBureauId(command.getCreditBureauId()) //
-                .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
-                .clientIp(IpAddressUtils.getClientIp()) //
-                .loanExternalId(command.getLoanExternalId()).sanitized(sanitized).submittedIdsKept(true).build(); //
-    }
 
     public String getPermissionCode() {
         return this.actionName + "_" + this.entityName;

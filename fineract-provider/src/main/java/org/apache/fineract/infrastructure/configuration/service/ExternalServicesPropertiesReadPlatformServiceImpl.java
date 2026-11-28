@@ -52,26 +52,6 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
     private final QCExternalServiceProperties esp = new QCExternalServiceProperties("esp");
     private final QCExternalService es = new QCExternalService("es");
 
-    private static final class S3CredentialsDataExtractor implements ResultSetExtractor<S3CredentialsData> {
-
-        @Override
-        public S3CredentialsData extractData(final ResultSet rs) throws SQLException, DataAccessException {
-            String accessKey = null;
-            String bucketName = null;
-            String secretKey = null;
-            while (rs.next()) {
-                if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.S3_ACCESS_KEY)) {
-                    accessKey = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.S3_BUCKET_NAME)) {
-                    bucketName = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.S3_SECRET_KEY)) {
-                    secretKey = rs.getString("value");
-                }
-            }
-            return new S3CredentialsData().setBucketName(bucketName).setAccessKey(accessKey).setSecretKey(secretKey);
-        }
-    }
-
     private static final class ExternalServiceMapper implements RowMapper<ExternalServicesPropertiesData> {
 
         List<String> secretAttributes;
@@ -121,10 +101,21 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
 
     @Override
     public S3CredentialsData getS3Credentials() {
-        final ResultSetExtractor<S3CredentialsData> resultSetExtractor = new S3CredentialsDataExtractor();
-        final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
-                + ExternalServicesConstants.S3_SERVICE_NAME + "'";
-        final S3CredentialsData s3CredentialsData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
+        List<Tuple> rows = queryFactory.select(esp.name, esp.value).from(esp).innerJoin(es).on(esp.externalServiceId.eq(es.id))
+                .where(es.name.eq(ExternalServicesConstants.S3_SERVICE_NAME)).fetch();
+
+        S3CredentialsData s3CredentialsData = new S3CredentialsData();
+        for (Tuple t : rows) {
+            String name = t.get(esp.name);
+            String value = t.get(esp.value);
+            if (ExternalServicesConstants.S3_ACCESS_KEY.equalsIgnoreCase(name)) {
+                s3CredentialsData.setAccessKey(value);
+            } else if (ExternalServicesConstants.S3_BUCKET_NAME.equalsIgnoreCase(name)) {
+                s3CredentialsData.setBucketName(value);
+            } else if (ExternalServicesConstants.S3_SECRET_KEY.equalsIgnoreCase(name)) {
+                s3CredentialsData.setSecretKey(value);
+            }
+        }
         return s3CredentialsData;
     }
 

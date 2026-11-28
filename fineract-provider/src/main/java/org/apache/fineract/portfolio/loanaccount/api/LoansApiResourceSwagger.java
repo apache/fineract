@@ -788,6 +788,12 @@ final class LoansApiResourceSwagger {
                 public boolean buyDownFeeAmortization;
                 @Schema(example = "false")
                 public boolean buyDownFeeAmortizationAdjustment;
+                @Schema(example = "false")
+                public boolean deferredCharge;
+                @Schema(example = "false")
+                public boolean deferredChargeAmortization;
+                @Schema(example = "false")
+                public boolean deferredChargeAmortizationAdjustment;
             }
 
             static final class GetLoansLoanIdPaymentDetailData {
@@ -1055,6 +1061,14 @@ final class LoansApiResourceSwagger {
             private BigDecimal amountUnrecognized;
             @Schema(example = "3ert3453")
             private String externalId;
+            @Schema(description = "Amortization period type copied onto the loan charge")
+            public StringEnumOptionData amortizationPeriodType;
+            @Schema(example = "30")
+            public Integer amortizationDays;
+            @Schema(description = "Amortization calculation type copied onto the loan charge")
+            public StringEnumOptionData amortizationCalculationType;
+            @Schema(description = "Amortization income type copied onto the loan charge")
+            public StringEnumOptionData amortizationIncomeType;
         }
 
         static final class GetLoansLoanIdDelinquencySummary {

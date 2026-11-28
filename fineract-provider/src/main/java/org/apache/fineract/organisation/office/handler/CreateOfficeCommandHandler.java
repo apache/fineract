@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.organisation.office.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.organisation.office.service.OfficeWritePlatformService;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.organisation.office.data.OfficeCreateRequest;
+import org.apache.fineract.organisation.office.data.OfficeCreateResponse;
+import org.apache.fineract.organisation.office.service.OfficeWriteService;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "OFFICE", action = "CREATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class CreateOfficeCommandHandler implements NewCommandSourceHandler {
+public class CreateOfficeCommandHandler implements CommandHandler<OfficeCreateRequest, OfficeCreateResponse> {
 
-    private final OfficeWritePlatformService writePlatformService;
+    private final OfficeWriteService officeWriteService;
 
-    @Transactional
+    @Retry(name = "commandOfficeCreate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public OfficeCreateResponse handle(final Command<OfficeCreateRequest> command) {
+        return officeWriteService.createOffice(command.getPayload());
+    }
 
-        return this.writePlatformService.createOffice(command);
+    @Override
+    public OfficeCreateResponse fallback(final Command<OfficeCreateRequest> command, final Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

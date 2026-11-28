@@ -308,4 +308,10 @@
     <include file="parts/0286_add_enable_charge_amortization_to_loan_product.xml" relativeToChangelogFile="true" />
     <include file="parts/0287_add_permissions_for_api_authorization_rules.xml" relativeToChangelogFile="true" />
     <include file="parts/0288_add_is_force_transaction_to_savings_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0289_widen_command_source_api_get_url.xml" relativeToChangelogFile="true" />
+    <include file="parts/0290_add_deferred_charge_transaction_types.xml" relativeToChangelogFile="true" />
+    <include file="parts/0291_add_amortization_configuration_to_loan_charge.xml" relativeToChangelogFile="true" />
+    <include file="parts/0292_create_loan_deferred_charge_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0293_fix_stretchy_report_sql.xml" relativeToChangelogFile="true" />
+    <include file="parts/0294_add_recalculate_loan_permission.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

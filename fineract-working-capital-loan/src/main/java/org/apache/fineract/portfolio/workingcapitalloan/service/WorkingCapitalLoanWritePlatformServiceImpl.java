@@ -134,6 +134,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
     private final WorkingCapitalLoanChargeRepository chargeRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
+    private final WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
     private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
@@ -409,12 +410,19 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         updateBalanceOnDisburse(loan, transactionAmount);
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnDisbursement(loan, transactionAmount, actualDisbursementDate);
         generateInitialDelinquencyAndBreachPeriods(loan);
+        // A disbursement backdated past the end of the starting period leaves periods that have already ended: they are
+        // generated and evaluated now, so the classification below sees the same schedule the next COB would.
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = delinquencyRangeScheduleService
+                .reprocessSchedulePeriodsIfAnyEnded(loan);
 
         accountingProcessor.postJournalEntries(loan, disbursementTransaction, allocation, false);
 
         this.loanRepository.saveAndFlush(loan);
         changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
+        // Classified after the status transition and the loan save, as on every other transaction. It only has
+        // work to do on a backdated disbursement: the ended periods are tagged now rather than at the next COB.
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanDisbursalBusinessEvent(loan));
         notifyBalanceChanged(loan);
@@ -626,9 +634,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         updateBalanceForDiscountChange(loan, amount, false);
         delinquencyRangeScheduleService.recalculateBaseExpectedAmount(loan);
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
-        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = delinquencyRangeScheduleService
+                .reprocessSchedulePeriods(loan);
         breachScheduleService.recalculateMinimumPayment(loan);
         loanRepository.saveAndFlush(loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         notifyBalanceChanged(loan);
 
@@ -760,8 +770,6 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         amortizationScheduleWriteService.applyDiscountFeeAdjustment(loan);
         updateBalanceForDiscountChange(loan, amount, true);
-        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
-        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
         // Backdated adjustment on an already charged-off loan (validated above to predate the charge-off): reprocess
         // to replay the charge-off's final lump-sum amortization against the reduced discount pool, the same way a
@@ -774,6 +782,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 || (loan.getBalance() != null && MathUtil.isGreaterThanZero(loan.getBalance().getOverpaymentAmount()))) {
             transactionReprocessingService.reprocessTransactions(loan);
         }
+        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived from the
+        // balance the replay above leaves behind.
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = delinquencyRangeScheduleService
+                .reprocessSchedulePeriods(loan);
 
         final LoanStatus oldStatus = loan.getLoanStatus();
 
@@ -797,6 +809,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         if (StringUtils.isNotBlank(noteText)) {
             changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
         }
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent(adjustmentTransaction));
         notifyBalanceChanged(loan);
@@ -908,7 +921,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // charge-off cover the restored charge again, and the principal it moves shifts the cap the delinquency
         // periods are built on.
         transactionReprocessingService.reprocessTransactions(loan);
-        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = delinquencyRangeScheduleService
+                .reprocessSchedulePeriods(loan);
 
         final LocalDate reversedOnDate = waiverTransaction.getReversedOnDate();
         final LoanStatus oldStatus = loan.getLoanStatus();
@@ -921,6 +935,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         adjustTransactionEventPublisher.publishReversal(loan.getId(), waiverTransaction);
         notifyBalanceChanged(loan);
@@ -1005,7 +1020,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transactionToAdjust.setReversalExternalId(reversalExternalId);
         transactionToAdjust.setReversedOnDate(businessLocalDate);
 
-        final boolean replacementReplayed = processUndoTransaction(loan, transactionToAdjust, newTransaction);
+        final UndoOutcome undoOutcome = processUndoTransaction(loan, transactionToAdjust, newTransaction);
+        final boolean replacementReplayed = undoOutcome.replacementReplayed();
+        // The undo and the replacement update the delinquency schedule separately, but classification runs once, on the
+        // state both of them leave behind.
+        WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = undoOutcome.delinquencyClassification();
 
         if (!isReverseOnly) {
 
@@ -1019,8 +1038,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 breachScheduleService.recalculatePastDueAmount(loan);
                 breachScheduleService.rederiveNearBreachIfReopened(loan, oldStatus);
             } else {
-                transactionProcessor.processRepaymentLikeTransaction(loan, newTransaction, newTransaction.getTransactionDate(),
-                        newTransactionAmount);
+                delinquencyClassification = delinquencyClassification.combine(transactionProcessor.processRepaymentLikeTransaction(loan,
+                        newTransaction, newTransaction.getTransactionDate(), newTransactionAmount));
             }
 
             final WorkingCapitalLoanTransaction overpaidOnDateProbe = DateUtils.isBefore(originalTransactionDate,
@@ -1039,6 +1058,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         handleNote(loan, command, changes);
 
         this.loanRepository.saveAndFlush(loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         if (isReverseOnly) {
             adjustTransactionEventPublisher.publishReversal(loan.getId(), transactionToAdjust);
@@ -1149,8 +1169,6 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         amortizationScheduleWriteService.applyDiscountFeeAdjustment(loan);
         updateBalanceForDiscountChange(loan, adjustmentTransaction.getTransactionAmount().negate(), true);
-        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
-        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
         // Undoing a backdated adjustment on an already charged-off loan must reprocess, so the charge-off's final
         // lump-sum amortization is replayed back up against the restored discount pool instead of being left stranded
@@ -1165,6 +1183,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         if (loan.isChargedOff()) {
             transactionReprocessingService.reprocessTransactions(loan);
         }
+        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived from the
+        // balance the replay above leaves behind.
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = delinquencyRangeScheduleService
+                .reprocessSchedulePeriods(loan);
 
         // Restoring the outstanding can reopen a loan the adjustment had closed, so re-run the status transition.
         final LocalDate reversedOnDate = adjustmentTransaction.getReversedOnDate();
@@ -1177,6 +1199,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
 
         adjustTransactionEventPublisher.publishReversal(loan.getId(), adjustmentTransaction);
         notifyBalanceChanged(loan);
@@ -1225,15 +1248,17 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 transactionDate, classification, txnExternalId);
         this.transactionRepository.saveAndFlush(transaction);
 
-        transactionProcessor.processRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
+        final WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = transactionProcessor
+                .processRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
 
         changes.put("status", loan.getLoanStatus());
 
         handleNote(loan, command, changes);
 
-        notifyPostBusinessEvent(transactionType, transaction, loan);
-
         this.loanRepository.saveAndFlush(loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, delinquencyClassification);
+
+        notifyPostBusinessEvent(transactionType, transaction, loan);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
@@ -1378,6 +1403,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation,
                 transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, creditBalanceRefundTransaction));
+        // The refund moves no principal, so the delinquency schedule is unchanged. A refund that closes the loan
+        // changes its status, so the delinquency is classified on the new status; a partial refund changes neither.
+        if (loan.getLoanStatus() != oldStatus) {
+            delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, WorkingCapitalLoanDelinquencyClassificationMode.ALWAYS);
+        }
 
         businessEventNotifierService.notifyPostBusinessEvent(
                 new WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent(creditBalanceRefundTransaction, loan.getId()));
@@ -1508,12 +1538,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transaction.setReversedOnDate(reversedOnDate);
         changes.put("reversedOnDate", reversedOnDate);
 
-        processUndoTransaction(loan, transaction);
+        final UndoOutcome undoOutcome = processUndoTransaction(loan, transaction);
 
         changes.put("status", loan.getLoanStatus());
 
         handleNote(loan, command, changes);
         this.loanRepository.saveAndFlush(loan);
+        delinquencyClassificationService.classifyDelinquencyOnFinalState(loan, undoOutcome.delinquencyClassification());
         adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
@@ -1522,8 +1553,22 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .withEntityId(transaction.getId()).withEntityExternalId(transaction.getExternalId()).with(changes).build();
     }
 
-    private void processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
-        processUndoTransaction(loan, transaction, null);
+    private UndoOutcome processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        return processUndoTransaction(loan, transaction, null);
+    }
+
+    /**
+     * What
+     * {@link #processUndoTransaction(WorkingCapitalLoan, WorkingCapitalLoanTransaction, WorkingCapitalLoanTransaction)}
+     * leaves to its caller.
+     *
+     * @param replacementReplayed
+     *            whether the replay already allocated the replacement, leaving its non-replay effects and the
+     *            evaluation of the final state - status, near breach, settlement dates - to the caller
+     * @param delinquencyClassification
+     *            the delinquency classification the undo owes once the caller has saved the loan
+     */
+    private record UndoOutcome(boolean replacementReplayed, WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification) {
     }
 
     /**
@@ -1532,10 +1577,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
      * replayed once with both changes rather than once per change, so later transactions are restated (and reported)
      * once.
      *
-     * @return whether the replay already allocated the replacement, leaving its non-replay effects and the evaluation
-     *         of the final state - status, near breach, settlement dates - to the caller
+     * @return whether the replay already allocated the replacement, and the delinquency classification the undo owes
      */
-    private boolean processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
+    private UndoOutcome processUndoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
             final WorkingCapitalLoanTransaction replacement) {
         final LoanStatus statusBeforeUndo = loan.getLoanStatus();
         final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
@@ -1572,9 +1616,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             transactionReprocessingService.reprocessTransactions(loan);
         }
 
+        WorkingCapitalLoanDelinquencyClassificationMode delinquencyClassification = WorkingCapitalLoanDelinquencyClassificationMode.NONE;
         if (!isAccountingOnly) {
             breachScheduleService.applyRepaymentUndo(loan, transaction.getTransactionDate(), transaction.getTransactionAmount());
-            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+            delinquencyClassification = delinquencyRangeScheduleService.reprocessSchedulePeriods(loan);
         }
 
         accountingProcessor.postReversalJournalEntries(loan, transaction);
@@ -1583,7 +1628,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             // The balance already carries the replacement, so evaluating the status here would close or reopen the loan
             // as of the business date instead of the replacement's own date. The caller evaluates status, near breach
             // and settlement dates once, on the final state.
-            return true;
+            return new UndoOutcome(true, delinquencyClassification);
         }
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
@@ -1593,7 +1638,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
         transactionProcessor.recalculateSettlementDates(loan);
-        return false;
+        return new UndoOutcome(false, delinquencyClassification);
     }
 
     private boolean isChargesInvolved(WorkingCapitalLoan loan) {

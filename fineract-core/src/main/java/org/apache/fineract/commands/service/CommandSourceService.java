@@ -45,6 +45,8 @@ import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.IpAddressUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.jspecify.annotations.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -166,8 +168,31 @@ public class CommandSourceService {
     }
 
     public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
-        CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey,
-                UNDER_PROCESSING.getValue(), false);
+        CommandSource commandSourceResult = CommandSource.builder() //
+                .actionName(wrapper.actionName()) //
+                .entityName(wrapper.entityName()) //
+                .resourceGetUrl(wrapper.getHref()) //
+                .resourceId(jsonCommand.entityId()) //
+                .subResourceId(jsonCommand.subentityId()) //
+                .commandAsJson(jsonCommand.json()) //
+                .maker(maker) //
+                .madeOnDate(DateUtils.getAuditOffsetDateTime()) //
+                .status(UNDER_PROCESSING.getValue()) //
+                .idempotencyKey(idempotencyKey) //
+                .officeId(wrapper.getOfficeId()) //
+                .groupId(jsonCommand.getGroupId()) //
+                .clientId(jsonCommand.getClientId()) //
+                .loanId(jsonCommand.getLoanId()) //
+                .savingsId(jsonCommand.getSavingsId()) //
+                .productId(jsonCommand.getProductId()) //
+                .transactionId(jsonCommand.getTransactionId()) //
+                .creditBureauId(jsonCommand.getCreditBureauId()) //
+                .organisationCreditBureauId(jsonCommand.getOrganisationCreditBureauId()) //
+                .clientIp(IpAddressUtils.getClientIp()) //
+                .loanExternalId(jsonCommand.getLoanExternalId()) //
+                .sanitized(false) //
+                .submittedIdsKept(true) //
+                .build();
         sanitizeJson(commandSourceResult, wrapper.getSanitizeJsonKeys());
         if (commandSourceResult.getCommandAsJson() == null) {
             commandSourceResult.setCommandAsJson("{}");

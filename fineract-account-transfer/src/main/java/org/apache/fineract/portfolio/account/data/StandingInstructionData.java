@@ -93,6 +93,9 @@ public final class StandingInstructionData {
     private final MonthDay recurrenceOnMonthDay;
     @Getter
     private final boolean allowPartialTransfer;
+    /** Business date of the last successful or partial run of the Execute Standing Instruction job, if any. */
+    @Getter
+    private final LocalDate lastRunDate;
     private final Page<AccountTransferData> transactions;
 
     @Getter
@@ -156,14 +159,15 @@ public final class StandingInstructionData {
         final Integer recurrenceInterval = null;
         final MonthDay recurrenceOnMonthDay = null;
         final boolean allowPartialTransfer = false;
+        final LocalDate lastRunDate = null;
         final Page<AccountTransferData> transactions = null;
 
         return new StandingInstructionData(id, accountDetailId, name, fromOffice, fromClient, fromAccountType, fromAccount, toOffice,
                 toClient, toAccountType, toAccount, transferType, priority, instructionType, status, amount, validFrom, validTill,
-                recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, transactions,
-                fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions,
-                toAccountTypeOptions, toAccountOptions, transferTypeOptions, statusOptions, instructionTypeOptions, priorityOptions,
-                recurrenceTypeOptions, recurrenceFrequencyOptions);
+                recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, lastRunDate,
+                transactions, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions,
+                toClientOptions, toAccountTypeOptions, toAccountOptions, transferTypeOptions, statusOptions, instructionTypeOptions,
+                priorityOptions, recurrenceTypeOptions, recurrenceFrequencyOptions);
     }
 
     public static StandingInstructionData instance(final Long id, final Long accountDetailId, final String name,
@@ -173,6 +177,19 @@ public final class StandingInstructionData {
             final EnumOptionData instructionType, final EnumOptionData status, final BigDecimal amount, final LocalDate validFrom,
             final LocalDate validTill, final EnumOptionData recurrenceType, final EnumOptionData recurrenceFrequency,
             final Integer recurrenceInterval, final MonthDay recurrenceOnMonthDay, final boolean allowPartialTransfer) {
+        return instance(id, accountDetailId, name, fromOffice, toOffice, fromClient, toClient, fromAccountType, fromAccount, toAccountType,
+                toAccount, transferType, priority, instructionType, status, amount, validFrom, validTill, recurrenceType,
+                recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, null);
+    }
+
+    public static StandingInstructionData instance(final Long id, final Long accountDetailId, final String name,
+            final OfficeData fromOffice, final OfficeData toOffice, final ClientData fromClient, final ClientData toClient,
+            final EnumOptionData fromAccountType, final PortfolioAccountData fromAccount, final EnumOptionData toAccountType,
+            final PortfolioAccountData toAccount, final EnumOptionData transferType, final EnumOptionData priority,
+            final EnumOptionData instructionType, final EnumOptionData status, final BigDecimal amount, final LocalDate validFrom,
+            final LocalDate validTill, final EnumOptionData recurrenceType, final EnumOptionData recurrenceFrequency,
+            final Integer recurrenceInterval, final MonthDay recurrenceOnMonthDay, final boolean allowPartialTransfer,
+            final LocalDate lastRunDate) {
         final Page<AccountTransferData> transactions = null;
         final Collection<OfficeData> fromOfficeOptions = null;
         final Collection<ClientData> fromClientOptions = null;
@@ -191,10 +208,10 @@ public final class StandingInstructionData {
 
         return new StandingInstructionData(id, accountDetailId, name, fromOffice, fromClient, fromAccountType, fromAccount, toOffice,
                 toClient, toAccountType, toAccount, transferType, priority, instructionType, status, amount, validFrom, validTill,
-                recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, transactions,
-                fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions,
-                toAccountTypeOptions, toAccountOptions, transferTypeOptions, statusOptions, instructionTypeOptions, priorityOptions,
-                recurrenceTypeOptions, recurrenceFrequencyOptions);
+                recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, lastRunDate,
+                transactions, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions,
+                toClientOptions, toAccountTypeOptions, toAccountOptions, transferTypeOptions, statusOptions, instructionTypeOptions,
+                priorityOptions, recurrenceTypeOptions, recurrenceFrequencyOptions);
     }
 
     public static StandingInstructionData withTemplateData(StandingInstructionData instructionData, StandingInstructionData templateData) {
@@ -204,12 +221,12 @@ public final class StandingInstructionData {
                 instructionData.transferType, instructionData.priority, instructionData.instructionType, instructionData.status,
                 instructionData.amount, instructionData.validFrom, instructionData.validTill, instructionData.recurrenceType,
                 instructionData.recurrenceFrequency, instructionData.recurrenceInterval, instructionData.recurrenceOnMonthDay,
-                instructionData.allowPartialTransfer, instructionData.transactions, templateData.fromOfficeOptions,
-                templateData.fromClientOptions, templateData.fromAccountTypeOptions, templateData.fromAccountOptions,
-                templateData.toOfficeOptions, templateData.toClientOptions, templateData.toAccountTypeOptions,
-                templateData.toAccountOptions, templateData.transferTypeOptions, templateData.statusOptions,
-                templateData.instructionTypeOptions, templateData.priorityOptions, templateData.recurrenceTypeOptions,
-                templateData.recurrenceFrequencyOptions);
+                instructionData.allowPartialTransfer, instructionData.lastRunDate, instructionData.transactions,
+                templateData.fromOfficeOptions, templateData.fromClientOptions, templateData.fromAccountTypeOptions,
+                templateData.fromAccountOptions, templateData.toOfficeOptions, templateData.toClientOptions,
+                templateData.toAccountTypeOptions, templateData.toAccountOptions, templateData.transferTypeOptions,
+                templateData.statusOptions, templateData.instructionTypeOptions, templateData.priorityOptions,
+                templateData.recurrenceTypeOptions, templateData.recurrenceFrequencyOptions);
     }
 
     private StandingInstructionData(final Long id, final Long accountDetailId, final String name, final OfficeData fromOffice,
@@ -218,14 +235,15 @@ public final class StandingInstructionData {
             final EnumOptionData transferType, final EnumOptionData priority, final EnumOptionData instructionType,
             final EnumOptionData status, final BigDecimal amount, final LocalDate validFrom, LocalDate validTill,
             final EnumOptionData recurrenceType, final EnumOptionData recurrenceFrequency, final Integer recurrenceInterval,
-            final MonthDay recurrenceOnMonthDay, final boolean allowPartialTransfer, final Page<AccountTransferData> transactions,
-            final Collection<OfficeData> fromOfficeOptions, final Collection<ClientData> fromClientOptions,
-            final Collection<EnumOptionData> fromAccountTypeOptions, final Collection<PortfolioAccountData> fromAccountOptions,
-            final Collection<OfficeData> toOfficeOptions, final Collection<ClientData> toClientOptions,
-            final Collection<EnumOptionData> toAccountTypeOptions, final Collection<PortfolioAccountData> toAccountOptions,
-            final Collection<EnumOptionData> transferTypeOptions, final Collection<EnumOptionData> statusOptions,
-            final Collection<EnumOptionData> instructionTypeOptions, final Collection<EnumOptionData> priorityOptions,
-            final Collection<EnumOptionData> recurrenceTypeOptions, final Collection<EnumOptionData> recurrenceFrequencyOptions) {
+            final MonthDay recurrenceOnMonthDay, final boolean allowPartialTransfer, final LocalDate lastRunDate,
+            final Page<AccountTransferData> transactions, final Collection<OfficeData> fromOfficeOptions,
+            final Collection<ClientData> fromClientOptions, final Collection<EnumOptionData> fromAccountTypeOptions,
+            final Collection<PortfolioAccountData> fromAccountOptions, final Collection<OfficeData> toOfficeOptions,
+            final Collection<ClientData> toClientOptions, final Collection<EnumOptionData> toAccountTypeOptions,
+            final Collection<PortfolioAccountData> toAccountOptions, final Collection<EnumOptionData> transferTypeOptions,
+            final Collection<EnumOptionData> statusOptions, final Collection<EnumOptionData> instructionTypeOptions,
+            final Collection<EnumOptionData> priorityOptions, final Collection<EnumOptionData> recurrenceTypeOptions,
+            final Collection<EnumOptionData> recurrenceFrequencyOptions) {
         this.id = id;
         this.accountDetailId = accountDetailId;
         this.name = name;
@@ -250,6 +268,7 @@ public final class StandingInstructionData {
         this.recurrenceInterval = recurrenceInterval;
         this.recurrenceOnMonthDay = recurrenceOnMonthDay;
         this.allowPartialTransfer = allowPartialTransfer;
+        this.lastRunDate = lastRunDate;
 
         this.fromOfficeOptions = fromOfficeOptions;
         this.fromClientOptions = fromClientOptions;
@@ -293,14 +312,15 @@ public final class StandingInstructionData {
         final Integer recurrenceInterval = null;
         final MonthDay recurrenceOnMonthDay = null;
         final boolean allowPartialTransfer = false;
+        final LocalDate lastRunDate = null;
         final Page<AccountTransferData> transactions = null;
 
         return new StandingInstructionData(id, accountDetailId, name, fromOffice, fromClient, fromAccountType, fromAccount, toOffice,
                 toClient, toAccountType, toAccount, transferType, priority, instructionType, status, amount, validFrom, validTill,
-                recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, transactions,
-                fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions,
-                toAccountTypeOptions, toAccountOptions, transferTypeOptions, statusOptions, instructionTypeOptions, priorityOptions,
-                recurrenceTypeOptions, recurrenceFrequencyOptions);
+                recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnMonthDay, allowPartialTransfer, lastRunDate,
+                transactions, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions, toOfficeOptions,
+                toClientOptions, toAccountTypeOptions, toAccountOptions, transferTypeOptions, statusOptions, instructionTypeOptions,
+                priorityOptions, recurrenceTypeOptions, recurrenceFrequencyOptions);
     }
 
     public static StandingInstructionData withTransferData(StandingInstructionData instructionData,
@@ -311,11 +331,12 @@ public final class StandingInstructionData {
                 instructionData.transferType, instructionData.priority, instructionData.instructionType, instructionData.status,
                 instructionData.amount, instructionData.validFrom, instructionData.validTill, instructionData.recurrenceType,
                 instructionData.recurrenceFrequency, instructionData.recurrenceInterval, instructionData.recurrenceOnMonthDay,
-                instructionData.allowPartialTransfer, transactions, instructionData.fromOfficeOptions, instructionData.fromClientOptions,
-                instructionData.fromAccountTypeOptions, instructionData.fromAccountOptions, instructionData.toOfficeOptions,
-                instructionData.toClientOptions, instructionData.toAccountTypeOptions, instructionData.toAccountOptions,
-                instructionData.transferTypeOptions, instructionData.statusOptions, instructionData.instructionTypeOptions,
-                instructionData.priorityOptions, instructionData.recurrenceTypeOptions, instructionData.recurrenceFrequencyOptions);
+                instructionData.allowPartialTransfer, instructionData.lastRunDate, transactions, instructionData.fromOfficeOptions,
+                instructionData.fromClientOptions, instructionData.fromAccountTypeOptions, instructionData.fromAccountOptions,
+                instructionData.toOfficeOptions, instructionData.toClientOptions, instructionData.toAccountTypeOptions,
+                instructionData.toAccountOptions, instructionData.transferTypeOptions, instructionData.statusOptions,
+                instructionData.instructionTypeOptions, instructionData.priorityOptions, instructionData.recurrenceTypeOptions,
+                instructionData.recurrenceFrequencyOptions);
     }
 
     // Domain enum helper for internal logic - renamed to avoid Jackson property conflict

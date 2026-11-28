@@ -1702,6 +1702,19 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
     }
 
+    @When("Admin modifies the loan resending its existing charges")
+    public void modifyLoanResendingExistingCharges() {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final Long loanId = loanResponse.getLoanId();
+        final GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
+                Map.of("staffInSelectedOfficeOnly", "false", "associations", "charges")));
+        assertThat(loanDetails.getCharges()).as("loan charges").isNotEmpty();
+
+        final PutLoansLoanIdResponse responseMod = ok(
+                () -> fineractClient.loans().updateLoanApplication(loanId, modifyLoanRequestWithExistingCharges(loanDetails), Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, responseMod);
+    }
+
     private PutLoansLoanIdRequest modifyLoanRequestWithExistingCharges(final GetLoansLoanIdResponse loanDetails) {
         final PutLoansLoanIdRequest putLoansLoanIdRequest = new PutLoansLoanIdRequest()//
                 .productId(loanDetails.getLoanProductId())//
@@ -1726,10 +1739,14 @@ public class LoanStepDef extends AbstractStepDef {
         final List<GetLoansLoanIdLoanChargeData> existingCharges = loanDetails.getCharges();
         if (existingCharges != null && !existingCharges.isEmpty()) {
             for (final GetLoansLoanIdLoanChargeData charge : existingCharges) {
-                putLoansLoanIdRequest.addChargesItem(new PutLoansLoanIdChargeData()//
+                final PutLoansLoanIdChargeData chargeData = new PutLoansLoanIdChargeData()//
                         .id(charge.getId())//
                         .chargeId(charge.getChargeId())//
-                        .dueDate(charge.getDueDate().format(FORMATTER)).amount(charge.getAmountOrPercentage()));
+                        .amount(charge.getAmountOrPercentage());
+                if (charge.getDueDate() != null) {
+                    chargeData.dueDate(FORMATTER.format(charge.getDueDate()));
+                }
+                putLoansLoanIdRequest.addChargesItem(chargeData);
             }
         }
         return putLoansLoanIdRequest;
@@ -4361,6 +4378,23 @@ public class LoanStepDef extends AbstractStepDef {
                     .recalculationRestFrequencyType(2)//
                     .recalculationRestFrequencyInterval(1);
         }
+        ok(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
+    @Given("Loan product {string} dedicated to this scenario exists with interest recalculation and overdueDaysForNPA {int}")
+    public void ensureDedicatedNpaLoanProduct(final String loanProductName, final Integer overdueDaysForNPA) {
+        final Optional<Long> existingId = findLoanProductIdByName(loanProductName);
+        if (existingId.isPresent()) {
+            final PutLoanProductsProductIdRequest updateRequest = new PutLoanProductsProductIdRequest()//
+                    .locale(LOCALE_EN)//
+                    .overdueDaysForNPA(overdueDaysForNPA);
+            ok(() -> fineractClient.loanProducts().updateLoanProduct(existingId.get(), updateRequest));
+            return;
+        }
+        final PostLoanProductsRequest request = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2InterestRecalculationDailyTillPreClose()//
+                .name(loanProductName)//
+                .overdueDaysForNPA(overdueDaysForNPA);
         ok(() -> fineractClient.loanProducts().createLoanProduct(request));
     }
 

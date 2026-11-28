@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import org.apache.fineract.command.jdbc.store.mapping.CommandMapper;
 import org.apache.fineract.template.data.TemplateCreateRequest;
 import org.apache.fineract.template.data.TemplateData;
 import org.apache.fineract.template.data.TemplateMapperData;
@@ -44,9 +43,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TemplateDomainServiceImplTest {
-
-    @Mock
-    private CommandMapper commandMapper;
 
     @Mock
     private TemplateRepository templateRepository;

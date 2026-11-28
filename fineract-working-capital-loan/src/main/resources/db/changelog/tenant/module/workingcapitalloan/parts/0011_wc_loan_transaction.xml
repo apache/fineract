@@ -105,7 +105,7 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan_transaction"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_payment_detail"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_transaction" foreignKeyName="FK_m_wc_loan_transaction_payment_detail"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="payment_detail_id"
@@ -117,7 +117,7 @@
             <tableExists tableName="m_wc_loan_transaction"/>
             <columnExists tableName="m_wc_loan_transaction" columnName="classification_cv_id"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_classification_cv"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_transaction" foreignKeyName="FK_m_wc_loan_transaction_classification_cv"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="classification_cv_id"
@@ -128,7 +128,7 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan_transaction"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_created_by"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_transaction" foreignKeyName="FK_m_wc_loan_transaction_created_by"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="created_by"
@@ -241,7 +241,7 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan_transaction_allocation"/>
             <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_allocation_created_by"/>
+                <foreignKeyConstraintExists foreignKeyTableName="m_wc_loan_transaction_allocation" foreignKeyName="FK_m_wc_loan_transaction_allocation_created_by"/>
             </not>
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_wc_loan_transaction_allocation" baseColumnNames="created_by"

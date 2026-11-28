@@ -55,9 +55,9 @@ public final class GLAccountProjection extends MappingProjection<GLAccountData> 
                 "GL account classification is required");
         final int usageId = Objects.requireNonNull(row.get(accGlAccount.accountUsage), "GL account usage is required");
         final String nameDecorated = row.get(NAME_DECORATED);
-        // Preserve the API response: a null nameDecorated produces a null tag ID;
-        // otherwise, an account without a tag has tag ID 0.
-        final Long tagId = nameDecorated == null ? null : Objects.requireNonNullElse(row.get(mCodeValue.id), 0).longValue();
+        // An account without a tag has no tagId
+        final Integer tagId = row.get(mCodeValue.id);
+        final CodeValueData tag = tagId == null ? null : CodeValueData.instance(tagId.longValue(), row.get(mCodeValue.codeValue));
         // Preserve the API response: read the balance as Long, discarding the fractional part (e.g. 24.75 becomes 24).
         final Long balance = runningBalance == null ? null : Objects.requireNonNullElse(row.get(runningBalance), 0L);
 
@@ -66,7 +66,7 @@ public final class GLAccountProjection extends MappingProjection<GLAccountData> 
                 .setDisabled(Boolean.TRUE.equals(row.get(accGlAccount.disabled)))
                 .setManualEntriesAllowed(Boolean.TRUE.equals(row.get(accGlAccount.manualJournalEntriesAllowed)))
                 .setType(AccountingEnumerations.gLAccountType(classificationId)).setUsage(AccountingEnumerations.gLAccountUsage(usageId))
-                .setDescription(row.get(accGlAccount.description)).setNameDecorated(nameDecorated)
-                .setTagId(CodeValueData.instance(tagId, row.get(mCodeValue.codeValue))).setOrganizationRunningBalance(balance);
+                .setDescription(row.get(accGlAccount.description)).setNameDecorated(nameDecorated).setTagId(tag)
+                .setOrganizationRunningBalance(balance);
     }
 }
