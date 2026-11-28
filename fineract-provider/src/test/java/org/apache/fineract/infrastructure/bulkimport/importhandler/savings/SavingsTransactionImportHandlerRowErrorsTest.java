@@ -30,6 +30,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -39,7 +40,8 @@ import org.junit.jupiter.api.Test;
 class SavingsTransactionImportHandlerRowErrorsTest {
 
     private final PortfolioCommandSourceWritePlatformService commandService = mock(PortfolioCommandSourceWritePlatformService.class);
-    private final SavingsTransactionImportHandler handler = new SavingsTransactionImportHandler(commandService);
+    private final SavingsTransactionImportHandler handler = new SavingsTransactionImportHandler(commandService,
+            mock(SavingsAccountRepositoryWrapper.class));
 
     @Test
     void anAmountThatIsNotANumberFailsOnlyItsRow() throws IOException {

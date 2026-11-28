@@ -87,12 +87,49 @@ public class OfficeImportHandler implements ImportHandler {
 
     private OfficeData readOffice(final Row row, final String locale, final String dateFormat, final Map<Integer, String> rowErrors) {
         String officeName = ImportHandlerUtils.readAsString(OfficeConstants.OFFICE_NAME_COL, row);
-        Long parentId = readParentOfficeId(row, rowErrors);
+        Long parentId = readParentOffice(row, rowErrors);
         LocalDate openedDate = ImportHandlerUtils.readAsDate(OfficeConstants.OPENED_ON_COL, row);
         String externalId = ImportHandlerUtils.readAsString(OfficeConstants.EXTERNAL_ID_COL, row);
         OfficeData office = OfficeData.importInstance(officeName, parentId, openedDate, ExternalIdFactory.produce(externalId));
         office.setImportFields(row.getRowNum(), locale, dateFormat);
         return office;
+    }
+
+    static Long readParentOffice(final Row row, final Map<Integer, String> rowErrors) {
+        final Long parentId = readParentOfficeId(row, rowErrors);
+        final Cell parentIdCell = row.getCell(OfficeConstants.PARENT_OFFICE_ID_COL);
+        if (parentId == null || parentIdCell == null || parentIdCell.getCellType() == CellType.FORMULA) {
+            return parentId;
+        }
+        final String parentName = ImportHandlerUtils.readAsString(OfficeConstants.PARENT_OFFICE_NAME_COL, row);
+        if (parentName != null && hasOfficeList(row.getSheet())) {
+            final Long namedId = findListedOfficeId(row.getSheet(), parentName);
+            if (namedId == null) {
+                rowErrors.putIfAbsent(row.getRowNum(), "Parent Office '" + parentName + "' not found");
+            } else if (!namedId.equals(parentId)) {
+                rowErrors.putIfAbsent(row.getRowNum(), "Parent Office '" + parentName + "' does not match Parent OfficeId " + parentId);
+            }
+        }
+        return parentId;
+    }
+
+    private static Long findListedOfficeId(final Sheet sheet, final String officeName) {
+        for (Row lookupRow : sheet) {
+            if (lookupRow.getRowNum() > 0
+                    && officeName.equals(ImportHandlerUtils.readAsString(OfficeConstants.LOOKUP_OFFICE_COL, lookupRow))) {
+                return ImportHandlerUtils.readAsLong(OfficeConstants.LOOKUP_OFFICE_ID_COL, lookupRow);
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasOfficeList(final Sheet sheet) {
+        for (Row lookupRow : sheet) {
+            if (lookupRow.getRowNum() > 0 && ImportHandlerUtils.readAsLong(OfficeConstants.LOOKUP_OFFICE_ID_COL, lookupRow) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Long readParentOfficeId(final Row row, final Map<Integer, String> rowErrors) {

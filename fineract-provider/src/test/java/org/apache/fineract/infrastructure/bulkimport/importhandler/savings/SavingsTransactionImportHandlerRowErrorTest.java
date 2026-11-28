@@ -30,6 +30,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -41,7 +42,8 @@ class SavingsTransactionImportHandlerRowErrorTest {
     @Test
     void blankOrUnknownPaymentTypeFailsOnlyItsOwnRow() throws IOException {
         PortfolioCommandSourceWritePlatformService commands = mock(PortfolioCommandSourceWritePlatformService.class);
-        SavingsTransactionImportHandler handler = new SavingsTransactionImportHandler(commands);
+        SavingsTransactionImportHandler handler = new SavingsTransactionImportHandler(commands,
+                mock(SavingsAccountRepositoryWrapper.class));
 
         try (Workbook workbook = new HSSFWorkbook()) {
             Sheet sheet = workbook.createSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);

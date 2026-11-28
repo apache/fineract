@@ -120,6 +120,8 @@ public class ClientEntityImportHandler implements ImportHandler {
         LocalDate activationDate = ImportHandlerUtils.readAsDate(ClientEntityConstants.ACTIVATION_DATE_COL, row);
         if (!active) {
             activationDate = submittedOn;
+        } else {
+            ImportHandlerUtils.requireSubmittedOnNotAfterActivation(submittedOn, activationDate);
         }
         AddressData addressDataObj;
         Collection<AddressData> addressList = null;
