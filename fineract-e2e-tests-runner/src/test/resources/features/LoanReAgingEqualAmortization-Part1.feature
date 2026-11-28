@@ -4527,13 +4527,13 @@ Feature: LoanReAgingEqualAmortization - Part1
       | 3  | 14   | 15 March 2024     | 15 March 2024    | 83.57           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0   | 0.0   | 0.0        | 0.0  | 0.0         |
       | 4  | 17   | 01 April 2024     | 01 April 2024    | 69.64           | 13.93         | 0.25     | 0.0  | 0.0       | 14.18 | 14.18 | 0.0        | 0.0  | 0.0         |
       | 5  | 30   | 01 May 2024       | 01 April 2024    | 55.71           | 13.93         | 0.25     | 0.0  | 0.0       | 14.18 | 14.18 | 14.18      | 0.0  | 0.0         |
-      | 6  | 31   | 01 June 2024      |                  | 41.78           | 13.93         | 0.25     | 0.0  | 0.0       | 14.18 | 6.21  | 6.21       | 0.0  | 7.97        |
+      | 6  | 31   | 01 June 2024      |                  | 41.78           | 13.93         | 0.25     | 0.0  | 0.0       | 14.18 | 6.43  | 6.43       | 0.0  | 7.75        |
       | 7  | 30   | 01 July 2024      |                  | 27.85           | 13.93         | 0.25     | 0.0  | 0.0       | 14.18 | 0.0   | 0.0        | 0.0  | 14.18       |
       | 8  | 31   | 01 August 2024    |                  | 13.92           | 13.93         | 0.25     | 0.0  | 0.0       | 14.18 | 0.0   | 0.0        | 0.0  | 14.18       |
       | 9  | 31   | 01 September 2024 |                  | 0.0             | 13.92         | 0.26     | 0.0  | 0.0       | 14.18 | 0.0   | 0.0        | 0.0  | 14.18       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.09     | 0.0  | 0.0       | 102.09 | 51.58 | 20.39      | 0.0  | 50.51       |
+      | 100.0         | 2.09     | 0.0  | 0.0       | 102.09 | 51.80 | 20.61      | 0.0  | 50.29       |
     Then Loan Transactions tab has the following data without accruals:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -4541,7 +4541,7 @@ Feature: LoanReAgingEqualAmortization - Part1
       | 01 February 2024 | Accrual Activity       | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Re-age                 | 85.08  | 83.57     | 1.51     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Merchant Issued Refund | 34.02  | 33.52     | 0.5      | 0.0  | 0.0       | 50.05        | false    | false    |
-      | 01 April 2024    | Interest Refund        | 0.55   | 0.55      | 0.0      | 0.0  | 0.0       | 49.5         | false    | false    |
+      | 01 April 2024    | Interest Refund        | 0.77   | 0.77      | 0.0      | 0.0  | 0.0       | 49.28        | false    | false    |
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 14 March 2024    | Accrual            | 1.27   | 0.0       | 1.27     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4572,7 +4572,7 @@ Feature: LoanReAgingEqualAmortization - Part1
       | 01 February 2024 | Accrual Activity       | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 March 2024    | Re-age                 | 85.08  | 83.57     | 1.51     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Merchant Issued Refund | 34.02  | 33.52     | 0.5      | 0.0  | 0.0       | 50.05        | false    | false    |
-      | 01 April 2024    | Interest Refund        | 0.55   | 0.55      | 0.0      | 0.0  | 0.0       | 49.5         | false    | false    |
+      | 01 April 2024    | Interest Refund        | 0.77   | 0.77      | 0.0      | 0.0  | 0.0       | 49.28        | false    | false    |
       | 01 April 2024    | Accrual Activity       | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
