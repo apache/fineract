@@ -24,7 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -44,10 +43,8 @@ import org.apache.fineract.query.QStretchyParameter;
 import org.apache.fineract.query.QStretchyReport;
 import org.apache.fineract.query.QStretchyReportParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -57,15 +54,12 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
     private final JdbcTemplate jdbcTemplate;
     private final SQLQueryFactory sqlQueryFactory;
 
-    private final BusinessRuleMapper businessRuleMapper;
-
     private final EmailCampaignMapper emailCampaignMapper;
 
     @Autowired
     public EmailCampaignReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final SQLQueryFactory sqlQueryFactory) {
         this.jdbcTemplate = jdbcTemplate;
         this.sqlQueryFactory = sqlQueryFactory;
-        this.businessRuleMapper = new BusinessRuleMapper();
         this.emailCampaignMapper = new EmailCampaignMapper();
     }
 
@@ -146,127 +140,62 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
         }
     }
 
-    private static final class BusinessRuleMapper implements ResultSetExtractor<List<EmailBusinessRulesData>> {
-
-        private static final String BUSINESS_RULE_SCHEMA = """
-                sr.id as id,
-                sr.report_name as reportName,
-                sr.report_type as reportType,
-                sr.report_subtype as reportSubType,
-                sr.description as description,
-                sp.parameter_variable as params,
-                sp.parameter_FormatType as paramType,
-                sp.parameter_label as paramLabel,
-                sp.parameter_name as paramName
-                from stretchy_report sr
-                left join stretchy_report_parameter as srp on srp.report_id = sr.id
-                left join stretchy_parameter as sp on sp.id = srp.parameter_id\s""";
-
-        private BusinessRuleMapper() {}
-
-        private String schema() {
-            return BUSINESS_RULE_SCHEMA;
-        }
-
-        @Override
-        public List<EmailBusinessRulesData> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            List<EmailBusinessRulesData> emailBusinessRulesDataList = new ArrayList<EmailBusinessRulesData>();
-
-            EmailBusinessRulesData emailBusinessRulesData = null;
-
-            Map<Long, EmailBusinessRulesData> mapOfSameObjects = new HashMap<Long, EmailBusinessRulesData>();
-
-            while (rs.next()) {
-                final Long id = rs.getLong("id");
-                emailBusinessRulesData = mapOfSameObjects.get(id);
-                if (emailBusinessRulesData == null) {
-                    final String reportName = rs.getString("reportName");
-                    final String reportType = rs.getString("reportType");
-                    final String reportSubType = rs.getString("reportSubType");
-                    final String paramName = rs.getString("paramName");
-                    final String paramLabel = rs.getString("paramLabel");
-                    final String description = rs.getString("description");
-
-                    Map<String, Object> hashMap = new HashMap<String, Object>();
-                    hashMap.put(paramLabel, paramName);
-                    emailBusinessRulesData = EmailBusinessRulesData.instance(id, reportName, reportType, hashMap, reportSubType,
-                            description);
-                    mapOfSameObjects.put(id, emailBusinessRulesData);
-                    // add to the list
-                    emailBusinessRulesDataList.add(emailBusinessRulesData);
-                }
-                // add new paramType to the existing object
-                Map<String, Object> hashMap = new HashMap<String, Object>();
-                final String paramName = rs.getString("paramName");
-                final String paramLabel = rs.getString("paramLabel");
-                hashMap.put(paramLabel, paramName);
-
-                // get existing map and add new items to it
-                emailBusinessRulesData.getReportParamName().putAll(hashMap);
-            }
-
-            return emailBusinessRulesDataList;
-        }
-    }
-
     @Override
     public Collection<EmailBusinessRulesData> retrieveAll() {
-        final String searchType = "Email";
-        final QStretchyReport sr = new QStretchyReport("sr");
-        final QStretchyReportParameter srp = new QStretchyReportParameter("srp");
-        final QStretchyParameter sp = new QStretchyParameter("sp");
-
-        final List<Tuple> rows = this.sqlQueryFactory
-                .select(sr.id, sr.reportName, sr.reportType, sr.reportSubtype, sr.description, sp.parameterVariable, sp.parameterFormatType,
-                        sp.parameterLabel, sp.parameterName)
-                .from(sr).leftJoin(srp).on(srp.reportId.eq(sr.id)).leftJoin(sp).on(sp.id.eq(srp.parameterId))
-                .where(sr.reportType.eq(searchType)).fetch();
-
-        final Map<Long, EmailBusinessRulesData> mapOfSameObjects = new LinkedHashMap<>();
-
-        for (final Tuple row : rows) {
-            final Integer reportIdInt = row.get(sr.id);
-            final Long id = reportIdInt != null ? reportIdInt.longValue() : null;
-            EmailBusinessRulesData emailBusinessRulesData = mapOfSameObjects.get(id);
-
-            final String paramName = row.get(sp.parameterName);
-            final String paramLabel = row.get(sp.parameterLabel);
-
-            if (emailBusinessRulesData == null) {
-                final String reportName = row.get(sr.reportName);
-                final String reportType = row.get(sr.reportType);
-                final String reportSubType = row.get(sr.reportSubtype);
-                final String description = row.get(sr.description);
-
-                final Map<String, Object> hashMap = new HashMap<>();
-                if (paramLabel != null && paramName != null) {
-                    hashMap.put(paramLabel, paramName);
-                }
-                emailBusinessRulesData = EmailBusinessRulesData.instance(id, reportName, reportType, hashMap, reportSubType, description);
-                mapOfSameObjects.put(id, emailBusinessRulesData);
-            } else if (paramLabel != null && paramName != null) {
-                emailBusinessRulesData.getReportParamName().put(paramLabel, paramName);
-            }
-        }
-
-        return mapOfSameObjects.values();
+        return retrieveBusinessRules(null);
     }
 
     @Override
-    public EmailBusinessRulesData retrieveOneTemplate(Long resourceId) {
-        final String searchType = "Email";
-
-        final String sql = "select " + this.businessRuleMapper.schema() + " where sr.report_type = ? and sr.id = ?";
-
-        List<EmailBusinessRulesData> retrieveOne = this.jdbcTemplate.query(sql, this.businessRuleMapper, // NOSONAR
-                new Object[] { searchType, resourceId });
-        try {
-            EmailBusinessRulesData emailBusinessRulesData = retrieveOne.get(0);
-            return emailBusinessRulesData;
-        } catch (final IndexOutOfBoundsException e) {
-            throw new EmailBusinessRuleNotFound(resourceId, e);
+    public EmailBusinessRulesData retrieveOneTemplate(final Long resourceId) {
+        if (resourceId == null) {
+            throw new EmailBusinessRuleNotFound(resourceId);
         }
+        final Collection<EmailBusinessRulesData> businessRules = retrieveBusinessRules(resourceId);
+        if (businessRules.isEmpty()) {
+            throw new EmailBusinessRuleNotFound(resourceId);
+        }
+        return businessRules.iterator().next();
+    }
 
+    /**
+     * Retrieves the email business rules (stretchy reports of type "Email") together with their parameters. A report
+     * with several parameters comes back as several rows, which are merged into one {@link EmailBusinessRulesData}.
+     *
+     * @param reportId
+     *            the report to retrieve, or {@code null} to retrieve all email business rules
+     */
+    private Collection<EmailBusinessRulesData> retrieveBusinessRules(final Long reportId) {
+        final String searchType = "Email";
+        final QStretchyReport report = new QStretchyReport("sr");
+        final QStretchyReportParameter reportParameter = new QStretchyReportParameter("srp");
+        final QStretchyParameter parameter = new QStretchyParameter("sp");
+
+        // QueryDSL ignores a null predicate, so the id condition is only added when a report id is given
+        final List<Tuple> rows = this.sqlQueryFactory
+                .select(report.id, report.reportName, report.reportType, report.reportSubtype, report.description,
+                        parameter.parameterVariable, parameter.parameterFormatType, parameter.parameterLabel, parameter.parameterName)
+                .from(report).leftJoin(reportParameter).on(reportParameter.reportId.eq(report.id)).leftJoin(parameter)
+                .on(parameter.id.eq(reportParameter.parameterId))
+                .where(report.reportType.eq(searchType), reportId != null ? report.id.eq(reportId.intValue()) : null).fetch();
+
+        final Map<Long, EmailBusinessRulesData> businessRulesById = new LinkedHashMap<>();
+        for (final Tuple row : rows) {
+            final Integer reportIdValue = row.get(report.id);
+            final Long id = reportIdValue != null ? reportIdValue.longValue() : null;
+            final String paramName = row.get(parameter.parameterName);
+            final String paramLabel = row.get(parameter.parameterLabel);
+
+            EmailBusinessRulesData businessRule = businessRulesById.get(id);
+            if (businessRule == null) {
+                businessRule = EmailBusinessRulesData.instance(id, row.get(report.reportName), row.get(report.reportType), new HashMap<>(),
+                        row.get(report.reportSubtype), row.get(report.description));
+                businessRulesById.put(id, businessRule);
+            }
+            if (paramLabel != null && paramName != null) {
+                businessRule.getReportParamName().put(paramLabel, paramName);
+            }
+        }
+        return businessRulesById.values();
     }
 
     @Override
