@@ -24,6 +24,7 @@ import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 /**
  * Immutable data object for global configuration property.
@@ -32,6 +33,7 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@JsonLocalDateArrayFormat
 public class GlobalConfigurationPropertyData {
 
     @SuppressWarnings("unused")

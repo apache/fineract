@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.infrastructure.core.jersey;
 
-import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
 import jakarta.ws.rs.ext.WriterInterceptor;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
@@ -41,32 +40,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class JsonLocalDateArrayFormatWriterInterceptor implements WriterInterceptor {
 
-    @Context
-    private ResourceInfo resourceInfo;
-
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException {
-        if (isLocalDateArrayFormat(context.getAnnotations(), resourceInfo)) {
-            JacksonLocalDateBeanSerializerModifier.withLocalDateArrayFormat(() -> {
-                context.proceed();
-                return null;
-            });
+        if (isLocalDateArrayFormat(context)) {
+            JacksonLocalDateBeanSerializerModifier.writeWithLocalDateArrayFormat(context::proceed);
         } else {
             context.proceed();
         }
     }
 
-    /**
-     * Whether the response of the current resource method is written with {@link JsonLocalDateArrayFormat}. Also used
-     * by {@link PartialResponseFilter}, which serializes the response before this interceptor runs.
-     */
-    static boolean isLocalDateArrayFormat(final Annotation[] entityAnnotations, final ResourceInfo resourceInfo) {
-        if (entityAnnotations != null && Arrays.stream(entityAnnotations).anyMatch(JsonLocalDateArrayFormat.class::isInstance)) {
-            return true;
-        }
-        // Jersey passes the annotations of the method it invokes, which has none when the resource is a Spring proxy,
-        // so the annotation is also looked up on the resource method and the methods it overrides
-        final Method resourceMethod = resourceInfo == null ? null : resourceInfo.getResourceMethod();
-        return resourceMethod != null && AnnotatedElementUtils.hasAnnotation(resourceMethod, JsonLocalDateArrayFormat.class);
+    private boolean isLocalDateArrayFormat(WriterInterceptorContext context) {
+        return context.getAnnotations() != null
+                && Arrays.stream(context.getAnnotations()).anyMatch(JsonLocalDateArrayFormat.class::isInstance);
     }
 }
